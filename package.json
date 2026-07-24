@@ -13,8 +13,7 @@
     "preview": "vite preview",
     "fix:packet-permissions": "bash ./scripts/fix-packet-capture-permissions.sh",
     "deploy": "bash ./scripts/deploy.sh",
-    "update:deps": "bash ./scripts/update-deps.sh",
-    "update": "pnpm update:deps"
+    "update": "bash ./scripts/update-deps.sh"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^2.0.35",

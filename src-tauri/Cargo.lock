@@ -781,8 +781,6 @@ dependencies = [
  "compression-core",
  "flate2",
  "memchr",
- "zstd",
- "zstd-safe",
 ]
 
 [[package]]
@@ -2276,7 +2274,7 @@ dependencies = [
 [[package]]
 name = "hexbuffer-proxy"
 version = "0.0.2"
-source = "git+https://github.com/arhamymr/hexbuffer-proxy.git#e871f89c89b5aeaf812cebd4a0964753dc831155"
+source = "git+https://github.com/arhamymr/hexbuffer-proxy.git#ef2ca677a24c65f6de74f6799e9f9aaaa50523eb"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2294,11 +2292,11 @@ dependencies = [
  "rcgen",
  "rustls-pki-types",
  "thiserror 2.0.19",
+ "time",
  "tokio",
  "tokio-rustls",
  "tokio-tungstenite",
  "tower",
- "tower-http",
  "webpki-roots 1.0.9",
  "zstd",
 ]
@@ -2550,7 +2548,7 @@ dependencies = [
  "libc",
  "percent-encoding",
  "pin-project-lite",
- "socket2 0.6.5",
+ "socket2 0.5.10",
  "system-configuration 0.7.0",
  "tokio",
  "tower-service",
@@ -6001,7 +5999,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.4.3",
+ "getrandom 0.3.4",
  "once_cell",
  "rustix",
  "windows-sys 0.59.0",
@@ -7047,7 +7045,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]

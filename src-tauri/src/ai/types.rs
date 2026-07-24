@@ -138,64 +138,7 @@ pub struct ChatMessageRecord {
     pub created_at: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct AiEngineChatMessage {
-    #[serde(rename = "type")]
-    pub(crate) message_type: String,
-    pub(crate) provider: Option<String>,
-    pub(crate) model: Option<String>,
-    pub(crate) delta: Option<String>,
-    pub(crate) content: Option<String>,
-    pub(crate) message: Option<String>,
-    #[serde(default)]
-    pub(crate) action: Option<String>,
-    #[serde(default)]
-    pub(crate) payload: Option<Value>,
-    #[serde(default)]
-    pub(crate) created_at: Option<String>,
-    // Workflow passthrough fields
-    #[serde(default)]
-    pub(crate) workflow_id: Option<String>,
-    #[serde(default)]
-    pub(crate) step_id: Option<String>,
-    #[serde(default)]
-    pub(crate) name: Option<String>,
-    #[serde(default)]
-    pub(crate) duration_ms: Option<f64>,
-    #[serde(default)]
-    pub(crate) error: Option<String>,
-    #[serde(default)]
-    pub(crate) step_index: Option<u32>,
-    #[serde(default)]
-    pub(crate) session_id: Option<String>,
-    #[serde(default)]
-    pub(crate) started_at: Option<String>,
-    #[serde(default)]
-    pub(crate) completed_at: Option<String>,
-    #[serde(default)]
-    pub(crate) failed_at: Option<String>,
-    #[serde(default)]
-    pub(crate) finished_at: Option<String>,
-    #[serde(default)]
-    pub(crate) content_length: Option<usize>,
-    #[serde(default)]
-    pub(crate) extra: Option<Value>,
-}
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct AiEngineInvokerAutoMarkMessage {
-    #[serde(rename = "type")]
-    pub(crate) message_type: String,
-    pub(crate) provider: Option<String>,
-    pub(crate) model: Option<String>,
-    #[serde(default)]
-    pub(crate) suggestions: Vec<InvokerMarkerSuggestion>,
-    #[serde(default)]
-    pub(crate) candidate_count: usize,
-    pub(crate) message: Option<String>,
-}
 
 
 fn default_ai_key_status() -> BTreeMap<String, bool> {
