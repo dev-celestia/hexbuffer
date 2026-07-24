@@ -22,6 +22,7 @@ import {
   useHighlightStore,
 } from '@/stores/history';
 import { useShallow } from 'zustand/react/shallow';
+import { METHOD_FILTERS, STATUS_FILTERS } from './log-table/utils';
 
 interface LogFiltersProps {
   filter?: HistoryFilterState;

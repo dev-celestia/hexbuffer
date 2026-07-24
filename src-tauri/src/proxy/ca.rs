@@ -31,16 +31,11 @@ fn get_ca_key_path() -> PathBuf {
 fn sync_ca_files(ca: &CertificationAuthority) -> Result<(), Box<dyn std::error::Error>> {
     let dir = get_ca_dir();
     fs::create_dir_all(&dir)?;
-    ca.save_ca_to_pem(
-        get_ca_cert_path()
-            .to_str()
-            .ok_or("invalid cert path")?,
-    )?;
-    ca.save_key_to_pem(
-        get_ca_key_path()
-            .to_str()
-            .ok_or("invalid key path")?,
-    )?;
+    fs::write(get_ca_cert_path(), ca.ca_cert_pem())?;
+    let default_key = std::path::Path::new("cert").join("ca-key.pem");
+    if default_key.exists() && !get_ca_key_path().exists() {
+        fs::copy(&default_key, get_ca_key_path())?;
+    }
     Ok(())
 }
 

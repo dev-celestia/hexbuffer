@@ -260,7 +260,6 @@ pub fn run(config: ProxyConfig, app_handle: AppHandle) {
     let builder = ProxyBuilder::new()
         .with_addr(socket_addr)
         .with_ca(authority)
-        .with_decompression(true)
         .with_request_buffer_size(16384)
         .with_enabled(config.enabled)
         .add_http_handler(hexbuffer_proxy::decoder::DecodeHandler)
