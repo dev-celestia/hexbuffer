@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSqliPage } from './hooks/use-sqli-page';
@@ -10,7 +11,18 @@ export function SqlInjectionPage() {
   const page = useSqliPage();
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-background">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col min-h-0",
+
+        // Sizing & Spacing
+        "h-full",
+
+        // Backgrounds & Borders
+        "bg-background"
+      )}
+    >
       <ScanToolbar
         url={page.url}
         onUrlChange={page.setUrl}
@@ -33,28 +45,91 @@ export function SqlInjectionPage() {
         onExportCsv={page.handleExportCsv}
       />
 
-      <main className="min-h-0 flex-1 flex flex-col overflow-hidden">
+      <main
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col flex-1 min-h-0 overflow-hidden"
+        )}
+      >
         {/* Progress bar */}
         {page.progress.total > 0 && (
-          <div className="w-full bg-muted/20 shrink-0 border-b">
-            <div className="h-[2px] bg-primary/25 rounded-full overflow-hidden w-full relative">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "shrink-0",
+
+              // Sizing & Spacing
+              "w-full",
+
+              // Backgrounds & Borders
+              "bg-muted/20 border-b"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "relative overflow-hidden w-full",
+
+                // Sizing & Spacing
+                "h-[2px]",
+
+                // Visuals & Colors
+                "bg-primary/25 rounded-full"
+              )}
+            >
               <div
-                className="h-full bg-primary transition-all duration-300 shadow-[0_0_8px_rgba(var(--primary),0.5)]"
+                className={cn(
+                  // Layout & Positioning
+                  "h-full",
+
+                  // Visuals & Colors
+                  "bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]",
+
+                  // Interactive & States
+                  "transition-all duration-300"
+                )}
                 style={{
                   width: `${Math.min(100, (page.progress.current / page.progress.total) * 100)}%`,
                 }}
               />
             </div>
-            <div className="px-4 py-1 text-[10px] text-muted-foreground font-mono flex items-center justify-between">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center justify-between",
+
+                // Sizing & Spacing
+                "px-4 py-1",
+
+                // Typography
+                "text-[10px] font-mono text-muted-foreground"
+              )}
+            >
               <span>{page.progress.message}</span>
               <span className="font-semibold">{Math.round(Math.min(100, (page.progress.current / page.progress.total) * 100))}%</span>
             </div>
           </div>
         )}
 
-        <div className="flex flex-1 min-h-0 overflow-hidden">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-1 min-h-0 overflow-hidden"
+          )}
+        >
           {/* Left: parameters config */}
-          <div className="w-64 shrink-0 flex flex-col border-r overflow-hidden">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-col shrink-0 overflow-hidden",
+
+              // Sizing & Spacing
+              "w-64",
+
+              // Backgrounds & Borders
+              "border-r"
+            )}
+          >
             <ParametersPanel
               parameters={page.parameters}
               newParamName={page.newParamName}
@@ -74,27 +149,102 @@ export function SqlInjectionPage() {
           </div>
 
           {/* Right: results tabs */}
-          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            <Tabs defaultValue="vulnerabilities" className="h-full flex flex-col min-h-0 bg-background">
-              <div className="flex h-9 shrink-0 items-center justify-between border-b bg-muted/15 px-3">
-                <TabsList className="h-7 bg-background/50 p-0.5 border shadow-sm rounded-md">
-                  <TabsTrigger value="vulnerabilities" className="h-6 text-[11px] px-3 font-medium transition-all">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-col flex-1 min-h-0 overflow-hidden"
+            )}
+          >
+            <Tabs
+              defaultValue="vulnerabilities"
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col min-h-0",
+
+                // Sizing & Spacing
+                "h-full",
+
+                // Backgrounds & Borders
+                "bg-background"
+              )}
+            >
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center justify-between shrink-0",
+
+                  // Sizing & Spacing
+                  "h-9 px-3",
+
+                  // Backgrounds & Borders
+                  "border-b bg-muted/15"
+                )}
+              >
+                <TabsList
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-7 p-0.5",
+
+                    // Backgrounds & Borders
+                    "bg-background/50 border rounded-md shadow-sm"
+                  )}
+                >
+                  <TabsTrigger
+                    value="vulnerabilities"
+                    className={cn(
+                      // Sizing & Spacing
+                      "h-6 px-3",
+
+                      // Typography
+                      "text-[11px] font-medium",
+
+                      // Interactive & States
+                      "transition-all"
+                    )}
+                  >
                     Vulnerabilities
                     {page.vulnerabilities.length > 0 && (
                       <Badge
                         variant="outline"
-                        className="ml-1.5 px-1 py-0 h-4 text-[9px] border-amber-500/20 text-amber-600 bg-amber-500/5 font-bold"
+                        className={cn(
+                          // Sizing & Spacing
+                          "ml-1.5 px-1 py-0 h-4",
+
+                          // Typography
+                          "text-[9px] font-bold",
+
+                          // Visuals & Colors
+                          "border-amber-500/20 text-amber-600 bg-amber-500/5"
+                        )}
                       >
                         {page.vulnerabilities.length}
                       </Badge>
                     )}
                   </TabsTrigger>
-                  <TabsTrigger value="extraction" className="h-6 text-[11px] px-3 font-medium transition-all">
+                  <TabsTrigger
+                    value="extraction"
+                    className={cn(
+                      // Sizing & Spacing
+                      "h-6 px-3",
+
+                      // Typography
+                      "text-[11px] font-medium",
+
+                      // Interactive & States
+                      "transition-all"
+                    )}
+                  >
                     Data Extraction
                     {page.databases.length > 0 && (
                       <Badge
                         variant="outline"
-                        className="ml-1.5 px-1 py-0 h-4 text-[9px] font-bold"
+                        className={cn(
+                          // Sizing & Spacing
+                          "ml-1.5 px-1 py-0 h-4",
+
+                          // Typography
+                          "text-[9px] font-bold"
+                        )}
                       >
                         {page.databases.length}
                       </Badge>
@@ -105,7 +255,13 @@ export function SqlInjectionPage() {
 
               <TabsContent
                 value="vulnerabilities"
-                className="flex-1 min-h-0 flex flex-col m-0 overflow-hidden"
+                className={cn(
+                  // Layout & Positioning
+                  "flex flex-col flex-1 min-h-0 overflow-hidden",
+
+                  // Sizing & Spacing
+                  "m-0"
+                )}
               >
                 <VulnerabilitiesTab
                   vulnerabilities={page.vulnerabilities}
@@ -118,7 +274,13 @@ export function SqlInjectionPage() {
 
               <TabsContent
                 value="extraction"
-                className="flex-1 min-h-0 flex flex-col m-0 overflow-hidden"
+                className={cn(
+                  // Layout & Positioning
+                  "flex flex-col flex-1 min-h-0 overflow-hidden",
+
+                  // Sizing & Spacing
+                  "m-0"
+                )}
               >
                 <ExtractionTab
                   databases={page.databases}

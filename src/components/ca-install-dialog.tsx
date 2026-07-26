@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { invoke } from '@tauri-apps/api/core';
@@ -59,14 +60,32 @@ export function CaInstallDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        <Alert variant="default" className="min-h-11 items-center shrink-0 border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-200">
+        <Alert
+          variant="default"
+          className={cn(
+            // Layout & Positioning
+            "flex items-center shrink-0 min-h-11",
+
+            // Backgrounds & Borders
+            "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-200"
+          )}
+        >
           <AlertTitle>External apps need this certificate</AlertTitle>
           <AlertDescription>
             Browsers or apps outside hexbuffer may block intercepted HTTPS requests unless they trust the hexbuffer CA that signs proxy certificates
           </AlertDescription>
         </Alert>
 
-        <Alert variant="default" className="min-h-11 items-center shrink-0 border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-200">
+        <Alert
+          variant="default"
+          className={cn(
+            // Layout & Positioning
+            "flex items-center shrink-0 min-h-11",
+
+            // Backgrounds & Borders
+            "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-200"
+          )}
+        >
           <AlertDescription>
             Use <b>Open Browser </b>for ready-to-go interception, or install the CA from here when you need external
             traffic capture.

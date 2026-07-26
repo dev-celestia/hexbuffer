@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { useNavStore } from '@/stores/nav';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
-import { pageComponentMap } from './page-lazy-imports';
+import { PAGE_COMPONENT_MAP } from './page-lazy-imports';
 import { DesktopWindow } from './desktop-window';
 
 interface DesktopWorkspaceProps {
@@ -12,7 +12,7 @@ interface DesktopWorkspaceProps {
 export function DesktopWorkspace({ activeChild }: DesktopWorkspaceProps) {
   const windows = useNavStore((state) => state.windows);
   const activeWindowId = useNavStore((state) => state.activeWindowId);
-  const DesktopComponent = pageComponentMap['/'];
+  const DesktopComponent = PAGE_COMPONENT_MAP['/'];
   const bgType = useAppSettingsStore((s) => s.bgType);
 
   // ponytail: memoize filtered window list to avoid creating new array refs on every render
@@ -22,11 +22,11 @@ export function DesktopWorkspace({ activeChild }: DesktopWorkspaceProps) {
   );
 
   // Transparent so BgLayer (behind this) shows through
-  const rootBg = 'bg-transparent';
+  const ROOT_BG = 'bg-transparent';
 
   return (
     <div
-      className={`relative w-full h-full overflow-hidden ${rootBg}`}
+      className={`relative w-full h-full overflow-hidden ${ROOT_BG}`}
     >
       <style>{`
         .select-none-global, .select-none-global * {

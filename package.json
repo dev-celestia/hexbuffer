@@ -1,7 +1,7 @@
 {
   "name": "hexbuffer",
   "private": true,
-  "version": "2026.0.77",
+  "version": "2026.0.78",
   "packageManager": "pnpm@9.15.4",
   "type": "module",
   "scripts": {

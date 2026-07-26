@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { PlayIcon, SquareIcon, PauseIcon, ArrowCounterClockwiseIcon, InfoIcon } from '@phosphor-icons/react';
 import { AiInsightsPanel } from './components/insight-panel';
 import { ActionLogPanel } from './components/ActionLogPanel';
@@ -26,16 +27,50 @@ export function BrowserAutomationPage() {
   return (
     <>
       {proxyStatus !== 'connected' && (
-        <div className="p-2">
-          <Alert variant="default" className="mb-2 min-h-11 items-center shrink-0 border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-200">
-            <AlertDescription className="flex items-center gap-2 text-amber-700 dark:text-amber-200/70">
+        <div
+          className={cn(
+            // Sizing & Spacing
+            "p-2"
+          )}
+        >
+          <Alert
+            variant="default"
+            className={cn(
+              // Layout & Positioning
+              "flex items-center shrink-0 min-h-11",
+
+              // Sizing & Spacing
+              "mb-2",
+
+              // Backgrounds & Borders
+              "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-200"
+            )}
+          >
+            <AlertDescription
+              className={cn(
+                // Layout & Positioning
+                "flex items-center",
+
+                // Sizing & Spacing
+                "gap-2",
+
+                // Typography
+                "text-amber-700 dark:text-amber-200/70"
+              )}
+            >
               <span>Start the proxy to intercept HTTP requests.</span>
             </AlertDescription>
             <AlertAction>
               <Button
                 variant="outline"
                 size="xs"
-                className="h-6 border-amber-300 text-amber-800 hover:bg-amber-100 dark:border-amber-500/50 dark:text-amber-300 dark:hover:bg-amber-500/20"
+                className={cn(
+                  // Sizing & Spacing
+                  "h-6",
+
+                  // Typography / Visuals & Colors
+                  "border-amber-300 text-amber-800 hover:bg-amber-100 dark:border-amber-500/50 dark:text-amber-300 dark:hover:bg-amber-500/20"
+                )}
                 onClick={handleStartProxy}
                 disabled={isStarting || proxyStatus === 'starting'}
               >
@@ -47,8 +82,25 @@ export function BrowserAutomationPage() {
       )}
 
       {!page.browserAutomationSafetyAlertDismissed && (
-        <div className="p-2">
-          <Alert variant="default" className="min-h-12 mb-0 shrink-0 border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-200">
+        <div
+          className={cn(
+            // Sizing & Spacing
+            "p-2"
+          )}
+        >
+          <Alert
+            variant="default"
+            className={cn(
+              // Layout & Positioning
+              "shrink-0 min-h-12",
+
+              // Sizing & Spacing
+              "mb-0",
+
+              // Backgrounds & Borders
+              "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-200"
+            )}
+          >
             <InfoIcon className="!text-amber-600 shrink-0" />
             <AlertDescription className="text-amber-600">
               The browser automation will interact with external websites. Only scan targets you own or are authorized to assess. Unauthorized scanning may violate terms of service or applicable laws.
@@ -72,12 +124,53 @@ export function BrowserAutomationPage() {
         onTabChange={page.setActiveTabId}
         onTabRename={page.renameTab}
         onTabClose={page.closeTab}
-        contentClassName="flex-1 border rounded-md overflow-hidden bg-background min-h-0"
+        contentClassName={cn(
+          // Layout & Positioning
+          "flex-1 min-h-0 overflow-hidden",
+
+          // Backgrounds & Borders
+          "border rounded-md bg-background"
+        )}
       >
-        <div className="flex h-full min-h-0 flex-col bg-background">
-          <header className="bg-muted p-1">
-            <div className="flex flex-wrap justify-end items-center gap-2 p-1">
-              <div className="flex items-center gap-2">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col min-h-0",
+
+            // Sizing & Spacing
+            "h-full",
+
+            // Backgrounds & Borders
+            "bg-background"
+          )}
+        >
+          <header
+            className={cn(
+              // Sizing & Spacing
+              "p-1",
+
+              // Backgrounds & Borders
+              "bg-muted"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-wrap items-center justify-end",
+
+                // Sizing & Spacing
+                "p-1 gap-2"
+              )}
+            >
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center",
+
+                  // Sizing & Spacing
+                  "gap-2"
+                )}
+              >
                 <CrawlStatusBadge status={page.status} />
 
                 {/* Start/Stop/Pause/Resume */}
@@ -117,7 +210,12 @@ export function BrowserAutomationPage() {
             </div>
           </header>
 
-          <main className="min-h-0 flex-1">
+          <main
+            className={cn(
+              // Layout & Positioning
+              "flex-1 min-h-0"
+            )}
+          >
             <ResizablePanelGroup orientation="vertical" className="h-full min-h-0">
               <ResizablePanel defaultSize={60} minSize={20}>
                 <ResizablePanelGroup orientation="horizontal" className="h-full min-h-0">

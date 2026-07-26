@@ -174,7 +174,7 @@ detect_platform() {
 
 PLATFORM=$(detect_platform)
 
-SRC_DIR="target/release/bundle"
+SRC_DIR="src-tauri/target/release/bundle"
 BUNDLE_DIR=""
 BUNDLE_EXT=""
 INSTALLER_DIR=""
@@ -242,7 +242,7 @@ has_newer_build_inputs() {
 
 windows_bundle_dir_for_target() {
   local rust_target="$1"
-  echo "target/${rust_target}/release/bundle/nsis"
+  echo "src-tauri/target/${rust_target}/release/bundle/nsis"
 }
 
 windows_runner_args() {
@@ -390,7 +390,7 @@ upload_installer_checksum() {
   local installer_name="$2"
   local installer_sha_file
 
-  installer_sha_file="/tmp/${installer_name}.sha256"
+  installer_sha_file=$(mktemp "${TMPDIR:-/tmp}/${installer_name}.XXXXXX.sha256")
   sha256_file "$installer_file" | awk -v name="$installer_name" '{print $1 "  " name}' > "$installer_sha_file"
   echo "[upload] uploading installer checksum: ${GREEN}${installer_name}.sha256${NC}"
   r2_cp "$installer_sha_file" "s3://${R2_BUCKET}/${installer_name}.sha256"
@@ -487,7 +487,7 @@ r2_cp "$ROOT/scripts/install.sh" "s3://${R2_BUCKET}/install.sh"
 
 # ── Update latest.json ───────────────────────────────────────────────
 
-LATEST_JSON="/tmp/hexbuffer_latest.json"
+LATEST_JSON=$(mktemp "${TMPDIR:-/tmp}/hexbuffer_latest.XXXXXX.json")
 LATEST_JSON_NAME="latest.json"
 
 echo "[upload] downloading existing latest.json..."

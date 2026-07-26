@@ -13,9 +13,9 @@ import {
 import type { Node } from '@xyflow/react';
 import { useAutomationStore } from '@/stores/automation';
 import { addOpenNodeContextMenuListener } from '../nodes/node-card-menu';
-import { connectionLineStyle, edgeTypes, nodeTypes } from '../lib/canvas-definitions';
+import { CONNECTION_LINE_STYLE, EDGE_TYPES, NODE_TYPES } from '../lib/canvas-definitions';
 import {
-  automationDefaultEdgeOptions,
+  AUTOMATION_DEFAULT_EDGE_OPTIONS,
   buildAutomationEdgeFromConnection,
   keepOneAutomationEdgePerHandle,
   normalizeAutomationEdges,
@@ -441,9 +441,9 @@ export function useWorkflowCanvas(
     deleteNode,
     onRun,
     // config
-    nodeTypes,
-    edgeTypes,
-    defaultEdgeOptions: automationDefaultEdgeOptions,
-    connectionLineStyle,
+    nodeTypes: NODE_TYPES,
+    edgeTypes: EDGE_TYPES,
+    defaultEdgeOptions: AUTOMATION_DEFAULT_EDGE_OPTIONS,
+    connectionLineStyle: CONNECTION_LINE_STYLE,
   };
 }

@@ -1,13 +1,13 @@
 import CryptoJS from 'crypto-js';
 import type { CodecType, CodecResult } from '../types';
 
-export const encoderFunctions: Record<CodecType, (input: string) => string> = {
+export const ENCODER_FUNCTIONS: Record<CodecType, (input: string) => string> = {
   url: (input) => encodeURIComponent(input),
   base64: (input) => CryptoJS.enc.Utf8.parse(input).toString(CryptoJS.enc.Base64),
   hex: (input) => CryptoJS.enc.Utf8.parse(input).toString(CryptoJS.enc.Hex),
 };
 
-export const decoderFunctions: Record<CodecType, (input: string) => CodecResult> = {
+export const DECODER_FUNCTIONS: Record<CodecType, (input: string) => CodecResult> = {
   url: (input) => {
     try {
       return { output: decodeURIComponent(input), error: null };
@@ -45,11 +45,11 @@ export function convert(input: string, activeType: CodecType, mode: 'encode' | '
 
   if (mode === 'encode') {
     try {
-      return { output: encoderFunctions[activeType](input), error: null };
+      return { output: ENCODER_FUNCTIONS[activeType](input), error: null };
     } catch {
       return { output: '', error: 'Encoding failed' };
     }
   }
 
-  return decoderFunctions[activeType](input);
+  return DECODER_FUNCTIONS[activeType](input);
 }

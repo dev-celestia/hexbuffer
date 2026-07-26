@@ -2,8 +2,8 @@ import * as React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { useNavStore, type WindowState } from "@/stores/nav";
-import { pageComponentMap } from "./page-lazy-imports";
-import { allNavItems } from "../constants";
+import { PAGE_COMPONENT_MAP } from "./page-lazy-imports";
+import { ALL_NAV_ITEMS } from "../constants";
 import { WindowProvider } from "@/providers/window-provider";
 
 import { useWindowDrag } from "./hooks/use-window-drag";
@@ -42,7 +42,7 @@ const DesktopWindow = React.memo(function DesktopWindow({
   const updateWindowSize = useNavStore((s) => s.updateWindowSize);
 
   const navItem = React.useMemo(() => {
-    return allNavItems.find((item) => item.href === id);
+    return ALL_NAV_ITEMS.find((item) => item.href === id);
   }, [id]);
 
   const windowRef = React.useRef<HTMLDivElement>(null);
@@ -95,7 +95,7 @@ const DesktopWindow = React.memo(function DesktopWindow({
   };
 
   const isCurrentRoute = location.pathname === id;
-  const StaticComponent = pageComponentMap[id];
+  const StaticComponent = PAGE_COMPONENT_MAP[id];
 
   // ponytail: get index of current minimized window to offset them horizontally
   const minimizedIndex = useNavStore((s) => {

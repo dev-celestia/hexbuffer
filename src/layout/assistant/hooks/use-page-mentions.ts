@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { usePromptInputController } from '@/components/ai-elements/prompt-input';
-import { mainNavItems, type NavItem } from '@/layout/constants';
+import { MAIN_NAV_ITEMS, type NavItem } from '@/layout/constants';
 
 interface MentionState {
   isOpen: boolean;
@@ -22,8 +22,8 @@ export function usePageMentions() {
   });
   const [highlightedIndex, setHighlightedIndex] = useState(0);
 
-  // Available pages to mention (filtered by flag in production via mainNavItems)
-  const mentionablePages = useMemo(() => mainNavItems, []);
+  // Available pages to mention (filtered by flag in production via MAIN_NAV_ITEMS)
+  const mentionablePages = useMemo(() => MAIN_NAV_ITEMS, []);
 
   // Detect @pattern in text up to cursor position
   const detectMention = useCallback(

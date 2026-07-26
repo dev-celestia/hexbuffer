@@ -13,7 +13,7 @@ export const AUTOMATION_MARKER_END = {
   height: 20,
 };
 
-export const automationDefaultEdgeOptions = {
+export const AUTOMATION_DEFAULT_EDGE_OPTIONS = {
   type: 'deletable' as const,
   animated: true,
   selectable: true,
@@ -24,7 +24,7 @@ export const automationDefaultEdgeOptions = {
 
 export function buildAutomationEdge(edge: Partial<AutomationEdge> & Pick<AutomationEdge, 'source' | 'target'>): AutomationEdge {
   return {
-    ...automationDefaultEdgeOptions,
+    ...AUTOMATION_DEFAULT_EDGE_OPTIONS,
     ...edge,
     style: {
       ...(edge.style ?? {}),
@@ -34,7 +34,7 @@ export function buildAutomationEdge(edge: Partial<AutomationEdge> & Pick<Automat
       ...AUTOMATION_MARKER_END,
       ...((edge.markerEnd as object | undefined) ?? {}),
     },
-    interactionWidth: edge.interactionWidth ?? automationDefaultEdgeOptions.interactionWidth,
+    interactionWidth: edge.interactionWidth ?? AUTOMATION_DEFAULT_EDGE_OPTIONS.interactionWidth,
   } as AutomationEdge;
 }
 

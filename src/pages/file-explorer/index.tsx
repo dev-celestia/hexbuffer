@@ -151,13 +151,54 @@ export function FileExplorerPage() {
   // Render Onboarding state if credentials are not configured
   if (!loading && !credentials && activeTab === 'r2') {
     return (
-      <div className="h-full flex flex-col bg-background relative overflow-hidden select-none">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "relative flex flex-col select-none overflow-hidden",
+
+          // Sizing & Spacing
+          "h-full",
+
+          // Backgrounds & Borders
+          "bg-background"
+        )}
+      >
         {/* Tab bar even in the onboarding state so user can switch to Local */}
-        <div className="border-b border-border px-3 h-10 flex items-center shrink-0">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center shrink-0",
+
+            // Sizing & Spacing
+            "h-10 px-3",
+
+            // Backgrounds & Borders
+            "border-b border-border"
+          )}
+        >
           <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="max-w-md w-full border border-border bg-muted/10 p-6 rounded-lg text-center backdrop-blur-sm select-none">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-1 items-center justify-center",
+
+            // Sizing & Spacing
+            "p-6"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "w-full max-w-md select-none text-center",
+
+              // Sizing & Spacing
+              "p-6",
+
+              // Backgrounds & Borders
+              "border border-border bg-muted/10 rounded-lg backdrop-blur-sm"
+            )}
+          >
             <HardDriveIcon className="size-12 text-primary mx-auto mb-4 animate-pulse" />
             <h2 className="text-base font-semibold text-foreground">
               Cloudflare R2 Storage Not Configured
@@ -182,19 +223,54 @@ export function FileExplorerPage() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-background relative overflow-hidden select-none">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "relative flex flex-col select-none overflow-hidden",
+
+        // Sizing & Spacing
+        "h-full",
+
+        // Backgrounds & Borders
+        "bg-background"
+      )}
+    >
       {/* Tab bar */}
-      <div className="border-b border-border px-3 h-10 flex items-center gap-3 shrink-0">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center shrink-0",
+
+          // Sizing & Spacing
+          "h-10 px-3 gap-3",
+
+          // Backgrounds & Borders
+          "border-b border-border"
+        )}
+      >
         <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
         {activeTab === 'local' && local.rootDir && (
-          <span className="text-[10px] text-muted-foreground font-mono truncate">
+          <span
+            className={cn(
+              // Layout & Positioning
+              "truncate",
+
+              // Typography
+              "text-[10px] font-mono text-muted-foreground"
+            )}
+          >
             {local.rootDir}
           </span>
         )}
       </div>
 
       {/* Main workspace */}
-      <div className="flex-1 flex min-h-0 relative">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "relative flex flex-1 min-h-0"
+        )}
+      >
         {activeTab === 'r2' ? (
           <>
             <ExplorerSidebar
@@ -209,7 +285,12 @@ export function FileExplorerPage() {
               loading={loading}
             />
 
-            <div className="flex-1 flex flex-col min-w-0 min-h-0">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col flex-1 min-w-0 min-h-0"
+              )}
+            >
               <FileToolbar
                 breadcrumbs={r2Breadcrumbs}
                 isAtRoot={!currentPrefix}
@@ -317,7 +398,12 @@ export function FileExplorerPage() {
           </>
         ) : (
           /* Local Storage tab */
-          <div className="flex-1 flex flex-col min-w-0 min-h-0">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-col flex-1 min-w-0 min-h-0"
+            )}
+          >
             <FileToolbar
               breadcrumbs={localBreadcrumbs}
               isAtRoot={local.isAtRoot}
@@ -334,7 +420,12 @@ export function FileExplorerPage() {
               onViewModeChange={handleViewModeChange}
               loading={local.loading}
             />
-            <div className="flex-1 flex min-h-0">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-1 min-h-0"
+              )}
+            >
               <FileGrid
                 items={local.items.map((item) => ({ ...item, id: item.path }))}
                 selectedItem={local.selectedItem ? { ...local.selectedItem, id: local.selectedItem.path } : null}
@@ -342,11 +433,11 @@ export function FileExplorerPage() {
                 deletingId={local.deletingPath}
                 onSelectItem={(item) => local.setSelectedItem(local.items.find((i) => i.path === item.id) ?? null)}
                 onDoubleClickItem={(item) => {
-                  const orig = local.items.find((i) => i.path === item.id);
+                  const orig = local.items.find((i) => i.path === item.path);
                   if (orig) void local.handleOpenFile(orig);
                 }}
                 onDeleteItem={(item) => {
-                  const orig = local.items.find((i) => i.path === item.id);
+                  const orig = local.items.find((i) => i.path === item.path);
                   if (orig) void local.handleDeleteItem(orig);
                 }}
                 viewMode={viewMode}
@@ -366,18 +457,71 @@ export function FileExplorerPage() {
 
       {/* Concurrent upload progress bar */}
       {uploadProgress && activeTab === 'r2' && (
-        <div className="absolute bottom-4 right-4 bg-muted border border-border shadow-md rounded-lg p-3 w-80 z-50 animate-in fade-in slide-in-from-bottom-4 duration-200">
-          <div className="flex items-center justify-between text-[11px] mb-1.5 font-medium">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "absolute bottom-4 right-4 z-50",
+
+            // Sizing & Spacing
+            "w-80 p-3",
+
+            // Backgrounds & Borders
+            "bg-muted border border-border shadow-md rounded-lg",
+
+            // Interactive & States
+            "animate-in fade-in slide-in-from-bottom-4 duration-200"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center justify-between mb-1.5",
+
+              // Typography
+              "text-[11px] font-medium"
+            )}
+          >
             <span className="truncate pr-4 text-foreground">{uploadProgress.fileName}</span>
             <span className="shrink-0 text-primary">{uploadProgress.progress}%</span>
           </div>
-          <div className="w-full bg-border rounded-full h-1.5 overflow-hidden">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "overflow-hidden w-full",
+
+              // Sizing & Spacing
+              "h-1.5",
+
+              // Backgrounds & Borders
+              "bg-border rounded-full"
+            )}
+          >
             <div
-              className="bg-primary h-full rounded-full transition-all duration-300"
+              className={cn(
+                // Layout & Positioning
+                "h-full",
+
+                // Backgrounds & Borders
+                "bg-primary rounded-full",
+
+                // Interactive & States
+                "transition-all duration-300"
+              )}
               style={{ width: `${uploadProgress.progress}%` }}
             />
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1">
+          <p
+            className={cn(
+              // Layout & Positioning
+              "flex items-center mt-1.5",
+
+              // Sizing & Spacing
+              "gap-1",
+
+              // Typography
+              "text-[10px] text-muted-foreground"
+            )}
+          >
             <ShieldWarningIcon className="size-3.5 text-primary shrink-0" />
             Uploading to R2 Buckets concurrently…
           </p>
@@ -399,7 +543,13 @@ function TabBar({
       <Button
         variant="outline"
         size="sm"
-        className={cn('text-xs', activeTab === 'r2' && 'text-primary')}
+        className={cn(
+          // Typography
+          "text-xs",
+
+          // Interactive & States
+          activeTab === 'r2' && 'text-primary'
+        )}
         data-state={activeTab === 'r2' ? 'on' : 'off'}
         onClick={() => onTabChange('r2')}
       >
@@ -408,7 +558,13 @@ function TabBar({
       <Button
         variant="outline"
         size="sm"
-        className={cn('text-xs', activeTab === 'local' && 'text-primary')}
+        className={cn(
+          // Typography
+          "text-xs",
+
+          // Interactive & States
+          activeTab === 'local' && 'text-primary'
+        )}
         data-state={activeTab === 'local' ? 'on' : 'off'}
         onClick={() => onTabChange('local')}
       >

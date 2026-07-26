@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { ActivityStatusBadge, statusActivity } from '@/components/status-badge';
+import { ActivityStatusBadge, STATUS_ACTIVITY } from '@/components/status-badge';
 import type { ActionLogEntry } from '@/stores/browser-automation';
 import type { StatusActivityValue } from '@/components/status-badge';
 
@@ -12,11 +12,11 @@ interface ActionLogPanelProps {
 
 function mapTypeToActivity(type: ActionLogEntry['type']): StatusActivityValue {
   switch (type) {
-    case 'command': return statusActivity.session;
-    case 'result':  return statusActivity.extraction;
-    case 'error':   return statusActivity.error;
-    case 'ai':      return statusActivity.ai;
-    default:        return statusActivity.queue;
+    case 'command': return STATUS_ACTIVITY.session;
+    case 'result':  return STATUS_ACTIVITY.extraction;
+    case 'error':   return STATUS_ACTIVITY.error;
+    case 'ai':      return STATUS_ACTIVITY.ai;
+    default:        return STATUS_ACTIVITY.queue;
   }
 }
 

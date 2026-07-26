@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { useHashPage } from './hooks/use-hash-page';
 import { HashToolbar } from './components/hash-toolbar';
 import { HashInputPanel } from './components/hash-input-panel';
@@ -7,7 +8,18 @@ export function HashPage() {
   const page = useHashPage();
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-background">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col min-h-0",
+
+        // Sizing & Spacing
+        "h-full",
+
+        // Backgrounds & Borders
+        "bg-background"
+      )}
+    >
       <HashToolbar
         activeType={page.activeType}
         onTypeChange={page.setActiveType}
@@ -17,9 +29,25 @@ export function HashPage() {
         onClear={page.handleClear}
       />
 
-      <main className="min-h-0 flex-1 flex flex-col">
+      <main
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col flex-1 min-h-0"
+        )}
+      >
         {/* Static 50/50 side-by-side pane split */}
-        <section className="grid h-full min-h-0 grid-cols-2 divide-x divide-border bg-background">
+        <section
+          className={cn(
+            // Layout & Positioning
+            "grid grid-cols-2 divide-x min-h-0",
+
+            // Sizing & Spacing
+            "h-full",
+
+            // Backgrounds & Borders
+            "divide-border bg-background"
+          )}
+        >
           <HashInputPanel
             input={page.input}
             isEmpty={page.isEmpty}

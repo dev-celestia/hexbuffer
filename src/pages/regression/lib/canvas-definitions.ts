@@ -2,11 +2,11 @@ import type React from 'react';
 import { MarkerType } from '@xyflow/react';
 import { StepNode } from '../nodes/step-node';
 
-export const regressionNodeTypes = {
+export const REGRESSION_NODE_TYPES = {
   regressionStep: StepNode,
 };
 
-export const regressionDefaultEdgeOptions = {
+export const REGRESSION_DEFAULT_EDGE_OPTIONS = {
   animated: true,
   selectable: false,
   style: {
@@ -21,7 +21,7 @@ export const regressionDefaultEdgeOptions = {
   },
 };
 
-export const regressionConnectionLineStyle: React.CSSProperties = {
+export const REGRESSION_CONNECTION_LINE_STYLE: React.CSSProperties = {
   stroke: 'var(--primary)',
   strokeWidth: 2,
 };

@@ -17,9 +17,9 @@ import { Button } from '@/components/ui/button';
 import type { RegressionStepNodeData } from '../nodes/step-node';
 import type { TestStep } from '../types';
 import {
-  regressionConnectionLineStyle,
-  regressionDefaultEdgeOptions,
-  regressionNodeTypes,
+  REGRESSION_CONNECTION_LINE_STYLE,
+  REGRESSION_DEFAULT_EDGE_OPTIONS,
+  REGRESSION_NODE_TYPES,
 } from '../lib/canvas-definitions';
 
 interface StepFlowCanvasProps {
@@ -49,7 +49,7 @@ function buildRegressionEdge(source: string, target: string, index: number): Edg
     id: `regression-edge-${source}-${target}-${index}`,
     source,
     target,
-    ...regressionDefaultEdgeOptions,
+    ...REGRESSION_DEFAULT_EDGE_OPTIONS,
   };
 }
 
@@ -130,7 +130,7 @@ export function StepFlowCanvas({
         className="regression-flow"
         nodes={nodes}
         edges={edges}
-        nodeTypes={regressionNodeTypes}
+        nodeTypes={REGRESSION_NODE_TYPES}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={(_, node) => {
@@ -138,8 +138,8 @@ export function StepFlowCanvas({
           if (index >= 0) onSelectedStepChange(index);
         }}
         onPaneClick={() => onSelectedStepChange(null)}
-        defaultEdgeOptions={regressionDefaultEdgeOptions}
-        connectionLineStyle={regressionConnectionLineStyle}
+        defaultEdgeOptions={REGRESSION_DEFAULT_EDGE_OPTIONS}
+        connectionLineStyle={REGRESSION_CONNECTION_LINE_STYLE}
         nodesDraggable
         nodesConnectable={false}
         elementsSelectable

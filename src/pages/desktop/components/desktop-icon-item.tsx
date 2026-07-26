@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { allNavItems } from '@/layout/constants';
+import { ALL_NAV_ITEMS } from '@/layout/constants';
 
 const CONTAINER_SIZE = "size-20";
 const INNER_SIZE = "size-[56px]";
@@ -21,7 +21,7 @@ const DEFAULT_COLORS = {
 
 export function DesktopIconItem({ href, label, icon: IconComp, onClick }: DesktopIconItemProps) {
   const item = React.useMemo(() => {
-    return allNavItems.find((i) => i.href === href);
+    return ALL_NAV_ITEMS.find((i) => i.href === href);
   }, [href]);
 
   const CustomIcon = item?.icon || IconComp;

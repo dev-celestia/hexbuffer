@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
-import { mainNavItems } from '@/layout/constants';
+import { MAIN_NAV_ITEMS } from '@/layout/constants';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -34,7 +34,7 @@ export function ShortcutManager() {
   const [searchQuery, setSearchQuery] = React.useState('');
 
   const itemsToManage = React.useMemo(() => {
-    return mainNavItems.filter((item) => item.label !== 'Desktop');
+    return MAIN_NAV_ITEMS.filter((item) => item.label !== 'Desktop');
   }, []);
 
   const filteredItems = React.useMemo(() => {

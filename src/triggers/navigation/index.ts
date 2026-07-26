@@ -1,5 +1,5 @@
 import { useNavStore } from '@/stores/nav';
-import { allNavItems } from '@/layout/constants';
+import { ALL_NAV_ITEMS } from '@/layout/constants';
 
 /**
  * Normalizes app paths and opens/focuses the corresponding window.
@@ -14,7 +14,7 @@ export function openApp(path: string, navigate?: (path: string) => void): void {
     targetPath = '/http-history';
   }
 
-  const navItem = allNavItems.find((item) => item.href === targetPath);
+  const navItem = ALL_NAV_ITEMS.find((item) => item.href === targetPath);
   if (navItem) {
     useNavStore.getState().triggerNavBlink(targetPath);
     useNavStore.getState().openWindow(targetPath, navItem.label);

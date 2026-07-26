@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
 import { useRepeaterPage } from './hooks/use-repeater-page';
 import { WorkspacePanel } from './components/workspace-panel';
@@ -18,8 +19,26 @@ export function RepeaterPage() {
         onTabManage={page.onTabManage}
         onCloseTabsToLeft={page.onCloseTabsToLeft}
         onCloseTabsToRight={page.onCloseTabsToRight}
-        className="flex h-full min-h-0 flex-col bg-background"
-        contentClassName="flex-1 m-2 border rounded-md overflow-hidden bg-background min-h-0"
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col min-h-0",
+
+          // Sizing & Spacing
+          "h-full",
+
+          // Backgrounds & Borders
+          "bg-background"
+        )}
+        contentClassName={cn(
+          // Layout & Positioning
+          "flex-1 min-h-0 overflow-hidden",
+
+          // Sizing & Spacing
+          "m-2",
+
+          // Backgrounds & Borders
+          "border rounded-md bg-background"
+        )}
       >
         {page.activeWorkspaceId && (
           <WorkspacePanel key={page.activeWorkspaceId} workspaceId={page.activeWorkspaceId} />

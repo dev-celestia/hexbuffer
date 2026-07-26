@@ -34,13 +34,43 @@ function CategoryContent({ settings, active }: CategoryContentProps) {
   const title = CATEGORY_LABELS[active];
 
   return (
-    <div className="flex-1 overflow-auto">
-      <div className="mx-auto w-full max-w-2xl px-8 py-8">
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex-1 overflow-auto"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "mx-auto w-full max-w-2xl",
+
+          // Sizing & Spacing
+          "px-8 py-8"
+        )}
+      >
+        <div
+          className={cn(
+            // Sizing & Spacing
+            "mb-6"
+          )}
+        >
+          <h1
+            className={cn(
+              // Typography
+              "text-xl font-semibold tracking-tight"
+            )}
+          >
+            {title}
+          </h1>
         </div>
 
-        <div className="space-y-6">
+        <div
+          className={cn(
+            // Sizing & Spacing
+            "space-y-6"
+          )}
+        >
           {active === 'general' && <GeneralSettingsTab settings={settings} />}
           {active === 'ca-cert' && <CaCertificateSettingsTab settings={settings} />}
           {active === 'ai' && <AiSettingsTab settings={settings} />}
@@ -69,13 +99,25 @@ export function SettingsLayout({ settings }: SettingsLayoutProps) {
   }, []);
 
   return (
-    <div className="flex h-full overflow-hidden">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex overflow-hidden",
+
+        // Sizing & Spacing
+        "h-full"
+      )}
+    >
       <SettingsSidebar active={active} onSelect={handleSelect} />
 
       <div
         key={contentKey}
         className={cn(
-          'flex flex-1 flex-col overflow-hidden animate-in fade-in slide-in-from-right-4 duration-200',
+          // Layout & Positioning
+          "flex flex-col flex-1 overflow-hidden",
+
+          // Interactive & States
+          "animate-in fade-in slide-in-from-right-4 duration-200"
         )}
       >
         <CategoryContent settings={settings} active={active} />

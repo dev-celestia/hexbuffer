@@ -2,7 +2,7 @@ import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { allNavItems } from '@/layout/constants';
+import { ALL_NAV_ITEMS } from '@/layout/constants';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 
 export function NavSettingsCard() {
@@ -14,7 +14,7 @@ export function NavSettingsCard() {
 
   return (
     <div className="divide-y">
-      {allNavItems.map((item) => {
+      {ALL_NAV_ITEMS.map((item) => {
         const Icon = item.icon;
         const isHidden = hiddenNavItems.includes(item.href);
 

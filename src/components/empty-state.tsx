@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { BugIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 
 interface EmptyStateProps {
@@ -7,7 +8,18 @@ interface EmptyStateProps {
 export function EmptyState({ variant }: EmptyStateProps) {
   if (variant === 'no-traffic') {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col items-center justify-center",
+
+          // Sizing & Spacing
+          "h-full",
+
+          // Typography
+          "text-muted-foreground"
+        )}
+      >
         <BugIcon className="h-12 w-12 mb-4 opacity-20" />
         <p className="text-lg font-medium mb-2">No traffic captured</p>
         <p className="text-sm">Make HTTP requests to see logs here</p>
@@ -15,7 +27,18 @@ export function EmptyState({ variant }: EmptyStateProps) {
     );
   }
   return (
-    <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col items-center justify-center",
+
+        // Sizing & Spacing
+        "h-full",
+
+        // Typography
+        "text-muted-foreground"
+      )}
+    >
       <MagnifyingGlassIcon className="h-12 w-12 mb-4 opacity-20" />
       <p className="text-lg font-medium mb-2">No matching logs</p>
       <p className="text-sm">Try adjusting your filters</p>

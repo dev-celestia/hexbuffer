@@ -5,7 +5,22 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from '@/lib/utils';
 
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-sm border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
+  [
+    // Layout & Positioning
+    "inline-flex items-center justify-center shrink-0 whitespace-nowrap overflow-hidden gap-1 [&>svg]:size-3 [&>svg]:pointer-events-none",
+
+    // Sizing & Spacing
+    "w-fit px-2 py-0.5",
+
+    // Typography
+    "text-xs font-medium",
+
+    // Backgrounds & Borders
+    "rounded-sm border",
+
+    // Interactive & States
+    "transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  ],
   {
     variants: {
       variant: {
@@ -32,8 +47,10 @@ function Badge({
   variant,
   asChild = false,
   ...props
-}: React.ComponentProps<"span"> &
-  VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+}: Readonly<
+  React.ComponentProps<"span"> &
+    VariantProps<typeof badgeVariants> & { asChild?: boolean }
+>) {
   const Comp = asChild ? Slot : "span"
 
   return (

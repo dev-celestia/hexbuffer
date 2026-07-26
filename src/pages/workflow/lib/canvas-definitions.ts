@@ -4,7 +4,7 @@ import { ConditionNode } from '../nodes/condition-node';
 import { ActionNode } from '../nodes/action-node';
 import { DeletableEdge } from '../components/deletable-edge';
 
-export const nodeTypes = {
+export const NODE_TYPES = {
   'trigger:scan-completed': TriggerNode,
   'trigger:scheduled': TriggerNode,
   'trigger:manual': TriggerNode,
@@ -45,11 +45,11 @@ export const nodeTypes = {
   'action:connect-cdp': ActionNode,
 };
 
-export const edgeTypes = {
+export const EDGE_TYPES = {
   deletable: DeletableEdge,
 };
 
-export const connectionLineStyle: React.CSSProperties = {
+export const CONNECTION_LINE_STYLE: React.CSSProperties = {
   stroke: '#00c950',
   strokeWidth: 3,
 };

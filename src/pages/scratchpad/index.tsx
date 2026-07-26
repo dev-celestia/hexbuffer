@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { cn } from '@/lib/utils';
 import { useScratchpadPage } from './hooks/use-scratchpad-page';
 import { ScratchpadSidebar } from './components/scratchpad-sidebar';
 import { ScratchpadEditorPane } from './components/scratchpad-editor-pane';
@@ -8,8 +8,27 @@ export function ScratchpadPage() {
 
   // ponytail: sidebar + editor page layout using consistent container aesthetics
   return (
-    <div className="h-full w-full overflow-hidden bg-background p-2 flex">
-      <div className="flex-1 flex border rounded-md overflow-hidden bg-background min-h-0">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex overflow-hidden",
+
+        // Sizing & Spacing
+        "h-full w-full p-2",
+
+        // Backgrounds & Borders
+        "bg-background"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-1 min-h-0 overflow-hidden",
+
+          // Backgrounds & Borders
+          "border rounded-md bg-background"
+        )}
+      >
         {hook.isSidebarOpen && <ScratchpadSidebar hook={hook} />}
         <ScratchpadEditorPane hook={hook} />
       </div>

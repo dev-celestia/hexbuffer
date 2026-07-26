@@ -3,13 +3,13 @@ import { Badge } from '@/components/ui/badge';
 import { getMethodBadgeColor } from '@/lib/method-colors';
 import { cn } from '@/lib/utils';
 
-export const levelBadge = {
+export const LEVEL_BADGE = {
   info: 'info',
   warning: 'warning',
   error: 'error',
 } as const;
 
-export const statusActivity = {
+export const STATUS_ACTIVITY = {
   session: 'session',
   navigation: 'navigation',
   extraction: 'extraction',
@@ -20,8 +20,8 @@ export const statusActivity = {
   queue: 'queue',
 } as const;
 
-export type LevelBadgeValue = (typeof levelBadge)[keyof typeof levelBadge];
-export type StatusActivityValue = (typeof statusActivity)[keyof typeof statusActivity];
+export type LevelBadgeValue = (typeof LEVEL_BADGE)[keyof typeof LEVEL_BADGE];
+export type StatusActivityValue = (typeof STATUS_ACTIVITY)[keyof typeof STATUS_ACTIVITY];
 export type StatusBadgeValue = number | null | undefined;
 
 export function getStatusColor(status: StatusBadgeValue) {
@@ -42,7 +42,15 @@ export function StatusBadge({ status }: { status: StatusBadgeValue }) {
     <Badge
       variant="outline"
       className={cn(
-        'text-[10px] px-1 py-0.5 rounded font-mono shadow-none border-none text-background font-semibold',
+        // Sizing & Spacing
+        "px-1 py-0.5",
+
+        // Typography
+        "text-[10px] font-mono font-semibold text-background",
+
+        // Backgrounds & Borders
+        "rounded shadow-none border-none",
+
         colorClass
       )}
     >
@@ -52,9 +60,9 @@ export function StatusBadge({ status }: { status: StatusBadgeValue }) {
 }
 
 export function getLevelColor(level: LevelBadgeValue) {
-  if (level === levelBadge.info) return 'bg-blue-600';
-  if (level === levelBadge.warning) return 'bg-orange-600';
-  if (level === levelBadge.error) return 'bg-red-600';
+  if (level === LEVEL_BADGE.info) return 'bg-blue-600';
+  if (level === LEVEL_BADGE.warning) return 'bg-orange-600';
+  if (level === LEVEL_BADGE.error) return 'bg-red-600';
   return 'bg-gray-600';
 }
 
@@ -64,7 +72,15 @@ export function LevelBadge({ level }: { level: LevelBadgeValue }) {
     <Badge
       variant="outline"
       className={cn(
-        'text-[10px] px-1 py-0.5 rounded font-mono shadow-none border-none text-white font-semibold',
+        // Sizing & Spacing
+        "px-1 py-0.5",
+
+        // Typography
+        "text-[10px] font-mono font-semibold text-white",
+
+        // Backgrounds & Borders
+        "rounded shadow-none border-none",
+
         colorClass
       )}
     >
@@ -74,17 +90,17 @@ export function LevelBadge({ level }: { level: LevelBadgeValue }) {
 }
 
 export function getActivityStatusColor(status: StatusActivityValue) {
-  if (status === statusActivity.session) return 'bg-yellow-600';
-  if (status === statusActivity.navigation) return 'bg-green-600';
-  if (status === statusActivity.extraction) return 'bg-blue-600';
-  if (status === statusActivity.ai) return 'bg-purple-600';
-  if (status === statusActivity.human) return 'bg-cyan-600';
-  if (status === statusActivity.policy) return 'bg-red-600';
-  if (status === statusActivity.error) return 'bg-red-600';
-  if (status === statusActivity.queue) return 'bg-gray-600';
+  if (status === STATUS_ACTIVITY.session) return 'bg-yellow-600';
+  if (status === STATUS_ACTIVITY.navigation) return 'bg-green-600';
+  if (status === STATUS_ACTIVITY.extraction) return 'bg-blue-600';
+  if (status === STATUS_ACTIVITY.ai) return 'bg-purple-600';
+  if (status === STATUS_ACTIVITY.human) return 'bg-cyan-600';
+  if (status === STATUS_ACTIVITY.policy) return 'bg-red-600';
+  if (status === STATUS_ACTIVITY.error) return 'bg-red-600';
+  if (status === STATUS_ACTIVITY.queue) return 'bg-gray-600';
   return 'bg-gray-600';
 }
-export const severity = {
+export const SEVERITY = {
   info: 'info',
   low: 'low',
   medium: 'medium',
@@ -92,14 +108,14 @@ export const severity = {
   critical: 'critical',
 } as const;
 
-export type SeverityBadgeValue = (typeof severity)[keyof typeof severity];
+export type SeverityBadgeValue = (typeof SEVERITY)[keyof typeof SEVERITY];
 
 export function getSeverityColor(sev: SeverityBadgeValue) {
-  if (sev === severity.info) return 'bg-blue-600';
-  if (sev === severity.low) return 'bg-green-600';
-  if (sev === severity.medium) return 'bg-yellow-600';
-  if (sev === severity.high) return 'bg-orange-600';
-  if (sev === severity.critical) return 'bg-red-600';
+  if (sev === SEVERITY.info) return 'bg-blue-600';
+  if (sev === SEVERITY.low) return 'bg-green-600';
+  if (sev === SEVERITY.medium) return 'bg-yellow-600';
+  if (sev === SEVERITY.high) return 'bg-orange-600';
+  if (sev === SEVERITY.critical) return 'bg-red-600';
   return 'bg-gray-600';
 }
 
@@ -109,7 +125,15 @@ export function SeverityBadge({ severity: sev }: { severity: SeverityBadgeValue 
     <Badge
       variant="outline"
       className={cn(
-        'text-[10px] px-1 py-0.5 rounded font-mono shadow-none border-none text-white font-semibold',
+        // Sizing & Spacing
+        "px-1 py-0.5",
+
+        // Typography
+        "text-[10px] font-mono font-semibold text-white",
+
+        // Backgrounds & Borders
+        "rounded shadow-none border-none",
+
         colorClass
       )}
     >
@@ -122,7 +146,16 @@ export function InterestingBadge() {
   return (
     <Badge
       variant="outline"
-      className="text-[10px] px-1 py-0.5 rounded font-mono shadow-none border-none text-white font-semibold bg-yellow-600"
+      className={cn(
+        // Sizing & Spacing
+        "px-1 py-0.5",
+
+        // Typography
+        "text-[10px] font-mono font-semibold text-white",
+
+        // Backgrounds & Borders
+        "rounded shadow-none border-none bg-yellow-600"
+      )}
     >
       Interesting
     </Badge>
@@ -138,7 +171,15 @@ export function ConsoleLevelBadge({ level }: { level: ConsoleLevelValue }) {
     <Badge
       variant="outline"
       className={cn(
-        'text-[10px] px-1 py-0.5 rounded font-mono shadow-none border-none text-white font-semibold',
+        // Sizing & Spacing
+        "px-1 py-0.5",
+
+        // Typography
+        "text-[10px] font-mono font-semibold text-white",
+
+        // Backgrounds & Borders
+        "rounded shadow-none border-none",
+
         colorClass
       )}
     >
@@ -151,9 +192,16 @@ export function ActivityStatusBadge({ status }: { status: StatusActivityValue })
   const colorClass = getActivityStatusColor(status);
   return (
     <Badge
-      // variant="outline"
       className={cn(
-        'text-[10px] px-1 py-0.5 rounded font-mono shadow-none border-none text-white font-semibold',
+        // Sizing & Spacing
+        "px-1 py-0.5",
+
+        // Typography
+        "text-[10px] font-mono font-semibold text-white",
+
+        // Backgrounds & Borders
+        "rounded shadow-none border-none",
+
         colorClass
       )}
     >
@@ -165,9 +213,19 @@ export function ActivityStatusBadge({ status }: { status: StatusActivityValue })
 export function MethodBadge({ method, className }: { method: string; className?: string }) {
   return (
     <Badge
-      // variant="outline"
       className={cn(
-        'text-[10px] px-1 py-0.5 rounded font-mono shadow-none border shrink-0 font-semibold uppercase',
+        // Layout & Positioning
+        "shrink-0",
+
+        // Sizing & Spacing
+        "px-1 py-0.5",
+
+        // Typography
+        "text-[10px] font-mono font-semibold uppercase",
+
+        // Backgrounds & Borders
+        "rounded shadow-none border",
+
         getMethodBadgeColor(method),
         className
       )}
@@ -177,7 +235,7 @@ export function MethodBadge({ method, className }: { method: string; className?:
   );
 }
 
-export const crawlStatus = {
+export const CRAWL_STATUS = {
   idle: 'idle',
   running: 'running',
   paused: 'paused',
@@ -186,15 +244,15 @@ export const crawlStatus = {
   stopped: 'stopped',
 } as const;
 
-export type CrawlStatusValue = (typeof crawlStatus)[keyof typeof crawlStatus];
+export type CrawlStatusValue = (typeof CRAWL_STATUS)[keyof typeof CRAWL_STATUS];
 
 export function getCrawlStatusColor(status: CrawlStatusValue) {
-  if (status === crawlStatus.running) return 'bg-emerald-600';
-  if (status === crawlStatus.paused) return 'bg-amber-600';
-  if (status === crawlStatus.completed) return 'bg-sky-600';
-  if (status === crawlStatus.failed) return 'bg-red-600';
-  if (status === crawlStatus.stopped) return 'bg-gray-500';
-  if (status === crawlStatus.idle) return 'bg-gray-500';
+  if (status === CRAWL_STATUS.running) return 'bg-emerald-600';
+  if (status === CRAWL_STATUS.paused) return 'bg-amber-600';
+  if (status === CRAWL_STATUS.completed) return 'bg-sky-600';
+  if (status === CRAWL_STATUS.failed) return 'bg-red-600';
+  if (status === CRAWL_STATUS.stopped) return 'bg-gray-500';
+  if (status === CRAWL_STATUS.idle) return 'bg-gray-500';
   return 'bg-gray-500';
 }
 
@@ -204,7 +262,15 @@ export function CrawlStatusBadge({ status }: { status: CrawlStatusValue }) {
     <Badge
       variant="outline"
       className={cn(
-        'text-[10px] px-1 py-0.5 rounded font-mono shadow-none border-none text-white font-semibold',
+        // Sizing & Spacing
+        "px-1 py-0.5",
+
+        // Typography
+        "text-[10px] font-mono font-semibold text-white",
+
+        // Backgrounds & Borders
+        "rounded shadow-none border-none",
+
         colorClass
       )}
     >

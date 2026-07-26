@@ -1,4 +1,5 @@
 
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CopyIcon, TrashIcon } from '@phosphor-icons/react';
@@ -14,9 +15,31 @@ export function XssGeneratorPage() {
   const isEmpty = !page.basePayload && !page.encodedOutput;
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-background">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col min-h-0",
+
+        // Sizing & Spacing
+        "h-full",
+
+        // Backgrounds & Borders
+        "bg-background"
+      )}
+    >
       {/* Toolbar */}
-      <div className="flex shrink-0 items-center justify-between border-b px-2 py-1 gap-3">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between shrink-0",
+
+          // Sizing & Spacing
+          "px-2 py-1 gap-3",
+
+          // Backgrounds & Borders
+          "border-b"
+        )}
+      >
         <Tabs
           value={page.activeCategory}
           onValueChange={(v) => page.setActiveCategory(v as XssPayloadCategory)}
@@ -30,7 +53,15 @@ export function XssGeneratorPage() {
           </TabsList>
         </Tabs>
 
-        <div className="flex items-center gap-1 shrink-0">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center shrink-0",
+
+            // Sizing & Spacing
+            "gap-1"
+          )}
+        >
           <Button
             variant="outline"
             onClick={() => page.handleCopy(page.encodedOutput)}
@@ -50,15 +81,33 @@ export function XssGeneratorPage() {
         </div>
       </div>
 
-      <main className="flex min-h-0 flex-1">
-        <div className="w-72 shrink-0">
+      <main
+        className={cn(
+          // Layout & Positioning
+          "flex flex-1 min-h-0"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "shrink-0",
+
+            // Sizing & Spacing
+            "w-72"
+          )}
+        >
           <PayloadLibraryPanel
             filteredPayloads={page.filteredPayloads}
             onSelectPayload={page.handleSelectPayload}
           />
         </div>
 
-        <div className="flex-1 min-w-0">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex-1 min-w-0"
+          )}
+        >
           <PayloadBuilderPanel
             basePayload={page.basePayload}
             onBasePayloadChange={page.setBasePayload}

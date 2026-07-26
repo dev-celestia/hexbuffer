@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { useListenerPage } from './hooks/use-listener-page';
 import { ListenerHosts } from './components/hosts-panel';
 import { ListenerInteractions } from './components/interactions-panel';
@@ -29,17 +30,44 @@ export function ListenerPage() {
   ];
 
   return (
-    <div className="relative h-full flex flex-col">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "relative flex flex-col",
+
+        // Sizing & Spacing
+        "h-full"
+      )}
+    >
       {/* Global Listener Toggle */}
-      <div className="absolute right-4 top-[9px] z-20 flex items-center gap-2">
-        <span className="text-[10px] font-semibold font-mono tracking-wider text-muted-foreground select-none">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "absolute right-4 top-[9px] z-20 flex items-center",
+
+          // Sizing & Spacing
+          "gap-2"
+        )}
+      >
+        <span
+          className={cn(
+            // Typography
+            "text-[10px] font-semibold font-mono tracking-wider text-muted-foreground select-none"
+          )}
+        >
           LISTENER: {page.isEnabled ? 'ACTIVE' : 'DISABLED'}
         </span>
         <Switch
           checked={page.isEnabled}
           onCheckedChange={page.setIsEnabled}
           aria-label="Toggle listener active state"
-          className="h-4 w-7 data-[state=checked]:bg-green-500 [&>span]:h-3 [&>span]:w-3 data-[state=checked]:[&>span]:translate-x-3"
+          className={cn(
+            // Sizing & Spacing
+            "h-4 w-7 [&>span]:h-3 [&>span]:w-3",
+
+            // Visuals & Colors / Interactive & States
+            "data-[state=checked]:bg-green-500 data-[state=checked]:[&>span]:translate-x-3"
+          )}
         />
       </div>
 
@@ -48,7 +76,16 @@ export function ListenerPage() {
         activeTabId={page.activeSubTab}
         onTabChange={(tabId) => page.setActiveSubTab(tabId as ListenerSubTab)}
       >
-        <TabsContent value="hosts" className="h-full min-h-0 flex flex-col">
+        <TabsContent
+          value="hosts"
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col min-h-0",
+
+            // Sizing & Spacing
+            "h-full"
+          )}
+        >
           <ListenerHosts
             servers={page.servers}
             payloads={page.payloads}
@@ -62,7 +99,16 @@ export function ListenerPage() {
           />
         </TabsContent>
 
-        <TabsContent value="interactions" className="h-full min-h-0 flex flex-col">
+        <TabsContent
+          value="interactions"
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col min-h-0",
+
+            // Sizing & Spacing
+            "h-full"
+          )}
+        >
           <ListenerInteractions
             servers={page.servers}
             interactions={page.interactions}

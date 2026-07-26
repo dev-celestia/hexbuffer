@@ -6,6 +6,8 @@ import { ComparerToolbar } from './components/comparer-toolbar';
 import { ComparerInputs } from './components/comparer-inputs';
 import { ComparerDiffView } from './components/comparer-diff-view';
 
+import { cn } from '@/lib/utils';
+
 export function ComparerPage() {
   const page = useComparerPage();
   const [showInputs, setShowInputs] = useState(true);
@@ -38,7 +40,18 @@ export function ComparerPage() {
 
   // ponytail: thin page coordinator wiring presentation sub-components together.
   return (
-    <div className="flex h-full min-h-0 flex-col bg-background p-2">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col min-h-0",
+
+        // Sizing & Spacing
+        "h-full p-2",
+
+        // Backgrounds & Borders
+        "bg-background"
+      )}
+    >
       <ComparerToolbar
         hasContent={page.hasContent}
         hasDiff={page.hasDiff}
@@ -54,7 +67,15 @@ export function ComparerPage() {
         copyPanel={copyPanel}
       />
 
-      <div className="min-h-0 flex-1 border rounded-b-md overflow-hidden relative">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "relative flex-1 min-h-0 overflow-hidden",
+
+          // Backgrounds & Borders
+          "border rounded-b-md"
+        )}
+      >
         {showInputs ? (
           <ResizablePanelGroup orientation="vertical" className="h-full">
             <ResizablePanel defaultSize={35} minSize={15}>
@@ -71,7 +92,15 @@ export function ComparerPage() {
             <ResizableHandle withHandle />
 
             <ResizablePanel defaultSize={65} minSize={30}>
-              <div className="relative h-full w-full">
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "relative",
+
+                  // Sizing & Spacing
+                  "h-full w-full"
+                )}
+              >
                 <ComparerDiffView
                   diffResult={page.diffResult}
                   diffMode={page.diffMode}
@@ -80,7 +109,15 @@ export function ComparerPage() {
             </ResizablePanel>
           </ResizablePanelGroup>
         ) : (
-          <div className="relative h-full w-full">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "relative",
+
+              // Sizing & Spacing
+              "h-full w-full"
+            )}
+          >
             <ComparerDiffView
               diffResult={page.diffResult}
               diffMode={page.diffMode}

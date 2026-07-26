@@ -11,7 +11,7 @@ export interface NavItem {
   flag?: 'alpha' | 'beta' | 'release';
 }
 
-export const allNavItems: NavItem[] = [
+export const ALL_NAV_ITEMS: NavItem[] = [
   {
     label: 'Desktop',
     icon: HouseIcon,
@@ -223,6 +223,6 @@ export const allNavItems: NavItem[] = [
   }
 ];
 
-export const mainNavItems = import.meta.env.PROD
-  ? allNavItems.filter((item) => item.flag !== 'alpha')
-  : allNavItems;
+export const MAIN_NAV_ITEMS = import.meta.env.PROD
+  ? ALL_NAV_ITEMS.filter((item) => item.flag !== 'alpha')
+  : ALL_NAV_ITEMS;

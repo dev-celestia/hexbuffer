@@ -13,7 +13,7 @@ import {
   CommandGroup,
   CommandItem,
 } from '@/components/ui/command';
-import { mainNavItems } from '../constants';
+import { MAIN_NAV_ITEMS } from '../constants';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { Kbd } from '@/components/ui/kbd';
 import { TriangleLogo } from '../triangle-logo';
@@ -25,7 +25,7 @@ export function AppLauncher() {
   const pinnedNavItems = useAppSettingsStore((s) => s.pinnedNavItems);
   const togglePinNavItem = useAppSettingsStore((s) => s.togglePinNavItem);
 
-  const launcherItems = mainNavItems.filter((item) => item.href !== '/');
+  const launcherItems = MAIN_NAV_ITEMS.filter((item) => item.href !== '/');
 
   const MAX_PINNED = 9;
   const pinnedCount = pinnedNavItems.length;

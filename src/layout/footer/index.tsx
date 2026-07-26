@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { getEffectiveProxyPort, useAppStore } from '@/stores/app';
-import { proxyStatusLabel } from './utils';
+import { PROXY_STATUS_LABEL } from './utils';
 import { ProxyStatusIndicator } from './proxy-status';
 import pkg from '../../../package.json';
 
@@ -14,7 +14,7 @@ export function AppFooter() {
   const isDefaultPortChanged = proxyStatus === 'connected' && proxyPort !== null && proxyPort !== proxyDefaultPort;
   const proxyTitle = isDefaultPortChanged
     ? `Proxy connected on ${activeProxyPort}. Restart to use configured port ${proxyDefaultPort}.`
-    : `Proxy ${proxyStatusLabel[proxyStatus].toLowerCase()}`;
+    : `Proxy ${PROXY_STATUS_LABEL[proxyStatus].toLowerCase()}`;
 
   React.useEffect(() => {
     checkProxyStatus();

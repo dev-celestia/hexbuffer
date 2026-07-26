@@ -10,7 +10,7 @@ import type {
   ListenerPayload,
 } from '../../types';
 
-export const serverFormSchema = z.object({
+export const SERVER_FORM_SCHEMA = z.object({
   name: z.string().trim().min(1, 'Name is required.'),
   url: z
     .string()
@@ -27,9 +27,9 @@ export const serverFormSchema = z.object({
   apiKey: z.string().trim().min(1, 'API key is required.'),
 });
 
-export type ServerFormValues = z.infer<typeof serverFormSchema>;
+export type ServerFormValues = z.infer<typeof SERVER_FORM_SCHEMA>;
 
-export const serverFormDefaults: ServerFormValues = {
+export const SERVER_FORM_DEFAULTS: ServerFormValues = {
   name: '',
   url: '',
   apiKey: '',
@@ -57,8 +57,8 @@ export function useHostsPanel({
   const [expandedPayloads, setExpandedPayloads] = useState<Record<string, boolean>>({});
 
   const form = useForm<ServerFormValues>({
-    resolver: zodResolver(serverFormSchema),
-    defaultValues: serverFormDefaults,
+    resolver: zodResolver(SERVER_FORM_SCHEMA),
+    defaultValues: SERVER_FORM_DEFAULTS,
     mode: 'onChange',
   });
 
@@ -76,7 +76,7 @@ export function useHostsPanel({
     setShowFormKey(false);
     if (!open) {
       setEditingServer(null);
-      form.reset(serverFormDefaults);
+      form.reset(SERVER_FORM_DEFAULTS);
     }
   };
 
@@ -128,7 +128,7 @@ export function useHostsPanel({
 
     setDialogOpen(false);
     setEditingServer(null);
-    form.reset(serverFormDefaults);
+    form.reset(SERVER_FORM_DEFAULTS);
   };
 
   const handleCheck = async (id: string) => {

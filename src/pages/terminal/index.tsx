@@ -6,6 +6,8 @@ import { TerminalContainer } from './components/terminal-container';
 import { TerminalEmptyState } from './components/terminal-empty-state';
 import { TerminalSidebar } from './components/terminal-sidebar';
 
+import { cn } from '@/lib/utils';
+
 export function TerminalPage() {
   const {
     sessions,
@@ -57,11 +59,31 @@ export function TerminalPage() {
       onTabClose={closeSession}
       onCloseTabsToLeft={closeTabsToLeft}
       onCloseTabsToRight={closeTabsToRight}
-      className="flex min-h-0 h-full flex-1 flex-col"
-      contentClassName="flex-1 rounded-lg border min-h-0 overflow-hidden bg-background"
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col flex-1 min-h-0",
+
+        // Sizing & Spacing
+        "h-full"
+      )}
+      contentClassName={cn(
+        // Layout & Positioning
+        "flex-1 min-h-0 overflow-hidden",
+
+        // Backgrounds & Borders
+        "rounded-lg border bg-background"
+      )}
     >
       {sessions.length > 0 ? (
-        <div className="h-full min-h-0 flex flex-col">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col min-h-0",
+
+            // Sizing & Spacing
+            "h-full"
+          )}
+        >
           <TerminalToolbar
             activeSessionName={activeSessionName}
             clearActiveSessionBuffer={clearActiveSessionBuffer}
@@ -73,11 +95,25 @@ export function TerminalPage() {
             toggleSidebar={toggleSidebar}
           />
 
-          <div className="flex-1 min-h-0 flex relative">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-1 min-h-0 relative"
+            )}
+          >
             {/* Left Workspace: Terminals Container */}
             <div
               ref={workspaceRef}
-              className="flex-1 min-h-0 bg-background relative p-2"
+              className={cn(
+                // Layout & Positioning
+                "flex-1 min-h-0 relative",
+
+                // Sizing & Spacing
+                "p-2",
+
+                // Backgrounds & Borders
+                "bg-background"
+              )}
             >
               {sessions.map((session) => (
                 <TerminalContainer
@@ -94,7 +130,15 @@ export function TerminalPage() {
 
             {/* Right Panel: Recent Commands Sidebar */}
             {isSidebarOpen && (
-              <div className="w-64 shrink-0 h-full">
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "shrink-0",
+
+                  // Sizing & Spacing
+                  "w-64 h-full"
+                )}
+              >
                 <TerminalSidebar
                   recentCommands={recentCommands}
                   clearRecentCommands={clearRecentCommands}

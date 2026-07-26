@@ -104,3 +104,12 @@ export {
   restartTerminalSession,
   setActiveTerminalId,
 } from './terminal';
+
+export {
+  APP_AI_TOOL_DEFINITIONS,
+  executeAiToolCall,
+  setupAiToolEventListener,
+} from '@/layout/assistant/lib/ai-tools';
+export type { AppAiToolDefinition, AppAiToolCallPayload } from '@/layout/assistant/lib/ai-tools';
+
+

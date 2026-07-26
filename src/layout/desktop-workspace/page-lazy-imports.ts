@@ -26,7 +26,7 @@ const ScratchpadPage = React.lazy(() => import("@/pages/scratchpad").then((m) =>
 const MockForgePage = React.lazy(() => import("@/pages/mock-forge").then((m) => ({ default: m.MockForgePage })));
 const TerminalPage = React.lazy(() => import("@/pages/terminal").then((m) => ({ default: m.TerminalPage })));
 
-export const pageComponentMap: Record<string, React.ComponentType<any>> = {
+export const PAGE_COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
   '/': DesktopPage,
   '/http-history': HttpHistoryPage,
   '/websocket-history': WebSocketHistoryPage,

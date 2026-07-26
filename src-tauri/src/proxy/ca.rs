@@ -28,38 +28,11 @@ fn get_ca_key_path() -> PathBuf {
     get_ca_dir().join("ca-key.pem")
 }
 
-fn sync_ca_files(ca: &CertificationAuthority) -> Result<(), Box<dyn std::error::Error>> {
-    let dir = get_ca_dir();
-    fs::create_dir_all(&dir)?;
-    fs::write(get_ca_cert_path(), ca.ca_cert_pem())?;
-    let default_key = std::path::Path::new("cert").join("ca-key.pem");
-    if default_key.exists() && !get_ca_key_path().exists() {
-        fs::copy(&default_key, get_ca_key_path())?;
-    }
-    Ok(())
-}
-
 pub fn create_proxy_authority(
 ) -> Result<CertificationAuthority, Box<dyn std::error::Error>> {
     let ca_dir = get_ca_dir();
-    let cert_dir = std::path::Path::new("cert");
     fs::create_dir_all(&ca_dir)?;
-    fs::create_dir_all(cert_dir)?;
-
-    let target_key = cert_dir.join("ca-key.pem");
-    let target_cert = cert_dir.join("ca.pem");
-    let src_key = get_ca_key_path();
-    let src_cert = get_ca_cert_path();
-
-    if src_key.exists() && !target_key.exists() {
-        fs::copy(&src_key, &target_key).ok();
-    }
-    if src_cert.exists() && !target_cert.exists() {
-        fs::copy(&src_cert, &target_cert).ok();
-    }
-
-    let ca = CertificationAuthority::new();
-    sync_ca_files(&ca)?;
+    let ca = CertificationAuthority::new_in(&ca_dir);
     Ok(ca)
 }
 
@@ -72,14 +45,11 @@ pub fn get_ca_cert_pem() -> Result<String, Box<dyn std::error::Error>> {
 }
 
 pub fn regenerate_ca() -> Result<(), Box<dyn std::error::Error>> {
+    let ca_dir = get_ca_dir();
     fs::remove_file(get_ca_cert_path()).ok();
     fs::remove_file(get_ca_key_path()).ok();
-    fs::remove_file("cert/ca.pem").ok();
-    fs::remove_file("cert/ca-key.pem").ok();
 
-    let ca = CertificationAuthority::new();
-    sync_ca_files(&ca)?;
-
+    let _ca = CertificationAuthority::new_in(&ca_dir);
     Ok(())
 }
 
@@ -94,5 +64,26 @@ pub fn ensure_ca_exists() {
         } else {
             eprintln!("[ca] CA regenerated successfully");
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_create_proxy_authority_uses_ca_dir() {
+        let temp_dir = std::env::temp_dir().join("apprecon_ca_test");
+        let _ = fs::remove_dir_all(&temp_dir);
+
+        init_ca_dir(temp_dir.clone());
+        let auth = create_proxy_authority();
+        assert!(auth.is_ok(), "CA authority creation should succeed");
+
+        let cert_pem = get_ca_cert_pem();
+        assert!(cert_pem.is_ok(), "CA cert PEM read should succeed");
+        assert!(cert_pem.unwrap().contains("BEGIN CERTIFICATE"));
+
+        let _ = fs::remove_dir_all(&temp_dir);
     }
 }

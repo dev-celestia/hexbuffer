@@ -4,6 +4,15 @@
 
 use components inside `/src/components/ui` dont put any custom className just use the original components 
 
+## Component Styling Standard
+
+MANDATORY: For all React component styling and Tailwind CSS classes in this project, ALWAYS follow the `categorized-tailwind-css` skill ([SKILL.md](file:///Users/arham/Desktop/project/apprecon/.agents/skills/categorized-tailwind-css/SKILL.md)). Organize classes passed to `cn(...)` or `cva(...)` into line-separated, commented category sections:
+- `// Layout & Positioning`
+- `// Sizing & Spacing`
+- `// Typography`
+- `// Backgrounds & Borders`
+- `// Interactive & States`
+
 ## Project Structure & Module Organization
 
 `src/` contains the React + TypeScript frontend. Feature pages live in `src/pages/` (for example, `http-history/`, `repeater/`, and `brute-force/`), shared UI primitives in `src/components/ui/`, stores in `src/stores/`, hooks in `src/hooks/`, and helpers in `src/lib/`. Static assets live in `public/` and `src/assets/`.
@@ -23,7 +32,7 @@ use components inside `/src/components/ui` dont put any custom className just us
 
 ## Coding Style & Naming Conventions
 
-Use TypeScript with React function components. Existing files use 2-space indentation, semicolons, and path aliases such as `@/components/ui/button`. Keep page folders kebab-cased (`brute-force`), React components PascalCased (`RepeaterPage`), hooks camelCased with a `use` prefix (`useTargets`), and Zustand stores short, domain-based names (`target.ts`, `filter.ts`).
+Use TypeScript with React function components. Existing files use 2-space indentation, semicolons, and path aliases such as `@/components/ui/button`. Keep page folders kebab-cased (`brute-force`), React components PascalCased (`RepeaterPage`), hooks camelCased with a `use` prefix (`useTargets`), and Zustand stores short, domain-based names (`target.ts`, `filter.ts`). Always capitalize constants using UPPER_SNAKE_CASE (for example, `ROOT_BG` instead of `rootBg`).
 
 There is no committed lint or formatting configuration yet, so match nearby code style and keep imports organized manually. Rust code should follow standard `rustfmt` conventions.
 
@@ -59,6 +68,24 @@ src/pages/feature-name/
 ```
 
 This repository now prefers “page entry + page hook + presentational sections” over large all-in-one page files.
+
+## AI Agent Tools & Triggers Integration
+
+When adding new app capabilities that AI agents can execute (or modifying existing tools), follow this standard two-step pattern across `hexbuffer-ai` and `apprecon`:
+
+### 1. Rust LLM Tool Definition (`hexbuffer-ai`)
+- Create a dedicated file under `/Users/arham/Desktop/project/hexbuffer-ai/src/tools/<feature>.rs` implementing Rig's `Tool` trait.
+- Export args, output, and tool struct in `src/tools/mod.rs`.
+- Attach the tool struct to the `AgentBuilder` in `src/chat.rs`.
+- If high-risk, configure security policy in `src/policy.rs` (`SecurityApprovalPolicy`).
+
+### 2. Frontend App Trigger Integration (`apprecon`)
+- Define the frontend tool definition (`*_AI_TOOL_DEFINITION`) and execution handler (`execute*AiTool`) under `src/layout/assistant/lib/ai-tools/<feature>.ts`.
+- Register the tool schema in `src/layout/assistant/lib/ai-tools/definitions.ts`.
+- Register the tool execution case in `src/layout/assistant/lib/ai-tools/executor.ts`.
+- Re-export the feature tool from `src/layout/assistant/lib/ai-tools/index.ts` and `src/triggers/<feature>/index.ts`.
+- Store state manipulation or IPC calls inside `src/triggers/<feature>/` to keep UI components decoupled.
+
 
 ## Testing Guidelines
 

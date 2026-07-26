@@ -8,32 +8,60 @@ import { useHttpHistoryQueryStore } from '@/stores/history';
 import { useShallow } from 'zustand/react/shallow';
 import { buildHistoryQuery, hasActiveHistoryFilters } from '../../../state/build-history-query';
 
-function buildUrlParts(uri: string) {
+export function buildUrlParts(
+  uri: string,
+  headers?: Record<string, string>,
+  serverAddr?: string
+) {
   let urlObj: URL | null = null;
+  let fullUrl = uri;
+
+  const rawHost =
+    headers?.['host'] ||
+    headers?.['Host'] ||
+    (serverAddr && !serverAddr.startsWith('/') ? serverAddr : '');
+
   if (uri.includes('://')) {
     try {
       urlObj = new URL(uri);
-    } catch (error) {
-      console.warn('Failed to parse proxy record URL:', uri, error);
+      fullUrl = uri;
+    } catch {
+      // Fallback below
+    }
+  } else if (rawHost) {
+    const isExplicitHttp = rawHost.endsWith(':80');
+    const scheme = isExplicitHttp ? 'http' : 'https';
+    const cleanUri = uri.startsWith('/') ? uri : `/${uri}`;
+    fullUrl = `${scheme}://${rawHost}${cleanUri}`;
+    try {
+      urlObj = new URL(fullUrl);
+    } catch {
+      // Fallback below
     }
   }
 
-  const fallbackHost = uri.split('://').pop()?.split('/')[0] || '';
-  const fallbackPath = (() => {
+  const host =
+    urlObj?.host ||
+    rawHost ||
+    uri.split('://').pop()?.split('/')[0] ||
+    '';
+
+  const path = (() => {
+    if (urlObj) return urlObj.pathname + urlObj.search;
     const pathStart = uri.indexOf('/', uri.indexOf('://') + 3);
-    if (pathStart === -1) return '/';
+    if (pathStart === -1) return uri.startsWith('/') ? uri : '/';
     return uri.slice(pathStart) || '/';
   })();
 
   return {
-    urlObj,
-    fallbackHost,
-    fallbackPath,
+    fullUrl,
+    host,
+    path,
   };
 }
 
 export function adaptProxySummaryToApiCall(record: ProxyLogSummary): ApiCall {
-  const { urlObj, fallbackHost, fallbackPath } = buildUrlParts(record.url);
+  const { fullUrl, host, path } = buildUrlParts(record.url, undefined, record.server_addr);
 
   return {
     id: record.id,
@@ -42,9 +70,9 @@ export function adaptProxySummaryToApiCall(record: ProxyLogSummary): ApiCall {
     timestamp: new Date(record.timestamp).getTime(),
     request_type: 'Other',
     method: record.method,
-    url: record.url,
-    host: urlObj?.host || fallbackHost,
-    path: urlObj?.pathname || fallbackPath,
+    url: fullUrl,
+    host: host,
+    path: path,
     query_params: {},
     headers: {},
     user_agent: record.user_agent ?? null,
@@ -66,7 +94,11 @@ export function adaptProxySummaryToApiCall(record: ProxyLogSummary): ApiCall {
 }
 
 export function adaptProxyRecordToApiCall(record: ProxyRecord): ApiCall {
-  const { urlObj, fallbackHost, fallbackPath } = buildUrlParts(record.request.uri);
+  const { fullUrl, host, path } = buildUrlParts(
+    record.request.uri,
+    record.request.headers,
+    record.server_addr
+  );
 
   return {
     id: record.id,
@@ -75,9 +107,9 @@ export function adaptProxyRecordToApiCall(record: ProxyRecord): ApiCall {
     timestamp: new Date(record.timestamp).getTime(),
     request_type: 'Other',
     method: record.request.method,
-    url: record.request.uri,
-    host: urlObj?.host || fallbackHost,
-    path: urlObj?.pathname || fallbackPath,
+    url: fullUrl,
+    host: host,
+    path: path,
     query_params: {},
     headers: record.request.headers,
     user_agent: record.request.headers['user-agent'] ?? null,

@@ -15,17 +15,61 @@ export function JwtPage() {
       : !page.genHeader && !page.genPayload && !page.generatedToken;
 
   return (
-    <div className="bg-background h-full p-2">
-      <div className="flex h-full min-h-0 flex-col border rounded-md overflow-hidden">
+    <div
+      className={cn(
+        // Sizing & Spacing
+        "h-full p-2",
+
+        // Backgrounds & Borders
+        "bg-background"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col min-h-0 overflow-hidden",
+
+          // Sizing & Spacing
+          "h-full",
+
+          // Backgrounds & Borders
+          "border rounded-md"
+        )}
+      >
         {/* Toolbar */}
-        <div className="flex h-10 shrink-0 items-center justify-between border-b bg-muted/40 px-3 gap-2">
-          <div className="flex items-center gap-2">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center justify-between shrink-0",
+
+            // Sizing & Spacing
+            "h-10 px-3 gap-2",
+
+            // Backgrounds & Borders
+            "border-b bg-muted/40"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "gap-2"
+            )}
+          >
             <ButtonGroup>
               <Button
                 variant="outline"
                 className={cn(
-                  'h-6 text-xs px-2.5',
-                  page.mode === 'decode' && 'text-green-500',
+                  // Sizing & Spacing
+                  "h-6 px-2.5",
+
+                  // Typography
+                  "text-xs",
+
+                  // Interactive & States
+                  page.mode === 'decode' && 'text-green-500'
                 )}
                 data-state={page.mode === 'decode' ? 'on' : 'off'}
                 onClick={() => page.setMode('decode')}
@@ -35,8 +79,14 @@ export function JwtPage() {
               <Button
                 variant="outline"
                 className={cn(
-                  'h-6 text-xs px-2.5',
-                  page.mode === 'generate' && 'text-green-500',
+                  // Sizing & Spacing
+                  "h-6 px-2.5",
+
+                  // Typography
+                  "text-xs",
+
+                  // Interactive & States
+                  page.mode === 'generate' && 'text-green-500'
                 )}
                 data-state={page.mode === 'generate' ? 'on' : 'off'}
                 onClick={() => page.setMode('generate')}
@@ -46,19 +96,49 @@ export function JwtPage() {
             </ButtonGroup>
 
             {page.mode === 'decode' && page.decoded && (
-              <span className="text-[10px] px-1 py-0.5 rounded font-mono text-white bg-blue-600">
+              <span
+                className={cn(
+                  // Sizing & Spacing
+                  "px-1 py-0.5",
+
+                  // Typography
+                  "text-[10px] font-mono",
+
+                  // Visuals & Colors
+                  "text-white bg-blue-600 rounded"
+                )}
+              >
                 {page.decoded.algorithm}
               </span>
             )}
             {page.mode === 'decode' && page.vulnerabilities.length > 0 && (
-              <span className="text-[10px] px-1 py-0.5 rounded font-mono text-white bg-amber-600">
+              <span
+                className={cn(
+                  // Sizing & Spacing
+                  "px-1 py-0.5",
+
+                  // Typography
+                  "text-[10px] font-mono",
+
+                  // Visuals & Colors
+                  "text-white bg-amber-600 rounded"
+                )}
+              >
                 {page.vulnerabilities.length} finding
                 {page.vulnerabilities.length !== 1 ? 's' : ''}
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "gap-1.5"
+            )}
+          >
             {page.mode === 'decode' && (
               <>
                 <Button
@@ -66,7 +146,13 @@ export function JwtPage() {
                   size="sm"
                   onClick={() => page.handleCopy(page.tokenInput)}
                   disabled={!page.tokenInput}
-                  className="h-7 text-xs gap-1 px-2"
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-7 px-2 gap-1",
+
+                    // Typography
+                    "text-xs"
+                  )}
                 >
                   <CopyIcon className="h-3 w-3" />
                   Copy Token
@@ -76,7 +162,13 @@ export function JwtPage() {
                   size="icon"
                   onClick={page.handleClear}
                   disabled={!page.tokenInput}
-                  className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-7 w-7",
+
+                    // Visuals & Colors / Interactive & States
+                    "text-muted-foreground hover:text-foreground"
+                  )}
                 >
                   <TrashIcon className="h-3.5 w-3.5" />
                 </Button>
@@ -89,7 +181,13 @@ export function JwtPage() {
                   size="sm"
                   onClick={() => page.handleCopy(page.generatedToken)}
                   disabled={!page.generatedToken}
-                  className="h-7 text-xs gap-1 px-2"
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-7 px-2 gap-1",
+
+                    // Typography
+                    "text-xs"
+                  )}
                 >
                   <CopyIcon className="h-3 w-3" />
                   Copy Token
@@ -99,7 +197,13 @@ export function JwtPage() {
                   size="icon"
                   onClick={page.handleClearGenerate}
                   disabled={isEmpty}
-                  className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-7 w-7",
+
+                    // Visuals & Colors / Interactive & States
+                    "text-muted-foreground hover:text-foreground"
+                  )}
                 >
                   <TrashIcon className="h-3.5 w-3.5" />
                 </Button>
@@ -109,7 +213,12 @@ export function JwtPage() {
         </div>
 
         {/* Content */}
-        <main className="min-h-0 flex-1 flex flex-col">
+        <main
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col flex-1 min-h-0"
+          )}
+        >
           {page.mode === 'decode' ? (
             <JwtDecodeView
               tokenInput={page.tokenInput}

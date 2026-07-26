@@ -76,21 +76,68 @@ export function FileToolbar({
   };
 
   return (
-    <div className="flex flex-col gap-2 p-3 border-b border-border bg-background/50 shrink-0">
-      <div className="flex items-center justify-between gap-4">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col shrink-0",
+
+        // Sizing & Spacing
+        "p-3 gap-2",
+
+        // Backgrounds & Borders
+        "border-b border-border bg-background/50"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between",
+
+          // Sizing & Spacing
+          "gap-4"
+        )}
+      >
         {/* Breadcrumb path */}
-        <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none min-w-0">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center overflow-x-auto min-w-0 scrollbar-none",
+
+            // Sizing & Spacing
+            "gap-1.5 py-1"
+          )}
+        >
           <Button
             size="xs"
             variant="ghost"
             onClick={onNavigateUp}
             disabled={isAtRoot || loading}
-            className="size-7 p-0 shrink-0 text-muted-foreground hover:text-foreground"
+            className={cn(
+              // Layout & Positioning
+              "shrink-0",
+
+              // Sizing & Spacing
+              "size-7 p-0",
+
+              // Visuals & Colors / Interactive & States
+              "text-muted-foreground hover:text-foreground"
+            )}
           >
             <ArrowLeftIcon className="size-4" />
           </Button>
 
-          <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground whitespace-nowrap min-w-0">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center min-w-0 whitespace-nowrap",
+
+              // Sizing & Spacing
+              "gap-1",
+
+              // Typography
+              "text-xs font-medium text-muted-foreground"
+            )}
+          >
             {breadcrumbs.map((crumb, idx) => {
               const isLast = idx === breadcrumbs.length - 1;
               return (
@@ -100,8 +147,11 @@ export function FileToolbar({
                     onClick={() => !isLast && onNavigateTo(crumb.id)}
                     disabled={isLast || loading}
                     className={cn(
-                      crumb.label ? 'truncate max-w-[160px]' : 'opacity-0',
-                      isLast ? 'text-foreground font-semibold' : 'hover:text-foreground hover:underline'
+                      // Typography
+                      isLast ? 'text-foreground font-semibold' : 'hover:text-foreground hover:underline',
+
+                      // Sizing & Spacing
+                      crumb.label ? 'truncate max-w-[160px]' : 'opacity-0'
                     )}
                   >
                     {crumb.label}
@@ -113,19 +163,54 @@ export function FileToolbar({
         </div>
 
         {/* Global Actions */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center shrink-0",
+
+            // Sizing & Spacing
+            "gap-2"
+          )}
+        >
           {/* Create Folder trigger */}
           {showFolderInput ? (
-            <form onSubmit={handleCreateSubmit} className="flex items-center gap-1.5">
+            <form
+              onSubmit={handleCreateSubmit}
+              className={cn(
+                // Layout & Positioning
+                "flex items-center",
+
+                // Sizing & Spacing
+                "gap-1.5"
+              )}
+            >
               <Input
                 value={folderNameInput}
                 onChange={(e) => setFolderNameInput(e.target.value)}
                 placeholder="Folder name"
-                className="w-36 h-7 text-xs"
+                className={cn(
+                  // Sizing & Spacing
+                  "w-36 h-7",
+
+                  // Typography
+                  "text-xs"
+                )}
                 disabled={creating}
                 autoFocus
               />
-              <Button type="submit" size="xs" variant="outline" className="size-7 p-0 shrink-0" disabled={creating}>
+              <Button
+                type="submit"
+                size="xs"
+                variant="outline"
+                className={cn(
+                  // Layout & Positioning
+                  "shrink-0",
+
+                  // Sizing & Spacing
+                  "size-7 p-0"
+                )}
+                disabled={creating}
+              >
                 <CheckIcon className="size-3.5 text-primary" />
               </Button>
               <Button
@@ -136,7 +221,13 @@ export function FileToolbar({
                   setShowFolderInput(false);
                   setFolderNameInput('');
                 }}
-                className="size-7 p-0 shrink-0"
+                className={cn(
+                  // Layout & Positioning
+                  "shrink-0",
+
+                  // Sizing & Spacing
+                  "size-7 p-0"
+                )}
                 disabled={creating}
               >
                 <XIcon className="size-3.5 text-muted-foreground" />
@@ -168,22 +259,47 @@ export function FileToolbar({
             variant="ghost"
             onClick={onRefresh}
             disabled={loading || actionDisabled}
-            className="size-7 p-0 shrink-0"
+            className={cn(
+              // Layout & Positioning
+              "shrink-0",
+
+              // Sizing & Spacing
+              "size-7 p-0"
+            )}
           >
             <ArrowClockwiseIcon className={`size-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between"
+        )}
+      >
         {/* Search filtering */}
-        <div className="relative w-72">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "relative",
+
+            // Sizing & Spacing
+            "w-72"
+          )}
+        >
           <MagnifyingGlassIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search files in current directory…"
-            className="pl-8 text-xs h-7 w-full"
+            className={cn(
+              // Sizing & Spacing
+              "h-7 w-full pl-8",
+
+              // Typography
+              "text-xs"
+            )}
             disabled={actionDisabled}
           />
         </div>
@@ -192,7 +308,14 @@ export function FileToolbar({
         <ButtonGroup>
           <Button
             variant="outline"
-            className={cn('size-7 p-0 hover:text-primary', viewMode === 'list' && 'text-primary')}
+            className={cn(
+              // Sizing & Spacing
+              "size-7 p-0",
+
+              // Interactive & States
+              "hover:text-primary",
+              viewMode === 'list' && 'text-primary'
+            )}
             data-state={viewMode === 'list' ? 'on' : 'off'}
             onClick={() => onViewModeChange('list')}
             title="List view"
@@ -202,7 +325,14 @@ export function FileToolbar({
           </Button>
           <Button
             variant="outline"
-            className={cn('size-7 p-0 hover:text-primary', viewMode === 'grid' && 'text-primary')}
+            className={cn(
+              // Sizing & Spacing
+              "size-7 p-0",
+
+              // Interactive & States
+              "hover:text-primary",
+              viewMode === 'grid' && 'text-primary'
+            )}
             data-state={viewMode === 'grid' ? 'on' : 'off'}
             onClick={() => onViewModeChange('grid')}
             title="Grid view"

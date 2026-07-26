@@ -11,6 +11,8 @@ import {
   GROUP_TAB_PREFIX,
 } from './hooks/use-http-history-page';
 
+import { cn } from '@/lib/utils';
+
 export function HttpHistoryPage() {
   const page = useHttpHistoryPage();
 
@@ -70,10 +72,27 @@ export function HttpHistoryPage() {
         onTabRename={page.renameTab}
         onTabAdd={page.addGroup}
         renderTabContextMenuItems={renderTabContextMenuItems}
-        contentClassName="flex-1 border rounded-lg flex flex-col overflow-hidden bg-background min-h-0"
+        contentClassName={cn(
+          // Layout & Positioning
+          "flex flex-col flex-1 min-h-0 overflow-hidden",
+
+          // Backgrounds & Borders
+          "border rounded-lg bg-background"
+        )}
       >
         <LogFilters />
-        <Card className="flex-1 flex flex-col overflow-hidden !py-0 rounded-none">
+        <Card
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col flex-1 overflow-hidden",
+
+            // Sizing & Spacing
+            "!py-0",
+
+            // Backgrounds & Borders
+            "rounded-none"
+          )}
+        >
           <HttpHistoryView
             isPinnedTabActive={page.isPinnedTabActive}
             isGroupTabActive={page.isGroupTabActive}

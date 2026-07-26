@@ -53,3 +53,7 @@ export function restartTerminalSession(id: string): Promise<void> {
 export function setActiveTerminalId(id: string | null): void {
   useTerminalStore.getState().setActiveId(id);
 }
+
+export { TERMINAL_AI_TOOL_DEFINITION, executeRunTerminalCommandAiTool } from '@/layout/assistant/lib/ai-tools/terminal';
+
+

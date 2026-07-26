@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { SpinnerGapIcon, PauseIcon } from '@phosphor-icons/react';
 
-import { mainNavItems, type NavItem } from '../../constants';
+import { MAIN_NAV_ITEMS, type NavItem } from '../../constants';
 import { useNavStore } from '@/stores/nav';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { useAutomationStore } from '@/stores/automation';
@@ -55,7 +55,7 @@ export function useSidebarNav() {
   const focusWindow = useNavStore((state) => state.focusWindow);
 
   const visibleNavItems = React.useMemo(
-    () => mainNavItems.filter((item) => !hiddenNavItems.includes(item.href)),
+    () => MAIN_NAV_ITEMS.filter((item) => !hiddenNavItems.includes(item.href)),
     [hiddenNavItems],
   );
 

@@ -18,7 +18,7 @@ import { CallActionCell } from "../call-action-cell";
 interface UseTrafficTableColumnsOptions {
   pinnedSet: Set<string>;
   getGroupsForRequest: (id: string) => GroupDefinition[];
-  getHighlightColor: (host: string, path: string) => string | null;
+  getHighlightColor: (host: string, path: string) => string | undefined;
   highlightedHosts: Record<string, string>;
   handleNewGroup: (call: ApiCall) => void;
 }
@@ -78,7 +78,10 @@ export function useTrafficTableColumns({
               return row.original.url;
             }
           })();
-          const isSecured = row.original.url.startsWith("https://");
+          const isSecured =
+            row.original.url.startsWith("https://") ||
+            row.original.url.startsWith("wss://") ||
+            row.original.security_state === "secure";
 
           return (
             <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
@@ -94,15 +97,13 @@ export function useTrafficTableColumns({
                 />
               ))}
               {isSecured ? (
-                <LockIcon
-                  className="size-3 text-emerald-500 shrink-0"
-                  title="HTTPS (Secured)"
-                />
+                <span title="HTTPS (Secured)">
+                  <LockIcon className="size-3 text-emerald-500 shrink-0" />
+                </span>
               ) : (
-                <LockOpenIcon
-                  className="size-3 text-amber-500 shrink-0"
-                  title="HTTP (Not Secured)"
-                />
+                <span title="HTTP (Not Secured)">
+                  <LockOpenIcon className="size-3 text-amber-500 shrink-0" />
+                </span>
               )}
               <BrowserIcon userAgent={row.original.user_agent} />
               <span

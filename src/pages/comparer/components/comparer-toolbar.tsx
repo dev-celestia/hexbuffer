@@ -32,6 +32,8 @@ interface ComparerToolbarProps {
   copyPanel: (value: string, label: string) => void;
 }
 
+import { cn } from '@/lib/utils';
+
 export function ComparerToolbar({
   hasContent,
   hasDiff,
@@ -48,22 +50,74 @@ export function ComparerToolbar({
 }: ComparerToolbarProps) {
   // ponytail: kept simple with inline event handlers to minimize abstraction overhead.
   return (
-    <div className="flex h-10 shrink-0 items-center justify-between  border border-b-0 rounded-t-md bg-muted/40 px-3">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex items-center justify-between shrink-0",
 
-      <div className='flex items-center gap-2'>
+        // Sizing & Spacing
+        "h-10 px-3",
+
+        // Backgrounds & Borders
+        "border border-b-0 rounded-t-md bg-muted/40"
+      )}
+    >
+
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center",
+
+          // Sizing & Spacing
+          "gap-2"
+        )}
+      >
         {/* Diff Mode Select */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-medium text-muted-foreground uppercase">Mode:</span>
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-1.5"
+          )}
+        >
+          <span
+            className={cn(
+              // Typography
+              "text-[10px] font-medium text-muted-foreground uppercase"
+            )}
+          >
+            Mode:
+          </span>
           <Select
             value={diffMode}
             onValueChange={(val) => setDiffMode(val as DiffMode)}
           >
-            <SelectTrigger className="h-6 w-20 text-[11px] px-2 py-0 [&_svg]:size-3 bg-background">
+            <SelectTrigger
+              className={cn(
+                // Sizing & Spacing
+                "h-6 w-20 px-2 py-0 [&_svg]:size-3",
+
+                // Typography
+                "text-[11px]",
+
+                // Backgrounds & Borders
+                "bg-background"
+              )}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {DIFF_MODE_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value} className="text-[11px]">
+                <SelectItem
+                  key={opt.value}
+                  value={opt.value}
+                  className={cn(
+                    // Typography
+                    "text-[11px]"
+                  )}
+                >
                   {opt.label}
                 </SelectItem>
               ))}
@@ -71,14 +125,28 @@ export function ComparerToolbar({
           </Select>
         </div>
 
-        <div className="h-4 w-[1px] bg-border mx-1" />
+        <div
+          className={cn(
+            // Sizing & Spacing
+            "h-4 w-[1px] mx-1",
+
+            // Backgrounds & Borders
+            "bg-border"
+          )}
+        />
 
         {/* Toggle Inputs */}
         <Button
           variant="outline"
           size="xs"
           onClick={() => setShowInputs(!showInputs)}
-          className="h-6 text-[11px] gap-1.5 px-2"
+          className={cn(
+            // Sizing & Spacing
+            "h-6 px-2 gap-1.5",
+
+            // Typography
+            "text-[11px]"
+          )}
         >
           {showInputs ? <EyeSlashIcon className="h-3 w-3" /> : <EyeIcon className="h-3 w-3" />}
           {showInputs ? 'Hide Inputs' : 'Show Inputs'}
@@ -90,7 +158,13 @@ export function ComparerToolbar({
           size="xs"
           onClick={handleSwap}
           disabled={!hasContent}
-          className="h-6 text-[11px] gap-1.5 px-2"
+          className={cn(
+            // Sizing & Spacing
+            "h-6 px-2 gap-1.5",
+
+            // Typography
+            "text-[11px]"
+          )}
         >
           <ArrowsLeftRightIcon className="h-3 w-3" />
           Swap A/B
@@ -98,14 +172,28 @@ export function ComparerToolbar({
 
 
       </div>
-      <div className='flex items-center gap-2'>
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center",
+
+          // Sizing & Spacing
+          "gap-2"
+        )}
+      >
         {/* Copy original/modified */}
         <Button
           variant="ghost"
           size="xs"
           onClick={() => copyPanel(valueA, 'Original (A)')}
           disabled={!valueA}
-          className="h-6 text-[11px] gap-1.5 px-2"
+          className={cn(
+            // Sizing & Spacing
+            "h-6 px-2 gap-1.5",
+
+            // Typography
+            "text-[11px]"
+          )}
         >
           <CopyIcon className="h-3 w-3" />
           Copy A
@@ -115,7 +203,13 @@ export function ComparerToolbar({
           size="xs"
           onClick={() => copyPanel(valueB, 'Modified (B)')}
           disabled={!valueB}
-          className="h-6 text-[11px] gap-1.5 px-2"
+          className={cn(
+            // Sizing & Spacing
+            "h-6 px-2 gap-1.5",
+
+            // Typography
+            "text-[11px]"
+          )}
         >
           <CopyIcon className="h-3 w-3" />
           Copy B
@@ -127,7 +221,13 @@ export function ComparerToolbar({
           size="xs"
           onClick={handleCopy}
           disabled={!hasDiff}
-          className="h-6 text-[11px] gap-1.5 px-2"
+          className={cn(
+            // Sizing & Spacing
+            "h-6 px-2 gap-1.5",
+
+            // Typography
+            "text-[11px]"
+          )}
         >
           <CopyIcon className="h-3 w-3" />
           Copy Diff
@@ -139,7 +239,16 @@ export function ComparerToolbar({
           size="xs"
           onClick={handleClear}
           disabled={!hasContent}
-          className="h-6 text-[11px] gap-1.5 px-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          className={cn(
+            // Sizing & Spacing
+            "h-6 px-2 gap-1.5",
+
+            // Typography
+            "text-[11px]",
+
+            // Backgrounds & Colors / Interactive & States
+            "text-destructive hover:bg-destructive/10 hover:text-destructive"
+          )}
         >
           <TrashIcon className="h-3 w-3" />
           Clear All

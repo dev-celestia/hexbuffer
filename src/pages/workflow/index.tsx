@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -27,8 +28,26 @@ export function AutomationPage() {
         onTabAdd={page.onTabAdd}
         onCloseTabsToLeft={page.onCloseTabsToLeft}
         onCloseTabsToRight={page.onCloseTabsToRight}
-        className="flex h-full min-h-0 flex-col bg-background"
-        contentClassName="flex-1 m-2 border rounded-lg overflow-hidden bg-background min-h-0"
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col min-h-0",
+
+          // Sizing & Spacing
+          "h-full",
+
+          // Backgrounds & Borders
+          "bg-background"
+        )}
+        contentClassName={cn(
+          // Layout & Positioning
+          "flex-1 min-h-0 overflow-hidden",
+
+          // Sizing & Spacing
+          "m-2",
+
+          // Backgrounds & Borders
+          "border rounded-lg bg-background"
+        )}
       >
         <ResizablePanelGroup
           id="automation-workspace-panels"
@@ -43,13 +62,26 @@ export function AutomationPage() {
           >
             <ResizablePanelGroup orientation="vertical" className="h-full min-h-0">
               <ResizablePanel defaultSize={75} minSize={30}>
-                <div className="relative flex h-full min-h-0 flex-col">
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "relative flex flex-col min-h-0",
+
+                    // Sizing & Spacing
+                    "h-full"
+                  )}
+                >
                   <ExecutionLogToggle
                     showExecutionLog={page.showExecutionLog}
                     onToggle={page.setShowExecutionLog}
                   />
                   <WorkflowToolbar />
-                  <div className="flex-1 min-h-0">
+                  <div
+                    className={cn(
+                      // Layout & Positioning
+                      "flex-1 min-h-0"
+                    )}
+                  >
                     <WorkflowCanvas
                       key={page.activeWorkflowId}
                       addNodeRef={page.addNodeAtCenterRef}
@@ -65,7 +97,15 @@ export function AutomationPage() {
                 <>
                   <ResizableHandle withHandle />
                   <ResizablePanel defaultSize={25} minSize={10}>
-                    <div className="h-full min-h-0">
+                    <div
+                      className={cn(
+                        // Layout & Positioning
+                        "min-h-0",
+
+                        // Sizing & Spacing
+                        "h-full"
+                      )}
+                    >
                       <ExecutionLogPanel workflowId={page.activeWorkflowId || null} />
                     </div>
                   </ResizablePanel>

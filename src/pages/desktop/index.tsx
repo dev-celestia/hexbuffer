@@ -18,6 +18,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
+import { cn } from '@/lib/utils';
+
 export function DesktopPage() {
   const {
     displayItems,
@@ -26,7 +28,7 @@ export function DesktopPage() {
   } = useDesktopPage();
   const hiddenWidgets = useAppSettingsStore((s) => s.hiddenWidgets || []);
 
-  const rootBg = 'bg-transparent';
+  const ROOT_BG = 'bg-background';
 
   // ponytail: filter out widgets that have been hidden by the user
   const showCollections = !hiddenWidgets.includes('collections');
@@ -37,13 +39,61 @@ export function DesktopPage() {
   const hasVisibleWidgets = showCollections || showProxy || showVpn || showScratchpad || showClipboard;
 
   return (
-    <div className={`${rootBg} flex flex-col h-full min-h-0 overflow-y-auto scrollbar-thin`}>
-      <div className="mx-auto w-full p-6 flex flex-col md:flex-row gap-6 items-start">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-4 mb-4 max-w-[800px] border-b pb-2 border-border/40">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col min-h-0 overflow-y-auto scrollbar-thin",
+
+        // Sizing & Spacing
+        "h-full",
+
+        // Backgrounds & Borders
+        ROOT_BG
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col md:flex-row items-start mx-auto",
+
+          // Sizing & Spacing
+          "w-full p-6 gap-6"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex-1 min-w-0"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center max-w-[800px]",
+
+              // Sizing & Spacing
+              "gap-4 mb-4 pb-2",
+
+              // Backgrounds & Borders
+              "border-b border-border/40"
+            )}
+          >
             <Dialog>
               <DialogTrigger asChild>
-                <Button size="xs" variant="ghost" className="h-5 px-1.5 text-[11px] text-muted-foreground hover:text-foreground hover:bg-muted/60">
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-5 px-1.5",
+
+                    // Typography
+                    "text-[11px]",
+
+                    // Visuals & Colors / Interactive & States
+                    "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  )}
+                >
                   <GearSixIcon className="mr-1 size-3.5" />
                   Manage
                 </Button>
@@ -60,12 +110,30 @@ export function DesktopPage() {
                 </div>
               </DialogContent>
             </Dialog>
-            <p className="text-[11px] font-mono font-bold tracking-wider text-muted-foreground uppercase">Shortcuts</p>
+            <p
+              className={cn(
+                // Typography
+                "text-[11px] font-mono font-bold tracking-wider uppercase",
+
+                // Backgrounds & Colors
+                "text-muted-foreground"
+              )}
+            >
+              Shortcuts
+            </p>
 
           </div>
 
           {displayItems.length > 0 ? (
-            <div className="flex max-w-[800px] flex-wrap gap-3 justify-items-center">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-wrap justify-items-center max-w-[800px]",
+
+                // Sizing & Spacing
+                "gap-3"
+              )}
+            >
               {displayItems.map((item) => (
                 <DesktopIconItem
                   key={item.href}
@@ -77,14 +145,34 @@ export function DesktopPage() {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-16 px-4 rounded-lg border border-dashed border-border/80 bg-muted/20 backdrop-blur-sm">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col items-center justify-center",
+
+                // Sizing & Spacing
+                "py-16 px-4",
+
+                // Backgrounds & Borders
+                "rounded-lg border border-dashed border-border/80 bg-muted/20 backdrop-blur-sm"
+              )}
+            >
               <ShieldWarningIcon className="size-8 text-muted-foreground mb-3" />
               <p className="text-sm font-medium text-foreground">No features matched your search</p>
               <p className="text-xs text-muted-foreground mt-1">Try searching for another keyword or clear the search input.</p>
               <Button
                 variant="link"
                 onClick={handleClearSearch}
-                className="mt-2 text-xs font-semibold text-primary hover:underline h-auto p-0"
+                className={cn(
+                  // Sizing & Spacing
+                  "h-auto p-0 mt-2",
+
+                  // Typography
+                  "text-xs font-semibold",
+
+                  // Visuals & Colors / Interactive & States
+                  "text-primary hover:underline"
+                )}
               >
                 Clear search query
               </Button>
@@ -93,7 +181,15 @@ export function DesktopPage() {
         </div>
 
         {hasVisibleWidgets && (
-          <div className="w-full md:w-64 lg:w-72 shrink-0 flex flex-col gap-4">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-col shrink-0",
+
+              // Sizing & Spacing
+              "w-full md:w-64 lg:w-72 gap-4"
+            )}
+          >
             {showCollections && <CollectionsWidget />}
             {showProxy && <ProxyWidget />}
             {showVpn && <VpnWidget />}

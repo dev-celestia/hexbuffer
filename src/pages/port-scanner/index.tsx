@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { useCallback } from 'react';
 import { usePortScannerPage } from './hooks/use-port-scanner-page';
 import { ScannerSidebar } from './components/scanner-sidebar';
@@ -17,8 +18,24 @@ export function PortScannerPage() {
   }, [page.target, page.setTarget, page.handlePresetChange, page.startScan]);
 
   return (
-    <div className='p-2 h-full'>
-      <div className="grid rounded-md grid-cols-[300px_1fr] h-full min-h-0 bg-background overflow-hidden border">
+    <div
+      className={cn(
+        // Sizing & Spacing
+        "h-full p-2"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "grid grid-cols-[300px_1fr] min-h-0 overflow-hidden",
+
+          // Sizing & Spacing
+          "h-full",
+
+          // Backgrounds & Borders
+          "rounded-md border bg-background"
+        )}
+      >
         <ScannerSidebar
           target={page.target}
           onTargetChange={page.setTarget}
@@ -56,6 +73,5 @@ export function PortScannerPage() {
         />
       </div>
     </div>
-
   );
 }

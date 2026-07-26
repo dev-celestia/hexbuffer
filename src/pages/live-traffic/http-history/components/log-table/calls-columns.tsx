@@ -1,6 +1,5 @@
-import { useCallback, useState, useRef, memo, useMemo } from "react";
+import { useCallback, useState, memo, useMemo } from "react";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { Empty, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -27,7 +26,6 @@ export const TrafficTable = memo(function TrafficTable({
   isGroupTabActive?: boolean;
   activeGroupId?: string | null;
 }) {
-  const tableContainerRef = useRef<HTMLDivElement>(null);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const selectedCallId = useHttpHistoryQueryStore((state) => state.selectedCallId);
   const setSelectedCallId = useHttpHistoryQueryStore((state) => state.setSelectedCallId);
@@ -135,14 +133,6 @@ export const TrafficTable = memo(function TrafficTable({
     },
   });
 
-  const tableRows = table.getRowModel().rows;
-  const rowVirtualizer = useVirtualizer({
-    count: tableRows.length,
-    getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 32,
-    overscan: 10,
-  });
-
   const handleContextMenuOpenChange = useCallback((open: boolean) => {
     setIsContextMenuOpen(open);
   }, []);
@@ -185,22 +175,22 @@ export const TrafficTable = memo(function TrafficTable({
   }
 
   if (visibleCalls.length === 0 && !isLoading) {
+    let emptyTitle = "No traffic yet";
+    let emptyDescription = "HTTP requests will appear here once captured.";
+
+    if (isPinnedTabActive) {
+      emptyTitle = "No pinned requests";
+      emptyDescription = "Right-click a request and select Pin to add it here.";
+    } else if (hasActiveFilters || hasScopedTab) {
+      emptyTitle = "No matching traffic";
+      emptyDescription =
+        "The database has traffic, but the current tab or filters may be hiding it. Switch to All History or clear the active filters.";
+    }
+
     return (
       <Empty>
-        <EmptyTitle>
-          {isPinnedTabActive
-            ? "No pinned requests"
-            : hasActiveFilters || hasScopedTab
-              ? "No matching traffic"
-              : "No traffic yet"}
-        </EmptyTitle>
-        <EmptyDescription>
-          {isPinnedTabActive
-            ? "Right-click a request and select Pin to add it here."
-            : hasActiveFilters || hasScopedTab
-              ? "The database has traffic, but the current tab or filters may be hiding it. Switch to All History or clear the active filters."
-              : "HTTP requests will appear here once captured."}
-        </EmptyDescription>
+        <EmptyTitle>{emptyTitle}</EmptyTitle>
+        <EmptyDescription>{emptyDescription}</EmptyDescription>
       </Empty>
     );
   }
@@ -252,77 +242,68 @@ export const TrafficTable = memo(function TrafficTable({
         </div>
 
         {/* Scrollable Table Body */}
-        <div ref={tableContainerRef} className="flex-1 overflow-auto min-w-0">
-          <div
-            className="relative w-full"
-            style={{
-              height: `${rowVirtualizer.getTotalSize()}px`,
-            }}
-          >
-            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const row = tableRows[virtualRow.index];
-              const call = row.original;
+        <div className="flex-1 overflow-auto min-w-0">
+          {table.getRowModel().rows.map((row) => {
+            const call = row.original;
 
-              return (
-                <LogEntryContextMenu
-                  key={row.id}
-                  call={call}
-                  onDelete={removeCallLocallyWithUnpin}
-                  onOpenChange={handleContextMenuOpenChange}
-                  onNewGroup={handleNewGroup}
+            return (
+              <LogEntryContextMenu
+                key={row.id}
+                call={call}
+                onDelete={removeCallLocallyWithUnpin}
+                onOpenChange={handleContextMenuOpenChange}
+                onNewGroup={handleNewGroup}
+              >
+                <button
+                  type="button"
+                  aria-pressed={call.id === selectedCallId}
+                  className={
+                    "flex items-center w-full min-w-0 font-mono transition-colors border-b text-left h-8 focus:outline-none focus-visible:ring-1 focus-visible:ring-ring" +
+                    (pinnedSet.has(call.id) ? " bg-amber-500/10 dark:bg-amber-800/20" : "") +
+                    (isGroupTabActive ? " bg-sky-500/5 dark:bg-sky-950/20" : "") +
+                    (call.id === selectedCallId
+                      ? " hover:!bg-muted bg-muted"
+                      : " hover:bg-muted/50")
+                  }
+                  onClick={() => handleRowClick(call.id)}
                 >
-                  <div
-                    className={
-                      "absolute left-0 right-0 flex items-center w-full min-w-0 font-mono transition-colors border-b cursor-pointer" +
-                      (pinnedSet.has(call.id) ? " bg-amber-500/10 dark:bg-amber-800/20" : "") +
-                      (isGroupTabActive ? " bg-sky-500/5 dark:bg-sky-950/20" : "") +
-                      (call.id === selectedCallId
-                        ? " hover:!bg-muted bg-muted"
-                        : " hover:bg-muted/50")
-                    }
-                    style={{
-                      height: `${virtualRow.size}px`,
-                      transform: `translateY(${virtualRow.start}px)`,
-                    }}
-                    onClick={() => handleRowClick(call.id)}
-                  >
-                    {row.getVisibleCells().map((cell) => {
-                      const isRightAligned =
-                        cell.column.id === "response_body_size" ||
-                        cell.column.id === "request_body_size";
-                      const isCentered = cell.column.id === "action";
-                      const size = cell.column.getSize();
-                      const isHost = cell.column.id === "host";
+                  {row.getVisibleCells().map((cell) => {
+                    const isRightAligned =
+                      cell.column.id === "response_body_size" ||
+                      cell.column.id === "request_body_size";
+                    const isCentered = cell.column.id === "action";
+                    const size = cell.column.getSize();
+                    const isHost = cell.column.id === "host";
 
-                      return (
-                        <div
-                          key={cell.id}
-                          className={
-                            "text-xs text-muted-foreground px-3 py-1 truncate min-w-0" +
-                            (isRightAligned ? " text-right" : isCentered ? " text-center" : "")
-                          }
-                          title={
-                            cell.column.id === "host"
-                              ? call.url
-                              : cell.column.id === "response_content_type"
-                                ? call.response_content_type ?? undefined
-                                : undefined
-                          }
-                          style={{
-                            width: isHost ? undefined : size,
-                            minWidth: isHost ? 200 : size,
-                            flex: isHost ? "1 1 auto" : "0 0 auto",
-                          }}
-                        >
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </LogEntryContextMenu>
-              );
-            })}
-          </div>
+                    let cellTitle: string | undefined;
+                    if (cell.column.id === "host") {
+                      cellTitle = call.url;
+                    } else if (cell.column.id === "response_content_type") {
+                      cellTitle = call.response_content_type ?? undefined;
+                    }
+
+                    return (
+                      <div
+                        key={cell.id}
+                        className={
+                          "text-xs text-muted-foreground px-3 py-1 truncate min-w-0" +
+                          (isRightAligned ? " text-right" : isCentered ? " text-center" : "")
+                        }
+                        title={cellTitle}
+                        style={{
+                          width: isHost ? undefined : size,
+                          minWidth: isHost ? 200 : size,
+                          flex: isHost ? "1 1 auto" : "0 0 auto",
+                        }}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </div>
+                    );
+                  })}
+                </button>
+              </LogEntryContextMenu>
+            );
+          })}
         </div>
 
         {/* Footer Pagination */}

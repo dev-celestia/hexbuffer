@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { allNavItems } from '@/layout/constants';
+import { ALL_NAV_ITEMS } from '@/layout/constants';
 import { useNavStore } from '@/stores/nav';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 
@@ -12,7 +12,7 @@ export function useDesktopPage() {
 
   // Get all unique navigation items, filter out 'Desktop', apply environment check and query matching
   const displayItems = React.useMemo(() => {
-    const baseItems = allNavItems.filter(
+    const baseItems = ALL_NAV_ITEMS.filter(
       (item) => item.label !== 'Desktop' && !hiddenNavItems.includes(item.href)
     );
     

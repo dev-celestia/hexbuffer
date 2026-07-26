@@ -15,7 +15,7 @@ interface ConnectionsColumnsProps {
   loading: boolean;
 }
 
-export const connectionsColumns: (
+export const CONNECTIONS_COLUMNS: (
   props: ConnectionsColumnsProps
 ) => ColumnDef<ProxyConnection>[] = ({ onAddToNewTarget, onAddToScope, loading }) => [
   {

@@ -6,6 +6,8 @@ import { KanbanDetailModal } from './components/kanban-detail-modal';
 import { KanbanCardItem } from './components/kanban-card-item';
 import { DndContext, useSensor, useSensors, MouseSensor, TouchSensor, DragOverlay, closestCorners, MeasuringStrategy } from '@dnd-kit/core';
 
+import { cn } from '@/lib/utils';
+
 export function KanbanPage() {
   const page = useKanbanPage();
 
@@ -46,7 +48,18 @@ export function KanbanPage() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex h-full min-h-0 flex-col bg-background">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col min-h-0",
+
+          // Sizing & Spacing
+          "h-full",
+
+          // Backgrounds & Borders
+          "bg-background"
+        )}
+      >
         <KanbanToolbar
           groupBy={page.groupBy}
           onGroupByChange={page.setGroupBy}
@@ -56,8 +69,22 @@ export function KanbanPage() {
         />
 
         {/* Board scroll area */}
-        <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden">
-          <div className="flex h-full gap-4 p-4 items-start" style={{ minWidth: 'max-content' }}>
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex-1 min-h-0 overflow-x-auto overflow-y-hidden"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-start",
+
+              // Sizing & Spacing
+              "h-full p-4 gap-4"
+            )}
+            style={{ minWidth: 'max-content' }}
+          >
             {page.columns.map((col) => (
               <KanbanColumnPanel
                 key={col.id}
@@ -91,7 +118,18 @@ export function KanbanPage() {
 
       <DragOverlay dropAnimation={null}>
         {activeCard ? (
-          <div className="w-[262px] rotate-[2deg] shadow-lg pointer-events-none">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "pointer-events-none rotate-[2deg]",
+
+              // Sizing & Spacing
+              "w-[262px]",
+
+              // Visuals & Colors
+              "shadow-lg"
+            )}
+          >
             <KanbanCardItem
               card={activeCard}
               isDragging={false}

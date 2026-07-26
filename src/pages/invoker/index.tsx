@@ -11,6 +11,8 @@ import { useInvokerPage } from './hooks/use-page';
 import { stopInvokerUiAttack } from '@/triggers';
 import { useInvokerStore } from '@/stores/invoker';
 
+import { cn } from '@/lib/utils';
+
 export function InvokerPage() {
   const page = useInvokerPage();
   
@@ -34,11 +36,44 @@ export function InvokerPage() {
     <>
       {/* Condensed safety warning banner */}
       {!page.invokerSafetyAlertDismissed && (
-        <div className="p-2 shrink-0">
-          <Alert variant="default" className="min-h-10 border-amber-500/30 bg-amber-500/5 text-amber-900 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-200 flex items-center justify-between gap-3 px-3 py-1.5 rounded-md">
-            <div className="flex items-center gap-2">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "shrink-0",
+
+            // Sizing & Spacing
+            "p-2"
+          )}
+        >
+          <Alert
+            variant="default"
+            className={cn(
+              // Layout & Positioning
+              "flex items-center justify-between min-h-10",
+
+              // Sizing & Spacing
+              "px-3 py-1.5 gap-3",
+
+              // Backgrounds & Borders
+              "border-amber-500/30 bg-amber-500/5 text-amber-900 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-200 rounded-md"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center",
+
+                // Sizing & Spacing
+                "gap-2"
+              )}
+            >
               <InfoIcon className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-              <AlertDescription className="text-xs text-amber-800 dark:text-amber-300 font-sans leading-normal">
+              <AlertDescription
+                className={cn(
+                  // Typography
+                  "text-xs font-sans leading-normal text-amber-800 dark:text-amber-300"
+                )}
+              >
                 Only run invoker tests against systems you own or are explicitly authorized to assess. Unauthorized assessments can be illegal.
               </AlertDescription>
             </div>
@@ -60,12 +95,45 @@ export function InvokerPage() {
         onTabChange={page.setActiveTabId}
         onTabRename={page.renameTab}
         onTabClose={page.closeTab}
-        contentClassName="flex-1 border rounded-lg overflow-hidden bg-card min-h-0"
+        contentClassName={cn(
+          // Layout & Positioning
+          "flex-1 min-h-0 overflow-hidden",
+
+          // Backgrounds & Borders
+          "border rounded-lg bg-card"
+        )}
       >
-        <div className="flex h-full min-h-0 flex-col">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col min-h-0",
+
+            // Sizing & Spacing
+            "h-full"
+          )}
+        >
           {/* Top Control Toolbar */}
-          <div className="relative flex items-center justify-between px-3 py-2 border-b bg-muted/20 shrink-0 select-none">
-            <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "relative flex items-center justify-between shrink-0 select-none",
+
+              // Sizing & Spacing
+              "px-3 py-2",
+
+              // Backgrounds & Borders
+              "border-b bg-muted/20"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center",
+
+                // Sizing & Spacing
+                "gap-3"
+              )}
+            >
               {page.isRunning ? (
                 <Button 
                   size="xs" 
@@ -86,16 +154,43 @@ export function InvokerPage() {
               )}
 
               {/* Status Indicator */}
-              <div className="flex items-center gap-1.5 border-l pl-3 border-border">
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center border-l",
+
+                  // Sizing & Spacing
+                  "pl-3 gap-1.5",
+
+                  // Backgrounds & Borders
+                  "border-border"
+                )}
+              >
                 <span className={`h-2 w-2 rounded-full ${page.isRunning ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/45'}`} />
-                <span className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">
+                <span
+                  className={cn(
+                    // Typography
+                    "text-[11px] text-muted-foreground font-semibold uppercase tracking-wider"
+                  )}
+                >
                   {page.isRunning ? 'Running' : 'Ready'}
                 </span>
               </div>
 
               {/* Safety / Start Blocked Warnings */}
               {!page.isRunning && page.startBlockedReason && (
-                <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                <span
+                  className={cn(
+                    // Sizing & Spacing
+                    "px-2 py-0.5",
+
+                    // Typography
+                    "text-[10px] font-medium",
+
+                    // Visuals & Colors
+                    "text-amber-600 dark:text-amber-400 bg-amber-500/10 rounded border border-amber-500/20"
+                  )}
+                >
                   {page.startBlockedReason}
                 </span>
               )}
@@ -103,7 +198,18 @@ export function InvokerPage() {
 
             {/* Compact Progress Info */}
             {page.isRunning && page.progress && (
-              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center",
+
+                  // Sizing & Spacing
+                  "gap-2",
+
+                  // Typography
+                  "text-xs font-semibold text-muted-foreground"
+                )}
+              >
                 <span>Progress:</span>
                 <span className="font-mono text-foreground">
                   {page.progress.current} / {page.progress.total} ({percentage}%)
@@ -114,17 +220,53 @@ export function InvokerPage() {
             {/* Slick bottom border progress line */}
             {page.isRunning && page.progress && (
               <div
-                className="absolute bottom-0 left-0 h-[2px] bg-primary transition-all duration-300 ease-out"
+                className={cn(
+                  // Layout & Positioning
+                  "absolute bottom-0 left-0",
+
+                  // Sizing & Spacing
+                  "h-[2px]",
+
+                  // Backgrounds & Borders
+                  "bg-primary",
+
+                  // Interactive & States
+                  "transition-all duration-300 ease-out"
+                )}
                 style={{ width: `${percentage}%` }}
               />
             )}
           </div>
 
           {/* Main workspace (Simplified 50/50 Grid layout) */}
-          <div className="flex-1 min-h-0 min-w-0">
-            <div className="grid grid-cols-2 h-full min-h-0 divide-x divide-border">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex-1 min-h-0 min-w-0"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "grid grid-cols-2 divide-x min-h-0",
+
+                // Sizing & Spacing
+                "h-full",
+
+                // Backgrounds & Borders
+                "divide-border"
+              )}
+            >
               {/* Left Column: Attack configurations and Request templates */}
-              <div className="flex flex-col min-h-0 p-3 overflow-auto">
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex flex-col min-h-0 overflow-auto",
+
+                  // Sizing & Spacing
+                  "p-3"
+                )}
+              >
                 <InvokerConfigDialog 
                   isRunning={page.isRunning} 
                   progress={page.progress} 
@@ -133,16 +275,45 @@ export function InvokerPage() {
               </div>
 
               {/* Right Column: Results & inspector view */}
-              <div className="flex flex-col min-h-0 overflow-hidden">
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex flex-col min-h-0 overflow-hidden"
+                )}
+              >
                 {selectedResult ? (
-                  <div className="grid grid-rows-2 h-full min-h-0 divide-y divide-border">
+                  <div
+                    className={cn(
+                      // Layout & Positioning
+                      "grid grid-rows-2 divide-y min-h-0",
+
+                      // Sizing & Spacing
+                      "h-full",
+
+                      // Backgrounds & Borders
+                      "divide-border"
+                    )}
+                  >
                     {/* Top Row: Results list table */}
-                    <div className="flex flex-col min-h-0 p-3 pb-1.5">
+                    <div
+                      className={cn(
+                        // Layout & Positioning
+                        "flex flex-col min-h-0",
+
+                        // Sizing & Spacing
+                        "p-3 pb-1.5"
+                      )}
+                    >
                       <InvokerResultsPanel />
                     </div>
 
                     {/* Bottom Row: Inline Request / Response inspector */}
-                    <div className="flex flex-col min-h-0">
+                    <div
+                      className={cn(
+                        // Layout & Positioning
+                        "flex flex-col min-h-0"
+                      )}
+                    >
                       {page.activeTab.config && (
                         <InvokerResultInspector 
                           selectedResult={selectedResult} 
@@ -153,7 +324,15 @@ export function InvokerPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="h-full w-full p-3">
+                  <div
+                    className={cn(
+                      // Layout & Positioning
+                      "w-full min-h-0",
+
+                      // Sizing & Spacing
+                      "h-full p-3"
+                    )}
+                  >
                     <InvokerResultsPanel />
                   </div>
                 )}

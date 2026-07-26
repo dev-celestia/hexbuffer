@@ -9,6 +9,8 @@ import { TrashIcon, PlayIcon, PauseIcon, TargetIcon } from '@phosphor-icons/reac
 import { Button } from "@/components/ui/button";
 import { openTargetSelector } from "@/triggers";
 
+import { cn } from "@/lib/utils";
+
 export function WebSocketHistoryPage() {
   const page = useWebSocketHistoryPage();
   const isWsPaused = useWebSocketHistoryQueryStore((s) => s.isStreamManuallyPaused);
@@ -40,27 +42,113 @@ export function WebSocketHistoryPage() {
         activeTabId={page.activeTabId}
         onTabChange={page.setActiveTabId}
         onTabClose={page.removeTab}
-        contentClassName="flex-1 border rounded-lg flex flex-col overflow-hidden bg-background min-h-0"
+        contentClassName={cn(
+          // Layout & Positioning
+          "flex flex-col flex-1 min-h-0 overflow-hidden",
+
+          // Backgrounds & Borders
+          "border rounded-lg bg-background"
+        )}
       >
-        <div className="bg-muted p-1 px-2 flex justify-between items-center border-b">
-          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider pl-1">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center justify-between",
+
+            // Sizing & Spacing
+            "p-1 px-2",
+
+            // Backgrounds & Borders
+            "bg-muted border-b"
+          )}
+        >
+          <span
+            className={cn(
+              // Typography
+              "text-[10px] font-medium text-muted-foreground uppercase tracking-wider pl-1"
+            )}
+          >
             WebSocket
           </span>
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" className="h-6 text-xs shrink-0" onClick={togglePause}>
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "gap-1"
+            )}
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                // Layout & Positioning
+                "shrink-0",
+
+                // Sizing & Spacing
+                "h-6",
+
+                // Typography
+                "text-xs"
+              )}
+              onClick={togglePause}
+            >
               {isWsPaused ? <><PlayIcon className="size-3" /> Resume</> : <><PauseIcon className="size-3" /> Pause</>}
             </Button>
-            <Button variant="ghost" size="sm" className="h-6 text-xs shrink-0" onClick={openTargetSelector}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                // Layout & Positioning
+                "shrink-0",
+
+                // Sizing & Spacing
+                "h-6",
+
+                // Typography
+                "text-xs"
+              )}
+              onClick={openTargetSelector}
+            >
               <TargetIcon className="size-3" />
               Target
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleClearAll} className="text-xs !text-red-500 shrink-0 h-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearAll}
+              className={cn(
+                // Layout & Positioning
+                "shrink-0",
+
+                // Sizing & Spacing
+                "h-6",
+
+                // Typography
+                "text-xs",
+
+                // Visuals & Colors
+                "!text-red-500"
+              )}
+            >
               <TrashIcon className="size-3 mr-1" />
               Clear All
             </Button>
           </div>
         </div>
-        <Card className="flex-1 flex flex-col overflow-hidden !py-0 rounded-none">
+        <Card
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col flex-1 overflow-hidden",
+
+            // Sizing & Spacing
+            "!py-0",
+
+            // Backgrounds & Borders
+            "rounded-none"
+          )}
+        >
           {page.websocketView}
         </Card>
       </TabbedPageLayout>

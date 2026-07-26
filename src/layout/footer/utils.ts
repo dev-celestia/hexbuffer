@@ -1,4 +1,4 @@
-export const proxyStatusLabel = {
+export const PROXY_STATUS_LABEL = {
   connected: 'Connected',
   starting: 'Starting',
   stopping: 'Stopping',

@@ -2,7 +2,7 @@ import * as React from "react"
 
 import { cn } from '@/lib/utils';
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+function Input({ className, type, ...props }: Readonly<React.ComponentProps<"input">>) {
   return (
     <input
       type={type}
@@ -12,9 +12,21 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
       autoCapitalize="off"
       spellCheck="false"
       className={cn(
-        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground border-input h-7 w-full min-w-0 rounded-sm border bg-background px-3 py-1 text-base transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        "focus-visible:border-primary",
-        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+        // Layout & Positioning
+        "min-w-0 outline-none file:inline-flex",
+
+        // Sizing & Spacing
+        "h-7 w-full px-3 py-1 file:h-7",
+
+        // Typography
+        "text-base md:text-sm file:text-sm file:font-medium placeholder:text-muted-foreground file:text-foreground selection:bg-primary selection:text-primary-foreground",
+
+        // Backgrounds & Borders
+        "rounded-sm border border-input bg-background file:border-0 file:bg-transparent",
+
+        // Interactive & States
+        "transition-[color,box-shadow] focus-visible:border-primary aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+
         className
       )}
       {...props}
