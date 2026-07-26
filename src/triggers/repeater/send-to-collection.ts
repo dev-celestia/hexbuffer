@@ -73,8 +73,17 @@ export async function sendToCollection(options: SendToCollectionOptions): Promis
     selectedNodeId: `ep-${endpoint.id}`,
   }));
 
-  // Open/activate the collection tab
-  useRepeaterStore.getState().addCollectionTab(stashId, resolvedName);
+  // Ensure the workspace containing this collection is activated
+  const stash = collectionsStore.stashes.find((s) => s.id === stashId);
+  const parentWsId = stash?.parentId;
+  if (parentWsId && useRepeaterStore.getState().workspaces.some((w) => w.id === parentWsId)) {
+    useRepeaterStore.getState().setActiveWorkspaceId(parentWsId);
+  } else {
+    const state = useRepeaterStore.getState();
+    if (!state.activeWorkspaceId) {
+      state.createWorkspace();
+    }
+  }
 
   // Navigate to repeater
   useNavStore.getState().triggerNavBlink('/repeater');

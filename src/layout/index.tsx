@@ -16,11 +16,11 @@ import {
 import { MonitorIcon, SunIcon, MoonIcon, ImageIcon, GearSixIcon } from '@phosphor-icons/react';
 import { AppSidebar } from './taskbar';
 import { DesktopWorkspace } from './desktop-workspace';
+import { cn } from '@/lib/utils';
 
 import whiteWallpaper from '@/assets/white-wallpaper.png';
 import blackWallpaper from '@/assets/black-wallpaper.png';
 
-// ponytail: inline — rendered behind everything, transparent when no bg set
 function BgLayer() {
   const bgType = useAppSettingsStore((s) => s.bgType);
   const bgValue = useAppSettingsStore((s) => s.bgValue);
@@ -55,7 +55,10 @@ function BgLayer() {
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 z-0"
+      className={cn(
+        // Layout & Positioning
+        "absolute inset-0 z-0 pointer-events-none"
+      )}
       style={style}
     />
   );
@@ -64,24 +67,41 @@ function BgLayer() {
 export function AppLayout({ children }: { children?: React.ReactNode }) {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const bgType = useAppSettingsStore((s) => s.bgType);
-
-  // // Drop bg-background when a custom background is active so BgLayer shows through
-  // const rootBg = bgType === 'none' ? 'bg-background' : 'bg-transparent';
 
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
-        <div className={`flex h-screen flex-col bg-background relative overflow-hidden`}>
+        <div
+          className={cn(
+            // Layout & Positioning
+            "relative flex flex-col overflow-hidden",
+
+            // Sizing & Spacing
+            "h-screen",
+
+            // Backgrounds & Borders
+            "bg-background"
+          )}
+        >
           <BgLayer />
-          <div className="min-h-0 flex-1 relative z-10">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "relative z-10 flex-1 min-h-0"
+            )}
+          >
             <DesktopWorkspace activeChild={children} />
           </div>
           <AppSidebar />
         </div>
       </ContextMenuTrigger>
 
-      <ContextMenuContent className="w-48">
+      <ContextMenuContent
+        className={cn(
+          // Sizing & Spacing
+          "w-48"
+        )}
+      >
         <ContextMenuItem
           id="ctx-settings"
           onClick={() => navigate('/settings')}
@@ -133,3 +153,4 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
     </ContextMenu>
   );
 }
+

@@ -3,6 +3,7 @@ import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { buildRawHttpRequest } from '@/lib/http-message';
 import { useNavStore } from '@/stores/nav';
 import { useRepeaterStore } from '@/stores/repeater';
+import { sendRawToRepeater } from '@/triggers/repeater';
 import { useInvokerStore } from '@/stores/invoker';
 import { useAutomationStore, type ExecutionLog, type LiveTrafficHostInsight, type NodeRuntimeState } from '@/stores/automation';
 import { useInterceptStore } from '@/pages/intercept/state/intercept-store';
@@ -313,14 +314,12 @@ function handleAutomationActionUi(payload: AutomationActionUiEvent): void {
   const request = requestFromAutomationInput(payload.inputData);
 
   if (payload.actionType === 'action:send-to-repeater') {
-    const tabId = useRepeaterStore.getState().addRequestTab({
+    const tabName = stringField(params, ['tabName'], '');
+    void sendRawToRepeater({
       raw: buildRawHttpRequest(request),
       url: request.url,
+      name: tabName || undefined,
     });
-    const tabName = stringField(params, ['tabName'], '');
-    if (tabName) {
-      useRepeaterStore.getState().renameTab(tabId, tabName);
-    }
     if (booleanParam(params, 'open', true)) {
       useNavStore.getState().triggerNavBlink('/repeater');
     }

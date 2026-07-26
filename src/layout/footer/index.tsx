@@ -2,6 +2,7 @@ import * as React from 'react';
 import { getEffectiveProxyPort, useAppStore } from '@/stores/app';
 import { PROXY_STATUS_LABEL } from './utils';
 import { ProxyStatusIndicator } from './proxy-status';
+import { cn } from '@/lib/utils';
 import pkg from '../../../package.json';
 
 export function AppFooter() {
@@ -25,8 +26,30 @@ export function AppFooter() {
   }, [checkProxyStatus]);
 
   return (
-    <footer className="border-t px-4 py-1.5 flex items-center justify-between text-xs text-muted-foreground bg-background">
-      <div className="flex items-center justify-between gap-4 w-full">
+    <footer
+      className={cn(
+        // Layout & Positioning
+        "flex items-center justify-between",
+
+        // Sizing & Spacing
+        "px-4 py-1.5",
+
+        // Typography
+        "text-xs text-muted-foreground",
+
+        // Backgrounds & Borders
+        "border-t bg-background"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between",
+
+          // Sizing & Spacing
+          "w-full gap-4"
+        )}
+      >
         <span>© hexbuffer v{pkg.version}</span>
         <ProxyStatusIndicator
           proxyStatus={proxyStatus}
@@ -38,3 +61,4 @@ export function AppFooter() {
     </footer>
   );
 }
+

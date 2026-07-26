@@ -9,7 +9,7 @@ import { PaperPlaneTiltIcon, TrashIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useRepeaterStore } from '@/stores/repeater';
 import { deleteWebSocket, getWebSocketDetail } from '../../api';
-import { sendToCollection } from '@/triggers/repeater/send-to-collection';
+import { sendToCollection, sendRawToRepeater } from '@/triggers/repeater';
 import { CollectionPickerSubmenu } from '@/triggers/repeater/collection-picker-submenu';
 
 interface WebSocketContextMenuProps {
@@ -33,11 +33,15 @@ export function WebSocketContextMenu({
 
   const handleOpenInRepeater = async () => {
     try {
-      const detail = await fetchWebSocketDetail(connectionId);
+      const detail = await getWebSocketDetail(connectionId);
       const headers = detail.connection.handshake_request_headers || {};
       const url = connectionUrl || detail.connection.url || '';
 
-      useRepeaterStore.getState().addEmptyHttpTab();
+      await sendRawToRepeater({
+        url,
+        headers,
+        name: `WS ${url}`,
+      });
 
       navigate('/repeater');
     } catch (error) {

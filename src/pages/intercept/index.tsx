@@ -61,7 +61,7 @@ export function InterceptPage() {
                 // Sizing & Spacing
                 "gap-2",
 
-                // Typography / Visuals & Colors
+                // Typography
                 "text-amber-700 dark:text-amber-200/70"
               )}
             >

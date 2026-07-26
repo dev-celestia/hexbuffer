@@ -23,7 +23,7 @@ import { useInterceptStore } from '@/pages/intercept/state/intercept-store';
 import { invoke } from '@tauri-apps/api/core';
 import { useMockForgeStore } from '@/stores/mock-forge';
 import type { MockDomain, MockRoute } from '@/pages/mock-forge/types';
-import { sendToCollection } from '@/triggers/repeater/send-to-collection';
+import { sendToCollection, sendRawToRepeater } from '@/triggers/repeater';
 import { cleanUrl } from '@/lib/utils';
 
 function buildAutomationTargetUrl(request: ApiCall) {
@@ -140,7 +140,7 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
       const detail = await getHttpLogDetail(call.id);
       const request = adaptProxyRecordToApiCall(detail);
       const cleanedUrl = cleanUrl(request.url);
-      useRepeaterStore.getState().addRequestTab({
+      await sendRawToRepeater({
         raw: buildRawHttpRequest({
           method: request.method,
           url: cleanedUrl,
@@ -148,8 +148,8 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
           body: request.request_body || '',
         }),
         url: cleanedUrl,
+        name: `${request.method} ${request.path || cleanedUrl}`,
       });
-      useNavStore.getState().triggerNavBlink('/repeater');
       toast.success(`Sent ${request.method} ${request.path || request.url} to Repeater`);
     } catch (error) {
       console.error('Failed to open request in Repeater:', error);

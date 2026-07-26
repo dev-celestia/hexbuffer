@@ -17,7 +17,13 @@ export function OpenBrowserButton() {
     <Button
       variant="outline"
       size="xs"
-      className="h-6 p-0 gap-0"
+      className={cn(
+        // Layout & Positioning
+        "flex items-center justify-center",
+
+        // Sizing & Spacing
+        "h-6 p-0 gap-0"
+      )}
       onClick={openBrowser}
       disabled={isOpeningBrowser}
       title={openBrowserTitle}
@@ -25,14 +31,37 @@ export function OpenBrowserButton() {
       onMouseLeave={handleMouseLeave}
     >
       {isOpeningBrowser ? (
-        <SpinnerGapIcon className="h-4 w-4 animate-spin shrink-0" />
+        <SpinnerGapIcon
+          className={cn(
+            // Layout & Positioning
+            "shrink-0 animate-spin",
+
+            // Sizing & Spacing
+            "h-4 w-4"
+          )}
+        />
       ) : (
-        <GlobeIcon className="h-4 w-4 shrink-0" />
+        <GlobeIcon
+          className={cn(
+            // Layout & Positioning
+            "shrink-0",
+
+            // Sizing & Spacing
+            "h-4 w-4"
+          )}
+        />
       )}
       <span
         className={cn(
-          'transition-all duration-300 overflow-hidden whitespace-nowrap',
-          showLabel ? 'max-w-32 opacity-100 ml-2 ' : 'max-w-0 opacity-0',
+          // Layout & Positioning
+          "overflow-hidden whitespace-nowrap",
+
+          // Sizing & Spacing
+          showLabel ? "max-w-32 ml-2" : "max-w-0",
+
+          // Interactive & States
+          "transition-all duration-300",
+          showLabel ? "opacity-100" : "opacity-0"
         )}
       >
         OPEN BROWSER
@@ -40,3 +69,4 @@ export function OpenBrowserButton() {
     </Button>
   );
 }
+

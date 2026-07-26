@@ -42,17 +42,57 @@ export function InterceptQueuePanel() {
   } = useQueuePanel();
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex min-h-0 flex-1 flex-col p-2">
-        <div className="min-h-0 flex-1 overflow-auto rounded-md border bg-background">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col",
+
+        // Sizing & Spacing
+        "h-full"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col flex-1 min-h-0",
+
+          // Sizing & Spacing
+          "p-2"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex-1 min-h-0 overflow-auto",
+
+            // Backgrounds & Borders
+            "rounded-md border bg-background"
+          )}
+        >
           {activeRequests.length === 0 ? (
-            <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center justify-center text-center",
+
+                // Sizing & Spacing
+                "h-full p-6",
+
+                // Typography
+                "text-sm text-muted-foreground"
+              )}
+            >
               {isEnabled && activeTab?.captureHosts.length
                 ? "Waiting for matching hosts in this tab..."
                 : "Add a capture host to this tab to pause live requests."}
             </div>
           ) : (
-            <div className="divide-y ">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "divide-y"
+              )}
+            >
               {activeRequests.map((request) => {
                 const isSelected = request.id === selectedRequestId;
                 const isRemoving = removingIds.has(request.id);
@@ -72,20 +112,73 @@ export function InterceptQueuePanel() {
                           }
                         }}
                         className={cn(
-                          "group relative flex flex-col gap-2 p-2 items-start justify-between w-full text-sm hover:bg-muted cursor-pointer transition-colors outline-none focus-visible:bg-muted",
+                          // Layout & Positioning
+                          "group relative flex flex-col items-start justify-between outline-none",
+
+                          // Sizing & Spacing
+                          "w-full p-2 gap-2",
+
+                          // Typography
+                          "text-sm",
+
+                          // Interactive & States
+                          "cursor-pointer transition-colors hover:bg-muted focus-visible:bg-muted",
                           isSelected && "bg-muted",
                           isRemoving &&
-                            "pointer-events-none animate-slide-out-right",
+                            "pointer-events-none animate-slide-out-right"
                         )}
                         title={`${host}${path}`}
                       >
-                        <div className="flex gap-2 min-w-0 flex-1 mb-2 w-full">
+                        <div
+                          className={cn(
+                            // Layout & Positioning
+                            "flex flex-1 min-w-0 w-full",
+
+                            // Sizing & Spacing
+                            "gap-2 mb-2"
+                          )}
+                        >
                           <div className="min-w-0 flex-1">
-                            <div className="flex flex-col items-start gap-1 w-full">
-                              <div className="flex items-center justify-between w-full">
-                                <div className="mb-1 flex gap-2 w-full">
+                            <div
+                              className={cn(
+                                // Layout & Positioning
+                                "flex flex-col items-start w-full",
+
+                                // Sizing & Spacing
+                                "gap-1"
+                              )}
+                            >
+                              <div
+                                className={cn(
+                                  // Layout & Positioning
+                                  "flex items-center justify-between w-full"
+                                )}
+                              >
+                                <div
+                                  className={cn(
+                                    // Layout & Positioning
+                                    "flex w-full",
+
+                                    // Sizing & Spacing
+                                    "gap-2 mb-1"
+                                  )}
+                                >
                                   {direction === "response" ? (
-                                    <span className="inline-flex rounded border px-1.5 py-0.5 text-[11px] font-semibold shrink-0">
+                                    <span
+                                      className={cn(
+                                        // Layout & Positioning
+                                        "inline-flex shrink-0",
+
+                                        // Sizing & Spacing
+                                        "px-1.5 py-0.5",
+
+                                        // Typography
+                                        "text-[11px] font-semibold",
+
+                                        // Backgrounds & Borders
+                                        "rounded border"
+                                      )}
+                                    >
                                       {request.response?.status_code ?? "RES"}
                                     </span>
                                   ) : (
@@ -95,36 +188,81 @@ export function InterceptQueuePanel() {
                                     />
                                   )}
                                   <span className="min-w-0 flex-1">
-                                    <span className="block text-xs font-medium">
+                                    <span
+                                      className={cn(
+                                        // Layout & Positioning
+                                        "block",
+
+                                        // Typography
+                                        "text-xs font-medium"
+                                      )}
+                                    >
                                       {host}
                                     </span>
                                   </span>
                                 </div>
                                 <div>
- {direction === "response" ? (
-                                  <ArrowLeftIcon className="size-4 text-green-500" />
-                                ) : (
-                                  <ArrowRightIcon className="size-4 text-blue-500" />
-                                )}
+                                  {direction === "response" ? (
+                                    <ArrowLeftIcon className="size-4 text-green-500" />
+                                  ) : (
+                                    <ArrowRightIcon className="size-4 text-blue-500" />
+                                  )}
                                 </div>
-                               
                               </div>
 
-                              <span className="block font-mono text-xs text-muted-foreground w-full">
+                              <span
+                                className={cn(
+                                  // Layout & Positioning
+                                  "block w-full",
+
+                                  // Typography
+                                  "font-mono text-xs text-muted-foreground"
+                                )}
+                              >
                                 {path}
                               </span>
                             </div>
                           </div>
                         </div>
 
-                        <div className="relative flex flex-col items-end gap-1.5 self-stretch shrink-0 justify-center min-w-[160px]">
+                        <div
+                          className={cn(
+                            // Layout & Positioning
+                            "relative flex flex-col items-end justify-center self-stretch shrink-0",
+
+                            // Sizing & Spacing
+                            "gap-1.5 min-w-[160px]"
+                          )}
+                        >
                           {/* Normal state: time */}
-                          <span className="pt-1 text-[11px] text-muted-foreground group-hover:opacity-0 transition-opacity duration-150">
+                          <span
+                            className={cn(
+                              // Sizing & Spacing
+                              "pt-1",
+
+                              // Typography
+                              "text-[11px] text-muted-foreground",
+
+                              // Interactive & States
+                              "group-hover:opacity-0 transition-opacity duration-150"
+                            )}
+                          >
                             {formatRequestTime(request.timestamp)}
                           </span>
 
                           {/* Hover state: actions */}
-                          <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150 flex items-center gap-1.5">
+                          <div
+                            className={cn(
+                              // Layout & Positioning
+                              "absolute right-0 top-1/2 -translate-y-1/2 flex items-center",
+
+                              // Sizing & Spacing
+                              "gap-1.5",
+
+                              // Interactive & States
+                              "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150"
+                            )}
+                          >
                             {direction === "request" && (
                               <Button
                                 variant="outline"
@@ -203,3 +341,4 @@ export function InterceptQueuePanel() {
     </div>
   );
 }
+
