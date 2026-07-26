@@ -8,6 +8,7 @@ import { usePromptInputController } from '@/components/ai-elements/prompt-input'
 import { useBrowserAutomationStore } from '@/stores/browser-automation';
 import { DASHBOARD_DEFAULT_AI_MODEL } from '../constants';
 import { DashboardSettingsChatTransport } from '../lib/dashboard-chat-transport';
+import { formatAttachedFileContent } from '../lib/file-utils';
 import type { ChatMessageRecord, CrawlCompletedEvent, CrawlHumanInputRequest, DashboardAiSettings, DashboardChatMessage, HumanSelectionRequest, IntentClarificationRequest } from '../types';
 
 const DEFAULT_AI_SETTINGS: DashboardAiSettings = {
@@ -413,20 +414,37 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
   }, []);
 
   const handleSubmit = useCallback(async ({ text, files, mentionedPages }: PromptInputMessage) => {
-    if (!text.trim()) {
+    const hasText = text.trim().length > 0;
+    const hasFiles = files && files.length > 0;
+
+    if (!hasText && !hasFiles) {
       return;
     }
 
-    // Build context prefix from mentioned pages
+    // Process and format attached text or markdown files
+    const fileContextParts: string[] = [];
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const formattedFile = await formatAttachedFileContent(file);
+        if (formattedFile) {
+          fileContextParts.push(formattedFile);
+        }
+      }
+    }
+
+    // Build context prefix from mentioned pages and attached files
     const contextParts: string[] = [];
     if (mentionedPages && mentionedPages.length > 0) {
       contextParts.push(`[Referenced pages: ${mentionedPages.map((p) => p.label).join(', ')}]`);
     }
-    const contextPrefix = contextParts.length > 0 ? contextParts.join('\n') + '\n\n' : '';
+    if (fileContextParts.length > 0) {
+      contextParts.push(...fileContextParts);
+    }
+    const contextPrefix = contextParts.length > 0 ? contextParts.join('\n\n') + '\n\n' : '';
 
     // If there's a pending credential request, try to parse credentials from the text
     const pendingRequest = crawlInputRef.current;
-    if (pendingRequest && !inputBeingConsumedRef.current) {
+    if (pendingRequest && !inputBeingConsumedRef.current && hasText) {
       const extracted = parseCredentialInput(text, pendingRequest.requestedFields);
       if (extracted) {
         inputBeingConsumedRef.current = true;
@@ -444,8 +462,10 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
     promptController.attachments.clear();
 
     clearError();
+    const finalPrompt = (contextPrefix + text).trim();
+
     await sendMessage(
-      { text: contextPrefix + text, files },
+      { text: finalPrompt, files },
       {
         body: {
           aiSettings: aiSettingsRef.current,

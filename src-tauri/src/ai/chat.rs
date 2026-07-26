@@ -53,6 +53,8 @@ pub async fn send_ai_chat_message_impl(
         session_id: request.active_workspace_id.clone(),
         history: engine_history,
         context_summary: context_json,
+        enable_tools: None,
+        tools: None,
     };
 
     let _ = app.emit(

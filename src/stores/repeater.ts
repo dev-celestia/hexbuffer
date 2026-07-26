@@ -113,12 +113,15 @@ export const useRepeaterStore = create<RepeaterState>()(
 
       // ── Backward-compat shims ──
 
-      addRequestTab: (_request) => {
+      addRequestTab: (request) => {
         const state = get();
         let wsId = state.activeWorkspaceId;
         if (!wsId || !state.workspaces.find((w) => w.id === wsId)) {
           wsId = state.createWorkspace(DEFAULT_WORKSPACE_NAME);
         }
+        import('@/triggers/repeater').then(({ sendRawToRepeater }) => {
+          void sendRawToRepeater({ raw: request?.raw, url: request?.url });
+        }).catch(console.error);
         return wsId;
       },
 

@@ -1,5 +1,3 @@
-// ponytail: premium, self-contained VPN connection widget with interactive transition timings, clean layout, and custom log viewer.
-
 import * as React from 'react';
 import { useVpnStore } from '@/stores/vpn-store';
 import { Button } from '@/components/ui/button';
@@ -18,32 +16,24 @@ import {
   FolderOpenIcon,
   TerminalWindowIcon,
   TrashIcon,
-  LockKeyIcon,
   GearIcon,
   CaretDownIcon,
 } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 
 export function VpnWidget() {
   const {
     status,
-    error,
     configPath,
-    access,
-    server,
     protocol,
-    port,
     logs,
     username,
     password,
-    showCredentials,
     setConfigPath,
-    setAccess,
-    setServer,
     setProtocol,
     setPort,
     setUsername,
     setPassword,
-    setShowCredentials,
     clearLogs,
     connect,
     disconnect,
@@ -97,17 +87,57 @@ export function VpnWidget() {
   };
 
   return (
-    <div className="p-3 rounded-md border bg-muted/60 backdrop-blur-md flex flex-col gap-3 select-none transition-shadow duration-200 hover:shadow-md">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col select-none",
+
+        // Sizing & Spacing
+        "p-3 gap-3",
+
+        // Backgrounds & Borders
+        "rounded-md border bg-muted/60 backdrop-blur-md",
+
+        // Interactive & States
+        "transition-shadow duration-200 hover:shadow-md"
+      )}
+    >
       {/* Widget Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-1.5"
+          )}
+        >
+          <span
+            className={cn(
+              // Typography
+              "text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase"
+            )}
+          >
             OpenVPN Connection
           </span>
         </div>
         
         {/* Status Indicator Lights */}
-        <div className="flex items-center gap-2">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-2"
+          )}
+        >
           {status === 'connected' && (
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -134,7 +164,18 @@ export function VpnWidget() {
       </div>
 
       {/* Select Config Row */}
-      <div className="flex items-center justify-between gap-2 bg-background/50 border border-border/40 p-1.5 rounded-md">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between",
+
+          // Sizing & Spacing
+          "gap-2 p-1.5",
+
+          // Backgrounds & Borders
+          "rounded-md border border-border/40 bg-background/50"
+        )}
+      >
         <div className="flex-1 min-w-0 px-1">
           <p className="text-[10px] text-muted-foreground font-medium uppercase font-mono tracking-tight leading-none mb-0.5">
             Config File
@@ -151,28 +192,91 @@ export function VpnWidget() {
           variant="outline"
           onClick={handleSelectFile}
           disabled={status === 'connecting' || status === 'connected'}
-          className="h-7 px-2 shrink-0 active:scale-[0.97] transition-transform duration-100"
+          className={cn(
+            // Layout & Positioning
+            "shrink-0",
+
+            // Sizing & Spacing
+            "h-7 px-2",
+
+            // Interactive & States
+            "active:scale-[0.97] transition-transform duration-100"
+          )}
         >
           <FolderOpenIcon className="size-3.5" />
         </Button>
       </div>
 
       {/* Collapsible Connection Settings (Accordion) */}
-      <div className="border border-border/40 rounded-md bg-background/25 overflow-hidden transition-all duration-200">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "overflow-hidden",
+
+          // Backgrounds & Borders
+          "border border-border/40 rounded-md bg-background/25",
+
+          // Interactive & States
+          "transition-all duration-200"
+        )}
+      >
         <button
           type="button"
           onClick={() => setShowSettings(!showSettings)}
-          className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-muted/40 transition-colors duration-150 select-none text-left"
+          className={cn(
+            // Layout & Positioning
+            "w-full flex items-center justify-between text-left select-none",
+
+            // Sizing & Spacing
+            "px-2.5 py-1.5",
+
+            // Interactive & States
+            "hover:bg-muted/40 transition-colors duration-150 cursor-pointer"
+          )}
         >
-          <span className="text-[10px] uppercase font-mono font-bold text-muted-foreground flex items-center gap-1.5">
+          <span
+            className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "gap-1.5",
+
+              // Typography
+              "text-[10px] uppercase font-mono font-bold text-muted-foreground"
+            )}
+          >
             <GearIcon className="size-3.5" />
             Connection Settings
           </span>
-          <CaretDownIcon className={`size-3 text-muted-foreground transition-transform duration-200 ${showSettings ? 'rotate-180' : ''}`} />
+          <CaretDownIcon
+            className={cn(
+              // Sizing & Spacing
+              "size-3",
+
+              // Typography
+              "text-muted-foreground",
+
+              // Interactive & States
+              "transition-transform duration-200",
+              showSettings ? "rotate-180" : ""
+            )}
+          />
         </button>
 
         {showSettings && (
-          <div className="p-2 border-t border-border/30 flex flex-col gap-2.5 bg-background/10">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-col",
+
+              // Sizing & Spacing
+              "p-2 gap-2.5",
+
+              // Backgrounds & Borders
+              "border-t border-border/30 bg-background/10"
+            )}
+          >
             {/* Protocol Override */}
             <div className="space-y-1">
               <Label className="text-[9px] text-muted-foreground uppercase font-mono font-semibold">
@@ -186,7 +290,25 @@ export function VpnWidget() {
                 }}
                 disabled={status === 'connecting' || status === 'connected'}
               >
-                <SelectTrigger size="sm" className="w-full text-xs h-7 py-1 px-2 select-none active:scale-[0.97] transition-transform duration-100 bg-background/50">
+                <SelectTrigger
+                  size="sm"
+                  className={cn(
+                    // Layout & Positioning
+                    "w-full select-none",
+
+                    // Sizing & Spacing
+                    "h-7 py-1 px-2",
+
+                    // Typography
+                    "text-xs",
+
+                    // Backgrounds & Borders
+                    "bg-background/50",
+
+                    // Interactive & States
+                    "active:scale-[0.97] transition-transform duration-100"
+                  )}
+                >
                   <SelectValue placeholder="Protocol" />
                 </SelectTrigger>
                 <SelectContent>
@@ -207,7 +329,16 @@ export function VpnWidget() {
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Optional"
                   disabled={status === 'connecting' || status === 'connected'}
-                  className="h-7 text-xs bg-background/50 border-border/60"
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-7",
+
+                    // Typography
+                    "text-xs",
+
+                    // Backgrounds & Borders
+                    "bg-background/50 border-border/60"
+                  )}
                 />
               </div>
               <div className="space-y-1">
@@ -220,7 +351,16 @@ export function VpnWidget() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Optional"
                   disabled={status === 'connecting' || status === 'connected'}
-                  className="h-7 text-xs bg-background/50 border-border/60"
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-7",
+
+                    // Typography
+                    "text-xs",
+
+                    // Backgrounds & Borders
+                    "bg-background/50 border-border/60"
+                  )}
                 />
               </div>
             </div>
@@ -229,11 +369,31 @@ export function VpnWidget() {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-2 items-center mt-1">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center",
+
+          // Sizing & Spacing
+          "gap-2 mt-1"
+        )}
+      >
         <Button
           onClick={handleConnectToggle}
           variant={status === 'connected' || status === 'connecting' ? 'destructive' : 'default'}
-          className="flex-1 h-7 text-xs font-semibold select-none active:scale-[0.97] transition-all duration-150"
+          className={cn(
+            // Layout & Positioning
+            "flex-1 select-none",
+
+            // Sizing & Spacing
+            "h-7",
+
+            // Typography
+            "text-xs font-semibold",
+
+            // Interactive & States
+            "active:scale-[0.97] transition-all duration-150"
+          )}
         >
           {status === 'connecting' ? (
             <>
@@ -252,7 +412,14 @@ export function VpnWidget() {
           size="xs"
           variant="outline"
           onClick={() => setShowLogs(!showLogs)}
-          className={`h-7 px-2.5 active:scale-[0.97] transition-all duration-150 ${showLogs ? 'bg-accent border-accent-foreground text-accent-foreground' : ''}`}
+          className={cn(
+            // Sizing & Spacing
+            "h-7 px-2.5",
+
+            // Interactive & States
+            "active:scale-[0.97] transition-all duration-150",
+            showLogs ? 'bg-accent border-accent-foreground text-accent-foreground' : ''
+          )}
         >
           <TerminalWindowIcon className="size-4" />
         </Button>
@@ -260,12 +427,53 @@ export function VpnWidget() {
 
       {/* Collapsible Logs Terminal Panel */}
       {showLogs && (
-        <div className="mt-1 border border-border/60 bg-black/90 text-zinc-100 rounded-md p-2 flex flex-col gap-2 max-h-[160px] min-h-[100px] transition-all duration-300 font-mono text-[9px] relative">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-1 shrink-0">
-            <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider">Connection Logs</span>
+        <div
+          className={cn(
+            // Layout & Positioning
+            "relative flex flex-col mt-1",
+
+            // Sizing & Spacing
+            "p-2 gap-2 max-h-[160px] min-h-[100px]",
+
+            // Typography
+            "font-mono text-[9px] text-zinc-100",
+
+            // Backgrounds & Borders
+            "border border-border/60 bg-black/90 rounded-md",
+
+            // Interactive & States
+            "transition-all duration-300"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center justify-between shrink-0",
+
+              // Sizing & Spacing
+              "pb-1",
+
+              // Backgrounds & Borders
+              "border-b border-zinc-800"
+            )}
+          >
+            <span
+              className={cn(
+                // Typography
+                "text-[8px] font-bold text-zinc-500 uppercase tracking-wider"
+              )}
+            >
+              Connection Logs
+            </span>
             <button
               onClick={clearLogs}
-              className="text-zinc-500 hover:text-zinc-200 transition-colors"
+              className={cn(
+                // Typography
+                "text-zinc-500",
+
+                // Interactive & States
+                "hover:text-zinc-200 transition-colors cursor-pointer"
+              )}
             >
               <TrashIcon className="size-3" />
             </button>
@@ -273,7 +481,16 @@ export function VpnWidget() {
 
           <div
             ref={logContainerRef}
-            className="flex-1 overflow-y-auto scrollbar-thin flex flex-col gap-1 pr-1 font-mono leading-normal select-text"
+            className={cn(
+              // Layout & Positioning
+              "flex-1 overflow-y-auto scrollbar-thin flex flex-col select-text",
+
+              // Sizing & Spacing
+              "gap-1 pr-1",
+
+              // Typography
+              "font-mono leading-normal"
+            )}
           >
             {logs.length === 0 ? (
               <span className="text-zinc-600 italic">No logs capture. Ready to connect...</span>
@@ -281,7 +498,13 @@ export function VpnWidget() {
               logs.map((log, i) => (
                 <div
                   key={i}
-                  className={`whitespace-pre-wrap break-all ${log.includes('[ERROR]') ? 'text-red-400' : log.includes('Sequence Completed') ? 'text-emerald-400' : 'text-zinc-300'}`}
+                  className={cn(
+                    // Layout & Positioning
+                    "whitespace-pre-wrap break-all",
+
+                    // Typography
+                    log.includes('[ERROR]') ? 'text-red-400' : log.includes('Sequence Completed') ? 'text-emerald-400' : 'text-zinc-300'
+                  )}
                 >
                   {log}
                 </div>
@@ -293,3 +516,4 @@ export function VpnWidget() {
     </div>
   );
 }
+

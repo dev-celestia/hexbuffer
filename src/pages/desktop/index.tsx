@@ -30,7 +30,6 @@ export function DesktopPage() {
 
   const ROOT_BG = 'bg-background';
 
-  // ponytail: filter out widgets that have been hidden by the user
   const showCollections = !hiddenWidgets.includes('collections');
   const showProxy = !hiddenWidgets.includes('proxy');
   const showVpn = !hiddenWidgets.includes('vpn');
@@ -88,24 +87,34 @@ export function DesktopPage() {
                     "h-5 px-1.5",
 
                     // Typography
-                    "text-[11px]",
+                    "text-[11px] text-muted-foreground",
 
-                    // Visuals & Colors / Interactive & States
-                    "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                    // Interactive & States
+                    "hover:text-foreground hover:bg-muted/60"
                   )}
                 >
                   <GearSixIcon className="mr-1 size-3.5" />
                   Manage
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md">
+              <DialogContent
+                className={cn(
+                  // Sizing & Spacing
+                  "max-w-md"
+                )}
+              >
                 <DialogHeader>
                   <DialogTitle>Manage Desktop</DialogTitle>
                   <DialogDescription>
                     Toggle visibility of shortcuts and widgets on your desktop workspace.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="mt-2">
+                <div
+                  className={cn(
+                    // Sizing & Spacing
+                    "mt-2"
+                  )}
+                >
                   <ShortcutManager />
                 </div>
               </DialogContent>
@@ -113,15 +122,11 @@ export function DesktopPage() {
             <p
               className={cn(
                 // Typography
-                "text-[11px] font-mono font-bold tracking-wider uppercase",
-
-                // Backgrounds & Colors
-                "text-muted-foreground"
+                "text-[11px] font-mono font-bold tracking-wider uppercase text-muted-foreground"
               )}
             >
               Shortcuts
             </p>
-
           </div>
 
           {displayItems.length > 0 ? (
@@ -157,9 +162,34 @@ export function DesktopPage() {
                 "rounded-lg border border-dashed border-border/80 bg-muted/20 backdrop-blur-sm"
               )}
             >
-              <ShieldWarningIcon className="size-8 text-muted-foreground mb-3" />
-              <p className="text-sm font-medium text-foreground">No features matched your search</p>
-              <p className="text-xs text-muted-foreground mt-1">Try searching for another keyword or clear the search input.</p>
+              <ShieldWarningIcon
+                className={cn(
+                  // Sizing & Spacing
+                  "size-8 mb-3",
+
+                  // Typography
+                  "text-muted-foreground"
+                )}
+              />
+              <p
+                className={cn(
+                  // Typography
+                  "text-sm font-medium text-foreground"
+                )}
+              >
+                No features matched your search
+              </p>
+              <p
+                className={cn(
+                  // Sizing & Spacing
+                  "mt-1",
+
+                  // Typography
+                  "text-xs text-muted-foreground"
+                )}
+              >
+                Try searching for another keyword or clear the search input.
+              </p>
               <Button
                 variant="link"
                 onClick={handleClearSearch}
@@ -168,10 +198,10 @@ export function DesktopPage() {
                   "h-auto p-0 mt-2",
 
                   // Typography
-                  "text-xs font-semibold",
+                  "text-xs font-semibold text-primary",
 
-                  // Visuals & Colors / Interactive & States
-                  "text-primary hover:underline"
+                  // Interactive & States
+                  "hover:underline"
                 )}
               >
                 Clear search query
@@ -201,4 +231,5 @@ export function DesktopPage() {
     </div>
   );
 }
+
 

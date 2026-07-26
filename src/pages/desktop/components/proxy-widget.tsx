@@ -1,6 +1,7 @@
 import { useAppStore } from '@/stores/app';
 import { Button } from '@/components/ui/button';
 import { HardDrivesIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 
 export function ProxyWidget() {
   const {
@@ -22,16 +23,66 @@ export function ProxyWidget() {
   const activePort = proxyPort ?? proxyDefaultPort;
 
   return (
-    <div className="p-3 rounded-md border bg-muted/60 backdrop-blur-md flex flex-col gap-3 select-none transition-shadow duration-200 hover:shadow-md">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase">Proxy</span>
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col select-none",
+
+        // Sizing & Spacing
+        "p-3 gap-3",
+
+        // Backgrounds & Borders
+        "rounded-md border bg-muted/60 backdrop-blur-md",
+
+        // Interactive & States
+        "transition-shadow duration-200 hover:shadow-md"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-1.5"
+          )}
+        >
+          <span
+            className={cn(
+              // Typography
+              "text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase"
+            )}
+          >
+            Proxy
+          </span>
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-4 mt-0.5">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between",
+
+          // Sizing & Spacing
+          "gap-4 mt-0.5"
+        )}
+      >
         <div className="flex-1 min-w-0">
-          <div className="text-xs font-semibold truncate text-foreground">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "truncate",
+
+              // Typography
+              "text-xs font-semibold text-foreground"
+            )}
+          >
             {proxyStatus === 'connected' ? (
               <span className="text-emerald-500">Connected</span>
             ) : proxyStatus === 'starting' ? (
@@ -43,7 +94,17 @@ export function ProxyWidget() {
             )}
           </div>
           {proxyStatus === 'connected' && (
-            <div className="text-[9px] text-muted-foreground mt-0.5 font-mono">Port {activePort}</div>
+            <div
+              className={cn(
+                // Sizing & Spacing
+                "mt-0.5",
+
+                // Typography
+                "text-[9px] text-muted-foreground font-mono"
+              )}
+            >
+              Port {activePort}
+            </div>
           )}
         </div>
 
@@ -51,7 +112,16 @@ export function ProxyWidget() {
           onClick={handleProxyToggle}
           disabled={proxyStatus === 'starting' || proxyStatus === 'stopping'}
           variant={proxyStatus === 'connected' ? 'destructive' : 'default'}
-          className="h-6 px-2.5 text-[10px] font-medium shrink-0"
+          className={cn(
+            // Layout & Positioning
+            "shrink-0",
+
+            // Sizing & Spacing
+            "h-6 px-2.5",
+
+            // Typography
+            "text-[10px] font-medium"
+          )}
         >
           {proxyStatus === 'starting' || proxyStatus === 'stopping' ? (
             <SpinnerGapIcon className="size-3 animate-spin" />
@@ -65,3 +135,4 @@ export function ProxyWidget() {
     </div>
   );
 }
+

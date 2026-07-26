@@ -1,5 +1,5 @@
-export { sendToRepeater } from './send-to';
-export type { SendToRepeaterOptions } from './send-to';
+export { sendToRepeater, sendRawToRepeater } from './send-to';
+export type { SendToRepeaterOptions, SendRawToRepeaterOptions } from './send-to';
 export { sendToCollection } from './send-to-collection';
 export type { SendToCollectionOptions } from './send-to-collection';
 export { sendRequest } from './ui';

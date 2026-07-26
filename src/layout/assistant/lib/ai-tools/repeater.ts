@@ -1,6 +1,6 @@
 import { useRepeaterStore } from '@/stores/repeater';
 import { useNavStore } from '@/stores/nav';
-import { createCollection, createFolder, createEndpoint, selectEndpoint } from '@/triggers/repeater';
+import { createCollection, createFolder, createEndpoint, selectEndpoint, sendRawToRepeater } from '@/triggers/repeater';
 
 export const REPEATER_AI_TOOL_DEFINITION = {
   name: 'send_to_repeater',
@@ -94,13 +94,10 @@ export const CREATE_ENDPOINT_AI_TOOL_DEFINITION = {
   },
 };
 
-export function executeSendToRepeaterAiTool(args: Record<string, any>) {
+export async function executeSendToRepeaterAiTool(args: Record<string, any>) {
   const raw = args.raw_request || '';
   const url = args.target_url || '';
-  useRepeaterStore.getState().addRequestTab({ raw, url });
-  useNavStore.getState().triggerNavBlink('/repeater');
-  useNavStore.getState().openWindow('/repeater', 'Repeater');
-  useNavStore.getState().focusWindow('/repeater');
+  await sendRawToRepeater({ raw, url });
   return { status: 'success', tool: 'send_to_repeater' };
 }
 

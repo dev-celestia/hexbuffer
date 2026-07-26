@@ -4,6 +4,7 @@ import { ArrowsOutIcon } from '@phosphor-icons/react';
 import { TextEditor } from '@/components/ui/text-editor';
 import { useScratchpadStore } from '@/stores/scratchpad';
 import { useNavStore } from '@/stores/nav';
+import { cn } from '@/lib/utils';
 
 export function ScratchpadWidget() {
   const { note, setNote } = useScratchpadStore();
@@ -17,18 +18,70 @@ export function ScratchpadWidget() {
   };
 
   return (
-    <div className="p-3 rounded-md border bg-muted/60 backdrop-blur-md flex flex-col gap-3 transition-shadow duration-200 hover:shadow-md">
-      <div className="flex items-center justify-between gap-1.5">
-        <span className="text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase">Scratchpad</span>
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col",
+
+        // Sizing & Spacing
+        "p-3 gap-3",
+
+        // Backgrounds & Borders
+        "rounded-md border bg-muted/60 backdrop-blur-md",
+
+        // Interactive & States
+        "transition-shadow duration-200 hover:shadow-md"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between",
+
+          // Sizing & Spacing
+          "gap-1.5"
+        )}
+      >
+        <span
+          className={cn(
+            // Typography
+            "text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase"
+          )}
+        >
+          Scratchpad
+        </span>
         <button
           onClick={handleExpand}
-          className="p-0.5 rounded hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+          className={cn(
+            // Sizing & Spacing
+            "p-0.5",
+
+            // Typography
+            "text-muted-foreground",
+
+            // Backgrounds & Borders
+            "rounded",
+
+            // Interactive & States
+            "hover:bg-muted/50 hover:text-foreground transition-colors cursor-pointer"
+          )}
           title="Expand scratchpad"
         >
           <ArrowsOutIcon className="size-3" />
         </button>
       </div>
-      <div className="h-34 overflow-hidden rounded-sm border">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "overflow-hidden",
+
+          // Sizing & Spacing
+          "h-34",
+
+          // Backgrounds & Borders
+          "rounded-sm border"
+        )}
+      >
         <TextEditor
           value={note}
           onChange={(value) => setNote(value ?? '')}
@@ -40,3 +93,4 @@ export function ScratchpadWidget() {
     </div>
   );
 }
+

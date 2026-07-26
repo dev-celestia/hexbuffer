@@ -3,6 +3,7 @@ import { TrashIcon, CopyIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useClipboardStore } from '@/stores/clipboard';
 import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '@/lib/utils';
 
 export function ClipboardWidget() {
   const { history, clearHistory } = useClipboardStore();
@@ -19,15 +20,54 @@ export function ClipboardWidget() {
   };
 
   return (
-    <div className="p-3 max-h-30 rounded-md border bg-muted/60 backdrop-blur-md flex flex-col gap-3 select-none group/widget transition-shadow duration-200 hover:shadow-md">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col select-none group/widget",
+
+        // Sizing & Spacing
+        "p-3 max-h-30 gap-3",
+
+        // Backgrounds & Borders
+        "rounded-md border bg-muted/60 backdrop-blur-md",
+
+        // Interactive & States
+        "transition-shadow duration-200 hover:shadow-md"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between"
+        )}
+      >
+        <span
+          className={cn(
+            // Typography
+            "text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase"
+          )}
+        >
           Clipboard History
         </span>
         {history.length > 0 && (
           <button
             onClick={clearHistory}
-            className="p-0.5 rounded opacity-0 group-hover/widget:opacity-100 hover:bg-destructive/20 hover:text-destructive text-muted-foreground transition-all duration-150 active:scale-95 cursor-pointer"
+            className={cn(
+              // Layout & Positioning
+              "opacity-0 group-hover/widget:opacity-100 cursor-pointer",
+
+              // Sizing & Spacing
+              "p-0.5",
+
+              // Typography
+              "text-muted-foreground",
+
+              // Backgrounds & Borders
+              "rounded",
+
+              // Interactive & States
+              "hover:bg-destructive/20 hover:text-destructive transition-all duration-150 active:scale-95"
+            )}
             title="Clear clipboard history"
           >
             <TrashIcon className="size-3" />
@@ -35,7 +75,15 @@ export function ClipboardWidget() {
         )}
       </div>
 
-      <div className="flex flex-col gap-1 max-h-[220px] overflow-y-auto scrollbar-thin pr-0.5">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col overflow-y-auto scrollbar-thin",
+
+          // Sizing & Spacing
+          "gap-1 max-h-[220px] pr-0.5"
+        )}
+      >
         <AnimatePresence initial={false}>
           {history.map((item) => {
             // Replace newlines with return arrow to fit neatly in one line preview
@@ -48,7 +96,22 @@ export function ClipboardWidget() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
                 onClick={() => handleCopyItem(item)}
-                className="flex items-center justify-between gap-2 p-1.5 rounded-sm hover:bg-muted-foreground/5 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors duration-150 cursor-pointer active:scale-[0.99] group/item"
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center justify-between group/item cursor-pointer",
+
+                  // Sizing & Spacing
+                  "gap-2 p-1.5",
+
+                  // Typography
+                  "text-[11px] font-mono text-muted-foreground",
+
+                  // Backgrounds & Borders
+                  "rounded-sm",
+
+                  // Interactive & States
+                  "hover:bg-muted-foreground/5 hover:text-foreground transition-colors duration-150 active:scale-[0.99]"
+                )}
                 title={item}
               >
                 <span className="truncate flex-1">
@@ -59,7 +122,22 @@ export function ClipboardWidget() {
                     e.stopPropagation();
                     handleCopyItem(item);
                   }}
-                  className="p-1 rounded opacity-0 group-hover/item:opacity-100 hover:bg-muted-foreground/10 text-muted-foreground hover:text-foreground transition-all duration-150 active:scale-90 cursor-pointer"
+                  className={cn(
+                    // Layout & Positioning
+                    "opacity-0 group-hover/item:opacity-100 cursor-pointer",
+
+                    // Sizing & Spacing
+                    "p-1",
+
+                    // Typography
+                    "text-muted-foreground",
+
+                    // Backgrounds & Borders
+                    "rounded",
+
+                    // Interactive & States
+                    "hover:bg-muted-foreground/10 hover:text-foreground transition-all duration-150 active:scale-90"
+                  )}
                   title="Copy text"
                 >
                   <CopyIcon className="size-3" />
@@ -73,7 +151,19 @@ export function ClipboardWidget() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center py-6 px-2 text-center border border-dashed rounded-sm border-border/80 bg-muted/10"
+            className={cn(
+              // Layout & Positioning
+              "flex flex-col items-center justify-center",
+
+              // Sizing & Spacing
+              "py-6 px-2",
+
+              // Typography
+              "text-center",
+
+              // Backgrounds & Borders
+              "border border-dashed rounded-sm border-border/80 bg-muted/10"
+            )}
           >
             <CopyIcon className="size-4 text-muted-foreground/60 mb-1" />
             <span className="text-[9px] text-muted-foreground font-mono">No items in clipboard</span>
@@ -83,3 +173,4 @@ export function ClipboardWidget() {
     </div>
   );
 }
+

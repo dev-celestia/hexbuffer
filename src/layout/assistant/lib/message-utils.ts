@@ -1,3 +1,4 @@
+import type { FileUIPart } from 'ai';
 import type { DashboardChatMessage } from '../types';
 
 export function getMessageText(message: DashboardChatMessage) {
@@ -11,8 +12,16 @@ export function getReasoningParts(message: DashboardChatMessage) {
   return message.parts.filter((part) => part.type === 'reasoning');
 }
 
+export function getFileParts(message: DashboardChatMessage): FileUIPart[] {
+  return message.parts.filter((part): part is FileUIPart => part.type === 'file');
+}
+
 export function hasContent(message: DashboardChatMessage) {
-  return getMessageText(message).length > 0 || getReasoningParts(message).length > 0;
+  return (
+    getMessageText(message).length > 0 ||
+    getReasoningParts(message).length > 0 ||
+    getFileParts(message).length > 0
+  );
 }
 
 export function providerLabel(message: DashboardChatMessage) {

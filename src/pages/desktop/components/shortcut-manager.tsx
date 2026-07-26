@@ -12,15 +12,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-
-// ponytail: static config for desktop widgets to keep it simple and light
-const WIDGETS = [
-  { id: 'collections', label: 'Collections Widget', description: 'Access request collections quickly.' },
-  { id: 'proxy', label: 'Proxy Widget', description: 'Monitor and control the local proxy listener.' },
-  { id: 'vpn', label: 'VPN Widget', description: 'Manage OpenVPN configuration files and connect.' },
-  { id: 'scratchpad', label: 'Scratchpad Widget', description: 'Write down quick notes or scripts.' },
-  { id: 'clipboard', label: 'Clipboard Widget', description: 'Capture system clipboard history.' },
-];
+import { DESKTOP_WIDGETS } from '../constants';
+import { cn } from '@/lib/utils';
 
 export function ShortcutManager() {
   const hiddenNavItems = useAppSettingsStore((s) => s.hiddenNavItems);
@@ -54,32 +47,113 @@ export function ShortcutManager() {
   }, [resetHiddenNavItems, resetHiddenWidgets]);
 
   return (
-    <div className="flex flex-col gap-4 select-none text-left">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col select-none text-left",
+
+        // Sizing & Spacing
+        "gap-4"
+      )}
+    >
       <Accordion type="multiple" defaultValue={['shortcuts', 'widgets']} className="w-full">
-        <AccordionItem value="shortcuts" className="border-b border-border/40">
-          <AccordionTrigger className="hover:no-underline py-2.5">
-            <div className="flex items-center justify-between flex-1 mr-2">
-              <span className="text-xs font-mono font-bold tracking-wider text-muted-foreground uppercase">
+        <AccordionItem
+          value="shortcuts"
+          className={cn(
+            // Backgrounds & Borders
+            "border-b border-border/40"
+          )}
+        >
+          <AccordionTrigger
+            className={cn(
+              // Sizing & Spacing
+              "py-2.5",
+
+              // Interactive & States
+              "hover:no-underline"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center justify-between flex-1",
+
+                // Sizing & Spacing
+                "mr-2"
+              )}
+            >
+              <span
+                className={cn(
+                  // Typography
+                  "text-xs font-mono font-bold tracking-wider text-muted-foreground uppercase"
+                )}
+              >
                 Shortcuts
               </span>
-              <span className="text-[10px] text-muted-foreground font-mono font-normal normal-case">
+              <span
+                className={cn(
+                  // Typography
+                  "text-[10px] text-muted-foreground font-mono font-normal normal-case"
+                )}
+              >
                 {filteredItems.length} available
               </span>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="pt-1 pb-3.5 space-y-3">
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
+          <AccordionContent
+            className={cn(
+              // Sizing & Spacing
+              "pt-1 pb-3.5 space-y-3"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "relative"
+              )}
+            >
+              <MagnifyingGlassIcon
+                className={cn(
+                  // Layout & Positioning
+                  "absolute left-2.5 top-2.5",
+
+                  // Sizing & Spacing
+                  "size-3.5",
+
+                  // Typography
+                  "text-muted-foreground"
+                )}
+              />
               <Input
                 type="text"
                 placeholder="Filter shortcuts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 h-8 text-xs bg-muted/40"
+                className={cn(
+                  // Sizing & Spacing
+                  "pl-8 h-8",
+
+                  // Typography
+                  "text-xs",
+
+                  // Backgrounds & Borders
+                  "bg-muted/40"
+                )}
               />
             </div>
 
-            <div className="border border-border/60 rounded-md divide-y divide-border/40 max-h-[220px] overflow-y-auto scrollbar-thin bg-background">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "overflow-y-auto scrollbar-thin divide-y divide-border/40",
+
+                // Sizing & Spacing
+                "max-h-[220px]",
+
+                // Backgrounds & Borders
+                "border border-border/60 rounded-md bg-background"
+              )}
+            >
               {filteredItems.length > 0 ? (
                 filteredItems.map((item) => {
                   const Icon = item.icon;
@@ -87,21 +161,64 @@ export function ShortcutManager() {
                   return (
                     <div
                       key={item.href}
-                      className="flex items-center justify-between gap-4 p-2 hover:bg-muted/30 transition-colors"
+                      className={cn(
+                        // Layout & Positioning
+                        "flex items-center justify-between",
+
+                        // Sizing & Spacing
+                        "gap-4 p-2",
+
+                        // Interactive & States
+                        "hover:bg-muted/30 transition-colors"
+                      )}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className={`p-1 rounded-sm border ${item.colors?.bg ?? 'bg-muted'} text-white shrink-0`}>
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "flex items-center min-w-0",
+
+                          // Sizing & Spacing
+                          "gap-2.5"
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            // Layout & Positioning
+                            "shrink-0",
+
+                            // Sizing & Spacing
+                            "p-1",
+
+                            // Typography
+                            "text-white",
+
+                            // Backgrounds & Borders
+                            "rounded-sm border",
+                            item.colors?.bg ?? 'bg-muted'
+                          )}
+                        >
                           <Icon className="size-3.5" />
                         </div>
                         <div className="min-w-0">
                           <Label
                             htmlFor={`shortcut-toggle-${item.href}`}
-                            className="cursor-pointer text-xs font-medium truncate block"
+                            className={cn(
+                              // Layout & Positioning
+                              "block truncate cursor-pointer",
+
+                              // Typography
+                              "text-xs font-medium"
+                            )}
                           >
                             {item.label}
                           </Label>
                           {item.description && (
-                            <span className="text-[10px] text-muted-foreground line-clamp-1">
+                            <span
+                              className={cn(
+                                // Typography
+                                "text-[10px] text-muted-foreground line-clamp-1"
+                              )}
+                            >
                               {item.description}
                             </span>
                           )}
@@ -116,7 +233,15 @@ export function ShortcutManager() {
                   );
                 })
               ) : (
-                <div className="py-6 text-center text-xs text-muted-foreground">
+                <div
+                  className={cn(
+                    // Sizing & Spacing
+                    "py-6",
+
+                    // Typography
+                    "text-center text-xs text-muted-foreground"
+                  )}
+                >
                   No matching shortcuts
                 </div>
               )}
@@ -124,29 +249,81 @@ export function ShortcutManager() {
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="widgets" className="border-b-0">
-          <AccordionTrigger className="hover:no-underline py-2.5">
-            <span className="text-xs font-mono font-bold tracking-wider text-muted-foreground uppercase">
+        <AccordionItem
+          value="widgets"
+          className={cn(
+            // Backgrounds & Borders
+            "border-b-0"
+          )}
+        >
+          <AccordionTrigger
+            className={cn(
+              // Sizing & Spacing
+              "py-2.5",
+
+              // Interactive & States
+              "hover:no-underline"
+            )}
+          >
+            <span
+              className={cn(
+                // Typography
+                "text-xs font-mono font-bold tracking-wider text-muted-foreground uppercase"
+              )}
+            >
               Desktop Widgets
             </span>
           </AccordionTrigger>
-          <AccordionContent className="pt-1 pb-3.5">
-            <div className="border border-border/60 rounded-md divide-y divide-border/40 bg-background">
-              {WIDGETS.map((widget) => {
+          <AccordionContent
+            className={cn(
+              // Sizing & Spacing
+              "pt-1 pb-3.5"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "divide-y divide-border/40",
+
+                // Backgrounds & Borders
+                "border border-border/60 rounded-md bg-background"
+              )}
+            >
+              {DESKTOP_WIDGETS.map((widget) => {
                 const isHidden = hiddenWidgets.includes(widget.id);
                 return (
                   <div
                     key={widget.id}
-                    className="flex items-center justify-between gap-4 p-2 hover:bg-muted/30 transition-colors"
+                    className={cn(
+                      // Layout & Positioning
+                      "flex items-center justify-between",
+
+                      // Sizing & Spacing
+                      "gap-4 p-2",
+
+                      // Interactive & States
+                      "hover:bg-muted/30 transition-colors"
+                    )}
                   >
                     <div className="min-w-0">
                       <Label
                         htmlFor={`widget-toggle-${widget.id}`}
-                        className="cursor-pointer text-xs font-medium block"
+                        className={cn(
+                          // Layout & Positioning
+                          "block cursor-pointer",
+
+                          // Typography
+                          "text-xs font-medium"
+                        )}
                       >
                         {widget.label}
                       </Label>
-                      <span className="text-[10px] text-muted-foreground line-clamp-1">
+                      <span
+                        className={cn(
+                          // Typography
+                          "text-[10px] text-muted-foreground line-clamp-1"
+                        )}
+                      >
                         {widget.description}
                       </span>
                     </div>
@@ -163,7 +340,18 @@ export function ShortcutManager() {
         </AccordionItem>
       </Accordion>
 
-      <div className="flex items-center justify-between gap-4 border-t pt-3.5 mt-1 border-border/60">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between",
+
+          // Sizing & Spacing
+          "gap-4 pt-3.5 mt-1",
+
+          // Backgrounds & Borders
+          "border-t border-border/60"
+        )}
+      >
         <div className="space-y-0.5">
           <p className="text-xs font-medium">Reset customized state</p>
           <p className="text-[10px] text-muted-foreground">
@@ -175,7 +363,16 @@ export function ShortcutManager() {
           variant="outline"
           onClick={handleResetAll}
           disabled={!hasHiddenItems}
-          className="h-7 text-[10px] hover:bg-muted font-medium"
+          className={cn(
+            // Sizing & Spacing
+            "h-7",
+
+            // Typography
+            "text-[10px] font-medium",
+
+            // Interactive & States
+            "hover:bg-muted"
+          )}
         >
           <ArrowCounterClockwiseIcon className="mr-1.5 size-3" />
           Reset
@@ -184,3 +381,4 @@ export function ShortcutManager() {
     </div>
   );
 }
+

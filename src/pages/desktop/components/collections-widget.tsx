@@ -88,7 +88,6 @@ export function CollectionsWidget() {
   }, [stashes]);
 
   const handleCollectionClick = (stash: StashRecord) => {
-    // ponytail: ensure workspace is active before opening collection
     if (stash.parentId) {
       setActiveWorkspaceId(findWorkspaceId(stash.parentId));
     }
@@ -98,7 +97,6 @@ export function CollectionsWidget() {
   };
 
   const handleEndpointClick = (ep: StashEndpointRecord, stash: StashRecord) => {
-    // ponytail: ensure workspace is active before opening endpoint
     if (stash.parentId) {
       setActiveWorkspaceId(findWorkspaceId(stash.parentId));
     }
@@ -109,17 +107,52 @@ export function CollectionsWidget() {
   };
 
   return (
-    <div className="p-3 rounded-md border bg-muted/60 backdrop-blur-md flex flex-col gap-3 transition-shadow duration-200 hover:shadow-md max-h-[200px] overflow-y-auto scrollbar-thin">
-      <span className="text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col overflow-y-auto scrollbar-thin",
+
+        // Sizing & Spacing
+        "p-3 gap-3 max-h-[200px]",
+
+        // Backgrounds & Borders
+        "rounded-md border bg-muted/60 backdrop-blur-md",
+
+        // Interactive & States
+        "transition-shadow duration-200 hover:shadow-md"
+      )}
+    >
+      <span
+        className={cn(
+          // Typography
+          "text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase"
+        )}
+      >
         API Collections
       </span>
 
       {workspaces.length === 0 ? (
-        <p className="text-[11px] text-muted-foreground italic px-0.5">
+        <p
+          className={cn(
+            // Sizing & Spacing
+            "px-0.5",
+
+            // Typography
+            "text-[11px] text-muted-foreground italic"
+          )}
+        >
           {isHydrated ? 'No workspaces yet' : 'Loading…'}
         </p>
       ) : (
-        <div className="flex flex-col gap-1.5">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col",
+
+            // Sizing & Spacing
+            "gap-1.5"
+          )}
+        >
           {workspaces.map((ws) => {
             const wsExpanded = expandedNodes.has(`ws-${ws.id}`);
             const isActive = ws.id === activeWorkspaceId;
@@ -128,11 +161,37 @@ export function CollectionsWidget() {
             return (
               <div key={ws.id} className="flex flex-col gap-0.5">
                 {/* Workspace Row */}
-                <div className="w-full flex items-center gap-1 group rounded-sm hover:bg-muted/40 transition-colors px-1 py-0.5">
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "w-full flex items-center group",
+
+                    // Sizing & Spacing
+                    "gap-1 px-1 py-0.5",
+
+                    // Backgrounds & Borders
+                    "rounded-sm",
+
+                    // Interactive & States
+                    "hover:bg-muted/40 transition-colors"
+                  )}
+                >
                   {/* Chevron to expand */}
                   <button
                     onClick={() => toggleExpand(`ws-${ws.id}`)}
-                    className="p-0.5 text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                    className={cn(
+                      // Layout & Positioning
+                      "shrink-0",
+
+                      // Sizing & Spacing
+                      "p-0.5",
+
+                      // Typography
+                      "text-muted-foreground",
+
+                      // Interactive & States
+                      "hover:text-foreground transition-colors cursor-pointer"
+                    )}
                   >
                     {wsExpanded ? (
                       <CaretDownIcon className="size-3" />
@@ -144,9 +203,14 @@ export function CollectionsWidget() {
                   {/* Icon and Name */}
                   <div
                     onClick={() => toggleExpand(`ws-${ws.id}`)}
-                    className="flex-1 min-w-0 flex items-center gap-1.5 cursor-pointer"
+                    className={cn(
+                      // Layout & Positioning
+                      "flex-1 min-w-0 flex items-center cursor-pointer",
+
+                      // Sizing & Spacing
+                      "gap-1.5"
+                    )}
                   >
-                    {/* ponytail: use workspace folder icon */}
                     <img
                       src={wsExpanded ? folderComponentOpenIcon : folderComponentIcon}
                       alt="workspace"
@@ -156,7 +220,21 @@ export function CollectionsWidget() {
                       {ws.name}
                     </span>
                     {isActive && (
-                      <span className="text-[8px] font-mono font-bold bg-blue-500/10 text-blue-500 px-1 py-px rounded shrink-0">
+                      <span
+                        className={cn(
+                          // Layout & Positioning
+                          "shrink-0",
+
+                          // Sizing & Spacing
+                          "px-1 py-px",
+
+                          // Typography
+                          "text-[8px] font-mono font-bold text-blue-500",
+
+                          // Backgrounds & Borders
+                          "bg-blue-500/10 rounded"
+                        )}
+                      >
                         Active
                       </span>
                     )}
@@ -165,7 +243,19 @@ export function CollectionsWidget() {
                   {/* Switch Action */}
                   <button
                     onClick={() => handleWorkspaceSwitch(ws.id)}
-                    className="text-[10px] font-medium text-blue-500 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity flex items-center gap-0.5 shrink-0 pl-1 hover:underline"
+                    className={cn(
+                      // Layout & Positioning
+                      "flex items-center shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer",
+
+                      // Sizing & Spacing
+                      "gap-0.5 pl-1",
+
+                      // Typography
+                      "text-[10px] font-medium text-blue-500",
+
+                      // Interactive & States
+                      "transition-opacity hover:underline"
+                    )}
                   >
                     Switch <ArrowRightIcon className="size-2.5" />
                   </button>
@@ -175,7 +265,15 @@ export function CollectionsWidget() {
                 {wsExpanded && (
                   <div className="flex flex-col gap-0.5">
                     {wsStashes.length === 0 ? (
-                      <span className="text-[10px] text-muted-foreground/60 italic py-0.5 pl-6">
+                      <span
+                        className={cn(
+                          // Sizing & Spacing
+                          "py-0.5 pl-6",
+
+                          // Typography
+                          "text-[10px] text-muted-foreground/60 italic"
+                        )}
+                      >
                         No collections
                       </span>
                     ) : (
@@ -193,20 +291,49 @@ export function CollectionsWidget() {
                           return (
                             <div key={s.id} className="flex ml-5 flex-col gap-0.5" style={{ paddingLeft: depth > 0 ? '8px' : '0px' }}>
                               {/* Collection Row */}
-                              <div className="w-full flex items-center gap-1 group rounded-sm hover:bg-muted/40 transition-colors px-1 py-0.5">
+                              <div
+                                className={cn(
+                                  // Layout & Positioning
+                                  "w-full flex items-center group",
 
+                                  // Sizing & Spacing
+                                  "gap-1 px-1 py-0.5",
+
+                                  // Backgrounds & Borders
+                                  "rounded-sm",
+
+                                  // Interactive & States
+                                  "hover:bg-muted/40 transition-colors"
+                                )}
+                              >
                                 {/* Icon + Name */}
                                 <div
                                   onClick={() => toggleExpand(`stash-${s.id}`)}
-                                  className="flex-1 min-w-0 flex items-center gap-1.5 cursor-pointer"
+                                  className={cn(
+                                    // Layout & Positioning
+                                    "flex-1 min-w-0 flex items-center cursor-pointer",
+
+                                    // Sizing & Spacing
+                                    "gap-1.5"
+                                  )}
                                 >
-                                  {/* ponytail: use custom SVG folder icon */}
                                   <img
                                     src={stashExpanded ? folderOpenIcon : folderIcon}
                                     alt="folder"
                                     className="size-3.5 shrink-0"
                                   />
-                                  <span className="text-[11px] font-medium truncate text-muted-foreground hover:text-foreground transition-colors">
+                                  <span
+                                    className={cn(
+                                      // Layout & Positioning
+                                      "truncate",
+
+                                      // Typography
+                                      "text-[11px] font-medium text-muted-foreground",
+
+                                      // Interactive & States
+                                      "hover:text-foreground transition-colors"
+                                    )}
+                                  >
                                     {s.name}
                                   </span>
                                   {epCount > 0 && (
@@ -228,7 +355,19 @@ export function CollectionsWidget() {
                                     <div
                                       key={ep.id}
                                       onClick={() => handleEndpointClick(ep, s)}
-                                      className="w-full flex items-center gap-1.5 px-1 py-0.5 rounded-sm cursor-pointer hover:bg-muted/40 text-left group pl-5"
+                                      className={cn(
+                                        // Layout & Positioning
+                                        "w-full flex items-center text-left group cursor-pointer",
+
+                                        // Sizing & Spacing
+                                        "gap-1.5 px-1 py-0.5 pl-5",
+
+                                        // Backgrounds & Borders
+                                        "rounded-sm",
+
+                                        // Interactive & States
+                                        "hover:bg-muted/40"
+                                      )}
                                     >
                                       {ep.method && (
                                         <span className={cn('text-[9px] font-bold font-mono uppercase shrink-0', getMethodColor(ep.method))}>
@@ -266,5 +405,6 @@ export function CollectionsWidget() {
     </div>
   );
 }
+
 
 

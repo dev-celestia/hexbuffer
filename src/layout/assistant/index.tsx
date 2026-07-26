@@ -1,4 +1,4 @@
-import { CheckCircleIcon, CaretDownIcon, CircleIcon, SpinnerGapIcon, SidebarIcon, ShieldWarningIcon, TriangleIcon, XIcon, XCircleIcon, StarFourIcon } from '@phosphor-icons/react';
+import { CheckCircleIcon, CaretDownIcon, CircleIcon, SpinnerGapIcon, SidebarIcon, ShieldWarningIcon, TriangleIcon, XIcon, XCircleIcon, StarFourIcon, FileTextIcon, PaperclipIcon } from '@phosphor-icons/react';
 import { useCallback } from 'react';
 import type { FileUIPart } from 'ai';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +30,7 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
+  usePromptInputAttachments,
 } from '@/components/ai-elements/prompt-input';
 import {
   Reasoning,
@@ -50,10 +51,135 @@ import { PageMentionChip } from './components/page-mention-chip';
 import { PageMentionPopover } from './components/page-mention-popover';
 import { useAiChatPane } from './hooks/use-ai-chat-pane';
 import { usePageMentions } from './hooks/use-page-mentions';
-import { getMessageText, getReasoningParts, hasContent, providerLabel } from './lib/message-utils';
+import { getFileParts, getMessageText, getReasoningParts, hasContent, providerLabel } from './lib/message-utils';
+import { parseAttachedFilesFromMessage, getUserPromptOnly } from './lib/file-utils';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { TriangleLogo } from '@/layout/triangle-logo';
+
+function PromptInputAttachmentsBar() {
+  const attachments = usePromptInputAttachments();
+
+  if (attachments.files.length === 0) {
+    return null;
+  }
+
+  return (
+    <div
+      className={cn(
+        // Layout & Positioning
+        'flex flex-col gap-1.5 w-full shrink-0',
+        // Sizing & Spacing
+        'p-2 pb-2.5 mb-2',
+        // Typography
+        'text-xs text-foreground',
+        // Backgrounds & Borders
+        'rounded-lg border border-blue-500/30 bg-blue-500/10 dark:bg-blue-950/30 shadow-2xs',
+      )}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 font-medium text-xs text-blue-600 dark:text-blue-400">
+          <PaperclipIcon className="h-3.5 w-3.5 shrink-0" />
+          <span>File{attachments.files.length > 1 ? 's' : ''} added to prompt ({attachments.files.length})</span>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="xs"
+          onClick={attachments.clear}
+          className={cn(
+            // Layout & Positioning
+            'shrink-0',
+            // Sizing & Spacing
+            'h-5 px-1.5',
+            // Typography
+            'text-[11px] text-muted-foreground',
+            // Interactive & States
+            'hover:text-foreground transition-colors',
+          )}
+        >
+          Clear all
+        </Button>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {attachments.files.map((file) => {
+          const ext = (file.filename || '').split('.').pop()?.toUpperCase() || 'TXT';
+          return (
+            <div
+              key={file.id}
+              className={cn(
+                // Layout & Positioning
+                'flex items-center gap-2 max-w-xs truncate relative group',
+                // Sizing & Spacing
+                'px-2.5 py-1.5',
+                // Typography
+                'text-xs font-medium text-foreground',
+                // Backgrounds & Borders
+                'rounded-md border border-border bg-background shadow-xs',
+              )}
+            >
+              <FileTextIcon className="h-4 w-4 shrink-0 text-blue-500" />
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="truncate text-xs font-semibold">{file.filename || 'Attachment'}</span>
+                <span className="text-[10px] text-muted-foreground font-mono">
+                  {ext} file attached
+                </span>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  // Layout & Positioning
+                  'flex items-center justify-center shrink-0',
+                  // Sizing & Spacing
+                  'h-5 w-5 p-0',
+                  // Typography
+                  'text-muted-foreground',
+                  // Interactive & States
+                  'hover:bg-destructive/20 hover:text-destructive transition-colors',
+                )}
+                onClick={() => attachments.remove(file.id)}
+                title="Remove file"
+              >
+                <XIcon className="h-3 w-3" />
+              </Button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function PromptInputUploadButton({ disabled }: { disabled?: boolean }) {
+  const attachments = usePromptInputAttachments();
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className={cn(
+        // Layout & Positioning
+        'relative flex items-center justify-center shrink-0',
+        // Sizing & Spacing
+        'h-8 w-8 p-0',
+        // Typography
+        'text-muted-foreground',
+        // Backgrounds & Borders
+        'rounded-md border border-border bg-background',
+        // Interactive & States
+        'hover:bg-accent hover:text-foreground transition-colors disabled:opacity-50',
+      )}
+      onClick={attachments.openFileDialog}
+      disabled={disabled}
+      title="Upload .txt or .md file"
+    >
+      <PaperclipIcon className="h-4 w-4" />
+    </Button>
+  );
+}
 
 function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
   const {
@@ -101,6 +227,8 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
     removeMentionedPage,
     clearMentionedPages,
   } = usePageMentions();
+
+  const attachments = usePromptInputAttachments();
 
   // Wrap handleSubmit to include mentioned pages and clear them after
   const wrappedHandleSubmit = useCallback(
@@ -169,22 +297,24 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
           <Conversation>
             <ConversationContent className="flex-1 h-full max-w-xl mx-auto">
               {messages.length === 0 && !pendingCrawlInput ? (
-                <div className='flex-1'>
+                <div className="flex-1">
                   <ConversationEmptyState
-                    icon={<TriangleLogo size='large' />}
+                    icon={<TriangleLogo size="large" />}
                     title="AI Assistant"
                     description="Analyze traffic, extract URL data, write findings, and manage your recon scope."
                   />
                 </div>
-
               ) : (
                 <>
                   {messages.map((message) => {
                     const label = providerLabel(message);
                     const reasoningParts = getReasoningParts(message);
-                    const text = getMessageText(message);
+                    const fileParts = getFileParts(message);
+                    const rawText = getMessageText(message);
+                    const attachedFiles = parseAttachedFilesFromMessage(fileParts, rawText);
+                    const displayText = message.role === 'user' ? getUserPromptOnly(rawText) : rawText;
 
-                    if (!hasContent(message) && message.role !== 'user') {
+                    if (!hasContent(message) && message.role !== 'user' && attachedFiles.length === 0) {
                       return null;
                     }
 
@@ -200,6 +330,50 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                             </div>
                           ) : null}
 
+                          {/* Attached files card list on chat send */}
+                          {attachedFiles.length > 0 ? (
+                            <div
+                              className={cn(
+                                // Layout & Positioning
+                                'flex flex-col gap-1.5 w-full shrink-0',
+                                // Sizing & Spacing
+                                'mb-2 p-2',
+                                // Typography
+                                'text-xs',
+                                // Backgrounds & Borders
+                                'rounded-md border border-border bg-muted/60',
+                              )}
+                            >
+                              <div className="flex items-center gap-1.5 font-medium text-xs text-muted-foreground">
+                                <PaperclipIcon className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+                                <span>Attached file{attachedFiles.length > 1 ? 's' : ''} sent with prompt</span>
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {attachedFiles.map((file, idx) => (
+                                  <div
+                                    key={idx}
+                                    className={cn(
+                                      // Layout & Positioning
+                                      'flex items-center gap-2 max-w-[260px] truncate',
+                                      // Sizing & Spacing
+                                      'py-1 px-2.5',
+                                      // Typography
+                                      'text-xs font-medium text-foreground',
+                                      // Backgrounds & Borders
+                                      'rounded-md border border-border bg-background shadow-xs',
+                                    )}
+                                  >
+                                    <FileTextIcon className="h-4 w-4 shrink-0 text-blue-500" />
+                                    <span className="truncate flex-1">{file.filename}</span>
+                                    <Badge variant="outline" className="text-[10px] py-0 px-1 font-mono uppercase shrink-0">
+                                      {file.ext}
+                                    </Badge>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
+
                           {/* Reasoning / thinking blocks */}
                           {reasoningParts.map((part, i) => (
                             <Reasoning
@@ -212,9 +386,9 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                           ))}
 
                           {/* Text response */}
-                          {text ? (
-                            <MessageResponse className='text-sm' isAnimating={isStreaming && message.role === 'assistant'}>
-                              {text}
+                          {displayText ? (
+                            <MessageResponse className="text-sm" isAnimating={isStreaming && message.role === 'assistant'}>
+                              {displayText}
                             </MessageResponse>
                           ) : null}
                         </MessageContent>
@@ -408,7 +582,13 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
               )}
 
               <div className="relative w-full">
-                <PromptInput onSubmit={wrappedHandleSubmit} className=' '>
+                <PromptInput
+                  onSubmit={wrappedHandleSubmit}
+                  accept=".txt,.md,.markdown,.text,text/plain,text/markdown"
+                  maxFileSize={5 * 1024 * 1024}
+                  className=" "
+                >
+                  <PromptInputAttachmentsBar />
                   <PromptInputBody>
                     <PromptInputTextarea
                       className="min-h-12"
@@ -419,7 +599,7 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                             ? 'Select an option above or type a message…'
                             : pendingClarification
                               ? 'Select a task above to clarify your intent…'
-                              : 'Message AI… (use @ to mention a page)'
+                              : 'Message AI… (use @ to mention a page, or attach .txt/.md files)'
                       }
                       onChange={onTextareaChange}
                       onSelect={onTextareaSelect}
@@ -428,13 +608,14 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                   </PromptInputBody>
                   <PromptInputFooter>
                     <PromptInputTools>
+                      <PromptInputUploadButton disabled={isStreaming || !!pendingCrawlInput} />
                       <PromptInputSelect
                         disabled={isStreaming || !!pendingCrawlInput}
                         onValueChange={handleModelChange}
                         value={model}
                       >
                         <PromptInputSelectTrigger className="border border-border">
-                          <ModelSelectorLogo provider="deepseek" className='size-4' />
+                          <ModelSelectorLogo provider="deepseek" className="size-4" />
                           <PromptInputSelectValue />
                         </PromptInputSelectTrigger>
                         <PromptInputSelectContent>
@@ -450,6 +631,8 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                       onStop={stop}
                       status={status}
                     />
+                  </PromptInputFooter>
+                </PromptInput>
                   </PromptInputFooter>
                 </PromptInput>
                 <PageMentionPopover
