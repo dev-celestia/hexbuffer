@@ -633,8 +633,6 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                     />
                   </PromptInputFooter>
                 </PromptInput>
-                  </PromptInputFooter>
-                </PromptInput>
                 <PageMentionPopover
                   isOpen={mentionState.isOpen}
                   filteredPages={filteredPages}
