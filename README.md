@@ -104,33 +104,6 @@ apprecon/
 
 ---
 
-## Architecture & Coding Standards
-
-### Component Styling
-* Always reuse components from `src/components/ui/` without adding custom `className` overrides where possible.
-* Structure Tailwind CSS utility classes using commented category headers when passed to `cn(...)`:
-  ```tsx
-  cn(
-    // Layout & Positioning
-    "relative flex flex-col",
-    // Sizing & Spacing
-    "w-full h-full p-4 space-y-2",
-    // Typography
-    "text-sm font-medium text-foreground",
-    // Backgrounds & Borders
-    "bg-background border border-border rounded-md",
-    // Interactive & States
-    "hover:bg-accent/50 focus:outline-none"
-  )
-  ```
-
-### AI Tool Integration Pattern
-When adding AI capabilities:
-1. **Rust Tool** (`hexbuffer-ai/src/tools/`): Implement Rig `Tool` trait and attach to `AgentBuilder`.
-2. **Frontend Trigger** (`apprecon/src/triggers/` & `src/layout/assistant/lib/ai-tools/`): Define schema, register executor case, and invoke stores/IPC.
-
----
-
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
