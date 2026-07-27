@@ -28,7 +28,7 @@ export function DesktopPage() {
   } = useDesktopPage();
   const hiddenWidgets = useAppSettingsStore((s) => s.hiddenWidgets || []);
 
-  const ROOT_BG = 'bg-background';
+  const ROOT_BG = 'bg-transparent';
 
   const showCollections = !hiddenWidgets.includes('collections');
   const showProxy = !hiddenWidgets.includes('proxy');

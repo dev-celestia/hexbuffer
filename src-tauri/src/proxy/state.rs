@@ -235,16 +235,7 @@ impl ProxyState {
             .records
             .iter()
             .filter(|record| {
-                let host = record
-                    .request
-                    .uri
-                    .split("://")
-                    .nth(1)
-                    .unwrap_or("")
-                    .split('/')
-                    .next()
-                    .unwrap_or("");
-                if !filter.host_matches_scope(host) {
+                if !filter.record_matches_scope(record) {
                     return false;
                 }
                 if let Some(ref methods) = filter.methods {
@@ -264,19 +255,12 @@ impl ProxyState {
                     if !search.is_empty() {
                         let search_lower = search.to_lowercase();
                         let uri_lower = record.request.uri.to_lowercase();
-                        let host_lower = host.to_lowercase();
-                        let path = record
-                            .request
-                            .uri
-                            .split('/')
-                            .skip(3)
-                            .collect::<Vec<_>>()
-                            .join("/");
-                        let path_lower = path.to_lowercase();
+                        let server_addr_lower = record.server_addr.to_lowercase();
+                        let req_headers = serde_json::to_string(&record.request.headers).unwrap_or_default().to_lowercase();
 
                         if !uri_lower.contains(&search_lower)
-                            && !host_lower.contains(&search_lower)
-                            && !path_lower.contains(&search_lower)
+                            && !server_addr_lower.contains(&search_lower)
+                            && !req_headers.contains(&search_lower)
                         {
                             return false;
                         }

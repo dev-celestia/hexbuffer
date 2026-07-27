@@ -5,6 +5,30 @@ use uuid::Uuid;
 use super::types::{PaginatedResponse, ProxySummaryRow, TreeNode, TreePath};
 use super::Database;
 
+fn build_scope_sql_clause(scope: &[String]) -> Option<String> {
+    let scope_clauses: Vec<String> = scope
+        .iter()
+        .filter_map(|pattern| {
+            let value = pattern.trim();
+            if value.is_empty() {
+                return None;
+            }
+
+            let domain = value.strip_prefix("*.").unwrap_or(value);
+            Some(format!(
+                "(url LIKE '%{}%' OR server_addr LIKE '%{}%' OR request_headers LIKE '%{}%')",
+                domain, domain, domain
+            ))
+        })
+        .collect();
+
+    if scope_clauses.is_empty() {
+        None
+    } else {
+        Some(format!(" AND ({})", scope_clauses.join(" OR ")))
+    }
+}
+
 impl Database {
     pub fn insert_log(&self, record: &ProxyRecord) -> SqlResult<()> {
         let conn = self.conn.lock().unwrap();
@@ -215,29 +239,8 @@ impl Database {
         }
 
         if let Some(ref scope) = filter.scope {
-            let scope_clauses: Vec<String> = scope
-                .iter()
-                .filter_map(|pattern| {
-                    let value = pattern.trim();
-                    if value.is_empty() {
-                        return None;
-                    }
-
-                    if let Some(domain) = value.strip_prefix("*.") {
-                        Some(format!(
-                            "(url LIKE '%://{}%' OR url LIKE '%://%.{}%')",
-                            domain, domain
-                        ))
-                    } else {
-                        Some(format!("url LIKE '%://{}%'", value))
-                    }
-                })
-                .collect();
-
-            if !scope_clauses.is_empty() {
-                sql.push_str(" AND (");
-                sql.push_str(&scope_clauses.join(" OR "));
-                sql.push(')');
+            if let Some(clause) = build_scope_sql_clause(scope) {
+                sql.push_str(&clause);
             }
         }
 
@@ -294,29 +297,8 @@ impl Database {
         }
 
         if let Some(ref scope) = filter.scope {
-            let scope_clauses: Vec<String> = scope
-                .iter()
-                .filter_map(|pattern| {
-                    let value = pattern.trim();
-                    if value.is_empty() {
-                        return None;
-                    }
-
-                    if let Some(domain) = value.strip_prefix("*.") {
-                        Some(format!(
-                            "(url LIKE '%://{}%' OR url LIKE '%://%.{}%')",
-                            domain, domain
-                        ))
-                    } else {
-                        Some(format!("url LIKE '%://{}%'", value))
-                    }
-                })
-                .collect();
-
-            if !scope_clauses.is_empty() {
-                count_sql.push_str(" AND (");
-                count_sql.push_str(&scope_clauses.join(" OR "));
-                count_sql.push(')');
+            if let Some(clause) = build_scope_sql_clause(scope) {
+                count_sql.push_str(&clause);
             }
         }
 
@@ -442,28 +424,8 @@ impl Database {
         }
 
         if let Some(ref scope) = filter.scope {
-            let scope_clauses: Vec<String> = scope
-                .iter()
-                .filter_map(|pattern| {
-                    let value = pattern.trim();
-                    if value.is_empty() {
-                        return None;
-                    }
-                    if let Some(domain) = value.strip_prefix("*.") {
-                        Some(format!(
-                            "(url LIKE '%://{}%' OR url LIKE '%://%.{}%')",
-                            domain, domain
-                        ))
-                    } else {
-                        Some(format!("url LIKE '%://{}%'", value))
-                    }
-                })
-                .collect();
-
-            if !scope_clauses.is_empty() {
-                where_sql.push_str(" AND (");
-                where_sql.push_str(&scope_clauses.join(" OR "));
-                where_sql.push(')');
+            if let Some(clause) = build_scope_sql_clause(scope) {
+                where_sql.push_str(&clause);
             }
         }
 
@@ -571,29 +533,8 @@ impl Database {
         }
 
         if let Some(ref scope) = filter.scope {
-            let scope_clauses: Vec<String> = scope
-                .iter()
-                .filter_map(|pattern| {
-                    let value = pattern.trim();
-                    if value.is_empty() {
-                        return None;
-                    }
-
-                    if let Some(domain) = value.strip_prefix("*.") {
-                        Some(format!(
-                            "(url LIKE '%://{}%' OR url LIKE '%://%.{}%')",
-                            domain, domain
-                        ))
-                    } else {
-                        Some(format!("url LIKE '%://{}%'", value))
-                    }
-                })
-                .collect();
-
-            if !scope_clauses.is_empty() {
-                sql.push_str(" AND (");
-                sql.push_str(&scope_clauses.join(" OR "));
-                sql.push(')');
+            if let Some(clause) = build_scope_sql_clause(scope) {
+                sql.push_str(&clause);
             }
         }
 

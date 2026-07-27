@@ -154,6 +154,83 @@ pub struct ProxyFilter {
 }
 
 impl ProxyFilter {
+    pub fn record_matches_scope(&self, record: &ProxyRecord) -> bool {
+        let Some(ref scope) = self.scope else {
+            return true;
+        };
+        if scope.is_empty() {
+            return true;
+        }
+
+        let mut candidate_domains = Vec::new();
+
+        // 1. Origin header
+        if let Some(origin) = record.request.headers.get("origin").or_else(|| record.request.headers.get("Origin")) {
+            let clean = origin.trim_start_matches("http://").trim_start_matches("https://");
+            let dom = clean.split('/').next().unwrap_or("").split(':').next().unwrap_or("").trim();
+            if !dom.is_empty() && dom != "null" && dom != "opaque" {
+                candidate_domains.push(dom.to_lowercase());
+            }
+        }
+
+        // 2. Referer header
+        if let Some(referer) = record.request.headers.get("referer").or_else(|| record.request.headers.get("Referer")) {
+            let clean = referer.trim_start_matches("http://").trim_start_matches("https://");
+            let dom = clean.split('/').next().unwrap_or("").split(':').next().unwrap_or("").trim();
+            if !dom.is_empty() {
+                candidate_domains.push(dom.to_lowercase());
+            }
+        }
+
+        // 3. Request URI host
+        if record.request.uri.contains("://") {
+            if let Some(after_scheme) = record.request.uri.split("://").nth(1) {
+                let dom = after_scheme.split('/').next().unwrap_or("").split(':').next().unwrap_or("").trim();
+                if !dom.is_empty() {
+                    candidate_domains.push(dom.to_lowercase());
+                }
+            }
+        } else if !record.request.uri.starts_with('/') {
+            let dom = record.request.uri.split('/').next().unwrap_or("").split(':').next().unwrap_or("").trim();
+            if !dom.is_empty() {
+                candidate_domains.push(dom.to_lowercase());
+            }
+        }
+
+        // 4. Host header
+        if let Some(host_hdr) = record.request.headers.get("host").or_else(|| record.request.headers.get("Host")) {
+            let dom = host_hdr.split(':').next().unwrap_or("").trim();
+            if !dom.is_empty() {
+                candidate_domains.push(dom.to_lowercase());
+            }
+        }
+
+        // 5. Server addr
+        if !record.server_addr.is_empty() && !record.server_addr.starts_with('/') {
+            let dom = record.server_addr.split(':').next().unwrap_or("").trim();
+            if !dom.is_empty() {
+                candidate_domains.push(dom.to_lowercase());
+            }
+        }
+
+        for pattern in scope {
+            let pattern_lower = pattern.trim().to_lowercase();
+            if pattern_lower.is_empty() {
+                continue;
+            }
+
+            let domain_target = pattern_lower.strip_prefix("*.").unwrap_or(&pattern_lower);
+
+            for dom in &candidate_domains {
+                if dom == domain_target || dom.ends_with(&format!(".{}", domain_target)) || dom.contains(domain_target) {
+                    return true;
+                }
+            }
+        }
+
+        false
+    }
+
     pub fn host_matches_scope(&self, host: &str) -> bool {
         let Some(ref scope) = self.scope else {
             return true;
@@ -162,11 +239,9 @@ impl ProxyFilter {
             return true;
         }
         for pattern in scope {
-            if let Some(domain) = pattern.strip_prefix("*.") {
-                if host.ends_with(domain) {
-                    return true;
-                }
-            } else if host.contains(pattern.as_str()) {
+            let pattern_lower = pattern.trim().to_lowercase();
+            let domain_target = pattern_lower.strip_prefix("*.").unwrap_or(&pattern_lower);
+            if host == domain_target || host.ends_with(&format!(".{}", domain_target)) || host.contains(domain_target) {
                 return true;
             }
         }

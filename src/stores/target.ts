@@ -27,7 +27,10 @@ function createTargetId() {
   return `target-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function normalizeHostScope(host: string) {
+function normalizeHostScope(host?: string | null): string {
+  if (!host || typeof host !== 'string') {
+    return '';
+  }
   const trimmedHost = host.trim();
 
   if (!trimmedHost) {
@@ -35,7 +38,8 @@ function normalizeHostScope(host: string) {
   }
 
   try {
-    return new URL(trimmedHost).host.toLowerCase();
+    const withScheme = trimmedHost.includes('://') ? trimmedHost : `http://${trimmedHost}`;
+    return new URL(withScheme).host.toLowerCase();
   } catch {
     return trimmedHost
       .replace(/^https?:\/\//i, '')
