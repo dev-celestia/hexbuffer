@@ -18,10 +18,12 @@ import { useHistoryTable, useTrafficTableColumns } from "./hooks";
 import { TrafficTablePagination } from "@/pages/live-traffic/components/traffic-table-pagination";
 
 export const TrafficTable = memo(function TrafficTable({
+  activeTabId,
   isPinnedTabActive = false,
   isGroupTabActive = false,
   activeGroupId = null,
 }: {
+  activeTabId?: string;
   isPinnedTabActive?: boolean;
   isGroupTabActive?: boolean;
   activeGroupId?: string | null;
@@ -34,6 +36,7 @@ export const TrafficTable = memo(function TrafficTable({
     calls,
     pagination,
     isLoading,
+    isTabLoading,
     newEventsCount,
     loadError,
     searchQuery,
@@ -46,7 +49,7 @@ export const TrafficTable = memo(function TrafficTable({
     goToPreviousPage,
     handleRefresh,
     removeCallLocally,
-  } = useHistoryTable({ isStreamPaused: isContextMenuOpen });
+  } = useHistoryTable({ isStreamPaused: isContextMenuOpen, activeTabId });
 
   const pinnedIds = usePinnedRequestsStore((s) => s.pinnedIds);
   const unpinId = usePinnedRequestsStore((s) => s.unpinId);
@@ -152,7 +155,7 @@ export const TrafficTable = memo(function TrafficTable({
     );
   }
 
-  if (isLoading && calls.length === 0) {
+  if (isTabLoading || (isLoading && calls.length === 0)) {
     return <HistoryLoadingState label="Loading HTTP history..." columns={8} />;
   }
 
@@ -316,6 +319,7 @@ export const TrafficTable = memo(function TrafficTable({
           hasPreviousPage={hasPreviousPage}
           hasNextPage={hasNextPage}
           isLoading={isLoading}
+          itemLabel="request"
           onPreviousPage={goToPreviousPage}
           onNextPage={goToNextPage}
         />

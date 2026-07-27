@@ -10,6 +10,7 @@ export interface TrafficTablePaginationProps {
   hasPreviousPage: boolean;
   hasNextPage: boolean;
   isLoading: boolean;
+  itemLabel?: string;
   onPreviousPage: () => void;
   onNextPage: () => void;
 }
@@ -23,6 +24,7 @@ export function TrafficTablePagination({
   hasPreviousPage,
   hasNextPage,
   isLoading,
+  itemLabel = 'item',
   onPreviousPage,
   onNextPage,
 }: TrafficTablePaginationProps) {
@@ -30,7 +32,7 @@ export function TrafficTablePagination({
     <div className="flex items-center justify-between px-3 py-1.5 border-t bg-muted/20 text-xs shrink-0 select-none">
       <div className="flex items-center gap-2 text-muted-foreground">
         <span>
-          Showing {showingStart} – {showingEnd} of {total} item{total === 1 ? '' : 's'}
+          Showing {showingStart} – {showingEnd} of {total} {itemLabel}{total === 1 ? '' : 's'}
         </span>
       </div>
       <div className="flex items-center gap-2">

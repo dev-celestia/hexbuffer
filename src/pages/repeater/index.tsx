@@ -37,7 +37,7 @@ export function RepeaterPage() {
           "m-2",
 
           // Backgrounds & Borders
-          "border rounded-md bg-background"
+          "border rounded-md bg-card"
         )}
       >
         {page.activeWorkspaceId && (

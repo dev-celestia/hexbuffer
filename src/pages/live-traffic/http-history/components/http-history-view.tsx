@@ -5,12 +5,14 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 import { useHttpHistoryQueryStore } from '@/stores/history';
 
 export interface HttpHistoryViewProps {
+  activeTabId?: string;
   isPinnedTabActive?: boolean;
   isGroupTabActive?: boolean;
   activeGroupId?: string | null;
 }
 
 export function HttpHistoryView({
+  activeTabId,
   isPinnedTabActive = false,
   isGroupTabActive = false,
   activeGroupId = null,
@@ -43,7 +45,12 @@ export function HttpHistoryView({
     >
       <ResizablePanel id="http-history-table" defaultSize={selectedCallId ? 60 : 100} minSize={20} className="min-w-0">
         <div className="h-full overflow-hidden min-w-0" style={{ width: '100%', ...coverStyle }}>
-          <TrafficTable isPinnedTabActive={isPinnedTabActive} isGroupTabActive={isGroupTabActive} activeGroupId={activeGroupId} />
+          <TrafficTable
+            activeTabId={activeTabId}
+            isPinnedTabActive={isPinnedTabActive}
+            isGroupTabActive={isGroupTabActive}
+            activeGroupId={activeGroupId}
+          />
         </div>
       </ResizablePanel>
       {selectedCallId && (

@@ -138,6 +138,7 @@ export function WebSocketTable({ selectedConnectionId, onSelectConnection }: Web
         hasPreviousPage={hasPreviousPage}
         hasNextPage={hasNextPage}
         isLoading={isLoading}
+        itemLabel="connection"
         onPreviousPage={goToPreviousPage}
         onNextPage={goToNextPage}
       />

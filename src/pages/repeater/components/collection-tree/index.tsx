@@ -62,7 +62,7 @@ export function CollectionsTree({ workspaceId }: { workspaceId: string }) {
   } = useCollectionsTree(workspaceId);
 
   return (
-    <div className="flex flex-col h-full min-h-0 bg-background">
+    <div className="flex flex-col h-full min-h-0">
       <TreeHeader
         onExport={handleExport}
         onImportClick={handleImportClick}

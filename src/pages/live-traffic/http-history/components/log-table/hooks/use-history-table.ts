@@ -133,9 +133,10 @@ export function adaptProxyRecordToApiCall(record: ProxyRecord): ApiCall {
 
 interface UseHistoryTableOptions {
   isStreamPaused?: boolean;
+  activeTabId?: string;
 }
 
-export function useHistoryTable({ isStreamPaused = false }: UseHistoryTableOptions = {}) {
+export function useHistoryTable({ isStreamPaused = false, activeTabId }: UseHistoryTableOptions = {}) {
   const {
     filter,
     activeScope,
@@ -185,6 +186,32 @@ export function useHistoryTable({ isStreamPaused = false }: UseHistoryTableOptio
   const [isLoading, setIsLoading] = useState(true);
   const [newEventsCount, setNewEventsCount] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  const [prevTabId, setPrevTabId] = useState<string | undefined>(activeTabId);
+  const [isTabLoading, setIsTabLoading] = useState(false);
+  const tabTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  if (activeTabId !== undefined && activeTabId !== prevTabId) {
+    setPrevTabId(activeTabId);
+    setIsTabLoading(true);
+    setCalls([]);
+  }
+
+  useEffect(() => {
+    if (isTabLoading) {
+      if (tabTimerRef.current) {
+        clearTimeout(tabTimerRef.current);
+      }
+      tabTimerRef.current = setTimeout(() => {
+        setIsTabLoading(false);
+      }, 250);
+    }
+    return () => {
+      if (tabTimerRef.current) {
+        clearTimeout(tabTimerRef.current);
+      }
+    };
+  }, [isTabLoading]);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingEventsCountRef = useRef(0);
@@ -255,8 +282,6 @@ export function useHistoryTable({ isStreamPaused = false }: UseHistoryTableOptio
       clearTimeout(debounceRef.current);
     }
 
-    setIsLoading(true);
-
     debounceRef.current = setTimeout(() => {
       fetchPage(page);
     }, 250);
@@ -284,7 +309,7 @@ export function useHistoryTable({ isStreamPaused = false }: UseHistoryTableOptio
         } else {
           await fetchPage(1);
         }
-      }, 500);
+      }, 1200);
     };
 
     const unlistenPromise = listen<ProxyRecord>('proxy-record', handleEvent);
@@ -339,6 +364,7 @@ export function useHistoryTable({ isStreamPaused = false }: UseHistoryTableOptio
     calls,
     pagination,
     isLoading,
+    isTabLoading,
     newEventsCount,
     loadError,
     sortOrder,

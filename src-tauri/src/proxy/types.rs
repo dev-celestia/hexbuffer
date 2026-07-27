@@ -164,7 +164,7 @@ impl ProxyFilter {
 
         let mut candidate_domains = Vec::new();
 
-        // 1. Origin header
+        // 1. Origin header (for CORS requests initiated by app JS)
         if let Some(origin) = record.request.headers.get("origin").or_else(|| record.request.headers.get("Origin")) {
             let clean = origin.trim_start_matches("http://").trim_start_matches("https://");
             let dom = clean.split('/').next().unwrap_or("").split(':').next().unwrap_or("").trim();
@@ -173,16 +173,7 @@ impl ProxyFilter {
             }
         }
 
-        // 2. Referer header
-        if let Some(referer) = record.request.headers.get("referer").or_else(|| record.request.headers.get("Referer")) {
-            let clean = referer.trim_start_matches("http://").trim_start_matches("https://");
-            let dom = clean.split('/').next().unwrap_or("").split(':').next().unwrap_or("").trim();
-            if !dom.is_empty() {
-                candidate_domains.push(dom.to_lowercase());
-            }
-        }
-
-        // 3. Request URI host
+        // 2. Request URI host
         if record.request.uri.contains("://") {
             if let Some(after_scheme) = record.request.uri.split("://").nth(1) {
                 let dom = after_scheme.split('/').next().unwrap_or("").split(':').next().unwrap_or("").trim();

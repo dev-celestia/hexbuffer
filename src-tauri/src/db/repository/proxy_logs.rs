@@ -16,8 +16,8 @@ fn build_scope_sql_clause(scope: &[String]) -> Option<String> {
 
             let domain = value.strip_prefix("*.").unwrap_or(value);
             Some(format!(
-                "(url LIKE '%{}%' OR server_addr LIKE '%{}%' OR request_headers LIKE '%{}%')",
-                domain, domain, domain
+                "(url LIKE '%{}%' OR server_addr LIKE '%{}%' OR request_headers LIKE '%\"origin\"%{}%' OR request_headers LIKE '%\"Origin\"%{}%')",
+                domain, domain, domain, domain
             ))
         })
         .collect();
@@ -328,6 +328,8 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         let offset = (page - 1) * per_page;
 
+        let limit = per_page + 1;
+
         let sql = format!(
             "SELECT id, timestamp, method, url, response_status, response_status_text,
                     COALESCE(LENGTH(request_body), 0),
@@ -343,21 +345,27 @@ impl Database {
 
         let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
         let mut rows = stmt
-            .query(params![per_page as i64, offset as i64])
+            .query(params![limit as i64, offset as i64])
             .map_err(|e| e.to_string())?;
         let mut records: Vec<ProxySummaryRow> = Vec::new();
         while let Some(row) = rows.next().map_err(|e| e.to_string())? {
             records.push(row_to_proxy_summary(row).map_err(|e| e.to_string())?);
         }
 
-        let total: i64 = conn
-            .query_row("SELECT COUNT(*) FROM http_logs", [], |row| row.get(0))
-            .map_err(|e| e.to_string())?;
-        let has_more = (offset as usize + records.len()) < total as usize;
+        let has_more = records.len() > per_page as usize;
+        if has_more {
+            records.pop();
+        }
+
+        let total = if has_more {
+            offset as usize + records.len() + 1
+        } else {
+            offset as usize + records.len()
+        };
 
         Ok(PaginatedResponse {
             data: records,
-            total: total as usize,
+            total,
             page,
             per_page,
             has_more,
@@ -429,6 +437,10 @@ impl Database {
             }
         }
 
+        let limit = per_page + 1;
+        let limit_i64 = limit as i64;
+        let offset_i64 = offset as i64;
+
         let data_sql = format!(
             "SELECT id, timestamp, method, url, response_status, response_status_text,
                     COALESCE(LENGTH(request_body), 0),
@@ -442,13 +454,11 @@ impl Database {
             where_sql, sort_order
         );
 
-        let count_sql = format!("SELECT COUNT(*) FROM http_logs WHERE 1=1{}", where_sql);
-
         let mut stmt = conn.prepare(&data_sql).map_err(|e| e.to_string())?;
         let mut all_params: Vec<&dyn rusqlite::ToSql> =
             params_vec.iter().map(|b| b.as_ref()).collect();
-        all_params.push(&per_page as &dyn rusqlite::ToSql);
-        all_params.push(&offset as &dyn rusqlite::ToSql);
+        all_params.push(&limit_i64 as &dyn rusqlite::ToSql);
+        all_params.push(&offset_i64 as &dyn rusqlite::ToSql);
 
         let mut rows = stmt
             .query(all_params.as_slice())
@@ -458,16 +468,20 @@ impl Database {
             records.push(row_to_proxy_summary(row).map_err(|e| e.to_string())?);
         }
 
-        let count_params: Vec<&dyn rusqlite::ToSql> =
-            params_vec.iter().map(|b| b.as_ref()).collect();
-        let total: i64 = conn
-            .query_row(&count_sql, count_params.as_slice(), |row| row.get(0))
-            .map_err(|e| e.to_string())?;
-        let has_more = (offset as usize + records.len()) < total as usize;
+        let has_more = records.len() > per_page as usize;
+        if has_more {
+            records.pop();
+        }
+
+        let total = if has_more {
+            offset as usize + records.len() + 1
+        } else {
+            offset as usize + records.len()
+        };
 
         Ok(PaginatedResponse {
             data: records,
-            total: total as usize,
+            total,
             page,
             per_page,
             has_more,
