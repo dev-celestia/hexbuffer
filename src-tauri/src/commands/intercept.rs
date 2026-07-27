@@ -261,9 +261,9 @@ pub fn browser_candidates() -> Vec<PathBuf> {
         }
 
         if let Some(program_files) = std::env::var_os("PROGRAMFILES") {
-            candidates
-                .push(PathBuf::from(program_files).join("Google/Chrome/Application/chrome.exe"));
-            candidates.push(PathBuf::from(program_files).join("Chromium/Application/chrome.exe"));
+            let base = PathBuf::from(program_files);
+            candidates.push(base.join("Google/Chrome/Application/chrome.exe"));
+            candidates.push(base.join("Chromium/Application/chrome.exe"));
         }
 
         if let Some(program_files_x86) = std::env::var_os("PROGRAMFILES(X86)") {
@@ -349,6 +349,7 @@ pub async fn open_intercept_browser(app: AppHandle, proxy_port: u16) -> Result<(
 
     let mut last_error = None;
     let proxy_port = crate::proxy::active_proxy_port().unwrap_or(proxy_port);
+    #[allow(unused_mut)]
     let mut args = vec![
         format!("--user-data-dir={}", profile_dir.display()),
         "--new-window".to_string(),
