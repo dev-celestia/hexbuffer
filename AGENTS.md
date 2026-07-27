@@ -38,6 +38,8 @@ There is no committed lint or formatting configuration yet, so match nearby code
 
 ## Frontend Page Pattern
 
+MANDATORY: ALWAYS split logic and UI. Keep all state management, event handlers, derived computations, store coordination, and side effects inside custom hooks (e.g., `hooks/use-feature-page.ts` or presentational component hooks). UI components must remain thin, declarative, and strictly presentational.
+
 For files under `src/pages/`, prefer a thin page-entry pattern:
 
 - Keep each page `index.tsx` focused on layout composition and wiring top-level sections together.

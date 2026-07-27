@@ -1,57 +1,113 @@
-import { memo, useEffect, useRef } from 'react';
+import { memo } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { ActivityStatusBadge, STATUS_ACTIVITY } from '@/components/status-badge';
+import { ActivityStatusBadge } from '@/components/status-badge';
+import { cn } from '@/lib/utils';
 import type { ActionLogEntry } from '@/stores/browser-automation';
-import type { StatusActivityValue } from '@/components/status-badge';
+import { useActionLogPanel } from './hooks/use-action-log-panel';
 
 interface ActionLogPanelProps {
   actions: ActionLogEntry[];
   onClear: () => void;
 }
 
-function mapTypeToActivity(type: ActionLogEntry['type']): StatusActivityValue {
-  switch (type) {
-    case 'command': return STATUS_ACTIVITY.session;
-    case 'result':  return STATUS_ACTIVITY.extraction;
-    case 'error':   return STATUS_ACTIVITY.error;
-    case 'ai':      return STATUS_ACTIVITY.ai;
-    default:        return STATUS_ACTIVITY.queue;
-  }
-}
-
 function ActionLogPanelComponent({ actions, onClear }: ActionLogPanelProps) {
-  const topRef = useRef<HTMLDivElement>(null);
-  const reversed = [...actions].reverse();
-
-  useEffect(() => {
-    topRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [actions]);
+  const { topRef, reversed, hasActions, mapTypeToActivity } = useActionLogPanel({ actions });
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 border-b">
-      <div className="px-2 py-1 border-b flex items-center justify-between">
-        <span className="text-xs font-medium">Action Log</span>
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex-1 flex flex-col min-h-0",
+
+        // Backgrounds & Borders
+        "border-b"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between",
+
+          // Sizing & Spacing
+          "px-2 py-1",
+
+          // Backgrounds & Borders
+          "border-b"
+        )}
+      >
+        <span
+          className={cn(
+            // Typography
+            "text-xs font-medium"
+          )}
+        >
+          Action Log
+        </span>
         <Button variant="ghost" onClick={onClear}>
           Clear
         </Button>
       </div>
-      <ScrollArea className="flex-1">
-        <div className="p-1 space-y-0">
+      <ScrollArea
+        className={cn(
+          // Layout & Positioning
+          "flex-1"
+        )}
+      >
+        <div
+          className={cn(
+            // Sizing & Spacing
+            "p-1 space-y-0"
+          )}
+        >
           <div ref={topRef} />
-          {actions.length === 0 ? (
-            <div className="text-xs text-muted-foreground p-1">No actions yet.</div>
+          {!hasActions ? (
+            <div
+              className={cn(
+                // Sizing & Spacing
+                "p-1",
+
+                // Typography
+                "text-xs text-muted-foreground"
+              )}
+            >
+              No actions yet.
+            </div>
           ) : (
             reversed.map((action, index) => (
               <div
                 key={index}
-                className="flex items-start gap-1.5 py-1 px-2 border-b border-border text-xs"
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-start",
+
+                  // Sizing & Spacing
+                  "gap-1.5 py-1 px-2",
+
+                  // Typography
+                  "text-xs",
+
+                  // Backgrounds & Borders
+                  "border-b border-border"
+                )}
               >
                 <ActivityStatusBadge status={mapTypeToActivity(action.type)} />
-                <span className="text-muted-foreground text-[10px]">
+                <span
+                  className={cn(
+                    // Typography
+                    "text-[10px] text-muted-foreground"
+                  )}
+                >
                   {action.timestamp.toLocaleTimeString()}
                 </span>
-                <span className="flex-1 break-words">{action.message}</span>
+                <span
+                  className={cn(
+                    // Layout & Positioning
+                    "flex-1 break-words"
+                  )}
+                >
+                  {action.message}
+                </span>
               </div>
             ))
           )}

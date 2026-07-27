@@ -2258,7 +2258,6 @@ dependencies = [
 [[package]]
 name = "hexbuffer-ai"
 version = "0.1.0"
-source = "git+https://github.com/arhamymr/hexbuffer-agent.git#c39751306c01aae3d5286c1f6fcb6e1784fd136c"
 dependencies = [
  "async-trait",
  "futures",

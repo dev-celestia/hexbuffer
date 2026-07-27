@@ -1,11 +1,11 @@
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { WarningCircleIcon, CircleIcon, StopCircleIcon, FileTextIcon, ShieldSlashIcon, SpinnerIcon } from '@phosphor-icons/react';
 import { Badge } from '@/components/ui/badge';
 import { TreeView, type TreeNodeData } from '@/components/tree-view';
 import { cn } from '@/lib/utils';
-import { useBrowserAutomationStore } from '@/stores/browser-automation';
 import { PAGE_STATUS_LABELS } from '../constants';
 import type { CrawlPageStatus, CrawlStatus, CrawlTreeNode } from '../types';
+import { useCrawlTreePanel } from './hooks/use-crawl-tree-panel';
 
 type CrawlTreeMeta = { pageId: string };
 
@@ -62,7 +62,17 @@ function toTreeNode(node: CrawlTreeNode, crawlStopped: boolean): TreeNodeData<Cr
       showStopped && 'text-muted-foreground',
     ),
     badge: (
-      <Badge variant="outline" className={cn('h-4 px-1 text-[10px] capitalize', statusStyles[node.status])}>
+      <Badge
+        variant="outline"
+        className={cn(
+          // Sizing & Spacing
+          "h-4 px-1",
+
+          // Typography
+          "text-[10px] capitalize",
+          statusStyles[node.status]
+        )}
+      >
         {PAGE_STATUS_LABELS[node.status]}
       </Badge>
     ),
@@ -73,27 +83,57 @@ function toTreeNode(node: CrawlTreeNode, crawlStopped: boolean): TreeNodeData<Cr
 function CrawlTreePanelComponent({
   nodes,
   selectedPageId,
-  expandedPageIds,
   searchQuery = '',
   crawlStatus,
 }: CrawlTreePanelProps) {
-  const selectPage = useBrowserAutomationStore((s) => s.selectPage);
+  const { allPageIds, selectPage } = useCrawlTreePanel(nodes);
   const crawlStopped = crawlStatus === 'stopped';
   const treeNodes = nodes.map((node) => toTreeNode(node, crawlStopped));
 
-  const allPageIds = useMemo(() => {
-    function collect(node: CrawlTreeNode): string[] {
-      return [node.id, ...node.children.flatMap(collect)];
-    }
-    return nodes.flatMap(collect);
-  }, [nodes]);
-
   return (
-    <section className="flex min-h-0 min-w-0 flex-col border-b bg-background">
-      <div className="sticky top-0 z-10 flex min-w-0 gap-2 border-b bg-background px-3 py-1">
-        <div className="min-w-0">
-          <div className="text-xs font-medium">Pages</div>
-          <div className="text-xs text-muted-foreground">Discovered page structure</div>
+    <section
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col min-h-0 min-w-0",
+
+        // Backgrounds & Borders
+        "border-b bg-background"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "sticky top-0 z-10 flex min-w-0",
+
+          // Sizing & Spacing
+          "gap-2 px-3 py-1",
+
+          // Backgrounds & Borders
+          "border-b bg-background"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "min-w-0"
+          )}
+        >
+          <div
+            className={cn(
+              // Typography
+              "text-xs font-medium"
+            )}
+          >
+            Pages
+          </div>
+          <div
+            className={cn(
+              // Typography
+              "text-xs text-muted-foreground"
+            )}
+          >
+            Discovered page structure
+          </div>
         </div>
       </div>
 
@@ -115,3 +155,4 @@ function CrawlTreePanelComponent({
 }
 
 export const CrawlTreePanel = memo(CrawlTreePanelComponent);
+

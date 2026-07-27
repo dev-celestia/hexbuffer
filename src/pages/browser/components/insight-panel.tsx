@@ -1,5 +1,4 @@
-import { memo, useMemo, useState } from 'react';
-import type { KeyboardEvent } from 'react';
+import { memo } from 'react';
 import { CheckCircleIcon, ScanSmileyIcon } from '@phosphor-icons/react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
@@ -23,32 +22,9 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { SeverityBadge } from '@/components/status-badge';
-import { useBrowserAutomationStore } from '@/stores/browser-automation';
 import { formatTime } from '../lib/crawl-data';
-import type { AIInsight, CrawlPage, InsightSeverity } from '../types';
-
-type SeverityFilter = 'all' | InsightSeverity;
-type DetailItem =
-  | { type: 'page'; page: CrawlPage }
-  | { type: 'insight'; insight: AIInsight };
-
-const SEVERITY_ORDER: InsightSeverity[] = ['critical', 'high', 'medium', 'low', 'info'];
-const SEVERITY_RANK = SEVERITY_ORDER.reduce<Record<InsightSeverity, number>>((acc, severity, index) => {
-  acc[severity] = index;
-  return acc;
-}, {} as Record<InsightSeverity, number>);
-
-function normalizePageUrl(value?: string) {
-  if (!value) return '';
-
-  try {
-    const url = new URL(value);
-    url.hash = '';
-    return url.toString().replace(/\/$/, '');
-  } catch {
-    return value.trim().replace(/\/$/, '');
-  }
-}
+import type { AIInsight, CrawlPage } from '../types';
+import { useAiInsightsPanel, type SeverityFilter } from './hooks/use-ai-insights-panel';
 
 function getInsightSourceLabel(insight: AIInsight) {
   if (insight.analysisSource === 'ai') return 'AI';
@@ -67,7 +43,17 @@ function InsightSourceBadge({ insight }: { insight: AIInsight }) {
   return (
     <span
       className={cn(
-        'max-w-full shrink-0 break-words rounded px-1 py-0.5 font-mono text-xs',
+        // Layout & Positioning
+        "shrink-0 max-w-full break-words",
+
+        // Sizing & Spacing
+        "px-1 py-0.5",
+
+        // Typography
+        "font-mono text-xs",
+
+        // Backgrounds & Borders
+        "rounded",
         isAi
           ? 'bg-purple-500 text-white'
           : 'border border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
@@ -89,70 +75,103 @@ function AiInsightsPanelComponent({
   interestingPages,
   searchQuery = '',
 }: AiInsightsPanelProps) {
-  const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all');
-  const [detailItem, setDetailItem] = useState<DetailItem | null>(null);
-  const selectPage = useBrowserAutomationStore((s) => s.selectPage);
-  const toggleInsightReviewed = useBrowserAutomationStore((s) => s.toggleInsightReviewed);
-
-  const visibleInsights = useMemo(() => {
-    return [...insights]
-      .filter((insight) => severityFilter === 'all' || insight.severity === severityFilter)
-      .sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity]);
-  }, [insights, severityFilter]);
-
-  function findPageForInsight(insight: AIInsight) {
-    // ponytail: get pages on demand to avoid subscribing to pages state
-    const pages = useBrowserAutomationStore.getState().getActiveTab()?.pages ?? [];
-    const pageById = insight.pageId
-      ? pages.find((item) => item.id === insight.pageId)
-      : null;
-
-    if (pageById) return pageById;
-
-    const insightUrl = normalizePageUrl(insight.url);
-    if (!insightUrl) return null;
-
-    return pages.find((item) => normalizePageUrl(item.url) === insightUrl) ?? null;
-  }
-
-  function getDetailPage() {
-    if (!detailItem) return null;
-    return detailItem.type === 'page' ? detailItem.page : findPageForInsight(detailItem.insight);
-  }
-
-  function handleDetailOpenPage() {
-    const page = getDetailPage();
-    if (!page) return;
-
-    selectPage(page.id);
-    setDetailItem(null);
-  }
-
-  function handleCardKeyDown(event: KeyboardEvent<HTMLDivElement>, item: DetailItem) {
-    if (event.key !== 'Enter' && event.key !== ' ') return;
-    event.preventDefault();
-    setDetailItem(item);
-  }
-
-  const detailPage = getDetailPage();
+  const {
+    severityFilter,
+    setSeverityFilter,
+    detailItem,
+    setDetailItem,
+    visibleInsights,
+    detailPage,
+    handleDetailOpenPage,
+    handleCardKeyDown,
+    toggleInsightReviewed,
+    severityOrder,
+  } = useAiInsightsPanel(insights);
 
   return (
-    <section className="flex h-full flex-col overflow-hidden bg-background">
-      <div className="sticky top-0 z-10 shrink-0 border-b bg-background px-3 py-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 text-xs font-medium">
+    <section
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col overflow-hidden",
+
+        // Sizing & Spacing
+        "h-full",
+
+        // Backgrounds & Borders
+        "bg-background"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "sticky top-0 z-10 shrink-0",
+
+          // Sizing & Spacing
+          "px-3 py-2",
+
+          // Backgrounds & Borders
+          "border-b bg-background"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-wrap items-center",
+
+            // Sizing & Spacing
+            "gap-2"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex-1"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center",
+
+                // Sizing & Spacing
+                "gap-2",
+
+                // Typography
+                "text-xs font-medium"
+              )}
+            >
               Insights
             </div>
-            <div className="break-words text-xs text-muted-foreground">Recon observations from crawl evidence.</div>
+            <div
+              className={cn(
+                // Layout & Positioning
+                "break-words",
+
+                // Typography
+                "text-xs text-muted-foreground"
+              )}
+            >
+              Recon observations from crawl evidence.
+            </div>
           </div>
           <Select value={severityFilter} onValueChange={(value) => setSeverityFilter(value as SeverityFilter)}>
-            <SelectTrigger className="h-7 max-w-full basis-32 text-xs">
+            <SelectTrigger
+              className={cn(
+                // Layout & Positioning
+                "max-w-full basis-32",
+
+                // Sizing & Spacing
+                "h-7",
+
+                // Typography
+                "text-xs"
+              )}
+            >
               <SelectValue placeholder="Severity" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Severity</SelectItem>
-              {SEVERITY_ORDER.map((severity) => (
+              {severityOrder.map((severity) => (
                 <SelectItem key={severity} value={severity}>
                   {severity}
                 </SelectItem>
@@ -162,22 +181,83 @@ function AiInsightsPanelComponent({
         </div>
       </div>
 
-      <ScrollArea className="min-h-0 flex-1 px-3">
-        <div className="max-w-full space-y-2 py-3">
+      <ScrollArea
+        className={cn(
+          // Layout & Positioning
+          "flex-1 min-h-0",
+
+          // Sizing & Spacing
+          "px-3"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "max-w-full",
+
+            // Sizing & Spacing
+            "space-y-2 py-3"
+          )}
+        >
           <Accordion
             type="multiple"
             defaultValue={['interesting-pages', 'all-insights']}
-            className="max-w-full space-y-2 overflow-hidden"
+            className={cn(
+              // Layout & Positioning
+              "max-w-full overflow-hidden",
+
+              // Sizing & Spacing
+              "space-y-2"
+            )}
           >
             {interestingPages.length > 0 && (
-              <AccordionItem value="interesting-pages" className="max-w-full overflow-hidden rounded-md border">
-                <AccordionTrigger className="w-full max-w-full gap-2 overflow-hidden px-2 py-2 text-xs font-semibold uppercase text-muted-foreground hover:bg-muted/50 hover:no-underline">
-                  <span className="flex max-w-full flex-1 items-center gap-2 overflow-hidden">
+              <AccordionItem
+                value="interesting-pages"
+                className={cn(
+                  // Layout & Positioning
+                  "max-w-full overflow-hidden",
+
+                  // Backgrounds & Borders
+                  "rounded-md border"
+                )}
+              >
+                <AccordionTrigger
+                  className={cn(
+                    // Layout & Positioning
+                    "w-full max-w-full overflow-hidden",
+
+                    // Sizing & Spacing
+                    "gap-2 px-2 py-2",
+
+                    // Typography
+                    "text-xs font-semibold uppercase text-muted-foreground",
+
+                    // Interactive & States
+                    "hover:bg-muted/50 hover:no-underline"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      // Layout & Positioning
+                      "flex flex-1 items-center max-w-full overflow-hidden",
+
+                      // Sizing & Spacing
+                      "gap-2"
+                    )}
+                  >
                     <ScanSmileyIcon className="size-3.5 shrink-0" />
                     <span className="max-w-full break-words">Interesting Pages ({interestingPages.length})</span>
                   </span>
                 </AccordionTrigger>
-                <AccordionContent className="max-w-full space-y-2 overflow-hidden px-2 pb-2">
+                <AccordionContent
+                  className={cn(
+                    // Layout & Positioning
+                    "max-w-full overflow-hidden",
+
+                    // Sizing & Spacing
+                    "space-y-2 px-2 pb-2"
+                  )}
+                >
                   {interestingPages.map((page) => {
                     const hasAiSummary = !!page.aiSummary?.trim();
                     return (
@@ -185,11 +265,31 @@ function AiInsightsPanelComponent({
                         key={page.id}
                         role="button"
                         tabIndex={0}
-                        className="max-w-full cursor-pointer rounded-md border border-amber-500/20 bg-amber-500/5 p-1 text-left transition-colors hover:bg-amber-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className={cn(
+                          // Layout & Positioning
+                          "max-w-full text-left",
+
+                          // Sizing & Spacing
+                          "p-1",
+
+                          // Backgrounds & Borders
+                          "rounded-md border border-amber-500/20 bg-amber-500/5",
+
+                          // Interactive & States
+                          "cursor-pointer transition-colors hover:bg-amber-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        )}
                         onClick={() => setDetailItem({ type: 'page', page })}
                         onKeyDown={(event) => handleCardKeyDown(event, { type: 'page', page })}
                       >
-                        <div className="flex items-start justify-between gap-2">
+                        <div
+                          className={cn(
+                            // Layout & Positioning
+                            "flex items-start justify-between",
+
+                            // Sizing & Spacing
+                            "gap-2"
+                          )}
+                        >
                           <div className="flex-1">
                             <div className="break-words text-xs font-medium">
                               <HighlightedText text={page.title || page.url} query={searchQuery} />
@@ -211,13 +311,58 @@ function AiInsightsPanelComponent({
               </AccordionItem>
             )}
 
-            <AccordionItem value="all-insights" className="max-w-full overflow-hidden rounded-md border">
-              <AccordionTrigger className="w-full max-w-full gap-2 overflow-hidden px-2 py-2 text-xs font-semibold uppercase text-muted-foreground hover:bg-muted/50 hover:no-underline">
+            <AccordionItem
+              value="all-insights"
+              className={cn(
+                // Layout & Positioning
+                "max-w-full overflow-hidden",
+
+                // Backgrounds & Borders
+                "rounded-md border"
+              )}
+            >
+              <AccordionTrigger
+                className={cn(
+                  // Layout & Positioning
+                  "w-full max-w-full overflow-hidden",
+
+                  // Sizing & Spacing
+                  "gap-2 px-2 py-2",
+
+                  // Typography
+                  "text-xs font-semibold uppercase text-muted-foreground",
+
+                  // Interactive & States
+                  "hover:bg-muted/50 hover:no-underline"
+                )}
+              >
                 <span className="max-w-full flex-1 break-words">All Insights ({visibleInsights.length})</span>
               </AccordionTrigger>
-              <AccordionContent className="max-w-full space-y-2 overflow-hidden px-2 pb-2">
+              <AccordionContent
+                className={cn(
+                  // Layout & Positioning
+                  "max-w-full overflow-hidden",
+
+                  // Sizing & Spacing
+                  "space-y-2 px-2 pb-2"
+                )}
+              >
                 {visibleInsights.length === 0 ? (
-                  <div className="max-w-full rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+                  <div
+                    className={cn(
+                      // Layout & Positioning
+                      "max-w-full",
+
+                      // Sizing & Spacing
+                      "p-4",
+
+                      // Typography
+                      "text-sm text-muted-foreground",
+
+                      // Backgrounds & Borders
+                      "rounded-md border border-dashed"
+                    )}
+                  >
                     No insights match the current filters.
                   </div>
                 ) : (
@@ -226,32 +371,107 @@ function AiInsightsPanelComponent({
                       key={insight.id}
                       role="button"
                       tabIndex={0}
-                      className={cn(' max-w-full cursor-pointer rounded-md border bg-background p-2 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                        insight.reviewed && 'opacity-65'
+                      className={cn(
+                        // Layout & Positioning
+                        "max-w-full text-left",
+
+                        // Sizing & Spacing
+                        "p-2",
+
+                        // Backgrounds & Borders
+                        "rounded-md border bg-background",
+
+                        // Interactive & States
+                        "cursor-pointer transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        insight.reviewed && "opacity-65"
                       )}
                       onClick={() => setDetailItem({ type: 'insight', insight })}
                       onKeyDown={(event) => handleCardKeyDown(event, { type: 'insight', insight })}
                     >
-                      <div className="flex max-w-full flex-wrap items-center gap-1.5">
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "flex max-w-full flex-wrap items-center",
+
+                          // Sizing & Spacing
+                          "gap-1.5"
+                        )}
+                      >
                         <SeverityBadge severity={insight.severity} />
                         <InsightSourceBadge insight={insight} />
-                        <span className="max-w-full break-all rounded border border-gray-500 px-1 py-0.5 font-mono text-xs text-muted-foreground">
+                        <span
+                          className={cn(
+                            // Layout & Positioning
+                            "max-w-full break-all",
+
+                            // Sizing & Spacing
+                            "px-1 py-0.5",
+
+                            // Typography
+                            "font-mono text-xs text-muted-foreground",
+
+                            // Backgrounds & Borders
+                            "rounded border border-gray-500"
+                          )}
+                        >
                           <HighlightedText text={insight.type} query={searchQuery} />
                         </span>
                         {insight.reviewed && (
-                          <Badge variant="outline" className="h-5 shrink-0 border-emerald-500/25 px-1.5 text-[10px] text-emerald-700 dark:text-emerald-300">
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              // Layout & Positioning
+                              "shrink-0",
+
+                              // Sizing & Spacing
+                              "h-5 px-1.5",
+
+                              // Typography
+                              "text-[10px] text-emerald-700 dark:text-emerald-300",
+
+                              // Backgrounds & Borders
+                              "border-emerald-500/25"
+                            )}
+                          >
                             <CheckCircleIcon className="h-3 w-3" />
                             Reviewed
                           </Badge>
                         )}
                       </div>
-                      <div className="mt-1.5 break-words text-xs font-medium leading-4">
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "break-words mt-1.5",
+
+                          // Typography
+                          "text-xs font-medium leading-4"
+                        )}
+                      >
                         <HighlightedText text={insight.title} query={searchQuery} />
                       </div>
-                      <p className="mt-0.5 line-clamp-3 break-words text-xs leading-4 text-muted-foreground">
+                      <p
+                        className={cn(
+                          // Layout & Positioning
+                          "line-clamp-3 break-words mt-0.5",
+
+                          // Typography
+                          "text-xs leading-4 text-muted-foreground"
+                        )}
+                      >
                         <HighlightedText text={insight.description} query={searchQuery} />
                       </p>
-                      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-muted-foreground">
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "flex flex-wrap items-center mt-1",
+
+                          // Sizing & Spacing
+                          "gap-x-2 gap-y-1",
+
+                          // Typography
+                          "text-[10px] text-muted-foreground"
+                        )}
+                      >
                         <span className="shrink-0 font-mono">{formatTime(insight.createdAt)}</span>
                         {insight.url && (
                           <span className="max-w-full break-all font-mono">
@@ -260,11 +480,22 @@ function AiInsightsPanelComponent({
                         )}
                       </div>
 
-                      <div className="mt-1 flex flex-wrap">
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "flex flex-wrap mt-1"
+                        )}
+                      >
                         <Button
                           size="xs"
                           variant="ghost"
-                          className="h-6 px-2 text-xs"
+                          className={cn(
+                            // Sizing & Spacing
+                            "h-6 px-2",
+
+                            // Typography
+                            "text-xs"
+                          )}
                           onKeyDown={(event) => event.stopPropagation()}
                           onClick={(event) => {
                             event.stopPropagation();
@@ -285,9 +516,22 @@ function AiInsightsPanelComponent({
       </ScrollArea>
 
       <Dialog open={detailItem !== null} onOpenChange={(open) => !open && setDetailItem(null)}>
-        <DialogContent className="max-h-[85vh] overflow-hidden sm:max-w-[720px]">
-          <DialogHeader className="">
-            <DialogTitle className="break-words pr-6 text-base">
+        <DialogContent
+          className={cn(
+            // Layout & Positioning
+            "overflow-hidden sm:max-w-[720px] max-h-[85vh]"
+          )}
+        >
+          <DialogHeader>
+            <DialogTitle
+              className={cn(
+                // Layout & Positioning
+                "break-words pr-6",
+
+                // Typography
+                "text-base"
+              )}
+            >
               <HighlightedText
                 text={
                   detailItem?.type === 'page'
@@ -297,7 +541,15 @@ function AiInsightsPanelComponent({
                 query={searchQuery}
               />
             </DialogTitle>
-            <DialogDescription className="max-w-full break-all font-mono text-xs">
+            <DialogDescription
+              className={cn(
+                // Layout & Positioning
+                "max-w-full break-all",
+
+                // Typography
+                "font-mono text-xs"
+              )}
+            >
               <HighlightedText
                 text={detailItem?.type === 'page' ? detailItem.page.url : detailItem?.insight.url || detailPage?.url || ''}
                 query={searchQuery}
@@ -305,8 +557,27 @@ function AiInsightsPanelComponent({
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="max-w-full max-h-[56vh] rounded-md border">
-            <div className="max-w-full space-y-3 p-3 text-sm">
+          <ScrollArea
+            className={cn(
+              // Layout & Positioning
+              "max-w-full max-h-[56vh]",
+
+              // Backgrounds & Borders
+              "rounded-md border"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "max-w-full",
+
+                // Sizing & Spacing
+                "space-y-3 p-3",
+
+                // Typography
+                "text-sm"
+              )}
+            >
               {detailItem?.type === 'page' ? (
                 <>
                   <div className="text-xs font-semibold uppercase text-muted-foreground">AI Summary</div>
@@ -350,3 +621,4 @@ function AiInsightsPanelComponent({
 }
 
 export const AiInsightsPanel = memo(AiInsightsPanelComponent);
+

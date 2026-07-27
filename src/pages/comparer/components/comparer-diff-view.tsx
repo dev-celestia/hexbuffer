@@ -1,124 +1,8 @@
-import { useMemo } from 'react';
-import { diffWords, diffChars, type Change } from 'diff';
+import { type Change } from 'diff';
 import { GitDiffIcon } from '@phosphor-icons/react';
 import type { DiffMode } from '../types';
-
-// ── Types ───────────────────────────────────────────
-
-interface InlinePart {
-  text: string;
-  type: 'unchanged' | 'added' | 'removed';
-}
-
-interface LineData {
-  leftContent: string;
-  rightContent: string;
-  leftType: 'unchanged' | 'removed' | 'empty';
-  rightType: 'unchanged' | 'added' | 'empty';
-  inlineLeft?: InlinePart[];
-  inlineRight?: InlinePart[];
-}
-
-// ── Helpers ─────────────────────────────────────────
-
-function getLines(change: Change): string[] {
-  const lines = change.value.split('\n');
-  if (lines.length > 0 && lines[lines.length - 1] === '') {
-    return lines.slice(0, -1);
-  }
-  return lines;
-}
-
-function computeInlineParts(a: string, b: string, mode: DiffMode) {
-  if (mode === 'lines' || !a || !b) return undefined;
-  const fn = mode === 'words' ? diffWords : diffChars;
-  try {
-    const changes = fn(a, b);
-    const left: InlinePart[] = [];
-    const right: InlinePart[] = [];
-    for (const c of changes) {
-      if (c.added) {
-        right.push({ text: c.value, type: 'added' });
-      } else if (c.removed) {
-        left.push({ text: c.value, type: 'removed' });
-      } else {
-        left.push({ text: c.value, type: 'unchanged' });
-        right.push({ text: c.value, type: 'unchanged' });
-      }
-    }
-    return { left, right };
-  } catch {
-    return undefined;
-  }
-}
-
-function buildLines(changes: Change[], mode: DiffMode): LineData[] {
-  const lines: LineData[] = [];
-  let i = 0;
-
-  while (i < changes.length) {
-    const c = changes[i];
-
-    if (c.added) {
-      for (const line of getLines(c)) {
-        lines.push({
-          leftContent: '',
-          rightContent: line,
-          leftType: 'empty',
-          rightType: 'added',
-        });
-      }
-      i++;
-    } else if (c.removed) {
-      // Check if next change is an added block (for pairing → inline diff)
-      if (i + 1 < changes.length && changes[i + 1].added) {
-        const removedLines = getLines(c);
-        const addedLines = getLines(changes[i + 1]);
-        const maxLen = Math.max(removedLines.length, addedLines.length);
-
-        for (let j = 0; j < maxLen; j++) {
-          const left = j < removedLines.length ? removedLines[j] : '';
-          const right = j < addedLines.length ? addedLines[j] : '';
-          const inline = left && right ? computeInlineParts(left, right, mode) : undefined;
-
-          lines.push({
-            leftContent: left,
-            rightContent: right,
-            leftType: left ? 'removed' : 'empty',
-            rightType: right ? 'added' : 'empty',
-            inlineLeft: inline?.left,
-            inlineRight: inline?.right,
-          });
-        }
-
-        i += 2;
-      } else {
-        for (const line of getLines(c)) {
-          lines.push({
-            leftContent: line,
-            rightContent: '',
-            leftType: 'removed',
-            rightType: 'empty',
-          });
-        }
-        i++;
-      }
-    } else {
-      // Unchanged
-      for (const line of getLines(c)) {
-        lines.push({
-          leftContent: line,
-          rightContent: line,
-          leftType: 'unchanged',
-          rightType: 'unchanged',
-        });
-      }
-      i++;
-    }
-  }
-
-  return lines;
-}
+import { useComparerDiffView, type InlinePart } from './hooks/use-comparer-diff-view';
+import { cn } from '@/lib/utils';
 
 // ── Inline Renderer ─────────────────────────────────
 
@@ -128,13 +12,14 @@ function InlineRenderer({ parts }: { parts: InlinePart[] }) {
       {parts.map((p, i) => (
         <span
           key={i}
-          className={
+          className={cn(
+            // Backgrounds & Borders
             p.type === 'added'
               ? 'bg-green-400/30 rounded-sm'
               : p.type === 'removed'
                 ? 'bg-red-400/30 rounded-sm'
                 : ''
-          }
+          )}
         >
           {p.text}
         </span>
@@ -151,13 +36,40 @@ interface ComparerDiffViewProps {
 }
 
 export function ComparerDiffView({ diffResult, diffMode }: ComparerDiffViewProps) {
-  const lines = useMemo(() => buildLines(diffResult, diffMode), [diffResult, diffMode]);
+  const { lines, isEmpty } = useComparerDiffView(diffResult, diffMode);
 
-  if (lines.length === 0) {
+  if (isEmpty) {
     return (
-      <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-        <div className="text-center">
-          <GitDiffIcon className="mx-auto h-8 w-8 mb-2 text-muted-foreground/50" />
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-center",
+
+          // Sizing & Spacing
+          "h-full",
+
+          // Typography
+          "text-sm text-muted-foreground"
+        )}
+      >
+        <div
+          className={cn(
+            // Typography
+            "text-center"
+          )}
+        >
+          <GitDiffIcon
+            className={cn(
+              // Layout & Positioning
+              "mx-auto",
+
+              // Sizing & Spacing
+              "h-8 w-8 mb-2",
+
+              // Typography
+              "text-muted-foreground/50"
+            )}
+          />
           <p>Enter text in both panels to see the diff</p>
         </div>
       </div>
@@ -168,20 +80,91 @@ export function ComparerDiffView({ diffResult, diffMode }: ComparerDiffViewProps
   let rightLineNum = 0;
 
   return (
-    <div className="h-full overflow-auto font-mono text-xs">
-      <table className="w-full border-collapse">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "overflow-auto",
+
+        // Sizing & Spacing
+        "h-full",
+
+        // Typography
+        "font-mono text-xs"
+      )}
+    >
+      <table
+        className={cn(
+          // Layout & Positioning
+          "w-full",
+
+          // Backgrounds & Borders
+          "border-collapse"
+        )}
+      >
         <thead>
-          <tr className="sticky top-0 z-10 bg-muted/95 backdrop-blur">
-            <th className="w-12 border-r border-b px-2 py-1 text-left text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+          <tr
+            className={cn(
+              // Layout & Positioning
+              "sticky top-0 z-10",
+
+              // Backgrounds & Borders
+              "bg-muted/95 backdrop-blur"
+            )}
+          >
+            <th
+              className={cn(
+                // Sizing & Spacing
+                "w-12 px-2 py-1",
+
+                // Typography
+                "text-left text-[10px] font-semibold text-muted-foreground uppercase tracking-wider",
+
+                // Backgrounds & Borders
+                "border-r border-b"
+              )}
+            >
               A
             </th>
-            <th className="border-b px-2 py-1 text-left text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+            <th
+              className={cn(
+                // Sizing & Spacing
+                "px-2 py-1",
+
+                // Typography
+                "text-left text-[10px] font-semibold text-muted-foreground uppercase tracking-wider",
+
+                // Backgrounds & Borders
+                "border-b"
+              )}
+            >
               Original
             </th>
-            <th className="w-12 border-x border-b px-2 py-1 text-left text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+            <th
+              className={cn(
+                // Sizing & Spacing
+                "w-12 px-2 py-1",
+
+                // Typography
+                "text-left text-[10px] font-semibold text-muted-foreground uppercase tracking-wider",
+
+                // Backgrounds & Borders
+                "border-x border-b"
+              )}
+            >
               B
             </th>
-            <th className="border-b px-2 py-1 text-left text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+            <th
+              className={cn(
+                // Sizing & Spacing
+                "px-2 py-1",
+
+                // Typography
+                "text-left text-[10px] font-semibold text-muted-foreground uppercase tracking-wider",
+
+                // Backgrounds & Borders
+                "border-b"
+              )}
+            >
               Modified
             </th>
           </tr>
@@ -199,7 +182,8 @@ export function ComparerDiffView({ diffResult, diffMode }: ComparerDiffViewProps
             return (
               <tr
                 key={idx}
-                className={
+                className={cn(
+                  // Backgrounds & Borders
                   isRemoved && isAdded
                     ? 'bg-yellow-500/[0.06]'
                     : isRemoved
@@ -207,21 +191,43 @@ export function ComparerDiffView({ diffResult, diffMode }: ComparerDiffViewProps
                       : isAdded
                         ? 'bg-green-500/[0.07]'
                         : ''
-                }
+                )}
               >
                 {/* Left line number */}
-                <td className="w-12 select-none border-r px-2 py-0.5 text-right text-[10px] leading-[1.4] text-muted-foreground/60 align-top">
+                <td
+                  className={cn(
+                    // Layout & Positioning
+                    "select-none align-top",
+
+                    // Sizing & Spacing
+                    "w-12 px-2 py-0.5",
+
+                    // Typography
+                    "text-right text-[10px] leading-[1.4] text-muted-foreground/60",
+
+                    // Backgrounds & Borders
+                    "border-r"
+                  )}
+                >
                   {showLeftNum ? leftLineNum : ''}
                 </td>
                 {/* Left content */}
                 <td
-                  className={`px-2 py-0.5 leading-[1.4] whitespace-pre-wrap break-all align-top ${
+                  className={cn(
+                    // Layout & Positioning
+                    "whitespace-pre-wrap break-all align-top",
+
+                    // Sizing & Spacing
+                    "px-2 py-0.5",
+
+                    // Typography
+                    "leading-[1.4]",
                     isRemoved
                       ? 'text-red-600/90 dark:text-red-400/90'
                       : line.leftType === 'empty'
                         ? 'opacity-30'
                         : 'text-foreground/80'
-                  }`}
+                  )}
                 >
                   {line.inlineLeft ? (
                     <InlineRenderer parts={line.inlineLeft} />
@@ -230,18 +236,40 @@ export function ComparerDiffView({ diffResult, diffMode }: ComparerDiffViewProps
                   )}
                 </td>
                 {/* Right line number */}
-                <td className="w-12 select-none border-x px-2 py-0.5 text-right text-[10px] leading-[1.4] text-muted-foreground/60 align-top">
+                <td
+                  className={cn(
+                    // Layout & Positioning
+                    "select-none align-top",
+
+                    // Sizing & Spacing
+                    "w-12 px-2 py-0.5",
+
+                    // Typography
+                    "text-right text-[10px] leading-[1.4] text-muted-foreground/60",
+
+                    // Backgrounds & Borders
+                    "border-x"
+                  )}
+                >
                   {showRightNum ? rightLineNum : ''}
                 </td>
                 {/* Right content */}
                 <td
-                  className={`px-2 py-0.5 leading-[1.4] whitespace-pre-wrap break-all align-top ${
+                  className={cn(
+                    // Layout & Positioning
+                    "whitespace-pre-wrap break-all align-top",
+
+                    // Sizing & Spacing
+                    "px-2 py-0.5",
+
+                    // Typography
+                    "leading-[1.4]",
                     isAdded
                       ? 'text-green-600/90 dark:text-green-400/90'
                       : line.rightType === 'empty'
                         ? 'opacity-30'
                         : 'text-foreground/80'
-                  }`}
+                  )}
                 >
                   {line.inlineRight ? (
                     <InlineRenderer parts={line.inlineRight} />
@@ -257,3 +285,4 @@ export function ComparerDiffView({ diffResult, diffMode }: ComparerDiffViewProps
     </div>
   );
 }
+

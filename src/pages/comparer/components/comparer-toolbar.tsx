@@ -16,6 +16,8 @@ import {
   EyeIcon,
   EyeSlashIcon
 } from '@phosphor-icons/react';
+import { useComparerToolbar } from './hooks/use-comparer-toolbar';
+import { cn } from '@/lib/utils';
 
 interface ComparerToolbarProps {
   hasContent: boolean;
@@ -32,8 +34,6 @@ interface ComparerToolbarProps {
   copyPanel: (value: string, label: string) => void;
 }
 
-import { cn } from '@/lib/utils';
-
 export function ComparerToolbar({
   hasContent,
   hasDiff,
@@ -48,7 +48,14 @@ export function ComparerToolbar({
   valueB,
   copyPanel,
 }: ComparerToolbarProps) {
-  // ponytail: kept simple with inline event handlers to minimize abstraction overhead.
+  const { toggleShowInputs, handleCopyA, handleCopyB } = useComparerToolbar({
+    showInputs,
+    setShowInputs,
+    copyPanel,
+    valueA,
+    valueB,
+  });
+
   return (
     <div
       className={cn(
@@ -62,7 +69,6 @@ export function ComparerToolbar({
         "border border-b-0 rounded-t-md bg-muted/40"
       )}
     >
-
       <div
         className={cn(
           // Layout & Positioning
@@ -139,7 +145,7 @@ export function ComparerToolbar({
         <Button
           variant="outline"
           size="xs"
-          onClick={() => setShowInputs(!showInputs)}
+          onClick={toggleShowInputs}
           className={cn(
             // Sizing & Spacing
             "h-6 px-2 gap-1.5",
@@ -169,9 +175,8 @@ export function ComparerToolbar({
           <ArrowsLeftRightIcon className="h-3 w-3" />
           Swap A/B
         </Button>
-
-
       </div>
+
       <div
         className={cn(
           // Layout & Positioning
@@ -185,7 +190,7 @@ export function ComparerToolbar({
         <Button
           variant="ghost"
           size="xs"
-          onClick={() => copyPanel(valueA, 'Original (A)')}
+          onClick={handleCopyA}
           disabled={!valueA}
           className={cn(
             // Sizing & Spacing
@@ -201,7 +206,7 @@ export function ComparerToolbar({
         <Button
           variant="ghost"
           size="xs"
-          onClick={() => copyPanel(valueB, 'Modified (B)')}
+          onClick={handleCopyB}
           disabled={!valueB}
           className={cn(
             // Sizing & Spacing
@@ -244,18 +249,17 @@ export function ComparerToolbar({
             "h-6 px-2 gap-1.5",
 
             // Typography
-            "text-[11px]",
+            "text-[11px] text-destructive",
 
-            // Backgrounds & Colors / Interactive & States
-            "text-destructive hover:bg-destructive/10 hover:text-destructive"
+            // Interactive & States
+            "hover:bg-destructive/10 hover:text-destructive"
           )}
         >
           <TrashIcon className="h-3 w-3" />
           Clear All
         </Button>
-
       </div>
-
     </div>
   );
 }
+

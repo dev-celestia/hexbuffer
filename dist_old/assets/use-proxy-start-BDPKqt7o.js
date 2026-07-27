@@ -1,0 +1,1 @@
+import{em as c,eM as s}from"./vendor-92gQFPr5.js";import{b1 as a}from"./main-C1YHKILr.js";function u(){const o=a(t=>t.proxyStatus),e=a(t=>t.startProxy),[n,r]=c.useState(!1);return{proxyStatus:o,isStarting:n,handleStartProxy:async()=>{r(!0);try{await e(),s.success("Proxy started")}catch(t){s.error(t instanceof Error?t.message:"Failed to start proxy")}finally{r(!1)}}}}export{u};

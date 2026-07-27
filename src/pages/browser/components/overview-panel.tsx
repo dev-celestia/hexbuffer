@@ -1,53 +1,105 @@
-import { PulseIcon, WarningCircleIcon, ClockIcon, EyeIcon, FileTextIcon, GlobeIcon, StackIcon, ShieldSlashIcon, TimerIcon } from '@phosphor-icons/react';
-import { formatDuration } from '../lib/crawl-data';
+import { PulseIcon } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 import type { CrawlOverview } from '../types';
+import { useCrawlOverviewPanel } from './hooks/use-crawl-overview-panel';
 
 interface CrawlOverviewPanelProps {
   overview: CrawlOverview;
 }
 
-const metricIcons: Record<string, typeof PulseIcon> = {
-  Status: PulseIcon,
-  Visited: EyeIcon,
-  Discovered: GlobeIcon,
-  Queued: ClockIcon,
-  Depth: StackIcon,
-  Errors: WarningCircleIcon,
-  Blocked: ShieldSlashIcon,
-  Forms: FileTextIcon,
-  Duration: TimerIcon,
-};
-
 export function CrawlOverviewPanel({ overview }: CrawlOverviewPanelProps) {
-  const metrics = [
-    { label: 'Status', value: overview.sessionStatus },
-    { label: 'Visited', value: overview.pagesVisited },
-    { label: 'Discovered', value: overview.urlsDiscovered },
-    { label: 'Queued', value: overview.urlsQueued },
-    { label: 'Depth', value: overview.currentDepth },
-    { label: 'Errors', value: overview.errors },
-    { label: 'Blocked', value: overview.blockedPages },
-    { label: 'Forms', value: overview.formsFound },
-    { label: 'Duration', value: formatDuration(overview.durationSeconds) },
-  ];
+  const { metrics, metricIcons } = useCrawlOverviewPanel({ overview });
 
   return (
-    <section className="flex min-h-0 flex-col border-b bg-background xl:border-b-0">
-      <div className="border-b px-3 py-2">
-        <div className="text-sm font-medium">Automation Overview</div>
-        <div className="text-xs text-muted-foreground">Real-time crawl metrics.</div>
+    <section
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col min-h-0",
+
+        // Backgrounds & Borders
+        "border-b bg-background xl:border-b-0"
+      )}
+    >
+      <div
+        className={cn(
+          // Sizing & Spacing
+          "px-3 py-2",
+
+          // Backgrounds & Borders
+          "border-b"
+        )}
+      >
+        <div
+          className={cn(
+            // Typography
+            "text-sm font-medium"
+          )}
+        >
+          Automation Overview
+        </div>
+        <div
+          className={cn(
+            // Typography
+            "text-xs text-muted-foreground"
+          )}
+        >
+          Real-time crawl metrics.
+        </div>
       </div>
 
-      <div className="grid content-start gap-y-2 overflow-auto p-3 text-xs text-muted-foreground">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "grid content-start overflow-auto",
+
+          // Sizing & Spacing
+          "gap-y-2 p-3",
+
+          // Typography
+          "text-xs text-muted-foreground"
+        )}
+      >
         {metrics.map((metric) => {
           const Icon = metricIcons[metric.label] ?? PulseIcon;
           return (
-            <div key={metric.label} className="grid grid-cols-[1fr_auto] gap-3">
-              <span className="inline-flex items-center gap-1.5">
-                <Icon className="size-3.5 shrink-0" />
+            <div
+              key={metric.label}
+              className={cn(
+                // Layout & Positioning
+                "grid grid-cols-[1fr_auto]",
+
+                // Sizing & Spacing
+                "gap-3"
+              )}
+            >
+              <span
+                className={cn(
+                  // Layout & Positioning
+                  "inline-flex items-center",
+
+                  // Sizing & Spacing
+                  "gap-1.5"
+                )}
+              >
+                <Icon
+                  className={cn(
+                    // Layout & Positioning
+                    "shrink-0",
+
+                    // Sizing & Spacing
+                    "size-3.5"
+                  )}
+                />
                 {metric.label}
               </span>
-              <span className="font-semibold capitalize text-foreground">{metric.value}</span>
+              <span
+                className={cn(
+                  // Typography
+                  "font-semibold capitalize text-foreground"
+                )}
+              >
+                {metric.value}
+              </span>
             </div>
           );
         })}
@@ -55,3 +107,4 @@ export function CrawlOverviewPanel({ overview }: CrawlOverviewPanelProps) {
     </section>
   );
 }
+

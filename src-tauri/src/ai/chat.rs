@@ -2,10 +2,7 @@ use tauri::{AppHandle, Emitter, State};
 
 use super::keyring::read_required_ai_api_key;
 use super::settings::read_ai_settings;
-use super::types::{
-    AiChatContext, AiChatCrawlContext, AiChatRequest, AiChatResponse, AiSettings,
-};
-
+use super::types::{AiChatContext, AiChatCrawlContext, AiChatRequest, AiChatResponse, AiSettings};
 
 pub async fn send_ai_chat_message_impl(
     app: AppHandle,
@@ -28,6 +25,18 @@ pub async fn send_ai_chat_message_impl(
     } else {
         hexbuffer_ai::AiConfig::new(&settings.provider, &settings.model, &api_key)
     };
+
+    let app_handle = app.clone();
+    hexbuffer_ai::tools::set_tool_call_handler(move |tool_name, args| {
+        let _ = app_handle.emit(
+            "ai:execute-tool",
+            serde_json::json!({
+                "id": format!("call-{}", chrono::Utc::now().timestamp_millis()),
+                "tool_name": tool_name,
+                "arguments": args,
+            }),
+        );
+    });
 
     let engine = hexbuffer_ai::AiEngine::new(config);
 

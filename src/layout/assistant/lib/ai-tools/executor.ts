@@ -9,11 +9,9 @@ import { executeToggleInterceptAiTool } from './intercept';
 import { executeTriggerScanAiTool } from './browser';
 import { executeRunTerminalCommandAiTool } from './terminal';
 import { executeWriteDocumentAiTool } from './documents';
+import { addTrackedAction, completeTrackedAction } from './tracker';
 
-/**
- * Executes a tool capability directly using Apprecon frontend triggers
- */
-export async function executeAiToolCall(toolName: string, args: Record<string, any>): Promise<any> {
+async function dispatchToolExecution(toolName: string, args: Record<string, any>): Promise<any> {
   switch (toolName) {
     case 'send_to_repeater':
       return executeSendToRepeaterAiTool(args);
@@ -44,5 +42,20 @@ export async function executeAiToolCall(toolName: string, args: Record<string, a
 
     default:
       throw new Error(`Unknown AI Tool capability: ${toolName}`);
+  }
+}
+
+/**
+ * Executes a tool capability directly using Apprecon frontend triggers and tracks progress
+ */
+export async function executeAiToolCall(toolName: string, args: Record<string, any>): Promise<any> {
+  const actionId = addTrackedAction(toolName);
+  try {
+    const result = await dispatchToolExecution(toolName, args);
+    completeTrackedAction(actionId, false);
+    return result;
+  } catch (error) {
+    completeTrackedAction(actionId, true);
+    throw error;
   }
 }

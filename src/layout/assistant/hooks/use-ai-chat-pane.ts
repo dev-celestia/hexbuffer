@@ -2,8 +2,7 @@ import type { UIMessage } from '@ai-sdk/react';
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useChatSessions } from './use-chat-sessions';
 import { useDashboardPage } from './use-dashboard-page';
-import { useAiChatActions } from '@/hooks/use-ai-chat-actions';
-import { useTrackedActions, clearTrackedActions } from '@/lib/ai-chat-actions';
+import { useTrackedActions, clearTrackedActions } from '../lib/ai-tools';
 import { AI_MODEL_OPTIONS_BY_PROVIDER } from '@/pages/settings/constants';
 
 // ponytail: removed active page auto-detection to simplify system context and rely on explicit mentions
@@ -49,7 +48,6 @@ export function useAiChatPane() {
   const providerDisplay = 'DeepSeek';
   const modelOptions = AI_MODEL_OPTIONS_BY_PROVIDER[aiSettings.provider] ?? [];
 
-  useAiChatActions();
   const trackedActions = useTrackedActions();
 
   useEffect(() => {
