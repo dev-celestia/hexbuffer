@@ -124,13 +124,6 @@ apprecon/
   )
   ```
 
-### Frontend Page Pattern
-Pages inside `src/pages/` follow a mandatory **Page-Hook-Component** separation:
-1. **Page Entry** (`index.tsx`): Pure presentation layout composition.
-2. **Page Hook** (`hooks/use-[feature]-page.ts`): State management, store coordination, and event handlers.
-3. **Presentational Components** (`components/`): Focused UI sub-components (`*-toolbar`, `*-pane`, `*-filters`).
-4. **Shared Primitives**: Reusable tab bar components imported from `src/pages/shared/`.
-
 ### AI Tool Integration Pattern
 When adding AI capabilities:
 1. **Rust Tool** (`hexbuffer-ai/src/tools/`): Implement Rig `Tool` trait and attach to `AgentBuilder`.
