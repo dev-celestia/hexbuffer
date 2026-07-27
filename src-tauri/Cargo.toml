@@ -4,6 +4,7 @@ version = "2026.0.79"
 description = "Proxy App"
 authors = ["Arham"]
 edition = "2021"
+license = "MIT"
 
 [lib]
 name = "hexbuffer"

@@ -2,6 +2,7 @@
   "name": "hexbuffer",
   "private": true,
   "version": "2026.0.79",
+  "license": "MIT",
   "packageManager": "pnpm@9.15.4",
   "type": "module",
   "scripts": {

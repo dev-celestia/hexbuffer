@@ -140,4 +140,4 @@ When adding AI capabilities:
 
 ## License
 
-Private and proprietary. See repository permissions for details.
+This project is licensed under the [MIT License](LICENSE).
