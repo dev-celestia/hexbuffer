@@ -54,6 +54,7 @@ export function setActiveTerminalId(id: string | null): void {
   useTerminalStore.getState().setActiveId(id);
 }
 
-export { TERMINAL_AI_TOOL_DEFINITION, executeRunTerminalCommandAiTool } from '@/layout/assistant/lib/ai-tools/terminal';
+export { TERMINAL_AI_TOOL_DEFINITION, executeRunTerminalCommandAiTool } from './ai-tool';
+
 
 
