@@ -9,6 +9,7 @@ pub mod history;
 pub mod port_scanner;
 pub mod proxy;
 pub mod sqli;
+pub mod tools;
 
 pub use ai::{
     clear_ai_api_key, get_ai_key_status, get_ai_settings, save_ai_settings,

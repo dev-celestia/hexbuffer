@@ -17,6 +17,7 @@ Welcome to the official documentation directory for **Hexbuffer** (AppRecon).
 
 - 📘 **[System Capabilities & Technical Reference](capabilities.md)** — Exhaustive overview of system architecture, 24 UI feature modules, Rust backend APIs, Zustand stores, AI trigger integrations, and coding standards.
 - ⚙️ **[hexbuffer-proxy Library Usage Guide](hexbuffer-proxy.md)** — Low-level technical guide for the `hexbuffer-proxy` Rust library (TLS termination, HTTP/2 negotiation, WebSocket interception, body decompression).
+- 🚀 **[Automated Builds & CI/CD Release Guide](ci-cd-release-guide.md)** — Step-by-step guide on GitHub Actions matrix builds, version tagging, cross-platform packaging (Linux, macOS, Windows), and automated releases.
 
 ---
 
@@ -26,4 +27,6 @@ Welcome to the official documentation directory for **Hexbuffer** (AppRecon).
 - [Feature Matrix](capabilities.md#2-feature--module-capability-matrix)
 - [Tauri IPC API Commands](capabilities.md#3-backend-ipc-api-command-reference)
 - [Zustand State Architecture](capabilities.md#4-frontend-state-management-architecture)
+- [Automated Builds & Releases](ci-cd-release-guide.md)
 - [Development Standards](capabilities.md#5-development--contribution-standards)
+

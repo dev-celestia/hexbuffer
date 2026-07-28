@@ -27,7 +27,7 @@ pub async fn send_ai_chat_message_impl(
     };
 
     let app_handle = app.clone();
-    hexbuffer_ai::tools::set_tool_call_handler(move |tool_name, args| {
+    crate::tools::set_tool_call_handler(move |tool_name, args| {
         let _ = app_handle.emit(
             "ai:execute-tool",
             serde_json::json!({
