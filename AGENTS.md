@@ -1,8 +1,10 @@
 # Repository Guidelines
 
-## Components usage 
+## Components Usage & Styling Rules
 
-use components inside `/src/components/ui` dont put any custom className just use the original components 
+- **MANDATORY**: Always use pre-built UI components inside `/src/components/ui`.
+- **FORBIDDEN**: Do NOT generate custom or inline `className` props when using components.
+- Always rely on the original styled components from `/src/components/ui` as designed to maintain UI consistency across all files. 
 
 ## Component Styling Standard
 

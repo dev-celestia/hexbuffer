@@ -1,6 +1,15 @@
 # hexbuffer
 
-**hexbuffer** is a high-performance desktop environment for application security testing, network traffic analysis, request crafting, and AI-assisted debugging. Designed for developers, security researchers, and QA engineers, it unifies MITM proxying, active interception, automated fuzzing, out-of-band callback logging, node-based visual automation, terminal sessions, and AI agent execution into a single, cohesive interface.
+**hexbuffer** is a high-performance desktop environment for general web application testing, API debugging, network traffic analysis, request crafting, and AI-assisted development. Designed for developers, QA engineers, and system architects, it unifies MITM proxying, active interception, automated parameter testing, out-of-band callback logging, node-based visual automation, terminal sessions, and AI agent execution into a single, cohesive interface.
+
+### How Is It Different?
+
+**hexbuffer** unifies real-time HTTP/HTTPS traffic diagnostics, API request crafting, automated testing workflows, AI-driven reconnaissance and debugging, node-based automation, and documentation in a single desktop application.
+
+- **No web-based tool sprawl**: Stop jumping between disjointed browser extensions, API clients, terminal tabs, and external AI tools.
+- **Autonomous AI Integration**: Built-in AI agents inspect network traffic, draft API requests, run parameter tests, manage terminal sessions, and generate documentation in real time.
+- **Complete Web Testing Workspace**: Real-time traffic inspection, parameter testing, mock servers, performance profiling, and test reporting exist within a cohesive, single-window workspace.
+- **Just open hexbuffer and get to work.**
 
 ---
 
