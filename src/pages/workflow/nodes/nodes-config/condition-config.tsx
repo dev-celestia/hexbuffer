@@ -1,13 +1,6 @@
+import { Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'hexbuffer-ui';
 import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import { NODE_TYPE_REGISTRY } from '../../constants';
 import { defaultDataPathForCondition } from '../../lib/condition-evaluator';
 import { getNodeDataSchema } from '../../lib/node-capabilities';

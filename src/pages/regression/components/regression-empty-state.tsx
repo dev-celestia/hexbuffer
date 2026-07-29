@@ -1,5 +1,5 @@
+import { Button } from 'hexbuffer-ui';
 import { FlaskIcon, PlusIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
 
 export function RegressionEmptyState({ onCreate }: { onCreate: () => void }) {
   return (

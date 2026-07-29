@@ -1,5 +1,5 @@
+import { ScrollArea } from 'hexbuffer-ui';
 import { useMemo, useCallback } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function JsonViewer({ data, onCopyRef }: { data: unknown; onCopyRef?: (fn: () => void) => void }) {
   const text = useMemo(() => {

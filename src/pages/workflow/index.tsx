@@ -1,9 +1,6 @@
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
 import { cn } from '@/lib/utils';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable';
+
 import { ReactFlowProvider } from '@xyflow/react';
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
 import { WorkflowCanvas } from './components/workflow-canvas';

@@ -1,10 +1,6 @@
-import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
+
+import { Button, Collapsible, CollapsibleContent, CollapsibleTrigger, ScrollArea } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import { CaretDownIcon, PaperclipIcon } from '@phosphor-icons/react';
 import type { ComponentProps } from "react";

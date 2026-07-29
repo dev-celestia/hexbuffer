@@ -1,10 +1,6 @@
+import { Badge, Button, Input, ScrollArea, Separator, TextEditor } from 'hexbuffer-ui';
 import { ListIcon, ArrowSquareOutIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { TextEditor } from '@/components/ui/text-editor';
+
 import type { MockDomain, MockRoute, RequestLog } from '../types';
 import { useLogsPanel, useLogDetail } from './hooks/use-logs-panel';
 

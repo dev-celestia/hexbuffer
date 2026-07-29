@@ -1,3 +1,4 @@
+import { Alert, AlertAction, AlertDescription, Button, ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
 import { cn } from '@/lib/utils';
 import { PlayIcon, SquareIcon, PauseIcon, ArrowCounterClockwiseIcon, InfoIcon } from '@phosphor-icons/react';
 import { AiInsightsPanel } from './components/insight-panel';
@@ -5,9 +6,7 @@ import { ActionLogPanel } from './components/ActionLogPanel';
 import { CrawlSetupScreen } from './components/setup-screen';
 import { CrawlTreePanel } from './components/tree-panel';
 import { PageDetailPanel } from './components/page-detail-panel';
-import { Alert, AlertAction, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
 import { CrawlStatusBadge } from '@/components/status-badge';
 import { useProxyStart } from '@/hooks/use-proxy-start';

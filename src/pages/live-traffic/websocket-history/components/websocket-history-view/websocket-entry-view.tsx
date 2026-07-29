@@ -1,9 +1,7 @@
+import { Alert, AlertDescription, AlertTitle, Checkbox, Empty, EmptyDescription, EmptyTitle, Input } from 'hexbuffer-ui';
 import { useState, useRef, useEffect } from 'react';
 import { MagnifyingGlassIcon } from '@phosphor-icons/react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Empty, EmptyDescription, EmptyTitle } from '@/components/ui/empty';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
+
 import { useWebSocketDetail } from '../../hooks/use-websocket-detail';
 import { InspectorSection, buildHeadersList } from '@/pages/live-traffic/components/inspector';
 import { WebSocketMessageCard } from './websocket-message-card';

@@ -1,14 +1,6 @@
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+
+
+import { Collapsible, CollapsibleContent, CollapsibleTrigger, Tabs, TabsContent, TabsList, TabsTrigger } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import type { ToolUIPart } from "ai";
 import { CaretDownIcon, CodeIcon } from '@phosphor-icons/react';

@@ -1,3 +1,4 @@
+import { Button } from 'hexbuffer-ui';
 import React from 'react';
 import {
   Background,
@@ -13,7 +14,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { PlusIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
+
 import type { RegressionStepNodeData } from '../nodes/step-node';
 import type { TestStep } from '../types';
 import {

@@ -1,3 +1,4 @@
+import { Button } from 'hexbuffer-ui';
 import React from 'react';
 import {
   PlayIcon,
@@ -9,7 +10,7 @@ import {
   CaretRightIcon,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+
 import {
   useAutomationStore,
   type ExecutionLog,

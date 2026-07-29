@@ -1,19 +1,6 @@
+import { Badge, ResizableHandle, ResizablePanel, ResizablePanelGroup, ScrollArea, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'hexbuffer-ui';
 import { DatabaseIcon, TableIcon } from '@phosphor-icons/react';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable';
+
 import type { SqliExtractedDatabase } from '../types';
 
 interface ExtractionTabProps {

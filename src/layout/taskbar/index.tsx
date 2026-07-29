@@ -1,3 +1,4 @@
+import { Separator, Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
 import {
   XCircleIcon,
 } from '@phosphor-icons/react';
@@ -18,7 +19,6 @@ import {
   horizontalListSortingStrategy,
 } from "@dnd-kit/sortable";
 
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSidebarNav } from "./hooks/use-taskbar-nav";
 import { useSidebarDock } from "./hooks/use-taskbar-dock";
 import { AppLauncher } from "./app-launcher";
@@ -28,7 +28,6 @@ import { useBrowserSessionEvents } from "../hooks/use-browser-session-events";
 import { useAppSettingsStore } from "@/stores/app-settings-store";
 import { useBrowserAutomationStore } from "@/stores/browser-automation";
 import { useNavStore } from "@/stores/nav";
-import { Separator } from "@/components/ui/separator";
 
 // Sub-components
 import { DockItem, SortableDockItem } from './components/dock-item';

@@ -1,5 +1,6 @@
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
 import { useState } from 'react';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+
 import { toast } from 'sonner';
 import { useComparerPage } from './hooks/use-comparer-page';
 import { ComparerToolbar } from './components/comparer-toolbar';
@@ -128,5 +129,4 @@ export function ComparerPage() {
     </div>
   );
 }
-
 

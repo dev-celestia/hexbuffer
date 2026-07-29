@@ -1,3 +1,4 @@
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from 'hexbuffer-ui';
 import { memo } from "react";
 import {
   DotsThreeVerticalIcon,
@@ -11,17 +12,7 @@ import {
   PaletteIcon,
   PaperPlaneTiltIcon,
 } from "@phosphor-icons/react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
-} from "@/components/ui/dropdown-menu";
+
 import type { ApiCall } from "@/types";
 import { useLogEntryActions } from "./hooks/use-log-entry-actions";
 import {

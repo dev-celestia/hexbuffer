@@ -1,5 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { SpinnerIcon } from "@/components/ui/spinner";
+
+
+import { Button, SpinnerIcon } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import { MicrophoneIcon, SquareIcon } from '@phosphor-icons/react';
 import type { ComponentProps } from "react";

@@ -1,6 +1,6 @@
+import { Button, Input } from 'hexbuffer-ui';
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import { useAutomationStore } from '@/stores/automation';
 import { WarningCircleIcon, TrashIcon, PencilIcon, CheckIcon, XIcon, SpinnerGapIcon, OctagonIcon, PauseIcon, PlayIcon, PauseCircleIcon } from '@phosphor-icons/react';
 import { getWorkflowReadiness } from '../lib/workflow-readiness';

@@ -1,14 +1,6 @@
+import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Input, ScrollArea } from 'hexbuffer-ui';
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { useRepeaterStore } from '@/stores/repeater';
 import { deleteWorkspace, renameWorkspace } from '@/triggers/repeater';
 import {

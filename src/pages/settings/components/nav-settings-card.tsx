@@ -1,7 +1,6 @@
+import { Button, Label, Switch } from 'hexbuffer-ui';
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+
 import { ALL_NAV_ITEMS } from '@/layout/constants';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 

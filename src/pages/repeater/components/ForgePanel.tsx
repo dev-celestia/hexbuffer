@@ -1,10 +1,10 @@
+import { Tabs, TabsList, TabsTrigger } from 'hexbuffer-ui';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useForgePanel } from './forge-panel/use-forge-panel';
 import { ForgeRequestBar } from './forge-panel/forge-request-bar';
 import { ForgeRequestTabs } from './forge-panel/forge-request-tabs';
 import { ForgeResponseView } from './forge-panel/forge-response-view';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 function ForgeLoadingView() {
   return (

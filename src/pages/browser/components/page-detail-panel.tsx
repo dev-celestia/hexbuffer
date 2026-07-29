@@ -1,18 +1,10 @@
+import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, ScrollArea, Tabs, TabsContent, TabsList, TabsTrigger, TextEditor } from 'hexbuffer-ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { memo } from 'react';
 import { CopyIcon, ArrowSquareOutIcon, SpinnerGapIcon, ArrowsOutIcon, StarIcon } from '@phosphor-icons/react';
 import { InterestingBadge } from '@/components/status-badge';
 import { HighlightedText } from '@/components/highlighted-text';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TextEditor } from '@/components/ui/text-editor';
+
 import { copyText } from '@/lib/clipboard';
 import { cn } from '@/lib/utils';
 import { PAGE_STATUS_LABELS } from '../constants';

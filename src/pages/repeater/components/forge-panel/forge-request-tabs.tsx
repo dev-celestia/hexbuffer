@@ -1,12 +1,6 @@
+import { Button, ButtonGroup, Checkbox, Label, RadioGroup, RadioGroupItem, ScrollArea, Switch, TextEditor } from 'hexbuffer-ui';
 import { useState, useRef } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { TextEditor } from "@/components/ui/text-editor";
-import { Switch } from "@/components/ui/switch";
+
 import { TrashIcon, PlusIcon, UploadSimpleIcon, ImageSquareIcon } from '@phosphor-icons/react';
 import type { KeyValuePair, ActiveRequestState } from "@/stores/collections";
 import { cn } from "@/lib/utils";

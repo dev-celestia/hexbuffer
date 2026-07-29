@@ -1,6 +1,7 @@
+import { Button } from 'hexbuffer-ui';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+
 import { SpinnerGapIcon, PlayIcon, WarningCircleIcon } from '@phosphor-icons/react';
 
 // Import xterm.css so helper elements (like the textarea) are styled/hidden off-screen correctly

@@ -1,16 +1,6 @@
+import { Button, Input, Label, ScrollArea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, TextEditor } from 'hexbuffer-ui';
 import * as React from 'react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { TextEditor } from '@/components/ui/text-editor';
+
 import { CopyIcon, KeyIcon } from '@phosphor-icons/react';
 import type { JwtAlgorithm } from '../types';
 import { ALGORITHM_OPTIONS } from '../constants';

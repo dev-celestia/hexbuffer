@@ -1,7 +1,8 @@
+import { Button } from 'hexbuffer-ui';
 import { useInvokerStore } from '@/stores/invoker';
 import { formatPayloadValues, getResultUrl } from '../lib/utils';
 import { useInvokerFilters } from '../hooks/use-filters';
-import { Button } from '@/components/ui/button';
+
 import { TrashIcon } from '@phosphor-icons/react';
 
 export function InvokerResultsPanel() {

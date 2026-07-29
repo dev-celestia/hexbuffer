@@ -1,5 +1,6 @@
+import { Tabs } from 'hexbuffer-ui';
 import type { ReactNode } from 'react';
-import { Tabs } from '@/components/ui/tabs';
+
 import { PageTabBar } from './tab-bar';
 import type { PageTabItem } from './types';
 import { cn } from '@/lib/utils';

@@ -1,4 +1,5 @@
-import { Badge } from "@/components/ui/badge";
+
+import { Badge } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import { ArrowRightIcon, MinusIcon, PackageIcon, PlusIcon } from '@phosphor-icons/react';
 import type { HTMLAttributes } from "react";

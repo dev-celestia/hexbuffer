@@ -1,6 +1,6 @@
-import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
-import { TextEditor } from '@/components/ui/text-editor';
+
+
+import { Badge, Label, TextEditor } from 'hexbuffer-ui';
 import { buildRawHttpResponse } from '@/lib/http-message';
 import { WarningCircleIcon } from '@phosphor-icons/react';
 import { useInvokerStore } from '@/stores/invoker';

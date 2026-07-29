@@ -1,17 +1,10 @@
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, Input, Label, Switch } from 'hexbuffer-ui';
 import * as React from 'react';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { MAIN_NAV_ITEMS } from '@/layout/constants';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+
 import { ArrowCounterClockwiseIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
+
 import { DESKTOP_WIDGETS } from '../constants';
 import { cn } from '@/lib/utils';
 

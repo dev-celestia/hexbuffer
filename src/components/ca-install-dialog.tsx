@@ -1,20 +1,12 @@
+import { Alert, AlertDescription, AlertTitle, Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from 'hexbuffer-ui';
 import { cn } from '@/lib/utils';
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { invoke } from '@tauri-apps/api/core';
 import { SpinnerGapIcon, GearIcon, KeyIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+
 import { useNavStore } from '@/stores/nav';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 
 const STORAGE_KEY = 'ca-install-dialog-dismissed';
 

@@ -1,7 +1,6 @@
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Alert, AlertDescription, AlertTitle, Button } from 'hexbuffer-ui';
 import { DownloadSimpleIcon, KeyIcon, ArrowClockwiseIcon } from '@phosphor-icons/react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+
 import {
   HOW_IT_WORKS,
   INSTALLATION_GUIDES,

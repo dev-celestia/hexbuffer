@@ -1,15 +1,7 @@
+import { Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea } from 'hexbuffer-ui';
 import React from 'react';
 import { GlobeIcon, Info } from '@phosphor-icons/react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import type { TriggerConfig } from '../../types';
 
 export const OPERATOR_OPTIONS: { value: NonNullable<TriggerConfig['operator']>; label: string }[] = [

@@ -1,6 +1,6 @@
+import { Badge, Button } from 'hexbuffer-ui';
 import { FlaskIcon, ListChecksIcon, PlayIcon, PlayCircleIcon, SquareIcon } from '@phosphor-icons/react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+
 import { cn } from '@/lib/utils';
 import type { TestCase } from '../types';
 

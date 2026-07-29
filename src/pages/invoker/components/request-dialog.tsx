@@ -1,13 +1,6 @@
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+
+
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Label } from 'hexbuffer-ui';
 import { useInvokerStore } from '@/stores/invoker';
 import { findRequestPayloadPositions, parseRawRequest } from '../types';
 

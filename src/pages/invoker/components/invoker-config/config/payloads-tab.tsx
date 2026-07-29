@@ -1,11 +1,6 @@
+import { Badge, Button, Input, Label, Tabs, TabsContent, TabsList, TabsTrigger, TextEditor } from 'hexbuffer-ui';
 import * as React from 'react';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TextEditor } from '@/components/ui/text-editor';
 import { useInvokerStore } from '@/stores/invoker';
 import { createDefaultPayloadConfig, type PayloadConfig, type PayloadType } from '../../../types';
 import { InvokerPayloadPresetDialog } from '../../payload-preset-dialog';

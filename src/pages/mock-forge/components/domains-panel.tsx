@@ -1,3 +1,4 @@
+import { Badge, Button, Input, ScrollArea, Switch } from 'hexbuffer-ui';
 import {
   TrashIcon,
   LockSimpleIcon,
@@ -6,11 +7,7 @@ import {
   MagnifyingGlassIcon,
   Info,
 } from '@phosphor-icons/react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import type { MockDomain, MockRoute } from '../types';
 import { useDomainsPanel } from './hooks/use-domains-panel';
 

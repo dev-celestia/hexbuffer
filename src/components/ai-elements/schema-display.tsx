@@ -1,9 +1,6 @@
-import { Badge } from "@/components/ui/badge";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+
+
+import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import { CaretRightIcon } from '@phosphor-icons/react';
 import type { ComponentProps, HTMLAttributes } from "react";

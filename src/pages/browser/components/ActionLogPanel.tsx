@@ -1,6 +1,6 @@
+import { Button, ScrollArea } from 'hexbuffer-ui';
 import { memo } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
+
 import { ActivityStatusBadge } from '@/components/status-badge';
 import { cn } from '@/lib/utils';
 import type { ActionLogEntry } from '@/stores/browser-automation';

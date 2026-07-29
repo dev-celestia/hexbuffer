@@ -1,3 +1,4 @@
+import { Button, ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from 'hexbuffer-ui';
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -8,15 +9,9 @@ import {
   TrashIcon,
   PauseIcon,
 } from "@phosphor-icons/react";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
+
 import { MethodBadge } from "@/components/status-badge";
-import { Button } from "@/components/ui/button";
+
 import { cn } from "@/lib/utils";
 import { formatRequestTime } from "../lib";
 import { useQueuePanel } from "./hooks/use-queue-panel";

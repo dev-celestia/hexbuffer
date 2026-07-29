@@ -1,5 +1,6 @@
+import { Button } from 'hexbuffer-ui';
 import { useAppStore } from '@/stores/app';
-import { Button } from '@/components/ui/button';
+
 import { HardDrivesIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 

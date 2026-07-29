@@ -1,10 +1,6 @@
+import { Badge, ResizableHandle, ResizablePanel, ResizablePanelGroup, TabsContent } from 'hexbuffer-ui';
 import { ReactFlowProvider } from '@xyflow/react';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable';
-import { TabsContent } from '@/components/ui/tabs';
+
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
 import { useRegressionPage } from './hooks/use-regression-page';
 import { RegressionHeader } from './components/regression-header';
@@ -15,7 +11,6 @@ import { TestResults } from './components/test-results';
 import { RegressionTree } from './components/regression-tree';
 import { RelationalDashboard } from './components/relational-dashboard';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
 
 export function RegressionPage() {
   const page = useRegressionPage();

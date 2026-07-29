@@ -1,8 +1,6 @@
+import { Button, Checkbox, Input, Label } from 'hexbuffer-ui';
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+
 import { useAutomationStore } from '@/stores/automation';
 import {
   AUTOMATION_SETTINGS_LIMITS,

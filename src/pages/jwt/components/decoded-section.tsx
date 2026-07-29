@@ -1,5 +1,6 @@
+import { Label } from 'hexbuffer-ui';
 import * as React from 'react';
-import { Label } from '@/components/ui/label';
+
 import { formatTimestamp } from '../lib/jwt-helpers';
 
 const TIMESTAMP_KEYS = new Set(['iat', 'exp', 'nbf']);

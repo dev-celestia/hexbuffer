@@ -1,10 +1,6 @@
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from 'hexbuffer-ui';
 import { useNavigate } from 'react-router-dom';
-import {
-  ContextMenu,
-  ContextMenuTrigger,
-  ContextMenuContent,
-  ContextMenuItem,
-} from '@/components/ui/context-menu';
+
 import { PaperPlaneTiltIcon, TrashIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useRepeaterStore } from '@/stores/repeater';

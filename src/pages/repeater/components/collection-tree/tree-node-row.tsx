@@ -1,3 +1,4 @@
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from 'hexbuffer-ui';
 import React, { useRef, useEffect } from 'react';
 import { CaretDownIcon, DotsSixVerticalIcon, PlusIcon, TrashIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import folderIcon from '@/assets/explorer-icon/_folder.svg';
@@ -7,12 +8,6 @@ import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
 import type { FlatNode, DropAction } from './utils';
 import { getMethodColor } from '@/lib/method-colors';
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from '@/components/ui/context-menu';
 
 // ── Props ──
 

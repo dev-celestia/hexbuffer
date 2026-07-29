@@ -1,3 +1,4 @@
+import { Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
 import * as React from 'react';
 import {
   SpinnerGapIcon,
@@ -10,11 +11,7 @@ import {
 } from '@phosphor-icons/react';
 
 import { cn } from '@/lib/utils';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+
 import { GlobalSearch } from '../../global-search';
 import type { NavItem } from '../../constants';
 import { DockItem } from './dock-item';

@@ -1,5 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+
+
+import { Button, Textarea } from 'hexbuffer-ui';
 import { TrashIcon } from '@phosphor-icons/react';
 
 interface HashInputPanelProps {

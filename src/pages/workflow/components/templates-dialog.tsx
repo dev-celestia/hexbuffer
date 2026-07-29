@@ -1,12 +1,6 @@
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, ScrollArea } from 'hexbuffer-ui';
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { cn } from '@/lib/utils';
 import { useAutomationStore } from '@/stores/automation';
 import { WORKFLOW_TEMPLATES, type WorkflowTemplate } from '../templates';

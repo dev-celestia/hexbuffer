@@ -1,3 +1,4 @@
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Badge, Input, ScrollArea } from 'hexbuffer-ui';
 import React from 'react';
 import {
   PlayIcon,
@@ -30,15 +31,7 @@ import {
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from '@/components/ui/accordion';
+
 import {
   NODE_TYPE_REGISTRY,
   NODE_CATEGORY_GROUPS,

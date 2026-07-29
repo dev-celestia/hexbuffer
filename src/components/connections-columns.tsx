@@ -1,6 +1,7 @@
+import { Button } from 'hexbuffer-ui';
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowSquareOutIcon, PlusIcon } from '@phosphor-icons/react';
-import { Button } from "@/components/ui/button";
+
 import { ProxyConnection } from "@/types";
 
 function formatBytes(bytes: number): string {

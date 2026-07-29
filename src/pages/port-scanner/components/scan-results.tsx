@@ -1,15 +1,6 @@
+import { Badge, Button, Progress, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'hexbuffer-ui';
 import { useMemo, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+
 import {
   BroadcastIcon,
   SpinnerGapIcon,

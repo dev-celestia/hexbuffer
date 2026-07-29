@@ -1,16 +1,7 @@
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, Input } from 'hexbuffer-ui';
 import * as React from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+
 import { PlusIcon } from '@phosphor-icons/react';
 
 interface TargetDialogProps {

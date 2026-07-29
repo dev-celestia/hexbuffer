@@ -1,10 +1,6 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+
+
+import { Avatar, AvatarFallback, Button, Collapsible, CollapsibleContent, CollapsibleTrigger } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import {
   CheckIcon,

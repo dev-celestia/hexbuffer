@@ -1,20 +1,8 @@
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Label, ScrollArea, Switch, Textarea } from 'hexbuffer-ui';
 import React from 'react';
 import { WarningCircleIcon, PlusIcon, FloppyDiskIcon, GearSixIcon, XIcon, FlaskIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Switch } from '@/components/ui/switch';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+
 import type { TestCase, TestStep } from '../types';
 import { AiStepGenerator } from './ai-step-generator';
 import { StepFlowBuilder } from './step-flow-builder';

@@ -1,8 +1,7 @@
+import { Badge, Button, ScrollArea } from 'hexbuffer-ui';
 import React from 'react';
 import { PlayIcon, CheckCircleIcon, XCircleIcon, SpinnerGapIcon, ClockIcon, WarningCircleIcon, PlayCircleIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
+
 import { cn } from '@/lib/utils';
 import type { StepResult, TestCase, TestRun } from '../types';
 import { STEP_KIND_LABELS, STEP_KIND_ICONS } from '../constants';

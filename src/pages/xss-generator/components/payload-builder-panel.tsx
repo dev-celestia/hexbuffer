@@ -1,9 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
+
+import { Button, Checkbox, Input, Label, ScrollArea, Textarea } from 'hexbuffer-ui';
 import { CopyIcon } from '@phosphor-icons/react';
 import type { XssEncodingType } from '../types';
 import { ENCODING_LABELS, ENCODING_ORDER } from '../constants';

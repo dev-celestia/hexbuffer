@@ -1,3 +1,4 @@
+import { Badge, Separator } from 'hexbuffer-ui';
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -11,8 +12,6 @@ import {
 
 import { useNavStore } from "@/stores/nav";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 
 interface WindowHeaderProps {
   id: string;

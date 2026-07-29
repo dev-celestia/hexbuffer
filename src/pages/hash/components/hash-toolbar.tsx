@@ -1,5 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { ButtonGroup } from '@/components/ui/button-group';
+
+
+import { Button, ButtonGroup } from 'hexbuffer-ui';
 import { cn } from '@/lib/utils';
 import { CopyIcon, TrashIcon } from '@phosphor-icons/react';
 import type { HashType } from '../types';

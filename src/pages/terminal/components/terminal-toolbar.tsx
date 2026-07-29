@@ -1,12 +1,6 @@
+import { Button, Input, Label, Popover, PopoverContent, PopoverTrigger } from 'hexbuffer-ui';
 import * as React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+
 import { GearSixIcon, EraserIcon, ClockCounterClockwiseIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 

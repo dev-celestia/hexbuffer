@@ -1,6 +1,7 @@
+import { Badge } from 'hexbuffer-ui';
 import { memo } from 'react';
 import { WarningCircleIcon, CircleIcon, StopCircleIcon, FileTextIcon, ShieldSlashIcon, SpinnerIcon } from '@phosphor-icons/react';
-import { Badge } from '@/components/ui/badge';
+
 import { TreeView, type TreeNodeData } from '@/components/tree-view';
 import { cn } from '@/lib/utils';
 import { PAGE_STATUS_LABELS } from '../constants';

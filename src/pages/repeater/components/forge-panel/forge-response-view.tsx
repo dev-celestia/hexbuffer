@@ -1,7 +1,6 @@
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
-import { ButtonGroup } from '@/components/ui/button-group';
-import { TextEditor } from '@/components/ui/text-editor';
+
+
+import { Button, ButtonGroup, ScrollArea, TextEditor } from 'hexbuffer-ui';
 import { CheckCircleIcon, XCircleIcon, CopyIcon, CheckIcon } from '@phosphor-icons/react';
 import { useMemo } from 'react';
 import { useCollectionsStore, type ForgeResponse, type TestResult } from '@/stores/collections';

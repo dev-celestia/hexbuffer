@@ -1,5 +1,6 @@
+import { Label } from 'hexbuffer-ui';
 import React from 'react';
-import { Label } from '@/components/ui/label';
+
 import { NODE_TYPE_REGISTRY } from '../../constants';
 import type { ActionConfig, AutomationNodeType } from '../../types';
 import {

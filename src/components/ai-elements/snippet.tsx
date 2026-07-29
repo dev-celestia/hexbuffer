@@ -1,10 +1,5 @@
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-  InputGroupText,
-} from "@/components/ui/input-group";
+
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import { CheckIcon, CopyIcon } from '@phosphor-icons/react';
 import type { ComponentProps } from "react";

@@ -1,11 +1,6 @@
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+
+import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import { CheckIcon, CopyIcon } from '@phosphor-icons/react';
 import type { ComponentProps, CSSProperties, HTMLAttributes } from "react";

@@ -1,6 +1,6 @@
-import { ButtonGroup } from '@/components/ui/button-group';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+
+
+import { Badge, Button, ButtonGroup } from 'hexbuffer-ui';
 import { ArrowsLeftRightIcon, CopyIcon, TrashIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import type { CodecType, CodecMode } from '../types';

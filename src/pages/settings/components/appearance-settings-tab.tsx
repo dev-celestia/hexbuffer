@@ -1,8 +1,9 @@
+import { Button } from 'hexbuffer-ui';
 import * as React from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { ImageIcon, PaletteIcon, TrashIcon, ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
+
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { SettingsGroup, SettingsRow } from './settings-group';
 import { ShortcutManager } from '@/pages/desktop/components/shortcut-manager';

@@ -1,6 +1,6 @@
+import { Button } from 'hexbuffer-ui';
 import React from 'react';
 import { DotsThreeVerticalIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
 
 const OPEN_NODE_CONTEXT_MENU_EVENT = 'automation-open-node-context-menu';
 

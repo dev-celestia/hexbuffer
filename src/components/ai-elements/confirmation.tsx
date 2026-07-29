@@ -1,5 +1,6 @@
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+
+
+import { Alert, AlertDescription, Button } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import type { ToolUIPart } from "ai";
 import type { ComponentProps, ReactNode } from "react";

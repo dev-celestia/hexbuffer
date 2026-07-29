@@ -1,3 +1,4 @@
+import { Alert, AlertDescription, AlertTitle, Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, Empty, EmptyDescription, EmptyTitle, Label, TextEditor } from 'hexbuffer-ui';
 import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -8,18 +9,7 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Empty, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
-import { Label } from "@/components/ui/label";
-import { TextEditor } from "@/components/ui/text-editor";
+
 import {
   buildRawHttpRequest,
   buildRawHttpResponse,
@@ -70,7 +60,6 @@ export function LogEntryBurpView() {
   );
   const [viewMode, setViewMode] = useState<DetailViewMode>("text");
   const navigate = useNavigate();
-
 
   const handleSendToCollection = useCallback(
     (stashId: string) => {

@@ -1,15 +1,7 @@
-import { Badge } from "@/components/ui/badge";
+
+import { Badge, Carousel, CarouselContent, CarouselItem, HoverCard, HoverCardContent, HoverCardTrigger } from 'hexbuffer-ui';
 import type { CarouselApi } from "@/components/ui/carousel";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+
 import { cn } from "@/lib/utils";
 import { ArrowLeftIcon, ArrowRightIcon } from '@phosphor-icons/react';
 import type { ComponentProps } from "react";

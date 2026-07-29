@@ -1,11 +1,8 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { TabsContent } from '@/components/ui/tabs';
+
+
+import { Badge, Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle, Input, ScrollArea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, TabsContent } from 'hexbuffer-ui';
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent, EmptyMedia } from '@/components/ui/empty';
+
 import { PlugsConnected, Bug, Terminal, WifiHigh, HardDrive, Browser, ArrowClockwise, Warning } from '@phosphor-icons/react';
 import { useInspectExternal } from './hooks/use-inspect-external';
 import { NetworkMonitor } from './components/network-monitor';

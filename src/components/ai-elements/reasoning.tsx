@@ -1,9 +1,6 @@
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from 'hexbuffer-ui';
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+
 import { cn } from "@/lib/utils";
 import { code } from "@streamdown/code";
 import { BrainIcon, CaretDownIcon } from '@phosphor-icons/react';

@@ -1,7 +1,7 @@
+import { Badge, Button } from 'hexbuffer-ui';
 import { useState, useMemo, useCallback } from 'react';
 import { CopyIcon, CheckIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+
 import type { WebSocketMessage } from '../../hooks/use-websocket-detail';
 import { formatBytes } from '../../../http-history/components/log-table/utils';
 import { formatHexDump } from '../../utils';

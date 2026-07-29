@@ -1,19 +1,8 @@
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, Input, Label, Textarea } from 'hexbuffer-ui';
 import React from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { SparkleIcon, SpinnerGapIcon, WarningCircleIcon, Info, TargetIcon, CheckCircleIcon, CircleIcon, ArrowRightIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+
 import { cn } from '@/lib/utils';
 import type { TestStep, PageStructure, FormField, ButtonInfo } from '../types';
 import { AI_STEP_GENERATOR_PROMPT, AI_GOAL_STEP_PROMPT } from '../constants';

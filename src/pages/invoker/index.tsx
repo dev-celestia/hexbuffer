@@ -1,6 +1,6 @@
+import { Alert, AlertDescription, Button } from 'hexbuffer-ui';
 import * as React from 'react';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+
 import { InfoIcon, PlayIcon, SquareIcon } from '@phosphor-icons/react';
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
 import { InvokerConfigDialog } from './components/invoker-config';

@@ -1,5 +1,6 @@
+import { Input } from 'hexbuffer-ui';
 import React, { useRef, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
+
 import { PlusIcon } from '@phosphor-icons/react';
 
 export interface InlineCreateProps {

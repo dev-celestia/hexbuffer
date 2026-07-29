@@ -1,13 +1,8 @@
+import { Button, ScrollArea, Tabs, TabsContent, TabsList, TabsTrigger, Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
 import { XIcon, TrashIcon, Info } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
+
 import { useAutomationStore } from '@/stores/automation';
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from '@/components/ui/tooltip';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { type Node } from '@xyflow/react';
 import type {
   AutomationNodeData,

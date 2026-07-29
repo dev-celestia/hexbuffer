@@ -1,7 +1,8 @@
+import { Button } from 'hexbuffer-ui';
 import * as React from 'react';
 import { CheckIcon, ClipboardIcon, TerminalIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+
 import { copyText } from '@/lib/clipboard';
 import { cn } from '@/lib/utils';
 

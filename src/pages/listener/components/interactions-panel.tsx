@@ -1,20 +1,6 @@
-import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+
+
+import { Badge, ResizableHandle, ResizablePanel, ResizablePanelGroup, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'hexbuffer-ui';
 import { CaretDownIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { InteractionDetailPane } from './interaction-detail-pane';
 import { ListenerMetrics } from './metrics';

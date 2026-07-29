@@ -1,10 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
+
+import { Button, Separator, Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import type { IconProps } from '@phosphor-icons/react';
 import { BookmarkIcon } from '@phosphor-icons/react';

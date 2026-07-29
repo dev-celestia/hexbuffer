@@ -1,5 +1,6 @@
+import { Button } from 'hexbuffer-ui';
 import React from 'react';
-import { Button } from '@/components/ui/button';
+
 import { PlusIcon, DownloadIcon, UploadIcon } from '@phosphor-icons/react';
 
 interface TreeHeaderProps {

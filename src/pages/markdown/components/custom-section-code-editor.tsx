@@ -1,4 +1,5 @@
-import { TextEditor } from '@/components/ui/text-editor';
+
+import { TextEditor } from 'hexbuffer-ui';
 import { type CustomSection } from '../types';
 
 interface CustomSectionCodeEditorProps {

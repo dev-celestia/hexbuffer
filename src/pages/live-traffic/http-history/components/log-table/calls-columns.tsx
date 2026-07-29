@@ -1,8 +1,7 @@
+import { Alert, AlertDescription, AlertTitle, Button, Empty, EmptyDescription, EmptyTitle } from 'hexbuffer-ui';
 import { useCallback, useState, memo, useMemo } from "react";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { Empty, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+
 import type { ApiCall } from "@/types";
 import {
   useHttpHistoryQueryStore,

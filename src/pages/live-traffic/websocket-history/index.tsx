@@ -1,12 +1,13 @@
+import { Button, Card } from 'hexbuffer-ui';
 import { TabbedPageLayout } from "@/components/tabs-layout/tabbed-page-layout";
-import { Card } from "@/components/ui/card";
+
 import { TargetSelectorDialog } from "@/pages/live-traffic/components/target-selector";
 import { useWebSocketHistoryPage } from "./hooks/use-websocket-history-page";
 import { useWebSocketHistoryQueryStore } from "@/stores/history";
 import { invoke } from "@tauri-apps/api/core";
 import { toast } from "sonner";
 import { TrashIcon, PlayIcon, PauseIcon, TargetIcon } from '@phosphor-icons/react';
-import { Button } from "@/components/ui/button";
+
 import { openTargetSelector } from "@/triggers";
 
 import { cn } from "@/lib/utils";

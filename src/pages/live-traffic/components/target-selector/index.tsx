@@ -1,14 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+
+
+import { Badge, Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from 'hexbuffer-ui';
 import { PlusIcon, TargetIcon, ArrowLeftIcon } from '@phosphor-icons/react';
 import { TargetSearchList } from './target-search-list';
 import { TargetDialogForm } from './target-dialog-form';

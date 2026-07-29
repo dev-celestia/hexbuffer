@@ -1,10 +1,6 @@
+import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from 'hexbuffer-ui';
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
-import { Badge } from "@/components/ui/badge";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+
 import { cn } from "@/lib/utils";
 import type { Icon } from '@phosphor-icons/react';
 import { BrainIcon, CaretDownIcon, DotIcon } from '@phosphor-icons/react';

@@ -1,4 +1,5 @@
-import { Button } from '@/components/ui/button';
+
+import { Button } from 'hexbuffer-ui';
 import { LayoutIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 

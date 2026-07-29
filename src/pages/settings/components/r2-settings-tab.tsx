@@ -1,7 +1,7 @@
+import { Button, Input } from 'hexbuffer-ui';
 import * as React from 'react';
 import { EyeIcon, EyeSlashIcon, FloppyDiskIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import type { SettingsPageState } from '../hooks/use-settings-page';
 import { SettingsGroup, SettingsRow } from './settings-group';
 

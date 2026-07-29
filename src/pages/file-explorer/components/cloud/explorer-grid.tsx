@@ -1,3 +1,4 @@
+import { ContextMenuItem, ContextMenuSeparator } from 'hexbuffer-ui';
 import * as React from 'react';
 import {
   CheckCircleIcon,
@@ -7,7 +8,6 @@ import {
 } from '@phosphor-icons/react';
 import type { R2Item } from '../../types';
 import { FileGrid, type FileItem } from '../file-grid';
-import { ContextMenuItem, ContextMenuSeparator } from '@/components/ui/context-menu';
 
 interface ExplorerGridProps {
   items: R2Item[];

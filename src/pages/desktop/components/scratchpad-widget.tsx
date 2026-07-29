@@ -1,7 +1,8 @@
+import { TextEditor } from 'hexbuffer-ui';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowsOutIcon } from '@phosphor-icons/react';
-import { TextEditor } from '@/components/ui/text-editor';
+
 import { useScratchpadStore } from '@/stores/scratchpad';
 import { useNavStore } from '@/stores/nav';
 import { cn } from '@/lib/utils';

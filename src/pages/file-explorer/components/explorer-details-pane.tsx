@@ -1,3 +1,4 @@
+import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'hexbuffer-ui';
 import * as React from 'react';
 import {
   FileIcon,
@@ -7,14 +8,7 @@ import {
   CopyIcon,
   LinkSimpleIcon,
 } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import { PRESIGNED_URL_EXPIRATIONS } from '../constants';
 import type { R2Item } from '../types';
 

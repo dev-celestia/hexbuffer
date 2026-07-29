@@ -1,5 +1,6 @@
+import { Badge } from 'hexbuffer-ui';
 import { CONSOLE_LEVEL_COLORS } from '@/pages/inspector/constants';
-import { Badge } from '@/components/ui/badge';
+
 import { getMethodBadgeColor } from '@/lib/method-colors';
 import { cn } from '@/lib/utils';
 

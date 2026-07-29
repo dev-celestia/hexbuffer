@@ -1,12 +1,6 @@
+import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'hexbuffer-ui';
 import * as React from 'react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
+
 import { cn } from '@/lib/utils';
 import { ColorizedUrlInput } from '@/components/ui/select-env-input';
 import { METHOD_COLORS } from '@/lib/method-colors';
@@ -62,7 +56,6 @@ export function ForgeRequestBar({
           value={url}
           onChange={onUrlChange}
         />
-
 
         <div className="flex items-center space-x-1.5 shrink-0">
           <Button

@@ -1,3 +1,4 @@
+import { Button, ButtonGroup, ContextMenuItem, ContextMenuSeparator, ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -11,21 +12,15 @@ import {
   UploadSimpleIcon,
   DownloadSimpleIcon,
 } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
-import { ButtonGroup } from '@/components/ui/button-group';
+
 import { cn } from '@/lib/utils';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable';
+
 import { useFileExplorer } from './hooks/use-file-explorer';
 import { useLocalStorage, LOCAL_STORAGE_DIR_NAME } from './hooks/use-local-storage';
 import { ExplorerSidebar } from './components/explorer-sidebar';
 import { ExplorerDetailsPane } from './components/explorer-details-pane';
 import { FileGrid } from './components/file-grid';
 import { FileToolbar } from './components/file-toolbar';
-import { ContextMenuSeparator, ContextMenuItem } from '@/components/ui/context-menu';
 
 type ActiveTab = 'r2' | 'local';
 type ViewMode = 'list' | 'grid';

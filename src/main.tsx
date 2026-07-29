@@ -1,3 +1,4 @@
+import { Toaster } from 'hexbuffer-ui';
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
@@ -5,7 +6,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppLayout } from "@/layout";
-import { Toaster } from "@/components/ui/sonner";
+
 import { ResponseDetailWindow } from "@/pages/live-traffic/http-history/components/log-table/response-detail-window";
 import { suppressResizeObserverLoopErrors } from "@/lib/resize-observer-errors";
 import { useTauriFocusFix } from "@/hooks/useTauriFocusFix";
@@ -15,7 +16,6 @@ import "@fontsource-variable/geist-mono";
 import "@/styles/globals.css";
 
 suppressResizeObserverLoopErrors();
-
 
 function getResponseDetailCallId(): string | null {
   const params = new URLSearchParams(window.location.search);
@@ -45,7 +45,6 @@ function MainWindowReadySignal() {
 
 function Root() {
   useTauriFocusFix();
-
 
   const responseDetailCallId = getResponseDetailCallId();
   if (responseDetailCallId) {

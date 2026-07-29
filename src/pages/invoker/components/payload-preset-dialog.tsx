@@ -1,17 +1,7 @@
+import { Badge, Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Input, ScrollArea } from 'hexbuffer-ui';
 import * as React from 'react';
 import { FileTextIcon, FolderIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import {
   PAYLOAD_CATEGORIES,

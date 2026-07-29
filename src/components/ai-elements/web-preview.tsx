@@ -1,16 +1,6 @@
-import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Input } from "@/components/ui/input";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
+
+import { Button, Collapsible, CollapsibleContent, CollapsibleTrigger, Input, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import { CaretDownIcon } from '@phosphor-icons/react';
 import type { ComponentProps, ReactNode } from "react";

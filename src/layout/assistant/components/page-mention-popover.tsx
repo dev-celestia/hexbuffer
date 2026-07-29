@@ -1,10 +1,5 @@
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
+
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from 'hexbuffer-ui';
 import type { NavItem } from '@/layout/constants';
 
 interface PageMentionPopoverProps {

@@ -1,7 +1,6 @@
+import { Button, ButtonGroup, Input } from 'hexbuffer-ui';
 import * as React from 'react';
-import { Button } from '@/components/ui/button';
-import { ButtonGroup } from '@/components/ui/button-group';
-import { Input } from '@/components/ui/input';
+
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
 import { cn } from '@/lib/utils';
 import {

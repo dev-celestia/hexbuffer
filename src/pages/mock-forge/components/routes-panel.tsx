@@ -1,8 +1,7 @@
+import { Input, ScrollArea, Switch } from 'hexbuffer-ui';
 import { useState } from 'react';
 import { MagnifyingGlassIcon, GlobeIcon, PencilSimpleIcon, TreeStructureIcon, CaretRightIcon } from '@phosphor-icons/react';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import type { MockDomain, MockRoute } from '../types';
 import { useRoutesPanel } from './hooks/use-routes-panel';
 import { NewRouteDialog } from './new-route-dialog';

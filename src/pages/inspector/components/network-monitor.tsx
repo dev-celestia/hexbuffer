@@ -1,15 +1,7 @@
+import { Badge, Button, Input, ResizableHandle, ResizablePanel, ResizablePanelGroup, ScrollArea, Tabs, TabsContent, TabsList, TabsTrigger } from 'hexbuffer-ui';
 import { useRef, useMemo, useState, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import {
   Trash,
   MagnifyingGlass,

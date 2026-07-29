@@ -1,7 +1,7 @@
 
+import { Button, Tabs, TabsList, TabsTrigger } from 'hexbuffer-ui';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { CopyIcon, TrashIcon } from '@phosphor-icons/react';
 import { useXssGeneratorPage } from './hooks/use-xss-generator-page';
 import { PayloadLibraryPanel } from './components/payload-library-panel';

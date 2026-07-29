@@ -1,5 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+
+import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from 'hexbuffer-ui';
 import { useInvokerStore } from '@/stores/invoker';
 import { useInvokerPayloads } from '../hooks/use-payloads';
 

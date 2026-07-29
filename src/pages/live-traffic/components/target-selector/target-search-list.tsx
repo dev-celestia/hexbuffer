@@ -1,7 +1,6 @@
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
+
+import { Badge, Button, Input, ScrollArea } from 'hexbuffer-ui';
 import { PencilIcon, MagnifyingGlassIcon, XIcon, TargetIcon, CheckCircleIcon } from '@phosphor-icons/react';
 import type { Target } from '@/types';
 

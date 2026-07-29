@@ -1,10 +1,10 @@
+import { Switch, TabsContent } from 'hexbuffer-ui';
 import { cn } from '@/lib/utils';
 import { useListenerPage } from './hooks/use-listener-page';
 import { ListenerHosts } from './components/hosts-panel';
 import { ListenerInteractions } from './components/interactions-panel';
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
-import { TabsContent } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
+
 import type { ListenerSubTab } from './types';
 
 export function ListenerPage() {

@@ -1,3 +1,4 @@
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, Button, Checkbox } from 'hexbuffer-ui';
 import React from 'react';
 import {
   CaretDownIcon,
@@ -13,20 +14,9 @@ import {
 } from '@phosphor-icons/react';
 import folderIcon from '@/assets/explorer-icon/_folder.svg';
 import folderOpenIcon from '@/assets/explorer-icon/_folder_open.svg';
-import { Button } from '@/components/ui/button';
+
 import { cn } from '@/lib/utils';
 import type { TestCase } from '../types';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 
 // ponytail: Simple folder-based test suite tree using local expand/collapse state. Avoids dnd complexity.
 

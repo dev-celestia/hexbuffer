@@ -1,14 +1,9 @@
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from 'hexbuffer-ui';
 import * as React from 'react';
 import { FolderOpenIcon, TrashIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { getFileIconSrc, getFolderIconSrc } from '../lib/file-icons';
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from '@/components/ui/context-menu';
+
 import type { FileItem } from './file-grid';
 
 interface FileListRowProps<T extends FileItem> {

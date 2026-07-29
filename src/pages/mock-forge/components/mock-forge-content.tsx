@@ -1,4 +1,5 @@
-import { TabsContent } from '@/components/ui/tabs';
+
+import { TabsContent } from 'hexbuffer-ui';
 import { DomainsPanel } from './domains-panel';
 import { RoutesPanel } from './routes-panel';
 import { LogsPanel } from './logs-panel';

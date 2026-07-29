@@ -1,16 +1,13 @@
+import { Alert, AlertAction, AlertDescription, Badge, Button, Input, ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
 import * as React from 'react';
 import { PauseIcon, PlayIcon, PlusIcon, XIcon } from '@phosphor-icons/react';
-import { Alert, AlertDescription, AlertAction } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
 import { useProxyStart } from '@/hooks/use-proxy-start';
 import { InterceptQueuePanel } from './components/queue-panel';
 import { InterceptRequestPanel } from './components/request-panel';
 import { useInterceptPage } from './hooks/use-intercept-page';
 import { useInterceptStore } from './state/intercept-store';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 import { cn } from '@/lib/utils';
 

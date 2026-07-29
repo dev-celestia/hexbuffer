@@ -1,19 +1,7 @@
+import { Button, ButtonGroup, Checkbox, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, Input, Label } from 'hexbuffer-ui';
 import { useState } from 'react';
 import { GearSixIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
-import { ButtonGroup } from '@/components/ui/button-group';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+
 import { cn } from '@/lib/utils';
 import type { CrawlSetupConfig } from '../types';
 import { useSetupScreen } from './hooks/use-setup-screen';
@@ -533,6 +521,4 @@ export function CrawlSetupScreen({
     </Dialog>
   );
 }
-
-
 

@@ -1,19 +1,7 @@
+import { ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from 'hexbuffer-ui';
 import { FolderStarIcon, PaperPlaneTiltIcon, SpinnerGapIcon, FolderOpenIcon } from '@phosphor-icons/react';
 import React, { useMemo } from 'react';
-import {
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import {
-  ContextMenuSub,
-  ContextMenuSubTrigger,
-  ContextMenuSubContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-} from '@/components/ui/context-menu';
+
 import { useCollectionsStore } from '@/stores/collections';
 import { useRepeaterStore } from '@/stores/repeater';
 import { createWorkspace, createCollection } from './management';

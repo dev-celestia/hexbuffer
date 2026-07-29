@@ -1,22 +1,9 @@
+import { Badge, Button, ButtonGroup, Checkbox, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Label, TextEditor, Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
 import * as React from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { AsteriskIcon, Info, SpinnerGapIcon, SparkleIcon, TargetIcon } from '@phosphor-icons/react';
 import type { EditorView } from '@codemirror/view';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ButtonGroup } from '@/components/ui/button-group';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { TextEditor } from '@/components/ui/text-editor';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useInvokerStore } from '@/stores/invoker';
 import {
   buildRawRequest,

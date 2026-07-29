@@ -1,13 +1,5 @@
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from 'hexbuffer-ui';
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
 import { CustomSectionDialog } from './components/custom-section-dialog';
 import { DocumentTemplateDialog } from './components/document-template-dialog';

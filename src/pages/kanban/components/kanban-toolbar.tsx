@@ -1,8 +1,7 @@
+import { Button, Tabs, TabsList, TabsTrigger } from 'hexbuffer-ui';
 import type { GroupBy } from '../types';
 import { GROUP_OPTIONS } from '../constants';
 import { PlusIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Props {
   groupBy: GroupBy;

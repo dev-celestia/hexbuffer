@@ -1,10 +1,6 @@
-import { Button } from "@/components/ui/button";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import { Progress } from "@/components/ui/progress";
+
+
+import { Button, HoverCard, HoverCardContent, HoverCardTrigger, Progress } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import type { LanguageModelUsage } from "ai";
 import type { ComponentProps } from "react";

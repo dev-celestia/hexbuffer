@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from 'hexbuffer-ui';
 
 interface HistoryLoadingStateProps {
   label?: string;

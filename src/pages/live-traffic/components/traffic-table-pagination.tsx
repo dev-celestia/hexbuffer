@@ -1,5 +1,5 @@
+import { Button } from 'hexbuffer-ui';
 import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react";
-import { Button } from "@/components/ui/button";
 
 export interface TrafficTablePaginationProps {
   showingStart: number;

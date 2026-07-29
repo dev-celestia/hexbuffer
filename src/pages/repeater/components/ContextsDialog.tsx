@@ -1,14 +1,6 @@
+import { Button, Checkbox, Dialog, DialogContent, DialogHeader, DialogTitle, Input, ScrollArea } from 'hexbuffer-ui';
 import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Checkbox } from '@/components/ui/checkbox';
+
 import {
   useCollectionsStore,
   type ContextRecord,

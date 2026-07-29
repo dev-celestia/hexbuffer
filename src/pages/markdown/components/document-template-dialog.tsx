@@ -1,12 +1,6 @@
+import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from 'hexbuffer-ui';
 import { FileCodeIcon, PencilLineIcon, FlaskIcon, ShieldCheckIcon } from '@phosphor-icons/react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+
 import {
   DOCUMENT_TEMPLATES,
   type DocumentTemplate,

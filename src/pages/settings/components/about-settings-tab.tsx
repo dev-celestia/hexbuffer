@@ -1,5 +1,6 @@
+import { Button } from 'hexbuffer-ui';
 import { ArrowSquareOutIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
+
 import { PROFILE_LINKS } from '../constants';
 import { SettingsGroup, SettingsRow } from './settings-group';
 

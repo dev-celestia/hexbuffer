@@ -1,10 +1,6 @@
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
+
+import { Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import type { Icon } from '@phosphor-icons/react';
 import { XIcon } from '@phosphor-icons/react';

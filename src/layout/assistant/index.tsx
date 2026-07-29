@@ -1,8 +1,8 @@
+import { Badge, Button, Separator } from 'hexbuffer-ui';
 import { CheckCircleIcon, CaretDownIcon, CircleIcon, SpinnerGapIcon, SidebarIcon, ShieldWarningIcon, TriangleIcon, XIcon, XCircleIcon, StarFourIcon, FileTextIcon, PaperclipIcon } from '@phosphor-icons/react';
 import { useCallback } from 'react';
 import type { FileUIPart } from 'ai';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+
 import {
   Conversation,
   ConversationContent,
@@ -54,7 +54,7 @@ import { usePageMentions } from './hooks/use-page-mentions';
 import { getFileParts, getMessageText, getReasoningParts, hasContent, providerLabel } from './lib/message-utils';
 import { parseAttachedFilesFromMessage, getUserPromptOnly } from './lib/file-utils';
 import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
+
 import { TriangleLogo } from '@/layout/triangle-logo';
 
 function PromptInputAttachmentsBar() {

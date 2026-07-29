@@ -1,4 +1,5 @@
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
 import { WebSocketEntryView } from './websocket-entry-view';
 import { WebSocketTable } from './websocket-table';
 import { useWebSocketHistoryQueryStore } from '@/stores/history';

@@ -1,18 +1,10 @@
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from 'hexbuffer-ui';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { useTheme } from '@/components/theme-provider';
-import {
-  ContextMenu,
-  ContextMenuTrigger,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSub,
-  ContextMenuSubContent,
-  ContextMenuSubTrigger,
-  ContextMenuSeparator,
-} from '@/components/ui/context-menu';
+
 import { MonitorIcon, SunIcon, MoonIcon, ImageIcon, GearSixIcon } from '@phosphor-icons/react';
 import { AppSidebar } from './taskbar';
 import { DesktopWorkspace } from './desktop-workspace';

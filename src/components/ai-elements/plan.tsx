@@ -1,18 +1,6 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+
+
+import { Button, Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Collapsible, CollapsibleContent, CollapsibleTrigger } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import { CaretUpDownIcon } from '@phosphor-icons/react';
 import type { ComponentProps } from "react";

@@ -1,12 +1,11 @@
+import { Alert, AlertDescription, AlertTitle, Badge, Empty, EmptyDescription, EmptyTitle } from 'hexbuffer-ui';
 import { useEffect, useState, useMemo } from 'react';
 import { getHttpLogDetail } from '../../api';
 import { adaptProxyRecordToApiCall } from './hooks/use-history-table';
 import { formatJsonBody } from '@/lib/http-message';
 import { InspectorSection, buildHeadersList } from '@/pages/live-traffic/components/inspector';
 import { parseCookieHeader, formatBytes } from './utils';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Empty, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
-import { Badge } from '@/components/ui/badge';
+
 import type { ApiCall } from '@/types';
 
 function isJsonContent(headers: Record<string, string>, body: string | null): boolean {

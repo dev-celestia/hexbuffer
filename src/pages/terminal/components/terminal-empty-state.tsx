@@ -1,4 +1,5 @@
-import { Button } from '@/components/ui/button';
+
+import { Button } from 'hexbuffer-ui';
 import { TerminalWindowIcon, PlusIcon } from '@phosphor-icons/react';
 
 interface TerminalEmptyStateProps {

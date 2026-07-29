@@ -1,15 +1,7 @@
+import { Button, Label, ScrollArea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'hexbuffer-ui';
 import React from 'react';
 import { ArrowDownIcon, ArrowUpIcon, TrashIcon, XIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { cn } from '@/lib/utils';
 import type { StepKind, TestStep } from '../types';
 import { STEP_KIND_ICONS, STEP_KIND_LABELS, STEP_KIND_OPTIONS } from '../constants';

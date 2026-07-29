@@ -1,4 +1,5 @@
-import { ScrollArea } from '@/components/ui/scroll-area';
+
+import { ScrollArea } from 'hexbuffer-ui';
 import type { XssPayload } from '../types';
 
 interface PayloadLibraryPanelProps {

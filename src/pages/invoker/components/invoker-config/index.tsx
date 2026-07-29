@@ -1,5 +1,6 @@
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+
+import { Badge, Tabs, TabsContent, TabsList, TabsTrigger } from 'hexbuffer-ui';
 import {
   AttackTab,
   PayloadsTab,

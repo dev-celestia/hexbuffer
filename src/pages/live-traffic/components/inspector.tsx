@@ -1,7 +1,6 @@
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TextEditor } from 'hexbuffer-ui';
 import { useState, memo } from 'react';
-import { TextEditor } from '@/components/ui/text-editor';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+
 import { buildHttpHeaderList } from '@/lib/http-message';
 
 export interface KeyValue {

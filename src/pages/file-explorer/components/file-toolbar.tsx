@@ -1,3 +1,4 @@
+import { Button, ButtonGroup, Input } from 'hexbuffer-ui';
 import * as React from 'react';
 import {
   CaretRightIcon,
@@ -10,9 +11,7 @@ import {
   SquaresFourIcon,
   ArrowClockwiseIcon,
 } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
-import { ButtonGroup } from '@/components/ui/button-group';
-import { Input } from '@/components/ui/input';
+
 import { cn } from '@/lib/utils';
 
 export interface BreadcrumbCrumb {

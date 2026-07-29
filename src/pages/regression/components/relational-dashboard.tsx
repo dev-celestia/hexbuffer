@@ -1,3 +1,4 @@
+import { Badge, Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, ScrollArea } from 'hexbuffer-ui';
 import React from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import {
@@ -17,10 +18,7 @@ import {
   ArrowRightIcon,
   CpuIcon
 } from '@phosphor-icons/react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { cn } from '@/lib/utils';
 
 // ponytail: Relational Playwright Regression types matching Tauri structs

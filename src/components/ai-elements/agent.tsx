@@ -1,10 +1,6 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
+
+
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Badge } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import type { Tool } from "ai";
 import { TriangleIcon } from '@phosphor-icons/react';

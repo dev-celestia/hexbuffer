@@ -1,12 +1,7 @@
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from 'hexbuffer-ui';
 import { useCallback, type MouseEvent, type ReactNode } from 'react';
 import { WarningCircleIcon, CheckCircleIcon, SpinnerGapIcon, PlusIcon, XIcon, GearSixIcon } from '@phosphor-icons/react';
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from '@/components/ui/context-menu';
+
 import { cn } from '@/lib/utils';
 import { useTabBar } from './use-tab-bar';
 import type { PageTabItem } from './types';

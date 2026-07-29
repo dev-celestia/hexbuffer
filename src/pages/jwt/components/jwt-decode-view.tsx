@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
+
+import { Button, Label, ScrollArea } from 'hexbuffer-ui';
 import { CopyIcon } from '@phosphor-icons/react';
 import type { JwtDecoded, JwtVulnerability } from '../types';
 import { ColorizedJwtInput } from './colorized-jwt-input';

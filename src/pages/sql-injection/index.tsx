@@ -1,6 +1,6 @@
+import { Badge, Tabs, TabsContent, TabsList, TabsTrigger } from 'hexbuffer-ui';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { useSqliPage } from './hooks/use-sqli-page';
 import { ScanToolbar } from './components/scan-toolbar';
 import { ParametersPanel } from './components/parameters-panel';

@@ -1,3 +1,4 @@
+import { Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { XIcon, DotsSixIcon } from '@phosphor-icons/react';
@@ -5,11 +6,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 import { cn } from '@/lib/utils';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+
 import type { NavItem } from '../../constants';
 
 export interface DockItemProps {

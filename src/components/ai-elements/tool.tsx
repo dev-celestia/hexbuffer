@@ -1,9 +1,6 @@
-import { Badge } from "@/components/ui/badge";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+
+
+import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import type { DynamicToolUIPart, ToolUIPart } from "ai";
 import {

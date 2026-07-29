@@ -1,7 +1,8 @@
+import { Button } from 'hexbuffer-ui';
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { ArrowDownIcon, ArrowUpIcon, DotsSixIcon, TrashIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
+
 import { cn } from '@/lib/utils';
 import type { TestStep } from '../types';
 import { STEP_KIND_ICONS, STEP_KIND_LABELS } from '../constants';

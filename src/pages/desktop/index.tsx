@@ -1,3 +1,4 @@
+import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from 'hexbuffer-ui';
 import { useDesktopPage } from './hooks/use-desktop-page';
 import { ProxyWidget } from './components/proxy-widget';
 import { VpnWidget } from './components/vpn-widget';
@@ -5,18 +6,10 @@ import { ScratchpadWidget } from './components/scratchpad-widget';
 import { CollectionsWidget } from './components/collections-widget';
 import { ClipboardWidget } from './components/clipboard-widget';
 import { DesktopIconItem } from './components/desktop-icon-item';
-import { Button } from '@/components/ui/button';
+
 import { ShieldWarningIcon, GearSixIcon } from '@phosphor-icons/react';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { ShortcutManager } from './components/shortcut-manager';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 
 import { cn } from '@/lib/utils';
 
@@ -231,5 +224,4 @@ export function DesktopPage() {
     </div>
   );
 }
-
 

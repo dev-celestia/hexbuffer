@@ -1,25 +1,9 @@
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Badge, Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, ScrollArea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'hexbuffer-ui';
 import { memo } from 'react';
 import { CheckCircleIcon, ScanSmileyIcon } from '@phosphor-icons/react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+
 import { HighlightedText } from '@/components/highlighted-text';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import { cn } from '@/lib/utils';
 import { SeverityBadge } from '@/components/status-badge';
 import { formatTime } from '../lib/crawl-data';

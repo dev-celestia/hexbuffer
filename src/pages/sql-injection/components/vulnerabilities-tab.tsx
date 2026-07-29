@@ -1,21 +1,7 @@
+import { Badge, Label, ResizableHandle, ResizablePanel, ResizablePanelGroup, ScrollArea, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'hexbuffer-ui';
 import { useState } from 'react';
 import { WarningCircleIcon, CopyIcon, CheckIcon } from '@phosphor-icons/react';
-import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable';
+
 import type { SqliVulnerability, SqliTechnique } from '../types';
 import { TECHNIQUE_LABELS, SEVERITY_COLORS } from '../constants';
 

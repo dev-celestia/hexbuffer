@@ -1,5 +1,6 @@
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Empty, EmptyDescription, EmptyTitle } from '@/components/ui/empty';
+
+
+import { Alert, AlertDescription, AlertTitle, Empty, EmptyDescription, EmptyTitle } from 'hexbuffer-ui';
 import { cn } from '@/lib/utils';
 import { TreeNode } from './tree-node';
 import type { TreeViewProps } from './types';

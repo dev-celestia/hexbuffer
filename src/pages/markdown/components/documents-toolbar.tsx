@@ -1,7 +1,6 @@
+import { Button, ButtonGroup, Input } from 'hexbuffer-ui';
 import { DownloadIcon, ArrowClockwiseIcon, ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
-import { Button } from '@/components/ui/button';
-import { ButtonGroup } from '@/components/ui/button-group';
-import { Input } from '@/components/ui/input';
+
 import { type ReconDocument } from '../types';
 
 interface DocumentsToolbarProps {

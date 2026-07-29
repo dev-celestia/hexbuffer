@@ -1,5 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+
+
+import { Button, Textarea } from 'hexbuffer-ui';
 import { CopyIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 

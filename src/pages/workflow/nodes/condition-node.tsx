@@ -1,12 +1,9 @@
+import { Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { WarningCircleIcon, FunctionIcon, DotsSixIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from '@/components/ui/tooltip';
+
 import {
   CATEGORY_BORDER,
   CATEGORY_BG,

@@ -1,10 +1,6 @@
+import { Button, Collapsible, CollapsibleContent, CollapsibleTrigger } from 'hexbuffer-ui';
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
-import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+
 import { cn } from "@/lib/utils";
 import {
   WarningCircleIcon,

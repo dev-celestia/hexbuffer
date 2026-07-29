@@ -1,9 +1,9 @@
+import { Card, ContextMenuItem } from 'hexbuffer-ui';
 import * as React from 'react';
 import { PushPinSimpleIcon } from '@phosphor-icons/react';
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
 import type { PageTabItem } from '@/components/tabs-layout/types';
-import { Card } from '@/components/ui/card';
-import { ContextMenuItem } from '@/components/ui/context-menu';
+
 import { LogFilters, HttpHistoryView, CreateGroupDialog, TargetSelectorDialog } from './components';
 import {
   useHttpHistoryPage,

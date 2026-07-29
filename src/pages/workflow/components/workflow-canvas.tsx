@@ -1,3 +1,4 @@
+import { Kbd } from 'hexbuffer-ui';
 import React from 'react';
 import {
   ReactFlow,
@@ -8,7 +9,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { cn } from '@/lib/utils';
-import { Kbd } from '@/components/ui/kbd';
+
 import type { AutomationNodeType, AutomationNodeData } from '../types';
 import type { Node } from '@xyflow/react';
 import { useWorkflowCanvas, type WorkflowCanvasBridge } from '../hooks/use-workflow-canvas';

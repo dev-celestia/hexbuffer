@@ -1,17 +1,7 @@
+import { Alert, AlertDescription, AlertTitle, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea } from 'hexbuffer-ui';
 import React from 'react';
 import { WarningCircleIcon, ClockIcon, GlobeIcon, FunnelIcon, PlayIcon, TrashIcon, NetworkIcon, RadioIcon, ScanIcon } from '@phosphor-icons/react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import {
   useAutomationStore,
   type LiveTrafficHostInsight,

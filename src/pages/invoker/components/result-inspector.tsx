@@ -1,7 +1,7 @@
 // ponytail: simplify layout by using inline split inspector instead of full-screen drawer overlay
+import { Button, TextEditor } from 'hexbuffer-ui';
 import * as React from 'react';
-import { Button } from '@/components/ui/button';
-import { TextEditor } from '@/components/ui/text-editor';
+
 import { X, ArrowsIn, ArrowsOut } from '@phosphor-icons/react';
 import { buildRawHttpRequest, buildRawHttpResponse } from '@/lib/http-message';
 import type { AttackConfig, AttackResult, HttpRequest } from '../types';

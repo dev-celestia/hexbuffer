@@ -1,21 +1,14 @@
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, Kbd, Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SquaresFourIcon, PushPinSimpleIcon, PushPinSimpleSlashIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  CommandDialog,
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-} from '@/components/ui/command';
+
 import { MAIN_NAV_ITEMS } from '../constants';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
-import { Kbd } from '@/components/ui/kbd';
+
 import { TriangleLogo } from '../triangle-logo';
 
 export function AppLauncher() {

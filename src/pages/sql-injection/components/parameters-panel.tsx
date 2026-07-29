@@ -1,9 +1,8 @@
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
+
+import { Badge, Button, Checkbox, Input, ScrollArea } from 'hexbuffer-ui';
 import { TrashIcon, PlusIcon } from '@phosphor-icons/react';
-import { Badge } from '@/components/ui/badge';
+
 import type { SqliParam } from '../types';
 
 interface ParametersPanelProps {

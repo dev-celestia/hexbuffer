@@ -1,6 +1,7 @@
+import { Button } from 'hexbuffer-ui';
 import { CheckIcon, ListChecksIcon, XIcon } from '@phosphor-icons/react';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+
 import { cn } from '@/lib/utils';
 import type { HumanSelectionRequest } from '../types';
 

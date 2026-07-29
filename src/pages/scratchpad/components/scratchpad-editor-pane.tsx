@@ -1,9 +1,7 @@
+import { Button, Input, Kbd, KbdGroup, TextEditor } from 'hexbuffer-ui';
 import * as React from 'react';
 import { PencilSimpleIcon, CheckIcon, XIcon, FileTextIcon, SidebarSimpleIcon } from '@phosphor-icons/react';
-import { TextEditor } from '@/components/ui/text-editor';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Kbd, KbdGroup } from '@/components/ui/kbd';
+
 import { ScratchpadPageHookType } from '../hooks/use-scratchpad-page';
 
 interface ScratchpadEditorPaneProps {

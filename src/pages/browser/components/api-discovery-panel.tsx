@@ -1,5 +1,6 @@
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
+
+
+import { Badge, ScrollArea } from 'hexbuffer-ui';
 import { cn } from '@/lib/utils';
 import type { DiscoveredApi } from '@/stores/browser-automation';
 import { useApiDiscoveryPanel } from './hooks/use-api-discovery-panel';

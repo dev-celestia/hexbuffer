@@ -1,3 +1,4 @@
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from 'hexbuffer-ui';
 import React from 'react';
 import {
   FileTextIcon,
@@ -7,13 +8,7 @@ import {
   TrashIcon,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from '@/components/ui/context-menu';
+
 import { DragDropProvider, DragOverlay } from '@dnd-kit/react';
 import { useSortable, isSortable } from '@dnd-kit/react/sortable';
 import { type ReconDocument, type CustomSection } from '../types';

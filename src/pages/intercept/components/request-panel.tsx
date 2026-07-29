@@ -1,5 +1,6 @@
-import { Label } from '@/components/ui/label';
-import { TextEditor } from '@/components/ui/text-editor';
+
+
+import { Label, TextEditor } from 'hexbuffer-ui';
 import { useRequestPanel } from './hooks/use-request-panel';
 import { cn } from '@/lib/utils';
 

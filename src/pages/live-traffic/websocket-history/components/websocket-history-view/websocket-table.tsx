@@ -1,6 +1,6 @@
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Empty, EmptyDescription, EmptyTitle } from '@/components/ui/empty';
+
+
+import { Alert, AlertDescription, AlertTitle, Button, Empty, EmptyDescription, EmptyTitle } from 'hexbuffer-ui';
 import { HighlightedText } from '@/components/highlighted-text';
 import { useWebSocketTable } from '../../hooks/use-websocket-table';
 import { HistoryLoadingState } from '@/pages/live-traffic/components/history-loading-state';

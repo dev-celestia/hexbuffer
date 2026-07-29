@@ -1,5 +1,6 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+
+
+import { Badge, Button } from 'hexbuffer-ui';
 import { XIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import type { ListenerInteraction } from '../types';

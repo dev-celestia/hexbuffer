@@ -1,8 +1,6 @@
-import { Button } from "@/components/ui/button";
-import {
-  ScrollArea,
-  ScrollBar,
-} from "@/components/ui/scroll-area";
+
+
+import { Button, ScrollArea, ScrollBar } from 'hexbuffer-ui';
 import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 import { useCallback } from "react";

@@ -1,8 +1,6 @@
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from 'hexbuffer-ui';
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Globe, ArrowClockwise, Plugs, PlugsConnected, Bug, Browser, Warning } from '@phosphor-icons/react';
 import type { Target } from '../hooks/use-inspect-external';
 
