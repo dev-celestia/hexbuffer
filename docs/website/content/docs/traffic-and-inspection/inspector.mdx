@@ -1,0 +1,43 @@
+---
+title: Deep Message Inspector & Monaco Comparer
+description: Analyze HTTP structures, headers, cookies, and run side-by-side visual diffs.
+---
+
+# Deep Message Inspector & Monaco Comparer
+
+Understanding intricate request structures, header details, and payload variations requires specialized tools. The **Inspector** and **Comparer** modules in hexbuffer provide deep structural analysis and visual diff comparison for all web traffic.
+
+---
+
+## Deep Message Inspector
+
+Selecting any request in hexbuffer opens the **Inspector Pane**, which breaks down raw network packets into easy-to-read, structured components:
+
+### Key Inspection Views
+- **Headers View**: Organized key-value representation of HTTP request and response headers with quick-copy capabilities.
+- **Body & Payload View**: Formatted syntax-highlighted editor for JSON, XML, HTML, GraphQL, or raw text payloads with auto-indentation.
+- **Cookies & Tokens**: Dedicated tab isolating session cookies, Bearer tokens, and security flags (`HttpOnly`, `Secure`, `SameSite`).
+- **Timing Breakdown**: Visual waterfall breakdown showing DNS lookup, TLS handshake, request transfer, server processing time, and response download.
+
+---
+
+## Monaco-Powered Payload Comparer
+
+When comparing two API responses (e.g., staging vs. production, or authorized vs. unauthorized requests), finding subtle differences manually can be time-consuming. The **Comparer** tool automates this process using the industry-standard Monaco editor engine.
+
+### How to Compare Requests or Responses
+
+1. Select two items from your **Live Traffic** grid or **Repeater** tabs.
+2. Right-click and choose **Send to Comparer** (or open the **Comparer** tab directly).
+3. The split-screen diff viewer highlights:
+   - **Green**: Added lines or parameters.
+   - **Red**: Deleted lines or missing fields.
+   - **Yellow/Blue**: Modified header values or altered JSON properties.
+
+---
+
+## Customer Benefits
+
+- **Rapid Debugging**: Instantly spot missing header fields or mismatched API payload schemas.
+- **Regression Detection**: Compare successful API responses against failed responses to pinpoint breaking backend changes.
+- **Clean Visual Presentation**: Auto-formats messy, minified JSON or HTML into clean, readable code structures.

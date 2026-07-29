@@ -1,0 +1,41 @@
+---
+title: Intelligent AI Assistant & App Triggers
+description: Context-aware AI copilot for traffic inspection, request crafting, and app triggers.
+---
+
+# Intelligent AI Assistant & App Triggers
+
+**hexbuffer** embeds an autonomous AI assistant powered by the `hexbuffer-ai` / Rig LLM framework directly into your workspace sidebar. The assistant understands your current workspace context, inspects network traffic, executes application tools, and assists with complex debugging tasks in plain natural language.
+
+---
+
+## What Makes hexbuffer AI Unique?
+
+Unlike standard chatbot interfaces where you have to manually copy and paste code or JSON payloads, hexbuffer's AI agent has **direct tool integration with the application UI**:
+- **Live Traffic Context**: The AI can read active proxy logs, analyze HTTP headers, and identify anomalous response codes.
+- **Direct App Triggers**: Ask the AI to create a new Repeater tab, launch a port scan, decode a JWT token, or write a workflow node, and it will execute the action in the app for you.
+- **Terminal & File Access**: The AI can run diagnostic shell commands, check local test files, and organize documentation automatically.
+
+---
+
+## Example AI Prompts & Commands
+
+Try asking the AI copilot commands such as:
+
+- *"Inspect the last 5 failed HTTP requests in Live Traffic and tell me why they returned 500 errors."*
+- *"Send the POST /api/v1/auth request from Live Traffic to Repeater and create a pre-request script for timestamp generation."*
+- *"Generate a context-aware XSS payload list for the input field 'username' and open it in the Invoker fuzzer."*
+- *"Explain the claims inside this JWT token and check if the signature algorithm is weak."*
+
+---
+
+## Configuring AI Providers
+
+You can connect hexbuffer AI to your preferred LLM provider or local models:
+1. Open **Settings** -> **AI Configuration**.
+2. Select your provider (OpenAI, Anthropic Claude, Google Gemini, Ollama, or local LM Studio).
+3. Enter your API key or local model endpoint URL.
+4. Customize model temperature, context window size, and system prompts.
+
+> [!TIP]
+> **Privacy First**: When using local LLMs (via Ollama or LM Studio), all traffic analysis and AI reasoning remain entirely on your local machine without sending data to external cloud services!

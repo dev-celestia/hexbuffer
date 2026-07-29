@@ -1,0 +1,53 @@
+---
+title: Invoker & High-Speed Fuzzer
+description: Parameter stress testing, payload fuzzing, and automated vulnerability scanning.
+---
+
+# Invoker & High-Speed Fuzzer
+
+**Invoker** is hexbuffer's high-speed parameter fuzzing engine. It allows developers and security auditors to test how web applications handle unexpected inputs, boundary cases, high volumes of requests, and automated payload lists.
+
+---
+
+## What is Parameter Fuzzing?
+
+Fuzzing involves injecting a series of test inputs (payloads) into specific parameter locations within an HTTP request (such as URL parameters, form fields, headers, or JSON values) and analyzing the server's responses for anomalies, errors, or security flaws.
+
+---
+
+## Attack Modes & Concurrency Controls
+
+Invoker offers flexible execution strategies tailored to your testing goals:
+
+### 1. Sniper Mode
+Targets one specific parameter position at a time, testing each payload in sequence before moving to the next parameter.
+
+### 2. Battering Ram Mode
+Injects the exact same payload into multiple designated parameter locations simultaneously.
+
+### 3. Pitchfork Mode
+Uses multiple payload lists in parallel, iterating through list items synchronously across designated parameter markers.
+
+### 4. Concurrency & Rate Throttling
+Configure thread concurrency and request delay throttling (e.g., 50 requests/second with a 10ms delay) to prevent overwhelming target servers or triggering unintentional rate limiting during testing.
+
+---
+
+## Step-by-Step Fuzzing Workflow
+
+1. **Import Request**: Send a base HTTP request from **Live Traffic** or **Repeater** into **Invoker**.
+2. **Define Payload Positions**: Highlight parameter values in the request template (e.g., `id=§100§`) to mark where test payloads should be injected.
+3. **Select Payload Source**:
+   - Built-in wordlists (numbers, special characters, common filenames, path traversal strings).
+   - Custom uploaded text files or dictionary wordlists.
+   - Dynamic generators (numeric ranges, random string generators).
+4. **Configure Response Extractors**: Set up regex pattern extractors or status code filters to flag noteworthy responses.
+5. **Start Attack**: Click **Start Invoker Attack** and monitor real-time execution results, status code distributions, response length changes, and error flags.
+
+---
+
+## Key Benefits
+
+- **Boundary Validation**: Easily verify whether your backend gracefully handles oversized inputs, invalid data types, or unexpected symbols.
+- **Automated Parameter Exploration**: Quickly identify hidden API parameters or undiscovered endpoint paths.
+- **Fast Multithreaded Execution**: Powered by a high-performance Rust core engine for maximum request throughput.

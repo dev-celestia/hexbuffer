@@ -1,0 +1,14 @@
+{
+  "title": "hexbuffer Documentation",
+  "pages": [
+    "index",
+    "getting-started",
+    "---Core Features---",
+    "traffic-and-inspection",
+    "request-crafting-and-testing",
+    "ai-and-automation",
+    "developer-workspace",
+    "---User Guide---",
+    "user-guide-and-faqs"
+  ]
+}

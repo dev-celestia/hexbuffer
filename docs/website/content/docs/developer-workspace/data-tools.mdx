@@ -1,0 +1,41 @@
+---
+title: Encoders, Hashers & JWT Security Inspector
+description: Transform data formats, compute cryptographic hashes, and inspect JSON Web Tokens.
+---
+
+# Encoders, Hashers & JWT Security Inspector
+
+Data transformation and cryptographic analysis are everyday tasks during API development and security audits. hexbuffer packages a comprehensive suite of utility converters directly into the app.
+
+---
+
+## Universal Encoder & Decoder
+
+Transform strings and payloads instantly across multiple formats:
+- **Base64 & Base64URL**: Encode and decode standard Base64 data or URL-safe Base64 strings.
+- **URL / Query Escaping**: Convert special characters to `%XX` hex encoding for safe query parameter transmission.
+- **Hexadecimal**: Convert binary buffers to hex strings and back.
+- **HTML Entity Encoder**: Escape HTML special characters (`<`, `>`, `&`, `"`, `'`) to test input sanitization.
+
+---
+
+## Cryptographic Hasher
+
+Compute and verify cryptographic hash digests instantly:
+- **Supported Algorithms**: MD5, SHA-1, SHA-256, SHA-512, RIPEMD-160.
+- **HMAC Signatures**: Calculate Hash-based Message Authentication Codes (HMAC) using custom secret keys.
+- **Hash Matcher**: Compare target hashes against inputs to verify checksum integrity.
+
+---
+
+## JWT Security Inspector
+
+JSON Web Tokens (JWT) are widely used for API authentication. The **JWT Tool** decodes, audits, and signs JWT tokens:
+
+### Key Features
+- **Token Deconstruction**: Split JWT strings into Header, Payload, and Signature components visually.
+- **Weakness Auditor**: Automatically flags security risks, such as:
+  - Tokens using the weak `"alg": "none"` signature algorithm.
+  - Expired tokens (`exp` claim validation).
+  - Missing security claims (`nbf`, `iat`, `iss`, `aud`).
+- **Token Re-Signer**: Modify claims in the payload (e.g., change `"role": "user"` to `"role": "admin"`) and re-sign the token using a custom secret or private key to test authorization enforcement.

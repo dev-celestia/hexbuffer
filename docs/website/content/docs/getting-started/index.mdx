@@ -1,0 +1,68 @@
+---
+title: Quickstart & Workspace Setup
+description: Learn how to install hexbuffer, configure HTTPS proxying, and start testing in minutes.
+---
+
+# Getting Started with hexbuffer
+
+Welcome to **hexbuffer**! This guide will walk you through launching the application, configuring your network proxy settings, installing the Certificate Authority (CA) certificate for secure HTTPS inspection, and capturing your very first live HTTP request.
+
+---
+
+## Step 1: Launching hexbuffer
+
+After installing hexbuffer on your operating system (macOS, Windows, or Linux), open the desktop application. You will be greeted by the **Main Desktop Workspace**.
+
+- **Navigation Sidebar**: Located on the left side, giving you instant access to all modules including Traffic Interception, Repeater, Fuzzer, Workflows, and Settings.
+- **Top Status Bar**: Displays proxy connection status, active target scopes, listener ports, and AI copilot readiness.
+- **Main Viewport**: Dynamically loads your active tool module or split views.
+
+---
+
+## Step 2: Setting Up HTTPS Proxying & CA Certificate
+
+To inspect encrypted HTTPS traffic between your web browser or API clients and target servers, hexbuffer operates as a local Man-in-the-Middle (MITM) proxy.
+
+### 1. Enable the Proxy
+1. Click on **Settings** in the left sidebar.
+2. Under **Proxy Configuration**, verify the proxy port (default: `8080` or dynamically assigned).
+3. Toggle the **Enable Local Proxy** switch to `ON`.
+
+### 2. Install the Root CA Certificate
+1. In **Settings**, navigate to **CA Certificate Manager**.
+2. Click **Generate & Export Certificate** or **Install to System Trust Store**.
+3. Follow the automated prompt to add the hexbuffer Root Certificate to your operating system's trusted certificates (Keychain on macOS, Certificate Store on Windows, or browser trust store).
+4. Restart your browser or HTTP client to ensure it recognizes the certificate authority.
+
+---
+
+## Step 3: Capturing Your First Request
+
+Now that your proxy and certificates are configured:
+
+1. Open your browser or configure your application to use `127.0.0.1:8080` as its HTTP/HTTPS proxy.
+2. Navigate to any target web page or send an API request.
+3. Switch back to hexbuffer and select **Live Traffic** from the sidebar.
+4. You will see requests populating the real-time traffic grid, showing HTTP methods, status codes, response times, content lengths, and target URLs.
+
+---
+
+## Step 4: Adding Target Scopes
+
+To keep your workspace focused and uncluttered:
+
+1. Click **Scope Settings** at the top of the Live Traffic view.
+2. Enter your target domain (e.g., `*.example.com` or `api.myapp.dev`).
+3. Enable **Filter by Scope** to hide irrelevant background system traffic.
+
+> [!TIP]
+> **Pro Tip**: You can right-click any request in the Live Traffic grid and choose **Add to Scope** or **Send to Repeater** to inspect and replay requests immediately!
+
+---
+
+## Next Steps
+
+Now that your environment is ready, explore the core feature guides:
+- Learn how to pause and edit live traffic in [Active Traffic Interception](/docs/traffic-and-inspection/intercept).
+- Craft and replay custom requests in [Repeater](/docs/request-crafting-and-testing).
+- Harness AI guidance in [Intelligent AI Assistant](/docs/ai-and-automation).

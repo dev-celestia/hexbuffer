@@ -1,0 +1,37 @@
+---
+title: Embedded Browser & Automated Site Crawler
+description: In-app web browsing, automated BFS sitemap crawling, and AI error detection.
+---
+
+# Embedded Browser & Automated Site Crawler
+
+hexbuffer features an **Embedded Browser & Site Crawler** module that seamlessly integrates web browsing into your desktop security and testing environment. 
+
+You no longer need an external browser to navigate target applications—browse directly within hexbuffer while every HTTP request, cookie, script, and web resource is automatically logged to your proxy grid.
+
+---
+
+## Embedded Web Browser
+
+- **Integrated WebView**: Fully functional web browser viewport supporting modern HTML5, CSS3, JavaScript, and WebSockets.
+- **Automatic Proxy Binding**: Pre-configured to route all internal web traffic through hexbuffer's MITM proxy without manual network setup.
+- **DevTools & Console**: Access browser developer tools, inspect DOM elements, and view JavaScript console logs side-by-side with network traffic.
+
+---
+
+## Automated Breadth-First (BFS) Web Crawler
+
+Discover hidden endpoints, assets, and routes across target web applications with the built-in automated web crawler.
+
+### How the Crawler Works
+1. **Target URL**: Enter a starting URL (e.g., `https://myapp.dev`).
+2. **Crawl Depth & Limits**: Set maximum link crawl depth (e.g., 3 levels deep) and max page count limits.
+3. **BFS Exploration**: The crawler recursively discovers links, form targets, external JavaScript assets, and API routes using Breadth-First Search (BFS).
+4. **AI Error Extraction**: As pages are discovered, hexbuffer's AI engine automatically flags broken links, 404 routes, missing security headers, and console exceptions.
+
+---
+
+## Key Benefits
+
+- **Complete Site Discovery**: Ensure no obscure web page or unlinked API script goes unnoticed during security audits.
+- **Seamless Traffic Generation**: Populate your Live Traffic proxy grid automatically by running a 2-minute crawl across your target domain.

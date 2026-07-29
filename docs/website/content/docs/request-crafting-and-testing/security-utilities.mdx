@@ -1,0 +1,42 @@
+---
+title: Security & Vulnerability Testing Suite
+description: Context-aware SQL Injection testing, XSS payload generation, and input validation checks.
+---
+
+# Security & Vulnerability Testing Suite
+
+To ensure your web applications are resilient against common security threats, hexbuffer includes specialized, context-aware testing modules for **SQL Injection (SQLi)** and **Cross-Site Scripting (XSS)** payload generation.
+
+---
+
+## SQL Injection & Boundary Tester
+
+The **SQL Injection Tester** helps verify whether user input fields properly sanitize database query parameters before executing SQL queries.
+
+### Key Capabilities
+- **Vector Categories**: Includes error-based, boolean-based blind, time-based blind, and UNION query payload vectors.
+- **Automated Validation**: Analyzes server responses for database error patterns (MySQL, PostgreSQL, SQLite, MSSQL, Oracle).
+- **Safe Boundary Checking**: Designed to identify input validation weaknesses without causing database corruption or data loss.
+
+---
+
+## XSS Payload Generator & Encoder
+
+The **XSS Generator** crafts context-aware payload vectors to test whether web applications adequately escape user-supplied input rendered in HTML, attribute contexts, JavaScript blocks, or URI query strings.
+
+### Key Capabilities
+- **Context Awareness**: Generates tailored payloads based on where input is reflected (e.g., inside `<div>` tags, `<input value="...">` attributes, or `<script>` blocks).
+- **Nested Encoders**: Integrates Base64, URL encoding, HTML entity encoding, and Hex escaping to test bypass mechanisms against over-filtering.
+- **DOM-Based XSS Inspection**: Scans client-side JavaScript execution sinks to flag unescaped DOM assignments (`innerHTML`, `document.write`, `eval`).
+
+---
+
+## Remediation & Best Practices
+
+Testing with hexbuffer provides clear actionable feedback for engineering teams:
+
+> [!IMPORTANT]
+> **Use Parameterized Queries**: To prevent SQL Injection, always use prepared statements or parameterized ORM queries in your backend codebase.
+
+> [!TIP]
+> **Contextual HTML Escaping**: To prevent XSS, use framework-level auto-escaping (such as React or modern templating engines) and implement a robust **Content Security Policy (CSP)**.

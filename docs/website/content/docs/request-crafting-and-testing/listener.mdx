@@ -1,0 +1,39 @@
+---
+title: Out-of-Band (OOB) Listener & Collaborator
+description: Monitor asynchronous callbacks, DNS lookups, HTTP webhooks, and SMTP interactions.
+---
+
+# Out-of-Band (OOB) Listener & Collaborator
+
+Modern web applications frequently perform background processing—such as sending email confirmations, triggering third-party webhooks, processing asynchronous queue items, or fetching remote image URLs. 
+
+The **Out-of-Band (OOB) Listener** in hexbuffer provides dedicated server endpoints to capture and verify these asynchronous callbacks and background network interactions.
+
+---
+
+## Why Out-of-Band Testing Matters
+
+Standard HTTP testing only monitors immediate synchronous server responses. However, many vulnerabilities and application features trigger actions that occur out-of-band (OOB):
+- **Webhooks**: Confirming that a payment processor or API partner correctly invokes your callback URL.
+- **SSRF (Server-Side Request Forgery)**: Testing whether a backend server inappropriately initiates outbound network connections to external domains.
+- **Asynchronous Notifications**: Verifying that background workers correctly perform DNS resolutions or send automated emails.
+
+---
+
+## How to Use the OOB Listener
+
+1. **Open the Listener Tab**: Click **Listener** in the main sidebar.
+2. **Generate Unique Callback Domain**: Click **Generate OOB Hostname**. hexbuffer generates a unique temporary subdomain (e.g., `oob-12345.collaborator.hexbuffer.dev`).
+3. **Inject Hostname into Test Target**: Insert the generated subdomain into your application fields (e.g., as a webhook target URL or profile avatar image URL).
+4. **Monitor Incoming Events**: Watch the Listener event log. As soon as the target application makes a DNS query, HTTP request, or SMTP connection to your generated domain, hexbuffer captures:
+   - Client IP address and timestamp.
+   - HTTP method, headers, and request body.
+   - DNS record query type (A, AAAA, MX, TXT).
+
+---
+
+## Key Benefits
+
+- **Complete Visibility**: Uncover backend activity that produces no visible front-end HTTP response.
+- **Webhook Debugging**: Verify header structures and payload integrity for incoming third-party webhooks in real time.
+- **Reliable Verification**: Eliminates guessing when testing asynchronous microservices.

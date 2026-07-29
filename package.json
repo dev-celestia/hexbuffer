@@ -10,11 +10,9 @@
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "dev:clean": "lsof -ti:1420 | xargs kill -9 2>/dev/null || true && vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "fix:packet-permissions": "bash ./scripts/fix-packet-capture-permissions.sh",
-    "deploy": "bash ./scripts/deploy.sh",
-    "update": "bash ./scripts/update-deps.sh"
+    "docs": "pnpm --dir docs/website dev -p 5555",
+    "docs:dev": "pnpm --dir docs/website dev -p 5555",
+    "deploy": "bash ./scripts/deploy.sh"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^2.0.35",

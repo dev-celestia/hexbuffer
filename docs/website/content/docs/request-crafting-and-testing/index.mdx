@@ -1,0 +1,42 @@
+---
+title: Repeater & Request Replaying
+description: Replay, modify, and test custom HTTP and WebSocket requests interactively.
+---
+
+# Repeater & Request Crafting
+
+The **Repeater** module is an interactive sandbox designed for manual request manipulation and API testing. It allows you to take any captured HTTP or WebSocket request, modify its headers, URL, or body content, and send it to the server repeatedly to observe how responses change.
+
+---
+
+## Core Features
+
+### 1. Interactive Multi-Tab Interface
+Organize your testing workspace with multiple independent tabs. Work on multiple API endpoints simultaneously without losing your work.
+
+### 2. Request Editor & Syntax Highlighting
+Full-featured code editor with syntax highlighting for JSON, XML, HTML, and form data. Includes auto-formatting and validation to ensure your request body is clean before dispatching.
+
+### 3. Pre-Request & Test Scripts
+Automate dynamic request parameters using sandboxed JavaScript execution:
+- **Pre-Request Scripts**: Dynamically generate timestamps, calculate authentication signatures, or fetch fresh tokens before the request fires.
+- **Test Scripts & Assertions**: Run post-response assertions (e.g., assert status code `200`, check if response time is `< 200ms`, or validate JSON schema properties).
+
+### 4. WebSocket Support
+Repeater supports full two-way WebSocket connection testing! Establish persistent WebSocket handshakes, send custom text or binary frames, and monitor real-time incoming messages.
+
+---
+
+## How to Use Repeater
+
+1. **Send Request to Repeater**: From the **Live Traffic** grid, right-click any request and click **Send to Repeater** (or press `Cmd+R` / `Ctrl+R`).
+2. **Edit Request**: Change query string values, update request headers, or modify JSON request payload properties.
+3. **Click Send**: Click **Send** to dispatch the request directly to the target host.
+4. **Inspect Response**: View the response status, headers, and formatted body immediately in the adjacent panel.
+
+---
+
+## Best Practices for API Testing
+
+> [!TIP]
+> **Use Variables**: Define environment variables (e.g., `{{baseUrl}}`, `{{token}}`) in Repeater so you can quickly switch between local development, staging, and production servers without manually updating endpoints!
