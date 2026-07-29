@@ -1,16 +1,1 @@
-import { SpinnerGapIcon } from '@phosphor-icons/react'
-
-import { cn } from '@/lib/utils';
-
-function SpinnerIcon({ className, ...props }: React.ComponentProps<"svg">) {
-  return (
-    <SpinnerGapIcon
-      role="status"
-      aria-label="Loading"
-      className={cn("size-4 animate-spin", className)}
-      {...props}
-    />
-  )
-}
-
-export { SpinnerIcon }
+export * from "hexbuffer-ui";
