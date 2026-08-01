@@ -1,0 +1,6 @@
+- Each feature page composes its UI by delegating all state and logic to a custom hook (`usePortScannerPage`) that returns a flat object of props and handlers, keeping components purely presentational.
+- Tauri IPC is invoked via `invoke('command_name', { ... })` and long-running operations communicate progress/results through scoped event listeners registered with `listen<T>(channelName, handler)` and cleaned up in a `finally` block.
+- Shared data shapes are declared once in `types.ts` and imported wherever needed rather than redefined inline.
+- Configuration constants (port presets, preset options) live in `constants.ts` and are referenced by both the hook and sidebar components instead of being duplicated.
+- Pure utilities are isolated under `lib/` and accept typed parameters, returning new arrays or strings without side effects.
+- Derived state is computed with `useMemo` based on store values (e.g., `parsedPorts`, `openResults`, `selectedPortLabel`, `canScan`) to avoid recomputation on render.

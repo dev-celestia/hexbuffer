@@ -1,0 +1,1 @@
+No build or setup scripts are specific to this module; it runs as part of the app's Tauri frontend. It requires the Tauri proxy to be started before crawling so that `ai-browser:*` events can be received.

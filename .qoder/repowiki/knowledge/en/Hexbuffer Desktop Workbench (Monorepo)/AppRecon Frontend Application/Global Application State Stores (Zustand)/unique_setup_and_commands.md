@@ -1,0 +1,1 @@
+No build or setup commands are required — stores are imported directly by React components. Each persist-enabled store uses a unique storage key (e.g., `'hexbuffer-automation'`, `'hexbuffer-app'`, `'hexbuffer-jwt-page'`) so browser/local storage entries are namespaced per store.

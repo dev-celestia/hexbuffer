@@ -1,0 +1,1 @@
+Build/dev driven by `pnpm dev:clean` before dev and `pnpm build` before packaging, with the Tauri dev server pointing at `http://localhost:1420` and the frontend dist at `../dist`. Updater configured against `https://dist.0xbuffer.com/latest.json` with a minisign public key. External binaries `binaries/ai-engine` and `binaries/coding-agent` must be present for the bundled app.

@@ -1,0 +1,1 @@
+React + TypeScript with Tailwind CSS for styling, `@phosphor-icons/react` for icons, `hexbuffer-ui` for primitive components, `@dnd-kit/core` and `@dnd-kit/sortable` for dock reordering, `@ai-sdk/react` for the AI assistant chat, `react-router-dom` for navigation, and `@tauri-apps/api` for native window operations (dragging, file source conversion).

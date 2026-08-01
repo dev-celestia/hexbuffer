@@ -1,0 +1,1 @@
+A Chrome DevTools Protocol (CDP) inspector page that connects to a remote debugging browser, captures network requests, cookies, and storage, and displays console logs through a tabbed UI.

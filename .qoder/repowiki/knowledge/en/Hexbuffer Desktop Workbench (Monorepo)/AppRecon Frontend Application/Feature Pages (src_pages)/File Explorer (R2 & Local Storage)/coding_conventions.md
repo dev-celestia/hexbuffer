@@ -1,0 +1,5 @@
+- Each data source (R2, Local) is encapsulated in its own React hook that exposes a uniform interface (items, loading, selectedItem, navigation, CRUD callbacks) so the shared UI components remain agnostic of the storage backend.
+- User-facing feedback is delivered through `sonner`'s `toast.promise` pattern for async mutations (delete, rename, create folder), providing consistent loading/success/error messages without boilerplate.
+- UI classes are composed through the `cn()` utility from `@/lib/utils` with inline comment groupings (Layout & Positioning, Sizing & Spacing, Backgrounds & Borders, Typography, Interactive & States) applied consistently across all components.
+- Stateful user preferences (view mode, custom R2 buckets) are persisted to `localStorage` with try/catch wrappers that fall back to sensible defaults when storage is unavailable.
+- Error handling follows a console.error + toast.error dual pattern, with specific error message parsing (e.g., DOMParser/XML deserialization for invalid S3 endpoints) to guide users toward configuration fixes.

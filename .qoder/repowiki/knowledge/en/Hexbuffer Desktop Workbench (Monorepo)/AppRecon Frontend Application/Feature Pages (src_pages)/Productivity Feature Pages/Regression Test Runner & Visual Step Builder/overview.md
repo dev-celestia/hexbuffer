@@ -1,0 +1,1 @@
+React page that lets users author, visualize, execute, and observe Playwright-based regression test suites through a tabbed UI with a visual step-flow canvas and live step-by-step results.

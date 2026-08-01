@@ -1,0 +1,26 @@
+schema_version: 1
+module_path: ""
+title: Hexbuffer Desktop Workbench (Monorepo)
+scope:
+    - README.md
+    - AGENTS.md
+    - DESIGN.md
+    - .gitignore
+    - package.json
+    - pnpm-lock.yaml
+    - vite.config.ts
+    - tsconfig.json
+    - components.json
+    - postcss.config.mjs
+    - Cargo.lock
+    - LICENSE
+    - VERSION
+    - app-icon.png
+    - index.html
+    - skills-lock.json
+    - splashscreen.html
+    - tsconfig.node.json
+    - tsconfig.tsbuildinfo
+source_files: []
+depends_on: []
+related_to: []

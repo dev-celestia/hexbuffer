@@ -1,0 +1,5 @@
+- Tauri IPC is performed exclusively through `invoke('command_name', payload)` from `@tauri-apps/api/core`, never direct fetch calls to the backend.
+- State mutations are delegated to functions from `@/triggers/repeater` (e.g. `createWorkspace`, `renameWorkspace`, `deleteWorkspace`) rather than calling store setters directly.
+- User-facing errors and success feedback are surfaced through `sonner`'s `toast.error` / `toast.success` rather than alerts or custom dialogs.
+- Components receive data via props and read shared state through `useCollectionsStore((s) => s.field)` selectors, keeping component-local state minimal and derived.
+- Script execution uses a restricted `new Function` sandbox exposing only `pm`, `script`, `expect`, and a stubbed `console`, isolating user code from the host environment.

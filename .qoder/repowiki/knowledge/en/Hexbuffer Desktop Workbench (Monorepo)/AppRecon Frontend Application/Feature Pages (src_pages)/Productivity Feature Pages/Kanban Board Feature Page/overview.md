@@ -1,0 +1,1 @@
+Interactive kanban board page with drag-and-drop card management, grouping by status/assignee/priority, WIP limits, subtask tracking, and add/detail modals powered by @dnd-kit.

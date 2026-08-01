@@ -1,0 +1,8 @@
+schema_version: 1
+module_path: frontend_app/feature_pages/productivity_apps/workflow_canvas
+title: Workflow Canvas & Automation Builder
+scope:
+    - src/pages/workflow/
+source_files: []
+depends_on: []
+related_to: []

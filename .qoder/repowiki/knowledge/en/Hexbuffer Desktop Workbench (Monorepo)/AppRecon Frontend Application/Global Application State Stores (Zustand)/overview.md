@@ -1,0 +1,1 @@
+Zustand-based global state stores for the application, covering automation workflows, HTTP/WebSocket history, app settings, proxy management, and feature-specific UI state.

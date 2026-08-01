@@ -1,0 +1,1 @@
+A Tauri-based desktop workbench that unifies a React frontend, Rust backend, Fumadocs website, CI/CD pipelines, build scripts, and agent skill definitions into a single hexbuffer application.

@@ -1,0 +1,6 @@
+- Each trigger source file exposes a single `pub(crate) fn ingest_*` entry point that validates input and enqueues work via `enqueue_live_traffic_job_locked`.
+- Shared mutable state is always accessed through `state.0.lock()` under a `Mutex`, and helper functions suffixed `_locked` operate on `&mut AutomationRuntimeInner` without acquiring the lock themselves.
+- UI updates go through the centralized telemetry pipeline in `events.rs` (`append_log`, `set_node_runtime`, `flush_ui_telemetry_batch`) rather than direct `app.emit` calls, ensuring batching and throttling.
+- Node types are encoded as string prefixes (`trigger:*`, `condition:*`, `action:*`) read from `node.data.config.actionType` or `node.node_type`, with dispatch performed via match arms.
+- All serializable structs use `#[serde(rename_all = "camelCase")]` so internal Rust snake_case fields map to camelCase JSON for the frontend.
+- Every async workflow task checks `is_workflow_run_cancelled(app, workflow_id, run_token)` at sleep boundaries to honor aborts and superseded runs.

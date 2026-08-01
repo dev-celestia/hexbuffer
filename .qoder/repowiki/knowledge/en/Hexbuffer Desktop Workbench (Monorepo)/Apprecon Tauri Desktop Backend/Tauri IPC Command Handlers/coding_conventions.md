@@ -1,0 +1,5 @@
+- Every public IPC entry point is a function annotated with `#[tauri::command]` returning `Result<T, String>` where errors are propagated as error strings.
+- All request/response structs derive both `Serialize` and `Deserialize` and apply `#[serde(rename_all = "camelCase")]` so the Rust snake_case fields map to camelCase JSON keys consumed by the frontend.
+- Shared mutable state across commands is accessed through Tauri's `State<'_, T>` parameter, with `T` typically wrapping an `Arc<Mutex<...>>` or `AtomicBool` for thread-safe access.
+- Long-running background work inside a command is offloaded via `tokio::spawn` while keeping the command handler synchronous from Tauri's perspective, often returning an ID used later to cancel or poll progress.
+- Filesystem and I/O operations use `app.path().app_data_dir()` from the `AppHandle` to locate persistent directories rather than hard-coded paths.

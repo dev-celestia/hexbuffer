@@ -1,0 +1,6 @@
+- All Tauri commands are registered declaratively inside a single `tauri::generate_handler![...]` macro in `main.rs`, grouped by feature namespace (`hexbuffer::commands::*`, `hexbuffer::automation::*`, etc.).
+- Long-lived application state is stored as Tauri-managed singletons via `app.manage(StateType::new()/default())` during `setup::init`, then accessed through `app.state::<Type>()` or `window.try_state::<Type>()`.
+- Cross-cutting logging goes through the shared `crate::log()` function which prepends an ISO timestamp and writes to both stderr and `/tmp/hexbuffer.log`.
+- Command implementations in `app_commands.rs` return `Result<(), String>` error strings rather than typed errors, keeping the invoke layer simple.
+- Shared data structures use `#[derive(Debug, Clone, Serialize, Deserialize)]` with `#[serde(rename_all = "camelCase")]` to match the TypeScript frontend contract.
+- Desktop-only features (updater plugin, macOS keychain flag) are gated with `#[cfg(desktop)]` / `#[cfg(target_os = "macos")]` / `#[cfg(unix)]` attributes.

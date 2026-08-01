@@ -1,0 +1,1 @@
+Root-level `pnpm install` bootstraps all workspaces; `pnpm tauri dev` launches the full desktop app (frontend + Rust backend); `pnpm dev` runs only the Vite frontend on port 1420; `pnpm docs:dev` starts the docs site on port 5555; `pnpm deploy` executes the Bash deployment pipeline that builds, signs, and uploads artifacts.

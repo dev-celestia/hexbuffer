@@ -1,0 +1,6 @@
+- Public Tauri entry points are declared with `#[tauri::command]` and take `AppHandle` plus `State<'_, types::SqliScanState>` for shared mutable scan lifecycle management.
+- All serializable domain types derive both `Serialize` and `Deserialize` from `serde`, with enums using `#[serde(rename_all = ...)]` to normalize wire formats (lowercase or snake_case).
+- Progress feedback flows through the `SqliProgressEvent` tagged enum with constructor helpers (`update`, `vuln_found`, `data_extracted`, `complete`, `error`) rather than ad-hoc event construction.
+- DBMS-specific behavior is selected by matching lowercase strings against known identifiers (e.g. `mysql`, `postgresql`/`postgres`, `mssql`/`sqlserver`, `oracle`, `sqlite`) with a MySQL fallback.
+- HTTP requests are built imperatively by mutating a `reqwest::Request` builder, with URL/body/header parameter injection branching on `SqliParamLocation` variants.
+- Cancellation is implemented cooperatively via `Arc<AtomicBool>` stored in `SqliScanState`, set through `cancel_scan` and polled through `is_cancelled`.

@@ -1,0 +1,1 @@
+A Tauri-backed Markdown document editor page that manages multi-tab Recon documents with custom sections, template-based creation, undo/redo history, and PDF export.

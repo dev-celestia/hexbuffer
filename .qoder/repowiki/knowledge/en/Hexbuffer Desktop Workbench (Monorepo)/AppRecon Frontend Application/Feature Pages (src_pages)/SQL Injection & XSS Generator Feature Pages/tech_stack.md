@@ -1,0 +1,1 @@
+React with TypeScript, Tauri IPC (@tauri-apps/api/core invoke and event listen), hexbuffer-ui shadcn-style primitives (Tabs, Badge, Button), Phosphor icons, Tailwind CSS via cn utility from @/lib/utils.

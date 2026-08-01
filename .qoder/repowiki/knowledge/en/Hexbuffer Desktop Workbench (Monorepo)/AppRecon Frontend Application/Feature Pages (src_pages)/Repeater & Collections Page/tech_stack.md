@@ -1,0 +1,1 @@
+React + TypeScript with Zustand stores (`@/stores/repeater`, `@/stores/collections`), `@dnd-kit/core` and `@dnd-kit/sortable` for drag-and-drop, Tauri v2 (`@tauri-apps/api/core`, `plugin-dialog`, `plugin-fs`) for IPC and file I/O, `sonner` for toast notifications, and `hexbuffer-ui` for tab primitives.

@@ -1,0 +1,1 @@
+SYN scanning is explicitly disabled at the command boundary — it returns an error directing users to TCP connect scans instead, because SYN requires raw sockets and a privileged helper not available in this Tauri context. Scans are limited to 65,535 total host/port checks and CIDR expansions capped at 4,096 hosts.

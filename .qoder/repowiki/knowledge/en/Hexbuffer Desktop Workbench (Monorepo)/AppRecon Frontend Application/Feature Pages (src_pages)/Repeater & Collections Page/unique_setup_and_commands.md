@@ -1,0 +1,1 @@
+Requires a running Tauri backend exposing commands `send_repeater_request`, `save_stash`, and the collection CRUD triggers imported from `@/triggers/repeater`; no separate build step beyond the app's normal dev/build pipeline.

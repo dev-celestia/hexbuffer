@@ -1,0 +1,1 @@
+Provides the desktop-shell layout, taskbar dock, floating window workspace, global search, AI assistant pane, and footer that compose the application's main chrome around tool pages.

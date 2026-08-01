@@ -1,0 +1,1 @@
+React settings page for the desktop app that lets users configure proxy ports, install/regenerate CA certificates, manage AI provider keys and models, Cloudflare R2 credentials, appearance, automation, and about information.

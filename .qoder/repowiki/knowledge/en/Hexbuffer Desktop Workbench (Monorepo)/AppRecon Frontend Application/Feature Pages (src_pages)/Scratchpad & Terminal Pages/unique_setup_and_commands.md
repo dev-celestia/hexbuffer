@@ -1,0 +1,1 @@
+No build or setup scripts are specific to these pages; they rely on the app's standard React toolchain. The terminal page requires `@xterm/xterm/css/xterm.css` to be imported so the hidden textarea and viewport elements render correctly.

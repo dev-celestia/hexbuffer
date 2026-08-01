@@ -1,0 +1,1 @@
+Rust Tauri desktop backend that wires together a MITM proxy, browser crawler, AI agent, port scanner, SQLi scanner, automation engine, and SQLite persistence behind a single IPC command surface for the frontend.

@@ -1,0 +1,1 @@
+Reusable React component library providing base UI primitives (re-exported from hexbuffer-ui), AI conversation and agent visualization elements, and a tabbed page layout with persistent tab state.

@@ -1,0 +1,20 @@
+schema_version: 1
+module_path: tauri_backend/app_wiring
+title: Tauri Application Bootstrap & Command Wiring
+scope:
+    - src-tauri/src/lib.rs
+    - src-tauri/src/main.rs
+    - src-tauri/src/setup.rs
+    - src-tauri/src/tray.rs
+    - src-tauri/src/types.rs
+    - src-tauri/src/app_commands.rs
+source_files: []
+depends_on: []
+related_to:
+    - path: frontend_app/feature_pages/dev_tools/network_inspector
+    - path: frontend_app/feature_pages/file_explorer
+    - path: frontend_app/feature_pages/mock_forge
+    - path: frontend_app/feature_pages/productivity_apps/documents_editor
+    - path: frontend_app/feature_pages/productivity_apps/regression_test_runner
+    - path: frontend_app/feature_pages/scratchpad_terminal
+    - path: frontend_app/feature_pages/settings

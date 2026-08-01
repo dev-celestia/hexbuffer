@@ -1,0 +1,1 @@
+Bootstraps the Tauri desktop application by wiring command handlers, managing global app state, initializing the system tray, and launching auxiliary processes like a CDP browser.

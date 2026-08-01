@@ -1,0 +1,1 @@
+No unified build or CLI command; each page is imported individually by the application router and rendered as a top-level route.

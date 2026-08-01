@@ -1,0 +1,1 @@
+React page components that render tabbed HTTP proxy log and WebSocket connection history views with filtering, pagination, grouping, pinning, and Tauri-backed data fetching for the live traffic inspection feature.

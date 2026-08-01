@@ -1,0 +1,1 @@
+Builds require `TAURI_SIGNING_PRIVATE_KEY` secret in the repository; releases are created automatically from `v*` git tags. Docs deploy is gated to `docs/website/**` changes and uses `pnpm run build` inside that directory. The Codex hook invokes `.agents/skills/impeccable/scripts/hook.mjs` which must exist locally for UI-change checks during edits.

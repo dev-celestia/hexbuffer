@@ -1,0 +1,6 @@
+- Payload insertion points in requests are marked with `$...$` delimiters and parsed via `findPayloadPositions` / `markPayloadPosition` rather than regex placeholders or named parameters.
+- Each configuration object has a corresponding `createDefault*` factory function in `types.ts` that returns a fully-typed default instance used when initializing new tabs or syncing positions.
+- Store subscriptions use `useShallow` from `zustand/react/shallow` to slice only the needed fields and avoid unnecessary re-renders across components.
+- Side-effectful operations (file I/O, toast notifications, store updates) are wrapped in `React.useCallback` with explicit dependency arrays and surfaced through custom hooks rather than inline handlers.
+- Static data assets under `payload/` are consumed exclusively through the glob-based `PREDEFINED_PAYLOADS` loader, keeping wordlist content decoupled from component logic.
+- Utility functions in `lib/utils.ts` are pure and operate on the typed `AttackResult` / `Record<string,string>` shapes, avoiding direct store or DOM access.

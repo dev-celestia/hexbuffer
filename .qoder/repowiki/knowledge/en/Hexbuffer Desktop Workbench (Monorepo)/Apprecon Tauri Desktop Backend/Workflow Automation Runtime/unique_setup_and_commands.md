@@ -1,0 +1,1 @@
+All Tauri commands must be declared inside this module so the `#[tauri::command]` macro can discover them; they are registered elsewhere via the generated handler. The runtime state is injected as `State<'_, AutomationRuntimeState>` and requires a running Tauri app handle for event emission.

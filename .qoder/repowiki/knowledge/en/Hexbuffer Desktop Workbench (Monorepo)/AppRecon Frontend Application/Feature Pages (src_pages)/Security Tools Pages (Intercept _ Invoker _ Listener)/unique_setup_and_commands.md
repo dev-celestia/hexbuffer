@@ -1,0 +1,1 @@
+No unified build command at this level — each page is consumed by the parent app's router; development runs through the project's standard dev server which serves all `src/pages/*` routes.

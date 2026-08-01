@@ -1,0 +1,5 @@
+- Each tool is defined in its own file with a zero-sized struct (or a struct holding shared state like `ProxyBufferState`) that implements `rig::tool::Tool`, exposing a `const NAME` string, typed `Args`/`Output` generics, and an async `call` method.
+- Tool arguments are declared as separate `#[derive(Deserialize, Serialize)]` structs named `<ToolName>Args`, with required fields marked via `required` in the `json!` parameter schema returned by `definition`.
+- Every tool's `call` implementation delegates actual work by calling `super::dispatch_tool_call(Self::NAME, json!(args))` and returns a human-readable success string, keeping side effects out of the tool itself.
+- Errors are wrapped in crate-local `thiserror`-derived types (`AppToolError`, `ToolError`) rather than using `anyhow` or panics, and propagated through the `Result<Self::Output, Self::Error>` return type.
+- Shared mutable state (e.g. proxy buffers) is encapsulated in a `Clone`-able struct built on `Arc<Mutex<...>>` and injected into the tool struct that needs it, rather than accessed through globals.

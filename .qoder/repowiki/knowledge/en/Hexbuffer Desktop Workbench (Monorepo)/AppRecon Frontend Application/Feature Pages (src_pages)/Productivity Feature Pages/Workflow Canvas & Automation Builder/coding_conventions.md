@@ -1,0 +1,5 @@
+- Each node type is declared once in `node-type-registry.ts` with a `NodeTypeDef` containing `type`, `label`, `category`, `iconName`, `defaultConfig`, and `description`; the same string literal keys are reused across the registry, the `NODE_TYPES` component map in `canvas-definitions.ts`, and the `createAutomationNode` factory.
+- Node categories (`trigger`, `condition`, `action`) drive visual styling through shared `CATEGORY_*` maps in `constants.ts` (border, background, icon bg/text, handle colors) rather than inline style objects.
+- Cross-component communication between the page, canvas, and side panels goes through `React.MutableRefObject` bridges (`addNodeRef`, `persistRef`, `bridgeRef`) passed down as props instead of prop drilling callbacks.
+- Node runtime status is observed via a dedicated hook (`useNodeRuntimeStatus`) and displayed through a shared `NodeRuntimeStatus` component, keeping execution feedback consistent across all node types.
+- Per-node validation and capability checks are delegated to small pure functions in `lib/node-warnings.ts` and `lib/node-capabilities.ts`, returning descriptive reason strings rendered as badges or warning icons.

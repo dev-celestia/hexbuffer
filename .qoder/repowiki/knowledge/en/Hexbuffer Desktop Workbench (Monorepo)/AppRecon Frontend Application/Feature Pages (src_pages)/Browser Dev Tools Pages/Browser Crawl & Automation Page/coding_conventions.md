@@ -1,0 +1,6 @@
+- Each panel component is paired with a dedicated `use*-panel.ts` hook under `components/hooks/` that owns all local UI state (filters, selection, detail dialogs) while keeping the component itself presentational.
+- Component memoization is used consistently via `memo()` on panel components (`CrawlTreePanel`, `AiInsightsPanel`) to avoid re-renders when props are stable.
+- Tailwind CSS classes are grouped with inline comments categorizing them by purpose (Layout & Positioning, Sizing & Spacing, Typography, Backgrounds & Borders, Interactive & States) using the `cn` utility from `@/lib/utils`.
+- Event-driven updates from the backend are handled by registering Tauri `listen` calls inside a `useEffect` with proper cleanup, and errors are logged with a `[browser automation]` prefix when listeners are unavailable.
+- Derived data (filtered pages, filtered insights, filtered logs, crawl tree) is computed with `useMemo` keyed on search query and source arrays to keep rendering efficient.
+- Type definitions for crawl entities (`CrawlPage`, `AIInsight`, `ActivityLog`, `CrawlSetupConfig`, etc.) are declared once in `types.ts` and imported by both components and utility functions.

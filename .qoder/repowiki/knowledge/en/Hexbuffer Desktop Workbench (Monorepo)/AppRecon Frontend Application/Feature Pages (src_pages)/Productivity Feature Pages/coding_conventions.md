@@ -1,0 +1,5 @@
+- Each page exports a single default function component from `index.tsx` that wires a page-scoped `use-*-page` hook to the shared `TabbedPageLayout`.
+- Page state and tab management are centralized in a single custom hook named `use-<feature>-page.ts` rather than scattered across components.
+- Canvas-enabled pages wrap their content in `ReactFlowProvider` from `@xyflow/react` at the root of the component tree.
+- UI primitives (ResizablePanel, TabsContent, AlertDialog, etc.) are sourced exclusively from `hexbuffer-ui`, never re-implemented locally.
+- Styling uses the shared `cn()` utility from `@/lib/utils` with consistent class groups for layout, sizing, backgrounds, and borders.

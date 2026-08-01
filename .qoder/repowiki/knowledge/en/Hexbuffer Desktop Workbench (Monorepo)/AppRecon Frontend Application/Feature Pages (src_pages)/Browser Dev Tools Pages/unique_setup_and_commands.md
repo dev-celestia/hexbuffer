@@ -1,0 +1,1 @@
+The browser page requires a proxy to be started first (via `useProxyStart` / `handleStartProxy`) before crawling external sites; the inspector page requires a Chrome instance launched with `--remote-debugging-port=<port>` and uses the port input to discover/connect to targets.

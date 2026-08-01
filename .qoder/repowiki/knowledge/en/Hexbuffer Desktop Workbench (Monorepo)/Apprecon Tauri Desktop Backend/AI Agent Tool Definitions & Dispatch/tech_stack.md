@@ -1,0 +1,1 @@
+Rust with `rig` crate for AI tool definitions (`rig::tool::Tool`, `rig::completion::ToolDefinition`), `serde` + `serde_json` for argument serialization, `thiserror` for error types, and `std::sync::{OnceLock, RwLock, Arc, Mutex}` for thread-safe global state.

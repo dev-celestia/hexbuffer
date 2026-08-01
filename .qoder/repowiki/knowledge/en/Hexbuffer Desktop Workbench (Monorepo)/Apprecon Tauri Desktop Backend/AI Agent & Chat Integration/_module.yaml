@@ -1,0 +1,8 @@
+schema_version: 1
+module_path: tauri_backend/ai_agent
+title: AI Agent & Chat Integration
+scope:
+    - src-tauri/src/ai/
+source_files: []
+depends_on: []
+related_to: []

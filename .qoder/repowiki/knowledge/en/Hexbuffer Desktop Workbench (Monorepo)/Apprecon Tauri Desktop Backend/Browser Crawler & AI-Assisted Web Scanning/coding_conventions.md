@@ -1,0 +1,5 @@
+- All domain structs use `#[derive(Debug, Clone, Serialize, Deserialize)]` with `#[serde(rename_all = "camelCase")]` for consistent JSON field naming across the module.
+- Shared mutable state is exposed through `AiBrowserState` fields wrapped in `Arc<Mutex<HashMap<...>>>`, and every access goes through `.lock()` before mutation.
+- Persistence operations delegate to `HistoryBridge` methods accessed via `app.state::<crate::HistoryBridge>()`, with errors logged via `eprintln!` but never propagated to callers.
+- Real-time updates are emitted through `app.emit("ai-browser:<event>", payload)` after each in-memory update, keeping event emission separate from persistence logic.
+- Optional boolean fields default to `true` via a local `default_true()` helper used with `#[serde(default = "default_true")]` on `capture_screenshots`, `capture_rendered_html`, and `headless`.

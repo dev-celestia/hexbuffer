@@ -1,0 +1,1 @@
+React + TypeScript with functional components, custom hooks for stateful logic, and plain fetch-based API clients per page; payload data files live under `invoker/payload/` as static text resources loaded at runtime.

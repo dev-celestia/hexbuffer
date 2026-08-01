@@ -1,0 +1,1 @@
+Rust with `rusqlite` for SQLite access, `serde` + `serde_json` for JSON serialization of complex fields stored as TEXT/BLOB columns, and `std::sync::Mutex` for single-connection thread safety. Schema uses SQLite PRAGMAs (foreign_keys=ON, journal_mode=WAL) and native indexes.

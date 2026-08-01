@@ -1,0 +1,13 @@
+schema_version: 1
+module_path: frontend_app/stores
+title: Global Application State Stores (Zustand)
+scope:
+    - src/stores/
+source_files: []
+depends_on: []
+related_to:
+    - path: frontend_app/feature_pages/mock_forge
+    - path: frontend_app/feature_pages/productivity_apps/kanban_board
+    - path: frontend_app/feature_pages/repeater_and_collections
+    - path: frontend_app/feature_pages/security_tools/interaction_listener
+    - path: frontend_app/feature_pages/sql_xss_tools

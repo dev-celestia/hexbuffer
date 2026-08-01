@@ -1,0 +1,1 @@
+React + TypeScript with Tauri IPC (`@tauri-apps/api/core` invoke/listen), Monaco Language Client via WebSocket for Rust LSP, Tailwind CSS v4 with shadcn theme tokens, clsx/tailwind-merge for class merging, sonner for toast notifications, and hexbuffer-ui as a base stylesheet.

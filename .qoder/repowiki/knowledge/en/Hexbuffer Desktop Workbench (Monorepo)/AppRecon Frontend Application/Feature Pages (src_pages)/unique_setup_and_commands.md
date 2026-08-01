@@ -1,0 +1,1 @@
+No top-level command; pages are discovered and mounted by the parent app's tab registry at startup.

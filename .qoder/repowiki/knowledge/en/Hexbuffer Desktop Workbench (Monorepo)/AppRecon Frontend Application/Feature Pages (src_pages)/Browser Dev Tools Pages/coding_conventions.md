@@ -1,0 +1,4 @@
+- Each page is organized as an `index.tsx` root component plus co-located `components/`, `hooks/`, and `lib/` subdirectories with a matching `types.ts` and `constants.ts`.
+- Stateful behavior is extracted into custom hooks (e.g. `use-browserAutomationPage`, `useInspectExternal`) that return a plain object of state and setters consumed by the page component.
+- UI panels are implemented as separate `.tsx` components and composed inside the page via the shared `TabbedPageLayout` or `ResizablePanelGroup` containers.
+- User-facing status and badges use the shared `CrawlStatusBadge` and `hexbuffer-ui` Badge components rather than ad-hoc styling.

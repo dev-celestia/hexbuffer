@@ -1,0 +1,10 @@
+schema_version: 1
+module_path: frontend_app/feature_pages/scratchpad_terminal
+title: Scratchpad & Terminal Pages
+scope:
+    - src/pages/scratchpad/
+    - src/pages/terminal/
+source_files: []
+depends_on: []
+related_to:
+    - path: tauri_backend/app_wiring

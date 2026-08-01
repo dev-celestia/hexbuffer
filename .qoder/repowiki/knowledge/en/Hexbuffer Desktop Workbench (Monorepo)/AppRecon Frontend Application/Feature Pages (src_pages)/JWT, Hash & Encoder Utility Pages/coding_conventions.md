@@ -1,0 +1,6 @@
+- Each page exposes a single custom hook (`use-*-page.ts`) that centralizes all state, derived values, and actions, which the `index.tsx` component then destructures and passes down as props.
+- Pure transformation logic is isolated in a `lib/*-functions.ts` file and imported by the hook, keeping components free of business logic.
+- Auto-computation is triggered via a `useEffect` that re-runs whenever the relevant inputs change, so output is always in sync without explicit user action.
+- Clipboard copy operations use `navigator.clipboard.writeText` followed by a `toast.success` notification, consistently wrapped in `useCallback`.
+- UI constants (algorithm lists, hash options, codec labels) are exported from a `constants.ts` file and referenced by both hooks and components rather than being inline.
+- Error states are represented as nullable strings (`decodeError`, `genError`, `error`) and cleared alongside their associated data when clearing or on successful recomputation.

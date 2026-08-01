@@ -1,0 +1,6 @@
+- Each Tauri command call in `api.ts` is wrapped in a typed function that maps snake_case Rust fields to camelCase JS properties via dedicated `map*` helpers before returning strongly-typed interfaces from `types.ts`.
+- Component-local state and side effects are extracted into custom hooks under `components/hooks/` (e.g. `use-hosts-panel`, `use-interactions-panel`, `use-interaction-detail`), keeping JSX files thin and prop-driven.
+- Data mutations follow an optimistic-update pattern: the hook updates local Zustand state immediately after calling the API, rather than waiting for the response, with error handling falling back to clearing or filtering arrays.
+- Auto-polling is implemented via a `setInterval` inside a `useEffect` that triggers only when `isEnabled` and `servers.length > 0`, with cleanup clearing the interval and resetting `isPolling`.
+- Form validation uses `react-hook-form` with a `zodResolver` and a top-level `SERVER_FORM_SCHEMA` constant, surfacing errors via `form.setError('root', ...)` for user-facing messages.
+- UI styling consistently uses Tailwind classes combined with the `cn()` utility from `@/lib/utils` for conditional class composition.

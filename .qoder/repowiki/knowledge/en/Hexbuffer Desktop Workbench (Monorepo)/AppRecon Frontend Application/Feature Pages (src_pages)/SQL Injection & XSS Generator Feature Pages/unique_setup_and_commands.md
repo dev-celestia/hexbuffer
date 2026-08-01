@@ -1,0 +1,1 @@
+No build or setup scripts are specific to these pages; they rely on the project's standard Tauri dev/build pipeline. The SQLi scanner requires a running Tauri backend exposing start_sqli_scan and stop_sqli_scan commands and emitting sqli-progress-{scanId} events.

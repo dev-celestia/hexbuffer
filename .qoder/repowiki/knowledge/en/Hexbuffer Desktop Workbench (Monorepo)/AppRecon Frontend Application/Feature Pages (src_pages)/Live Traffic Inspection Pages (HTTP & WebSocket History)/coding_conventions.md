@@ -1,0 +1,6 @@
+- Each feature subdirectory mirrors the same structure: `index.tsx` page, `hooks/` with a `use-*-history-page` orchestrator plus query/detail/table hooks, `components/` for view fragments, `api.ts` for Tauri invocations, and `utils.ts` for formatting helpers.
+- API layers wrap every Tauri `invoke` call in a local `invokeT<T>` function that checks `window.__TAURI_INTERNALS__` and normalizes errors through a shared `toErrorMessage` helper before rethrowing.
+- Tabbed navigation is built by deriving a `tabs` array from active targets and memoizing it, then feeding it to `useTabState` with a feature-specific storage key (e.g. `'http-history-target-tabs'`, `'ws-history-target-tabs'`).
+- UI styling uses the `cn(...)` utility from `@/lib/utils` with inline class arrays grouped by layout, sizing, and visual categories rather than external CSS files.
+- Dialogs accept optional `externalOpen` / `onExternalOpenChange` props so they can be controlled externally (as done by both HTTP and WebSocket pages) while still supporting internal state when uncontrolled.
+- Toast notifications from `sonner` are used consistently for user feedback on actions like clearing history, sending scope to documents, or Tauri command failures.

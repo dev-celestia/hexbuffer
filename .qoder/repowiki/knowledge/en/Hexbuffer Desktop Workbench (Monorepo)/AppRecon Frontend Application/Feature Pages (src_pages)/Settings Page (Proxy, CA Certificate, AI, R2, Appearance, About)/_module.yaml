@@ -1,0 +1,9 @@
+schema_version: 1
+module_path: frontend_app/feature_pages/settings
+title: Settings Page (Proxy, CA Certificate, AI, R2, Appearance, About)
+scope:
+    - src/pages/settings/
+source_files: []
+depends_on: []
+related_to:
+    - path: tauri_backend/app_wiring

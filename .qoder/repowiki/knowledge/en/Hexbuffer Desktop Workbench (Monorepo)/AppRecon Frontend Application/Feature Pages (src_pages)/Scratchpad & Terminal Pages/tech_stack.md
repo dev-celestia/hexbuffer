@@ -1,0 +1,1 @@
+React with TypeScript, Zustand for store state (`@/stores/scratchpad`, `@/stores/terminal`), xterm.js for terminal rendering (`@xterm/xterm`), hexbuffer-ui for primitives (Button, Input, Popover, AlertDialog), Phosphor icons, and sonner for toast notifications.

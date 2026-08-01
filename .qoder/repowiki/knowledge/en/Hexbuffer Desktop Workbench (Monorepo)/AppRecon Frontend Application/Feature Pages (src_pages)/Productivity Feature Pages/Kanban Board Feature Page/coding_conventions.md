@@ -1,0 +1,5 @@
+- Component props are defined as explicit TypeScript interfaces at the top of each file rather than inline type annotations.
+- Stateful logic is centralized in a custom hook (`use-kanban-page`) that returns both derived values and callback setters, keeping components purely presentational.
+- Immutable updates use functional `setState` with spread operators to produce new arrays/objects instead of mutating existing state.
+- UI configuration (priorities, columns, group options, seed data) is kept in a dedicated `constants.ts` file typed against the module's domain types.
+- Conditional styling relies on the `cn()` utility from `@/lib/utils` to compose Tailwind class strings dynamically.

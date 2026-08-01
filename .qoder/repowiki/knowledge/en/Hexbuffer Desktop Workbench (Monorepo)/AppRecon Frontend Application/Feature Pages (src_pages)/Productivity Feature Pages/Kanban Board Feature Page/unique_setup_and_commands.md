@@ -1,0 +1,1 @@
+No special build or setup commands — the page is consumed as a standard React component exported from `src/pages/kanban/index.tsx`. Seed data is provided via `SEED_CARDS` in `constants.ts` so the board renders immediately without external data.

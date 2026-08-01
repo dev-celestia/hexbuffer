@@ -1,0 +1,1 @@
+No build or test commands are specific to this module; it is compiled as part of the Tauri Rust backend. `HistoryBridge::new(path)` requires an existing file path to initialize its SQLite database via `Database::new(path).init()`.

@@ -1,0 +1,6 @@
+- UI primitive files in `src/components/ui/` are single-line re-exports of `hexbuffer-ui`, keeping the local import surface stable without duplicating implementation.
+- AI element components are wrapped with `memo()` and expose typed props via `ComponentProps<...>` utility types rather than inline prop definitions.
+- Styling is done exclusively through Tailwind classes composed with the `cn()` helper from `@/lib/utils`, never through inline style objects or CSS modules.
+- Hooks follow the `useXxx` naming convention and return plain objects with getters/setters instead of using React's `useState` directly inside consumers.
+- Context-based components (e.g., `MessageBranch`) throw a descriptive error when used outside their provider, and consumer hooks call `useContext` with an explicit null check.
+- Each component file declares its own `displayName` property to aid debugging in React DevTools.

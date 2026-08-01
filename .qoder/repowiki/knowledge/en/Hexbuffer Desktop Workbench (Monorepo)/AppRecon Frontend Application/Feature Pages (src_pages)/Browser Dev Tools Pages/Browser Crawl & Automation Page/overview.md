@@ -1,0 +1,1 @@
+React page that orchestrates a browser-based website crawl session, presenting the discovered page tree, per-page details, AI-generated insights, and an action log through resizable panels driven by Tauri events.

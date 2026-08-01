@@ -1,0 +1,8 @@
+The module is organized into four logical sub-packages with clear dependency direction:
+- `ui/` — thin re-export barrel (`index.ts`) of the external `hexbuffer-ui` design system plus a few custom primitives (e.g. `monaco-editor`, `chat-input`, `sidebar`). These are the atomic building blocks used everywhere else.
+- `ai-elements/` — domain-specific composite components for AI/chat rendering (agent, conversation, code-block, terminal, sandbox, etc.). Each file exports memoized React components that compose `hexbuffer-ui` primitives and share internal helpers like `CodeBlock`.
+- `tabs-layout/` — stateful tabbed-page UX split across a presentational `tab-bar.tsx`, a layout wrapper `tabbed-page-layout.tsx`, and two hooks (`use-tab-bar`, `use-tab-state`) that encapsulate scroll/editing/context-menu behavior. Types live in `types.ts` and are re-exported by consumers.
+- `tree-view/` — generic recursive tree component (`index.tsx` + `tree-node.tsx`) parameterized by a `TreeNodeData<TMeta>` type, supporting selection, expansion, search, loading/error/empty states via `hexbuffer-ui`'s `Alert` and `Empty`.
+- Root-level files (`theme-provider.tsx`, `clipboard-watcher.tsx`, `scope-manager.tsx`, `status-badge.tsx`, etc.) are single-purpose utilities/providers that sit alongside the sub-packages and are consumed directly by app pages.
+
+Dependency direction is strictly inward: `ai-elements`, `tabs-layout`, and `tree-view` depend on `ui` (through `hexbuffer-ui`) and shared `@/lib/utils`; root utilities do not depend on the sub-packages. State lives outside components via Zustand stores (e.g. `@/stores/app-settings-store` used by `theme-provider.tsx`), keeping components pure and render-focused.

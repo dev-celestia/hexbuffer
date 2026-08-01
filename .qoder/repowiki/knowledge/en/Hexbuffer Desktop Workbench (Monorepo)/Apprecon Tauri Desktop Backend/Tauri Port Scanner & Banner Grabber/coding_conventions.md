@@ -1,0 +1,5 @@
+- Each submodule is declared private in `mod.rs` and only re-exports the public-facing types (`PortScanState`, `PortScanResult`) via `pub use`.
+- Cancellation across concurrent tasks is implemented by sharing an `Arc<AtomicBool>` stored in the global `PortScanState.cancellations` map keyed by `scan_id`, with `Ordering::Relaxed` loads/stores checked at task boundaries.
+- All I/O operations are wrapped in `tokio::time::timeout` using the request's `timeout_ms` (clamped between 100–10,000 ms) to prevent hanging connections.
+- User input validation returns `Result<T, String>` with descriptive error messages rather than panics, applied consistently in `expand_targets`, `normalize_scan_ports`, and `normalize_scan_host`.
+- Frontend communication uses Tauri's `app.emit` with scan-id-scoped channel names formatted as `{event}-{scan_id}` so multiple concurrent scans do not interfere.

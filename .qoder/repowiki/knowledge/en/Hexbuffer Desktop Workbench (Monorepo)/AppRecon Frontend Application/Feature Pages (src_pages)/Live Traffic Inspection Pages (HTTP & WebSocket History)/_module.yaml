@@ -1,0 +1,8 @@
+schema_version: 1
+module_path: frontend_app/feature_pages/live_traffic
+title: Live Traffic Inspection Pages (HTTP & WebSocket History)
+scope:
+    - src/pages/live-traffic/
+source_files: []
+depends_on: []
+related_to: []

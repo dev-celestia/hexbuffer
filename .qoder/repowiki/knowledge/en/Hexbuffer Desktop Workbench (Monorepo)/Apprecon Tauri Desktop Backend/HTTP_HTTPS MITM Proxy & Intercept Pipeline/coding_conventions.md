@@ -1,0 +1,6 @@
+- Shared mutable state is exposed through a `Mutex<T>` wrapper struct (e.g. `ProxyState(Mutex<ProxyStateInner>)`) with methods that acquire the lock internally, keeping callers lock-free.
+- Cross-module communication uses Tauri's `AppHandle::emit` with named event strings (e.g. `"proxy-record"`, `"websocket-connection"`, `"websocket-message"`, `"mock-forge-log"`) rather than return values for side effects.
+- Domain structs are annotated with `#[derive(Debug, Clone, Serialize, Deserialize)]` and use `Uuid` for IDs and `DateTime<Utc>` for timestamps, making them directly usable as Tauri event payloads.
+- Interception points follow a consistent pattern: check `InterceptMode`, create a `PausedRequest` with a UUID, add it to `ProxyState`, then spin-loop with `tokio::time::sleep(Duration::from_millis(100))` polling until `take_paused_action` yields an `InterceptAction`.
+- Bypass/scope matching uniformly supports `*.domain` suffix wildcards and plain substring match, applied consistently across `ProxyFilter`, `WebSocketFilter`, and `should_bypass_uri`.
+- Error paths log with a `[module]` prefix via `eprintln!` and return `Result` or early-return from `run()`, never panicking.

@@ -1,0 +1,1 @@
+Defines reusable design and code-review skills for the .agents, .gemini, and .opencode toolchains, centered on a production-grade frontend design system (impeccable) plus Apple-design, animation review, Tailwind CSS organization, and Emil Kowalski's design engineering philosophy.

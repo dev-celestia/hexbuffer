@@ -1,0 +1,1 @@
+React functional components with `memo` for performance; Tailwind CSS classes via the `cn()` utility from `@/lib/utils`; icons from `@phosphor-icons/react`; UI primitives re-exported from the `hexbuffer-ui` package; theme persistence through a Zustand store (`useAppSettingsStore`).

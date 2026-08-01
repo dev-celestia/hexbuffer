@@ -1,0 +1,1 @@
+Static documentation site for Hexbuffer built with Next.js App Router and Fumadocs, rendering MDX content under content/docs into a searchable, statically-exported docs website.

@@ -1,0 +1,13 @@
+schema_version: 1
+module_path: frontend_app/app_support
+title: Frontend Application Support Layer
+scope:
+    - src/hooks/
+    - src/lib/
+    - src/providers/
+    - src/triggers/
+    - src/styles/
+    - src/types/
+source_files: []
+depends_on: []
+related_to: []

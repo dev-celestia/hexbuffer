@@ -1,0 +1,1 @@
+Defines collaborator server/payload/interaction data models and a shared in-memory polling state, plus a HistoryBridge that persists proxy logs, WebSocket traffic, AI browser sessions, stashes, contexts, chronicle logs, chat sessions, and collaborator records through a SQLite-backed Database repository.

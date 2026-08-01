@@ -1,0 +1,1 @@
+No build or install steps are specific to this module; it runs as part of the app's dev server. Test execution requires the sidecar Playwright process to be available at runtime — the frontend calls `runTest`, `runSingleStep`, and `runAll` through the Zustand store, which communicates with the sidecar.

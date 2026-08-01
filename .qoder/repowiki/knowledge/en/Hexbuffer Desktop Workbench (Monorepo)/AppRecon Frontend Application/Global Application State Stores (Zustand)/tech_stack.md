@@ -1,0 +1,1 @@
+Zustand with `zustand/middleware` for `persist`; Tauri `@tauri-apps/api/core` invoke calls for native backend communication; Sonner `toast` for user feedback; TypeScript interfaces defining store shapes.

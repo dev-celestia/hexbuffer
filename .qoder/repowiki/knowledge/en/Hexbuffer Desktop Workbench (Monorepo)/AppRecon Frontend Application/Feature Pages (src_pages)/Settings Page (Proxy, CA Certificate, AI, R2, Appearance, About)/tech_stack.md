@@ -1,0 +1,1 @@
+React + TypeScript with Tauri (`@tauri-apps/api/core` invoke for Rust backend calls), `@tauri-apps/plugin-dialog` for file save dialogs, `sonner` for toast notifications, `react-router-dom` for URL-based tab routing, `@phosphor-icons/react` for icons, and a local `hexbuffer-ui` component library (Button, Input, Select, Accordion, AlertDialog, etc.).

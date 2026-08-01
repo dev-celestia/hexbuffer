@@ -1,0 +1,8 @@
+schema_version: 1
+module_path: tauri_backend/db_layer
+title: SQLite Database Layer & Repository Pattern
+scope:
+    - src-tauri/src/db/
+source_files: []
+depends_on: []
+related_to: []

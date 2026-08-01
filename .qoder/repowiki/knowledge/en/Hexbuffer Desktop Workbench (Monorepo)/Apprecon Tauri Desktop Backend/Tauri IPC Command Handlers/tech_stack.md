@@ -1,0 +1,1 @@
+Rust with Tauri's `#[tauri::command]` macro for IPC, `serde` for JSON serialization (all structs use `#[serde(rename_all = "camelCase")]`), `reqwest` for HTTP requests in repeater, `tokio` for async concurrency, `uuid` for IDs, `regex` for pattern matching, and SQLite-backed `Database`/`HistoryBridge` repositories.

@@ -1,0 +1,5 @@
+- Frontend state is centralized in Zustand stores under `src/stores/` and accessed via custom hooks.
+- UI primitives are sourced from the local `hexbuffer-ui` package rather than ad-hoc components.
+- Tauri IPC commands are declared in the Rust backend and called from the frontend via `@tauri-apps/api`.
+- Tailwind CSS v4 with Geist/Geist Mono typography and a dark-mode-first color palette defined in `DESIGN.md` governs all UI styling.
+- Scripts and tooling follow consistent naming patterns (`dev`, `build`, `deploy`) exposed through root `package.json` scripts.

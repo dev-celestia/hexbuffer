@@ -1,0 +1,1 @@
+Top-level feature pages that each expose a self-contained productivity workspace — workflow automation, regression testing, Markdown documents, and Kanban board — all mounted as tabs within the shared TabbedPageLayout shell.

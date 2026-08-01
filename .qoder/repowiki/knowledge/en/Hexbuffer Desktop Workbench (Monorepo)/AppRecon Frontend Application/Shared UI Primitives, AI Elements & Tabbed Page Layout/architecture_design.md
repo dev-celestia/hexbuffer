@@ -1,0 +1,6 @@
+Three sibling sub-packages with distinct responsibilities:
+- `ui/`: A thin re-export layer over the external `hexbuffer-ui` package — every file is a single `export * from "hexbuffer-ui";` line, giving the app a stable local import surface for primitives like Button, Dialog, Tabs, etc.
+- `ai-elements/`: Domain-specific presentation components for AI conversations and agents (message, agent, artifact, code-block, terminal, sandbox, etc.). Each file exports one or more memoized React components that compose `hexbuffer-ui` primitives via `cn()` from `@/lib/utils`, often wrapping them in context providers or custom hooks for behavior like branch navigation.
+- `tabs-layout/`: A cohesive tabbed-page system built around three files: `types.ts` defines the `PageTabItem` shape, `use-tab-bar.ts` provides scroll-aware tab editing state, `use-tab-state.ts` persists active tab per scope through `@/stores/tabs-layout` (Zustand store), and `tabbed-page-layout.tsx` composes everything with `hexbuffer-ui`'s `Tabs`.
+
+Dependency direction is strictly inward: `ai-elements` and `tabs-layout` depend on `ui` (via `hexbuffer-ui`) and shared app utilities (`@/lib/utils`, `@/stores/*`). There are no cross-dependencies between `ai-elements` and `tabs-layout`.

@@ -1,0 +1,1 @@
+React + TypeScript with Zustand (persisted to localStorage under key `hexbuffer-intercept-tabs`), Sonner for toast notifications, Phosphor icons, hexbuffer-ui primitives (`ResizablePanelGroup`, `TextEditor`, `ContextMenu`), and Tauri's `invoke` for IPC to the Rust backend. Raw HTTP parsing uses `@/lib/http-message` (`parseRawHttpRequest`, `parseRawHttpResponse`).

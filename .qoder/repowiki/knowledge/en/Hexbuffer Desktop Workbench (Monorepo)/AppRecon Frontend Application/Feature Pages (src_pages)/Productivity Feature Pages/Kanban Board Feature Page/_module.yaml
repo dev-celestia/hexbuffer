@@ -1,0 +1,9 @@
+schema_version: 1
+module_path: frontend_app/feature_pages/productivity_apps/kanban_board
+title: Kanban Board Feature Page
+scope:
+    - src/pages/kanban/
+source_files: []
+depends_on: []
+related_to:
+    - path: frontend_app/stores

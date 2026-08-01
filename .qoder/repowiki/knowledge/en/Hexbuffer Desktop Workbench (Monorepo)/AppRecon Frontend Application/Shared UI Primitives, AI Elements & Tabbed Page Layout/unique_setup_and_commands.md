@@ -1,0 +1,1 @@
+No build or test commands are defined within this module. The `ui/index.ts` barrel re-exports everything from `hexbuffer-ui`, so adding a new primitive requires only adding a matching re-export file in `src/components/ui/`.

@@ -1,0 +1,5 @@
+- Each panel component receives data and callbacks as props and delegates local filtering/search state to a dedicated `use*-panel` hook that returns `{ searchQuery, setSearchQuery, filtered* }`.
+- Backend mutations go through `invoke('mock_forge_*')` inside `useCallback` wrappers in `use-mock-forge-page.ts`, then immediately update the Zustand store via the corresponding setter to keep UI in sync.
+- Cross-store side effects (sending to Repeater, creating workspaces/stashes/endpoints) are performed by directly calling `useXxxStore.getState()` / `.create*` / `.updateActiveRequest` rather than through intermediate actions.
+- Toast feedback is emitted via `sonner`'s `toast.success` / `toast.error` after successful mutations or errors, keeping user feedback consistent across panels.
+- Type-only imports use `import type { ... }` syntax to avoid runtime import overhead, and shared types are imported from `../types` rather than re-declared.

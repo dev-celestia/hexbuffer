@@ -1,0 +1,1 @@
+GitHub Actions workflows for multi-platform Tauri app builds and docs deployment, plus local developer hooks for the Impeccable agent and Codex tooling.

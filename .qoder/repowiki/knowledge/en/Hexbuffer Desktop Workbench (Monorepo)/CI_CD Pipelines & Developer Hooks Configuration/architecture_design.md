@@ -1,0 +1,6 @@
+Three top-level dot-directories hold configuration-only files with no executable code:
+- `.github/workflows/build.yml` defines a two-job pipeline: a matrix `build` job that compiles the Tauri app on Ubuntu 22.04, macOS, and Windows (producing AppImage, deb, dmg, .app.tar.gz, and NSIS artifacts), followed by a `release` job that packages them into a GitHub Release triggered by `v*` tags or `workflow_dispatch`. Secrets (`TAURI_SIGNING_PRIVATE_KEY`, `GITHUB_TOKEN`) are injected via GitHub secrets.
+- `.github/workflows/docs-deploy.yml` is a separate single-job workflow that deploys `docs/website` to GitHub Pages on pushes to `main`/`master` or when its own file changes, using `actions/deploy-pages@v4` with restricted concurrency.
+- `.impeccable/config.local.json` stores a local consent flag accepted by the Impeccable agent.
+- `.codex/hooks.json` registers a `PostToolUse` hook that matches `Edit|Write|apply_patch` operations and runs an external Node script (`.agents/skills/impeccable/scripts/hook.mjs`) with a 5-second timeout to check UI changes.
+Dependency direction is outward only: these configs invoke external tools (pnpm, Rust toolchain, Tauri CLI, GitHub Actions) but contain no project logic.

@@ -1,0 +1,1 @@
+Interactive proxy interceptor page that lets users pause, inspect, edit, forward, drop, and selectively capture HTTP requests and responses across multiple browser-like tabs.

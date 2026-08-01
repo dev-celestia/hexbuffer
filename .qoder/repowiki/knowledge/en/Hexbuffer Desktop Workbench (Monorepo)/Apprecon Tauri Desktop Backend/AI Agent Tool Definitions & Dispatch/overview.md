@@ -1,0 +1,1 @@
+Defines rig.rs-compatible tools (browser, repeater, terminal, proxy, documents, intercept, invoker) that expose Apprecon capabilities to an AI agent and dispatches their execution through a global handler.

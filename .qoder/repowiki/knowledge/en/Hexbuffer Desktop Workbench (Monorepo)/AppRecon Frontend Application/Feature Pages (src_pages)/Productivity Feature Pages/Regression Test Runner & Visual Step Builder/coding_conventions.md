@@ -1,0 +1,5 @@
+- Step kinds form a discriminated union (`StepKind`) used consistently across `types.ts`, `constants.ts` label/icon/description maps, and every component that renders or edits steps.
+- UI behavior is driven by a single source-of-truth Zustand store accessed through a dedicated hook (`useRegressionPage`) that memoizes derived state and exposes callbacks rather than inline handlers.
+- Each step kind has a parallel entry in `STEP_KIND_LABELS`, `STEP_KIND_ICONS`, and `STEP_KIND_DESCRIPTIONS` records so rendering and editing stay in sync without magic strings.
+- React Flow nodes are defined as a single `type: 'regressionStep'` node registered via `REGRESSION_NODE_TYPES`, with all edge styling centralized in `REGRESSION_DEFAULT_EDGE_OPTIONS` and `REGRESSION_CONNECTION_LINE_STYLE`.
+- AI-generated content uses template-string prompts stored as exported constants (`AI_STEP_GENERATOR_PROMPT`, `AI_GOAL_STEP_PROMPT`) that embed `{targetUrl}`, `{scenario}`, and `{pageContext}` placeholders.

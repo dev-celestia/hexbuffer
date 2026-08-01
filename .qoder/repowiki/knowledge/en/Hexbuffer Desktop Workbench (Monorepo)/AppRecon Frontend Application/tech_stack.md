@@ -1,0 +1,1 @@
+React + TypeScript with Vite, react-router-dom for client-side routing, Zustand for global state, hexbuffer-ui for base primitives, Tauri for native IPC and window management, and @fontsource-variable fonts (Geist).

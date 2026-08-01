@@ -1,0 +1,1 @@
+Development runs on port 5555 via `pnpm dev`. Build triggers `fumadocs-mdx` during `postinstall` and again in `types:check` alongside `next typegen` and `tsc --noEmit`. The project uses pnpm (lockfile present) and exports a fully static site to `out/`.

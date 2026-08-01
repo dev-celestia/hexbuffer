@@ -1,0 +1,1 @@
+Two sibling React pages — a browser crawl/automation dashboard and a CDP-based network/storage inspector — that share the app's tabbed layout shell and Tauri-triggered backend orchestration.

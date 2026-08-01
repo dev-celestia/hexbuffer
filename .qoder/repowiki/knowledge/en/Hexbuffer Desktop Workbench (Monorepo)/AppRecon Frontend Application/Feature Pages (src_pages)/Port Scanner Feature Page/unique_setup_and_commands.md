@@ -1,0 +1,1 @@
+No build or setup steps specific to this module; it is consumed as part of the larger app. It requires the Tauri backend to expose the `scan_ports` and `stop_port_scan` commands and to emit `port-scan-result-{scanId}` / `port-scan-progress-{scanId}` events during execution.

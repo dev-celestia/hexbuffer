@@ -1,0 +1,1 @@
+Rust with Tauri's `#[tauri::command]` macro for IPC, `serde`/`serde_json` for serialization, the `keyring` crate for OS-level credential storage, and the external `hexbuffer_ai` crate (`AiConfig`, `AiEngine`) for provider-agnostic AI chat and marker-suggestion APIs.

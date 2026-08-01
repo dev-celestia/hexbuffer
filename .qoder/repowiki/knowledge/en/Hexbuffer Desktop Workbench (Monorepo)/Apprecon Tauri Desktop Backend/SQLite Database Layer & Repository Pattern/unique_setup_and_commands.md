@@ -1,0 +1,1 @@
+Database initialization is driven by calling `Database::init()`, which executes all `CREATE TABLE IF NOT EXISTS` blocks plus a series of `ensure_column` calls for backward-compatible schema migrations. Re-initialization after deleting the DB file goes through `close_connection` followed by `reopen_and_init`.

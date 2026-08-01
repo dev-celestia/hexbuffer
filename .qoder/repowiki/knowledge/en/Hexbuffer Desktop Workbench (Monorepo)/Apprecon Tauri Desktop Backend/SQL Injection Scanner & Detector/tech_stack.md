@@ -1,0 +1,1 @@
+Rust with Tauri's `#[tauri::command]` macro for IPC, `reqwest` for asynchronous HTTP requests, `serde` for serialization of scan configs/events, `uuid` for vulnerability IDs, and `urlencoding` (local implementation) for parameter encoding. No external SQL client is used — payloads are injected directly into HTTP requests.
