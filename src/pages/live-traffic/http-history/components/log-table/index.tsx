@@ -80,8 +80,6 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
   }
 
 
-  console.log(visibleCalls, "co,lumn")
-
   return (
     <>
       <div
@@ -119,7 +117,12 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
             "flex-1 overflow-auto min-w-0"
           )}
         >
-          <div className="min-w-full w-max flex flex-col min-h-full">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-col min-h-full min-w-full w-full"
+            )}
+          >
             {/* Sticky Table Header */}
             <div
               className={cn(
@@ -163,7 +166,6 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
                       style={{
                         width: isUrl ? undefined : col.size,
                         minWidth: isUrl ? 180 : col.size,
-                        maxWidth: isUrl ? 500 : undefined,
                         flex: isUrl ? "1 1 auto" : "0 0 auto",
                       }}
                     >
@@ -246,7 +248,6 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
                           style={{
                             width: isUrl ? undefined : col.size,
                             minWidth: isUrl ? 180 : col.size,
-                            maxWidth: isUrl ? 500 : undefined,
                             flex: isUrl ? "1 1 auto" : "0 0 auto",
                           }}
                         >

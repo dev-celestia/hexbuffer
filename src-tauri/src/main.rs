@@ -110,6 +110,7 @@ fn main() {
             hexbuffer::commands::cert::regenerate_ca_cert,
             hexbuffer::commands::storage::get_storage_info,
             hexbuffer::commands::storage::reset_all_app_data,
+            hexbuffer::commands::storage::delete_storage_artifact,
             hexbuffer::commands::browser::get_browser_status,
             hexbuffer::commands::browser::browser_open,
             hexbuffer::commands::browser::browser_close,

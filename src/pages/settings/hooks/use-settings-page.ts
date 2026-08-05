@@ -20,6 +20,10 @@ export interface StorageInfo {
   appDataDir: string;
   databasePath: string;
   browserArtifactsPath: string;
+  databaseSizeBytes: number;
+  browserArtifactsSizeBytes: number;
+  regressionArtifactsSizeBytes: number;
+  logFileSizeBytes: number;
 }
 
 type AiKeyStatus = Record<string, boolean>;
@@ -44,6 +48,7 @@ export function useSettingsPage() {
   const [providerKeyStatus, setProviderKeyStatus] = React.useState<AiKeyStatus>({});
   const [storageInfo, setStorageInfo] = React.useState<StorageInfo | null>(null);
   const [deletingAllData, setDeletingAllData] = React.useState(false);
+  const [deletingArtifact, setDeletingArtifact] = React.useState<string | null>(null);
   const proxyDefaultPort = useAppStore((state) => state.proxyDefaultPort);
   const proxyPort = useAppStore((state) => state.proxyPort);
   const proxyStatus = useAppStore((state) => state.proxyStatus);
@@ -216,13 +221,18 @@ export function useSettingsPage() {
     }
   }, []);
 
-  React.useEffect(() => {
-    invoke<StorageInfo>('get_storage_info')
-      .then(setStorageInfo)
-      .catch((error) => {
-        console.error('Failed to load storage info:', error);
-      });
+  const refreshStorageInfo = React.useCallback(async () => {
+    try {
+      const info = await invoke<StorageInfo>('get_storage_info');
+      setStorageInfo(info);
+    } catch (error) {
+      console.error('Failed to refresh storage info:', error);
+    }
   }, []);
+
+  React.useEffect(() => {
+    void refreshStorageInfo();
+  }, [refreshStorageInfo]);
 
   React.useEffect(() => {
     setProxyPortDraft(String(proxyDefaultPort));
@@ -254,6 +264,21 @@ export function useSettingsPage() {
       setDeletingAllData(false);
     }
   }, [clearBrowserAutomationArtifactPaths]);
+
+  const handleDeleteArtifact = React.useCallback(async (artifact: string) => {
+    try {
+      setDeletingArtifact(artifact);
+      const result = await invoke<{ bytesDeleted: number; label: string }>('delete_storage_artifact', { artifact });
+      const mb = (result.bytesDeleted / 1024 / 1024).toFixed(1);
+      toast.success(`${result.label} cleared (${mb} MB freed)`);
+      await refreshStorageInfo();
+    } catch (error) {
+      console.error('Failed to delete artifact:', error);
+      toast.error(`Failed to delete: ${error}`);
+    } finally {
+      setDeletingArtifact(null);
+    }
+  }, [refreshStorageInfo]);
 
   const handleDownloadCert = React.useCallback(async () => {
     try {
@@ -416,6 +441,8 @@ export function useSettingsPage() {
     proxyPortDraft,
     proxyStatus,
     deletingAllData,
+    deletingArtifact,
+    handleDeleteArtifact,
     downloading,
     installingCa,
     regeneratingCa,

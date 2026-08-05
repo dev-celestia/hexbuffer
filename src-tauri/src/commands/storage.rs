@@ -15,6 +15,10 @@ pub struct StorageInfo {
     app_data_dir: String,
     database_path: String,
     browser_artifacts_path: String,
+    database_size_bytes: u64,
+    browser_artifacts_size_bytes: u64,
+    regression_artifacts_size_bytes: u64,
+    log_file_size_bytes: u64,
 }
 
 #[derive(Serialize)]
@@ -28,6 +32,13 @@ pub struct ResetLocalDataResult {
     ca_file_removed: bool,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DeleteArtifactResult {
+    bytes_deleted: u64,
+    label: String,
+}
+
 #[tauri::command]
 pub async fn get_storage_info(app: AppHandle) -> Result<StorageInfo, String> {
     let app_data_dir = app
@@ -36,12 +47,112 @@ pub async fn get_storage_info(app: AppHandle) -> Result<StorageInfo, String> {
         .map_err(|error| error.to_string())?;
     let database_path = app_data_dir.join("hexbuffer.db");
     let browser_artifacts_path = app_data_dir.join("ai-browser-artifacts");
+    let regression_artifacts_path = app_data_dir.join("regression-artifacts");
+
+    // Database size: sum main db + wal + shm files
+    let db_size: u64 = [
+        database_path.clone(),
+        database_path.with_extension("db-wal"),
+        database_path.with_extension("db-shm"),
+    ]
+    .iter()
+    .filter_map(|p| fs::metadata(p).ok())
+    .map(|m| m.len())
+    .sum();
+
+    let (_, browser_size) = count_files(&browser_artifacts_path).unwrap_or((0, 0));
+    let (_, regression_size) = count_files(&regression_artifacts_path).unwrap_or((0, 0));
+
+    let log_size = fs::metadata("/tmp/hexbuffer.log")
+        .map(|m| m.len())
+        .unwrap_or(0);
 
     Ok(StorageInfo {
         app_data_dir: app_data_dir.display().to_string(),
         database_path: database_path.display().to_string(),
         browser_artifacts_path: browser_artifacts_path.display().to_string(),
+        database_size_bytes: db_size,
+        browser_artifacts_size_bytes: browser_size,
+        regression_artifacts_size_bytes: regression_size,
+        log_file_size_bytes: log_size,
     })
+}
+
+#[tauri::command]
+pub async fn delete_storage_artifact(
+    artifact: String,
+    app: AppHandle,
+    database: State<'_, Database>,
+    history: State<'_, HistoryBridge>,
+) -> Result<DeleteArtifactResult, String> {
+    let app_data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?;
+
+    match artifact.as_str() {
+        "database" => {
+            // Close connections, delete files, reopen
+            database.close_connection().map_err(|e| e.to_string())?;
+            history.close_connection().map_err(|e| e.to_string())?;
+
+            let db_path = app_data_dir.join("hexbuffer.db");
+            let mut bytes_deleted: u64 = 0;
+            for p in [
+                db_path.clone(),
+                db_path.with_extension("db-wal"),
+                db_path.with_extension("db-shm"),
+            ] {
+                if let Ok(meta) = fs::metadata(&p) {
+                    bytes_deleted += meta.len();
+                    let _ = fs::remove_file(&p);
+                }
+            }
+
+            database.reopen_and_init().map_err(|e| e.to_string())?;
+            history.reopen_and_init().map_err(|e| e.to_string())?;
+
+            Ok(DeleteArtifactResult {
+                bytes_deleted,
+                label: "SQL Database".to_string(),
+            })
+        }
+        "browser_artifacts" => {
+            let dir = app_data_dir.join("ai-browser-artifacts");
+            let (_, bytes_deleted) = count_files(&dir).unwrap_or((0, 0));
+            if dir.exists() {
+                fs::remove_dir_all(&dir).map_err(|e| e.to_string())?;
+            }
+            fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+            let _ = history.clear_ai_browser_artifact_paths();
+            Ok(DeleteArtifactResult {
+                bytes_deleted,
+                label: "Browser Artifacts".to_string(),
+            })
+        }
+        "regression_artifacts" => {
+            let dir = app_data_dir.join("regression-artifacts");
+            let (_, bytes_deleted) = count_files(&dir).unwrap_or((0, 0));
+            if dir.exists() {
+                fs::remove_dir_all(&dir).map_err(|e| e.to_string())?;
+            }
+            Ok(DeleteArtifactResult {
+                bytes_deleted,
+                label: "Regression Artifacts".to_string(),
+            })
+        }
+        "log_file" => {
+            let size = fs::metadata("/tmp/hexbuffer.log")
+                .map(|m| m.len())
+                .unwrap_or(0);
+            let _ = fs::write("/tmp/hexbuffer.log", "");
+            Ok(DeleteArtifactResult {
+                bytes_deleted: size,
+                label: "Log File".to_string(),
+            })
+        }
+        _ => Err(format!("Unknown artifact: {}", artifact)),
+    }
 }
 
 fn count_files(path: &Path) -> Result<(u64, u64), String> {

@@ -30,67 +30,28 @@ pub fn build_record(ctx: &Ctx) -> ProxyRecord {
 }
 
 pub fn save_and_emit(ctx: &Ctx, app_handle: &tauri::AppHandle) {
-    eprintln!(
-        "[completion] save_and_emit called for txn_id={}",
-        ctx.transaction_id
-    );
-    eprintln!(
-        "[completion] Request: {} {} (body: {} bytes)",
-        ctx.req_method,
-        ctx.req_uri,
-        ctx.req_body.len()
-    );
-    eprintln!(
-        "[completion] Response: {} {} (body: {} bytes)",
-        ctx.res_status_code,
-        ctx.res_status_text,
-        ctx.res_body.len()
-    );
-    eprintln!("[completion] Server addr: {}", ctx.server_addr);
-
     let txn = build_record(ctx);
 
     if let Some(history) = app_handle.try_state::<crate::HistoryBridge>() {
         if let Err(e) = history.insert_record(&txn) {
-            println!("[completion] failed to insert to DB: {}", e);
-        } else {
-            println!("[completion] saved to DB txn_id={}", ctx.transaction_id);
+            eprintln!("[completion] failed to insert to DB: {}", e);
         }
     }
 
     crate::automation::ingest_proxy_record(app_handle, &txn);
 
     if let Err(e) = app_handle.emit("proxy-record", &txn) {
-        println!("[completion] failed to emit event: {}", e);
-    } else {
-        println!(
-            "[completion] event emitted successfully for txn_id={}",
-            ctx.transaction_id
-        );
-        if let Ok(json) = serde_json::to_string_pretty(&txn) {
-            println!("[completion] proxy-record payload:\n{}", json);
-        }
+        eprintln!("[completion] failed to emit event: {}", e);
     }
 }
 
 pub fn handle_response_body(
     body: &mut Option<Bytes>,
-    end_of_stream: bool,
+    _end_of_stream: bool,
     ctx: &mut Ctx,
     _app_handle: &tauri::AppHandle,
 ) {
     if let Some(b) = body {
         ctx.res_body.extend_from_slice(b);
-    }
-
-    if end_of_stream {
-        println!(
-            "[completion] end txn_id={} status={}",
-            ctx.transaction_id, ctx.res_status_code
-        );
-        println!(
-            "[completion] request_complete txn_id={}",
-            ctx.transaction_id
-        );
     }
 }
