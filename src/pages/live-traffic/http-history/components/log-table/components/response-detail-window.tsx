@@ -1,10 +1,10 @@
 import { Alert, AlertDescription, AlertTitle, Badge, Empty, EmptyDescription, EmptyTitle } from 'hexbuffer-ui';
 import { useEffect, useState, useMemo } from 'react';
-import { getHttpLogDetail } from '../../api';
-import { adaptProxyRecordToApiCall } from './hooks/use-history-table';
+import { getHttpLogDetail } from '../../../api';
+import { adaptProxyRecordToApiCall } from '../hooks/use-history-table';
 import { formatJsonBody } from '@/lib/http-message';
 import { InspectorSection, buildHeadersList } from '@/pages/live-traffic/components/inspector';
-import { parseCookieHeader, formatBytes } from './utils';
+import { parseCookieHeader, formatBytes } from '../utils';
 
 import type { ApiCall } from '@/types';
 

@@ -8,6 +8,19 @@ export default defineConfig({
   worker: {
     format: "es",
   },
+  optimizeDeps: {
+    // hexbuffer-ui's dist contains Vite-specific `?worker` imports for Monaco
+    // workers; esbuild's dep optimizer cannot resolve the `?worker` query, so
+    // serve it as source and let Vite's worker plugin handle those imports.
+    exclude: ["hexbuffer-ui"],
+    // Force-bundle the CJS use-sync-external-store shims so Vite doesn't serve
+    // them as raw CJS to the browser (causes "Importing binding name not found").
+    include: [
+      "use-sync-external-store",
+      "use-sync-external-store/shim",
+      "use-sync-external-store/shim/with-selector",
+    ],
+  },
   server: {
     port: 1420,
     strictPort: true,

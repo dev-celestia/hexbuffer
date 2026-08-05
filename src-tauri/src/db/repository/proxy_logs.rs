@@ -335,9 +335,8 @@ impl Database {
                     COALESCE(LENGTH(request_body), 0),
                     COALESCE(LENGTH(response_body), 0),
                     COALESCE(server_addr, ''),
-                    json_extract(CASE WHEN request_headers IS NOT NULL AND request_headers != '' THEN request_headers ELSE '{{}}' END, '$.user-agent'),
-                    json_extract(CASE WHEN request_headers IS NOT NULL AND request_headers != '' THEN request_headers ELSE '{{}}' END, '$.referer'),
-                    json_extract(CASE WHEN response_headers IS NOT NULL AND response_headers != '' THEN response_headers ELSE '{{}}' END, '$.content-type')
+                    request_headers,
+                    response_headers
              FROM http_logs
              ORDER BY timestamp {} LIMIT ? OFFSET ?",
             sort_order
@@ -446,9 +445,8 @@ impl Database {
                     COALESCE(LENGTH(request_body), 0),
                     COALESCE(LENGTH(response_body), 0),
                     COALESCE(server_addr, ''),
-                    json_extract(CASE WHEN request_headers IS NOT NULL AND request_headers != '' THEN request_headers ELSE '{{}}' END, '$.user-agent'),
-                    json_extract(CASE WHEN request_headers IS NOT NULL AND request_headers != '' THEN request_headers ELSE '{{}}' END, '$.referer'),
-                    json_extract(CASE WHEN response_headers IS NOT NULL AND response_headers != '' THEN response_headers ELSE '{{}}' END, '$.content-type')
+                    request_headers,
+                    response_headers
              FROM http_logs WHERE 1=1{}
              ORDER BY timestamp {} LIMIT ? OFFSET ?",
             where_sql, sort_order
@@ -715,6 +713,49 @@ fn row_to_proxy_record(row: &rusqlite::Row) -> SqlResult<ProxyRecord> {
 }
 
 fn row_to_proxy_summary(row: &rusqlite::Row) -> SqlResult<ProxySummaryRow> {
+    let req_headers_raw: Option<String> = row.get(9).ok();
+    let res_headers_str: Option<String> = row.get(10).ok();
+
+    let mut user_agent = None;
+    let mut referrer = None;
+    let mut host = None;
+
+    if let Some(ref h_str) = req_headers_raw {
+        if let Ok(map) = serde_json::from_str::<std::collections::HashMap<String, String>>(h_str) {
+            for (k, v) in map {
+                let lower = k.to_lowercase();
+                if host.is_none() && (lower == "host" || lower == ":authority" || lower == "x-forwarded-host") {
+                    let trimmed = v.trim();
+                    if !trimmed.is_empty() {
+                        host = Some(trimmed.to_string());
+                    }
+                }
+                if user_agent.is_none() && lower == "user-agent" {
+                    let trimmed = v.trim();
+                    if !trimmed.is_empty() {
+                        user_agent = Some(trimmed.to_string());
+                    }
+                }
+                if referrer.is_none() && (lower == "referer" || lower == "referrer") {
+                    let trimmed = v.trim();
+                    if !trimmed.is_empty() {
+                        referrer = Some(trimmed.to_string());
+                    }
+                }
+            }
+        }
+    }
+
+    let response_content_type = res_headers_str.as_ref().and_then(|h_str| {
+        if let Ok(map) = serde_json::from_str::<std::collections::HashMap<String, String>>(h_str) {
+            map.into_iter()
+                .find(|(k, _)| k.eq_ignore_ascii_case("content-type"))
+                .map(|(_, v)| v)
+        } else {
+            None
+        }
+    });
+
     Ok(ProxySummaryRow {
         id: row.get(0)?,
         timestamp: row.get(1)?,
@@ -725,9 +766,9 @@ fn row_to_proxy_summary(row: &rusqlite::Row) -> SqlResult<ProxySummaryRow> {
         request_body_size: row.get::<_, i64>(6)? as usize,
         response_body_size: row.get::<_, i64>(7)? as usize,
         server_addr: row.get(8)?,
-        user_agent: row.get(9)?,
-        referrer: row.get(10)?,
-        response_content_type: row.get(11)?,
+        user_agent,
+        host,
+        response_content_type,
     })
 }
 

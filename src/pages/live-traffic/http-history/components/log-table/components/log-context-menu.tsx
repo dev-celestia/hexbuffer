@@ -1,9 +1,9 @@
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from 'hexbuffer-ui';
-import { useCallback, memo, useMemo } from 'react';
+import { memo } from 'react';
 
 import { CopyIcon, PlusIcon, TrashIcon, PaperPlaneTiltIcon, FilePlusIcon, PushPinSimpleIcon, PushPinSimpleSlashIcon, ProhibitIcon, PaletteIcon } from '@phosphor-icons/react';
 import type { ApiCall } from '@/types';
-import { useLogEntryActions } from './hooks/use-log-entry-actions';
+import { useLogEntryActions } from '../hooks/use-log-entry-actions';
 import { useHighlightStore, HIGHLIGHT_COLORS, HIGHLIGHT_COLOR_LABELS } from '@/stores/history';
 import { CollectionPickerSubmenu } from '@/triggers/repeater/collection-picker-submenu';
 
@@ -34,7 +34,6 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
     handleCopyUrl,
     handleAddToScope,
     handleOpenInInvoker,
-    handleOpenInRepeater,
     handleSendToCollection,
     handleSendToIntercept,
     handleSendToMockForge,
@@ -140,9 +139,6 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
         <ContextMenuItem onClick={handleOpenInBrowserAutomation} className='text-xs py-1 px-1.5'>
           <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Automate Browser
         </ContextMenuItem>
-        {/* <ContextMenuItem onClick={handleOpenInPromptInjection} className='text-xs'>
-          <RobotIcon className="mr-2 size-4" /> Open in Prompt Injection
-        </ContextMenuItem> */}
         <ContextMenuItem onClick={handleSaveToDocuments} className='text-xs py-1 px-1.5'>
           <FilePlusIcon className="mr-1.5 size-3" /> Save to Documents
         </ContextMenuItem>

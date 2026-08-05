@@ -104,7 +104,7 @@ export interface ProxyLogSummary {
   response_body_size: number;
   server_addr: string;
   user_agent: string | null;
-  referrer: string | null;
+  host: string | null;
 }
 
 export interface PaginatedResponse<T> {

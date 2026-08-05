@@ -1,6 +1,5 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { CaInstallDialog } from "@/components/ca-install-dialog";
 import { startLiveTrafficWatcher, stopLiveTrafficWatcher } from "@/triggers/live-traffic";
 import { startPageCrawledWatcher, stopPageCrawledWatcher } from "@/triggers/browser";
 import { ClipboardWatcher } from "@/components/clipboard-watcher";
@@ -107,7 +106,6 @@ function AppRoutes() {
     <>
       <AutomationEventWatchers />
       <ClipboardWatcher />
-      <CaInstallDialog />
       <React.Suspense fallback={<div className="h-full flex items-center justify-center text-muted-foreground text-sm">Loading…</div>}>
         <Routes>
           <Route path="/" element={<DesktopPage />} />

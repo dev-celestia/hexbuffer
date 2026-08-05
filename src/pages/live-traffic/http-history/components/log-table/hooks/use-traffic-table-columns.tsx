@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import type { ColumnDef } from "@tanstack/react-table";
 import {
   WarningCircleIcon,
   PushPinSimpleIcon,
@@ -10,10 +9,15 @@ import { HighlightedText } from "@/components/highlighted-text";
 import { StatusBadge, MethodBadge } from "@/components/status-badge";
 import type { ApiCall } from "@/types";
 import type { GroupDefinition } from "@/stores/history";
-import { formatTimestamp, formatBytes } from "../utils";
-import { ColoredUrl } from "../colored-url";
-import { BrowserIcon } from "../browser-icon";
-import { CallActionCell } from "../call-action-cell";
+import { formatTimestamp, formatBytes, getCallHost } from "../utils";
+import { ColoredUrl, BrowserIcon, CallActionCell } from "../components";
+
+export interface TrafficTableColumn {
+  id: string;
+  header: string;
+  size: number;
+  cell: (call: ApiCall, searchQuery?: string) => React.ReactNode;
+}
 
 interface UseTrafficTableColumnsOptions {
   pinnedSet: Set<string>;
@@ -30,27 +34,27 @@ export function useTrafficTableColumns({
   highlightedHosts,
   handleNewGroup,
 }: UseTrafficTableColumnsOptions) {
-  return useMemo<ColumnDef<ApiCall>[]>(
+  return useMemo<TrafficTableColumn[]>(
     () => [
       {
-        accessorKey: "timestamp",
+        id: "timestamp",
         header: "Time",
-        size: 85,
-        cell: ({ row }) => (
+        size: 80,
+        cell: (call) => (
           <span className="text-xs font-mono text-muted-foreground">
-            {formatTimestamp(row.original.timestamp)}
+            {formatTimestamp(call.timestamp)}
           </span>
         ),
       },
       {
-        accessorKey: "method",
+        id: "method",
         header: "Method",
-        size: 110,
-        cell: ({ row }) => (
+        size: 105,
+        cell: (call) => (
           <div className="flex items-center gap-1.5 shrink-0">
-            <MethodBadge method={row.original.method} />
-            <StatusBadge status={row.original.response_status} />
-            {row.original.content_decoded && (
+            <MethodBadge method={call.method} />
+            <StatusBadge status={call.response_status} />
+            {call.content_decoded && (
               <span title="Request body was decoded from gzip/br/deflate">
                 <WarningCircleIcon className="h-3 w-3 text-yellow-500 shrink-0" />
               </span>
@@ -59,14 +63,31 @@ export function useTrafficTableColumns({
         ),
       },
       {
-        accessorKey: "host",
+        id: "host",
+        header: "Host",
+        size: 140,
+        cell: (call, searchQuery = "") => {
+          const host = getCallHost(call);
+          const hostColor = getHighlightColor(host, call.path);
+          return (
+            <span
+              className="truncate block min-w-0 font-mono text-xs"
+              style={{ color: hostColor || undefined }}
+            >
+              <HighlightedText text={host} query={searchQuery} />
+            </span>
+          );
+        },
+      },
+      {
+        id: "url",
         header: "URL",
-        size: 400,
-        cell: ({ row, table }) => {
-          const requestGroups = getGroupsForRequest(row.original.id);
+        size: 300,
+        cell: (call, searchQuery = "") => {
+          const requestGroups = getGroupsForRequest(call.id);
           const displayUrl = (() => {
             try {
-              const u = new URL(row.original.url);
+              const u = new URL(call.url);
               if (
                 (u.protocol === "https:" && u.port === "443") ||
                 (u.protocol === "http:" && u.port === "80")
@@ -75,17 +96,19 @@ export function useTrafficTableColumns({
               }
               return u.toString();
             } catch {
-              return row.original.url;
+              return call.url;
             }
           })();
           const isSecured =
-            row.original.url.startsWith("https://") ||
-            row.original.url.startsWith("wss://") ||
-            row.original.security_state === "secure";
+            call.url.startsWith("https://") ||
+            call.url.startsWith("wss://") ||
+            call.security_state === "secure";
+
+          const host = getCallHost(call);
 
           return (
             <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
-              {pinnedSet.has(row.original.id) && (
+              {pinnedSet.has(call.id) && (
                 <PushPinSimpleIcon className="size-3 text-amber-500 shrink-0" />
               )}
               {requestGroups.map((g: GroupDefinition) => (
@@ -105,79 +128,51 @@ export function useTrafficTableColumns({
                   <LockOpenIcon className="size-3 text-amber-500 shrink-0" />
                 </span>
               )}
-              <BrowserIcon userAgent={row.original.user_agent} />
+              <BrowserIcon userAgent={call.user_agent} />
               <span
-                className="truncate min-w-0"
+                dir="rtl"
+                className="truncate min-w-0 text-left block"
                 style={{
                   color:
-                    getHighlightColor(row.original.host, row.original.path) ||
+                    getHighlightColor(host, call.path) ||
                     undefined,
                 }}
               >
-                <ColoredUrl
-                  url={displayUrl}
-                  searchQuery={
-                    (table.options.meta as { searchQuery?: string } | undefined)
-                      ?.searchQuery ?? ""
-                  }
-                />
+                <ColoredUrl url={displayUrl} searchQuery={searchQuery} />
               </span>
             </div>
           );
         },
       },
       {
-        accessorKey: "referrer",
-        header: "Referrer",
-        size: 160,
-        cell: ({ row, table }) => {
-          const displayReferrer =
-            row.original.referrer?.replace(/^https?:\/\//i, "") || "-";
-          return (
-            <span className="truncate block min-w-0">
-              <HighlightedText
-                text={displayReferrer}
-                query={
-                  (table.options.meta as { searchQuery?: string } | undefined)
-                    ?.searchQuery ?? ""
-                }
-              />
-            </span>
-          );
-        },
-      },
-      {
-        accessorKey: "response_body_size",
+        id: "response_body_size",
         header: "Size",
-        size: 75,
-        cell: ({ row }) => (
+        size: 70,
+        cell: (call) => (
           <span className="text-xs text-muted-foreground text-right block truncate">
-            {formatBytes(row.original.response_body_size)}
+            {formatBytes(call.response_body_size)}
           </span>
         ),
       },
       {
-        accessorKey: "request_body_size",
+        id: "request_body_size",
         header: "Length",
-        size: 75,
-        cell: ({ row }) => (
+        size: 70,
+        cell: (call) => (
           <span className="text-xs text-muted-foreground text-right block truncate">
-            {formatBytes(row.original.request_body_size)}
+            {formatBytes(call.request_body_size)}
           </span>
         ),
       },
       {
-        accessorKey: "response_content_type",
+        id: "response_content_type",
         header: "MIME Type",
-        size: 140,
-        cell: ({ row, table }) => (
+        size: 120,
+        cell: (call, searchQuery = "") => (
           <span className="text-xs text-muted-foreground truncate block min-w-0">
             <HighlightedText
-              text={row.original.response_content_type || "-"}
-              query={
-                (table.options.meta as { searchQuery?: string } | undefined)
-                  ?.searchQuery ?? ""
-              }
+              text={call.response_content_type || "-"}
+              query={searchQuery}
             />
           </span>
         ),
@@ -186,8 +181,8 @@ export function useTrafficTableColumns({
         id: "action",
         header: "",
         size: 36,
-        cell: ({ row }) => (
-          <CallActionCell call={row.original} onNewGroup={handleNewGroup} />
+        cell: (call) => (
+          <CallActionCell call={call} onNewGroup={handleNewGroup} />
         ),
       },
     ],

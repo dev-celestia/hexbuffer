@@ -14,7 +14,7 @@ import {
 } from "@phosphor-icons/react";
 
 import type { ApiCall } from "@/types";
-import { useLogEntryActions } from "./hooks/use-log-entry-actions";
+import { useLogEntryActions } from "../hooks/use-log-entry-actions";
 import {
   useHighlightStore,
   HIGHLIGHT_COLORS,

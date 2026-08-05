@@ -67,6 +67,9 @@ pub fn save_and_emit(ctx: &Ctx, app_handle: &tauri::AppHandle) {
             "[completion] event emitted successfully for txn_id={}",
             ctx.transaction_id
         );
+        if let Ok(json) = serde_json::to_string_pretty(&txn) {
+            println!("[completion] proxy-record payload:\n{}", json);
+        }
     }
 }
 

@@ -15,14 +15,14 @@ import {
   buildRawHttpResponse,
   formatJsonBody,
 } from "@/lib/http-message";
-import { useHistoryDetail } from "../../hooks/use-history-detail";
+import { useHistoryDetail } from "../../../hooks/use-history-detail";
 import { useHttpHistoryQueryStore } from "@/stores/history";
 import {
   InspectorSection,
   buildHeadersList,
   buildParamsList,
 } from "@/pages/live-traffic/components/inspector";
-import { parseCookieHeader } from "./cookie-display";
+import { parseCookieHeader } from "../utils";
 import { useInvokerStore } from "@/stores/invoker";
 import {
   createDefaultAttackConfig,
@@ -253,7 +253,8 @@ export function LogEntryBurpView() {
                     <>
                       <TableIcon className="mr-2 h-4 w-4" /> Toggle Table
                     </>
-                  )}
+                  )
+                  }
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <CollectionPickerSubmenu

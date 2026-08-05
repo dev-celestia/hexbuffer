@@ -22,18 +22,6 @@ export interface StorageInfo {
   browserArtifactsPath: string;
 }
 
-export interface ClearBrowserArtifactsResult {
-  artifactDir: string;
-  filesDeleted: number;
-  bytesDeleted: number;
-  pagesUpdated: number;
-}
-
-export interface ResetLocalDataResult extends ClearBrowserArtifactsResult {
-  interceptBrowserProfileRemoved: boolean;
-  caFileRemoved: boolean;
-}
-
 type AiKeyStatus = Record<string, boolean>;
 
 const DEFAULT_AI_SETTINGS: AiSettings = {
@@ -55,9 +43,7 @@ export function useSettingsPage() {
   const [aiSettingsSaving, setAiSettingsSaving] = React.useState(false);
   const [providerKeyStatus, setProviderKeyStatus] = React.useState<AiKeyStatus>({});
   const [storageInfo, setStorageInfo] = React.useState<StorageInfo | null>(null);
-  const [resettingLocalData, setResettingLocalData] = React.useState(false);
-  const [resettingDatabase, setResettingDatabase] = React.useState(false);
-  const [resettingAllAppData, setResettingAllAppData] = React.useState(false);
+  const [deletingAllData, setDeletingAllData] = React.useState(false);
   const proxyDefaultPort = useAppStore((state) => state.proxyDefaultPort);
   const proxyPort = useAppStore((state) => state.proxyPort);
   const proxyStatus = useAppStore((state) => state.proxyStatus);
@@ -252,53 +238,20 @@ export function useSettingsPage() {
     return () => window.clearInterval(interval);
   }, [checkProxyStatus]);
 
-  const handleResetLocalData = React.useCallback(async () => {
+  const handleDeleteAllData = React.useCallback(async () => {
     try {
-      setResettingLocalData(true);
-      const result = await invoke<ResetLocalDataResult>('reset_local_data');
-      clearBrowserAutomationArtifactPaths();
-      const sizeMb = result.bytesDeleted / 1024 / 1024;
-      toast.success(
-        `Reset local browser data and cleared ${result.filesDeleted} artifact file${result.filesDeleted === 1 ? '' : 's'} (${sizeMb.toFixed(2)} MB)`
-      );
-    } catch (error) {
-      console.error('Failed to reset local data:', error);
-      toast.error(`Failed to reset local data: ${error}`);
-    } finally {
-      setResettingLocalData(false);
-    }
-  }, [clearBrowserAutomationArtifactPaths]);
-
-  const handleResetDatabase = React.useCallback(async () => {
-    try {
-      setResettingDatabase(true);
-      await invoke('reset_database');
-      toast.success('Database and all saved data deleted successfully');
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (error) {
-      console.error('Failed to delete database:', error);
-      toast.error(`Failed to delete database: ${error}`);
-    } finally {
-      setResettingDatabase(false);
-    }
-  }, []);
-
-  const handleResetAllAppData = React.useCallback(async () => {
-    try {
-      setResettingAllAppData(true);
+      setDeletingAllData(true);
       await invoke('reset_all_app_data');
       clearBrowserAutomationArtifactPaths();
-      toast.success('Application fully reset. Reinitializing...');
+      toast.success('All data deleted. Reinitializing...');
       setTimeout(() => {
         window.location.reload();
       }, 1000);
     } catch (error) {
-      console.error('Failed to reset application:', error);
-      toast.error(`Failed to reset application: ${error}`);
+      console.error('Failed to delete data:', error);
+      toast.error(`Failed to delete data: ${error}`);
     } finally {
-      setResettingAllAppData(false);
+      setDeletingAllData(false);
     }
   }, [clearBrowserAutomationArtifactPaths]);
 
@@ -462,9 +415,7 @@ export function useSettingsPage() {
     proxyPort,
     proxyPortDraft,
     proxyStatus,
-    resettingLocalData,
-    resettingDatabase,
-    resettingAllAppData,
+    deletingAllData,
     downloading,
     installingCa,
     regeneratingCa,
@@ -472,9 +423,7 @@ export function useSettingsPage() {
     handleInstallMacCert,
     handleRegenerateCert,
     handleClearAiApiKey,
-    handleResetLocalData,
-    handleResetDatabase,
-    handleResetAllAppData,
+    handleDeleteAllData,
     handleResetProxyDefaultPort,
     handleSaveProxyDefaultPort,
     handleSaveAiSettings,

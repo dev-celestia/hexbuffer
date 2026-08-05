@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface TrackedAction {
   id: string;
@@ -61,14 +61,18 @@ export function clearTrackedActions() {
 }
 
 export function useTrackedActions() {
-  const subscribe = useCallback((callback: () => void) => {
-    actionListeners.add(callback);
+  const [actions, setActions] = useState<TrackedAction[]>(() => trackedActions);
+
+  useEffect(() => {
+    // Sync in case state changed between render and effect
+    setActions(trackedActions);
+
+    const update = () => setActions([...trackedActions]);
+    actionListeners.add(update);
     return () => {
-      actionListeners.delete(callback);
+      actionListeners.delete(update);
     };
   }, []);
 
-  const getSnapshot = useCallback(() => trackedActions, []);
-
-  return useSyncExternalStore(subscribe, getSnapshot);
+  return actions;
 }

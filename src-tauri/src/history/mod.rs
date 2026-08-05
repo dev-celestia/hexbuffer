@@ -29,7 +29,7 @@ pub struct ProxyLogSummary {
     pub response_body_size: usize,
     pub server_addr: String,
     pub user_agent: Option<String>,
-    pub referrer: Option<String>,
+    pub host: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -272,7 +272,7 @@ impl HistoryBridge {
                     response_body_size: r.response_body_size,
                     server_addr: r.server_addr,
                     user_agent: r.user_agent,
-                    referrer: r.referrer,
+                    host: r.host,
                     response_content_type: r.response_content_type,
                 })
                 .collect(),
@@ -580,7 +580,13 @@ impl From<ProxyRecord> for ProxyLogSummary {
             .and_then(|response| response.headers.get("content-type").cloned());
 
         let user_agent = record.request.headers.get("user-agent").cloned();
-        let referrer = record.request.headers.get("referer").cloned();
+        let host = record
+            .request
+            .headers
+            .get("host")
+            .or_else(|| record.request.headers.get("Host"))
+            .or_else(|| record.request.headers.get(":authority"))
+            .cloned();
 
         let response_body_size = record
             .response
@@ -609,7 +615,7 @@ impl From<ProxyRecord> for ProxyLogSummary {
             response_body_size,
             server_addr: record.server_addr,
             user_agent,
-            referrer,
+            host,
         }
     }
 }

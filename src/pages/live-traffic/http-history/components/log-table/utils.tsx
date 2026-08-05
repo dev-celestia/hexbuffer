@@ -78,3 +78,138 @@ export function buildCurlCommand(call: ApiCall): string {
     body: call.request_body ?? '',
   });
 }
+
+export function parseApiCall(raw: any): ApiCall {
+  if (!raw) {
+    return {
+      id: '',
+      session_id: '',
+      target_id: '',
+      timestamp: 0,
+      request_type: 'Other',
+      method: 'GET',
+      url: '',
+      host: '-',
+      path: '/',
+      query_params: {},
+      headers: {},
+      user_agent: null,
+      referrer: null,
+      cookies: {},
+      request_body: null,
+      request_body_size: 0,
+      response_status: null,
+      response_status_text: null,
+      response_headers: {},
+      response_cookies: {},
+      response_body: null,
+      response_body_size: 0,
+      response_content_type: null,
+      security_state: '',
+      server_ip: null,
+      duration_ms: null,
+    };
+  }
+
+  const uri = (raw.request?.uri || raw.url || raw.uri || '').trim();
+  const headers: Record<string, string> = raw.request?.headers || raw.headers || {};
+
+  // Case-insensitive header lookup for host, user-agent, referer
+  let extractedHost = raw.host || '';
+  let userAgent: string | null = raw.user_agent ?? null;
+  let referrer: string | null = raw.referrer ?? null;
+
+  for (const [key, value] of Object.entries(headers)) {
+    if (typeof value === 'string' && value.trim()) {
+      const lowerKey = key.toLowerCase();
+      if (!extractedHost && (lowerKey === 'host' || lowerKey === ':authority' || lowerKey === 'x-forwarded-host')) {
+        extractedHost = value.trim();
+      }
+      if (!userAgent && lowerKey === 'user-agent') {
+        userAgent = value.trim();
+      }
+      if (!referrer && lowerKey === 'referer') {
+        referrer = value.trim();
+      }
+    }
+  }
+
+  const serverAddr = raw.server_addr || raw.server_ip || null;
+  if (!extractedHost && serverAddr && !serverAddr.startsWith('/')) {
+    extractedHost = serverAddr.trim();
+  }
+
+  if (extractedHost && !headers.host && !headers.Host) {
+    headers.host = extractedHost;
+  }
+
+  let urlObj: URL | null = null;
+  let fullUrl = uri;
+
+  if (uri.includes('://')) {
+    try {
+      urlObj = new URL(uri);
+      fullUrl = uri;
+      if (!extractedHost && urlObj.host) {
+        extractedHost = urlObj.host;
+      }
+    } catch {}
+  } else if (extractedHost) {
+    const isExplicitHttp = extractedHost.endsWith(':80');
+    const scheme = isExplicitHttp ? 'http' : 'https';
+    const cleanUri = uri.startsWith('/') ? uri : `/${uri}`;
+    fullUrl = `${scheme}://${extractedHost}${cleanUri}`;
+    try {
+      urlObj = new URL(fullUrl);
+    } catch {}
+  }
+
+  const path = (() => {
+    if (urlObj) return urlObj.pathname + urlObj.search;
+    const pathStart = uri.indexOf('/', uri.indexOf('://') + 3);
+    if (pathStart === -1) return uri.startsWith('/') ? uri : '/';
+    return uri.slice(pathStart) || '/';
+  })();
+
+  const requestBody = raw.request_body ?? (raw.request?.body ? new TextDecoder().decode(new Uint8Array(raw.request.body)) : null);
+  const responseBody = raw.response_body ?? (raw.response?.body ? new TextDecoder().decode(new Uint8Array(raw.response.body)) : null);
+
+  return {
+    id: raw.id || '',
+    session_id: raw.session_id || '',
+    target_id: raw.target_id || '',
+    timestamp: typeof raw.timestamp === 'number' ? raw.timestamp : new Date(raw.timestamp || 0).getTime(),
+    request_type: raw.request_type || 'Other',
+    method: raw.request?.method || raw.method || 'GET',
+    url: fullUrl,
+    host: (extractedHost && !extractedHost.includes('/')) ? extractedHost : (urlObj?.host ?? '-'),
+    path,
+    query_params: raw.query_params || {},
+    headers,
+    user_agent: userAgent,
+    referrer: referrer,
+    cookies: raw.cookies || {},
+    request_body: requestBody,
+    request_body_size: raw.request_body_size ?? raw.request?.body?.length ?? 0,
+    response_status: raw.response_status ?? raw.response?.status_code ?? null,
+    response_status_text: raw.response_status_text ?? raw.response?.status_text ?? null,
+    response_headers: raw.response_headers || raw.response?.headers || {},
+    response_cookies: raw.response_cookies || {},
+    response_body: responseBody,
+    response_body_size: raw.response_body_size ?? raw.response?.body?.length ?? 0,
+    response_content_type: raw.response_content_type || raw.response?.headers?.['content-type'] || null,
+    content_decoded: raw.content_decoded || raw.request?.content_decoded || raw.response?.content_decoded,
+    security_state: raw.security_state || '',
+    server_ip: serverAddr,
+    duration_ms: raw.duration_ms ?? null,
+  };
+}
+
+export function getCallHost(call: Partial<ApiCall> | null | undefined): string {
+  if (!call) return '-';
+  if (call.host && call.host !== '-' && call.host.trim() && !call.host.includes('/')) {
+    return call.host.trim();
+  }
+  return parseApiCall(call).host;
+}
+

@@ -1,7 +1,7 @@
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
 import { useRef, useState, useCallback } from 'react';
-import { LogEntryBurpView } from './log-table/log-entry-view';
-import { TrafficTable } from './log-table/calls-columns';
+import { LogEntryBurpView } from './log-table/components';
+import { TrafficTable } from './log-table';
 
 import { useHttpHistoryQueryStore } from '@/stores/history';
 

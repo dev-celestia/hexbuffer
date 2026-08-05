@@ -99,7 +99,7 @@ export function HttpHistoryPage() {
             isGroupTabActive={page.isGroupTabActive}
             activeGroupId={page.activeGroupId}
           />
-        </Card>
+        </Card>           
       </TabbedPageLayout>
 
       <CreateGroupDialog

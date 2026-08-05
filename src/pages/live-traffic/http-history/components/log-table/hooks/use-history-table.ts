@@ -8,127 +8,28 @@ import { useHttpHistoryQueryStore } from '@/stores/history';
 import { useShallow } from 'zustand/react/shallow';
 import { buildHistoryQuery, hasActiveHistoryFilters } from '../../../state/build-history-query';
 
+import { parseApiCall } from '../utils';
+
 export function buildUrlParts(
   uri: string,
   headers?: Record<string, string>,
-  serverAddr?: string
+  serverAddr?: string,
+  fallbackHost?: string | null
 ) {
-  let urlObj: URL | null = null;
-  let fullUrl = uri;
-
-  const rawHost =
-    headers?.['host'] ||
-    headers?.['Host'] ||
-    (serverAddr && !serverAddr.startsWith('/') ? serverAddr : '');
-
-  if (uri.includes('://')) {
-    try {
-      urlObj = new URL(uri);
-      fullUrl = uri;
-    } catch {
-      // Fallback below
-    }
-  } else if (rawHost) {
-    const isExplicitHttp = rawHost.endsWith(':80');
-    const scheme = isExplicitHttp ? 'http' : 'https';
-    const cleanUri = uri.startsWith('/') ? uri : `/${uri}`;
-    fullUrl = `${scheme}://${rawHost}${cleanUri}`;
-    try {
-      urlObj = new URL(fullUrl);
-    } catch {
-      // Fallback below
-    }
-  }
-
-  const host =
-    urlObj?.host ||
-    rawHost ||
-    uri.split('://').pop()?.split('/')[0] ||
-    '';
-
-  const path = (() => {
-    if (urlObj) return urlObj.pathname + urlObj.search;
-    const pathStart = uri.indexOf('/', uri.indexOf('://') + 3);
-    if (pathStart === -1) return uri.startsWith('/') ? uri : '/';
-    return uri.slice(pathStart) || '/';
-  })();
-
+  const parsed = parseApiCall({ url: uri, headers, server_addr: serverAddr, host: fallbackHost });
   return {
-    fullUrl,
-    host,
-    path,
+    fullUrl: parsed.url,
+    host: parsed.host,
+    path: parsed.path,
   };
 }
 
 export function adaptProxySummaryToApiCall(record: ProxyLogSummary): ApiCall {
-  const { fullUrl, host, path } = buildUrlParts(record.url, undefined, record.server_addr);
-
-  return {
-    id: record.id,
-    session_id: '',
-    target_id: '',
-    timestamp: new Date(record.timestamp).getTime(),
-    request_type: 'Other',
-    method: record.method,
-    url: fullUrl,
-    host: host,
-    path: path,
-    query_params: {},
-    headers: {},
-    user_agent: record.user_agent ?? null,
-    referrer: record.referrer ?? null,
-    cookies: {},
-    request_body: null,
-    request_body_size: record.request_body_size,
-    response_status: record.response_status,
-    response_status_text: record.response_status_text,
-    response_headers: {},
-    response_cookies: {},
-    response_body: null,
-    response_body_size: record.response_body_size,
-    response_content_type: record.response_content_type,
-    security_state: '',
-    server_ip: record.server_addr || null,
-    duration_ms: null,
-  };
+  return parseApiCall(record);
 }
 
 export function adaptProxyRecordToApiCall(record: ProxyRecord): ApiCall {
-  const { fullUrl, host, path } = buildUrlParts(
-    record.request.uri,
-    record.request.headers,
-    record.server_addr
-  );
-
-  return {
-    id: record.id,
-    session_id: '',
-    target_id: '',
-    timestamp: new Date(record.timestamp).getTime(),
-    request_type: 'Other',
-    method: record.request.method,
-    url: fullUrl,
-    host: host,
-    path: path,
-    query_params: {},
-    headers: record.request.headers,
-    user_agent: record.request.headers['user-agent'] ?? null,
-    referrer: record.request.headers['referer'] ?? null,
-    cookies: {},
-    request_body: new TextDecoder().decode(new Uint8Array(record.request.body)),
-    request_body_size: record.request.body.length,
-    response_status: record.response?.status_code ?? null,
-    response_status_text: record.response?.status_text || null,
-    response_headers: record.response?.headers || {},
-    response_cookies: {},
-    response_body: record.response ? new TextDecoder().decode(new Uint8Array(record.response.body)) : null,
-    response_body_size: record.response?.body.length ?? 0,
-    response_content_type: record.response?.headers['content-type'] || null,
-    content_decoded: record.request.content_decoded || record.response?.content_decoded,
-    security_state: '',
-    server_ip: record.server_addr || null,
-    duration_ms: null,
-  };
+  return parseApiCall(record);
 }
 
 interface UseHistoryTableOptions {
