@@ -2,6 +2,7 @@ import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogT
 import { useDesktopPage } from './hooks/use-desktop-page';
 import { ProxyWidget } from './components/proxy-widget';
 import { VpnWidget } from './components/vpn-widget';
+import { TargetWidget } from './components/target-widget';
 import { ScratchpadWidget } from './components/scratchpad-widget';
 import { CollectionsWidget } from './components/collections-widget';
 import { ClipboardWidget } from './components/clipboard-widget';
@@ -26,9 +27,10 @@ export function DesktopPage() {
   const showCollections = !hiddenWidgets.includes('collections');
   const showProxy = !hiddenWidgets.includes('proxy');
   const showVpn = !hiddenWidgets.includes('vpn');
+  const showTarget = !hiddenWidgets.includes('target');
   const showScratchpad = !hiddenWidgets.includes('scratchpad');
   const showClipboard = !hiddenWidgets.includes('clipboard');
-  const hasVisibleWidgets = showCollections || showProxy || showVpn || showScratchpad || showClipboard;
+  const hasVisibleWidgets = showCollections || showProxy || showVpn || showTarget || showScratchpad || showClipboard;
 
   return (
     <div
@@ -216,6 +218,7 @@ export function DesktopPage() {
             {showCollections && <CollectionsWidget />}
             {showProxy && <ProxyWidget />}
             {showVpn && <VpnWidget />}
+            {showTarget && <TargetWidget />}
             {showScratchpad && <ScratchpadWidget />}
             {showClipboard && <ClipboardWidget />}
           </div>

@@ -42,7 +42,7 @@ export function TargetSelectorDialog({
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[480px] p-5 gap-4">
+      <DialogContent className="p-5 gap-4">
         {showCreateNew ? (
           <>
             <DialogHeader className="space-y-1">

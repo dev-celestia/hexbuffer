@@ -11,6 +11,7 @@ interface TargetSearchListProps {
   filteredTargets: Target[];
   onSelectTarget: (target: Target) => void;
   onEditTarget: (target: Target) => void;
+  listHeight?: string;
 }
 
 export function TargetSearchList({
@@ -20,6 +21,7 @@ export function TargetSearchList({
   filteredTargets,
   onSelectTarget,
   onEditTarget,
+  listHeight = 'h-[220px]',
 }: TargetSearchListProps) {
   const showSearch = targetCount >= 5 || searchQuery.length > 0;
 
@@ -59,7 +61,7 @@ export function TargetSearchList({
             </p>
           </div>
         ) : (
-          <ScrollArea className="h-[220px]">
+          <ScrollArea className={listHeight}>
             <div className="p-1.5 space-y-1">
               {filteredTargets.map((target) => {
                 const primaryScope = target.scope[0];
