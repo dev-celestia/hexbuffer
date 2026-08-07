@@ -1,6 +1,6 @@
 
 
-import { Badge, ScrollArea } from 'hexbuffer-ui';
+import { Badge, ScrollArea } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 import type { DiscoveredApi } from '@/stores/browser-automation';
 import { useApiDiscoveryPanel } from './hooks/use-api-discovery-panel';

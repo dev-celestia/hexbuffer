@@ -1,4 +1,4 @@
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from 'hexbuffer-ui';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@celestia-project/ui';
 import { useNavigate } from 'react-router-dom';
 
 import { PaperPlaneTiltIcon, TrashIcon } from '@phosphor-icons/react';

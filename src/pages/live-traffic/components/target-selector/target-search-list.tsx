@@ -1,6 +1,6 @@
 
 
-import { Badge, Button, Input, ScrollArea } from 'hexbuffer-ui';
+import { Badge, Button, Input, ScrollArea } from '@celestia-project/ui';
 import { PencilIcon, MagnifyingGlassIcon, XIcon, TargetIcon, CheckCircleIcon } from '@phosphor-icons/react';
 import type { Target } from '@/types';
 

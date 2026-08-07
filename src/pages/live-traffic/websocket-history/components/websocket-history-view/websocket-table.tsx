@@ -1,6 +1,6 @@
 
 
-import { Alert, AlertDescription, AlertTitle, Button, Empty, EmptyDescription, EmptyTitle } from 'hexbuffer-ui';
+import { Alert, AlertDescription, AlertTitle, Button, Empty, EmptyDescription, EmptyTitle } from '@celestia-project/ui';
 import { HighlightedText } from '@/components/highlighted-text';
 import { useWebSocketTable } from '../../hooks/use-websocket-table';
 import { HistoryLoadingState } from '@/pages/live-traffic/components/history-loading-state';

@@ -1,5 +1,5 @@
 // ponytail: simplify layout by using inline split inspector instead of full-screen drawer overlay
-import { Button, TextEditor } from 'hexbuffer-ui';
+import { Button, TextEditor } from '@celestia-project/ui';
 import * as React from 'react';
 
 import { X, ArrowsIn, ArrowsOut } from '@phosphor-icons/react';

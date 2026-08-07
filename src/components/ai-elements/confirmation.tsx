@@ -1,6 +1,6 @@
 
 
-import { Alert, AlertDescription, Button } from 'hexbuffer-ui';
+import { Alert, AlertDescription, Button } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import type { ToolUIPart } from "ai";
 import type { ComponentProps, ReactNode } from "react";

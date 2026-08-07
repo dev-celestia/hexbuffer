@@ -1,6 +1,6 @@
 
 
-import { Badge, Button, Switch } from 'hexbuffer-ui';
+import { Badge, Button, Switch } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import { CheckIcon, CopyIcon, EyeIcon, EyeSlashIcon } from '@phosphor-icons/react';
 import type { ComponentProps, HTMLAttributes } from "react";

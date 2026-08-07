@@ -1,5 +1,5 @@
 
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
 import {
   type CustomSection,
   type ReconDocument,

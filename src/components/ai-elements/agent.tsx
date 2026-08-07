@@ -1,6 +1,6 @@
 
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Badge } from 'hexbuffer-ui';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Badge } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import type { Tool } from "ai";
 import { TriangleIcon } from '@phosphor-icons/react';

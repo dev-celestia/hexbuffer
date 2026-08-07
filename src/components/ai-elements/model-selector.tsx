@@ -1,6 +1,6 @@
 
 
-import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut, Dialog, DialogContent, DialogTitle, DialogTrigger } from 'hexbuffer-ui';
+import { Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut, Dialog, DialogContent, DialogTitle, DialogTrigger } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import type { ComponentProps, ReactNode } from "react";
 

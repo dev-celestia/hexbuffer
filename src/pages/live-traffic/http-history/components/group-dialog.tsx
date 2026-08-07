@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input } from 'hexbuffer-ui';
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input } from '@celestia-project/ui';
 import { useState, useCallback, useEffect } from 'react';
 
 import type { ApiCall } from '@/types';

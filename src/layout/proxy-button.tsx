@@ -1,4 +1,4 @@
-import { Badge, Button } from 'hexbuffer-ui';
+import { Badge, Button } from '@celestia-project/ui';
 import { AsteriskIcon } from '@phosphor-icons/react';
 
 import { cn } from '@/lib/utils';

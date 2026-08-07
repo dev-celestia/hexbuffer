@@ -1,4 +1,4 @@
-import { Alert, AlertDescription, AlertTitle, Checkbox, Empty, EmptyDescription, EmptyTitle, Input } from 'hexbuffer-ui';
+import { Alert, AlertDescription, AlertTitle, Checkbox, Empty, EmptyDescription, EmptyTitle, Input } from '@celestia-project/ui';
 import { useState, useRef, useEffect } from 'react';
 import { MagnifyingGlassIcon } from '@phosphor-icons/react';
 

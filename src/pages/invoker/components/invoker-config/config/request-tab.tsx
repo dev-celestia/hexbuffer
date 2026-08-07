@@ -1,4 +1,4 @@
-import { Badge, Button, ButtonGroup, Checkbox, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Label, TextEditor, Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
+import { Badge, Button, ButtonGroup, Checkbox, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Label, TextEditor, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
 import * as React from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { AsteriskIcon, Info, SpinnerGapIcon, SparkleIcon, TargetIcon } from '@phosphor-icons/react';

@@ -1,4 +1,4 @@
-import { Badge, Button } from 'hexbuffer-ui';
+import { Badge, Button } from '@celestia-project/ui';
 import {
   PlusIcon,
   ArrowLeftIcon,

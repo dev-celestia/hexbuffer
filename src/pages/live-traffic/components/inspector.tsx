@@ -1,4 +1,4 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TextEditor } from 'hexbuffer-ui';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TextEditor } from '@celestia-project/ui';
 import { useState, memo } from 'react';
 
 import { buildHttpHeaderList } from '@/lib/http-message';

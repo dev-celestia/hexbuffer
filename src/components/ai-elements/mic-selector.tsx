@@ -1,4 +1,4 @@
-import { Button, Command, CommandEmpty, CommandInput, CommandItem, CommandList, Popover, PopoverContent, PopoverTrigger } from 'hexbuffer-ui';
+import { Button, Command, CommandEmpty, CommandInput, CommandItem, CommandList, Popover, PopoverContent, PopoverTrigger } from '@celestia-project/ui';
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
 
 import { cn } from "@/lib/utils";

@@ -1,5 +1,5 @@
 
-import { Button } from 'hexbuffer-ui';
+import { Button } from '@celestia-project/ui';
 import { LayoutIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 

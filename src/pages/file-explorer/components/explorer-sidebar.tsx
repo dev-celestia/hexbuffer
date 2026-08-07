@@ -1,4 +1,4 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, Button, Input } from 'hexbuffer-ui';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, Button, Input } from '@celestia-project/ui';
 import * as React from 'react';
 import { DatabaseIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';

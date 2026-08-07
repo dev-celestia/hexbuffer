@@ -1,4 +1,4 @@
-import { Button, Checkbox, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'hexbuffer-ui';
+import { Button, Checkbox, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@celestia-project/ui';
 import * as React from 'react';
 import { invoke } from '@tauri-apps/api/core';
 

@@ -1,4 +1,4 @@
-import { ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from 'hexbuffer-ui';
+import { ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '@celestia-project/ui';
 import { FolderStarIcon, PaperPlaneTiltIcon, SpinnerGapIcon, FolderOpenIcon } from '@phosphor-icons/react';
 import React, { useMemo } from 'react';
 

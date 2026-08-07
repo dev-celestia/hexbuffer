@@ -1,4 +1,4 @@
-import { Badge, Button, Input, ScrollArea, Separator, TextEditor } from 'hexbuffer-ui';
+import { Badge, Button, Input, ScrollArea, Separator, TextEditor } from '@celestia-project/ui';
 import { ListIcon, ArrowSquareOutIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 
 import type { MockDomain, MockRoute, RequestLog } from '../types';

@@ -1,4 +1,4 @@
-import { Alert, AlertDescription, AlertTitle, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea } from 'hexbuffer-ui';
+import { Alert, AlertDescription, AlertTitle, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea } from '@celestia-project/ui';
 import React from 'react';
 import { WarningCircleIcon, ClockIcon, GlobeIcon, FunnelIcon, PlayIcon, TrashIcon, NetworkIcon, RadioIcon, ScanIcon } from '@phosphor-icons/react';
 

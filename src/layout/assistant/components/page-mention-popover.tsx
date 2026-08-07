@@ -1,5 +1,5 @@
 
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from 'hexbuffer-ui';
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@celestia-project/ui';
 import type { NavItem } from '@/layout/constants';
 
 interface PageMentionPopoverProps {

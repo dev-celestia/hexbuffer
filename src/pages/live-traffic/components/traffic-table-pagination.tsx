@@ -1,4 +1,4 @@
-import { Button } from 'hexbuffer-ui';
+import { Button } from '@celestia-project/ui';
 import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react";
 
 export interface TrafficTablePaginationProps {

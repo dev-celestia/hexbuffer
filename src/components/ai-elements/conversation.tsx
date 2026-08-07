@@ -1,5 +1,5 @@
 
-import { Button } from 'hexbuffer-ui';
+import { Button } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
 import { ArrowDownIcon, DownloadSimpleIcon } from '@phosphor-icons/react';

@@ -1,6 +1,6 @@
 
 
-import { Badge, Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle, Input, ScrollArea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, TabsContent } from 'hexbuffer-ui';
+import { Badge, Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle, Input, ScrollArea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, TabsContent } from '@celestia-project/ui';
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
 
 import { PlugsConnected, Bug, Terminal, WifiHigh, HardDrive, Browser, ArrowClockwise, Warning } from '@phosphor-icons/react';

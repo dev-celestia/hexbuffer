@@ -1,6 +1,6 @@
 
 
-import { Label, TextEditor } from 'hexbuffer-ui';
+import { Label, TextEditor } from '@celestia-project/ui';
 import { useRequestPanel } from './hooks/use-request-panel';
 import { cn } from '@/lib/utils';
 

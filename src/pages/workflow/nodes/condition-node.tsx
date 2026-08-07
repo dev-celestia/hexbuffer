@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { WarningCircleIcon, FunctionIcon, DotsSixIcon } from '@phosphor-icons/react';

@@ -1,4 +1,4 @@
-import { Button } from 'hexbuffer-ui';
+import { Button } from '@celestia-project/ui';
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowSquareOutIcon, PlusIcon } from '@phosphor-icons/react';
 

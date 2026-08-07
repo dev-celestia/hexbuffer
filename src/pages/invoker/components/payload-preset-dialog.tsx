@@ -1,4 +1,4 @@
-import { Badge, Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Input, ScrollArea } from 'hexbuffer-ui';
+import { Badge, Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Input, ScrollArea } from '@celestia-project/ui';
 import * as React from 'react';
 import { FileTextIcon, FolderIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 

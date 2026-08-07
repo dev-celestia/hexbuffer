@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, ContextMenuItem, ContextMenuSeparator, ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
+import { Button, ButtonGroup, ContextMenuItem, ContextMenuSeparator, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {

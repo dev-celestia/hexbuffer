@@ -1,5 +1,5 @@
 
-import { Badge } from 'hexbuffer-ui';
+import { Badge } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import { ArrowRightIcon, MinusIcon, PackageIcon, PlusIcon } from '@phosphor-icons/react';
 import type { HTMLAttributes } from "react";

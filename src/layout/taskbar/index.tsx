@@ -1,4 +1,4 @@
-import { Separator, Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
+import { Separator, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
 import {
   XCircleIcon,
 } from '@phosphor-icons/react';

@@ -1,4 +1,4 @@
-import { Badge, Separator } from 'hexbuffer-ui';
+import { Badge, Separator } from '@celestia-project/ui';
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import {

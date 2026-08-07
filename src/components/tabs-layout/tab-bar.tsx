@@ -1,4 +1,4 @@
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from 'hexbuffer-ui';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from '@celestia-project/ui';
 import { useCallback, type MouseEvent, type ReactNode } from 'react';
 import { WarningCircleIcon, CheckCircleIcon, SpinnerGapIcon, PlusIcon, XIcon, GearSixIcon } from '@phosphor-icons/react';
 

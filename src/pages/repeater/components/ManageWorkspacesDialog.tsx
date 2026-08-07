@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Input, ScrollArea } from 'hexbuffer-ui';
+import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Input, ScrollArea } from '@celestia-project/ui';
 import React, { useState, useEffect, useRef } from 'react';
 
 import { useRepeaterStore } from '@/stores/repeater';

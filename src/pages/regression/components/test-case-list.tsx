@@ -1,4 +1,4 @@
-import { Button } from 'hexbuffer-ui';
+import { Button } from '@celestia-project/ui';
 import React from 'react';
 import { PlusIcon, TrashIcon, PlayIcon, PencilIcon, FlaskIcon, CaretRightIcon } from '@phosphor-icons/react';
 

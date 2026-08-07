@@ -1,1 +1,1 @@
-export * from "hexbuffer-ui";
+export * from "@celestia-project/ui";

@@ -1,6 +1,6 @@
 
 
-import { Badge, Tabs, TabsContent, TabsList, TabsTrigger } from 'hexbuffer-ui';
+import { Badge, Tabs, TabsContent, TabsList, TabsTrigger } from '@celestia-project/ui';
 import {
   AttackTab,
   PayloadsTab,

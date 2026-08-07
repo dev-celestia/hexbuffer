@@ -1,4 +1,4 @@
-import { Card, ContextMenuItem } from 'hexbuffer-ui';
+import { Card, ContextMenuItem } from '@celestia-project/ui';
 import * as React from 'react';
 import { PushPinSimpleIcon } from '@phosphor-icons/react';
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';

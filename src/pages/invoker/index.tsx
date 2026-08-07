@@ -1,4 +1,4 @@
-import { Alert, AlertDescription, Button } from 'hexbuffer-ui';
+import { Alert, AlertDescription, Button } from '@celestia-project/ui';
 import * as React from 'react';
 
 import { InfoIcon, PlayIcon, SquareIcon } from '@phosphor-icons/react';

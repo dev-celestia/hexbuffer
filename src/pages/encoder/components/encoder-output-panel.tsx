@@ -1,6 +1,6 @@
 
 
-import { Button, Textarea } from 'hexbuffer-ui';
+import { Button, Textarea } from '@celestia-project/ui';
 import { CopyIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 

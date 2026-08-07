@@ -1,4 +1,4 @@
-import { Button, Input, Kbd, KbdGroup, TextEditor } from 'hexbuffer-ui';
+import { Button, Input, Kbd, KbdGroup, TextEditor } from '@celestia-project/ui';
 import * as React from 'react';
 import { PencilSimpleIcon, CheckIcon, XIcon, FileTextIcon, SidebarSimpleIcon } from '@phosphor-icons/react';
 

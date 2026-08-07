@@ -1,4 +1,4 @@
-import { Badge } from 'hexbuffer-ui';
+import { Badge } from '@celestia-project/ui';
 import { CONSOLE_LEVEL_COLORS } from '@/pages/inspector/constants';
 
 import { getMethodBadgeColor } from '@/lib/method-colors';

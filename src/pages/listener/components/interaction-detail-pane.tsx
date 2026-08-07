@@ -1,6 +1,6 @@
 
 
-import { Badge, Button } from 'hexbuffer-ui';
+import { Badge, Button } from '@celestia-project/ui';
 import { XIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import type { ListenerInteraction } from '../types';

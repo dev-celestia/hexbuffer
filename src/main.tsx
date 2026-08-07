@@ -1,4 +1,4 @@
-import { Toaster } from 'hexbuffer-ui';
+import { Toaster } from '@celestia-project/ui';
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";

@@ -1,4 +1,4 @@
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, Button, ToggleGroup, ToggleGroupItem } from 'hexbuffer-ui';
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, Button, ToggleGroup, ToggleGroupItem } from '@celestia-project/ui';
 import { useState } from 'react';
 import { XIcon, TrashIcon, SpinnerGapIcon, PlayIcon, PauseIcon, TargetIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';

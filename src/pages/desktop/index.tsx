@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from 'hexbuffer-ui';
+import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@celestia-project/ui';
 import { useDesktopPage } from './hooks/use-desktop-page';
 import { ProxyWidget } from './components/proxy-widget';
 import { VpnWidget } from './components/vpn-widget';

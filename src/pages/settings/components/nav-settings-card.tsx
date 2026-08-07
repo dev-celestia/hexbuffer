@@ -1,4 +1,4 @@
-import { Button, Label, Switch } from 'hexbuffer-ui';
+import { Button, Label, Switch } from '@celestia-project/ui';
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
 
 import { ALL_NAV_ITEMS } from '@/layout/constants';

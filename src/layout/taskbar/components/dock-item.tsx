@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { XIcon, DotsSixIcon } from '@phosphor-icons/react';

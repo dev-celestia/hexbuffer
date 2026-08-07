@@ -1,4 +1,4 @@
-import { Tabs } from 'hexbuffer-ui';
+import { Tabs } from '@celestia-project/ui';
 import type { ReactNode } from 'react';
 
 import { PageTabBar } from './tab-bar';

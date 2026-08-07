@@ -1,4 +1,4 @@
-import { Button } from 'hexbuffer-ui';
+import { Button } from '@celestia-project/ui';
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { ArrowDownIcon, ArrowUpIcon, DotsSixIcon, TrashIcon } from '@phosphor-icons/react';

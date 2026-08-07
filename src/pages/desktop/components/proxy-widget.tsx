@@ -1,4 +1,4 @@
-import { Button } from 'hexbuffer-ui';
+import { Button } from '@celestia-project/ui';
 import { useAppStore } from '@/stores/app';
 
 import { HardDrivesIcon, SpinnerGapIcon } from '@phosphor-icons/react';

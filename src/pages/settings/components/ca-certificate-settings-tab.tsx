@@ -1,4 +1,4 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Alert, AlertDescription, AlertTitle, Button } from 'hexbuffer-ui';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Alert, AlertDescription, AlertTitle, Button } from '@celestia-project/ui';
 import { DownloadSimpleIcon, KeyIcon, ArrowClockwiseIcon } from '@phosphor-icons/react';
 
 import {

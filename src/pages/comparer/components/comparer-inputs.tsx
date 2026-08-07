@@ -1,5 +1,5 @@
 
-import { Button } from 'hexbuffer-ui';
+import { Button } from '@celestia-project/ui';
 import { ClipboardIcon } from '@phosphor-icons/react';
 import { useComparerInputs } from './hooks/use-comparer-inputs';
 import { cn } from '@/lib/utils';

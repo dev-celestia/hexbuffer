@@ -1,4 +1,4 @@
-import { Label } from 'hexbuffer-ui';
+import { Label } from '@celestia-project/ui';
 import React from 'react';
 
 import { NODE_TYPE_REGISTRY } from '../../constants';

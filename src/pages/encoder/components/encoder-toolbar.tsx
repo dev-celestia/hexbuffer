@@ -1,6 +1,6 @@
 
 
-import { Badge, Button, ButtonGroup } from 'hexbuffer-ui';
+import { Badge, Button, ButtonGroup } from '@celestia-project/ui';
 import { ArrowsLeftRightIcon, CopyIcon, TrashIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import type { CodecType, CodecMode } from '../types';

@@ -1,6 +1,6 @@
 
 
-import { Alert, AlertDescription, AlertTitle, Empty, EmptyDescription, EmptyTitle } from 'hexbuffer-ui';
+import { Alert, AlertDescription, AlertTitle, Empty, EmptyDescription, EmptyTitle } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 import { TreeNode } from './tree-node';
 import type { TreeViewProps } from './types';

@@ -1,4 +1,4 @@
-import { Button, Input, Label, ScrollArea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, TextEditor } from 'hexbuffer-ui';
+import { Button, Input, Label, ScrollArea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, TextEditor } from '@celestia-project/ui';
 import * as React from 'react';
 
 import { CopyIcon, KeyIcon } from '@phosphor-icons/react';

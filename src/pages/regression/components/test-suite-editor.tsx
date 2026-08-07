@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Label, ScrollArea, Switch, Textarea } from 'hexbuffer-ui';
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Input, Label, ScrollArea, Switch, Textarea } from '@celestia-project/ui';
 import React from 'react';
 import { WarningCircleIcon, PlusIcon, FloppyDiskIcon, GearSixIcon, XIcon, FlaskIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';

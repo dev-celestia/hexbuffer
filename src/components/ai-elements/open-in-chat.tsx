@@ -1,6 +1,6 @@
 
 
-import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from 'hexbuffer-ui';
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import {
   CaretDownIcon,

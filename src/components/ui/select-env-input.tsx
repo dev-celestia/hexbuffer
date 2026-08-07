@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ColorizedUrlInput as BaseColorizedUrlInput, type ColorizedUrlInputProps as BaseProps } from 'hexbuffer-ui';
+import { ColorizedUrlInput as BaseColorizedUrlInput, type ColorizedUrlInputProps as BaseProps } from '@celestia-project/ui';
 import { useCollectionsStore } from '@/stores/collections';
 
 function useEnvVarKeys(): string[] {

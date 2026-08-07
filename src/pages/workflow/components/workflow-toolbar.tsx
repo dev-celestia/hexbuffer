@@ -1,4 +1,4 @@
-import { Button, Input } from 'hexbuffer-ui';
+import { Button, Input } from '@celestia-project/ui';
 import React from 'react';
 
 import { useAutomationStore } from '@/stores/automation';

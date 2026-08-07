@@ -1,6 +1,6 @@
 
 
-import { Button, ButtonGroup, ScrollArea, TextEditor } from 'hexbuffer-ui';
+import { Button, ButtonGroup, ScrollArea, TextEditor } from '@celestia-project/ui';
 import { CheckCircleIcon, XCircleIcon, CopyIcon, CheckIcon } from '@phosphor-icons/react';
 import { useMemo } from 'react';
 import { useCollectionsStore, type ForgeResponse, type TestResult } from '@/stores/collections';

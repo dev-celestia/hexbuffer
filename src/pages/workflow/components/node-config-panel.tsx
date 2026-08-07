@@ -1,4 +1,4 @@
-import { Button, ScrollArea, Tabs, TabsContent, TabsList, TabsTrigger, Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
+import { Button, ScrollArea, Tabs, TabsContent, TabsList, TabsTrigger, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
 import { XIcon, TrashIcon, Info } from '@phosphor-icons/react';
 
 import { useAutomationStore } from '@/stores/automation';

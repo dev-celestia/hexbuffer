@@ -1,6 +1,6 @@
 
 
-import { Button, Collapsible, CollapsibleContent, CollapsibleTrigger, ScrollArea } from 'hexbuffer-ui';
+import { Button, Collapsible, CollapsibleContent, CollapsibleTrigger, ScrollArea } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import { CaretDownIcon, PaperclipIcon } from '@phosphor-icons/react';
 import type { ComponentProps } from "react";

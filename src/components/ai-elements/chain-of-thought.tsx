@@ -1,4 +1,4 @@
-import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from 'hexbuffer-ui';
+import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from '@celestia-project/ui';
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
 
 import { cn } from "@/lib/utils";

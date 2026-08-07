@@ -20,8 +20,9 @@ pub async fn try_intercept(
     let host_str_raw = uri_parsed.as_ref().and_then(|u| u.host_str()).unwrap_or("");
     let host_str = if host_str_raw.is_empty() {
         ctx.req_headers
-            .get("host")
-            .map(|h| h.split(':').next().unwrap_or(h))
+            .iter()
+            .find(|(k, _)| k.eq_ignore_ascii_case("host"))
+            .map(|(_, v)| v.split(':').next().unwrap_or(v))
             .unwrap_or("")
     } else {
         host_str_raw

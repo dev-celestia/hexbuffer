@@ -1,4 +1,4 @@
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger, Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
 import * as React from 'react';
 import { FolderOpenIcon, TrashIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';

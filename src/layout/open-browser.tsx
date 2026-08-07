@@ -1,4 +1,4 @@
-import { Button } from 'hexbuffer-ui';
+import { Button } from '@celestia-project/ui';
 import { GlobeIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 
 import { cn } from '@/lib/utils';

@@ -1,5 +1,5 @@
 
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText } from 'hexbuffer-ui';
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput, InputGroupText } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import { CheckIcon, CopyIcon } from '@phosphor-icons/react';
 import type { ComponentProps } from "react";

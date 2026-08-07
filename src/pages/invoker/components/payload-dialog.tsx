@@ -1,6 +1,6 @@
 
 
-import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from 'hexbuffer-ui';
+import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@celestia-project/ui';
 import { useInvokerStore } from '@/stores/invoker';
 import { useInvokerPayloads } from '../hooks/use-payloads';
 

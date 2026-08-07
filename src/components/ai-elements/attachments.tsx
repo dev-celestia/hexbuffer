@@ -1,6 +1,6 @@
 
 
-import { Button, HoverCard, HoverCardContent, HoverCardTrigger } from 'hexbuffer-ui';
+import { Button, HoverCard, HoverCardContent, HoverCardTrigger } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import type { FileUIPart, SourceDocumentUIPart } from "ai";
 import {

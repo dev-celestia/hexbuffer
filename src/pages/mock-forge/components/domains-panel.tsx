@@ -1,4 +1,4 @@
-import { Badge, Button, Input, ScrollArea, Switch } from 'hexbuffer-ui';
+import { Badge, Button, Input, ScrollArea, Switch } from '@celestia-project/ui';
 import {
   TrashIcon,
   LockSimpleIcon,

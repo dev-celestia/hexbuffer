@@ -1,4 +1,4 @@
-import { Button, Checkbox, Dialog, DialogContent, DialogHeader, DialogTitle, Input, ScrollArea } from 'hexbuffer-ui';
+import { Button, Checkbox, Dialog, DialogContent, DialogHeader, DialogTitle, Input, ScrollArea } from '@celestia-project/ui';
 import React, { useState, useEffect } from 'react';
 
 import {

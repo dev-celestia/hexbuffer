@@ -1,5 +1,5 @@
 
-import { ScrollArea } from 'hexbuffer-ui';
+import { ScrollArea } from '@celestia-project/ui';
 import type { XssPayload } from '../types';
 
 interface PayloadLibraryPanelProps {

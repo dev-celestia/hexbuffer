@@ -1,4 +1,4 @@
-import { Badge } from 'hexbuffer-ui';
+import { Badge } from '@celestia-project/ui';
 import { memo } from 'react';
 import { WarningCircleIcon, CircleIcon, StopCircleIcon, FileTextIcon, ShieldSlashIcon, SpinnerIcon } from '@phosphor-icons/react';
 

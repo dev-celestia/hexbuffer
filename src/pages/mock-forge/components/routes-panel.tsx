@@ -1,4 +1,4 @@
-import { Input, ScrollArea, Switch } from 'hexbuffer-ui';
+import { Input, ScrollArea, Switch } from '@celestia-project/ui';
 import { useState } from 'react';
 import { MagnifyingGlassIcon, GlobeIcon, PencilSimpleIcon, TreeStructureIcon, CaretRightIcon } from '@phosphor-icons/react';
 

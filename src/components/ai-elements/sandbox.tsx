@@ -1,6 +1,6 @@
 
 
-import { Collapsible, CollapsibleContent, CollapsibleTrigger, Tabs, TabsContent, TabsList, TabsTrigger } from 'hexbuffer-ui';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger, Tabs, TabsContent, TabsList, TabsTrigger } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import type { ToolUIPart } from "ai";
 import { CaretDownIcon, CodeIcon } from '@phosphor-icons/react';

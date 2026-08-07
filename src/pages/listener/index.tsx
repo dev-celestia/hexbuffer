@@ -1,4 +1,4 @@
-import { Switch, TabsContent } from 'hexbuffer-ui';
+import { Switch, TabsContent } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 import { useListenerPage } from './hooks/use-listener-page';
 import { ListenerHosts } from './components/hosts-panel';

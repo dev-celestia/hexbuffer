@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, ScrollArea } from 'hexbuffer-ui';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, ScrollArea } from '@celestia-project/ui';
 import React from 'react';
 
 import { cn } from '@/lib/utils';

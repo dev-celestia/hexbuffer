@@ -1,6 +1,6 @@
 
 
-import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from 'hexbuffer-ui';
+import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import type { DynamicToolUIPart, ToolUIPart } from "ai";
 import {

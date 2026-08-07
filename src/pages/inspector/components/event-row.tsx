@@ -1,5 +1,5 @@
 
-import { Badge } from 'hexbuffer-ui';
+import { Badge } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 import { ArrowLeftIcon, ArrowRightIcon } from '@phosphor-icons/react';
 import type { DebuggerEntry } from '@/stores/debugger';

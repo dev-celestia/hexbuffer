@@ -1,4 +1,4 @@
-import { Badge, ResizableHandle, ResizablePanel, ResizablePanelGroup, TabsContent } from 'hexbuffer-ui';
+import { Badge, ResizableHandle, ResizablePanel, ResizablePanelGroup, TabsContent } from '@celestia-project/ui';
 import { ReactFlowProvider } from '@xyflow/react';
 
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';

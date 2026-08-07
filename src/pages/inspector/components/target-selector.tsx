@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from 'hexbuffer-ui';
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from '@celestia-project/ui';
 import { useState, useEffect } from 'react';
 
 import { Globe, ArrowClockwise, Plugs, PlugsConnected, Bug, Browser, Warning } from '@phosphor-icons/react';

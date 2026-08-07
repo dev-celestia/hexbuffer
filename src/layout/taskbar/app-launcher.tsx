@@ -1,4 +1,4 @@
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, Kbd, Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, Kbd, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SquaresFourIcon, PushPinSimpleIcon, PushPinSimpleSlashIcon } from '@phosphor-icons/react';

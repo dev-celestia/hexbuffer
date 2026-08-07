@@ -1,4 +1,4 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Badge, Input, ScrollArea } from 'hexbuffer-ui';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Badge, Input, ScrollArea } from '@celestia-project/ui';
 import React from 'react';
 import {
   PlayIcon,

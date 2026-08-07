@@ -1,4 +1,4 @@
-import { Button } from 'hexbuffer-ui';
+import { Button } from '@celestia-project/ui';
 import { CheckIcon, QuestionIcon, XIcon } from '@phosphor-icons/react';
 import { useState } from 'react';
 

@@ -1,5 +1,5 @@
 
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from 'hexbuffer-ui';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import {
   CaretRightIcon,

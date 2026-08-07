@@ -1,4 +1,4 @@
-import { Button, Card } from 'hexbuffer-ui';
+import { Button, Card } from '@celestia-project/ui';
 import { TabbedPageLayout } from "@/components/tabs-layout/tabbed-page-layout";
 
 import { TargetSelectorDialog } from "@/pages/live-traffic/components/target-selector";

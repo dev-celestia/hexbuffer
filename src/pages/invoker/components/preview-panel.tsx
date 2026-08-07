@@ -1,6 +1,6 @@
 
 
-import { Badge, Label, TextEditor } from 'hexbuffer-ui';
+import { Badge, Label, TextEditor } from '@celestia-project/ui';
 import { buildRawHttpResponse } from '@/lib/http-message';
 import { WarningCircleIcon } from '@phosphor-icons/react';
 import { useInvokerStore } from '@/stores/invoker';

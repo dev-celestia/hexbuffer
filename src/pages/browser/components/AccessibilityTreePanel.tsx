@@ -1,6 +1,6 @@
 
 
-import { Button, ScrollArea } from 'hexbuffer-ui';
+import { Button, ScrollArea } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 import type { BrowserSnapshot } from '@/stores/browser-automation';
 import { useAccessibilityTreePanel } from './hooks/use-accessibility-tree-panel';

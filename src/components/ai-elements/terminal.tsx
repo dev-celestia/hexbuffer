@@ -1,5 +1,5 @@
 
-import { Button } from 'hexbuffer-ui';
+import { Button } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import Ansi from "ansi-to-react";
 import { CheckIcon, CopyIcon, TerminalWindowIcon, TrashIcon } from '@phosphor-icons/react';

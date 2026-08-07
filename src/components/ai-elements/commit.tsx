@@ -1,6 +1,6 @@
 
 
-import { Avatar, AvatarFallback, Button, Collapsible, CollapsibleContent, CollapsibleTrigger } from 'hexbuffer-ui';
+import { Avatar, AvatarFallback, Button, Collapsible, CollapsibleContent, CollapsibleTrigger } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import {
   CheckIcon,

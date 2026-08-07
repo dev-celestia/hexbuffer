@@ -1,4 +1,4 @@
-import { Alert, AlertDescription, AlertTitle, Badge, Empty, EmptyDescription, EmptyTitle } from 'hexbuffer-ui';
+import { Alert, AlertDescription, AlertTitle, Badge, Empty, EmptyDescription, EmptyTitle } from '@celestia-project/ui';
 import { useResponseDetailWindow } from './hooks/use-response-detail-window';
 import { InspectorSection } from '@/pages/live-traffic/components/inspector';
 import { formatBytes } from '../utils';

@@ -1,6 +1,6 @@
 
 
-import { Button, Checkbox, Input, Label, ScrollArea, Textarea } from 'hexbuffer-ui';
+import { Button, Checkbox, Input, Label, ScrollArea, Textarea } from '@celestia-project/ui';
 import { CopyIcon } from '@phosphor-icons/react';
 import type { XssEncodingType } from '../types';
 import { ENCODING_LABELS, ENCODING_ORDER } from '../constants';

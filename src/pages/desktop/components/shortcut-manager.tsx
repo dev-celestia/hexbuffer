@@ -1,4 +1,4 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, Input, Label, Switch } from 'hexbuffer-ui';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, Input, Label, Switch } from '@celestia-project/ui';
 import * as React from 'react';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { MAIN_NAV_ITEMS } from '@/layout/constants';

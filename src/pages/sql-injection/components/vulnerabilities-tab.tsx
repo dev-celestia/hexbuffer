@@ -1,4 +1,4 @@
-import { Badge, Label, ResizableHandle, ResizablePanel, ResizablePanelGroup, ScrollArea, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'hexbuffer-ui';
+import { Badge, Label, ResizableHandle, ResizablePanel, ResizablePanelGroup, ScrollArea, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@celestia-project/ui';
 import { useState } from 'react';
 import { WarningCircleIcon, CopyIcon, CheckIcon } from '@phosphor-icons/react';
 

@@ -1,4 +1,4 @@
-import { Button, Tabs, TabsList, TabsTrigger } from 'hexbuffer-ui';
+import { Button, Tabs, TabsList, TabsTrigger } from '@celestia-project/ui';
 import type { GroupBy } from '../types';
 import { GROUP_OPTIONS } from '../constants';
 import { PlusIcon } from '@phosphor-icons/react';

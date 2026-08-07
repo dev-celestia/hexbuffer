@@ -1,4 +1,4 @@
-import { Tabs, TabsList, TabsTrigger } from 'hexbuffer-ui';
+import { Tabs, TabsList, TabsTrigger } from '@celestia-project/ui';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useForgePanel } from './forge-panel/use-forge-panel';

@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, ScrollArea } from 'hexbuffer-ui';
+import { Badge, Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, ScrollArea } from '@celestia-project/ui';
 import React from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import {

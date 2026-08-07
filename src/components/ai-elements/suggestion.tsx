@@ -1,6 +1,6 @@
 
 
-import { Button, ScrollArea, ScrollBar } from 'hexbuffer-ui';
+import { Button, ScrollArea, ScrollBar } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 import { useCallback } from "react";

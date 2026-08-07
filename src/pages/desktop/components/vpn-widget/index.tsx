@@ -1,4 +1,4 @@
-import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'hexbuffer-ui';
+import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@celestia-project/ui';
 import {
   SpinnerGapIcon,
   FolderOpenIcon,

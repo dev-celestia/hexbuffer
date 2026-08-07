@@ -1,6 +1,6 @@
 
 
-import { Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from 'hexbuffer-ui';
+import { Button, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import type { Icon } from '@phosphor-icons/react';
 import { XIcon } from '@phosphor-icons/react';

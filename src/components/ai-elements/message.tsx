@@ -1,6 +1,6 @@
 
 
-import { Button, ButtonGroup, ButtonGroupText, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from 'hexbuffer-ui';
+import { Button, ButtonGroup, ButtonGroupText, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import { code } from "@streamdown/code";
 import type { UIMessage } from "ai";

@@ -1,4 +1,4 @@
-import { Alert, AlertAction, AlertDescription, Badge, Button, Input, ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
+import { Alert, AlertAction, AlertDescription, Badge, Button, Input, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
 import * as React from 'react';
 import { PauseIcon, PlayIcon, PlusIcon, XIcon } from '@phosphor-icons/react';
 

@@ -1,4 +1,4 @@
-import { ContextMenuItem, ContextMenuSeparator } from 'hexbuffer-ui';
+import { ContextMenuItem, ContextMenuSeparator } from '@celestia-project/ui';
 import * as React from 'react';
 import {
   CheckCircleIcon,

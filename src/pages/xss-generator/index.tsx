@@ -1,5 +1,5 @@
 
-import { Button, Tabs, TabsList, TabsTrigger } from 'hexbuffer-ui';
+import { Button, Tabs, TabsList, TabsTrigger } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 
 import { CopyIcon, TrashIcon } from '@phosphor-icons/react';

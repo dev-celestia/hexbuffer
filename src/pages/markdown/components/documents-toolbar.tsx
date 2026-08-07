@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Input } from 'hexbuffer-ui';
+import { Button, ButtonGroup, Input } from '@celestia-project/ui';
 import { DownloadIcon, ArrowClockwiseIcon, ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
 
 import { type ReconDocument } from '../types';

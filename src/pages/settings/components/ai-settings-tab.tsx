@@ -1,4 +1,4 @@
-import { Button, Checkbox, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'hexbuffer-ui';
+import { Button, Checkbox, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@celestia-project/ui';
 import * as React from 'react';
 import { WarningCircleIcon, CheckIcon, EyeIcon, EyeSlashIcon, FloppyDiskIcon, XIcon } from '@phosphor-icons/react';
 

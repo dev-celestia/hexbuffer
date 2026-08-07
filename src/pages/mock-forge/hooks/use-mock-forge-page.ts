@@ -65,7 +65,8 @@ export function useMockForgePage() {
 
   const addDomain = useCallback(async (hostname: string, ssl: boolean) => {
     try {
-      const domain = await invoke<MockDomain>('mock_forge_add_domain', { hostname, ssl });
+      const cleanHost = hostname.trim().replace(/^https?:\/\//i, '').split('/')[0];
+      const domain = await invoke<MockDomain>('mock_forge_add_domain', { hostname: cleanHost, ssl });
       const { domains: d } = useMockForgeStore.getState();
       setDomains([...d, domain]);
       return domain;

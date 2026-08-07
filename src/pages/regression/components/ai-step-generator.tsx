@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, Input, Label, Textarea } from 'hexbuffer-ui';
+import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, Input, Label, Textarea } from '@celestia-project/ui';
 import React from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { SparkleIcon, SpinnerGapIcon, WarningCircleIcon, Info, TargetIcon, CheckCircleIcon, CircleIcon, ArrowRightIcon } from '@phosphor-icons/react';

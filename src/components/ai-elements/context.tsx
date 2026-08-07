@@ -1,6 +1,6 @@
 
 
-import { Button, HoverCard, HoverCardContent, HoverCardTrigger, Progress } from 'hexbuffer-ui';
+import { Button, HoverCard, HoverCardContent, HoverCardTrigger, Progress } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import type { LanguageModelUsage } from "ai";
 import type { ComponentProps } from "react";

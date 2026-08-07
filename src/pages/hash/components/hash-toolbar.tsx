@@ -1,6 +1,6 @@
 
 
-import { Button, ButtonGroup } from 'hexbuffer-ui';
+import { Button, ButtonGroup } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 import { CopyIcon, TrashIcon } from '@phosphor-icons/react';
 import type { HashType } from '../types';

@@ -1,6 +1,6 @@
 
 
-import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from 'hexbuffer-ui';
+import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import { CaretRightIcon } from '@phosphor-icons/react';
 import type { ComponentProps, HTMLAttributes } from "react";

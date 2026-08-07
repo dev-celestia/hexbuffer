@@ -1,4 +1,4 @@
-import { Badge, Button, Separator } from 'hexbuffer-ui';
+import { Badge, Button, Separator } from '@celestia-project/ui';
 import { CheckCircleIcon, CaretDownIcon, CircleIcon, SpinnerGapIcon, SidebarIcon, ShieldWarningIcon, TriangleIcon, XIcon, XCircleIcon, StarFourIcon, FileTextIcon, PaperclipIcon } from '@phosphor-icons/react';
 import { useCallback } from 'react';
 import type { FileUIPart } from 'ai';

@@ -1,4 +1,4 @@
-import { Badge, Button, Input, ResizableHandle, ResizablePanel, ResizablePanelGroup, ScrollArea, Tabs, TabsContent, TabsList, TabsTrigger } from 'hexbuffer-ui';
+import { Badge, Button, Input, ResizableHandle, ResizablePanel, ResizablePanelGroup, ScrollArea, Tabs, TabsContent, TabsList, TabsTrigger } from '@celestia-project/ui';
 import { useRef, useMemo, useState, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 

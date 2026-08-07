@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from 'hexbuffer-ui';
+import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@celestia-project/ui';
 import { FileCodeIcon, PencilLineIcon, FlaskIcon, ShieldCheckIcon } from '@phosphor-icons/react';
 
 import {

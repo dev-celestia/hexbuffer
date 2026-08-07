@@ -1,4 +1,4 @@
-import { Button, Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
+import { Button, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import {

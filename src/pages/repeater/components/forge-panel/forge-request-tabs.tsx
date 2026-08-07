@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Checkbox, Label, RadioGroup, RadioGroupItem, ScrollArea, Switch, TextEditor } from 'hexbuffer-ui';
+import { Button, ButtonGroup, Checkbox, Label, RadioGroup, RadioGroupItem, ScrollArea, Switch, TextEditor } from '@celestia-project/ui';
 import { useState, useRef } from "react";
 
 import { TrashIcon, PlusIcon, UploadSimpleIcon, ImageSquareIcon } from '@phosphor-icons/react';

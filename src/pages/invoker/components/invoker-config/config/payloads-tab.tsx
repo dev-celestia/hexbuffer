@@ -1,4 +1,4 @@
-import { Badge, Button, Input, Label, Tabs, TabsContent, TabsList, TabsTrigger, TextEditor } from 'hexbuffer-ui';
+import { Badge, Button, Input, Label, Tabs, TabsContent, TabsList, TabsTrigger, TextEditor } from '@celestia-project/ui';
 import * as React from 'react';
 
 import { useInvokerStore } from '@/stores/invoker';

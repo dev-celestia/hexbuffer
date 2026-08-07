@@ -1,4 +1,4 @@
-import { Badge, Button } from 'hexbuffer-ui';
+import { Badge, Button } from '@celestia-project/ui';
 import { useState, useMemo, useCallback } from 'react';
 import { CopyIcon, CheckIcon } from '@phosphor-icons/react';
 

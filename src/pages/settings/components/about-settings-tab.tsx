@@ -1,4 +1,4 @@
-import { Button } from 'hexbuffer-ui';
+import { Button } from '@celestia-project/ui';
 import { ArrowSquareOutIcon } from '@phosphor-icons/react';
 
 import { PROFILE_LINKS } from '../constants';

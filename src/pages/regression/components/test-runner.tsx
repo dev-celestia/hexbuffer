@@ -1,4 +1,4 @@
-import { Badge, Button, ScrollArea } from 'hexbuffer-ui';
+import { Badge, Button, ScrollArea } from '@celestia-project/ui';
 import React from 'react';
 import { PlayIcon, CheckCircleIcon, XCircleIcon, SpinnerGapIcon, ClockIcon, WarningCircleIcon, PlayCircleIcon } from '@phosphor-icons/react';
 

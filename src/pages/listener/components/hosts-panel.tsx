@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardContent, Dialog, DialogContent, DialogHeader, DialogTitle, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input } from 'hexbuffer-ui';
+import { Badge, Button, Card, CardContent, Dialog, DialogContent, DialogHeader, DialogTitle, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input } from '@celestia-project/ui';
 import { toast } from 'sonner';
 import {
   PlusIcon,

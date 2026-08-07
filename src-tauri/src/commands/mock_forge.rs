@@ -117,9 +117,23 @@ impl MockForgeState {
     }
 }
 
+pub fn normalize_hostname(raw: &str) -> String {
+    let s = raw.trim();
+    let stripped = s
+        .strip_prefix("https://")
+        .or_else(|| s.strip_prefix("http://"))
+        .unwrap_or(s);
+    let host_and_port = stripped.split('/').next().unwrap_or(stripped);
+    let host_only = host_and_port.split(':').next().unwrap_or(host_and_port);
+    host_only.to_lowercase()
+}
+
 pub fn path_matches(route_path: &str, req_path: &str) -> bool {
-    let r_parts: Vec<&str> = route_path.split('/').filter(|s| !s.is_empty()).collect();
-    let p_parts: Vec<&str> = req_path.split('/').filter(|s| !s.is_empty()).collect();
+    let clean_route = route_path.split('?').next().unwrap_or(route_path);
+    let clean_req = req_path.split('?').next().unwrap_or(req_path);
+
+    let r_parts: Vec<&str> = clean_route.split('/').filter(|s| !s.is_empty()).collect();
+    let p_parts: Vec<&str> = clean_req.split('/').filter(|s| !s.is_empty()).collect();
     
     if r_parts.len() != p_parts.len() {
         return false;
@@ -144,9 +158,12 @@ fn matchers_satisfied(
 ) -> bool {
     for matcher in matchers {
         if let Some(ref hk) = matcher.header_key {
-            let val = req_headers.get(&hk.to_lowercase()).or_else(|| req_headers.get(hk));
+            let val = req_headers
+                .iter()
+                .find(|(k, _)| k.eq_ignore_ascii_case(hk))
+                .map(|(_, v)| v.as_str());
             if let Some(ref hv) = matcher.header_value {
-                if val.map(|s| s.as_str()) != Some(hv.as_str()) {
+                if val != Some(hv.as_str()) {
                     return false;
                 }
             } else if val.is_none() {
@@ -184,18 +201,19 @@ pub fn find_matching_route(
     req_body: &[u8],
     is_local_server: bool,
 ) -> Option<(MockDomain, MockRoute)> {
+    let req_host_norm = normalize_hostname(req_host);
+
     let matching_domains: Vec<&MockDomain> = domains
         .iter()
         .filter(|d| {
             if d.status != "active" {
                 return false;
             }
-            if is_local_server && (req_host.starts_with("localhost") || req_host.starts_with("127.0.0.1")) {
+            let dom_host_norm = normalize_hostname(&d.hostname);
+            if is_local_server && (req_host_norm == "localhost" || req_host_norm == "127.0.0.1") {
                 true
             } else {
-                let host_only = req_host.split(':').next().unwrap_or(req_host);
-                let d_host_only = d.hostname.split(':').next().unwrap_or(&d.hostname);
-                d_host_only.eq_ignore_ascii_case(host_only)
+                dom_host_norm == req_host_norm
             }
         })
         .collect();
@@ -491,5 +509,62 @@ mod tests {
         let (d, r) = matched.unwrap();
         assert_eq!(d.id, "d1");
         assert_eq!(r.id, "r1");
+    }
+
+    #[test]
+    fn test_normalize_hostname() {
+        assert_eq!(normalize_hostname("https://api.example.com/v1/users"), "api.example.com");
+        assert_eq!(normalize_hostname("http://localhost:3000"), "localhost");
+        assert_eq!(normalize_hostname("API.EXAMPLE.COM:8080"), "api.example.com");
+        assert_eq!(normalize_hostname("  example.com  "), "example.com");
+    }
+
+    #[test]
+    fn test_find_matching_route_with_scheme_domain() {
+        let domains = vec![MockDomain {
+            id: "d1".to_string(),
+            hostname: "https://api.example.com".to_string(),
+            ssl: true,
+            status: "active".to_string(),
+            created_at: "".to_string(),
+        }];
+        let routes = vec![MockRoute {
+            id: "r1".to_string(),
+            domain_id: "d1".to_string(),
+            method: "POST".to_string(),
+            path: "/v1/auth/login".to_string(),
+            status_code: 200,
+            response_body: "{}".to_string(),
+            response_headers: HashMap::new(),
+            matchers: vec![],
+            chaos: ChaosConfig {
+                latency_mode: "none".to_string(),
+                latency_fixed: None,
+                latency_min: None,
+                latency_max: None,
+                error_rate: None,
+                error_status: None,
+            },
+            enabled: true,
+            matcher_enabled: true,
+            request_query_params: None,
+            request_body: None,
+        }];
+
+        let mut req_headers = HashMap::new();
+        req_headers.insert("Host".to_string(), "api.example.com".to_string());
+
+        let matched = find_matching_route(
+            &domains,
+            &routes,
+            "api.example.com",
+            "POST",
+            "/v1/auth/login",
+            &req_headers,
+            &HashMap::new(),
+            &[],
+            false,
+        );
+        assert!(matched.is_some());
     }
 }

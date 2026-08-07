@@ -1,4 +1,4 @@
-import { Input } from 'hexbuffer-ui';
+import { Input } from '@celestia-project/ui';
 import React, { useRef, useEffect } from 'react';
 
 import { PlusIcon } from '@phosphor-icons/react';

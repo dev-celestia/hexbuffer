@@ -1,4 +1,4 @@
-import { Button, Input, Label, Popover, PopoverContent, PopoverTrigger } from 'hexbuffer-ui';
+import { Button, Input, Label, Popover, PopoverContent, PopoverTrigger } from '@celestia-project/ui';
 import * as React from 'react';
 
 import { GearSixIcon, EraserIcon, ClockCounterClockwiseIcon } from '@phosphor-icons/react';

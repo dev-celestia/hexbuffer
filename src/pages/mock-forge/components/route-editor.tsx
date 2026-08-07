@@ -1,4 +1,4 @@
-import { Button, Checkbox, Input, Label, ScrollArea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Switch, Tabs, TabsList, TabsTrigger, TextEditor } from 'hexbuffer-ui';
+import { Button, Checkbox, Input, Label, ScrollArea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Switch, Tabs, TabsList, TabsTrigger, TextEditor } from '@celestia-project/ui';
 import { useState } from 'react';
 import {
   TrashIcon,

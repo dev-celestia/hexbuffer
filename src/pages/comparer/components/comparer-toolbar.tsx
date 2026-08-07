@@ -1,6 +1,6 @@
 
 
-import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'hexbuffer-ui';
+import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@celestia-project/ui';
 import { DIFF_MODE_OPTIONS } from '../constants';
 import { type DiffMode } from '../types';
 import {

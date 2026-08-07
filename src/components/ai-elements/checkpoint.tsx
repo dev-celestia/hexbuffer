@@ -1,6 +1,6 @@
 
 
-import { Button, Separator, Tooltip, TooltipContent, TooltipTrigger } from 'hexbuffer-ui';
+import { Button, Separator, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import type { IconProps } from '@phosphor-icons/react';
 import { BookmarkIcon } from '@phosphor-icons/react';

@@ -1,6 +1,6 @@
 
 
-import { Badge, Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from 'hexbuffer-ui';
+import { Badge, Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@celestia-project/ui';
 import { PlusIcon, TargetIcon, ArrowLeftIcon } from '@phosphor-icons/react';
 import { TargetSearchList } from './target-search-list';
 import { TargetDialogForm } from './target-dialog-form';

@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, ScrollArea, Tabs, TabsContent, TabsList, TabsTrigger, TextEditor } from 'hexbuffer-ui';
+import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, ScrollArea, Tabs, TabsContent, TabsList, TabsTrigger, TextEditor } from '@celestia-project/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { memo } from 'react';
 import { CopyIcon, ArrowSquareOutIcon, SpinnerGapIcon, ArrowsOutIcon, StarIcon } from '@phosphor-icons/react';

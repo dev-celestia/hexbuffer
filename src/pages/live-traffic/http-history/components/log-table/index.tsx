@@ -1,4 +1,4 @@
-import { Alert, AlertDescription, AlertTitle, Button, Empty, EmptyDescription, EmptyTitle } from 'hexbuffer-ui';
+import { Alert, AlertDescription, AlertTitle, Button, Empty, EmptyDescription, EmptyTitle } from '@celestia-project/ui';
 import { memo } from "react";
 import { cn } from "@/lib/utils";
 

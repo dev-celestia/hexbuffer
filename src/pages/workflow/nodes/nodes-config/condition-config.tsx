@@ -1,4 +1,4 @@
-import { Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'hexbuffer-ui';
+import { Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@celestia-project/ui';
 import React from 'react';
 
 import { NODE_TYPE_REGISTRY } from '../../constants';

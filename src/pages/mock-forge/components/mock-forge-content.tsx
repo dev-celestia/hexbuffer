@@ -1,5 +1,5 @@
 
-import { TabsContent } from 'hexbuffer-ui';
+import { TabsContent } from '@celestia-project/ui';
 import { DomainsPanel } from './domains-panel';
 import { RoutesPanel } from './routes-panel';
 import { LogsPanel } from './logs-panel';

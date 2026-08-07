@@ -1,4 +1,4 @@
-import { Badge, ResizableHandle, ResizablePanel, ResizablePanelGroup, ScrollArea, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'hexbuffer-ui';
+import { Badge, ResizableHandle, ResizablePanel, ResizablePanelGroup, ScrollArea, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@celestia-project/ui';
 import { DatabaseIcon, TableIcon } from '@phosphor-icons/react';
 
 import type { SqliExtractedDatabase } from '../types';

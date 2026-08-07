@@ -1,4 +1,4 @@
-import { Button, ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from 'hexbuffer-ui';
+import { Button, ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from '@celestia-project/ui';
 import {
   ArrowLeftIcon,
   ArrowRightIcon,

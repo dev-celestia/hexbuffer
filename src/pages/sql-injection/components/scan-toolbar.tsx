@@ -1,4 +1,4 @@
-import { Badge, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'hexbuffer-ui';
+import { Badge, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@celestia-project/ui';
 import { DownloadIcon, PlayIcon, SquareIcon, TrashIcon, GearIcon } from '@phosphor-icons/react';
 
 import type { SqliRiskLevel, SqliTechnique } from '../types';

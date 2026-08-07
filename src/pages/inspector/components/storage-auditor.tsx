@@ -1,4 +1,4 @@
-import { Badge, Button, Input, ScrollArea } from 'hexbuffer-ui';
+import { Badge, Button, Input, ScrollArea } from '@celestia-project/ui';
 import { useState, useMemo } from 'react';
 
 import {

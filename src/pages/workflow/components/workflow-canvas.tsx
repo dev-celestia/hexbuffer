@@ -1,4 +1,4 @@
-import { Kbd } from 'hexbuffer-ui';
+import { Kbd } from '@celestia-project/ui';
 import React from 'react';
 import {
   ReactFlow,

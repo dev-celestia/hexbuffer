@@ -1,5 +1,5 @@
 
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from 'hexbuffer-ui';
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import { Handle, Position } from "@xyflow/react";
 import type { ComponentProps } from "react";

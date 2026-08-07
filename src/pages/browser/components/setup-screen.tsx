@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Checkbox, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, Input, Label } from 'hexbuffer-ui';
+import { Button, ButtonGroup, Checkbox, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, Input, Label } from '@celestia-project/ui';
 import { useState } from 'react';
 import { GearSixIcon } from '@phosphor-icons/react';
 

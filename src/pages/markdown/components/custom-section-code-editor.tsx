@@ -1,5 +1,5 @@
 
-import { TextEditor } from 'hexbuffer-ui';
+import { TextEditor } from '@celestia-project/ui';
 import { type CustomSection } from '../types';
 
 interface CustomSectionCodeEditorProps {

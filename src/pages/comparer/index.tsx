@@ -1,4 +1,4 @@
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
 import { useState } from 'react';
 
 import { toast } from 'sonner';

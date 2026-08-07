@@ -1,6 +1,6 @@
 
 
-import { Badge, ResizableHandle, ResizablePanel, ResizablePanelGroup, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'hexbuffer-ui';
+import { Badge, ResizableHandle, ResizablePanel, ResizablePanelGroup, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@celestia-project/ui';
 import { CaretDownIcon, CaretRightIcon } from '@phosphor-icons/react';
 import { InteractionDetailPane } from './interaction-detail-pane';
 import { ListenerMetrics } from './metrics';

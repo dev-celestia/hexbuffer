@@ -1,4 +1,4 @@
-import { Skeleton } from 'hexbuffer-ui';
+import { Skeleton } from '@celestia-project/ui';
 
 interface HistoryLoadingStateProps {
   label?: string;

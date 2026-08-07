@@ -1,4 +1,4 @@
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
 import { useRef, useState, useCallback } from 'react';
 import { LogDetailView } from './log-table/components/log-detail-view';
 

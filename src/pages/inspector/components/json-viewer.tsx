@@ -1,4 +1,4 @@
-import { ScrollArea } from 'hexbuffer-ui';
+import { ScrollArea } from '@celestia-project/ui';
 import { useMemo, useCallback } from 'react';
 
 export function JsonViewer({ data, onCopyRef }: { data: unknown; onCopyRef?: (fn: () => void) => void }) {

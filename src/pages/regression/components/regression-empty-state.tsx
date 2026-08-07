@@ -1,4 +1,4 @@
-import { Button } from 'hexbuffer-ui';
+import { Button } from '@celestia-project/ui';
 import { FlaskIcon, PlusIcon } from '@phosphor-icons/react';
 
 export function RegressionEmptyState({ onCreate }: { onCreate: () => void }) {

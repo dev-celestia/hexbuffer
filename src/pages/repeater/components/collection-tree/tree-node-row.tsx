@@ -1,4 +1,4 @@
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from 'hexbuffer-ui';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@celestia-project/ui';
 import React, { useRef, useEffect } from 'react';
 import { CaretDownIcon, DotsSixVerticalIcon, PlusIcon, TrashIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import folderIcon from '@/assets/explorer-icon/_folder.svg';

@@ -1,4 +1,4 @@
-import { Button, Checkbox, Input, Label } from 'hexbuffer-ui';
+import { Button, Checkbox, Input, Label } from '@celestia-project/ui';
 import { ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
 
 import { useAutomationStore } from '@/stores/automation';

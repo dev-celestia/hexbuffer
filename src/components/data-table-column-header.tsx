@@ -1,4 +1,4 @@
-import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from 'hexbuffer-ui';
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@celestia-project/ui';
 import { type Column } from "@tanstack/react-table";
 import { ArrowDownIcon, ArrowUpIcon, CaretUpDownIcon, EyeSlashIcon } from '@phosphor-icons/react';
 import { cn } from "@/lib/utils";

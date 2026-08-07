@@ -1,4 +1,4 @@
-import { Badge, Button, Progress, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'hexbuffer-ui';
+import { Badge, Button, Progress, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@celestia-project/ui';
 import { useMemo, useState } from 'react';
 
 import {

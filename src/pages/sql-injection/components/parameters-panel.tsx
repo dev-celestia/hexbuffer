@@ -1,6 +1,6 @@
 
 
-import { Badge, Button, Checkbox, Input, ScrollArea } from 'hexbuffer-ui';
+import { Badge, Button, Checkbox, Input, ScrollArea } from '@celestia-project/ui';
 import { TrashIcon, PlusIcon } from '@phosphor-icons/react';
 
 import type { SqliParam } from '../types';

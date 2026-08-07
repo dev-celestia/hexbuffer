@@ -1,5 +1,5 @@
 
-import { Button } from 'hexbuffer-ui';
+import { Button } from '@celestia-project/ui';
 import { TerminalWindowIcon, PlusIcon } from '@phosphor-icons/react';
 
 interface TerminalEmptyStateProps {

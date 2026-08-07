@@ -1,4 +1,4 @@
-import { TextEditor } from 'hexbuffer-ui';
+import { TextEditor } from '@celestia-project/ui';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowsOutIcon } from '@phosphor-icons/react';

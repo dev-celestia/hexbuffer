@@ -1,4 +1,4 @@
-import { Alert, AlertAction, AlertDescription, Button, ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
+import { Alert, AlertAction, AlertDescription, Button, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 import { PlayIcon, SquareIcon, PauseIcon, ArrowCounterClockwiseIcon, InfoIcon } from '@phosphor-icons/react';
 import { AiInsightsPanel } from './components/insight-panel';

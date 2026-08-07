@@ -1,4 +1,4 @@
-import { Button, Input } from 'hexbuffer-ui';
+import { Button, Input } from '@celestia-project/ui';
 import * as React from 'react';
 import { EyeIcon, EyeSlashIcon, FloppyDiskIcon } from '@phosphor-icons/react';
 

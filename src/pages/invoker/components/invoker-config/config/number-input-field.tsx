@@ -1,4 +1,4 @@
-import { Input, Label } from 'hexbuffer-ui';
+import { Input, Label } from '@celestia-project/ui';
 
 interface NumberInputFieldProps {
   label: string;

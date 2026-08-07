@@ -1,6 +1,6 @@
 
 
-import { Button, Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Collapsible, CollapsibleContent, CollapsibleTrigger } from 'hexbuffer-ui';
+import { Button, Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Collapsible, CollapsibleContent, CollapsibleTrigger } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import { CaretUpDownIcon } from '@phosphor-icons/react';
 import type { ComponentProps } from "react";

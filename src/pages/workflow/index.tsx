@@ -1,4 +1,4 @@
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 
 import { ReactFlowProvider } from '@xyflow/react';

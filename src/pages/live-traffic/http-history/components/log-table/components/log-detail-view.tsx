@@ -1,4 +1,4 @@
-import { Alert, AlertDescription, AlertTitle, Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, Empty, EmptyDescription, EmptyTitle, Label, TextEditor } from 'hexbuffer-ui';
+import { Alert, AlertDescription, AlertTitle, Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, Empty, EmptyDescription, EmptyTitle, Label, TextEditor } from '@celestia-project/ui';
 import {
   FileTextIcon,
   TableIcon,

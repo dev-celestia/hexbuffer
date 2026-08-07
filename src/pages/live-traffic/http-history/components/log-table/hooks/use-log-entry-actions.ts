@@ -350,14 +350,6 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
       }
 
       const matchers: { headerKey: string; headerValue: string }[] = [];
-      if (request.headers) {
-        for (const [key, val] of Object.entries(request.headers)) {
-          matchers.push({
-            headerKey: key,
-            headerValue: val,
-          });
-        }
-      }
 
       const route = {
         domainId: domain.id,
@@ -370,8 +362,8 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
         chaos: { latencyMode: 'none' },
         enabled: true,
         matcherEnabled: true,
-        requestQueryParams,
-        requestBody: request.request_body || undefined,
+        requestQueryParams: requestQueryParams.length > 0 ? requestQueryParams : undefined,
+        requestBody: undefined,
       };
 
       const newRoute = await invoke<MockRoute>('mock_forge_add_route', { route });

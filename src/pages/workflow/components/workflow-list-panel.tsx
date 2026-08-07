@@ -1,4 +1,4 @@
-import { Button, ScrollArea } from 'hexbuffer-ui';
+import { Button, ScrollArea } from '@celestia-project/ui';
 import React from 'react';
 
 import { cn } from '@/lib/utils';

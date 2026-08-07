@@ -1,4 +1,4 @@
-import { Label } from 'hexbuffer-ui';
+import { Label } from '@celestia-project/ui';
 import * as React from 'react';
 
 import { formatTimestamp } from '../lib/jwt-helpers';

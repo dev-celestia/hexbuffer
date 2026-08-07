@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Input } from 'hexbuffer-ui';
+import { Button, ButtonGroup, Input } from '@celestia-project/ui';
 import * as React from 'react';
 
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';

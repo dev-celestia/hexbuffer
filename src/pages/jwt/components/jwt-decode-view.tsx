@@ -1,6 +1,6 @@
 
 
-import { Button, Label, ScrollArea } from 'hexbuffer-ui';
+import { Button, Label, ScrollArea } from '@celestia-project/ui';
 import { CopyIcon } from '@phosphor-icons/react';
 import type { JwtDecoded, JwtVulnerability } from '../types';
 import { ColorizedJwtInput } from './colorized-jwt-input';
