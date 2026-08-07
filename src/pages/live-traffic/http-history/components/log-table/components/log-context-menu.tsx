@@ -3,8 +3,7 @@ import { memo } from 'react';
 
 import { CopyIcon, PlusIcon, TrashIcon, PaperPlaneTiltIcon, FilePlusIcon, PushPinSimpleIcon, PushPinSimpleSlashIcon, ProhibitIcon, PaletteIcon } from '@phosphor-icons/react';
 import type { ApiCall } from '@/types';
-import { useLogEntryActions } from '../hooks/use-log-entry-actions';
-import { useHighlightStore, HIGHLIGHT_COLORS, HIGHLIGHT_COLOR_LABELS } from '@/stores/history';
+import { useLogContextMenu } from './hooks/use-log-context-menu';
 import { CollectionPickerSubmenu } from '@/triggers/repeater/collection-picker-submenu';
 
 interface LogEntryContextMenuProps {
@@ -43,10 +42,11 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
     handleBlacklistHost,
     handleBlacklistHostAndPath,
     handleHighlightHost,
-  } = useLogEntryActions(call, onDelete);
-
-  const highlightColor = useHighlightStore((s) => s.getHighlightColor(call.host, call.path));
-  const removeHighlight = useHighlightStore((s) => s.removeHighlight);
+    highlightColor,
+    removeHighlight,
+    highlightColors,
+    highlightColorLabels,
+  } = useLogContextMenu({ call, onDelete });
 
   return (
     <ContextMenu onOpenChange={onOpenChange}>
@@ -148,14 +148,14 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
             <PaletteIcon className="mr-3 size-3" /> Highlight
           </ContextMenuSubTrigger>
           <ContextMenuSubContent>
-            {HIGHLIGHT_COLORS.map((color) => (
+            {highlightColors.map((color) => (
               <ContextMenuItem
                 key={color}
                 className='text-xs py-1 px-1.5'
                 onClick={() => handleHighlightHost(color)}
               >
                 <span className="mr-2 size-2 rounded-full" style={{ backgroundColor: color }} />
-                {HIGHLIGHT_COLOR_LABELS[color] || color}
+                {highlightColorLabels[color] || color}
                 {highlightColor === color && <span className="ml-auto text-muted-foreground">✓</span>}
               </ContextMenuItem>
             ))}
@@ -163,7 +163,7 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
               <>
                 <ContextMenuSeparator />
                 <ContextMenuItem
-                  className='text-xs py-1 px-1.5'
+                  className="text-xs py-1 px-1.5"
                   onClick={() => removeHighlight(call.host, call.path)}
                 >
                   Remove Highlight

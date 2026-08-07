@@ -10,6 +10,7 @@ Usage:
   ./scripts/build.sh                 Build/upload hexbuffer
   ./scripts/build.sh --help          Show this help
   ./scripts/build.sh --upload        Upload existing artifacts (skip build)
+  ./scripts/build.sh --no-upload     Build app locally without uploading to S3
   ./scripts/build.sh 0.1.1        Bump to exact version, then build/upload
   ./scripts/build.sh --bump          Auto-increment patch version, then build/upload
   ./scripts/build.sh --version 0.1.1
@@ -27,11 +28,16 @@ WINDOWS_ALL=false
 ALL=false
 
 UPLOAD_ONLY=false
+SKIP_UPLOAD=false
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --upload)
       UPLOAD_ONLY=true
+      shift
+      ;;
+    --no-upload|--skip-upload|--no-deploy)
+      SKIP_UPLOAD=true
       shift
       ;;
     --all)
@@ -479,6 +485,11 @@ upload_platform_artifacts() {
 
   update_latest_platform "$latest_json" "$platform" "$signature" "$bundle_name"
 }
+
+if $SKIP_UPLOAD; then
+  echo -e "${GREEN}[build] Done — build complete! (Skipping S3 upload as requested)${NC}"
+  exit 0
+fi
 
 echo -e "[upload] detected platform: ${GREEN}${PLATFORM}${NC}"
 

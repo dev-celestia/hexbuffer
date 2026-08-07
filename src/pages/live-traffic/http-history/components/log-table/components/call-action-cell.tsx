@@ -14,13 +14,9 @@ import {
 } from "@phosphor-icons/react";
 
 import type { ApiCall } from "@/types";
-import { useLogEntryActions } from "../hooks/use-log-entry-actions";
-import {
-  useHighlightStore,
-  HIGHLIGHT_COLORS,
-  HIGHLIGHT_COLOR_LABELS,
-} from "@/stores/history";
+import { useCallActionCell } from "./hooks/use-call-action-cell";
 import { CollectionPickerSubmenu } from "@/triggers/repeater/collection-picker-submenu";
+import { cn } from "@/lib/utils";
 
 export interface CallActionCellProps {
   call: ApiCall;
@@ -51,10 +47,11 @@ export const CallActionCell = memo(function CallActionCell({
     handleBlacklistHost,
     handleBlacklistHostAndPath,
     handleHighlightHost,
-  } = useLogEntryActions(call);
-
-  const highlightColor = useHighlightStore((s) => s.getHighlightColor(call.host, call.path));
-  const removeHighlight = useHighlightStore((s) => s.removeHighlight);
+    highlightColor,
+    removeHighlight,
+    highlightColors,
+    highlightColorLabels,
+  } = useCallActionCell({ call });
 
   return (
     <DropdownMenu>
@@ -62,7 +59,13 @@ export const CallActionCell = memo(function CallActionCell({
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 p-0"
+          className={cn(
+            // Layout & Positioning
+            "p-0",
+
+            // Sizing & Spacing
+            "h-6 w-6"
+          )}
           onClick={(e) => e.stopPropagation()}
         >
           <DotsThreeVerticalIcon className="size-3.5 text-muted-foreground" />
@@ -167,14 +170,14 @@ export const CallActionCell = memo(function CallActionCell({
             <PaletteIcon className="mr-2 size-3" /> Highlight
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
-            {HIGHLIGHT_COLORS.map((color) => (
+            {highlightColors.map((color) => (
               <DropdownMenuItem
                 key={color}
                 className="text-xs"
                 onClick={() => handleHighlightHost(color)}
               >
                 <span className="mr-2 size-2 rounded-full" style={{ backgroundColor: color }} />
-                {HIGHLIGHT_COLOR_LABELS[color] || color}
+                {highlightColorLabels[color] || color}
                 {highlightColor === color && <span className="ml-auto text-muted-foreground">✓</span>}
               </DropdownMenuItem>
             ))}

@@ -1,7 +1,7 @@
 {
   "name": "hexbuffer",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.3",
   "license": "MIT",
   "packageManager": "pnpm@9.15.4",
   "type": "module",
@@ -14,6 +14,7 @@
     "dev:clean": "lsof -ti:1420 | xargs kill -9 2>/dev/null || true && vite",
     "docs": "pnpm --dir docs/website dev -p 5555",
     "docs:dev": "pnpm --dir docs/website dev -p 5555",
+    "build:app": "bash ./scripts/deploy.sh --no-upload",
     "deploy": "bash ./scripts/deploy.sh"
   },
   "dependencies": {

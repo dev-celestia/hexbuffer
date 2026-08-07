@@ -1,6 +1,4 @@
 import { Alert, AlertDescription, AlertTitle, Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, Empty, EmptyDescription, EmptyTitle, Label, TextEditor } from 'hexbuffer-ui';
-import { useState, useMemo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   FileTextIcon,
   TableIcon,
@@ -8,148 +6,34 @@ import {
   CrosshairIcon,
   XIcon,
 } from "@phosphor-icons/react";
-import { toast } from "sonner";
 
-import {
-  buildRawHttpRequest,
-  buildRawHttpResponse,
-  formatJsonBody,
-} from "@/lib/http-message";
-import { useHistoryDetail } from "../../../hooks/use-history-detail";
-import { useHttpHistoryQueryStore } from "@/stores/history";
-import {
-  InspectorSection,
-  buildHeadersList,
-  buildParamsList,
-} from "@/pages/live-traffic/components/inspector";
-import { parseCookieHeader } from "../utils";
-import { useInvokerStore } from "@/stores/invoker";
-import {
-  createDefaultAttackConfig,
-  findRequestPayloadPositions,
-} from "@/pages/invoker/types";
-import { sendToCollection } from "@/triggers/repeater/send-to-collection";
+import { useLogEntryView } from "./hooks/use-log-entry-view";
+import { isJsonContent } from "../utils";
+import { formatJsonBody } from "@/lib/http-message";
+
+import { InspectorSection } from "@/pages/live-traffic/components/inspector";
 import { CollectionPickerSubmenu } from "@/triggers/repeater/collection-picker-submenu";
-
-type DetailViewMode = "text" | "table";
-
-function isJsonContent(
-  headers: Record<string, string>,
-  body: string | null,
-): boolean {
-  if (!body) {
-    return false;
-  }
-
-  const contentType =
-    Object.entries(headers)
-      .find(([name]) => name.toLowerCase() === "content-type")?.[1]
-      .toLowerCase() ?? "";
-
-  return (
-    contentType.includes("json") ||
-    body.trim().startsWith("{") ||
-    body.trim().startsWith("[")
-  );
-}
+import { cn } from "@/lib/utils";
 
 export function LogEntryBurpView() {
-  const { selectedCallId, call, isLoading, loadError } = useHistoryDetail();
-  const setSelectedCallId = useHttpHistoryQueryStore(
-    (state) => state.setSelectedCallId,
-  );
-  const [viewMode, setViewMode] = useState<DetailViewMode>("text");
-  const navigate = useNavigate();
-
-  const handleSendToCollection = useCallback(
-    (stashId: string) => {
-      if (!call) return;
-      void sendToCollection({
-        stashId,
-        stashName: "",
-        endpointData: {
-          name: `${call.method} ${call.path || call.url}`,
-          method: call.method,
-          url: call.url,
-          headers: call.headers,
-          body: call.request_body || null,
-        },
-      });
-    },
-    [call],
-  );
-
-  const handleSendToInvoker = useCallback(() => {
-    if (!call) return;
-    const baseRequest = {
-      method: call.method,
-      url: call.url,
-      headers: call.headers,
-      body: call.request_body ?? "",
-      follow_redirects: true,
-      max_hops: 10,
-    };
-    const config = {
-      ...createDefaultAttackConfig(),
-      name: `${call.method} ${call.path || call.url}`,
-      base_request: baseRequest,
-      positions: findRequestPayloadPositions(baseRequest),
-    };
-    useInvokerStore.getState().addAttackTab(config);
-    navigate("/invoker");
-    toast.success("Sent to Invoker");
-  }, [call, navigate]);
-
-  const rawRequest = useMemo(
-    () =>
-      call
-        ? buildRawHttpRequest({
-            method: call.method,
-            url: call.url,
-            headers: call.headers,
-            body: isJsonContent(call.headers, call.request_body)
-              ? formatJsonBody(call.request_body ?? "")
-              : (call.request_body ?? ""),
-          })
-        : "",
-    [call],
-  );
-  const rawResponse = useMemo(
-    () =>
-      call?.response_status
-        ? buildRawHttpResponse(
-            {
-              status: call.response_status,
-              status_text: call.response_status_text ?? "",
-              headers: call.response_headers,
-              body: call.response_body ?? "",
-            },
-            { prettyJsonBody: true },
-          )
-        : "",
-    [call],
-  );
-
-  const requestHeaders = useMemo(
-    () => buildHeadersList(call?.headers ?? {}),
-    [call?.headers],
-  );
-  const requestCookies = useMemo(
-    () => parseCookieHeader(call?.headers["cookie"]),
-    [call?.headers],
-  );
-  const requestParams = useMemo(
-    () => buildParamsList(call?.query_params ?? {}),
-    [call?.query_params],
-  );
-  const responseHeaders = useMemo(
-    () => buildHeadersList(call?.response_headers ?? {}),
-    [call?.response_headers],
-  );
-  const responseCookies = useMemo(
-    () => parseCookieHeader(call?.response_headers["set-cookie"]),
-    [call?.response_headers],
-  );
+  const {
+    selectedCallId,
+    call,
+    isLoading,
+    loadError,
+    viewMode,
+    toggleViewMode,
+    closeDetailView,
+    handleSendToCollection,
+    handleSendToInvoker,
+    rawRequest,
+    rawResponse,
+    requestHeaders,
+    requestCookies,
+    requestParams,
+    responseHeaders,
+    responseCookies,
+  } = useLogEntryView();
 
   if (!selectedCallId) {
     return (
@@ -172,7 +56,12 @@ export function LogEntryBurpView() {
 
   if (loadError) {
     return (
-      <div className="p-4">
+      <div
+        className={cn(
+          // Sizing & Spacing
+          "p-4"
+        )}
+      >
         <Alert variant="destructive">
           <AlertTitle>Failed to load request details</AlertTitle>
           <AlertDescription>{loadError}</AlertDescription>
@@ -193,19 +82,76 @@ export function LogEntryBurpView() {
   }
 
   return (
-    <div className="flex h-full min-h-0 bg-muted">
-      <div className="flex-1 flex flex-col h-full bg-background border-r">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex min-h-0",
+
+        // Sizing & Spacing
+        "h-full",
+
+        // Backgrounds & Borders
+        "bg-muted"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex-1 flex flex-col",
+
+          // Sizing & Spacing
+          "h-full",
+
+          // Backgrounds & Borders
+          "bg-background border-r"
+        )}
+      >
         {viewMode === "text" ? (
-          <div className="flex h-full min-h-0 flex-col p-2 mt-3">
-            <Label className="mb-1 block text-xs text-muted-foreground">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex min-h-0 flex-col",
+
+              // Sizing & Spacing
+              "h-full p-2 mt-3"
+            )}
+          >
+            <Label
+              className={cn(
+                // Layout & Positioning
+                "block",
+
+                // Sizing & Spacing
+                "mb-1",
+
+                // Typography
+                "text-xs text-muted-foreground"
+              )}
+            >
               Raw Request
             </Label>
-            <div className="min-h-0 flex-1 overflow-hidden rounded-md border">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "min-h-0 flex-1 overflow-hidden",
+
+                // Backgrounds & Borders
+                "rounded-md border"
+              )}
+            >
               <TextEditor value={rawRequest} />
             </div>
           </div>
         ) : (
-          <div className="min-h-0 flex-1 overflow-auto p-2">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "min-h-0 flex-1 overflow-auto",
+
+              // Sizing & Spacing
+              "p-2"
+            )}
+          >
             <InspectorSection
               title="Headers"
               items={requestHeaders}
@@ -229,32 +175,57 @@ export function LogEntryBurpView() {
           </div>
         )}
       </div>
-      <div className="flex-1 flex flex-col h-full bg-background">
-        <div className="flex w-full justify-end pr-2 pt-2">
-          <div className="flex gap-2 items-center">
+
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex-1 flex flex-col",
+
+          // Sizing & Spacing
+          "h-full",
+
+          // Backgrounds & Borders
+          "bg-background"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex justify-end",
+
+            // Sizing & Spacing
+            "w-full pr-2 pt-2"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "gap-2"
+            )}
+          >
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
-                  <DotsThreeVerticalIcon className="h-4 w-4" />
+                  <DotsThreeVerticalIcon className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                  onClick={() =>
-                    setViewMode(viewMode === "table" ? "text" : "table")
-                  }
+                  onClick={toggleViewMode}
                   className="text-xs"
                 >
                   {viewMode === "table" ? (
                     <>
-                      <FileTextIcon className="mr-2 h-4 w-4" /> Toggle Text
+                      <FileTextIcon className="mr-2 size-4" /> Toggle Text
                     </>
                   ) : (
                     <>
-                      <TableIcon className="mr-2 h-4 w-4" /> Toggle Table
+                      <TableIcon className="mr-2 size-4" /> Toggle Table
                     </>
-                  )
-                  }
+                  )}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <CollectionPickerSubmenu
@@ -265,28 +236,52 @@ export function LogEntryBurpView() {
                   onClick={handleSendToInvoker}
                   className="text-xs"
                 >
-                  <CrosshairIcon className="mr-2 h-4 w-4" /> Send to Invoker
+                  <CrosshairIcon className="mr-2 size-4" /> Send to Invoker
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setSelectedCallId(null)}
+              onClick={closeDetailView}
             >
-              <XIcon className="h-3.5 w-3.5" />
+              <XIcon className="size-3.5" />
             </Button>
           </div>
         </div>
 
         {viewMode === "text" ? (
-          <div className="flex h-full min-h-0 flex-col p-2 -mt-1">
-            <div className="min-h-0 flex-1 overflow-hidden rounded-md border">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex min-h-0 flex-col",
+
+              // Sizing & Spacing
+              "h-full p-2 -mt-1"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "min-h-0 flex-1 overflow-hidden",
+
+                // Backgrounds & Borders
+                "rounded-md border"
+              )}
+            >
               <TextEditor value={rawResponse} />
             </div>
           </div>
         ) : (
-          <div className="min-h-0 flex-1 overflow-auto p-2">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "min-h-0 flex-1 overflow-auto",
+
+              // Sizing & Spacing
+              "p-2"
+            )}
+          >
             <InspectorSection
               title="Headers"
               items={responseHeaders}

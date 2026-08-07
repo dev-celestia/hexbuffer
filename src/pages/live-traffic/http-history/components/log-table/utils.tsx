@@ -205,6 +205,7 @@ export function parseApiCall(raw: any): ApiCall {
   };
 }
 
+
 export function getCallHost(call: Partial<ApiCall> | null | undefined): string {
   if (!call) return '-';
   if (call.host && call.host !== '-' && call.host.trim() && !call.host.includes('/')) {
@@ -212,4 +213,25 @@ export function getCallHost(call: Partial<ApiCall> | null | undefined): string {
   }
   return parseApiCall(call).host;
 }
+
+export function isJsonContent(
+  headers: Record<string, string>,
+  body: string | null,
+): boolean {
+  if (!body) {
+    return false;
+  }
+
+  const contentType =
+    Object.entries(headers)
+      .find(([name]) => name.toLowerCase() === 'content-type')?.[1]
+      .toLowerCase() ?? '';
+
+  return (
+    contentType.includes('json') ||
+    body.trim().startsWith('{') ||
+    body.trim().startsWith('[')
+  );
+}
+
 
