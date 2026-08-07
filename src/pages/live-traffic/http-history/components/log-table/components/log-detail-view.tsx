@@ -15,7 +15,7 @@ import { InspectorSection } from "@/pages/live-traffic/components/inspector";
 import { CollectionPickerSubmenu } from "@/triggers/repeater/collection-picker-submenu";
 import { cn } from "@/lib/utils";
 
-export function LogEntryBurpView() {
+export function LogDetailView() {
   const {
     selectedCallId,
     call,

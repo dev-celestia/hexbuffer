@@ -1,6 +1,7 @@
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'hexbuffer-ui';
 import { useRef, useState, useCallback } from 'react';
-import { LogEntryBurpView } from './log-table/components';
+import { LogDetailView } from './log-table/components/log-detail-view';
+
 import { TrafficTable } from './log-table';
 
 import { useHttpHistoryQueryStore } from '@/stores/history';
@@ -62,7 +63,7 @@ export function HttpHistoryView({
           />
           <ResizablePanel id="http-history-detail" defaultSize={40} minSize={15} className="bg-muted">
             <div className="h-full overflow-hidden" style={coverStyle}>
-              <LogEntryBurpView />
+              <LogDetailView />
             </div>
           </ResizablePanel>
         </>

@@ -10,7 +10,10 @@ import { StatusBadge, MethodBadge } from "@/components/status-badge";
 import type { ApiCall } from "@/types";
 import type { GroupDefinition } from "@/stores/history";
 import { formatTimestamp, formatBytes, getCallHost } from "../utils";
-import { ColoredUrl, BrowserIcon, CallActionCell } from "../components";
+import { ColoredUrl } from "../components/colored-url";
+import { BrowserIcon } from "../components/browser-icon";
+import { CallActionCell } from "../components/call-action-cell";
+
 
 export interface TrafficTableColumn {
   id: string;

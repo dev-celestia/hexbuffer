@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils";
 import { HistoryLoadingState } from "@/pages/live-traffic/components/history-loading-state";
 import { TrafficTablePagination } from "@/pages/live-traffic/components/traffic-table-pagination";
 import { CreateGroupDialog } from "../group-dialog";
-import { LogEntryContextMenu } from "./components";
+import { LogEntryContextMenu } from "./components/log-context-menu";
+
 import { useTrafficTable } from "./hooks";
 import { getCallHost } from "./utils";
 
