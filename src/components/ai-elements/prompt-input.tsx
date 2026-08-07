@@ -1,6 +1,6 @@
 
 
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, HoverCard, HoverCardContent, HoverCardTrigger, InputGroup, InputGroupAddon, InputGroupButton, InputGroupTextarea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SpinnerIcon, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, HoverCard, HoverCardContent, HoverCardTrigger, InputGroup, InputGroupAddon, InputGroupButton, InputGroupTextarea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Spinner as SpinnerIcon, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import type { ChatStatus, FileUIPart, SourceDocumentUIPart } from "ai";
 import {

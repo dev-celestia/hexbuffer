@@ -1,6 +1,5 @@
 
-import { Badge, Carousel, CarouselContent, CarouselItem, HoverCard, HoverCardContent, HoverCardTrigger } from '@celestia-project/ui';
-import type { CarouselApi } from "@/components/ui/carousel";
+import { Badge, Carousel, CarouselContent, CarouselItem, HoverCard, HoverCardContent, HoverCardTrigger, type CarouselApi } from '@celestia-project/ui';
 
 import { cn } from "@/lib/utils";
 import { ArrowLeftIcon, ArrowRightIcon } from '@phosphor-icons/react';

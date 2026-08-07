@@ -1,4 +1,4 @@
-import { Button, Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut, Dialog, DialogContent, DialogTitle, DialogTrigger, SpinnerIcon } from '@celestia-project/ui';
+import { Button, Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut, Dialog, DialogContent, DialogTitle, DialogTrigger, Spinner as SpinnerIcon } from '@celestia-project/ui';
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
 
 import { cn } from "@/lib/utils";

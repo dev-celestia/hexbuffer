@@ -2,7 +2,7 @@ import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue }
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
-import { ColorizedUrlInput } from '@/components/ui/select-env-input';
+import { ColorizedUrlInput } from '@/components/select-env-input';
 import { METHOD_COLORS } from '@/lib/method-colors';
 import { useCollectionsStore } from '@/stores/collections';
 import { GearSixIcon, PaperPlaneTiltIcon, FloppyDiskIcon } from '@phosphor-icons/react';

@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { TrashIcon, PlusIcon, UploadSimpleIcon, ImageSquareIcon } from '@phosphor-icons/react';
 import type { KeyValuePair, ActiveRequestState } from "@/stores/collections";
 import { cn } from "@/lib/utils";
-import { ColorizedUrlInput } from "@/components/ui/select-env-input";
+import { ColorizedUrlInput } from "@/components/select-env-input";
 
 // ── Shared key-value list editor ──
 

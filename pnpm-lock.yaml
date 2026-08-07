@@ -24,8 +24,8 @@ importers:
         specifier: ^3.1086.0
         version: 3.1086.0
       '@celestia-project/ui':
-        specifier: file:../celestia-starter/packages/ui
-        version: file:../celestia-starter/packages/ui(@date-fns/tz@1.5.0)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react-is@17.0.2)(react@19.2.6)(redux@5.0.1)(typescript@5.8.3)
+        specifier: ^0.2.0
+        version: 0.2.0(@date-fns/tz@1.5.0)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react-is@17.0.2)(react@19.2.6)(redux@5.0.1)(typescript@5.8.3)
       '@codemirror/autocomplete':
         specifier: ^6.20.3
         version: 6.20.3
@@ -1379,8 +1379,8 @@ packages:
   '@braintree/sanitize-url@7.1.2':
     resolution: {integrity: sha512-jigsZK+sMF/cuiB7sERuo9V7N9jx+dhmHHnQyDSVdpZwVutaBu7WvNYqMDLSgFgfB30n452TP3vjDAvFC973mA==}
 
-  '@celestia-project/ui@file:../celestia-starter/packages/ui':
-    resolution: {directory: ../celestia-starter/packages/ui, type: directory}
+  '@celestia-project/ui@0.2.0':
+    resolution: {integrity: sha512-e+RU/UsVst7GKoEpQjBQbVssyVBXLzsfSLo+7TYnxFLlwBlYt7fbVxK2lWIUdP3Kdg7uDJ3Evmo9lqJMlfRn5w==}
     peerDependencies:
       react: ^19
       react-dom: ^19
@@ -4473,6 +4473,9 @@ packages:
   dompurify@3.4.7:
     resolution: {integrity: sha512-2jBxDJY4RR06tQNy4w5FlFH7kfxsQZlufd0sbv+chfHCxeJwrFw2baUDsSwvBISD4K4RDbd0PTfy3uNXsR6siA==}
 
+  dompurify@3.4.8:
+    resolution: {integrity: sha512-yb1cEmaOum7wFvOCSQxyfgVlv5D47Rc30iZWoMpbDIWTnJ6grDDQyu2KFJzB2k7u0pMuJcQ1zphH//fFnw2tjQ==}
+
   dotenv@17.4.2:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
@@ -5535,6 +5538,9 @@ packages:
 
   monaco-editor@0.55.1:
     resolution: {integrity: sha512-jz4x+TJNFHwHtwuV9vA9rMujcZRb0CEilTEwG2rRSpe/A7Jdkuj8xPKttCgOh+v/lkHy7HsZ64oj+q3xoAFl9A==}
+
+  monaco-editor@0.56.0:
+    resolution: {integrity: sha512-sXboRm3BeBeLm938eaiyLMe0OxzfXIlZvbv4ir/jVgQy1zDhWjgmny0WoN45fuDKhCCQsYMbBJrv/A6jd8aCUg==}
 
   monaco-languageclient@10.7.0:
     resolution: {integrity: sha512-oA5cOFixkF4bspVL2zMSn48LvlNR/Cu3vJ8MCVam3PdjobSULGgHtOASuZIi3FgWK42X1z8/6hrG0LCjvNu1Hw==}
@@ -7249,18 +7255,28 @@ snapshots:
 
   '@braintree/sanitize-url@7.1.2': {}
 
-  '@celestia-project/ui@file:../celestia-starter/packages/ui(@date-fns/tz@1.5.0)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react-is@17.0.2)(react@19.2.6)(redux@5.0.1)(typescript@5.8.3)':
+  '@celestia-project/ui@0.2.0(@date-fns/tz@1.5.0)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react-is@17.0.2)(react@19.2.6)(redux@5.0.1)(typescript@5.8.3)':
     dependencies:
       '@base-ui/react': 1.7.0(@date-fns/tz@1.5.0)(@types/react@19.2.15)(date-fns@4.4.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@codemirror/lang-javascript': 6.2.5
+      '@codemirror/lang-json': 6.0.2
+      '@codemirror/lang-markdown': 6.5.0
+      '@codemirror/language': 6.12.3
+      '@codemirror/state': 6.6.0
+      '@codemirror/view': 6.43.1
+      '@lezer/highlight': 1.2.3
       '@phosphor-icons/react': 2.1.10(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@shadcn/react': 0.2.1(@types/react@19.2.15)(react@19.2.6)
       '@tanstack/react-table': 8.21.3(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@tauri-apps/plugin-opener': 2.5.4
       class-variance-authority: 0.7.1
       clsx: 2.1.1
       cmdk: 1.1.1(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      codemirror: 6.0.2
       date-fns: 4.4.0
       embla-carousel-react: 8.6.0(react@19.2.6)
       input-otp: 1.4.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      monaco-editor: 0.56.0
       next-themes: 0.4.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react: 19.2.6
       react-day-picker: 10.0.1(@types/react@19.2.15)(react@19.2.6)
@@ -10672,6 +10688,10 @@ snapshots:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
+  dompurify@3.4.8:
+    optionalDependencies:
+      '@types/trusted-types': 2.0.7
+
   dotenv@17.4.2: {}
 
   downshift@7.6.2(react@19.2.6):
@@ -12119,6 +12139,11 @@ snapshots:
   monaco-editor@0.55.1:
     dependencies:
       dompurify: 3.2.7
+      marked: 14.0.0
+
+  monaco-editor@0.56.0:
+    dependencies:
+      dompurify: 3.4.8
       marked: 14.0.0
 
   monaco-languageclient@10.7.0:

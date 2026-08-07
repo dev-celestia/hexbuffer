@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "hexbuffer-ui/dist/styles.css";
+@import "@celestia-project/ui/globals.css";
 
 @custom-variant dark (&:is(.dark *));
 

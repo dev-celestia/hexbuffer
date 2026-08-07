@@ -1,6 +1,6 @@
 
 
-import { Button, SpinnerIcon } from '@celestia-project/ui';
+import { Button, Spinner as SpinnerIcon } from '@celestia-project/ui';
 import { cn } from "@/lib/utils";
 import { MicrophoneIcon, SquareIcon } from '@phosphor-icons/react';
 import type { ComponentProps } from "react";

@@ -9,10 +9,10 @@ export default defineConfig({
     format: "es",
   },
   optimizeDeps: {
-    // hexbuffer-ui's dist contains Vite-specific `?worker` imports for Monaco
+    // @celestia-project/ui's dist contains Vite-specific `?worker` imports for Monaco
     // workers; esbuild's dep optimizer cannot resolve the `?worker` query, so
     // serve it as source and let Vite's worker plugin handle those imports.
-    exclude: ["hexbuffer-ui"],
+    exclude: ["monaco-editor"],
     // Force-bundle the CJS use-sync-external-store shims so Vite doesn't serve
     // them as raw CJS to the browser (causes "Importing binding name not found").
     include: [
@@ -27,10 +27,20 @@ export default defineConfig({
     host: "127.0.0.1",
   },
   resolve: {
-    alias: {
-      "@/components": path.resolve(__dirname, "./src/components"),
-      "@": path.resolve(__dirname, "./src"),
-    },
+    alias: [
+      {
+        find: /^monaco-editor\/esm\/vs\/(.*)/,
+        replacement: "monaco-editor/$1",
+      },
+      {
+        find: "@/components",
+        replacement: path.resolve(__dirname, "./src/components"),
+      },
+      {
+        find: "@",
+        replacement: path.resolve(__dirname, "./src"),
+      },
+    ],
   },
   build: {
     chunkSizeWarningLimit: 900,
