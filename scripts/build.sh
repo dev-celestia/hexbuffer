@@ -10,9 +10,9 @@ Usage:
   ./scripts/build.sh                 Build/upload hexbuffer
   ./scripts/build.sh --help          Show this help
   ./scripts/build.sh --upload        Upload existing artifacts (skip build)
-  ./scripts/build.sh 2026.1.1        Bump to exact version, then build/upload
+  ./scripts/build.sh 0.1.1        Bump to exact version, then build/upload
   ./scripts/build.sh --bump          Auto-increment patch version, then build/upload
-  ./scripts/build.sh --version 2026.1.1
+  ./scripts/build.sh --version 0.1.1
   ./scripts/build.sh --windows       Cross-compile Windows x86_64 from macOS/Linux
   ./scripts/build.sh --windows-all   Build/upload Windows x64, x86, and ARM64
   ./scripts/build.sh --all            Build native platform + all Windows targets

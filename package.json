@@ -1,12 +1,14 @@
 {
   "name": "hexbuffer",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "packageManager": "pnpm@9.15.4",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "dev:clean": "lsof -ti:1420 | xargs kill -9 2>/dev/null || true && vite",

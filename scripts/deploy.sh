@@ -13,8 +13,8 @@ Usage:
   pnpm run deploy                         Auto-increment patch version, then build/upload
   pnpm run deploy -- --help               Show this help
   pnpm run deploy -- --bump               Auto-increment patch version, then build/upload
-  pnpm run deploy -- --version 2026.1.1   Bump to exact version, then build/upload
-  pnpm run deploy -- 2026.1.1             Bump to exact version, then build/upload
+  pnpm run deploy -- --version 0.1.1   Bump to exact version, then build/upload
+  pnpm run deploy -- 0.1.1             Bump to exact version, then build/upload
   pnpm run deploy -- --windows            Cross-compile Windows x86_64 from macOS/Linux
   pnpm run deploy -- --windows-all        Build/upload Windows x64, x86, and ARM64
   pnpm run deploy -- --all                Build native platform + all Windows targets
