@@ -41,14 +41,15 @@ export const CallActionCell = memo(function CallActionCell({
     handleOpenInInvoker,
     handleSendToCollection,
     handleSendToIntercept,
+    handleSendToMockForge,
     handleOpenInBrowserAutomation,
     handleSaveToDocuments,
     handleDelete,
     handleBlacklistHost,
     handleBlacklistHostAndPath,
     handleHighlightHost,
+    handleRemoveHighlight,
     highlightColor,
-    removeHighlight,
     highlightColors,
     highlightColorLabels,
   } = useCallActionCell({ call });
@@ -158,6 +159,9 @@ export const CallActionCell = memo(function CallActionCell({
         <DropdownMenuItem onClick={handleSendToIntercept} className="text-xs">
           <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Intercept
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleSendToMockForge} className="text-xs">
+          <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Mock Forge
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={handleOpenInBrowserAutomation} className="text-xs">
           <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Automate Browser
         </DropdownMenuItem>
@@ -186,7 +190,7 @@ export const CallActionCell = memo(function CallActionCell({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-xs"
-                  onClick={() => removeHighlight(call.host, call.path)}
+                  onClick={handleRemoveHighlight}
                 >
                   Remove Highlight
                 </DropdownMenuItem>

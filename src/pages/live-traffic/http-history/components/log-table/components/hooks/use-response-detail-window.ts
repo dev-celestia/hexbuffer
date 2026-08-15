@@ -52,7 +52,9 @@ export function useResponseDetailWindow({ callId }: UseResponseDetailWindowOptio
   }, [call]);
 
   const responseCookies = useMemo(() => {
-    return call ? parseCookieHeader(call.response_headers['set-cookie']) : [];
+    if (!call?.response_headers) return [];
+    const raw = call.response_headers['set-cookie'] ?? call.response_headers['Set-Cookie'];
+    return parseCookieHeader(raw);
   }, [call]);
 
   const responseBodyItem = useMemo(() => {

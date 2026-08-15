@@ -22,8 +22,26 @@ export const HIGHLIGHT_COLOR_LABELS: Record<string, string> = {
   '#a855f7': 'Purple',
 };
 
+export function normalizeHighlightHost(host: string): string {
+  if (!host || host === '-') return '';
+  return host
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//i, '')
+    .split('/')[0];
+}
+
+export function normalizeHighlightPath(path: string | null | undefined): string {
+  if (!path) return '';
+  const trimmed = path.trim();
+  if (!trimmed || trimmed === '/' || trimmed === '/*') return '';
+  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+}
+
 function makeKey(host: string, path: string): string {
-  return `${host.trim().toLowerCase()}|${(path ?? '').trim()}`;
+  const normHost = normalizeHighlightHost(host);
+  const normPath = normalizeHighlightPath(path);
+  return `${normHost}|${normPath}`;
 }
 
 interface HighlightState {
@@ -41,16 +59,18 @@ export const useHighlightStore = create<HighlightState>()(
 
       highlightHost: (host: string, path: string, color: string) => {
         const { highlightedHosts } = get();
+        const normHost = normalizeHighlightHost(host);
+        const normPath = normalizeHighlightPath(path);
         const key = makeKey(host, path);
 
-        if (!key || key === '|') return;
+        if (!normHost) return;
 
         const currentColor = highlightedHosts[key];
 
         if (currentColor === color) {
           const { [key]: _, ...rest } = highlightedHosts;
           set({ highlightedHosts: rest });
-          toast.success(`Removed highlight from ${host}${path ? ` ${path}` : ''}`);
+          toast.success(`Removed highlight from ${normHost}${normPath ? ` ${normPath}` : ''}`);
           return;
         }
 
@@ -64,7 +84,7 @@ export const useHighlightStore = create<HighlightState>()(
         });
 
         const label = HIGHLIGHT_COLOR_LABELS[color] || color;
-        const display = `${host}${path ? ` ${path}` : ''}`;
+        const display = `${normHost}${normPath ? ` ${normPath}` : ''}`;
         toast.success(
           currentColor
             ? `Changed ${display} highlight to ${label}`
@@ -73,18 +93,50 @@ export const useHighlightStore = create<HighlightState>()(
       },
 
       removeHighlight: (host: string, path: string) => {
+        const normHost = normalizeHighlightHost(host);
+        const normPath = normalizeHighlightPath(path);
         const key = makeKey(host, path);
-        if (!key || key === '|') return;
+        if (!normHost) return;
         set((state) => {
           const { [key]: _, ...rest } = state.highlightedHosts;
           return { highlightedHosts: rest };
         });
-        toast.success(`Removed highlight from ${host}${path ? ` ${path}` : ''}`);
+        toast.success(`Removed highlight from ${normHost}${normPath ? ` ${normPath}` : ''}`);
       },
 
       getHighlightColor: (host: string, path: string) => {
-        const key = makeKey(host ?? '', path ?? '');
-        return get().highlightedHosts[key];
+        const { highlightedHosts } = get();
+        if (!host || host === '-') return undefined;
+
+        const normHost = normalizeHighlightHost(host);
+        const normPath = normalizeHighlightPath(path);
+        const [normPathname] = normPath.split('?');
+
+        // 1. Exact match with query or path
+        const exactKey = `${normHost}|${normPath}`;
+        if (highlightedHosts[exactKey]) return highlightedHosts[exactKey];
+
+        // 2. Match pathname if query string differed
+        if (normPathname && normPathname !== normPath) {
+          const pathnameKey = `${normHost}|${normPathname}`;
+          if (highlightedHosts[pathnameKey]) return highlightedHosts[pathnameKey];
+        }
+
+        // 3. Match host-only highlight
+        const hostOnlyKey = `${normHost}|`;
+        if (highlightedHosts[hostOnlyKey]) return highlightedHosts[hostOnlyKey];
+
+        // 4. Match without port if host had port
+        const hostNoPort = normHost.split(':')[0];
+        if (hostNoPort !== normHost) {
+          if (highlightedHosts[`${hostNoPort}|${normPath}`]) return highlightedHosts[`${hostNoPort}|${normPath}`];
+          if (normPathname && highlightedHosts[`${hostNoPort}|${normPathname}`]) {
+            return highlightedHosts[`${hostNoPort}|${normPathname}`];
+          }
+          if (highlightedHosts[`${hostNoPort}|`]) return highlightedHosts[`${hostNoPort}|`];
+        }
+
+        return undefined;
       },
     }),
     { name: 'hexbuffer-highlights' }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRepeaterStore } from '@/stores/repeater';
 import { useCollectionsStore } from '@/stores/collections';
 import { useNavStore } from '@/stores/nav';
@@ -38,6 +38,11 @@ export function useRouteEditor(
   const [reqBody, setReqBody] = useState(route.requestBody || '');
   const [activeTab, setActiveTab] = useState<'config' | 'matcher' | 'response'>('config');
 
+  useEffect(() => {
+    setBody(route.responseBody);
+    setReqBody(route.requestBody || '');
+  }, [route.id, route.responseBody, route.requestBody]);
+
   const domain = domains.find((d) => d.id === route.domainId);
   const isWriteMethod = ['POST', 'PUT', 'PATCH'].includes(route.method);
   const queryParams = route.requestQueryParams || [];
@@ -50,6 +55,28 @@ export function useRouteEditor(
   const saveReqBody = () => {
     onUpdate(route.id, { requestBody: reqBody });
     toast.success('Expected request payload saved.');
+  };
+
+  const formatBody = () => {
+    if (!body) return;
+    try {
+      const formatted = JSON.stringify(JSON.parse(body), null, 2);
+      setBody(formatted);
+      toast.success('Prettified JSON response body');
+    } catch {
+      toast.error('Invalid JSON structure in response body');
+    }
+  };
+
+  const formatReqBody = () => {
+    if (!reqBody) return;
+    try {
+      const formatted = JSON.stringify(JSON.parse(reqBody), null, 2);
+      setReqBody(formatted);
+      toast.success('Prettified JSON request payload');
+    } catch {
+      toast.error('Invalid JSON structure in request payload');
+    }
   };
 
   const handleClone = () => {
@@ -158,6 +185,8 @@ export function useRouteEditor(
     queryParams,
     saveBody,
     saveReqBody,
+    formatBody,
+    formatReqBody,
     handleClone,
     handleAddParam,
     handleRemoveParam,

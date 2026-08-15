@@ -109,14 +109,17 @@ impl HttpHandler for AppHandler {
         ctx.req_uri = req.uri().to_string();
         ctx.req_http_version = format!("{:?}", req.version());
 
-        for (name, value) in req.headers().iter() {
+        let (mut parts, body) = req.into_parts();
+        parts.headers.remove("if-none-match");
+        parts.headers.remove("if-modified-since");
+
+        for (name, value) in parts.headers.iter() {
             if let Ok(v) = value.to_str() {
                 ctx.req_headers
                     .insert(name.as_str().to_string(), v.to_string());
             }
         }
 
-        let (mut parts, body) = req.into_parts();
         let body_bytes = match body.into_bytes().await {
             Ok(bytes) => bytes,
             Err(e) => {
@@ -238,6 +241,10 @@ impl HttpHandler for AppHandler {
                 }
             }
         }
+
+        // Strip conditional request headers to prevent web servers from returning 304 Not Modified
+        parts.headers.remove("if-none-match");
+        parts.headers.remove("if-modified-since");
 
         self.pending_ctxs.lock().unwrap().insert(http_ctx.id, ctx.clone());
 

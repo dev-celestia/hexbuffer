@@ -42,15 +42,15 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
     handleBlacklistHost,
     handleBlacklistHostAndPath,
     handleHighlightHost,
+    handleRemoveHighlight,
     highlightColor,
-    removeHighlight,
     highlightColors,
     highlightColorLabels,
   } = useLogContextMenu({ call, onDelete });
 
   return (
     <ContextMenu onOpenChange={onOpenChange}>
-      <ContextMenuTrigger asChild>
+      <ContextMenuTrigger>
         {children}
       </ContextMenuTrigger>
       <ContextMenuContent className="p-0.5">
@@ -164,7 +164,7 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
                 <ContextMenuSeparator />
                 <ContextMenuItem
                   className="text-xs py-1 px-1.5"
-                  onClick={() => removeHighlight(call.host, call.path)}
+                  onClick={handleRemoveHighlight}
                 >
                   Remove Highlight
                 </ContextMenuItem>

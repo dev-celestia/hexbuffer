@@ -57,7 +57,6 @@ export function LogFilters({
       await invoke('clear_proxy_all');
       storeSetSelectedCallId(null);
       triggerRefresh();
-      await new Promise((r) => setTimeout(r, 3000));
       toast.success('History cleared successfully');
     } catch {
       toast.error('Failed to clear history');

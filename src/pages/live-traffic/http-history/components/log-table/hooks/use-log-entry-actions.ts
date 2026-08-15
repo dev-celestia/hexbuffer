@@ -440,6 +440,15 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
     }
   }, [call]);
 
+  const handleRemoveHighlight = useCallback(async () => {
+    const host = await resolveHostForCall(call);
+    if (host) {
+      useHighlightStore.getState().removeHighlight(host, call.path);
+    } else {
+      useHighlightStore.getState().removeHighlight(call.host, call.path);
+    }
+  }, [call]);
+
   return {
     pinned,
     groups,
@@ -462,5 +471,6 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
     handleBlacklistHost,
     handleBlacklistHostAndPath,
     handleHighlightHost,
+    handleRemoveHighlight,
   };
 }

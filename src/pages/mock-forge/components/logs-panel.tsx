@@ -1,6 +1,7 @@
 import { Badge, Button, Input, ScrollArea, Separator, TextEditor } from '@celestia-project/ui';
 import { ListIcon, ArrowSquareOutIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 
+import { useTheme } from '@/components/theme-provider';
 import type { MockDomain, MockRoute, RequestLog } from '../types';
 import { useLogsPanel, useLogDetail } from './hooks/use-logs-panel';
 
@@ -136,6 +137,7 @@ function LogDetail({
   domains: MockDomain[];
   routes: MockRoute[];
 }) {
+  const { theme } = useTheme();
   const { tab, setTab, domain, route, handleSendToRepeater } = useLogDetail(log, domains, routes);
 
   return (
@@ -209,6 +211,7 @@ function LogDetail({
                       language="json"
                       options={{ readOnly: true }}
                       height="100%"
+                      theme={theme}
                     />
                   </div>
                 </Section>
@@ -230,6 +233,7 @@ function LogDetail({
                       language="json"
                       options={{ readOnly: true }}
                       height="100%"
+                      theme={theme}
                     />
                   </div>
                 </Section>

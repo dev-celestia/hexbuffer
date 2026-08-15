@@ -33,7 +33,7 @@ export function PortScannerPage() {
           "h-full",
 
           // Backgrounds & Borders
-          "rounded-md border bg-background"
+          "rounded-md border bg-card"
         )}
       >
         <ScannerSidebar

@@ -107,7 +107,10 @@ export function useLogEntryView() {
   );
 
   const requestCookies = useMemo(
-    () => parseCookieHeader(call?.headers["cookie"]),
+    () => {
+      const raw = call?.headers?.["cookie"] ?? call?.headers?.["Cookie"];
+      return parseCookieHeader(raw);
+    },
     [call?.headers],
   );
 
@@ -122,7 +125,10 @@ export function useLogEntryView() {
   );
 
   const responseCookies = useMemo(
-    () => parseCookieHeader(call?.response_headers["set-cookie"]),
+    () => {
+      const raw = call?.response_headers?.["set-cookie"] ?? call?.response_headers?.["Set-Cookie"];
+      return parseCookieHeader(raw);
+    },
     [call?.response_headers],
   );
 
