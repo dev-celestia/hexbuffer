@@ -192,6 +192,19 @@ fn main() {
             app_commands::safe_start_dragging,
             app_commands::get_cdp_targets,
             app_commands::open_cdp_browser,
+            hexbuffer::dev_server::get_available_ips,
+            hexbuffer::dev_server::start_dev_process,
+            hexbuffer::dev_server::stop_dev_process,
+            hexbuffer::dev_server::get_dev_process_status,
+            hexbuffer::dev_server::kill_port,
+            hexbuffer::dev_server::generate_qr_svg,
+            hexbuffer::dev_server::patch_target_next_config,
+            hexbuffer::peer_sync::get_discovered_peers,
+            hexbuffer::peer_sync::get_my_peer_info,
+            hexbuffer::peer_sync::set_peer_broadcast,
+            hexbuffer::peer_sync::set_device_name,
+            hexbuffer::peer_sync::share_data_to_peer,
+            hexbuffer::peer_sync::ping_peer,
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())

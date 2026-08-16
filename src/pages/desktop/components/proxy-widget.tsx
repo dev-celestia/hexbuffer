@@ -1,7 +1,7 @@
 import { Button } from '@celestia-project/ui';
 import { useAppStore } from '@/stores/app';
 
-import { HardDrivesIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { SpinnerGapIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
 export function ProxyWidget() {
@@ -22,6 +22,32 @@ export function ProxyWidget() {
   };
 
   const activePort = proxyPort ?? proxyDefaultPort;
+
+  const isPending = proxyStatus === 'starting' || proxyStatus === 'stopping';
+
+  const renderProxyStatus = () => {
+    switch (proxyStatus) {
+      case 'connected':
+        return <span className="text-emerald-500">Connected</span>;
+      case 'starting':
+        return <span className="text-amber-500 animate-pulse">Starting...</span>;
+      case 'stopping':
+        return <span className="text-amber-500 animate-pulse">Stopping...</span>;
+      case 'disconnected':
+      default:
+        return <span className="text-muted-foreground">Disconnected</span>;
+    }
+  };
+
+  const renderProxyButtonContent = () => {
+    if (isPending) {
+      return <SpinnerGapIcon className="size-3 animate-spin" />;
+    }
+    if (proxyStatus === 'connected') {
+      return 'Stop';
+    }
+    return 'Start';
+  };
 
   return (
     <div
@@ -84,15 +110,7 @@ export function ProxyWidget() {
               "text-xs font-semibold text-foreground"
             )}
           >
-            {proxyStatus === 'connected' ? (
-              <span className="text-emerald-500">Connected</span>
-            ) : proxyStatus === 'starting' ? (
-              <span className="text-amber-500 animate-pulse">Starting...</span>
-            ) : proxyStatus === 'stopping' ? (
-              <span className="text-amber-500 animate-pulse">Stopping...</span>
-            ) : (
-              <span className="text-muted-foreground">Disconnected</span>
-            )}
+            {renderProxyStatus()}
           </div>
           {proxyStatus === 'connected' && (
             <div
@@ -110,30 +128,14 @@ export function ProxyWidget() {
         </div>
 
         <Button
+          size="xs"
           onClick={handleProxyToggle}
-          disabled={proxyStatus === 'starting' || proxyStatus === 'stopping'}
+          disabled={isPending}
           variant={proxyStatus === 'connected' ? 'destructive' : 'default'}
-          className={cn(
-            // Layout & Positioning
-            "shrink-0",
-
-            // Sizing & Spacing
-            "h-6 px-2.5",
-
-            // Typography
-            "text-[10px] font-medium"
-          )}
         >
-          {proxyStatus === 'starting' || proxyStatus === 'stopping' ? (
-            <SpinnerGapIcon className="size-3 animate-spin" />
-          ) : proxyStatus === 'connected' ? (
-            'Stop'
-          ) : (
-            'Start'
-          )}
+          {renderProxyButtonContent()}
         </Button>
       </div>
     </div>
   );
 }
-

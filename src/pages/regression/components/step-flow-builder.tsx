@@ -184,7 +184,7 @@ export function StepFlowBuilder({ steps, onStepsChange, onAddStep, emptyActions 
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="xs"
                   disabled={selectedStepIndex === 0}
                   onClick={() => handleStepMove(selectedStepIndex, selectedStepIndex - 1)}
                 >
@@ -193,7 +193,7 @@ export function StepFlowBuilder({ steps, onStepsChange, onAddStep, emptyActions 
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="xs"
                   disabled={selectedStepIndex === steps.length - 1}
                   onClick={() => handleStepMove(selectedStepIndex, selectedStepIndex + 1)}
                 >
@@ -204,7 +204,7 @@ export function StepFlowBuilder({ steps, onStepsChange, onAddStep, emptyActions 
 
               <Button
                 variant="ghost"
-                size="sm"
+                size="xs"
                 className={cn('w-full justify-center text-muted-foreground hover:text-destructive')}
                 onClick={() => handleStepRemove(selectedStepIndex)}
               >

@@ -1,4 +1,4 @@
-import { Toaster } from '@celestia-project/ui';
+import { Toaster } from 'sonner';
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
@@ -52,7 +52,7 @@ function Root() {
       <BrowserRouter>
         <ThemeProvider>
           <ResponseDetailWindow callId={responseDetailCallId} />
-          <Toaster />
+          <Toaster position="bottom-right" closeButton />
         </ThemeProvider>
       </BrowserRouter>
     );
@@ -65,7 +65,7 @@ function Root() {
           <AppRoutes />
         </AppLayout>
         <MainWindowReadySignal />
-        <Toaster />
+        <Toaster position="bottom-right" closeButton />
       </ThemeProvider>
     </BrowserRouter>
   );

@@ -57,7 +57,7 @@ export function ClipboardWidget() {
               "opacity-0 group-hover/widget:opacity-100 cursor-pointer",
 
               // Sizing & Spacing
-              "p-0.5",
+              "p-0.5 mr-5",
 
               // Typography
               "text-muted-foreground",

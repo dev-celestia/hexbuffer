@@ -84,6 +84,9 @@ const FileExplorerPage = React.lazy(() =>
 const TerminalPage = React.lazy(() =>
   import("@/pages/terminal").then((m) => ({ default: m.TerminalPage }))
 );
+const DevServerPage = React.lazy(() =>
+  import("@/pages/dev-server").then((m) => ({ default: m.DevServerPage }))
+);
 
 
 
@@ -134,8 +137,7 @@ function AppRoutes() {
           <Route path="/kanban" element={<KanbanPage />} />
           <Route path="/file-explorer" element={<FileExplorerPage />} />
           <Route path="/terminal" element={<TerminalPage />} />
-
-
+          <Route path="/dev-server" element={<DevServerPage />} />
         </Routes>
       </React.Suspense>
     </>

@@ -3,6 +3,7 @@ import { Button, TextEditor } from '@celestia-project/ui';
 import * as React from 'react';
 
 import { X, ArrowsIn, ArrowsOut } from '@phosphor-icons/react';
+import { useTheme } from '@/components/theme-provider';
 import { buildRawHttpRequest, buildRawHttpResponse } from '@/lib/http-message';
 import type { AttackConfig, AttackResult, HttpRequest } from '../types';
 
@@ -72,6 +73,7 @@ export function InvokerResultInspector({
   config,
   onClose,
 }: InvokerResultInspectorProps) {
+  const { theme } = useTheme();
   const [isStacked, setIsStacked] = React.useState(false);
 
   const modifiedRequest = React.useMemo(() => {
@@ -129,6 +131,7 @@ export function InvokerResultInspector({
             <TextEditor
               value={modifiedRequest}
               options={{ readOnly: true }}
+              theme={theme}
             />
           </div>
         </div>
@@ -145,6 +148,7 @@ export function InvokerResultInspector({
             <TextEditor
               value={rawResponse}
               options={{ readOnly: true }}
+              theme={theme}
             />
           </div>
         </div>

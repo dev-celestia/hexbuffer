@@ -56,6 +56,7 @@ export function PageTabBar({
 
   const renderTab = useCallback((tab: PageTabItem) => {
     const canClose = !tab.disabled && Boolean(onTabClose) && tab.closable !== false;
+    const canRename = !tab.disabled && Boolean(onTabRename) && tab.renamable !== false;
     const StatusIcon =
       tab.status?.kind === 'running'
         ? SpinnerGapIcon
@@ -84,6 +85,7 @@ export function PageTabBar({
             value={editingName}
             onChange={(event) => setEditingName(event.target.value)}
             onBlur={finishEditingTab}
+            onClick={(event) => event.stopPropagation()}
             onKeyDown={(event) => {
               if (event.key === 'Enter') {
                 finishEditingTab();
@@ -103,6 +105,12 @@ export function PageTabBar({
               tab.disabled ? 'cursor-not-allowed' : 'cursor-pointer'
             )}
             onClick={() => !tab.disabled && onTabChange(tab.id)}
+            onDoubleClick={(event) => {
+              event.stopPropagation();
+              if (!tab.disabled && canRename) {
+                startEditingTab(tab);
+              }
+            }}
             disabled={tab.disabled}
             title={tab.status?.label}
           >
@@ -134,7 +142,7 @@ export function PageTabBar({
         )}
       </div>
     );
-  }, [activeTabId, editingTabId, editingName, onTabChange, closeTab, setEditingName, finishEditingTab, cancelEditingTab, onTabClose]);
+  }, [activeTabId, editingTabId, editingName, onTabChange, closeTab, setEditingName, finishEditingTab, cancelEditingTab, onTabClose, onTabRename, startEditingTab]);
 
   return (
     <div className="relative">
@@ -145,7 +153,7 @@ export function PageTabBar({
         <div className="flex min-w-full w-max items-center gap-1 px-2 pt-2 -mb-0.5">
           {tabs.map((tab) => {
             const tabIndex = tabs.findIndex((currentTab) => currentTab.id === tab.id);
-            const canRename = !tab.disabled && Boolean(onTabRename);
+            const canRename = !tab.disabled && Boolean(onTabRename) && tab.renamable !== false;
             const canClose = !tab.disabled && Boolean(onTabClose) && tab.closable !== false;
             const hasClosableTabsToLeft = tabs
               .slice(0, tabIndex)
@@ -164,7 +172,7 @@ export function PageTabBar({
               canCloseTabsToRight ||
               hasCustomContextMenuItems;
 
-            if (!hasContextMenu) {
+            if (!hasContextMenu || editingTabId === tab.id) {
               return <div key={tab.id}>{renderTab(tab)}</div>;
             }
 
@@ -175,7 +183,10 @@ export function PageTabBar({
                   {customContextMenuItems}
                   {hasCustomContextMenuItems && (canRename || canClose) && <ContextMenuSeparator />}
                   {canRename && (
-                    <ContextMenuItem onClick={() => startEditingTab(tab)}>
+                    <ContextMenuItem
+                      onSelect={() => startEditingTab(tab)}
+                      onClick={() => startEditingTab(tab)}
+                    >
                       Rename
                     </ContextMenuItem>
                   )}

@@ -172,10 +172,10 @@ export function InvokerPayloadPresetDialog({
         </div>
 
         <DialogFooter className="border-t px-4 py-3">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button size="xs" variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleUsePayload} disabled={!selectedPayload}>
+          <Button size="xs" onClick={handleUsePayload} disabled={!selectedPayload}>
             Use Payload
           </Button>
         </DialogFooter>

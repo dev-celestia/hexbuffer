@@ -40,7 +40,24 @@ pub fn save_and_emit(ctx: &Ctx, app_handle: &tauri::AppHandle) {
 
     crate::automation::ingest_proxy_record(app_handle, &txn);
 
-    if let Err(e) = app_handle.emit("proxy-record", &txn) {
+    let summary = crate::ProxyLogSummary {
+        id: txn.id.to_string(),
+        timestamp: txn.timestamp.to_rfc3339(),
+        method: txn.request.method.clone(),
+        url: txn.request.uri.clone(),
+        response_status: txn.response.as_ref().map(|r| r.status_code),
+        response_status_text: txn.response.as_ref().map(|r| r.status_text.clone()),
+        response_content_type: txn.response.as_ref().and_then(|r| {
+            r.headers.iter().find(|(k, _)| k.eq_ignore_ascii_case("content-type")).map(|(_, v)| v.clone())
+        }),
+        request_body_size: txn.request.body.len(),
+        response_body_size: txn.response.as_ref().map(|r| r.body.len()).unwrap_or(0),
+        server_addr: txn.server_addr.clone(),
+        user_agent: txn.request.headers.iter().find(|(k, _)| k.eq_ignore_ascii_case("user-agent")).map(|(_, v)| v.clone()),
+        host: txn.request.headers.iter().find(|(k, _)| k.eq_ignore_ascii_case("host") || k.eq_ignore_ascii_case(":authority")).map(|(_, v)| v.clone()),
+    };
+
+    if let Err(e) = app_handle.emit("proxy-record", &summary) {
         eprintln!("[completion] failed to emit event: {}", e);
     }
 }

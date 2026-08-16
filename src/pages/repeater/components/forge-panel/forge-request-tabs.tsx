@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 
 import { TrashIcon, PlusIcon, UploadSimpleIcon, ImageSquareIcon } from '@phosphor-icons/react';
 import type { KeyValuePair, ActiveRequestState } from "@/stores/collections";
+import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import { ColorizedUrlInput } from "@/components/select-env-input";
 
@@ -33,7 +34,7 @@ function KeyValueEditor({
         <span className="text-[10px] uppercase font-bold text-muted-foreground">
           {noun}
         </span>
-        <Button variant="ghost" size="sm" className="h-7 px-2" onClick={onAdd}>
+        <Button variant="ghost" size="xs" className="h-7 px-2" onClick={onAdd}>
           <PlusIcon className="h-3.5 w-3.5 mr-1" /> Add
         </Button>
       </div>
@@ -126,6 +127,7 @@ export function ForgeRequestTabs({
   onPreScriptChange,
   onTestScriptChange,
 }: ForgeRequestTabsProps) {
+  const { theme } = useTheme();
   const [isImageMode, setIsImageMode] = useState(() => {
     // ponytail: default to image mode if the body is already an image data URL
     return req.body.startsWith("data:image/");
@@ -193,7 +195,7 @@ export function ForgeRequestTabs({
             <Button
               key={t}
               variant="outline"
-              size="sm"
+              size="xs"
               className={cn("uppercase text-xs", activeReqTab === t && "text-primary")}
               onClick={() => onReqTabChange(t)}
             >
@@ -301,7 +303,7 @@ export function ForgeRequestTabs({
                       <div className="flex items-center space-x-2">
                         <Button
                           variant="outline"
-                          size="sm"
+                          size="xs"
                           onClick={() => fileInputRef.current?.click()}
                         >
                           <UploadSimpleIcon className="h-4 w-4 mr-1.5" />
@@ -309,7 +311,7 @@ export function ForgeRequestTabs({
                         </Button>
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="xs"
                           className="text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={() => onBodyChange("")}
                         >
@@ -338,7 +340,7 @@ export function ForgeRequestTabs({
                         </p>
                       </div>
                       <Button
-                        size="sm"
+                        size="xs"
                         onClick={() => fileInputRef.current?.click()}
                       >
                         Choose File
@@ -357,6 +359,7 @@ export function ForgeRequestTabs({
                 <TextEditor
                   value={req.body}
                   onChange={(val) => onBodyChange(val || "")}
+                  theme={theme}
                 />
               )}
             </div>
@@ -375,6 +378,7 @@ export function ForgeRequestTabs({
                   <TextEditor
                     value={req.preScript}
                     onChange={(val) => onPreScriptChange(val || "")}
+                    theme={theme}
                   />
                 </div>
               </div>
@@ -386,6 +390,7 @@ export function ForgeRequestTabs({
                   <TextEditor
                     value={req.testScript}
                     onChange={(val) => onTestScriptChange(val || "")}
+                    theme={theme}
                   />
                 </div>
               </div>

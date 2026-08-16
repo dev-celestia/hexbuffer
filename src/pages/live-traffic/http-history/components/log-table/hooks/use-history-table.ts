@@ -88,37 +88,11 @@ export function useHistoryTable({ isStreamPaused = false, activeTabId }: UseHist
   const [newEventsCount, setNewEventsCount] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const [prevTabId, setPrevTabId] = useState<string | undefined>(activeTabId);
-  const [isTabLoading, setIsTabLoading] = useState(false);
-  const tabTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  if (activeTabId !== undefined && activeTabId !== prevTabId) {
-    setPrevTabId(activeTabId);
-    setIsTabLoading(true);
-    setCalls([]);
-  }
-
-  useEffect(() => {
-    if (isTabLoading) {
-      if (tabTimerRef.current) {
-        clearTimeout(tabTimerRef.current);
-      }
-      tabTimerRef.current = setTimeout(() => {
-        setIsTabLoading(false);
-      }, 250);
-    }
-    return () => {
-      if (tabTimerRef.current) {
-        clearTimeout(tabTimerRef.current);
-      }
-    };
-  }, [isTabLoading]);
-
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingEventsCountRef = useRef(0);
   const isStreamPausedRef = useRef(isHistoryStreamPaused);
   const lastBaseQueryRef = useRef<string>('');
   const currentPageRef = useRef(page);
+  const isFetchingRef = useRef(false);
 
   useEffect(() => {
     currentPageRef.current = page;
@@ -144,6 +118,8 @@ export function useHistoryTable({ isStreamPaused = false, activeTabId }: UseHist
 
   const fetchPage = useCallback(
     async (pageToLoad: number) => {
+      if (isFetchingRef.current) return;
+      isFetchingRef.current = true;
       setIsLoading(true);
 
       try {
@@ -165,6 +141,7 @@ export function useHistoryTable({ isStreamPaused = false, activeTabId }: UseHist
         setCalls([]);
       } finally {
         setIsLoading(false);
+        isFetchingRef.current = false;
       }
     },
     [query]
@@ -178,46 +155,35 @@ export function useHistoryTable({ isStreamPaused = false, activeTabId }: UseHist
     }
 
     lastBaseQueryRef.current = baseQueryKey;
-
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
-    debounceRef.current = setTimeout(() => {
-      fetchPage(page);
-    }, 250);
-
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
+    fetchPage(page);
   }, [baseQueryKey, page, fetchPage, setPage]);
 
   useEffect(() => {
-    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let batchTimer: ReturnType<typeof setTimeout> | null = null;
 
     const handleEvent = () => {
       pendingEventsCountRef.current += 1;
-      if (debounceTimer) clearTimeout(debounceTimer);
 
-      debounceTimer = setTimeout(async () => {
-        const count = pendingEventsCountRef.current;
-        pendingEventsCountRef.current = 0;
+      if (!batchTimer) {
+        batchTimer = setTimeout(async () => {
+          batchTimer = null;
+          const count = pendingEventsCountRef.current;
+          pendingEventsCountRef.current = 0;
 
-        if (isStreamPausedRef.current || currentPageRef.current !== 1) {
-          setNewEventsCount((prev) => prev + count);
-        } else {
-          await fetchPage(1);
-        }
-      }, 1200);
+          if (isStreamPausedRef.current || currentPageRef.current !== 1) {
+            setNewEventsCount((prev) => prev + count);
+          } else {
+            await fetchPage(1);
+          }
+        }, 120);
+      }
     };
 
-    const unlistenPromise = listen<ProxyRecord>('proxy-record', handleEvent);
+    const unlistenPromise = listen<ProxyLogSummary>('proxy-record', handleEvent);
 
     return () => {
       unlistenPromise.then((unlisten) => unlisten());
-      if (debounceTimer) clearTimeout(debounceTimer);
+      if (batchTimer) clearTimeout(batchTimer);
     };
   }, [fetchPage]);
 
@@ -265,7 +231,6 @@ export function useHistoryTable({ isStreamPaused = false, activeTabId }: UseHist
     calls,
     pagination,
     isLoading,
-    isTabLoading,
     newEventsCount,
     loadError,
     sortOrder,

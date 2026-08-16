@@ -5,6 +5,7 @@ export interface PageTabItem {
   name: string;
   disabled?: boolean;
   closable?: boolean;
+  renamable?: boolean;
   indicator?: ReactNode;
   status?: {
     kind: 'running' | 'needs-action' | 'ready';

@@ -37,7 +37,7 @@ export function NewRouteDialog({ domains, onAdd }: NewRouteDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">
+        <Button size="xs">
           <PlusIcon className="mr-1 h-3 w-3 stroke-[2]" />
           New Route
         </Button>
@@ -103,7 +103,7 @@ export function NewRouteDialog({ domains, onAdd }: NewRouteDialogProps) {
               className="font-mono text-xs bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
             />
           </div>
-          <Button className="w-full bg-primary hover:bg-primary-dark text-black font-semibold h-9 rounded-md mt-2 cursor-pointer" onClick={handleAdd}>
+          <Button size="xs" className="w-full bg-primary hover:bg-primary-dark text-black font-semibold h-9 rounded-md mt-2 cursor-pointer" onClick={handleAdd}>
             Create Route
           </Button>
         </div>

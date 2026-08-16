@@ -12,7 +12,7 @@ import { TargetDialogForm } from '@/pages/live-traffic/components/target-selecto
 import * as React from 'react';
 
 export function TargetWidget() {
-  const [showList, setShowList] = React.useState(true);
+  const [showList, setShowList] = React.useState(false);
 
   const {
     showCreate,
@@ -79,7 +79,7 @@ export function TargetWidget() {
             'flex items-center',
 
             // Sizing & Spacing
-            'gap-1.5'
+            'gap-1.5 mr-5'
           )}
         >
           {targetCount > 0 && (
@@ -269,19 +269,9 @@ export function TargetWidget() {
                 >
                   <Button
                     type="button"
-                    size="icon-sm"
+                    size="xs"
                     variant="ghost"
                     onClick={handleCancelCreate}
-                    className={cn(
-                      // Sizing & Spacing
-                      'h-5 w-5 rounded-full shrink-0',
-
-                      // Typography
-                      'text-muted-foreground',
-
-                      // Interactive & States
-                      'hover:text-foreground active:scale-95 transition-all'
-                    )}
                     aria-label="Back to target list"
                   >
                     <ArrowLeftIcon className="h-3 w-3" />
@@ -340,16 +330,6 @@ export function TargetWidget() {
                     variant="default"
                     size="xs"
                     onClick={handleCreateNew}
-                    className={cn(
-                      // Sizing & Spacing
-                      'h-6 px-2',
-
-                      // Typography
-                      'text-[10px]',
-
-                      // Interactive & States
-                      'gap-1 active:scale-[0.98] transition-all'
-                    )}
                   >
                     <PlusIcon className="h-3 w-3" />
                     New Target

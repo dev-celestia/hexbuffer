@@ -5,7 +5,7 @@ import { MAIN_NAV_ITEMS } from '@/layout/constants';
 
 import { ArrowCounterClockwiseIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 
-import { DESKTOP_WIDGETS } from '../constants';
+import { DESKTOP_WIDGETS, DEFAULT_HIDDEN_WIDGETS } from '../constants';
 import { cn } from '@/lib/utils';
 
 export function ShortcutManager() {
@@ -13,7 +13,7 @@ export function ShortcutManager() {
   const toggleNavItem = useAppSettingsStore((s) => s.toggleNavItem);
   const resetHiddenNavItems = useAppSettingsStore((s) => s.resetHiddenNavItems);
 
-  const hiddenWidgets = useAppSettingsStore((s) => s.hiddenWidgets || []);
+  const hiddenWidgets = useAppSettingsStore((s) => s.hiddenWidgets || DEFAULT_HIDDEN_WIDGETS);
   const toggleWidget = useAppSettingsStore((s) => s.toggleWidget);
   const resetHiddenWidgets = useAppSettingsStore((s) => s.resetHiddenWidgets);
 
@@ -32,7 +32,11 @@ export function ShortcutManager() {
     );
   }, [searchQuery, itemsToManage]);
 
-  const hasHiddenItems = hiddenNavItems.length > 0 || hiddenWidgets.length > 0;
+  const isNavModified = hiddenNavItems.length > 0;
+  const isWidgetsModified =
+    hiddenWidgets.length !== DEFAULT_HIDDEN_WIDGETS.length ||
+    DEFAULT_HIDDEN_WIDGETS.some((id) => !hiddenWidgets.includes(id));
+  const hasModifiedItems = isNavModified || isWidgetsModified;
 
   const handleResetAll = React.useCallback(() => {
     resetHiddenNavItems();
@@ -355,17 +359,7 @@ export function ShortcutManager() {
           size="xs"
           variant="outline"
           onClick={handleResetAll}
-          disabled={!hasHiddenItems}
-          className={cn(
-            // Sizing & Spacing
-            "h-7",
-
-            // Typography
-            "text-[10px] font-medium",
-
-            // Interactive & States
-            "hover:bg-muted"
-          )}
+          disabled={!hasModifiedItems}
         >
           <ArrowCounterClockwiseIcon className="mr-1.5 size-3" />
           Reset

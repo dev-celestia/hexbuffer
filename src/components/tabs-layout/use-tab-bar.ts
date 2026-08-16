@@ -44,10 +44,11 @@ export function useTabBar({ tabs, onTabRename, onTabChange }: UseTabBarOptions) 
 
   useEffect(() => {
     if (editingTabId) {
-      requestAnimationFrame(() => {
+      const timer = setTimeout(() => {
         editingInputRef.current?.focus();
         editingInputRef.current?.select();
-      });
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [editingTabId]);
 
@@ -59,13 +60,16 @@ export function useTabBar({ tabs, onTabRename, onTabChange }: UseTabBarOptions) 
   }, [editingTabId, tabs]);
 
   const startEditingTab = useCallback((tab: PageTabItem) => {
-    if (!onTabRename || tab.disabled) {
+    if (!onTabRename || tab.disabled || tab.renamable === false) {
       return;
     }
 
-    setEditingTabId(tab.id);
-    setEditingName(tab.name);
-    onTabChange(tab.id);
+    // Delay setting state slightly so context menu dismissal and focus restoration don't immediately blur the input
+    setTimeout(() => {
+      setEditingTabId(tab.id);
+      setEditingName(tab.name);
+      onTabChange(tab.id);
+    }, 50);
   }, [onTabRename, onTabChange]);
 
   const finishEditingTab = useCallback(() => {

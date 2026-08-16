@@ -9,7 +9,7 @@ export function RegressionEmptyState({ onCreate }: { onCreate: () => void }) {
       <p className="max-w-sm text-xs text-muted-foreground">
         Create a new test case to start building regression coverage.
       </p>
-      <Button variant="outline" className="mt-4" onClick={onCreate}>
+      <Button size="xs" variant="outline" className="mt-4" onClick={onCreate}>
         <PlusIcon className="size-4" />
         New test case
       </Button>

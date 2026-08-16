@@ -5,9 +5,11 @@ import { ArrowsOutIcon } from '@phosphor-icons/react';
 
 import { useScratchpadStore } from '@/stores/scratchpad';
 import { useNavStore } from '@/stores/nav';
+import { useTheme } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
 
 export function ScratchpadWidget() {
+  const { theme } = useTheme();
   const { note, setNote } = useScratchpadStore();
   const navigate = useNavigate();
 
@@ -55,7 +57,7 @@ export function ScratchpadWidget() {
           onClick={handleExpand}
           className={cn(
             // Sizing & Spacing
-            "p-0.5",
+            "p-0.5 mr-5",
 
             // Typography
             "text-muted-foreground",
@@ -89,6 +91,7 @@ export function ScratchpadWidget() {
           language="markdown"
           height="100%"
           detectLinks={true}
+          theme={theme}
         />
       </div>
     </div>

@@ -30,6 +30,7 @@ export function HttpHistoryPage() {
           id: tab.id,
           name: tab.name,
           closable: tab.closable,
+          renamable: tab.type === 'group' || tab.type === 'target',
           indicator,
         };
       }),

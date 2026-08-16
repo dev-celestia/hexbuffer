@@ -97,7 +97,7 @@ export function TestResults({ runs, onRun, isRunning, logs, onClearLogs }: TestR
           <div className="flex items-center gap-2 px-4 py-2 border-b">
             <Button
               variant="ghost"
-              size="sm"
+              size="xs"
               className="text-xs h-7"
               onClick={() => setSelectedRunId(null)}
             >
@@ -115,7 +115,7 @@ export function TestResults({ runs, onRun, isRunning, logs, onClearLogs }: TestR
             <div className="flex-1" />
             <Button
               variant="outline"
-              size="sm"
+              size="xs"
               className="h-7 text-xs"
               onClick={() => onRun(selectedRun.testCaseId)}
               disabled={isRunning}

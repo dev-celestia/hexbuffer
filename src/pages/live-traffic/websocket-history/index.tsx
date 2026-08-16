@@ -82,7 +82,7 @@ export function WebSocketHistoryPage() {
           >
             <Button
               variant="ghost"
-              size="sm"
+              size="xs"
               className={cn(
                 // Layout & Positioning
                 "shrink-0",
@@ -99,7 +99,7 @@ export function WebSocketHistoryPage() {
             </Button>
             <Button
               variant="ghost"
-              size="sm"
+              size="xs"
               className={cn(
                 // Layout & Positioning
                 "shrink-0",
@@ -117,7 +117,7 @@ export function WebSocketHistoryPage() {
             </Button>
             <Button
               variant="ghost"
-              size="sm"
+              size="xs"
               onClick={handleClearAll}
               className={cn(
                 // Layout & Positioning

@@ -13,8 +13,26 @@ export const DESKTOP_WIDGETS: DesktopWidgetOption[] = [
   { id: 'clipboard', label: 'Clipboard Widget', description: 'Capture system clipboard history.' },
 ];
 
+export const DEFAULT_WIDGET_ORDER: string[] = [
+  'proxy',
+  'collections',
+  'vpn',
+  'target',
+  'scratchpad',
+  'clipboard',
+];
+
+export const DEFAULT_HIDDEN_WIDGETS: string[] = [
+  'collections',
+  'vpn',
+  'target',
+  'scratchpad',
+  'clipboard',
+];
+
 export const DEFAULT_ICON_COLORS = {
   bg: 'bg-muted/40 dark:bg-white/[0.03]',
   hoverBg: 'group-hover:bg-primary/10',
   border: 'border-transparent',
 };
+

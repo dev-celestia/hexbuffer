@@ -28,7 +28,7 @@ export function HashToolbar({
       {/* Hash Type Selector */}
       <ButtonGroup>
         {HASH_OPTIONS.map((opt) => (
-          <Button
+          <Button size="xs"
             key={opt.value}
             variant="outline"
             className={cn(
@@ -47,7 +47,7 @@ export function HashToolbar({
       <div className="flex items-center gap-1.5">
         <Button
           variant="outline"
-          size="sm"
+          size="xs"
           onClick={onCopy}
           disabled={!output}
           className="h-7 text-[11px] gap-1 px-2.5 font-semibold transition-all border-border"

@@ -31,7 +31,6 @@ export function useTrafficTable({
     calls,
     pagination,
     isLoading,
-    isTabLoading,
     newEventsCount,
     loadError,
     searchQuery,
@@ -103,7 +102,7 @@ export function useTrafficTable({
   const visibleCalls = useMemo(() => {
     if (blacklistRules.length === 0) return filteredCalls;
     return filteredCalls.filter((call) => !isBlacklisted(call));
-  }, [filteredCalls, blacklistRules.length, isBlacklisted]);
+  }, [filteredCalls, blacklistRules, isBlacklisted]);
 
   const removeCallLocallyWithUnpin = useCallback(
     (id: string) => {
@@ -160,7 +159,6 @@ export function useTrafficTable({
     selectedCallId,
     pinnedSet,
     isLoading,
-    isTabLoading,
     isGroupTabActive,
     filteredCalls,
     visibleCalls,

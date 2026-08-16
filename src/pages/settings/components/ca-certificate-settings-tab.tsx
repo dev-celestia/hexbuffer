@@ -38,15 +38,15 @@ export function CaCertificateSettingsTab({ settings }: CaCertificateSettingsTabP
 
       <SettingsGroup label="Certificate Actions" description="Manage the CA certificate for external browsers and apps.">
         <div className="flex flex-wrap gap-2 px-4 py-3">
-          <Button onClick={handleInstallMacCert} disabled={installingCa}>
+          <Button size="xs" onClick={handleInstallMacCert} disabled={installingCa}>
             <KeyIcon className="mr-1.5 size-4" />
             {installingCa ? 'Installing…' : 'Install to macOS Keychain'}
           </Button>
-          <Button variant="outline" onClick={handleDownloadCert} disabled={downloading}>
+          <Button size="xs" variant="outline" onClick={handleDownloadCert} disabled={downloading}>
             <DownloadSimpleIcon className="mr-1.5 size-4" />
             {downloading ? 'Saving…' : 'Download CA Certificate'}
           </Button>
-          <Button variant="outline" onClick={handleRegenerateCert} disabled={regeneratingCa}>
+          <Button size="xs" variant="outline" onClick={handleRegenerateCert} disabled={regeneratingCa}>
             <ArrowClockwiseIcon className="mr-1.5 size-4" />
             {regeneratingCa ? 'Regenerating…' : 'Regenerate CA'}
           </Button>

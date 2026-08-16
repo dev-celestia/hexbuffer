@@ -4,6 +4,7 @@ import { memo } from 'react';
 import { CopyIcon, ArrowSquareOutIcon, SpinnerGapIcon, ArrowsOutIcon, StarIcon } from '@phosphor-icons/react';
 import { InterestingBadge } from '@/components/status-badge';
 import { HighlightedText } from '@/components/highlighted-text';
+import { useTheme } from '@/components/theme-provider';
 
 import { copyText } from '@/lib/clipboard';
 import { cn } from '@/lib/utils';
@@ -109,11 +110,11 @@ function ArtifactActions({ label, path, onView }: { label: string; path?: string
         )}
       >
         {onView && (
-          <Button variant="outline" onClick={onView}>
+          <Button size="xs" variant="outline" onClick={onView}>
             <ArrowsOutIcon className="h-3.5 w-3.5" />
           </Button>
         )}
-        <Button variant="outline" onClick={() => copyText(path)}>
+        <Button size="xs" variant="outline" onClick={() => copyText(path)}>
           <CopyIcon className="h-3.5 w-3.5" />
         </Button>
       </div>
@@ -134,6 +135,7 @@ function PageDetailPanelComponent({ page, searchQuery = '' }: PageDetailPanelPro
     handleViewHtml,
     handleMarkPage,
   } = usePageDetailPanel({ page });
+  const { theme } = useTheme();
 
   if (!page) {
     return (
@@ -357,13 +359,13 @@ function PageDetailPanelComponent({ page, searchQuery = '' }: PageDetailPanelPro
             "gap-1.5"
           )}
         >
-          <Button variant="outline" onClick={handleOpenPage}>
+          <Button size="xs" variant="outline" onClick={handleOpenPage}>
             <ArrowSquareOutIcon className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="outline" onClick={handleCopyUrl}>
+          <Button size="xs" variant="outline" onClick={handleCopyUrl}>
             <CopyIcon className="h-3.5 w-3.5" />
           </Button>
-          <Button
+          <Button size="xs"
             variant={page.interesting ? 'secondary' : 'outline'}
             onClick={handleMarkPage}
           >
@@ -462,6 +464,7 @@ function PageDetailPanelComponent({ page, searchQuery = '' }: PageDetailPanelPro
                 <TextEditor
                   value={htmlContent ?? ''}
                   options={{ readOnly: true }}
+                  theme={theme}
                 />
               </TabsContent>
               <TabsContent value="preview" className="flex-1 min-h-0">

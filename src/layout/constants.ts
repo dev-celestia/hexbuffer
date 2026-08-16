@@ -220,6 +220,14 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     description: 'Interactive command-line shell with multi-tab support.',
     colors: { bg: 'bg-slate-700 dark:bg-slate-700', hoverBg: 'group-hover:bg-slate-700 dark:group-hover:bg-slate-700', border: 'border-slate-700 dark:border-slate-700' },
     flag: 'alpha'
+  },
+  {
+    label: 'Dev Server',
+    icon: BroadcastIcon,
+    href: '/dev-server',
+    description: 'Host and serve development servers or static builds over tethered networks & hotspots.',
+    colors: { bg: 'bg-emerald-600 dark:bg-emerald-600', hoverBg: 'group-hover:bg-emerald-600 dark:group-hover:bg-emerald-600', border: 'border-emerald-600 dark:border-emerald-600' },
+    flag: 'alpha'
   }
 ];
 

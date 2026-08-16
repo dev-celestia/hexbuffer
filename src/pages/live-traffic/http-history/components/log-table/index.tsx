@@ -24,7 +24,6 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
     selectedCallId,
     pinnedSet,
     isLoading,
-    isTabLoading,
     isGroupTabActive,
     filteredCalls,
     visibleCalls,
@@ -49,7 +48,7 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
     );
   }
 
-  if (isTabLoading || (isLoading && visibleCalls.length === 0 && filteredCalls.length === 0)) {
+  if (isLoading && visibleCalls.length === 0 && filteredCalls.length === 0) {
     return <HistoryLoadingState label="Loading HTTP history..." columns={8} />;
   }
 
@@ -137,7 +136,7 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
                 "text-xs font-semibold text-muted-foreground",
 
                 // Backgrounds & Borders
-                "bg-muted/40"
+                "bg-muted"
               )}
             >
               <div className="flex items-center w-full min-w-0">

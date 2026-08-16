@@ -55,7 +55,17 @@ export function isHostMatch(callHost: string, ruleHost: string): boolean {
 
   const cHostNoPort = cHost.split(':')[0];
   const rHostNoPort = rHost.split(':')[0];
-  return cHostNoPort === rHostNoPort;
+  if (cHostNoPort === rHostNoPort) return true;
+
+  // Wildcard subdomain matching (e.g. *.example.com)
+  if (rHost.startsWith('*.')) {
+    const base = rHost.slice(2);
+    if (cHost === base || cHost.endsWith(`.${base}`) || cHostNoPort === base || cHostNoPort.endsWith(`.${base}`)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export function normalizePath(path: string | null | undefined): string | null {
@@ -72,24 +82,39 @@ export function isPathMatch(callPathRaw: string | null | undefined, rulePathRaw:
   const callPath = normalizePath(callPathRaw) ?? '/';
   const rulePath = normalizePath(rulePathRaw) ?? '/';
 
+  const callLower = callPath.toLowerCase();
+  const ruleLower = rulePath.toLowerCase();
+
   // 1. Exact match
-  if (callPath === rulePath) return true;
+  if (callLower === ruleLower) return true;
 
-  const [callPathname, callSearch] = callPath.split('?');
-  const [rulePathname, ruleSearch] = rulePath.split('?');
+  const [callPathname, callSearch] = callLower.split('?');
+  const [rulePathname, ruleSearch] = ruleLower.split('?');
 
-  // 2. Query parameter matching if specified in rule
+  // 2. If rule specifies query parameters, check if incoming call contains them
   if (ruleSearch) {
-    return callPathname === rulePathname && Boolean(callSearch?.includes(ruleSearch));
+    if (callPathname === rulePathname && Boolean(callSearch?.includes(ruleSearch))) {
+      return true;
+    }
   }
 
   // 3. Pathname exact match (ignoring query strings on incoming call)
   if (callPathname === rulePathname) return true;
 
-  // 4. Subpath match
+  // 4. Subpath / prefix match
   const cleanRulePathname = rulePathname.endsWith('/') ? rulePathname : `${rulePathname}/`;
   if (callPathname.startsWith(cleanRulePathname)) {
     return true;
+  }
+
+  // 5. Wildcard pattern matching (e.g. /api/notifications/*)
+  if (rulePath.includes('*')) {
+    const regexPattern = '^' + ruleLower.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$';
+    try {
+      if (new RegExp(regexPattern).test(callLower) || new RegExp(regexPattern).test(callPathname)) {
+        return true;
+      }
+    } catch {}
   }
 
   return false;
@@ -156,9 +181,20 @@ export const useBlacklistStore = create<BlacklistState>()(
         const { rules } = get();
         if (rules.length === 0) return false;
         const callHost = extractCallHost(call);
+        let callPath = call.path;
+        if (!callPath && call.url) {
+          try {
+            const withScheme = call.url.includes('://') ? call.url : `http://${call.url}`;
+            const urlObj = new URL(withScheme);
+            callPath = `${urlObj.pathname}${urlObj.search}`;
+          } catch {
+            const afterHost = call.url.replace(/^https?:\/\/[^/]+/i, '');
+            callPath = afterHost.startsWith('/') ? afterHost : `/${afterHost}`;
+          }
+        }
         return rules.some((rule) => {
           if (!isHostMatch(callHost, rule.host)) return false;
-          return isPathMatch(call.path, rule.path);
+          return isPathMatch(callPath, rule.path);
         });
       },
 
@@ -166,9 +202,20 @@ export const useBlacklistStore = create<BlacklistState>()(
         const { rules } = get();
         if (rules.length === 0) return undefined;
         const callHost = extractCallHost(call);
+        let callPath = call.path;
+        if (!callPath && call.url) {
+          try {
+            const withScheme = call.url.includes('://') ? call.url : `http://${call.url}`;
+            const urlObj = new URL(withScheme);
+            callPath = `${urlObj.pathname}${urlObj.search}`;
+          } catch {
+            const afterHost = call.url.replace(/^https?:\/\/[^/]+/i, '');
+            callPath = afterHost.startsWith('/') ? afterHost : `/${afterHost}`;
+          }
+        }
         return rules.find((rule) => {
           if (!isHostMatch(callHost, rule.host)) return false;
-          return isPathMatch(call.path, rule.path);
+          return isPathMatch(callPath, rule.path);
         });
       },
     }),

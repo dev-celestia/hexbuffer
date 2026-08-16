@@ -1,6 +1,7 @@
 import { Badge, Button, Input, Label, Tabs, TabsContent, TabsList, TabsTrigger, TextEditor } from '@celestia-project/ui';
 import * as React from 'react';
 
+import { useTheme } from '@/components/theme-provider';
 import { useInvokerStore } from '@/stores/invoker';
 import { createDefaultPayloadConfig, type PayloadConfig, type PayloadType } from '../../../types';
 import { InvokerPayloadPresetDialog } from '../../payload-preset-dialog';
@@ -129,6 +130,7 @@ function getPayloadTypeLabel(payloadType: PayloadType) {
 }
 
 export function PayloadsTab() {
+  const { theme } = useTheme();
   const [presetDialogOpen, setPresetDialogOpen] = React.useState(false);
   const [activePositionName, setActivePositionName] = React.useState<string | null>(null);
   const config = useInvokerStore((s) => {
@@ -251,6 +253,7 @@ export function PayloadsTab() {
                           file_path: undefined,
                         })
                       }
+                      theme={theme}
                     />
                   </div>
 
@@ -423,7 +426,7 @@ function PayloadFileButton({ positionName }: { positionName: string }) {
 
   return (
     <>
-      <Button variant="outline" onClick={() => inputRef.current?.click()}>
+      <Button size="xs" variant="outline" onClick={() => inputRef.current?.click()}>
         Load from File
       </Button>
       <input

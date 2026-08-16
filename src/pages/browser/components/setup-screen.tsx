@@ -40,7 +40,7 @@ export function CrawlSetupScreen({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" disabled={disabled}>
+        <Button size="xs" variant="outline" disabled={disabled}>
           <GearSixIcon className="h-4 w-4" />
           Config
         </Button>
@@ -64,7 +64,7 @@ export function CrawlSetupScreen({
             )}
           >
             <ButtonGroup>
-              <Button
+              <Button size="xs"
                 type="button"
                 variant="outline"
                 className={cn(
@@ -83,7 +83,7 @@ export function CrawlSetupScreen({
               >
                 General
               </Button>
-              <Button
+              <Button size="xs"
                 type="button"
                 variant="outline"
                 className={cn(
@@ -102,7 +102,7 @@ export function CrawlSetupScreen({
               >
                 Limits & Timing
               </Button>
-              <Button
+              <Button size="xs"
                 type="button"
                 variant="outline"
                 className={cn(
@@ -512,7 +512,7 @@ export function CrawlSetupScreen({
               "mt-4"
             )}
           >
-            <Button type="submit" disabled={disabled || !isValid}>
+            <Button size="xs" type="submit" disabled={disabled || !isValid}>
               Save
             </Button>
           </DialogFooter>

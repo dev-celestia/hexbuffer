@@ -174,7 +174,7 @@ export function StepFlowCanvas({
 
       <Button
         variant="outline"
-        size="sm"
+        size="xs"
         onClick={onAddStep}
         className="absolute bottom-3 left-3 z-10 gap-1 bg-background/90 backdrop-blur"
       >

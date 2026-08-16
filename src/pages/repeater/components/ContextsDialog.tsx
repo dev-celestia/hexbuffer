@@ -255,14 +255,14 @@ export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
                             Delete Environment?
                           </span>
                           <div className="flex items-center gap-1.5">
-                            <Button
+                            <Button size="xs"
                               variant="destructive"
                               className="h-6 px-2 text-[10px] font-medium"
                               onClick={() => handleConfirmDelete(ctx.id)}
                             >
                               Confirm
                             </Button>
-                            <Button
+                            <Button size="xs"
                               variant="ghost"
                               className="h-6 px-2 text-[10px] font-medium hover:bg-muted"
                               onClick={() => setDeletingContextId(null)}
@@ -362,7 +362,7 @@ export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
                       {searchQuery ? 'No matching environments' : 'No environments configured'}
                     </span>
                     {!searchQuery && (
-                      <Button
+                      <Button size="xs"
                         variant="outline"
                         className="mt-2"
                         onClick={handleStartCreate}
@@ -404,7 +404,7 @@ export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                      <Button
+                      <Button size="xs"
                         variant="outline"
                         className="h-8 px-2.5 text-xs font-medium gap-1.5 transition-all hover:bg-muted active:scale-[0.97]"
                         onClick={handleBuildFromRequest}
@@ -412,7 +412,7 @@ export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
                         <SparkleIcon className="h-3.5 w-3.5 text-primary animate-pulse" />
                         <span>Pull Request Vars</span>
                       </Button>
-                      <Button
+                      <Button size="xs"
                         variant="outline"
                         className="h-8 px-2.5 text-xs font-medium gap-1.5 transition-all hover:bg-muted active:scale-[0.97]"
                         onClick={handleAddVar}
@@ -494,7 +494,7 @@ export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
                             <span className="text-[11px] text-muted-foreground/60 max-w-[250px] mb-4">
                               Add variables to refer to endpoint URLs, tokens, and other workspace settings dynamically.
                             </span>
-                            <Button
+                            <Button size="xs"
                               variant="outline"
                               className="gap-1.5 active:scale-[0.97]"
                               onClick={handleAddVar}
@@ -517,7 +517,7 @@ export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
 
                   {/* Dialog Footer Actions */}
                   <div className="p-4 border-t border-border flex justify-end gap-2 shrink-0 bg-muted/5">
-                    <Button
+                    <Button size="xs"
                       variant="ghost"
                       onClick={() => {
                         setIsCreating(false);
@@ -527,7 +527,7 @@ export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
                     >
                       Cancel
                     </Button>
-                    <Button
+                    <Button size="xs"
                       onClick={handleSave}
                       disabled={!name.trim()}
                       className="h-8 text-xs font-medium active:scale-[0.97]"
@@ -557,7 +557,7 @@ export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
                   <p className="text-[11px] text-muted-foreground/50 max-w-[260px] mt-2.5 leading-relaxed">
                     Reference active variables in URLs, queries, and headers using double braces, e.g. <code className="font-mono bg-muted px-1 rounded">{"{{base_url}}"}</code>.
                   </p>
-                  <Button
+                  <Button size="xs"
                     onClick={handleStartCreate}
                     className="mt-6 gap-1.5 active:scale-[0.97]"
                   >

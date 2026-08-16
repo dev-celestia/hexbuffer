@@ -594,7 +594,7 @@ function AiInsightsPanelComponent({
           </ScrollArea>
 
           <DialogFooter>
-            <Button variant="outline" onClick={handleDetailOpenPage} disabled={!detailPage}>
+            <Button size="xs" variant="outline" onClick={handleDetailOpenPage} disabled={!detailPage}>
               Open Page
             </Button>
           </DialogFooter>

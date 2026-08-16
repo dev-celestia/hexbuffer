@@ -13,6 +13,7 @@ import { formatJsonBody } from "@/lib/http-message";
 
 import { InspectorSection } from "@/pages/live-traffic/components/inspector";
 import { CollectionPickerSubmenu } from "@/triggers/repeater/collection-picker-submenu";
+import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 
 export function LogDetailView() {
@@ -34,6 +35,7 @@ export function LogDetailView() {
     responseHeaders,
     responseCookies,
   } = useLogEntryView();
+  const { theme } = useTheme();
 
   if (!selectedCallId) {
     return (
@@ -139,7 +141,7 @@ export function LogDetailView() {
                 "rounded-md border"
               )}
             >
-              <TextEditor value={rawRequest} />
+              <TextEditor value={rawRequest} theme={theme} />
             </div>
           </div>
         ) : (
@@ -207,7 +209,7 @@ export function LogDetailView() {
             )}
           >
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger>
                 <Button variant="ghost" size="icon">
                   <DotsThreeVerticalIcon className="size-4" />
                 </Button>
@@ -269,7 +271,7 @@ export function LogDetailView() {
                 "rounded-md border"
               )}
             >
-              <TextEditor value={rawResponse} />
+              <TextEditor value={rawResponse} theme={theme} />
             </div>
           </div>
         ) : (

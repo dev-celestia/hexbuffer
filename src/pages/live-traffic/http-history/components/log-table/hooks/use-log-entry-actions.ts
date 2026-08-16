@@ -12,6 +12,7 @@ import {
   useGroupsStore,
   useBlacklistStore,
   useHighlightStore,
+  extractCallHost,
 } from '@/stores/history';
 import { adaptProxyRecordToApiCall } from './use-history-table';
 import { useRepeaterStore } from '@/stores/repeater';
@@ -420,32 +421,35 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
   }, [call.id, onDelete, triggerRefresh, removeRequestFromAllGroups]);
 
   const handleBlacklistHost = useCallback(async () => {
-    const host = await resolveHostForCall(call);
+    const host = extractCallHost(call);
     if (host) {
       useBlacklistStore.getState().addRule(host);
     }
   }, [call]);
 
   const handleBlacklistHostAndPath = useCallback(async () => {
-    const host = await resolveHostForCall(call);
+    const host = extractCallHost(call);
+    const pathname = call.path ? call.path.split('?')[0] : null;
     if (host) {
-      useBlacklistStore.getState().addRule(host, call.path);
+      useBlacklistStore.getState().addRule(host, pathname);
     }
   }, [call]);
 
   const handleHighlightHost = useCallback(async (color: string) => {
-    const host = await resolveHostForCall(call);
+    const host = extractCallHost(call);
+    const pathname = call.path ? call.path.split('?')[0] : null;
     if (host) {
-      useHighlightStore.getState().highlightHost(host, call.path, color);
+      useHighlightStore.getState().highlightHost(host, pathname, color);
     }
   }, [call]);
 
   const handleRemoveHighlight = useCallback(async () => {
-    const host = await resolveHostForCall(call);
+    const host = extractCallHost(call);
+    const pathname = call.path ? call.path.split('?')[0] : null;
     if (host) {
-      useHighlightStore.getState().removeHighlight(host, call.path);
+      useHighlightStore.getState().removeHighlight(host, pathname);
     } else {
-      useHighlightStore.getState().removeHighlight(call.host, call.path);
+      useHighlightStore.getState().removeHighlight(call.host, pathname);
     }
   }, [call]);
 

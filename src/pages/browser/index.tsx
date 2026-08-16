@@ -105,7 +105,7 @@ export function BrowserAutomationPage() {
               The browser automation will interact with external websites. Only scan targets you own or are authorized to assess. Unauthorized scanning may violate terms of service or applicable laws.
             </AlertDescription>
             <AlertAction>
-              <Button
+              <Button size="xs"
                 variant="outline"
                 aria-label="Dismiss safety notice"
                 onClick={() => page.setBrowserAutomationSafetyAlertDismissed(true)}
@@ -174,26 +174,26 @@ export function BrowserAutomationPage() {
 
                 {/* Start/Stop/Pause/Resume */}
                 {(page.status === 'idle' || page.status === 'completed' || page.status === 'failed' || page.status === 'stopped') && (
-                  <Button size="sm" onClick={startBrowserCrawl}>
+                  <Button size="xs" onClick={startBrowserCrawl}>
                     <PlayIcon className="size-3" /> Start
                   </Button>
                 )}
                 {page.status === 'running' && (
                   <>
-                    <Button size="sm" variant="outline" onClick={toggleBrowserCrawl}>
+                    <Button size="xs" variant="outline" onClick={toggleBrowserCrawl}>
                       <PauseIcon className="size-3" /> Pause
                     </Button>
-                    <Button size="sm" variant="destructive" onClick={stopBrowserCrawl}>
+                    <Button size="xs" variant="destructive" onClick={stopBrowserCrawl}>
                       <SquareIcon className="size-3" /> Stop
                     </Button>
                   </>
                 )}
                 {page.status === 'paused' && (
                   <>
-                    <Button size="sm" variant="outline" onClick={toggleBrowserCrawl}>
+                    <Button size="xs" variant="outline" onClick={toggleBrowserCrawl}>
                       <ArrowCounterClockwiseIcon className="size-3" /> Resume
                     </Button>
-                    <Button size="sm" variant="destructive" onClick={stopBrowserCrawl}>
+                    <Button size="xs" variant="destructive" onClick={stopBrowserCrawl}>
                       <SquareIcon className="size-3" /> Stop
                     </Button>
                   </>

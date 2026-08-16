@@ -62,7 +62,7 @@ export function XssGeneratorPage() {
             "gap-1"
           )}
         >
-          <Button
+          <Button size="xs"
             variant="outline"
             onClick={() => page.handleCopy(page.encodedOutput)}
             disabled={!page.encodedOutput}

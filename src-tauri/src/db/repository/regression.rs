@@ -293,13 +293,13 @@ impl Database {
         )?;
         conn.execute(
             "INSERT INTO r_test_run_results (id, run_id, test_case_id, browser, device, status, duration_ms, retry_attempts, is_flaky, error_id, executed_at) \
-             VALUES ('res-1b', ?1, ?2, 'firefox', 'Desktop Firefox', 'failed', 5210, 2, 0, err1_id, '2026-07-12T13:01:00Z')",
-            params![r1_id, tc2_id],
+             VALUES ('res-1b', ?1, ?2, 'firefox', 'Desktop Firefox', 'failed', 5210, 2, 0, ?3, '2026-07-12T13:01:00Z')",
+            params![r1_id, tc2_id, err1_id],
         )?;
         conn.execute(
             "INSERT INTO r_test_run_results (id, run_id, test_case_id, browser, device, status, duration_ms, retry_attempts, is_flaky, error_id, executed_at) \
-             VALUES ('res-1c', ?1, ?2, 'webkit', 'iPhone 14', 'failed', 5420, 1, 0, err2_id, '2026-07-12T13:02:00Z')",
-            params![r1_id, tc3_id],
+             VALUES ('res-1c', ?1, ?2, 'webkit', 'iPhone 14', 'failed', 5420, 1, 0, ?3, '2026-07-12T13:02:00Z')",
+            params![r1_id, tc3_id, err2_id],
         )?;
 
         // Seed Test Run Results for Run 2 (Passed Run)
@@ -539,4 +539,18 @@ pub struct TestRunResultRecord {
     pub screenshot_url: Option<String>,
     pub executed_at: String,
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::Database;
+
+    #[test]
+    fn test_seed_relational_data_if_empty() {
+        let db = Database::new(std::path::PathBuf::from(":memory:")).expect("failed to create in-memory db");
+        db.init().expect("db init failed");
+        let projects = db.list_projects().expect("failed to list projects");
+        assert_eq!(projects.len(), 2);
+    }
+}
+
 

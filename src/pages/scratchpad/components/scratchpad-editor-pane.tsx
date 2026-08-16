@@ -1,6 +1,7 @@
 import { Button, Input, Kbd, KbdGroup, TextEditor } from '@celestia-project/ui';
 import * as React from 'react';
 import { PencilSimpleIcon, CheckIcon, XIcon, FileTextIcon, SidebarSimpleIcon } from '@phosphor-icons/react';
+import { useTheme } from '@/components/theme-provider';
 
 import { ScratchpadPageHookType } from '../hooks/use-scratchpad-page';
 
@@ -9,6 +10,7 @@ interface ScratchpadEditorPaneProps {
 }
 
 export function ScratchpadEditorPane({ hook }: ScratchpadEditorPaneProps) {
+  const { theme } = useTheme();
   const {
     activePad,
     note,
@@ -141,6 +143,7 @@ export function ScratchpadEditorPane({ hook }: ScratchpadEditorPaneProps) {
           language="markdown"
           height="100%"
           detectLinks={true}
+          theme={theme}
         />
       </div>
     </div>

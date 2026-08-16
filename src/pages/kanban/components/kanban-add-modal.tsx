@@ -225,7 +225,7 @@ export function KanbanAddModal({ isOpen, onClose, defaultColumnId, onAdd }: Prop
                     className="flex items-center justify-between gap-2 rounded-sm border px-2 py-1 bg-muted/20"
                   >
                     <span className="text-xs truncate">{sub.title}</span>
-                    <Button
+                    <Button size="xs"
                       type="button"
                       variant="ghost"
                       className="h-5 w-5 p-0"
@@ -252,7 +252,7 @@ export function KanbanAddModal({ isOpen, onClose, defaultColumnId, onAdd }: Prop
                 }}
                 placeholder="Add subtask title..."
               />
-              <Button
+              <Button size="xs"
                 type="button"
                 variant="outline"
                 className="h-7 w-7 p-0 shrink-0"
@@ -265,10 +265,10 @@ export function KanbanAddModal({ isOpen, onClose, defaultColumnId, onAdd }: Prop
 
           {/* Dialog actions */}
           <DialogFooter className="pt-2 border-t">
-            <Button type="button" variant="ghost" onClick={onClose}>
+            <Button size="xs" type="button" variant="ghost" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">
+            <Button size="xs" type="submit">
               Create Card
             </Button>
           </DialogFooter>

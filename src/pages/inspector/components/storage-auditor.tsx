@@ -166,7 +166,7 @@ export function StorageAuditor({
               />
             </div>
 
-            <Button variant="outline" size="sm" onClick={refreshStorage} className="h-8 gap-1 px-2.5">
+            <Button variant="outline" size="xs" onClick={refreshStorage} className="h-8 gap-1 px-2.5">
               <ArrowsClockwise className="size-3.5" />
               Refresh
             </Button>
@@ -177,7 +177,7 @@ export function StorageAuditor({
               Origin: {origin}
             </span>
 
-            <Button variant="outline" size="sm" onClick={clearStorage} className="h-8 gap-1.5 border-rose-500/30 text-rose-500 hover:bg-rose-500/5 px-2.5">
+            <Button variant="outline" size="xs" onClick={clearStorage} className="h-8 gap-1.5 border-rose-500/30 text-rose-500 hover:bg-rose-500/5 px-2.5">
               <Trash className="size-3.5" />
               Wipe Origin Storage
             </Button>

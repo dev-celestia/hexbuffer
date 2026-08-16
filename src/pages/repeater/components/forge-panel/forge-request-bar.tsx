@@ -59,7 +59,7 @@ export function ForgeRequestBar({
 
         <div className="flex items-center space-x-1.5 shrink-0">
           <Button
-            size="sm"
+            size="xs"
             className="h-7 text-xs font-semibold gap-2"
             onClick={() => { void sendCraftRequest(); }}
           >
@@ -67,7 +67,7 @@ export function ForgeRequestBar({
           </Button>
           {activeEndpoint && (
             <Button
-              size="sm"
+              size="xs"
               variant="outline"
               className="h-7 text-xs font-semibold gap-2"
               onClick={() => { void saveActiveEndpoint(); }}

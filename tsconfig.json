@@ -18,6 +18,12 @@
     "jsx": "react-jsx",
     "incremental": true,
     "paths": {
+      "@celestia-project/ui": [
+        "../celestia-starter/packages/ui/src/index.ts"
+      ],
+      "@celestia-project/ui/*": [
+        "../celestia-starter/packages/ui/src/*"
+      ],
       "@/components/ui/*": [
         "./src/components/ui/*"
       ],

@@ -1,4 +1,6 @@
 import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@celestia-project/ui';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useDesktopPage } from './hooks/use-desktop-page';
 import { ProxyWidget } from './components/proxy-widget';
 import { VpnWidget } from './components/vpn-widget';
@@ -7,30 +9,44 @@ import { ScratchpadWidget } from './components/scratchpad-widget';
 import { CollectionsWidget } from './components/collections-widget';
 import { ClipboardWidget } from './components/clipboard-widget';
 import { DesktopIconItem } from './components/desktop-icon-item';
+import { SortableWidget } from './components/sortable-widget';
 
 import { ShieldWarningIcon, GearSixIcon } from '@phosphor-icons/react';
-import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { ShortcutManager } from './components/shortcut-manager';
 
 import { cn } from '@/lib/utils';
 
+function renderWidget(id: string) {
+  switch (id) {
+    case 'proxy':
+      return <ProxyWidget />;
+    case 'collections':
+      return <CollectionsWidget />;
+    case 'vpn':
+      return <VpnWidget />;
+    case 'target':
+      return <TargetWidget />;
+    case 'scratchpad':
+      return <ScratchpadWidget />;
+    case 'clipboard':
+      return <ClipboardWidget />;
+    default:
+      return null;
+  }
+}
+
 export function DesktopPage() {
   const {
     displayItems,
+    visibleWidgetIds,
+    hasVisibleWidgets,
+    sensors,
+    handleWidgetDragEnd,
     handleItemClick,
     handleClearSearch,
   } = useDesktopPage();
-  const hiddenWidgets = useAppSettingsStore((s) => s.hiddenWidgets || []);
 
   const ROOT_BG = 'bg-transparent';
-
-  const showCollections = !hiddenWidgets.includes('collections');
-  const showProxy = !hiddenWidgets.includes('proxy');
-  const showVpn = !hiddenWidgets.includes('vpn');
-  const showTarget = !hiddenWidgets.includes('target');
-  const showScratchpad = !hiddenWidgets.includes('scratchpad');
-  const showClipboard = !hiddenWidgets.includes('clipboard');
-  const hasVisibleWidgets = showCollections || showProxy || showVpn || showTarget || showScratchpad || showClipboard;
 
   return (
     <div
@@ -73,7 +89,7 @@ export function DesktopPage() {
             )}
           >
             <Dialog>
-              <DialogTrigger asChild>
+              <DialogTrigger>
                 <Button
                   size="xs"
                   variant="ghost"
@@ -185,7 +201,7 @@ export function DesktopPage() {
               >
                 Try searching for another keyword or clear the search input.
               </p>
-              <Button
+              <Button size="xs"
                 variant="link"
                 onClick={handleClearSearch}
                 className={cn(
@@ -212,19 +228,38 @@ export function DesktopPage() {
               "flex flex-col shrink-0",
 
               // Sizing & Spacing
-              "w-full md:w-64 lg:w-72 gap-4"
+              "w-full md:w-64 lg:w-72"
             )}
           >
-            {showCollections && <CollectionsWidget />}
-            {showProxy && <ProxyWidget />}
-            {showVpn && <VpnWidget />}
-            {showTarget && <TargetWidget />}
-            {showScratchpad && <ScratchpadWidget />}
-            {showClipboard && <ClipboardWidget />}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleWidgetDragEnd}
+            >
+              <SortableContext
+                items={visibleWidgetIds}
+                strategy={verticalListSortingStrategy}
+              >
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex flex-col",
+
+                    // Sizing & Spacing
+                    "gap-4"
+                  )}
+                >
+                  {visibleWidgetIds.map((widgetId) => (
+                    <SortableWidget key={widgetId} id={widgetId}>
+                      {renderWidget(widgetId)}
+                    </SortableWidget>
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           </div>
         )}
       </div>
     </div>
   );
 }
-

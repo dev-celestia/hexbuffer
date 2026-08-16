@@ -3,6 +3,7 @@
 import { Badge, Label, TextEditor } from '@celestia-project/ui';
 import { buildRawHttpResponse } from '@/lib/http-message';
 import { WarningCircleIcon } from '@phosphor-icons/react';
+import { useTheme } from '@/components/theme-provider';
 import { useInvokerStore } from '@/stores/invoker';
 import type { AttackResult } from '../types';
 import { formatPayloadValues, getResultUrl } from '../lib/utils';
@@ -20,6 +21,7 @@ function buildRawAttackResponse(result: AttackResult) {
 }
 
 export function InvokerPreviewPane() {
+  const { theme } = useTheme();
   const selectedResult = useInvokerStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.selectedResult ?? null;
@@ -118,6 +120,7 @@ export function InvokerPreviewPane() {
                 <TextEditor
                   value={buildRawAttackResponse(selectedResult)}
                   options={{ readOnly: true }}
+                  theme={theme}
                 />
               </div>
             </div>

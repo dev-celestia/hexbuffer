@@ -1,5 +1,6 @@
 
 import { TextEditor } from '@celestia-project/ui';
+import { useTheme } from '@/components/theme-provider';
 import { type CustomSection } from '../types';
 
 interface CustomSectionCodeEditorProps {
@@ -13,6 +14,8 @@ export function CustomSectionCodeEditor({
   section,
   onChange,
 }: CustomSectionCodeEditorProps) {
+  const { theme } = useTheme();
+
   return (
     <TextEditor
       path={`${documentId}/sections/${section.key}.md`}
@@ -20,6 +23,7 @@ export function CustomSectionCodeEditor({
       onChange={(value) => onChange(value ?? '')}
       language="markdown"
       detectLinks={true}
+      theme={theme}
     />
   );
 }

@@ -35,6 +35,7 @@ export function useHttpHistoryPage() {
   const groups = useGroupsStore((s) => s.groups);
   const deleteGroup = useGroupsStore((s) => s.deleteGroup);
   const renameGroup = useGroupsStore((s) => s.renameGroup);
+  const updateTarget = useTargetStore((state) => state.updateTarget);
 
   const [isGroupDialogOpen, setIsGroupDialogOpen] = React.useState(false);
   const activeTargets = React.useMemo(
@@ -97,8 +98,10 @@ export function useHttpHistoryPage() {
   const handleRenameTab = React.useCallback((tabId: string, name: string) => {
     if (tabId.startsWith(GROUP_TAB_PREFIX)) {
       renameGroup(tabId.slice(GROUP_TAB_PREFIX.length), name);
+    } else {
+      updateTarget(tabId, { name });
     }
-  }, [renameGroup]);
+  }, [renameGroup, updateTarget]);
 
   const addGroup = React.useCallback(() => {
     setIsGroupDialogOpen(true);

@@ -203,7 +203,7 @@ export function FileExplorerPage() {
               and manage files, please set up your account credentials in Settings.
             </p>
             <div className="mt-6 flex justify-center gap-3">
-              <Button
+              <Button size="xs"
                 onClick={() => navigate('/settings?tab=r2')}
                 className="text-xs font-semibold"
               >
@@ -537,7 +537,7 @@ function TabBar({
     <ButtonGroup>
       <Button
         variant="outline"
-        size="sm"
+        size="xs"
         className={cn(
           // Typography
           "text-xs",
@@ -552,7 +552,7 @@ function TabBar({
       </Button>
       <Button
         variant="outline"
-        size="sm"
+        size="xs"
         className={cn(
           // Typography
           "text-xs",

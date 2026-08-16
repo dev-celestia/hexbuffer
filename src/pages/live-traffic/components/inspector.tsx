@@ -1,6 +1,6 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TextEditor } from '@celestia-project/ui';
 import { useState, memo } from 'react';
-
+import { useTheme } from '@/components/theme-provider';
 import { buildHttpHeaderList } from '@/lib/http-message';
 
 export interface KeyValue {
@@ -85,6 +85,8 @@ export const InspectorSection = memo(function InspectorSection({
   onItemSelect,
   isItemSelected,
 }: InspectorSectionProps) {
+  const { theme } = useTheme();
+
   return (
     <Accordion type="single" defaultValue={defaultOpen ? title : undefined} collapsible className="border rounded-md mb-2 min-w-0 overflow-hidden">
       <AccordionItem value={title} className="last:border-b-0">
@@ -104,6 +106,7 @@ export const InspectorSection = memo(function InspectorSection({
                     options={{
                       readOnly: true,
                     }}
+                    theme={theme}
                   />
                 </div>
               ) : (

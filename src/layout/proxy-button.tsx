@@ -25,7 +25,7 @@ export function ProxyButton() {
           "flex items-center",
 
           // Sizing & Spacing
-          "h-6 px-1.5 gap-0",
+          "h-5 px-1.5 gap-0",
 
           // Typography
           "text-xs",
@@ -82,16 +82,6 @@ export function ProxyButton() {
         size="xs"
         onClick={() => onToggleProxy(!isConnected)}
         disabled={!canToggle}
-        className={cn(
-          // Sizing & Spacing
-          "h-6 px-2",
-
-          // Typography
-          "text-[10px]",
-
-          // Interactive & States
-          "cursor-pointer"
-        )}
       >
         {isConnected ? 'Stop' : 'Start'}
       </Button>

@@ -54,7 +54,7 @@ export function EncoderToolbar({
         )}
       >
         <ButtonGroup>
-          <Button
+          <Button size="xs"
             variant="outline"
             className={cn(
               // Sizing & Spacing
@@ -72,7 +72,7 @@ export function EncoderToolbar({
           >
             URL
           </Button>
-          <Button
+          <Button size="xs"
             variant="outline"
             className={cn(
               // Sizing & Spacing
@@ -90,7 +90,7 @@ export function EncoderToolbar({
           >
             Base64
           </Button>
-          <Button
+          <Button size="xs"
             variant="outline"
             className={cn(
               // Sizing & Spacing
@@ -111,7 +111,7 @@ export function EncoderToolbar({
         </ButtonGroup>
 
         <ButtonGroup>
-          <Button
+          <Button size="xs"
             variant="outline"
             className={cn(
               // Sizing & Spacing
@@ -129,7 +129,7 @@ export function EncoderToolbar({
           >
             Encode
           </Button>
-          <Button
+          <Button size="xs"
             variant="outline"
             className={cn(
               // Sizing & Spacing
@@ -198,7 +198,7 @@ export function EncoderToolbar({
       >
         <Button
           variant="outline"
-          size="sm"
+          size="xs"
           onClick={onSwap}
           className={cn(
             // Layout & Positioning
@@ -216,7 +216,7 @@ export function EncoderToolbar({
         </Button>
         <Button
           variant="outline"
-          size="sm"
+          size="xs"
           onClick={onCopy}
           disabled={!output}
           className={cn(

@@ -4,6 +4,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { AsteriskIcon, Info, SpinnerGapIcon, SparkleIcon, TargetIcon } from '@phosphor-icons/react';
 import type { EditorView } from '@codemirror/view';
 
+import { useTheme } from '@/components/theme-provider';
 import { useInvokerStore } from '@/stores/invoker';
 import {
   buildRawRequest,
@@ -126,6 +127,7 @@ function HighlightedRequestPreview({
 }
 
 export function RequestTab() {
+  const { theme } = useTheme();
   const config = useInvokerStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.config;
@@ -294,7 +296,7 @@ export function RequestTab() {
             </ButtonGroup>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button type="button" variant="ghost" className="shrink-0">
+                <Button size="xs" type="button" variant="ghost" className="shrink-0">
                   <Info className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -314,6 +316,7 @@ export function RequestTab() {
             onMount={(editor) => {
               rawRequestEditorRef.current = editor;
             }}
+            theme={theme}
           />
         </div>
       </div>
@@ -384,7 +387,7 @@ export function RequestTab() {
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setSuggestionsDialogOpen(false)}>
+            <Button size="xs" type="button" variant="outline" onClick={() => setSuggestionsDialogOpen(false)}>
               Cancel
             </Button>
             <Button

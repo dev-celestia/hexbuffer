@@ -4,6 +4,7 @@ import { Button, ButtonGroup, ScrollArea, TextEditor } from '@celestia-project/u
 import { CheckCircleIcon, XCircleIcon, CopyIcon, CheckIcon } from '@phosphor-icons/react';
 import { useMemo } from 'react';
 import { useCollectionsStore, type ForgeResponse, type TestResult } from '@/stores/collections';
+import { useTheme } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
 
@@ -40,6 +41,7 @@ export function ForgeResponseView({
 }: ForgeResponseViewProps) {
   const activeContextId = useCollectionsStore((s) => s.activeContextId);
   const { isCopied, copy } = useCopyToClipboard();
+  const { theme } = useTheme();
 
   const handleCopy = () => {
     if (response?.body) {
@@ -158,7 +160,7 @@ export function ForgeResponseView({
                 <Button
                   key={t}
                   variant="outline"
-                  size="sm"
+                  size="xs"
                   className={cn('text-xs uppercase', activeResTab === t && 'text-primary')}
                   onClick={() => onResTabChange(t)}
                 >
@@ -171,7 +173,7 @@ export function ForgeResponseView({
               <div className="flex-1 min-h-0 mt-2">
                 <div className="h-full border rounded-md overflow-hidden bg-background">
                   {response ? (
-                    <TextEditor value={getFormattedBody()} options={{ readOnly: true }} />
+                    <TextEditor value={getFormattedBody()} options={{ readOnly: true }} theme={theme} />
                   ) : (
                     <div className="h-full flex items-center justify-center text-xs text-muted-foreground bg-muted/5">
                       No response received
@@ -185,7 +187,7 @@ export function ForgeResponseView({
               <div className="flex-1 min-h-0 mt-2">
                 <div className="h-full border rounded-md overflow-hidden bg-background">
                   {response ? (
-                    <TextEditor value={response.body} options={{ readOnly: true }} />
+                    <TextEditor value={response.body} options={{ readOnly: true }} theme={theme} />
                   ) : (
                     <div className="h-full flex items-center justify-center text-xs text-muted-foreground bg-muted/5">
                       No response received
@@ -265,7 +267,7 @@ export function ForgeResponseView({
                           Body ({safeBodyType})
                         </span>
                         <div className="flex-1 border rounded-md overflow-hidden bg-background min-h-[100px]">
-                          <TextEditor value={expandVars(safeBody)} options={{ readOnly: true }} />
+                          <TextEditor value={expandVars(safeBody)} options={{ readOnly: true }} theme={theme} />
                         </div>
                       </div>
                     )}

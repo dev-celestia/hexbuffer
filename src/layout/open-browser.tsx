@@ -18,13 +18,6 @@ export function OpenBrowserButton() {
     <Button
       variant="outline"
       size="xs"
-      className={cn(
-        // Layout & Positioning
-        "flex items-center justify-center",
-
-        // Sizing & Spacing
-        "h-6 p-0 gap-0"
-      )}
       onClick={openBrowser}
       disabled={isOpeningBrowser}
       title={openBrowserTitle}

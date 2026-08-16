@@ -76,10 +76,10 @@ export function CustomSectionDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>
+          <Button size="xs" variant="outline" onClick={() => handleOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleAdd} disabled={!title.trim()}>
+          <Button size="xs" onClick={handleAdd} disabled={!title.trim()}>
             {mode === 'edit' ? 'FloppyDisk File' : 'Add File'}
           </Button>
         </DialogFooter>

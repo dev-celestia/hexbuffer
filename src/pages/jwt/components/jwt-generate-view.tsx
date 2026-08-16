@@ -2,6 +2,7 @@ import { Button, Input, Label, ScrollArea, Select, SelectContent, SelectItem, Se
 import * as React from 'react';
 
 import { CopyIcon, KeyIcon } from '@phosphor-icons/react';
+import { useTheme } from '@/components/theme-provider';
 import type { JwtAlgorithm } from '../types';
 import { ALGORITHM_OPTIONS } from '../constants';
 
@@ -36,6 +37,7 @@ export function JwtGenerateView({
   onGenerate,
   onCopy,
 }: JwtGenerateViewProps) {
+  const { theme } = useTheme();
   const colorizedToken = React.useMemo(() => {
     const trimmed = generatedToken.trim();
     if (!trimmed) return null;
@@ -80,6 +82,7 @@ export function JwtGenerateView({
                 onChange={(v) => setGenHeader(v ?? '')}
                 height={200}
                 className="rounded-md border border-input overflow-hidden"
+                theme={theme}
               />
             </div>
             <div className="space-y-1">
@@ -92,6 +95,7 @@ export function JwtGenerateView({
                 onChange={(v) => setGenPayload(v ?? '')}
                 height={240}
                 className="rounded-md border border-input overflow-hidden"
+                theme={theme}
               />
             </div>
             <div className="flex items-end gap-3 pt-1">
@@ -128,7 +132,7 @@ export function JwtGenerateView({
                 </Select>
               </div>
             </div>
-            <Button
+            <Button size="xs"
               className="w-full h-8 text-xs gap-1.5 mt-2"
               onClick={onGenerate}
               disabled={generating || !genSecret}

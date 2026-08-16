@@ -106,7 +106,7 @@ export function NetworkMonitor({
             />
           </div>
 
-          <Button variant="outline" size="sm" onClick={clearNetwork} className="h-8 gap-1 px-2.5">
+          <Button variant="outline" size="xs" onClick={clearNetwork} className="h-8 gap-1 px-2.5">
             <Trash className="size-3.5" />
             Clear
           </Button>

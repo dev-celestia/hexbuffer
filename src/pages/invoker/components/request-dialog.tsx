@@ -50,10 +50,10 @@ export function InvokerRequestDialog() {
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setRawRequestDialogOpen(false)}>
+          <Button size="xs" variant="outline" onClick={() => setRawRequestDialogOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleImport} disabled={!rawRequestContent.trim()}>
+          <Button size="xs" onClick={handleImport} disabled={!rawRequestContent.trim()}>
             Import
           </Button>
         </DialogFooter>

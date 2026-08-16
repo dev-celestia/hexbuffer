@@ -104,9 +104,7 @@ impl HttpHandler for AppHandler {
         let mut ctx = Ctx::new(self.app_handle.clone());
 
         ctx.client_addr = http_ctx.client_addr.to_string();
-        ctx.server_addr = req.uri().to_string();
         ctx.req_method = req.method().to_string();
-        ctx.req_uri = req.uri().to_string();
         ctx.req_http_version = format!("{:?}", req.version());
 
         let (mut parts, body) = req.into_parts();
@@ -119,6 +117,61 @@ impl HttpHandler for AppHandler {
                     .insert(name.as_str().to_string(), v.to_string());
             }
         }
+
+        let raw_uri = parts.uri.to_string();
+        let (host, full_url) = if raw_uri.starts_with("http://") || raw_uri.starts_with("https://") {
+            let parsed_host = parts.uri.host().map(|h| {
+                if let Some(port) = parts.uri.port_u16() {
+                    if (raw_uri.starts_with("https://") && port == 443) || (raw_uri.starts_with("http://") && port == 80) {
+                        h.to_string()
+                    } else {
+                        format!("{}:{}", h, port)
+                    }
+                } else {
+                    h.to_string()
+                }
+            }).unwrap_or_default();
+            (parsed_host, raw_uri)
+        } else {
+            let host_header = ctx.req_headers.get("host")
+                .or_else(|| ctx.req_headers.get("Host"))
+                .or_else(|| ctx.req_headers.get(":authority"))
+                .cloned()
+                .unwrap_or_else(|| {
+                    if !http_ctx.host.is_empty() {
+                        http_ctx.host.clone()
+                    } else {
+                        String::new()
+                    }
+                });
+
+            let scheme = if ctx.req_headers.get("x-forwarded-proto").map(|v| v.eq_ignore_ascii_case("http")).unwrap_or(false)
+                || host_header.ends_with(":80")
+            {
+                "http"
+            } else {
+                "https"
+            };
+
+            let path = if raw_uri.starts_with('/') {
+                raw_uri
+            } else if raw_uri.is_empty() {
+                "/".to_string()
+            } else {
+                format!("/{}", raw_uri)
+            };
+
+            let normalized_url = if !host_header.is_empty() {
+                format!("{}://{}{}", scheme, host_header, path)
+            } else {
+                path
+            };
+
+            (host_header, normalized_url)
+        };
+
+        ctx.server_addr = if !host.is_empty() { host } else { http_ctx.host.clone() };
+        ctx.req_uri = full_url;
 
         let body_bytes = match body.into_bytes().await {
             Ok(bytes) => bytes,

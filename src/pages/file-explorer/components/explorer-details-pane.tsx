@@ -116,7 +116,7 @@ export function ExplorerDetailsPane({
                       </p>
                     </div>
                   </div>
-                  <Button
+                  <Button size="xs"
                     variant="outline"
                     className="w-full text-xs h-8 gap-1.5"
                     onClick={() => onOpenFile(item)}
@@ -135,7 +135,7 @@ export function ExplorerDetailsPane({
                       </p>
                     </div>
                   </div>
-                  <Button
+                  <Button size="xs"
                     variant="default"
                     className="w-full text-xs h-8 gap-1.5"
                     onClick={() => onOpenFile(item)}
@@ -168,7 +168,7 @@ export function ExplorerDetailsPane({
                   </SelectContent>
                 </Select>
                 <Button
-                  size="sm"
+                  size="xs"
                   variant="outline"
                   className="h-8 gap-1 shrink-0 text-xs"
                   onClick={() => onCopyPresignedUrl(item, parseInt(expiration, 10))}
@@ -182,7 +182,7 @@ export function ExplorerDetailsPane({
             {/* Public URL copy action */}
             <Button
               variant="outline"
-              size="sm"
+              size="xs"
               className="w-full text-xs h-8 gap-1.5"
               onClick={() => onCopyPublicUrl(item)}
             >

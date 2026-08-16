@@ -89,7 +89,7 @@ export function AccessibilityTreePanel({ snapshot, onElementClick }: Accessibili
             </div>
           ) : (
             elements.map((element) => (
-              <Button
+              <Button size="xs"
                 key={element.refId}
                 variant="ghost"
                 className={cn(

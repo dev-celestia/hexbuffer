@@ -1,4 +1,19 @@
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, Button, ToggleGroup, ToggleGroupItem } from '@celestia-project/ui';
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Button,
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from '@celestia-project/ui';
 import { useState } from 'react';
 import { XIcon, TrashIcon, SpinnerGapIcon, PlayIcon, PauseIcon, TargetIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
@@ -80,40 +95,56 @@ export function LogFilters({
       <div className="flex items-center gap-2 justify-between w-full">
         <div className='flex gap-2 items-center'>
           <span className="text-xs text-muted-foreground">Method:</span>
-          <ToggleGroup
-            type="multiple"
-            variant="outline"
-            size="sm"
+          <Combobox
+            multiple
             value={Array.from(filter.methods)}
             onValueChange={(values) =>
-              setFilter({ ...filter, methods: new Set(values) })
+              setFilter({ ...filter, methods: new Set(values as string[]) })
             }
-            className="bg-background cursor-pointer"
           >
-            {METHOD_FILTERS.map((method) => (
-              <ToggleGroupItem key={method} value={method}>
-                {method}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+            <ComboboxInput
+              placeholder="Method..."
+              showTrigger
+              showClear
+              className="h-7 text-xs w-32 bg-background"
+            />
+            <ComboboxContent>
+              <ComboboxList>
+                <ComboboxEmpty>No method</ComboboxEmpty>
+                {METHOD_FILTERS.map((method) => (
+                  <ComboboxItem key={method} value={method}>
+                    {method}
+                  </ComboboxItem>
+                ))}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
 
           <span className="text-xs text-muted-foreground">Status:</span>
-          <ToggleGroup
-            type="multiple"
-            variant="outline"
-            size="sm"
+          <Combobox
+            multiple
             value={Array.from(filter.statusCodes)}
             onValueChange={(values) =>
-              setFilter({ ...filter, statusCodes: new Set(values) })
+              setFilter({ ...filter, statusCodes: new Set(values as string[]) })
             }
-            className="text-[10px] bg-background cursor-pointer"
           >
-            {STATUS_FILTERS.map((status) => (
-              <ToggleGroupItem key={status.label} value={status.label}>
-                {status.label}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+            <ComboboxInput
+              placeholder="Status..."
+              showTrigger
+              showClear
+              className="h-7 text-xs w-32 bg-background"
+            />
+            <ComboboxContent>
+              <ComboboxList>
+                <ComboboxEmpty>No status</ComboboxEmpty>
+                {STATUS_FILTERS.map((status) => (
+                  <ComboboxItem key={status.label} value={status.label}>
+                    {status.label}
+                  </ComboboxItem>
+                ))}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
         </div>
 
         <div className='flex gap-2 items-center'>
@@ -122,13 +153,14 @@ export function LogFilters({
           )}
 
           {hasActiveFilters && (
-            <Button variant="destructive" onClick={clearFilters}>
+            <Button size="xs" variant="destructive" onClick={clearFilters}>
               <XIcon className="h-4 w-4 mr-1" />
               Clear
             </Button>
           )}
 
           <Button
+            size="xs"
             variant={"secondary"}
             onClick={() => {
               const store = useHttpHistoryQueryStore.getState();
@@ -142,12 +174,12 @@ export function LogFilters({
               : <><PauseIcon className="size-3" /> Pause</>}
           </Button>
 
-          <Button variant={"secondary"} onClick={openTargetSelector}>
+          <Button size="xs" variant={"secondary"} onClick={openTargetSelector}>
             <TargetIcon className="size-3" />
             Target
           </Button>
 
-          <Button variant={"destructive"} onClick={() => setClearDialogOpen(true)}>
+          <Button size="xs" variant={"destructive"} onClick={() => setClearDialogOpen(true)}>
             <TrashIcon className="size-3" />
           </Button>
         </div>
@@ -216,6 +248,7 @@ export function LogFilters({
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isClearing}>Cancel</AlertDialogCancel>
             <Button
+              size="xs"
               variant="destructive"
               disabled={isClearing}
               onClick={clearCalls}

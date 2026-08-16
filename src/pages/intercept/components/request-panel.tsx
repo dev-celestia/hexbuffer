@@ -1,10 +1,12 @@
 
 
 import { Label, TextEditor } from '@celestia-project/ui';
+import { useTheme } from '@/components/theme-provider';
 import { useRequestPanel } from './hooks/use-request-panel';
 import { cn } from '@/lib/utils';
 
 export function InterceptRequestPanel() {
+  const { theme } = useTheme();
   const {
     rawRequest,
     selectedRequestId,
@@ -58,6 +60,7 @@ export function InterceptRequestPanel() {
             value={rawRequest}
             onChange={handleRawChange}
             options={{ readOnly: !selectedRequestId }}
+            theme={theme}
           />
         </div>
       </div>

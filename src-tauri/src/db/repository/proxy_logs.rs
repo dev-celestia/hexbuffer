@@ -14,10 +14,22 @@ fn build_scope_sql_clause(scope: &[String]) -> Option<String> {
                 return None;
             }
 
-            let domain = value.strip_prefix("*.").unwrap_or(value);
+            let clean = value
+                .trim_start_matches("http://")
+                .trim_start_matches("https://")
+                .trim_start_matches("*.")
+                .trim_end_matches('/');
+
+            if clean.is_empty() {
+                return None;
+            }
+
+            let domain_no_port = clean.split(':').next().unwrap_or(clean);
+
             Some(format!(
-                "(url LIKE '%{}%' OR server_addr LIKE '%{}%' OR request_headers LIKE '%\"origin\"%{}%' OR request_headers LIKE '%\"Origin\"%{}%')",
-                domain, domain, domain, domain
+                "(url LIKE '%{clean}%' OR url LIKE '%{domain_no_port}%' OR server_addr LIKE '%{clean}%' OR server_addr LIKE '%{domain_no_port}%' OR request_headers LIKE '%{clean}%' OR request_headers LIKE '%{domain_no_port}%')",
+                clean = clean,
+                domain_no_port = domain_no_port
             ))
         })
         .collect();
@@ -82,8 +94,8 @@ impl Database {
         if let Some(ref search) = filter.search {
             if !search.is_empty() {
                 conditions.push(format!(
-                    "(url LIKE '%{}%' OR method LIKE '%{}%')",
-                    search, search
+                    "(url LIKE '%{}%' OR method LIKE '%{}%' OR server_addr LIKE '%{}%' OR request_headers LIKE '%{}%')",
+                    search, search, search, search
                 ));
             }
         }
@@ -197,7 +209,9 @@ impl Database {
         if let Some(ref search) = filter.search {
             if !search.is_empty() {
                 let search_pattern = format!("%{}%", search);
-                sql.push_str(" AND (url LIKE ? OR method LIKE ?)");
+                sql.push_str(" AND (url LIKE ? OR method LIKE ? OR server_addr LIKE ? OR request_headers LIKE ?)");
+                params_vec.push(Box::new(search_pattern.clone()));
+                params_vec.push(Box::new(search_pattern.clone()));
                 params_vec.push(Box::new(search_pattern.clone()));
                 params_vec.push(Box::new(search_pattern));
             }
@@ -267,8 +281,8 @@ impl Database {
         if let Some(ref search) = filter.search {
             if !search.is_empty() {
                 count_sql.push_str(&format!(
-                    " AND (url LIKE '%{}%' OR method LIKE '%{}%')",
-                    search, search
+                    " AND (url LIKE '%{}%' OR method LIKE '%{}%' OR server_addr LIKE '%{}%' OR request_headers LIKE '%{}%')",
+                    search, search, search, search
                 ));
             }
         }
@@ -389,7 +403,9 @@ impl Database {
         if let Some(ref search) = filter.search {
             if !search.is_empty() {
                 let search_pattern = format!("%{}%", search);
-                where_sql.push_str(" AND (url LIKE ? OR method LIKE ?)");
+                where_sql.push_str(" AND (url LIKE ? OR method LIKE ? OR server_addr LIKE ? OR request_headers LIKE ?)");
+                params_vec.push(Box::new(search_pattern.clone()));
+                params_vec.push(Box::new(search_pattern.clone()));
                 params_vec.push(Box::new(search_pattern.clone()));
                 params_vec.push(Box::new(search_pattern));
             }
@@ -503,7 +519,9 @@ impl Database {
         if let Some(ref search) = filter.search {
             if !search.is_empty() {
                 let search_pattern = format!("%{}%", search);
-                sql.push_str(" AND (url LIKE ? OR method LIKE ?)");
+                sql.push_str(" AND (url LIKE ? OR method LIKE ? OR server_addr LIKE ? OR request_headers LIKE ?)");
+                params_vec.push(Box::new(search_pattern.clone()));
+                params_vec.push(Box::new(search_pattern.clone()));
                 params_vec.push(Box::new(search_pattern.clone()));
                 params_vec.push(Box::new(search_pattern));
             }

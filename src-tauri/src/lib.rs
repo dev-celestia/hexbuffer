@@ -4,6 +4,7 @@ pub mod browser;
 pub mod collaborator;
 pub mod commands;
 pub mod db;
+pub mod dev_server;
 pub mod history;
 #[path = "port-scanner/mod.rs"]
 pub mod port_scanner;
@@ -51,5 +52,15 @@ pub use sqli::types::SqliScanState;
 pub use sqli::{
     start_sqli_scan, stop_sqli_scan, SqliParam, SqliParamLocation, SqliRiskLevel, SqliScanResult,
     SqliSeverity, SqliTechnique, SqliVulnerability,
+};
+pub use dev_server::{
+    auto_patch_next_configs, generate_qr_svg, get_available_ips, get_dev_process_status, kill_port,
+    patch_target_next_config, start_dev_process, stop_dev_process, DevProcessStatus,
+    NetworkInterfaceInfo, ProcessOutputLine,
+};
+pub mod peer_sync;
+pub use peer_sync::{
+    get_discovered_peers, get_my_peer_info, ping_peer, set_device_name, set_peer_broadcast,
+    share_data_to_peer, MyPeerInfo, PeerInfo, SharedDataPayload,
 };
 

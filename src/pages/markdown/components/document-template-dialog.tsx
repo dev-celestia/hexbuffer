@@ -32,7 +32,7 @@ function TemplateOption({
   const Icon = TEMPLATE_ICONS[template.id];
 
   return (
-    <Button
+    <Button size="xs"
       type="button"
       variant="outline"
       className="h-auto justify-start gap-3 px-3 py-3 text-left"

@@ -47,7 +47,7 @@ export function ScratchpadSidebar({ hook }: ScratchpadSidebarProps) {
       {/* Sidebar Header */}
       <div className="p-3 border-b flex items-center justify-between shrink-0 bg-muted/5">
 
-        <Button
+        <Button size="xs"
           variant="ghost"
           onClick={handleAdd}
           disabled={scratchpads.length >= 20}

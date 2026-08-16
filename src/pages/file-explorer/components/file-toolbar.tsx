@@ -305,7 +305,7 @@ export function FileToolbar({
 
         {/* View Mode Toggle */}
         <ButtonGroup>
-          <Button
+          <Button size="xs"
             variant="outline"
             className={cn(
               // Sizing & Spacing
@@ -322,7 +322,7 @@ export function FileToolbar({
           >
             <ListIcon className="size-4" />
           </Button>
-          <Button
+          <Button size="xs"
             variant="outline"
             className={cn(
               // Sizing & Spacing

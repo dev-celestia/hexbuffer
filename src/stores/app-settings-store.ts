@@ -1,5 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { DEFAULT_HIDDEN_WIDGETS, DEFAULT_WIDGET_ORDER } from '@/pages/desktop/constants'
+
+export { DEFAULT_HIDDEN_WIDGETS, DEFAULT_WIDGET_ORDER }
 
 export type BgType = 'none' | 'color' | 'image';
 export type AppTheme = 'dark' | 'light';
@@ -12,6 +15,7 @@ interface AppSettingsState {
   bgValue: string // hex color or data URL
   theme: AppTheme
   hiddenWidgets: string[]
+  widgetOrder: string[]
   setBg: (type: BgType, value: string) => void
   clearBg: () => void
   setTheme: (t: AppTheme) => void
@@ -22,10 +26,12 @@ interface AppSettingsState {
   addRecentApp: (href: string) => void
   removeRecentApp: (href: string) => void
   toggleWidget: (widgetId: string) => void
+  reorderWidgets: (fromIndex: number, toIndex: number) => void
+  setWidgetOrder: (order: string[]) => void
   resetHiddenWidgets: () => void
 }
 
-type PersistedSettings = Pick<AppSettingsState, 'hiddenNavItems' | 'pinnedNavItems' | 'recentApps' | 'bgType' | 'bgValue' | 'theme' | 'hiddenWidgets'>
+type PersistedSettings = Pick<AppSettingsState, 'hiddenNavItems' | 'pinnedNavItems' | 'recentApps' | 'bgType' | 'bgValue' | 'theme' | 'hiddenWidgets' | 'widgetOrder'>
 
 export const useAppSettingsStore = create<AppSettingsState>()(
   persist<AppSettingsState, [], [], PersistedSettings>(
@@ -43,7 +49,8 @@ export const useAppSettingsStore = create<AppSettingsState>()(
       bgType: 'none',
       bgValue: '',
       theme: 'dark',
-      hiddenWidgets: [],
+      hiddenWidgets: DEFAULT_HIDDEN_WIDGETS,
+      widgetOrder: DEFAULT_WIDGET_ORDER,
       setBg: (type, value) => set({ bgType: type, bgValue: value }),
       clearBg: () => set({ bgType: 'none', bgValue: '' }),
       setTheme: (t) => set({ theme: t }),
@@ -83,7 +90,21 @@ export const useAppSettingsStore = create<AppSettingsState>()(
             ? (state.hiddenWidgets || []).filter((w) => w !== widgetId)
             : [...(state.hiddenWidgets || []), widgetId],
         })),
-      resetHiddenWidgets: () => set({ hiddenWidgets: [] }),
+      reorderWidgets: (fromIndex, toIndex) =>
+        set((state) => {
+          const current = state.widgetOrder && state.widgetOrder.length > 0
+            ? [...state.widgetOrder]
+            : [...DEFAULT_WIDGET_ORDER];
+          const [moved] = current.splice(fromIndex, 1);
+          current.splice(toIndex, 0, moved);
+          return { widgetOrder: current };
+        }),
+      setWidgetOrder: (order) => set({ widgetOrder: order }),
+      resetHiddenWidgets: () =>
+        set({
+          hiddenWidgets: DEFAULT_HIDDEN_WIDGETS,
+          widgetOrder: DEFAULT_WIDGET_ORDER,
+        }),
     }),
     {
       name: 'hexbuffer-app-settings',
@@ -95,6 +116,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
         bgValue: state.bgValue,
         theme: state.theme,
         hiddenWidgets: state.hiddenWidgets,
+        widgetOrder: state.widgetOrder,
       }),
       merge: (persisted, current): AppSettingsState => {
         const base = current as AppSettingsState
@@ -108,8 +130,10 @@ export const useAppSettingsStore = create<AppSettingsState>()(
           bgValue: state?.bgValue ?? base.bgValue,
           theme: state?.theme ?? base.theme,
           hiddenWidgets: state?.hiddenWidgets ?? base.hiddenWidgets,
+          widgetOrder: state?.widgetOrder ?? base.widgetOrder,
         }
       },
     }
   )
 )
+

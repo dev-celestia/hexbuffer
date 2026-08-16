@@ -25,6 +25,7 @@ const AssistantPage = React.lazy(() => import("@/layout/assistant").then((m) => 
 const ScratchpadPage = React.lazy(() => import("@/pages/scratchpad").then((m) => ({ default: m.ScratchpadPage })));
 const MockForgePage = React.lazy(() => import("@/pages/mock-forge").then((m) => ({ default: m.MockForgePage })));
 const TerminalPage = React.lazy(() => import("@/pages/terminal").then((m) => ({ default: m.TerminalPage })));
+const DevServerPage = React.lazy(() => import("@/pages/dev-server").then((m) => ({ default: m.DevServerPage })));
 
 export const PAGE_COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
   '/': DesktopPage,
@@ -51,4 +52,5 @@ export const PAGE_COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
   '/scratchpad': ScratchpadPage,
   '/mock-forge': MockForgePage,
   '/terminal': TerminalPage,
+  '/dev-server': DevServerPage,
 };

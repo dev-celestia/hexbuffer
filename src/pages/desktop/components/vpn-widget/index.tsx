@@ -69,7 +69,7 @@ export function VpnWidget() {
         </span>
 
         {/* Status dot */}
-        <span className="relative flex h-2 w-2">
+        <span className="relative flex h-2 w-2 mr-5">
           {status === 'connected' && (
             <>
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -296,7 +296,7 @@ export function VpnWidget() {
           "gap-2 mt-1"
         )}
       >
-        <Button
+        <Button size="xs"
           onClick={handleConnectToggle}
           variant={isActive ? 'destructive' : 'default'}
           className={cn(

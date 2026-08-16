@@ -251,7 +251,7 @@ export function KanbanDetailModal({ card, isOpen, onClose, onSave, onDelete }: P
                         {sub.title}
                       </span>
                     </div>
-                    <Button
+                    <Button size="xs"
                       type="button"
                       variant="ghost"
                       onClick={() => handleRemoveSubtask(sub.id)}
@@ -277,7 +277,7 @@ export function KanbanDetailModal({ card, isOpen, onClose, onSave, onDelete }: P
                 }}
                 placeholder="Add subtask title..."
               />
-              <Button
+              <Button size="xs"
                 type="button"
                 variant="outline"
                 onClick={handleAddSubtask}
@@ -291,14 +291,14 @@ export function KanbanDetailModal({ card, isOpen, onClose, onSave, onDelete }: P
           <DialogFooter>
             {/* ponytail: clear delete button inside footer using only original component styles */}
             <div className="flex w-full justify-between items-center">
-              <Button type="button" variant="destructive" onClick={handleDelete}>
+              <Button size="xs" type="button" variant="destructive" onClick={handleDelete}>
                 Delete
               </Button>
               <div className="flex gap-2">
-                <Button type="button" variant="ghost" onClick={onClose}>
+                <Button size="xs" type="button" variant="ghost" onClick={onClose}>
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button size="xs" type="submit">
                   Save Changes
                 </Button>
               </div>

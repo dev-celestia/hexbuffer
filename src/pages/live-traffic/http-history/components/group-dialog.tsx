@@ -62,10 +62,10 @@ export function CreateGroupDialog({ open, onOpenChange, initialCall }: CreateGro
           autoFocus
         />
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" size="xs" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={!name.trim()}>
+          <Button size="xs" onClick={handleSubmit} disabled={!name.trim()}>
             Create
           </Button>
         </DialogFooter>
