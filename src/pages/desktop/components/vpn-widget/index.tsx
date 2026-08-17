@@ -117,16 +117,6 @@ export function VpnWidget() {
           variant="outline"
           onClick={handleSelectFile}
           disabled={isActive}
-          className={cn(
-            // Layout & Positioning
-            "shrink-0",
-
-            // Sizing & Spacing
-            "h-7 px-2",
-
-            // Interactive & States
-            "active:scale-[0.97] transition-transform duration-100"
-          )}
         >
           <FolderOpenIcon className="size-3.5" />
         </Button>
@@ -296,22 +286,10 @@ export function VpnWidget() {
           "gap-2 mt-1"
         )}
       >
-        <Button size="xs"
+        <Button
+          size="xs"
           onClick={handleConnectToggle}
           variant={isActive ? 'destructive' : 'default'}
-          className={cn(
-            // Layout & Positioning
-            "flex-1 select-none",
-
-            // Sizing & Spacing
-            "h-7",
-
-            // Typography
-            "text-xs font-semibold",
-
-            // Interactive & States
-            "active:scale-[0.97] transition-all duration-150"
-          )}
         >
           {status === 'connecting' ? (
             <>
@@ -331,17 +309,6 @@ export function VpnWidget() {
             size="xs"
             variant="outline"
             onClick={handleConnectToggle}
-            className={cn(
-              // Sizing & Spacing
-              "h-7 px-2.5",
-
-              // Backgrounds & Borders
-              "border-red-500/60 text-red-400",
-
-              // Interactive & States
-              "hover:bg-red-500/10 hover:border-red-400 hover:text-red-300",
-              "active:scale-[0.97] transition-all duration-150"
-            )}
           >
             <XIcon className="size-3.5 mr-1" />
             Cancel
@@ -352,14 +319,6 @@ export function VpnWidget() {
           size="xs"
           variant="outline"
           onClick={() => setShowLogs(!showLogs)}
-          className={cn(
-            // Sizing & Spacing
-            "h-7 px-2.5",
-
-            // Interactive & States
-            "active:scale-[0.97] transition-all duration-150",
-            showLogs ? 'bg-accent border-accent-foreground text-accent-foreground' : ''
-          )}
         >
           <TerminalWindowIcon className="size-4" />
         </Button>

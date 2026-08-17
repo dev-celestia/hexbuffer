@@ -27,78 +27,82 @@ import type { MockDomain, MockRoute } from '@/pages/mock-forge/types';
 import { sendToCollection, sendRawToRepeater } from '@/triggers/repeater';
 import { cleanUrl } from '@/lib/utils';
 
-export function extractHostFromCall(call: ApiCall): string {
-  // 1. Prioritize Origin header if present
+export function extractHostFromCall(call: Partial<ApiCall> | null | undefined): string {
+  if (!call) return '';
+
+  // 1. Prioritize Host / :authority header
+  const headerHost = call.headers?.['host'] || call.headers?.['Host'] || call.headers?.[':authority'];
+  if (headerHost && typeof headerHost === 'string' && headerHost.trim()) {
+    const cleaned = headerHost.trim().toLowerCase().replace(/^https?:\/\//i, '').split('/')[0].trim();
+    if (cleaned && !cleaned.startsWith('/')) {
+      return cleaned.endsWith(':80') ? cleaned.slice(0, -3) : cleaned.endsWith(':443') ? cleaned.slice(0, -4) : cleaned;
+    }
+  }
+
+  // 2. Fallback to call.host
+  const rawHost = call.host && call.host !== '-' ? call.host.trim() : '';
+  if (rawHost && !rawHost.includes('/') && !rawHost.startsWith('/')) {
+    const cleaned = rawHost.toLowerCase().replace(/^https?:\/\//i, '').split('/')[0].trim();
+    if (cleaned) {
+      return cleaned.endsWith(':80') ? cleaned.slice(0, -3) : cleaned.endsWith(':443') ? cleaned.slice(0, -4) : cleaned;
+    }
+  }
+
+  // 3. Fallback to call.url
+  if (call.url && call.url.trim()) {
+    try {
+      const withScheme = call.url.includes('://') ? call.url : `http://${call.url}`;
+      const urlObj = new URL(withScheme);
+      if (urlObj.host) {
+        const cleaned = urlObj.host.toLowerCase();
+        return cleaned.endsWith(':80') ? cleaned.slice(0, -3) : cleaned.endsWith(':443') ? cleaned.slice(0, -4) : cleaned;
+      }
+    } catch {
+      const parsed = call.url.replace(/^https?:\/\//i, '').split('/')[0].trim().toLowerCase();
+      if (parsed && !parsed.startsWith('/')) {
+        return parsed.endsWith(':80') ? parsed.slice(0, -3) : parsed.endsWith(':443') ? parsed.slice(0, -4) : parsed;
+      }
+    }
+  }
+
+  // 4. Fallback to server_ip
+  if (call.server_ip && call.server_ip.trim() && !call.server_ip.startsWith('/') && call.server_ip !== '-') {
+    return call.server_ip.trim().toLowerCase();
+  }
+
+  // 5. Fallback to Origin header if present
   const origin = call.headers?.['origin'] || call.headers?.['Origin'];
   if (origin && origin.trim() && origin.trim() !== 'null' && origin.trim() !== 'opaque') {
     try {
       const withScheme = origin.includes('://') ? origin : `http://${origin}`;
       const urlObj = new URL(withScheme);
-      if (urlObj.host) return urlObj.host;
+      if (urlObj.host) return urlObj.host.toLowerCase();
     } catch {
-      const parsed = origin.replace(/^https?:\/\//i, '').split('/')[0].trim();
+      const parsed = origin.replace(/^https?:\/\//i, '').split('/')[0].trim().toLowerCase();
       if (parsed) return parsed;
     }
   }
 
-  // 2. Fallback to Referer header if present
+  // 6. Fallback to Referer header if present
   const referer = call.headers?.['referer'] || call.headers?.['Referer'];
   if (referer && referer.trim()) {
     try {
       const withScheme = referer.includes('://') ? referer : `http://${referer}`;
       const urlObj = new URL(withScheme);
-      if (urlObj.host) return urlObj.host;
+      if (urlObj.host) return urlObj.host.toLowerCase();
     } catch {
-      const parsed = referer.replace(/^https?:\/\//i, '').split('/')[0].trim();
+      const parsed = referer.replace(/^https?:\/\//i, '').split('/')[0].trim().toLowerCase();
       if (parsed) return parsed;
     }
-  }
-
-  // 3. Fallback to call.host
-  if (call.host && call.host.trim()) {
-    return call.host.trim();
-  }
-
-  // 4. Fallback to host header
-  const headerHost = call.headers?.['host'] || call.headers?.['Host'];
-  if (headerHost && headerHost.trim()) {
-    return headerHost.trim();
-  }
-
-  // 5. Fallback to call.url
-  if (call.url && call.url.trim()) {
-    try {
-      const withScheme = call.url.includes('://') ? call.url : `http://${call.url}`;
-      const urlObj = new URL(withScheme);
-      if (urlObj.host) return urlObj.host;
-    } catch {
-      const parsedHost = call.url
-        .replace(/^https?:\/\//i, '')
-        .split('/')[0]
-        .trim();
-      if (parsedHost && !parsedHost.startsWith('/')) return parsedHost;
-    }
-  }
-
-  // 6. Fallback to server_ip
-  if (call.server_ip && call.server_ip.trim() && !call.server_ip.startsWith('/')) {
-    return call.server_ip.trim();
   }
 
   return '';
 }
 
 export async function resolveHostForCall(call: ApiCall): Promise<string> {
-  const hasOriginOrReferer = Boolean(
-    call.headers?.['origin'] ||
-    call.headers?.['Origin'] ||
-    call.headers?.['referer'] ||
-    call.headers?.['Referer']
-  );
-
-  if (hasOriginOrReferer) {
-    const hostFromHeaders = extractHostFromCall(call);
-    if (hostFromHeaders) return hostFromHeaders;
+  const directHost = extractHostFromCall(call);
+  if (directHost) {
+    return directHost;
   }
 
   if (call.id) {
@@ -112,7 +116,7 @@ export async function resolveHostForCall(call: ApiCall): Promise<string> {
     }
   }
 
-  return extractHostFromCall(call);
+  return '';
 }
 
 function buildAutomationTargetUrl(request: ApiCall) {
@@ -281,7 +285,7 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
     }
     useInterceptStore.getState().addTabForHost(host);
     useNavStore.getState().triggerNavBlink('/intercept');
-    toast.success(`Intercept tab created for ${host}`);
+    toast.success(`Added ${host} to Intercept`);
   }, [call]);
 
   const handleOpenInBrowserAutomation = useCallback(async () => {

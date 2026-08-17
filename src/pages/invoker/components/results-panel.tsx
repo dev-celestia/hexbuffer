@@ -1,12 +1,14 @@
-import { Button } from '@celestia-project/ui';
+import React, { useEffect, useRef, useState } from 'react';
+import { Button, Input } from '@celestia-project/ui';
 import { useInvokerStore } from '@/stores/invoker';
 import { formatPayloadValues, getResultUrl } from '../lib/utils';
 import { useInvokerFilters } from '../hooks/use-filters';
 
-import { TrashIcon } from '@phosphor-icons/react';
+import { TrashIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 
 export function InvokerResultsPanel() {
-  const { filteredResults, resultsCount, clearResults } = useInvokerFilters();
+  const { filterSearch, filteredResults, resultsCount, setFilterSearch, clearResults } = useInvokerFilters();
   const isRunning = useInvokerStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.isRunning ?? false;
@@ -17,13 +19,96 @@ export function InvokerResultsPanel() {
   });
   const setSelectedResult = useInvokerStore((s) => s.setSelectedResult);
 
+  const [localSearch, setLocalSearch] = useState(filterSearch);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setLocalSearch(filterSearch);
+  }, [filterSearch]);
+
+  const handleSearchChange = (val: string) => {
+    setLocalSearch(val);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setFilterSearch(val);
+    }, 200);
+  };
+
+  const handleClearSearch = () => {
+    setLocalSearch('');
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setFilterSearch('');
+  };
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-md border border-border bg-background">
       {/* Header bar */}
-      <div className="flex justify-between items-center bg-muted/40 px-3 py-1.5 border-b border-border shrink-0">
-        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Results ({filteredResults.length})
-        </span>
+      <div className="flex justify-between items-center bg-muted/40 px-3 py-1.5 border-b border-border shrink-0 gap-2">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Results ({filteredResults.length})
+          </span>
+          <div
+            className={cn(
+              // Layout & Positioning
+              "relative flex items-center"
+            )}
+          >
+            <MagnifyingGlassIcon
+              className={cn(
+                // Layout & Positioning
+                "absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none",
+
+                // Sizing & Spacing
+                "size-3.5",
+
+                // Typography
+                "text-muted-foreground"
+              )}
+            />
+            <Input
+              type="text"
+              value={localSearch}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder="Search status or payload…"
+              className={cn(
+                // Sizing & Spacing
+                "h-7 w-44 pl-7 pr-7 text-xs bg-background",
+
+                // Backgrounds & Borders
+                "border-input",
+
+                // Interactive & States
+                "focus:w-56 transition-all duration-150"
+              )}
+            />
+            {localSearch && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className={cn(
+                  // Layout & Positioning
+                  "absolute right-2 top-1/2 -translate-y-1/2",
+
+                  // Typography
+                  "text-muted-foreground",
+
+                  // Interactive & States
+                  "hover:text-foreground"
+                )}
+              >
+                <XIcon className="size-3" />
+              </button>
+            )}
+          </div>
+        </div>
+
         <Button
           variant="outline"
           size="xs"

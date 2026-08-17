@@ -1,4 +1,5 @@
-import { Button, Card } from '@celestia-project/ui';
+import React, { useEffect, useRef, useState } from "react";
+import { Button, Card, Input } from '@celestia-project/ui';
 import { TabbedPageLayout } from "@/components/tabs-layout/tabbed-page-layout";
 
 import { TargetSelectorDialog } from "@/pages/live-traffic/components/target-selector";
@@ -6,7 +7,7 @@ import { useWebSocketHistoryPage } from "./hooks/use-websocket-history-page";
 import { useWebSocketHistoryQueryStore } from "@/stores/history";
 import { invoke } from "@tauri-apps/api/core";
 import { toast } from "sonner";
-import { TrashIcon, PlayIcon, PauseIcon, TargetIcon } from '@phosphor-icons/react';
+import { TrashIcon, PlayIcon, PauseIcon, TargetIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
 
 import { openTargetSelector } from "@/triggers";
 
@@ -15,6 +16,35 @@ import { cn } from "@/lib/utils";
 export function WebSocketHistoryPage() {
   const page = useWebSocketHistoryPage();
   const isWsPaused = useWebSocketHistoryQueryStore((s) => s.isStreamManuallyPaused);
+  const search = useWebSocketHistoryQueryStore((s) => s.filter.search);
+  const setSearch = useWebSocketHistoryQueryStore((s) => s.setSearch);
+
+  const [localSearch, setLocalSearch] = useState(search);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setLocalSearch(search);
+  }, [search]);
+
+  const handleSearchChange = (val: string) => {
+    setLocalSearch(val);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setSearch(val);
+    }, 200);
+  };
+
+  const handleClearSearch = () => {
+    setLocalSearch('');
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setSearch('');
+  };
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   const togglePause = () => {
     const store = useWebSocketHistoryQueryStore.getState();
@@ -63,14 +93,78 @@ export function WebSocketHistoryPage() {
             "bg-muted border-b"
           )}
         >
-          <span
+          <div
             className={cn(
-              // Typography
-              "text-[10px] font-medium text-muted-foreground uppercase tracking-wider pl-1"
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "gap-2"
             )}
           >
-            WebSocket
-          </span>
+            <span
+              className={cn(
+                // Typography
+                "text-[10px] font-medium text-muted-foreground uppercase tracking-wider pl-1"
+              )}
+            >
+              WebSocket
+            </span>
+
+            <div
+              className={cn(
+                // Layout & Positioning
+                "relative flex items-center"
+              )}
+            >
+              <MagnifyingGlassIcon
+                className={cn(
+                  // Layout & Positioning
+                  "absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none",
+
+                  // Sizing & Spacing
+                  "size-3.5",
+
+                  // Typography
+                  "text-muted-foreground"
+                )}
+              />
+              <Input
+                type="text"
+                value={localSearch}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder="Search URL, host, path…"
+                className={cn(
+                  // Sizing & Spacing
+                  "h-7 w-44 pl-7 pr-7 text-xs bg-background",
+
+                  // Backgrounds & Borders
+                  "border-input",
+
+                  // Interactive & States
+                  "focus:w-56 transition-all duration-150"
+                )}
+              />
+              {localSearch && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className={cn(
+                    // Layout & Positioning
+                    "absolute right-2 top-1/2 -translate-y-1/2",
+
+                    // Typography
+                    "text-muted-foreground",
+
+                    // Interactive & States
+                    "hover:text-foreground"
+                  )}
+                >
+                  <XIcon className="size-3" />
+                </button>
+              )}
+            </div>
+          </div>
           <div
             className={cn(
               // Layout & Positioning

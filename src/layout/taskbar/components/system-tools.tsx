@@ -11,8 +11,6 @@ import {
 } from '@phosphor-icons/react';
 
 import { cn } from '@/lib/utils';
-
-import { GlobalSearch } from '../../global-search';
 import type { NavItem } from '../../constants';
 import { DockItem } from './dock-item';
 
@@ -52,9 +50,6 @@ export function SystemTools({
 
   return (
     <div className="flex items-center gap-2.5 min-w-[160px] justify-end">
-      <GlobalSearch />
-
-      <div className="h-5 w-px bg-border/60 mx-1" />
 
       {recentDockItems.length > 0 && (
         <>

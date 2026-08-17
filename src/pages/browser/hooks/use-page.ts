@@ -31,6 +31,7 @@ export function useBrowserAutomationPage() {
     applyInsightCreated,
     applyLogCreated,
     applyHumanInputRequested,
+    setSearch,
   } = useBrowserAutomationStore(
     useShallow((s) => ({
       tabs: s.tabs,
@@ -50,6 +51,7 @@ export function useBrowserAutomationPage() {
       applyInsightCreated: s.applyInsightCreated,
       applyLogCreated: s.applyLogCreated,
       applyHumanInputRequested: s.applyHumanInputRequested,
+      setSearch: s.setSearch,
     }))
   );
 
@@ -235,6 +237,8 @@ export function useBrowserAutomationPage() {
     status,
     isRunning,
     actionLogs,
+    search,
+    setSearch,
     browserAutomationSafetyAlertDismissed,
     setBrowserAutomationSafetyAlertDismissed,
   };

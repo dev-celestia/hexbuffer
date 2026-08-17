@@ -1,7 +1,8 @@
 
 
-import { Badge, ResizableHandle, ResizablePanel, ResizablePanelGroup, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@celestia-project/ui';
-import { CaretDownIcon, CaretRightIcon } from '@phosphor-icons/react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Badge, Input, ResizableHandle, ResizablePanel, ResizablePanelGroup, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@celestia-project/ui';
+import { CaretDownIcon, CaretRightIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
 import { InteractionDetailPane } from './interaction-detail-pane';
 import { ListenerMetrics } from './metrics';
 import { cn } from '@/lib/utils';
@@ -25,6 +26,8 @@ interface Props {
   selectedInteraction: ListenerInteraction | null;
   stats: ListenerDashboardStats;
   isEnabled: boolean;
+  search: string;
+  setSearch: (query: string) => void;
 }
 
 export function ListenerInteractions({
@@ -38,7 +41,36 @@ export function ListenerInteractions({
   selectedInteraction,
   stats,
   isEnabled,
+  search,
+  setSearch,
 }: Props) {
+  const [localSearch, setLocalSearch] = useState(search);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setLocalSearch(search);
+  }, [search]);
+
+  const handleSearchChange = (val: string) => {
+    setLocalSearch(val);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setSearch(val);
+    }, 200);
+  };
+
+  const handleClearSearch = () => {
+    setLocalSearch('');
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setSearch('');
+  };
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
   const {
     collapsedServers,
     handlePointerDown,
@@ -63,6 +95,60 @@ export function ListenerInteractions({
           {interactions.length} interaction{interactions.length !== 1 ? 's' : ''}
         </span>
         <div className="flex items-center gap-2">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "relative flex items-center"
+            )}
+          >
+            <MagnifyingGlassIcon
+              className={cn(
+                // Layout & Positioning
+                "absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none",
+
+                // Sizing & Spacing
+                "size-3.5",
+
+                // Typography
+                "text-muted-foreground"
+              )}
+            />
+            <Input
+              type="text"
+              value={localSearch}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder="Search type, IP, method, path, payload…"
+              className={cn(
+                // Sizing & Spacing
+                "h-7 w-52 pl-7 pr-7 text-xs bg-background",
+
+                // Backgrounds & Borders
+                "border-input",
+
+                // Interactive & States
+                "focus:w-72 transition-all duration-150"
+              )}
+            />
+            {localSearch && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className={cn(
+                  // Layout & Positioning
+                  "absolute right-2 top-1/2 -translate-y-1/2",
+
+                  // Typography
+                  "text-muted-foreground",
+
+                  // Interactive & States
+                  "hover:text-foreground"
+                )}
+              >
+                <XIcon className="size-3" />
+              </button>
+            )}
+          </div>
+
           <Select
             value={selectedTypeFilter ?? 'all'}
             onValueChange={(v) => setSelectedTypeFilter(v === 'all' ? null : v)}

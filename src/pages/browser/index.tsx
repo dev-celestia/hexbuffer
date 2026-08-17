@@ -1,6 +1,7 @@
-import { Alert, AlertAction, AlertDescription, Button, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, AlertAction, AlertDescription, Button, Input, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
-import { PlayIcon, SquareIcon, PauseIcon, ArrowCounterClockwiseIcon, InfoIcon } from '@phosphor-icons/react';
+import { PlayIcon, SquareIcon, PauseIcon, ArrowCounterClockwiseIcon, InfoIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
 import { AiInsightsPanel } from './components/insight-panel';
 import { ActionLogPanel } from './components/ActionLogPanel';
 import { CrawlSetupScreen } from './components/setup-screen';
@@ -16,6 +17,33 @@ import { startBrowserCrawl, stopBrowserCrawl, toggleBrowserCrawl } from '@/trigg
 export function BrowserAutomationPage() {
   const { proxyStatus, isStarting, handleStartProxy } = useProxyStart();
   const page = useBrowserAutomationPage();
+
+  const [localSearch, setLocalSearch] = useState(page.search);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setLocalSearch(page.search);
+  }, [page.search]);
+
+  const handleSearchChange = (val: string) => {
+    setLocalSearch(val);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      page.setSearch(val);
+    }, 200);
+  };
+
+  const handleClearSearch = () => {
+    setLocalSearch('');
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    page.setSearch('');
+  };
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   if (!page.activeTab) {
     return null;
@@ -36,7 +64,7 @@ export function BrowserAutomationPage() {
             variant="default"
             className={cn(
               // Layout & Positioning
-              "flex items-center shrink-0 min-h-11",
+              "flex items-center shrink-0",
 
               // Sizing & Spacing
               "mb-2",
@@ -155,12 +183,66 @@ export function BrowserAutomationPage() {
             <div
               className={cn(
                 // Layout & Positioning
-                "flex flex-wrap items-center justify-end",
+                "flex flex-wrap items-center justify-between",
 
                 // Sizing & Spacing
                 "p-1 gap-2"
               )}
             >
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "relative flex items-center"
+                )}
+              >
+                <MagnifyingGlassIcon
+                  className={cn(
+                    // Layout & Positioning
+                    "absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none",
+
+                    // Sizing & Spacing
+                    "size-3.5",
+
+                    // Typography
+                    "text-muted-foreground"
+                  )}
+                />
+                <Input
+                  type="text"
+                  value={localSearch}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  placeholder="Search pages, logs, insights…"
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-7 w-48 pl-7 pr-7 text-xs bg-background",
+
+                    // Backgrounds & Borders
+                    "border-input",
+
+                    // Interactive & States
+                    "focus:w-64 transition-all duration-150"
+                  )}
+                />
+                {localSearch && (
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className={cn(
+                      // Layout & Positioning
+                      "absolute right-2 top-1/2 -translate-y-1/2",
+
+                      // Typography
+                      "text-muted-foreground",
+
+                      // Interactive & States
+                      "hover:text-foreground"
+                    )}
+                  >
+                    <XIcon className="size-3" />
+                  </button>
+                )}
+              </div>
+
               <div
                 className={cn(
                   // Layout & Positioning
@@ -170,42 +252,52 @@ export function BrowserAutomationPage() {
                   "gap-2"
                 )}
               >
-                <CrawlStatusBadge status={page.status} />
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-center",
 
-                {/* Start/Stop/Pause/Resume */}
-                {(page.status === 'idle' || page.status === 'completed' || page.status === 'failed' || page.status === 'stopped') && (
-                  <Button size="xs" onClick={startBrowserCrawl}>
-                    <PlayIcon className="size-3" /> Start
-                  </Button>
-                )}
-                {page.status === 'running' && (
-                  <>
-                    <Button size="xs" variant="outline" onClick={toggleBrowserCrawl}>
-                      <PauseIcon className="size-3" /> Pause
+                    // Sizing & Spacing
+                    "gap-2"
+                  )}
+                >
+                  <CrawlStatusBadge status={page.status} />
+
+                  {/* Start/Stop/Pause/Resume */}
+                  {(page.status === 'idle' || page.status === 'completed' || page.status === 'failed' || page.status === 'stopped') && (
+                    <Button size="xs" onClick={startBrowserCrawl}>
+                      <PlayIcon className="size-3" /> Start
                     </Button>
-                    <Button size="xs" variant="destructive" onClick={stopBrowserCrawl}>
-                      <SquareIcon className="size-3" /> Stop
-                    </Button>
-                  </>
-                )}
-                {page.status === 'paused' && (
-                  <>
-                    <Button size="xs" variant="outline" onClick={toggleBrowserCrawl}>
-                      <ArrowCounterClockwiseIcon className="size-3" /> Resume
-                    </Button>
-                    <Button size="xs" variant="destructive" onClick={stopBrowserCrawl}>
-                      <SquareIcon className="size-3" /> Stop
-                    </Button>
-                  </>
-                )}
+                  )}
+                  {page.status === 'running' && (
+                    <>
+                      <Button size="xs" variant="outline" onClick={toggleBrowserCrawl}>
+                        <PauseIcon className="size-3" /> Pause
+                      </Button>
+                      <Button size="xs" variant="destructive" onClick={stopBrowserCrawl}>
+                        <SquareIcon className="size-3" /> Stop
+                      </Button>
+                    </>
+                  )}
+                  {page.status === 'paused' && (
+                    <>
+                      <Button size="xs" variant="outline" onClick={toggleBrowserCrawl}>
+                        <ArrowCounterClockwiseIcon className="size-3" /> Resume
+                      </Button>
+                      <Button size="xs" variant="destructive" onClick={stopBrowserCrawl}>
+                        <SquareIcon className="size-3" /> Stop
+                      </Button>
+                    </>
+                  )}
+                </div>
+
+                <CrawlSetupScreen
+                  setup={setup}
+                  disabled={page.isRunning}
+                  onSetupChange={page.updateSetup}
+                  onSave={page.saveConfig}
+                />
               </div>
-
-              <CrawlSetupScreen
-                setup={setup}
-                disabled={page.isRunning}
-                onSetupChange={page.updateSetup}
-                onSave={page.saveConfig}
-              />
             </div>
           </header>
 

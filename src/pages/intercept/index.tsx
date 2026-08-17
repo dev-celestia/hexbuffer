@@ -44,7 +44,7 @@ export function InterceptPage() {
             variant="default"
             className={cn(
               // Layout & Positioning
-              "flex items-center shrink-0 min-h-11",
+              "flex items-center shrink-0",
 
               // Backgrounds & Borders
               "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-200"
@@ -99,7 +99,7 @@ export function InterceptPage() {
           "flex-1 min-h-0 overflow-hidden",
 
           // Backgrounds & Borders
-          "rounded-lg border"
+          "rounded-lg border bg-card"
         )}
       >
         <div

@@ -13,11 +13,13 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
+  Input,
 } from '@celestia-project/ui';
-import { useState } from 'react';
-import { XIcon, TrashIcon, SpinnerGapIcon, PlayIcon, PauseIcon, TargetIcon } from '@phosphor-icons/react';
+import { useEffect, useRef, useState } from 'react';
+import { XIcon, TrashIcon, SpinnerGapIcon, PlayIcon, PauseIcon, TargetIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { CrawlStatusBadge } from '@/components/status-badge';
+import { cn } from '@/lib/utils';
 
 import { openTargetSelector } from '@/triggers';
 
@@ -66,6 +68,33 @@ export function LogFilters({
   const filter = filterProp ?? storeFilter;
   const clearFilters = onClearFilters ?? storeClearFilters;
 
+  const [localSearch, setLocalSearch] = useState(filter.search);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setLocalSearch(filter.search);
+  }, [filter.search]);
+
+  const handleSearchChange = (val: string) => {
+    setLocalSearch(val);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setFilter({ ...filter, search: val });
+    }, 200);
+  };
+
+  const handleClearSearch = () => {
+    setLocalSearch('');
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setFilter({ ...filter, search: '' });
+  };
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
   const clearCalls = clearCallsProp ?? (async () => {
     setIsClearing(true);
     try {
@@ -94,6 +123,60 @@ export function LogFilters({
     <div className="bg-muted p-1 px-2">
       <div className="flex items-center gap-2 justify-between w-full">
         <div className='flex gap-2 items-center'>
+          <div
+            className={cn(
+              // Layout & Positioning
+              "relative flex items-center"
+            )}
+          >
+            <MagnifyingGlassIcon
+              className={cn(
+                // Layout & Positioning
+                "absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none",
+
+                // Sizing & Spacing
+                "size-3.5",
+
+                // Typography
+                "text-muted-foreground"
+              )}
+            />
+            <Input
+              type="text"
+              value={localSearch}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder="Search URL, host, method, body…"
+              className={cn(
+                // Sizing & Spacing
+                "h-7 w-48 pl-7 pr-7 text-xs bg-background",
+
+                // Backgrounds & Borders
+                "border-input",
+
+                // Interactive & States
+                "focus:w-64 transition-all duration-150"
+              )}
+            />
+            {localSearch && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className={cn(
+                  // Layout & Positioning
+                  "absolute right-2 top-1/2 -translate-y-1/2",
+
+                  // Typography
+                  "text-muted-foreground",
+
+                  // Interactive & States
+                  "hover:text-foreground"
+                )}
+              >
+                <XIcon className="size-3" />
+              </button>
+            )}
+          </div>
+
           <span className="text-xs text-muted-foreground">Method:</span>
           <Combobox
             multiple

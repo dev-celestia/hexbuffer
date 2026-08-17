@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@celestia-project/ui';
+import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, Input } from '@celestia-project/ui';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useDesktopPage } from './hooks/use-desktop-page';
@@ -11,7 +11,7 @@ import { ClipboardWidget } from './components/clipboard-widget';
 import { DesktopIconItem } from './components/desktop-icon-item';
 import { SortableWidget } from './components/sortable-widget';
 
-import { ShieldWarningIcon, GearSixIcon } from '@phosphor-icons/react';
+import { ShieldWarningIcon, GearSixIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
 import { ShortcutManager } from './components/shortcut-manager';
 
 import { cn } from '@/lib/utils';
@@ -37,6 +37,8 @@ function renderWidget(id: string) {
 
 export function DesktopPage() {
   const {
+    searchQuery,
+    setSearchQuery,
     displayItems,
     visibleWidgetIds,
     hasVisibleWidgets,
@@ -79,7 +81,7 @@ export function DesktopPage() {
           <div
             className={cn(
               // Layout & Positioning
-              "flex items-center max-w-[800px]",
+              "flex items-center justify-between max-w-[800px]",
 
               // Sizing & Spacing
               "gap-4 mb-4 pb-2",
@@ -88,56 +90,120 @@ export function DesktopPage() {
               "border-b border-border/40"
             )}
           >
-            <Dialog>
-              <DialogTrigger>
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  className={cn(
-                    // Sizing & Spacing
-                    "h-5 px-1.5",
-
-                    // Typography
-                    "text-[11px] text-muted-foreground",
-
-                    // Interactive & States
-                    "hover:text-foreground hover:bg-muted/60"
-                  )}
-                >
-                  <GearSixIcon className="mr-1 size-3.5" />
-                  Manage
-                </Button>
-              </DialogTrigger>
-              <DialogContent
-                className={cn(
-                  // Sizing & Spacing
-                  "max-w-md"
-                )}
-              >
-                <DialogHeader>
-                  <DialogTitle>Manage Desktop</DialogTitle>
-                  <DialogDescription>
-                    Toggle visibility of shortcuts and widgets on your desktop workspace.
-                  </DialogDescription>
-                </DialogHeader>
-                <div
-                  className={cn(
-                    // Sizing & Spacing
-                    "mt-2"
-                  )}
-                >
-                  <ShortcutManager />
-                </div>
-              </DialogContent>
-            </Dialog>
-            <p
+            <div
               className={cn(
-                // Typography
-                "text-[11px] font-mono font-bold tracking-wider uppercase text-muted-foreground"
+                // Layout & Positioning
+                "flex items-center",
+
+                // Sizing & Spacing
+                "gap-3"
               )}
             >
-              Shortcuts
-            </p>
+              <Dialog>
+                <DialogTrigger>
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    className={cn(
+                      // Sizing & Spacing
+                      "h-5 px-1.5",
+
+                      // Typography
+                      "text-[11px] text-muted-foreground",
+
+                      // Interactive & States
+                      "hover:text-foreground hover:bg-muted/60"
+                    )}
+                  >
+                    <GearSixIcon className="mr-1 size-3.5" />
+                    Manage
+                  </Button>
+                </DialogTrigger>
+                <DialogContent
+                  className={cn(
+                    // Sizing & Spacing
+                    "max-w-md"
+                  )}
+                >
+                  <DialogHeader>
+                    <DialogTitle>Manage Desktop</DialogTitle>
+                    <DialogDescription>
+                      Toggle visibility of shortcuts and widgets on your desktop workspace.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div
+                    className={cn(
+                      // Sizing & Spacing
+                      "mt-2"
+                    )}
+                  >
+                    <ShortcutManager />
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <p
+                className={cn(
+                  // Typography
+                  "text-[11px] font-mono font-bold tracking-wider uppercase text-muted-foreground"
+                )}
+              >
+                Shortcuts
+              </p>
+            </div>
+
+            <div
+              className={cn(
+                // Layout & Positioning
+                "relative flex items-center"
+              )}
+            >
+              <MagnifyingGlassIcon
+                className={cn(
+                  // Layout & Positioning
+                  "absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none",
+
+                  // Sizing & Spacing
+                  "size-3.5",
+
+                  // Typography
+                  "text-muted-foreground"
+                )}
+              />
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search features…"
+                className={cn(
+                  // Sizing & Spacing
+                  "h-7 w-44 pl-7 pr-7 text-xs",
+
+                  // Backgrounds & Borders
+                  "bg-background/80 border-input",
+
+                  // Interactive & States
+                  "focus:w-56 transition-all duration-150"
+                )}
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className={cn(
+                    // Layout & Positioning
+                    "absolute right-2 top-1/2 -translate-y-1/2",
+
+                    // Typography
+                    "text-muted-foreground",
+
+                    // Interactive & States
+                    "hover:text-foreground"
+                  )}
+                >
+                  <XIcon className="size-3" />
+                </button>
+              )}
+            </div>
           </div>
 
           {displayItems.length > 0 ? (

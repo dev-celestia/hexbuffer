@@ -57,7 +57,15 @@ interface InterceptState {
 const initialTab = createInterceptTab(1);
 
 function normalizeHost(host: string): string {
-  return host.trim().toLowerCase();
+  if (!host) return '';
+  let cleaned = host.trim().toLowerCase();
+  cleaned = cleaned.replace(/^https?:\/\//i, '').split('/')[0].trim();
+  if (cleaned.endsWith(':80')) {
+    cleaned = cleaned.slice(0, -3);
+  } else if (cleaned.endsWith(':443')) {
+    cleaned = cleaned.slice(0, -4);
+  }
+  return cleaned;
 }
 
 function capturePatternMatchesHost(pattern: string, host: string): boolean {
@@ -184,17 +192,53 @@ export const useInterceptStore = create<InterceptState>()(
           return null;
         }
 
+        const state = get();
+
+        // 1. Check if any tab already has this host pattern
+        const existingTabWithHost = state.tabs.find((tab) =>
+          tab.captureHosts.some((pattern) => capturePatternMatchesHost(pattern, normalized))
+        );
+
+        if (existingTabWithHost) {
+          set((s) => ({
+            activeTabId: existingTabWithHost.id,
+            ...syncSelectedRequest(s.requests, existingTabWithHost.id, null, null, ''),
+          }));
+          void get().syncActiveScope();
+          return existingTabWithHost.id;
+        }
+
+        // 2. If tabs exist, append host to current active tab
+        if (state.tabs.length > 0) {
+          const targetTabId = state.tabs.some((tab) => tab.id === state.activeTabId)
+            ? state.activeTabId
+            : state.tabs[0].id;
+
+          set((s) => ({
+            activeTabId: targetTabId,
+            tabs: s.tabs.map((tab) =>
+              tab.id === targetTabId && !tab.captureHosts.includes(normalized)
+                ? { ...tab, captureHosts: [...tab.captureHosts, normalized] }
+                : tab
+            ),
+            ...syncSelectedRequest(s.requests, targetTabId, null, null, ''),
+          }));
+          void get().syncActiveScope();
+          return targetTabId;
+        }
+
+        // 3. Fallback: create initial tab if tabs list is empty
         const tab = {
-          ...createInterceptTab(get().nextTabNumber),
+          ...createInterceptTab(state.nextTabNumber),
           name: normalized,
           captureHosts: [normalized],
         };
 
-        set((state) => ({
-          tabs: [...state.tabs, tab],
+        set((s) => ({
+          tabs: [tab],
           activeTabId: tab.id,
-          nextTabNumber: state.nextTabNumber + 1,
-          ...syncSelectedRequest(state.requests, tab.id, null, null, ''),
+          nextTabNumber: s.nextTabNumber + 1,
+          ...syncSelectedRequest(s.requests, tab.id, null, null, ''),
         }));
         void get().syncActiveScope();
 

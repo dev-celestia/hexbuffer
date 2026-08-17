@@ -88,9 +88,6 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         });
     }
 
-    // Initialize System Tray Menu
-    crate::tray::init(app)?;
-
     crate::log("Tauri setup complete");
     Ok(())
 }

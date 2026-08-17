@@ -3,7 +3,6 @@
 
 mod app_commands;
 mod setup;
-mod tray;
 
 use tauri::Manager;
 

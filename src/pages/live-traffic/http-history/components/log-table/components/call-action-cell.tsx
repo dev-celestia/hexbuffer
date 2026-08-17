@@ -56,7 +56,7 @@ export const CallActionCell = memo(function CallActionCell({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger>
         <Button
           variant="ghost"
           size="icon"

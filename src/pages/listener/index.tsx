@@ -120,6 +120,8 @@ export function ListenerPage() {
             selectedInteraction={page.selectedInteraction}
             stats={page.stats}
             isEnabled={page.isEnabled}
+            search={page.search}
+            setSearch={page.setSearch}
           />
         </TabsContent>
       </TabbedPageLayout>
