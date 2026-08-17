@@ -1,19 +1,21 @@
 import { getHttpLogDetail } from '@/pages/live-traffic/http-history/api';
-import { useInvokerStore } from '@/stores/invoker';
+import { useIntruderStore } from '@/stores/intruder';
 import { useNavStore } from '@/stores/nav';
 import {
   createDefaultAttackConfig,
   findRequestPayloadPositions,
-} from '@/pages/invoker/types';
+} from '@/pages/intruder/types';
 
-export interface SendToInvokerOptions {
+export interface SendToIntruderOptions {
   logId: string;
   rawRequest?: string;
   payloadValues?: string[];
   delayMs?: number;
 }
 
-export async function sendToInvoker(options: SendToInvokerOptions): Promise<void> {
+export type SendToInvokerOptions = SendToIntruderOptions;
+
+export async function sendToIntruder(options: SendToIntruderOptions): Promise<void> {
   const { logId, rawRequest, payloadValues, delayMs } = options;
   if (!logId) return;
 
@@ -36,14 +38,17 @@ export async function sendToInvoker(options: SendToInvokerOptions): Promise<void
     ...(delayMs !== undefined ? { delay_ms: delayMs } : {}),
   };
 
-  const invokerStore = useInvokerStore.getState();
-  invokerStore.addAttackTab(config);
+  const intruderStore = useIntruderStore.getState();
+  intruderStore.addAttackTab(config);
 
   if (payloadValues?.length) {
-    invokerStore.updatePayloadValues(payloadValues);
+    intruderStore.updatePayloadValues(payloadValues);
   }
 
-  useNavStore.getState().triggerNavBlink('/invoker');
-  useNavStore.getState().openWindow('/invoker', 'Invoker');
-  useNavStore.getState().focusWindow('/invoker');
+  useNavStore.getState().triggerNavBlink('/intruder');
+  useNavStore.getState().openWindow('/intruder', 'Intruder');
+  useNavStore.getState().focusWindow('/intruder');
 }
+
+export const sendToInvoker = sendToIntruder;
+

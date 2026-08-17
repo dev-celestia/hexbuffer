@@ -238,8 +238,9 @@ export function LogDetailView() {
                   onClick={handleSendToInvoker}
                   className="text-xs"
                 >
-                  <CrosshairIcon className="mr-2 size-4" /> Send to Invoker
+                  <CrosshairIcon className="mr-2 size-4" /> Send to Intruder
                 </DropdownMenuItem>
+
               </DropdownMenuContent>
             </DropdownMenu>
             <Button

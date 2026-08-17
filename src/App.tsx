@@ -13,12 +13,13 @@ const HttpHistoryPage = React.lazy(() =>
 const WebSocketHistoryPage = React.lazy(() =>
   import("@/pages/live-traffic/websocket-history").then((m) => ({ default: m.WebSocketHistoryPage }))
 );
-const InvokerPage = React.lazy(() =>
-  import("@/pages/invoker").then((m) => ({ default: m.InvokerPage }))
+const IntruderPage = React.lazy(() =>
+  import("@/pages/intruder").then((m) => ({ default: m.IntruderPage }))
 );
 const Settings = React.lazy(() =>
   import("@/pages/settings").then((m) => ({ default: m.Settings }))
 );
+
 const RepeaterPage = React.lazy(() =>
   import("@/pages/repeater").then((m) => ({ default: m.RepeaterPage }))
 );
@@ -116,8 +117,10 @@ function AppRoutes() {
           <Route path="/websocket-history" element={<WebSocketHistoryPage />} />
           <Route path="/intercept" element={<InterceptPage />} />
           <Route path="/repeater" element={<RepeaterPage />} />
-          <Route path="/invoker" element={<InvokerPage />} />
+          <Route path="/intruder" element={<IntruderPage />} />
+          <Route path="/invoker" element={<IntruderPage />} />
           <Route path="/browser" element={<BrowserAutomationPage />} />
+
           <Route path="/listener" element={<ListenerPage />} />
           <Route path="/inspector" element={<InspectorPage />} />
           <Route path="/encoder" element={<EncoderPage />} />

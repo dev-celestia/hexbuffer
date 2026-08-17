@@ -1,7 +1,7 @@
-import { useInvokerStore } from '@/stores/invoker';
+import { useIntruderStore } from '@/stores/intruder';
 
-export function InvokerProgress() {
-  const progress = useInvokerStore((s) => {
+export function IntruderProgress() {
+  const progress = useIntruderStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.progress ?? null;
   });
@@ -29,3 +29,6 @@ export function InvokerProgress() {
     </div>
   );
 }
+
+export const InvokerProgress = IntruderProgress;
+

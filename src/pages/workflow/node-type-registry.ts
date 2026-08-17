@@ -252,12 +252,13 @@ export const NODE_TYPE_REGISTRY: Record<AutomationNodeType, NodeTypeDef> = {
   },
   'action:start-invoker': {
     type: 'action:start-invoker',
-    label: 'Start Invoker',
+    label: 'Start Intruder',
     category: 'action',
     iconName: 'Lightning',
-    description: 'Launch an Invoker attack against a target',
+    description: 'Launch an Intruder attack against a target',
     defaultConfig: { actionType: 'action:start-invoker', params: { mode: 'sniper', target: '', wordlist: '' } },
   },
+
   'action:port-scan': {
     type: 'action:port-scan',
     label: 'Port Scan',

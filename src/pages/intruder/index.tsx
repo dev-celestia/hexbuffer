@@ -3,25 +3,25 @@ import * as React from 'react';
 
 import { InfoIcon, PlayIcon, SquareIcon } from '@phosphor-icons/react';
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
-import { InvokerConfigDialog } from './components/invoker-config';
-import { InvokerPayloadDialog } from './components/payload-dialog';
-import { InvokerResultsPanel } from './components/results-panel';
-import { InvokerResultInspector } from './components/result-inspector';
-import { useInvokerPage } from './hooks/use-page';
-import { stopInvokerUiAttack } from '@/triggers';
-import { useInvokerStore } from '@/stores/invoker';
+import { IntruderConfigDialog } from './components/intruder-config';
+import { IntruderPayloadDialog } from './components/payload-dialog';
+import { IntruderResultsPanel } from './components/results-panel';
+import { IntruderResultInspector } from './components/result-inspector';
+import { useIntruderPage } from './hooks/use-page';
+import { stopIntruderUiAttack } from '@/triggers';
+import { useIntruderStore } from '@/stores/intruder';
 
 import { cn } from '@/lib/utils';
 
-export function InvokerPage() {
-  const page = useInvokerPage();
+export function IntruderPage() {
+  const page = useIntruderPage();
   
   // Read state directly from the store for selectedResult to wire up the inspector
-  const selectedResult = useInvokerStore((s) => {
+  const selectedResult = useIntruderStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.selectedResult ?? null;
   });
-  const setSelectedResult = useInvokerStore((s) => s.setSelectedResult);
+  const setSelectedResult = useIntruderStore((s) => s.setSelectedResult);
 
   if (!page.activeTab) {
     return null;
@@ -35,7 +35,7 @@ export function InvokerPage() {
   return (
     <>
       {/* Condensed safety warning banner */}
-      {!page.invokerSafetyAlertDismissed && (
+      {!page.intruderSafetyAlertDismissed && (
         <div
           className={cn(
             // Layout & Positioning
@@ -74,14 +74,14 @@ export function InvokerPage() {
                   "text-xs font-sans leading-normal text-amber-800 dark:text-amber-300"
                 )}
               >
-                Only run invoker tests against systems you own or are explicitly authorized to assess. Unauthorized assessments can be illegal.
+                Only run intruder tests against systems you own or are explicitly authorized to assess. Unauthorized assessments can be illegal.
               </AlertDescription>
             </div>
             <Button
               variant="outline"
               size="xs"
               aria-label="Dismiss safety notice"
-              onClick={() => page.setInvokerSafetyAlertDismissed(true)}
+              onClick={() => page.setIntruderSafetyAlertDismissed(true)}
             >
               Dismiss
             </Button>
@@ -138,7 +138,7 @@ export function InvokerPage() {
                 <Button 
                   size="xs" 
                   variant="destructive" 
-                  onClick={stopInvokerUiAttack}
+                  onClick={stopIntruderUiAttack}
                 >
                   <SquareIcon className="size-3" /> Stop Attack
                 </Button>
@@ -267,7 +267,7 @@ export function InvokerPage() {
                   "p-3"
                 )}
               >
-                <InvokerConfigDialog 
+                <IntruderConfigDialog 
                   isRunning={page.isRunning} 
                   progress={page.progress} 
                   startBlockedReason={page.startBlockedReason} 
@@ -304,7 +304,7 @@ export function InvokerPage() {
                         "p-3 pb-1.5"
                       )}
                     >
-                      <InvokerResultsPanel />
+                      <IntruderResultsPanel />
                     </div>
 
                     {/* Bottom Row: Inline Request / Response inspector */}
@@ -315,7 +315,7 @@ export function InvokerPage() {
                       )}
                     >
                       {page.activeTab.config && (
-                        <InvokerResultInspector 
+                        <IntruderResultInspector 
                           selectedResult={selectedResult} 
                           config={page.activeTab.config} 
                           onClose={() => setSelectedResult(null)} 
@@ -333,7 +333,7 @@ export function InvokerPage() {
                       "h-full p-3"
                     )}
                   >
-                    <InvokerResultsPanel />
+                    <IntruderResultsPanel />
                   </div>
                 )}
               </div>
@@ -341,9 +341,12 @@ export function InvokerPage() {
           </div>
 
           {/* Dialog helpers rendered off-canvas */}
-          <InvokerPayloadDialog />
+          <IntruderPayloadDialog />
         </div>
       </TabbedPageLayout>
     </>
   );
 }
+
+export const InvokerPage = IntruderPage;
+

@@ -7,7 +7,7 @@ import {
   RequestTab,
 } from './config/index';
 
-export function InvokerConfigDialog({
+export function IntruderConfigDialog({
   isRunning,
   progress,
   startBlockedReason,
@@ -16,6 +16,7 @@ export function InvokerConfigDialog({
   progress: { current: number; total: number } | null;
   startBlockedReason: string | null;
 }) {
+
   return (
    <div className="min-h-0 overflow-auto">
         {/* Progress badge */}
@@ -53,3 +54,6 @@ export function InvokerConfigDialog({
       </div>
   );
 }
+
+export const InvokerConfigDialog = IntruderConfigDialog;
+

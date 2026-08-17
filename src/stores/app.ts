@@ -27,10 +27,12 @@ export interface AppState {
   proxyStatus: ProxyStatus;
   proxyPort: number | null;
   proxyDefaultPort: number;
+  intruderSafetyAlertDismissed: boolean;
   invokerSafetyAlertDismissed: boolean;
   browserAutomationSafetyAlertDismissed: boolean;
   setProxyStatus: (status: ProxyStatus) => void;
   saveProxyDefaultPort: (port: number) => Promise<number>;
+  setIntruderSafetyAlertDismissed: (dismissed: boolean) => void;
   setInvokerSafetyAlertDismissed: (dismissed: boolean) => void;
   setBrowserAutomationSafetyAlertDismissed: (dismissed: boolean) => void;
   startProxy: () => Promise<void>;
@@ -40,7 +42,10 @@ export interface AppState {
 
 type PersistedAppState = Pick<
   AppState,
-  'proxyDefaultPort' | 'invokerSafetyAlertDismissed' | 'browserAutomationSafetyAlertDismissed'
+  | 'proxyDefaultPort'
+  | 'intruderSafetyAlertDismissed'
+  | 'invokerSafetyAlertDismissed'
+  | 'browserAutomationSafetyAlertDismissed'
 >;
 
 export function getEffectiveProxyPort(state: Pick<AppState, 'proxyPort' | 'proxyDefaultPort'>) {
@@ -53,10 +58,22 @@ export const useAppStore = create<AppState>()(
       proxyStatus: 'disconnected' as ProxyStatus,
       proxyPort: null,
       proxyDefaultPort: DEFAULT_PROXY_PORT,
+      intruderSafetyAlertDismissed: false,
       invokerSafetyAlertDismissed: false,
       browserAutomationSafetyAlertDismissed: false,
 
       setProxyStatus: (proxyStatus) => set({ proxyStatus }),
+      setIntruderSafetyAlertDismissed: (dismissed) =>
+        set({
+          intruderSafetyAlertDismissed: dismissed,
+          invokerSafetyAlertDismissed: dismissed,
+        }),
+      setInvokerSafetyAlertDismissed: (dismissed) =>
+        set({
+          intruderSafetyAlertDismissed: dismissed,
+          invokerSafetyAlertDismissed: dismissed,
+        }),
+
       saveProxyDefaultPort: async (proxyDefaultPort) => {
         if (!isValidProxyPort(proxyDefaultPort)) {
           throw new Error(`Proxy port must be between ${MIN_PROXY_PORT} and ${MAX_PROXY_PORT}`);
@@ -73,10 +90,9 @@ export const useAppStore = create<AppState>()(
         await useAppStore.getState().startProxy();
         return getEffectiveProxyPort(useAppStore.getState());
       },
-      setInvokerSafetyAlertDismissed: (invokerSafetyAlertDismissed) =>
-        set({ invokerSafetyAlertDismissed }),
       setBrowserAutomationSafetyAlertDismissed: (browserAutomationSafetyAlertDismissed) =>
         set({ browserAutomationSafetyAlertDismissed }),
+
 
       startProxy: async () => {
         console.log('[store] startProxy called');
@@ -168,11 +184,16 @@ export const useAppStore = create<AppState>()(
         const base = current as AppState;
         const state = persisted as Partial<AppState> | undefined;
 
+        const dismissed =
+          state?.intruderSafetyAlertDismissed ??
+          state?.invokerSafetyAlertDismissed ??
+          base.intruderSafetyAlertDismissed;
+
         return {
           ...base,
           proxyDefaultPort: state?.proxyDefaultPort ?? base.proxyDefaultPort,
-          invokerSafetyAlertDismissed:
-            state?.invokerSafetyAlertDismissed ?? base.invokerSafetyAlertDismissed,
+          intruderSafetyAlertDismissed: dismissed,
+          invokerSafetyAlertDismissed: dismissed,
           browserAutomationSafetyAlertDismissed:
             state?.browserAutomationSafetyAlertDismissed ??
             base.browserAutomationSafetyAlertDismissed,
@@ -180,9 +201,11 @@ export const useAppStore = create<AppState>()(
       },
       partialize: (state) => ({
         proxyDefaultPort: state.proxyDefaultPort,
+        intruderSafetyAlertDismissed: state.intruderSafetyAlertDismissed,
         invokerSafetyAlertDismissed: state.invokerSafetyAlertDismissed,
         browserAutomationSafetyAlertDismissed: state.browserAutomationSafetyAlertDismissed,
       }),
+
     }
   )
 );

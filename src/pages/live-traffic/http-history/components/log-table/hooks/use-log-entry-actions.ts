@@ -2,8 +2,8 @@ import { useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import type { ApiCall } from '@/types';
 import { getHttpLogDetail } from '../../../api';
-import { createDefaultAttackConfig, findRequestPayloadPositions } from '@/pages/invoker/types';
-import { useInvokerStore } from '@/stores/invoker';
+import { createDefaultAttackConfig, findRequestPayloadPositions } from '@/pages/intruder/types';
+import { useIntruderStore } from '@/stores/intruder';
 import { useDocumentsStore } from '@/stores/documents';
 import { useBrowserAutomationStore } from '@/stores/browser-automation';
 import {
@@ -26,6 +26,9 @@ import { useMockForgeStore } from '@/stores/mock-forge';
 import type { MockDomain, MockRoute } from '@/pages/mock-forge/types';
 import { sendToCollection, sendRawToRepeater } from '@/triggers/repeater';
 import { cleanUrl } from '@/lib/utils';
+import { exportHarJson } from '@/lib/har';
+import { downloadFile } from '@/lib/download';
+import { generatePythonRequestsCode, generateNodeFetchCode } from '@/lib/code-gen';
 
 export function extractHostFromCall(call: Partial<ApiCall> | null | undefined): string {
   if (!call) return '';
@@ -207,7 +210,7 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
     toast.success(`Added ${target.name} to targets`);
   }, [call]);
 
-  const handleOpenInInvoker = useCallback(async () => {
+  const handleOpenInIntruder = useCallback(async () => {
     try {
       const detail = await getHttpLogDetail(call.id);
       const request = adaptProxyRecordToApiCall(detail);
@@ -225,14 +228,17 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
         base_request: baseRequest,
         positions: findRequestPayloadPositions(baseRequest),
       };
-      useInvokerStore.getState().addAttackTab(config);
-      useNavStore.getState().triggerNavBlink('/invoker');
-      toast.success(`Sent ${request.method} ${request.path || request.url} to Invoker`);
+      useIntruderStore.getState().addAttackTab(config);
+      useNavStore.getState().triggerNavBlink('/intruder');
+      toast.success(`Sent ${request.method} ${request.path || request.url} to Intruder`);
     } catch (error) {
-      console.error('Failed to open request in Invoker:', error);
-      toast.error('Failed to open request in Invoker');
+      console.error('Failed to open request in Intruder:', error);
+      toast.error('Failed to open request in Intruder');
     }
   }, [call.id]);
+
+  const handleOpenInInvoker = handleOpenInIntruder;
+
 
   const handleOpenInRepeater = useCallback(async () => {
     try {
@@ -468,8 +474,10 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
     handleCopyCurlCommand,
     handleCopyUrl,
     handleAddToScope,
+    handleOpenInIntruder,
     handleOpenInInvoker,
     handleOpenInRepeater,
+
     handleSendToCollection,
     handleSendToIntercept,
     handleSendToMockForge,

@@ -2,11 +2,11 @@ import * as React from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { readTextFile } from '@tauri-apps/plugin-fs';
 import { toast } from 'sonner';
-import { useInvokerStore } from '@/stores/invoker';
+import { useIntruderStore } from '@/stores/intruder';
 
-export function useInvokerPayloads() {
-  const updateConfig = useInvokerStore((s) => s.updateConfig);
-  const setPayloadDialogOpen = useInvokerStore((s) => s.setPayloadDialogOpen);
+export function useIntruderPayloads() {
+  const updateConfig = useIntruderStore((s) => s.updateConfig);
+  const setPayloadDialogOpen = useIntruderStore((s) => s.setPayloadDialogOpen);
 
   const handleLoadPayloads = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,7 +20,7 @@ export function useInvokerPayloads() {
         const content = loadEvent.target?.result as string;
         const values = content.split('\n').filter((line) => line.trim());
 
-        const state = useInvokerStore.getState();
+        const state = useIntruderStore.getState();
         const tab = state.tabs.find((t) => t.id === state.activeTabId);
         const config = tab?.config;
 
@@ -58,7 +58,7 @@ export function useInvokerPayloads() {
       const content = await readTextFile(selected);
       const values = content.split(/\r?\n/).filter((line) => line.trim());
 
-      const state = useInvokerStore.getState();
+      const state = useIntruderStore.getState();
       const tab = state.tabs.find((t) => t.id === state.activeTabId);
       const config = tab?.config;
 
@@ -82,3 +82,6 @@ export function useInvokerPayloads() {
     handleSelectPayloadFile,
   };
 }
+
+export const useInvokerPayloads = useIntruderPayloads;
+

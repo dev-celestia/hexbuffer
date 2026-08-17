@@ -4,7 +4,7 @@ import * as React from 'react';
 const DesktopPage = React.lazy(() => import("@/pages/desktop").then((m) => ({ default: m.DesktopPage })));
 const HttpHistoryPage = React.lazy(() => import("@/pages/live-traffic/http-history").then((m) => ({ default: m.HttpHistoryPage })));
 const WebSocketHistoryPage = React.lazy(() => import("@/pages/live-traffic/websocket-history").then((m) => ({ default: m.WebSocketHistoryPage })));
-const InvokerPage = React.lazy(() => import("@/pages/invoker").then((m) => ({ default: m.InvokerPage })));
+const IntruderPage = React.lazy(() => import("@/pages/intruder").then((m) => ({ default: m.IntruderPage })));
 const Settings = React.lazy(() => import("@/pages/settings").then((m) => ({ default: m.Settings })));
 const RepeaterPage = React.lazy(() => import("@/pages/repeater").then((m) => ({ default: m.RepeaterPage })));
 const InterceptPage = React.lazy(() => import("@/pages/intercept").then((m) => ({ default: m.InterceptPage })));
@@ -33,8 +33,10 @@ export const PAGE_COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
   '/websocket-history': WebSocketHistoryPage,
   '/intercept': InterceptPage,
   '/repeater': RepeaterPage,
-  '/invoker': InvokerPage,
+  '/intruder': IntruderPage,
+  '/invoker': IntruderPage,
   '/browser': BrowserAutomationPage,
+
   '/listener': ListenerPage,
   '/inspector': InspectorPage,
   '/encoder': EncoderPage,

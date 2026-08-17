@@ -9,17 +9,20 @@ import {
   type PredefinedPayload,
 } from '../data/predefined-payloads';
 
-interface InvokerPayloadPresetDialogProps {
+export interface IntruderPayloadPresetDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUsePayload: (payload: PredefinedPayload) => void;
 }
 
-export function InvokerPayloadPresetDialog({
+export type InvokerPayloadPresetDialogProps = IntruderPayloadPresetDialogProps;
+
+export function IntruderPayloadPresetDialog({
   open,
   onOpenChange,
   onUsePayload,
-}: InvokerPayloadPresetDialogProps) {
+}: IntruderPayloadPresetDialogProps) {
+
   const [selectedCategory, setSelectedCategory] = React.useState(PAYLOAD_CATEGORIES[0] ?? '');
   const [selectedPayloadId, setSelectedPayloadId] = React.useState(
     PREDEFINED_PAYLOADS[0]?.id ?? ''
@@ -183,3 +186,6 @@ export function InvokerPayloadPresetDialog({
     </Dialog>
   );
 }
+
+export const InvokerPayloadPresetDialog = IntruderPayloadPresetDialog;
+

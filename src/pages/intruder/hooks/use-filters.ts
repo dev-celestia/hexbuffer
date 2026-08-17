@@ -1,14 +1,14 @@
 import * as React from 'react';
-import { useInvokerStore } from '@/stores/invoker';
+import { useIntruderStore } from '@/stores/intruder';
 import { filterResults } from '../lib/utils';
 
-export function useInvokerFilters() {
-  const activeTab = useInvokerStore((s) => s.tabs.find((t) => t.id === s.activeTabId));
+export function useIntruderFilters() {
+  const activeTab = useIntruderStore((s) => s.tabs.find((t) => t.id === s.activeTabId));
   const results = activeTab?.results ?? [];
   const filterSearch = activeTab?.filterSearch ?? '';
 
-  const setFilterSearch = useInvokerStore((s) => s.setFilterSearch);
-  const clearResults = useInvokerStore((s) => s.clearResults);
+  const setFilterSearch = useIntruderStore((s) => s.setFilterSearch);
+  const clearResults = useIntruderStore((s) => s.clearResults);
 
   const filteredResults = React.useMemo(
     () => filterResults(results, filterSearch),
@@ -23,3 +23,6 @@ export function useInvokerFilters() {
     clearResults,
   };
 }
+
+export const useInvokerFilters = useIntruderFilters;
+

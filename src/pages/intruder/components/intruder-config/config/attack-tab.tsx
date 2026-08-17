@@ -1,12 +1,13 @@
-import { useInvokerStore } from '@/stores/invoker';
+import { useIntruderStore } from '@/stores/intruder';
 import { NumberInputField } from './number-input-field';
 
 export function AttackTab() {
-  const config = useInvokerStore((s) => {
+  const config = useIntruderStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.config;
   });
-  const updateConfig = useInvokerStore((s) => s.updateConfig);
+  const updateConfig = useIntruderStore((s) => s.updateConfig);
+
 
   if (!config) return null;
 

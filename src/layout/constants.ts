@@ -85,13 +85,14 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     flag: 'beta'
   },
   {
-    label: 'Invoker',
+    label: 'Intruder',
     icon: CubeFocusIcon,
-    href: '/invoker',
+    href: '/intruder',
     description: 'Generate client-side requests, perform attacks, and trigger endpoints.',
     colors: { bg: 'bg-indigo-500 dark:bg-indigo-500', hoverBg: 'group-hover:bg-indigo-500 dark:group-hover:bg-indigo-500', border: 'border-indigo-500 dark:border-indigo-500' },
     flag: 'release'
   },
+
   {
     label: 'Repeater',
     icon: InfinityIcon,

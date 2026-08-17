@@ -1,16 +1,16 @@
 
 
 import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@celestia-project/ui';
-import { useInvokerStore } from '@/stores/invoker';
-import { useInvokerPayloads } from '../hooks/use-payloads';
+import { useIntruderStore } from '@/stores/intruder';
+import { useIntruderPayloads } from '../hooks/use-payloads';
 
-export function InvokerPayloadDialog() {
-  const payloadDialogOpen = useInvokerStore((s) => {
+export function IntruderPayloadDialog() {
+  const payloadDialogOpen = useIntruderStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.payloadDialogOpen ?? false;
   });
-  const setPayloadDialogOpen = useInvokerStore((s) => s.setPayloadDialogOpen);
-  const { handleLoadPayloads, handleSelectPayloadFile } = useInvokerPayloads();
+  const setPayloadDialogOpen = useIntruderStore((s) => s.setPayloadDialogOpen);
+  const { handleLoadPayloads, handleSelectPayloadFile } = useIntruderPayloads();
 
   return (
     <Dialog open={payloadDialogOpen} onOpenChange={setPayloadDialogOpen}>
@@ -33,3 +33,6 @@ export function InvokerPayloadDialog() {
     </Dialog>
   );
 }
+
+export const InvokerPayloadDialog = IntruderPayloadDialog;
+

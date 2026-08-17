@@ -1,22 +1,22 @@
 
 
 import { Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, Label } from '@celestia-project/ui';
-import { useInvokerStore } from '@/stores/invoker';
+import { useIntruderStore } from '@/stores/intruder';
 import { findRequestPayloadPositions, parseRawRequest } from '../types';
 
-export function InvokerRequestDialog() {
-  const rawRequestDialogOpen = useInvokerStore((s) => {
+export function IntruderRequestDialog() {
+  const rawRequestDialogOpen = useIntruderStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.rawRequestDialogOpen ?? false;
   });
-  const rawRequestContent = useInvokerStore((s) => {
+  const rawRequestContent = useIntruderStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.rawRequestContent ?? '';
   });
-  const setRawRequestDialogOpen = useInvokerStore((s) => s.setRawRequestDialogOpen);
-  const setRawRequestContent = useInvokerStore((s) => s.setRawRequestContent);
-  const setBaseRequest = useInvokerStore((s) => s.setBaseRequest);
-  const updateConfig = useInvokerStore((s) => s.updateConfig);
+  const setRawRequestDialogOpen = useIntruderStore((s) => s.setRawRequestDialogOpen);
+  const setRawRequestContent = useIntruderStore((s) => s.setRawRequestContent);
+  const setBaseRequest = useIntruderStore((s) => s.setBaseRequest);
+  const updateConfig = useIntruderStore((s) => s.updateConfig);
 
   const handleImport = () => {
     const parsed = parseRawRequest(rawRequestContent);
@@ -61,3 +61,6 @@ export function InvokerRequestDialog() {
     </Dialog>
   );
 }
+
+export const InvokerRequestDialog = IntruderRequestDialog;
+

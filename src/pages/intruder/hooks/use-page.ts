@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { toast } from 'sonner';
-import { useInvokerStore } from '@/stores/invoker';
+import { useIntruderStore } from '@/stores/intruder';
 import { useAppStore } from '@/stores/app';
 import { useShallow } from 'zustand/react/shallow';
 import {
@@ -10,9 +10,13 @@ import {
   type AttackConfig,
 } from '../types';
 
-export function useInvokerPage() {
-  const invokerSafetyAlertDismissed = useAppStore((s) => s.invokerSafetyAlertDismissed);
-  const setInvokerSafetyAlertDismissed = useAppStore((s) => s.setInvokerSafetyAlertDismissed);
+export function useIntruderPage() {
+  const intruderSafetyAlertDismissed = useAppStore(
+    (s) => s.intruderSafetyAlertDismissed ?? s.invokerSafetyAlertDismissed
+  );
+  const setIntruderSafetyAlertDismissed = useAppStore(
+    (s) => s.setIntruderSafetyAlertDismissed ?? s.setInvokerSafetyAlertDismissed
+  );
 
   const {
     tabs,
@@ -26,7 +30,7 @@ export function useInvokerPage() {
     stopAttack,
     startAttack,
     updateConfig,
-  } = useInvokerStore(
+  } = useIntruderStore(
     useShallow((s) => ({
       tabs: s.tabs,
       activeTabId: s.activeTabId,
@@ -69,7 +73,7 @@ export function useInvokerPage() {
         ? 'Add payloads for every marked position'
         : startError;
 
-  const pendingRequest = useInvokerStore((s) => s.pendingRequest);
+  const pendingRequest = useIntruderStore((s) => s.pendingRequest);
 
   React.useEffect(() => {
     if (!pendingRequest) {
@@ -141,7 +145,12 @@ export function useInvokerPage() {
     stopAttack,
     clearStartError,
     handleStartAttack,
-    invokerSafetyAlertDismissed,
-    setInvokerSafetyAlertDismissed,
+    intruderSafetyAlertDismissed,
+    setIntruderSafetyAlertDismissed,
+    invokerSafetyAlertDismissed: intruderSafetyAlertDismissed,
+    setInvokerSafetyAlertDismissed: setIntruderSafetyAlertDismissed,
   };
 }
+
+export const useInvokerPage = useIntruderPage;
+

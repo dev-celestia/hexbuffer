@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
-import { startAttack as orchStartAttack, stopAttack as orchStopAttack } from '@/triggers/invoker';
+import { startAttack as orchStartAttack, stopAttack as orchStopAttack } from '@/triggers/intruder';
 import {
   getInterceptBypassPatterns,
   addInterceptBypassPattern,
@@ -14,11 +14,11 @@ import type {
   PayloadType,
   PayloadConfig,
   PayloadProcessingStep,
-} from '@/pages/invoker/types';
+} from '@/pages/intruder/types';
 import {
   createDefaultAttackConfig,
   syncPositionPayloads,
-} from '@/pages/invoker/types';
+} from '@/pages/intruder/types';
 
 interface InterceptBypassState {
   bypassPatterns: string[];
@@ -27,7 +27,7 @@ interface InterceptBypassState {
   removeBypassPattern: (pattern: string) => Promise<void>;
 }
 
-export interface InvokerTab {
+export interface IntruderTab {
   id: string;
   name: string;
   config: AttackConfig;
@@ -44,8 +44,10 @@ export interface InvokerTab {
   rawRequestContent: string;
 }
 
-interface InvokerState extends InterceptBypassState {
-  tabs: InvokerTab[];
+export type InvokerTab = IntruderTab;
+
+export interface IntruderState extends InterceptBypassState {
+  tabs: IntruderTab[];
   activeTabId: string;
   nextAttackTabNumber: number;
   pendingRequest: AttackConfig['base_request'] | null;
@@ -88,12 +90,14 @@ interface InvokerState extends InterceptBypassState {
   clearStartError: () => void;
 }
 
+export type InvokerState = IntruderState;
+
 const unlistenProgressByTab = new Map<string, UnlistenFn>();
 const unlistenResultByTab = new Map<string, UnlistenFn>();
 
-function createAttackTab(index: number, config = createDefaultAttackConfig()): InvokerTab {
+function createAttackTab(index: number, config = createDefaultAttackConfig()): IntruderTab {
   return {
-    id: `invoker-tab-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    id: `intruder-tab-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
     name: String(index),
     config: {
       ...config,
@@ -128,20 +132,20 @@ function cleanupTabListeners(tabId: string) {
   unlistenResultByTab.delete(tabId);
 }
 
-function getActiveTab(state: InvokerState) {
+function getActiveTab(state: IntruderState) {
   return state.tabs.find((tab) => tab.id === state.activeTabId) ?? state.tabs[0] ?? null;
 }
 
 function updateActiveTab(
-  set: (partial: Partial<InvokerState> | ((state: InvokerState) => Partial<InvokerState>)) => void,
-  updater: (tab: InvokerTab) => InvokerTab
+  set: (partial: Partial<IntruderState> | ((state: IntruderState) => Partial<IntruderState>)) => void,
+  updater: (tab: IntruderTab) => IntruderTab
 ) {
   set((state) => ({
     tabs: state.tabs.map((tab) => (tab.id === state.activeTabId ? updater(tab) : tab)),
   }));
 }
 
-export const useInvokerStore = create<InvokerState>((set, get) => ({
+export const useIntruderStore = create<IntruderState>((set, get) => ({
   tabs: [initialTab],
   activeTabId: initialTab.id,
   nextAttackTabNumber: 2,
@@ -466,3 +470,6 @@ export const useInvokerStore = create<InvokerState>((set, get) => ({
     }
   },
 }));
+
+export const useInvokerStore = useIntruderStore;
+

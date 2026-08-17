@@ -4,7 +4,7 @@ import {
   executeCreateFolderAiTool,
   executeCreateEndpointAiTool,
 } from './repeater';
-import { executeStartInvokerAttackAiTool } from './invoker';
+import { executeStartIntruderAttackAiTool } from './intruder';
 import { executeToggleInterceptAiTool } from './intercept';
 import { executeTriggerScanAiTool } from './browser';
 import { executeRunTerminalCommandAiTool } from './terminal';
@@ -25,8 +25,10 @@ async function dispatchToolExecution(toolName: string, args: Record<string, any>
     case 'create_endpoint':
       return executeCreateEndpointAiTool(args);
 
+    case 'start_intruder_attack':
     case 'start_invoker_attack':
-      return executeStartInvokerAttackAiTool(args);
+      return executeStartIntruderAttackAiTool(args);
+
 
     case 'toggle_intercept':
       return executeToggleInterceptAiTool(args);

@@ -35,14 +35,20 @@ export {
 } from './intercept';
 
 export {
+  startAttack as startIntruderAttack,
+  stopAttack as stopIntruderAttack,
+  sendToIntruder,
+  startIntruderAttack as startIntruderUiAttack,
+  stopIntruderAttack as stopIntruderUiAttack,
   startAttack as startInvokerAttack,
   stopAttack as stopInvokerAttack,
   sendToInvoker,
   startInvokerAttack as startInvokerUiAttack,
   stopInvokerAttack as stopInvokerUiAttack,
-} from './invoker';
+} from './intruder';
 
-export type { SendToInvokerOptions } from './invoker';
+export type { SendToIntruderOptions, SendToInvokerOptions } from './intruder';
+
 
 export {
   triggerScan,

@@ -5,7 +5,7 @@ import { AsteriskIcon, Info, SpinnerGapIcon, SparkleIcon, TargetIcon } from '@ph
 import type { EditorView } from '@codemirror/view';
 
 import { useTheme } from '@/components/theme-provider';
-import { useInvokerStore } from '@/stores/invoker';
+import { useIntruderStore } from '@/stores/intruder';
 import {
   buildRawRequest,
   findRequestPayloadPositions,
@@ -30,6 +30,7 @@ interface InvokerMarkerSuggestionResponse {
   suggestions: InvokerMarkerSuggestion[];
   candidateCount: number;
 }
+
 
 function findMarkerRanges(text: string) {
   const ranges: Array<{ start: number; end: number }> = [];
@@ -128,15 +129,16 @@ function HighlightedRequestPreview({
 
 export function RequestTab() {
   const { theme } = useTheme();
-  const config = useInvokerStore((s) => {
+  const config = useIntruderStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.config;
   });
-  const isRunning = useInvokerStore((s) => {
+  const isRunning = useIntruderStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.isRunning ?? false;
   });
-  const updateConfig = useInvokerStore((s) => s.updateConfig);
+  const updateConfig = useIntruderStore((s) => s.updateConfig);
+
 
   const [rawRequestDraft, setRawRequestDraft] = React.useState(() =>
     config ? buildRawRequest(config.base_request) : ''

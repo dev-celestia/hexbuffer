@@ -62,17 +62,20 @@ function buildRawAttackResponse(result: AttackResult) {
   return buildRawHttpResponse(result.response, { prettyJsonBody: true });
 }
 
-interface InvokerResultInspectorProps {
+export interface IntruderResultInspectorProps {
   selectedResult: AttackResult;
   config: AttackConfig;
   onClose: () => void;
 }
 
-export function InvokerResultInspector({
+export type InvokerResultInspectorProps = IntruderResultInspectorProps;
+
+export function IntruderResultInspector({
   selectedResult,
   config,
   onClose,
-}: InvokerResultInspectorProps) {
+}: IntruderResultInspectorProps) {
+
   const { theme } = useTheme();
   const [isStacked, setIsStacked] = React.useState(false);
 
@@ -156,3 +159,6 @@ export function InvokerResultInspector({
     </div>
   );
 }
+
+export const InvokerResultInspector = IntruderResultInspector;
+

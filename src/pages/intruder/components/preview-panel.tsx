@@ -4,7 +4,7 @@ import { Badge, Label, TextEditor } from '@celestia-project/ui';
 import { buildRawHttpResponse } from '@/lib/http-message';
 import { WarningCircleIcon } from '@phosphor-icons/react';
 import { useTheme } from '@/components/theme-provider';
-import { useInvokerStore } from '@/stores/invoker';
+import { useIntruderStore } from '@/stores/intruder';
 import type { AttackResult } from '../types';
 import { formatPayloadValues, getResultUrl } from '../lib/utils';
 
@@ -20,12 +20,13 @@ function buildRawAttackResponse(result: AttackResult) {
   return buildRawHttpResponse(result.response, { prettyJsonBody: true });
 }
 
-export function InvokerPreviewPane() {
+export function IntruderPreviewPane() {
   const { theme } = useTheme();
-  const selectedResult = useInvokerStore((s) => {
+  const selectedResult = useIntruderStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.selectedResult ?? null;
   });
+
 
   const renderStatusBadge = () => {
     if (!selectedResult) return null;
@@ -134,3 +135,6 @@ export function InvokerPreviewPane() {
     </div>
   );
 }
+
+export const InvokerPreviewPane = IntruderPreviewPane;
+

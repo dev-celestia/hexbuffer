@@ -4,7 +4,7 @@ import { buildRawHttpRequest } from '@/lib/http-message';
 import { useNavStore } from '@/stores/nav';
 import { useRepeaterStore } from '@/stores/repeater';
 import { sendRawToRepeater } from '@/triggers/repeater';
-import { useInvokerStore } from '@/stores/invoker';
+import { useIntruderStore } from '@/stores/intruder';
 import { useAutomationStore, type ExecutionLog, type LiveTrafficHostInsight, type NodeRuntimeState } from '@/stores/automation';
 import { useInterceptStore } from '@/pages/intercept/state/intercept-store';
 import {
@@ -13,7 +13,8 @@ import {
   syncPositionPayloads,
   type AttackConfig,
   type PayloadConfig,
-} from '@/pages/invoker/types';
+} from '@/pages/intruder/types';
+
 import type { ProxyRecord } from '@/types';
 import type { TriggerConfig, WorkflowDef } from '@/pages/workflow/types';
 
@@ -342,11 +343,11 @@ function handleAutomationActionUi(payload: AutomationActionUiEvent): void {
     return;
   }
 
-  if (payload.actionType === 'action:start-invoker') {
-    const invokerStore = useInvokerStore.getState();
+  if (payload.actionType === 'action:start-intruder' || payload.actionType === 'action:start-invoker') {
+    const intruderStore = useIntruderStore.getState();
     const config = buildInvokerConfig(payload);
-    invokerStore.addAttackTab(config);
-    useNavStore.getState().triggerNavBlink('/invoker');
+    intruderStore.addAttackTab(config);
+    useNavStore.getState().triggerNavBlink('/intruder');
 
     const hasPositions = config.positions.length > 0;
     const hasPayloads =
@@ -354,9 +355,10 @@ function handleAutomationActionUi(payload: AutomationActionUiEvent): void {
       config.payload_config.values.length > 0 ||
       Boolean(config.payload_config.file_path);
     if (hasPositions && hasPayloads) {
-      void useInvokerStore.getState().startAttack();
+      void useIntruderStore.getState().startAttack();
     }
   }
+
 }
 
 async function syncAutomationRuntime(): Promise<void> {

@@ -2,9 +2,10 @@ import { Badge, Button, Input, Label, Tabs, TabsContent, TabsList, TabsTrigger, 
 import * as React from 'react';
 
 import { useTheme } from '@/components/theme-provider';
-import { useInvokerStore } from '@/stores/invoker';
+import { useIntruderStore } from '@/stores/intruder';
 import { createDefaultPayloadConfig, type PayloadConfig, type PayloadType } from '../../../types';
-import { InvokerPayloadPresetDialog } from '../../payload-preset-dialog';
+import { IntruderPayloadPresetDialog } from '../../payload-preset-dialog';
+
 
 const NUMBER_RANGE_PREVIEW_LIMIT = 8;
 
@@ -133,14 +134,15 @@ export function PayloadsTab() {
   const { theme } = useTheme();
   const [presetDialogOpen, setPresetDialogOpen] = React.useState(false);
   const [activePositionName, setActivePositionName] = React.useState<string | null>(null);
-  const config = useInvokerStore((s) => {
+  const config = useIntruderStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.config;
   });
-  const updatePositionPayload = useInvokerStore((s) => s.updatePositionPayload);
+  const updatePositionPayload = useIntruderStore((s) => s.updatePositionPayload);
 
   const positions = config?.positions ?? [];
   const selectedPositionName = activePositionName ?? positions[0]?.name ?? '';
+
 
   React.useEffect(() => {
     if (!positions.some((position) => position.name === selectedPositionName)) {
@@ -282,9 +284,10 @@ export function PayloadsTab() {
         })}
       </Tabs>
 
-      <InvokerPayloadPresetDialog
+      <IntruderPayloadPresetDialog
         open={presetDialogOpen}
         onOpenChange={setPresetDialogOpen}
+
         onUsePayload={(payload) => {
           if (!selectedPositionName) {
             return;
@@ -403,7 +406,8 @@ function NumberRangePayloadEditor({
 
 function PayloadFileButton({ positionName }: { positionName: string }) {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const updatePositionPayload = useInvokerStore((s) => s.updatePositionPayload);
+  const updatePositionPayload = useIntruderStore((s) => s.updatePositionPayload);
+
 
   const handleLoadPayloads = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

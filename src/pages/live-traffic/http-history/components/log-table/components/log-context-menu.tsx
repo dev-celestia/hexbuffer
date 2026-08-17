@@ -124,8 +124,9 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
           <PlusIcon className="mr-1.5 size-3" /> Add to Target
         </ContextMenuItem>
         <ContextMenuItem onClick={handleOpenInInvoker} className='text-xs py-1 px-1.5'>
-          <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Invoker
+          <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Intruder
         </ContextMenuItem>
+
         <CollectionPickerSubmenu
           variant="context"
           onSelect={(stashId) => { void handleSendToCollection(stashId); }}

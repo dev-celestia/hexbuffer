@@ -1,23 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, Input } from '@celestia-project/ui';
-import { useInvokerStore } from '@/stores/invoker';
+import { useIntruderStore } from '@/stores/intruder';
 import { formatPayloadValues, getResultUrl } from '../lib/utils';
-import { useInvokerFilters } from '../hooks/use-filters';
+import { useIntruderFilters } from '../hooks/use-filters';
 
 import { TrashIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
-export function InvokerResultsPanel() {
-  const { filterSearch, filteredResults, resultsCount, setFilterSearch, clearResults } = useInvokerFilters();
-  const isRunning = useInvokerStore((s) => {
+export function IntruderResultsPanel() {
+  const { filterSearch, filteredResults, resultsCount, setFilterSearch, clearResults } = useIntruderFilters();
+  const isRunning = useIntruderStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.isRunning ?? false;
   });
-  const selectedResult = useInvokerStore((s) => {
+  const selectedResult = useIntruderStore((s) => {
     const tab = s.tabs.find((t) => t.id === s.activeTabId);
     return tab?.selectedResult ?? null;
   });
-  const setSelectedResult = useInvokerStore((s) => s.setSelectedResult);
+  const setSelectedResult = useIntruderStore((s) => s.setSelectedResult);
+
 
   const [localSearch, setLocalSearch] = useState(filterSearch);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -215,3 +216,6 @@ export function InvokerResultsPanel() {
     </div>
   );
 }
+
+export const InvokerResultsPanel = IntruderResultsPanel;
+

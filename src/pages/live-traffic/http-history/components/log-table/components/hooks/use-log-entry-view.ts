@@ -13,11 +13,11 @@ import {
   buildParamsList,
 } from "@/pages/live-traffic/components/inspector";
 import { parseCookieHeader, isJsonContent } from "@/pages/live-traffic/http-history/components/log-table/utils";
-import { useInvokerStore } from "@/stores/invoker";
+import { useIntruderStore } from "@/stores/intruder";
 import {
   createDefaultAttackConfig,
   findRequestPayloadPositions,
-} from "@/pages/invoker/types";
+} from "@/pages/intruder/types";
 import { sendToCollection } from "@/triggers/repeater/send-to-collection";
 
 export type DetailViewMode = "text" | "table";
@@ -49,7 +49,7 @@ export function useLogEntryView() {
     [call],
   );
 
-  const handleSendToInvoker = useCallback(() => {
+  const handleSendToIntruder = useCallback(() => {
     if (!call) return;
     const baseRequest = {
       method: call.method,
@@ -65,10 +65,13 @@ export function useLogEntryView() {
       base_request: baseRequest,
       positions: findRequestPayloadPositions(baseRequest),
     };
-    useInvokerStore.getState().addAttackTab(config);
-    navigate("/invoker");
-    toast.success("Sent to Invoker");
+    useIntruderStore.getState().addAttackTab(config);
+    navigate("/intruder");
+    toast.success("Sent to Intruder");
   }, [call, navigate]);
+
+  const handleSendToInvoker = handleSendToIntruder;
+
 
   const rawRequest = useMemo(
     () =>
@@ -150,8 +153,10 @@ export function useLogEntryView() {
     toggleViewMode,
     closeDetailView,
     handleSendToCollection,
+    handleSendToIntruder,
     handleSendToInvoker,
     rawRequest,
+
     rawResponse,
     requestHeaders,
     requestCookies,

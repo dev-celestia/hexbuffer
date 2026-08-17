@@ -148,8 +148,9 @@ export const CallActionCell = memo(function CallActionCell({
           <PlusIcon className="mr-2 size-3" /> Add to Target
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleOpenInInvoker} className="text-xs">
-          <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Invoker
+          <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Intruder
         </DropdownMenuItem>
+
         <CollectionPickerSubmenu
           variant="dropdown"
           onSelect={(stashId) => {
