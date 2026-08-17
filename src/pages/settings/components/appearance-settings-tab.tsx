@@ -1,12 +1,21 @@
-import { Button } from '@celestia-project/ui';
+import { Button, Switch } from '@celestia-project/ui';
 import * as React from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { ImageIcon, PaletteIcon, TrashIcon, ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
+import {
+  ImageIcon,
+  PaletteIcon,
+  TrashIcon,
+  ArrowCounterClockwiseIcon,
+  SunIcon,
+  MoonIcon,
+} from '@phosphor-icons/react';
 
 import { useAppSettingsStore } from '@/stores/app-settings-store';
+import { useTheme } from '@/components/theme-provider';
 import { SettingsGroup, SettingsRow } from './settings-group';
 import { ShortcutManager } from '@/pages/desktop/components/shortcut-manager';
+import { cn } from '@/lib/utils';
 
 import whiteWallpaper from '@/assets/white-wallpaper.png';
 import blackWallpaper from '@/assets/black-wallpaper.png';
@@ -18,6 +27,7 @@ const PRESET_COLORS = [
 ];
 
 export function AppearanceSettingsTab() {
+  const { theme, setTheme } = useTheme();
   const bgType = useAppSettingsStore((s) => s.bgType);
   const bgValue = useAppSettingsStore((s) => s.bgValue);
   const setBg = useAppSettingsStore((s) => s.setBg);
@@ -38,15 +48,49 @@ export function AppearanceSettingsTab() {
     setBg('color', hex);
   }, [setBg]);
 
+  const lightWallpaperSrc = typeof whiteWallpaper === 'string' ? whiteWallpaper : (whiteWallpaper as { src?: string })?.src ?? '';
+  const darkWallpaperSrc = typeof blackWallpaper === 'string' ? blackWallpaper : (blackWallpaper as { src?: string })?.src ?? '';
+
   const backgroundSrc = React.useMemo(() => {
     if (bgType !== 'image') return null;
-    if (bgValue === 'default-light') return whiteWallpaper;
-    if (bgValue === 'default-dark') return blackWallpaper;
+    if (bgValue === 'default-light') return lightWallpaperSrc;
+    if (bgValue === 'default-dark') return darkWallpaperSrc;
     return convertFileSrc(bgValue);
-  }, [bgType, bgValue]);
+  }, [bgType, bgValue, lightWallpaperSrc, darkWallpaperSrc]);
 
   return (
     <>
+      <SettingsGroup label="Theme" description="Choose between dark and light appearance modes.">
+        <SettingsRow
+          label="Dark mode"
+          description={theme === 'dark' ? 'Dark theme is currently active.' : 'Light theme is currently active.'}
+        >
+          <div className="flex items-center gap-2">
+            <SunIcon
+              className={cn(
+                // Sizing & Spacing
+                "size-4",
+                // Typography & Colors
+                theme === 'light' ? 'text-amber-500' : 'text-muted-foreground'
+              )}
+            />
+            <Switch
+              id="appearance-theme-switch"
+              checked={theme === 'dark'}
+              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+            />
+            <MoonIcon
+              className={cn(
+                // Sizing & Spacing
+                "size-4",
+                // Typography & Colors
+                theme === 'dark' ? 'text-blue-400' : 'text-muted-foreground'
+              )}
+            />
+          </div>
+        </SettingsRow>
+      </SettingsGroup>
+
       <SettingsGroup label="Background" description="Customize the app background with a color or image.">
         <SettingsRow
           label="Background image"
@@ -80,7 +124,7 @@ export function AppearanceSettingsTab() {
                 outlineOffset: '2px',
               }}
             >
-              <img src={whiteWallpaper} alt="Light Wallpaper" className="h-full w-full object-cover" />
+              <img src={lightWallpaperSrc} alt="Light Wallpaper" className="h-full w-full object-cover" />
               <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
             </button>
             <button
@@ -93,7 +137,7 @@ export function AppearanceSettingsTab() {
                 outlineOffset: '2px',
               }}
             >
-              <img src={blackWallpaper} alt="Dark Wallpaper" className="h-full w-full object-cover" />
+              <img src={darkWallpaperSrc} alt="Dark Wallpaper" className="h-full w-full object-cover" />
               <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
             </button>
           </div>

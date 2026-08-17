@@ -82,7 +82,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/kanban',
     description: 'Visual project board: track tasks across status, priority, or assignee swimlanes with WIP limits.',
     colors: { bg: 'bg-rose-500 dark:bg-rose-500', hoverBg: 'group-hover:bg-rose-500 dark:group-hover:bg-rose-500', border: 'border-rose-500 dark:border-rose-500' },
-    flag: 'alpha'
+    flag: 'beta'
   },
   {
     label: 'Invoker',

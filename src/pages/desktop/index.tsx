@@ -81,7 +81,7 @@ export function DesktopPage() {
           <div
             className={cn(
               // Layout & Positioning
-              "flex items-center justify-between max-w-[800px]",
+              "flex items-center max-w-[800px]",
 
               // Sizing & Spacing
               "gap-4 mb-4 pb-2",

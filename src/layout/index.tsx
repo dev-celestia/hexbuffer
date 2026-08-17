@@ -18,12 +18,15 @@ function BgLayer() {
   const bgValue = useAppSettingsStore((s) => s.bgValue);
   const { theme } = useTheme();
 
+  const lightWallpaperSrc = typeof whiteWallpaper === 'string' ? whiteWallpaper : (whiteWallpaper as { src?: string })?.src ?? '';
+  const darkWallpaperSrc = typeof blackWallpaper === 'string' ? blackWallpaper : (blackWallpaper as { src?: string })?.src ?? '';
+
   let style: React.CSSProperties = {};
 
   if (bgType === 'image' && bgValue) {
     const isPreset = bgValue === 'default-light' || bgValue === 'default-dark';
     const bgUrl = isPreset
-      ? (bgValue === 'default-light' ? whiteWallpaper : blackWallpaper)
+      ? (bgValue === 'default-light' ? lightWallpaperSrc : darkWallpaperSrc)
       : convertFileSrc(bgValue);
 
     style = {
@@ -36,7 +39,7 @@ function BgLayer() {
     style = { backgroundColor: bgValue };
   } else {
     // bgType === 'none' — use theme-specific default wallpaper
-    const wallpaper = theme === 'light' ? whiteWallpaper : blackWallpaper;
+    const wallpaper = theme === 'light' ? lightWallpaperSrc : darkWallpaperSrc;
     style = {
       backgroundImage: `url(${wallpaper})`,
       backgroundSize: 'cover',
@@ -56,13 +59,17 @@ function BgLayer() {
   );
 }
 
-export function AppLayout({ children }: { children?: React.ReactNode }) {
+interface AppLayoutProps {
+  readonly children?: React.ReactNode;
+}
+
+export function AppLayout({ children }: AppLayoutProps) {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>
+      <ContextMenuTrigger>
         <div
           className={cn(
             // Layout & Positioning

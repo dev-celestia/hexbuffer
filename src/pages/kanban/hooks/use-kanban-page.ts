@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { KanbanCard, KanbanColumn, GroupBy } from '../types';
-import { STATUS_COLUMNS, PRIORITY_COLUMNS, SEED_CARDS } from '../constants';
+import { STATUS_COLUMNS, PRIORITY_COLUMNS } from '../constants';
 
 function buildAssigneeColumns(cards: KanbanCard[]): KanbanColumn[] {
   const seen = new Set<string>();
@@ -19,7 +19,7 @@ function buildAssigneeColumns(cards: KanbanCard[]): KanbanColumn[] {
 }
 
 export function useKanbanPage() {
-  const [cards, setCards] = useState<KanbanCard[]>(SEED_CARDS);
+  const [cards, setCards] = useState<KanbanCard[]>([]);
   const [groupBy, setGroupBy] = useState<GroupBy>('status');
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
