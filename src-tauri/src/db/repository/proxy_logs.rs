@@ -156,6 +156,23 @@ impl Database {
         Ok(())
     }
 
+    pub fn clear_logs_before(&self, cutoff_rfc3339: &str) -> SqlResult<usize> {
+        let conn = self.conn.lock().unwrap();
+        let rows = conn.execute(
+            "DELETE FROM http_logs WHERE timestamp < ?1",
+            params![cutoff_rfc3339],
+        )?;
+        let _ = conn.execute(
+            "DELETE FROM websocket_messages WHERE timestamp < ?1",
+            params![cutoff_rfc3339],
+        );
+        let _ = conn.execute(
+            "DELETE FROM websocket_connections WHERE timestamp < ?1",
+            params![cutoff_rfc3339],
+        );
+        Ok(rows)
+    }
+
     pub fn get_paginated(
         &self,
         page: u32,

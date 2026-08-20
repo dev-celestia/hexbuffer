@@ -1,5 +1,6 @@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@celestia-project/ui';
 import * as React from 'react';
+import { CircleNotchIcon } from '@phosphor-icons/react';
 import { FileGridCard } from './file-grid-card';
 import { FileListRow } from './file-list-row';
 
@@ -158,17 +159,23 @@ export function FileGrid<T extends FileItem>({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel size="xs" disabled={deletingId === itemToDelete?.id}>Cancel</AlertDialogCancel>
             <AlertDialogAction
+              size="xs"
               variant="destructive"
-              onClick={() => {
+              disabled={deletingId === itemToDelete?.id}
+              onClick={async (e) => {
                 if (itemToDelete) {
-                  onDeleteItem(itemToDelete);
+                  e.preventDefault();
+                  await onDeleteItem(itemToDelete);
                   setItemToDelete(null);
                 }
               }}
             >
-              Delete
+              {deletingId === itemToDelete?.id && (
+                <CircleNotchIcon className="mr-1.5 size-3.5 animate-spin" />
+              )}
+              {deletingId === itemToDelete?.id ? 'Deleting…' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -28,6 +28,7 @@ export function SortableWidget({ id, children }: SortableWidgetProps) {
   return (
     <div
       ref={setNodeRef}
+      data-desktop-widget
       style={style}
       className={cn(
         // Layout & Positioning

@@ -293,6 +293,11 @@ impl ProxyState {
         self.0.lock().unwrap().records.clear();
     }
 
+    pub fn clear_records_before(&self, cutoff: &chrono::DateTime<chrono::Utc>) {
+        let mut inner = self.0.lock().unwrap();
+        inner.records.retain(|r| r.timestamp >= *cutoff);
+    }
+
     pub fn delete_record(&self, id: &Uuid) -> Option<ProxyRecord> {
         let mut inner = self.0.lock().unwrap();
         inner

@@ -27,6 +27,7 @@ interface NavState {
   openWindow: (id: string, title: string) => void;
   closeWindow: (id: string, navigate?: (path: string) => void) => void | Promise<void>;
   minimizeWindow: (id: string, navigate?: (path: string) => void) => void;
+  minimizeAllWindows: (navigate?: (path: string) => void) => void;
   maximizeWindow: (id: string) => void;
   focusWindow: (id: string, navigate?: (path: string) => void) => void;
   updateWindowPosition: (id: string, position: { x: number; y: number }) => void;
@@ -232,6 +233,18 @@ export const useNavStore = create<NavState>()((set, get) => ({
     set({
       windows: windows.map((w) => (w.id === id ? { ...w, size } : w)),
     });
+  },
+
+  minimizeAllWindows: (navigate) => {
+    const { windows } = get();
+    const hasExpanded = windows.some((w) => w.isOpen && !w.isMinimized);
+    if (!hasExpanded) return;
+
+    const updated = windows.map((w) =>
+      w.isOpen && !w.isMinimized ? { ...w, isMinimized: true } : w
+    );
+    set({ windows: updated, activeWindowId: null });
+    if (navigate) navigate('/');
   },
 
   closeAllWindows: (navigate) => {

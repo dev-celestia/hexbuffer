@@ -1,32 +1,34 @@
 import * as React from 'react';
 
-import { useNavStore } from '@/stores/nav';
-import { useAppSettingsStore } from '@/stores/app-settings-store';
+import { cn } from '@/lib/utils';
 import { PAGE_COMPONENT_MAP } from './page-lazy-imports';
 import { DesktopWindow } from './desktop-window';
+import { useDesktopWorkspace } from './hooks/use-desktop-workspace';
 
 interface DesktopWorkspaceProps {
   activeChild: React.ReactNode;
 }
 
 export function DesktopWorkspace({ activeChild }: DesktopWorkspaceProps) {
-  const windows = useNavStore((state) => state.windows);
-  const activeWindowId = useNavStore((state) => state.activeWindowId);
+  const { openWindows, activeWindowId, handleWorkspaceClick } = useDesktopWorkspace();
   const DesktopComponent = PAGE_COMPONENT_MAP['/'];
-  const bgType = useAppSettingsStore((s) => s.bgType);
-
-  // ponytail: memoize filtered window list to avoid creating new array refs on every render
-  const openWindows = React.useMemo(
-    () => windows.filter((win) => win.isOpen),
-    [windows]
-  );
 
   // Transparent so BgLayer (behind this) shows through
   const ROOT_BG = 'bg-transparent';
 
   return (
     <div
-      className={`relative w-full h-full overflow-hidden ${ROOT_BG}`}
+      onClick={handleWorkspaceClick}
+      className={cn(
+        // Layout & Positioning
+        "relative overflow-hidden",
+
+        // Sizing & Spacing
+        "w-full h-full",
+
+        // Backgrounds & Borders
+        ROOT_BG
+      )}
     >
       <style>{`
         .select-none-global, .select-none-global * {
@@ -35,14 +37,44 @@ export function DesktopWorkspace({ activeChild }: DesktopWorkspaceProps) {
         }
       `}</style>
       {/* Desktop Background (Desktop Dashboard) */}
-      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
-        <React.Suspense fallback={<div className="h-full flex items-center justify-center text-muted-foreground text-sm">Loading desktop…</div>}>
+      <div
+        className={cn(
+          // Layout & Positioning
+          "absolute inset-0 z-0 overflow-hidden",
+
+          // Sizing & Spacing
+          "w-full h-full"
+        )}
+      >
+        <React.Suspense
+          fallback={
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center justify-center",
+
+                // Sizing & Spacing
+                "h-full",
+
+                // Typography
+                "text-muted-foreground text-sm"
+              )}
+            >
+              Loading desktop…
+            </div>
+          }
+        >
           {DesktopComponent ? <DesktopComponent /> : null}
         </React.Suspense>
       </div>
 
       {/* Floating Application Windows */}
-      <div className="absolute inset-0 pointer-events-none z-10">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "absolute inset-0 pointer-events-none z-10"
+        )}
+      >
         {openWindows.map((win) => (
           <DesktopWindow
             key={win.id}
@@ -55,3 +87,4 @@ export function DesktopWorkspace({ activeChild }: DesktopWorkspaceProps) {
     </div>
   );
 }
+

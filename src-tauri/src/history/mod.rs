@@ -218,6 +218,10 @@ impl HistoryBridge {
         self.db.clear_logs().map_err(|e| e.to_string())
     }
 
+    pub fn clear_before(&self, cutoff_rfc3339: &str) -> Result<usize, String> {
+        self.db.clear_logs_before(cutoff_rfc3339).map_err(|e| e.to_string())
+    }
+
     pub fn delete_by_id(&self, log_id: &str) -> Result<(), String> {
         self.db.delete_log(log_id).map_err(|e| e.to_string())
     }

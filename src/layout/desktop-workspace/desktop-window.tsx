@@ -106,18 +106,18 @@ const DesktopWindow = React.memo(function DesktopWindow({
 
   const currentScale = isMinimized ? (isHovered ? 0.12 : 0.1) : 1;
 
-  // ponytail: build className once, avoid cn() in hot path
+  // ponytail: build className once, avoid cn() in hot path. Animate only composited properties (transform, opacity).
   const windowClassName = `absolute rounded-sm flex flex-col overflow-hidden bg-background shadow-2xl select-text pointer-events-auto ${
     isMinimized
       ? "cursor-pointer border-[3px] border-border/85"
       : isFocused
       ? "border border-primary/60"
-      : "border border-border/40 shadow-none opacity-90"
+      : "border border-border/40 shadow-none opacity-95"
   } ${
     isMaximized && !isMinimized
       ? "inset-x-0 top-0 bottom-0 rounded-none border-none !w-full !h-full !translate-x-0 !translate-y-0"
       : ""
-  } ${isDragging || isResizing ? "select-none" : "transition-all duration-200 ease-in-out"}`;
+  } ${isDragging || isResizing ? "select-none" : "transition-[transform,opacity,border-color] duration-200 cubic-bezier(0.16, 1, 0.3, 1)"}`;
 
   return (
     <div
@@ -131,28 +131,33 @@ const DesktopWindow = React.memo(function DesktopWindow({
       className={windowClassName}
       style={
         isMaximized && !isMinimized
-          ? { zIndex }
+          ? { 
+              zIndex,
+              backfaceVisibility: "hidden",
+            }
           : isMinimized
           ? {
               left: 0,
               top: '100%',
-              transform: `translate(${mIndex * 120 + 4}px, ${-size.height * currentScale - 4}px) scale(${currentScale})`,
+              transform: `translate3d(${mIndex * 120 + 4}px, ${-size.height * currentScale - 4}px, 0) scale(${currentScale})`,
               transformOrigin: 'top left',
               width: size.width,
               height: size.height,
               zIndex: zIndex + 100,
-              willChange: "transform",
-              contain: "layout style",
+              willChange: "transform, opacity",
+              contain: "strict",
+              backfaceVisibility: "hidden",
             }
           : {
               left: 0,
               top: 0,
-              transform: `translate(${position.x}px, ${position.y}px)`,
+              transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
               width: size.width,
               height: size.height,
               zIndex,
-              willChange: "transform, width, height",
+              willChange: "transform, opacity",
               contain: "layout style",
+              backfaceVisibility: "hidden",
             }
       }
     >
@@ -178,7 +183,13 @@ const DesktopWindow = React.memo(function DesktopWindow({
       />
 
       {/* Window Body Container */}
-      <div className="flex-1 min-h-0 bg-background overflow-hidden relative">
+      <div 
+        className="flex-1 min-h-0 bg-background overflow-hidden relative"
+        aria-hidden={isMinimized}
+        style={{
+          visibility: isMinimized ? "hidden" : "visible",
+        }}
+      >
         {/* Interaction overlay blocks iframes/canvases during drag/resize to prevent reflow jank */}
         {(isDragging || isResizing) && (
           <div className="absolute inset-0 z-40" />

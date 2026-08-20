@@ -26,7 +26,11 @@ export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Deskto
 
   return (
     <div
-      onClick={() => onClick(href)}
+      data-desktop-icon
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(href);
+      }}
       className={cn(
         // Layout & Positioning
         "group relative flex flex-col items-center justify-center cursor-pointer select-none",

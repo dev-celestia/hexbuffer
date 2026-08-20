@@ -1,5 +1,6 @@
 import {
   AlertDialog,
+  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -16,7 +17,7 @@ import {
   Input,
 } from '@celestia-project/ui';
 import { useEffect, useRef, useState } from 'react';
-import { XIcon, TrashIcon, SpinnerGapIcon, PlayIcon, PauseIcon, TargetIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
+import { XIcon, TrashIcon, CircleNotchIcon, PlayIcon, PauseIcon, TargetIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { CrawlStatusBadge } from '@/components/status-badge';
 import { cn } from '@/lib/utils';
@@ -40,6 +41,34 @@ interface LogFiltersProps {
   clearCalls?: () => void;
 }
 
+const DATE_DELETE_OPTIONS = [
+  {
+    id: 'today',
+    label: 'Keep Today',
+    description: 'Delete logs recorded before today (keep today\'s traffic).',
+  },
+  {
+    id: 'week',
+    label: 'Keep This Week',
+    description: 'Delete logs older than 7 days (keep this week\'s traffic).',
+  },
+  {
+    id: 'month',
+    label: 'Keep This Month',
+    description: 'Delete logs older than 30 days (keep this month\'s traffic).',
+  },
+  {
+    id: 'custom',
+    label: 'Choose Date Cutoff',
+    description: 'Delete all logs recorded before a selected date.',
+  },
+  {
+    id: 'all',
+    label: 'Delete All History',
+    description: 'Permanently erase all HTTP and WebSocket logs.',
+  },
+] as const;
+
 export function LogFilters({
   filter: filterProp,
   onFilterChange,
@@ -47,6 +76,11 @@ export function LogFilters({
   clearCalls: clearCallsProp,
 }: LogFiltersProps) {
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
+  const [selectedRange, setSelectedRange] = useState<'today' | 'week' | 'month' | 'custom' | 'all'>('today');
+  const [customDate, setCustomDate] = useState(() => {
+    const d = new Date();
+    return d.toISOString().split('T')[0];
+  });
   const [isClearing, setIsClearing] = useState(false);
   const isStreamManuallyPaused = useHttpHistoryQueryStore((s) => s.isStreamManuallyPaused);
 
@@ -95,18 +129,37 @@ export function LogFilters({
     };
   }, []);
 
-  const clearCalls = clearCallsProp ?? (async () => {
+  const clearCalls = clearCallsProp ?? (async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     setIsClearing(true);
     try {
-      await invoke('clear_proxy_all');
+      if (selectedRange === 'all') {
+        await invoke('clear_proxy_all');
+        toast.success('All history cleared successfully');
+      } else if (selectedRange === 'custom') {
+        if (!customDate) {
+          toast.error('Please choose a valid cutoff date');
+          setIsClearing(false);
+          return;
+        }
+        await invoke('clear_proxy_by_date', { keepRange: 'custom', customDate });
+        toast.success(`Cleared logs recorded before ${customDate}`);
+      } else {
+        await invoke('clear_proxy_by_date', { keepRange: selectedRange, customDate: null });
+        const labelMap: Record<string, string> = {
+          today: 'Kept today\'s history (older logs cleared)',
+          week: 'Kept this week\'s history (older logs cleared)',
+          month: 'Kept this month\'s history (older logs cleared)',
+        };
+        toast.success(labelMap[selectedRange] || 'History cleared');
+      }
       storeSetSelectedCallId(null);
       triggerRefresh();
-      toast.success('History cleared successfully');
+      setClearDialogOpen(false);
     } catch {
       toast.error('Failed to clear history');
     } finally {
       setIsClearing(false);
-      setClearDialogOpen(false);
     }
   });
 
@@ -320,31 +373,134 @@ export function LogFilters({
         </div>
       )}
 
-      <AlertDialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
-        <AlertDialogContent>
+      <AlertDialog open={clearDialogOpen} onOpenChange={(next) => { if (!isClearing) setClearDialogOpen(next); }}>
+        <AlertDialogContent
+          className={cn(
+            // Sizing & Spacing
+            "max-w-md"
+          )}
+        >
           <AlertDialogHeader>
-            <AlertDialogTitle>Clear All History ?</AlertDialogTitle>
+            <AlertDialogTitle>Clear History by Date</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete all logged history requests and responses. This action cannot be undone.
+              Choose how much historical request data to keep.
             </AlertDialogDescription>
           </AlertDialogHeader>
+
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-col",
+
+              // Sizing & Spacing
+              "gap-2 my-2"
+            )}
+          >
+            {DATE_DELETE_OPTIONS.map((opt) => {
+              const isSelected = selectedRange === opt.id;
+              return (
+                <div
+                  key={opt.id}
+                  onClick={() => setSelectedRange(opt.id)}
+                  className={cn(
+                    // Layout & Positioning
+                    "flex flex-col cursor-pointer select-none",
+
+                    // Sizing & Spacing
+                    "p-2.5 rounded-md",
+
+                    // Backgrounds & Borders
+                    "border transition-all duration-150",
+                    isSelected
+                      ? "border-primary bg-primary/5 shadow-xs"
+                      : "border-border/60 hover:bg-muted/50"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      // Layout & Positioning
+                      "flex items-center justify-between"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        // Typography
+                        "text-xs font-medium",
+                        isSelected ? "text-primary font-semibold" : "text-foreground"
+                      )}
+                    >
+                      {opt.label}
+                    </span>
+                    {isSelected && (
+                      <span
+                        className={cn(
+                          // Typography
+                          "text-xs text-primary"
+                        )}
+                      >
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                  <span
+                    className={cn(
+                      // Sizing & Spacing
+                      "mt-0.5",
+
+                      // Typography
+                      "text-[11px] text-muted-foreground leading-tight"
+                    )}
+                  >
+                    {opt.description}
+                  </span>
+
+                  {opt.id === 'custom' && isSelected && (
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className={cn(
+                        // Layout & Positioning
+                        "flex items-center",
+
+                        // Sizing & Spacing
+                        "mt-2 gap-2"
+                      )}
+                    >
+                      <Input
+                        type="date"
+                        value={customDate}
+                        max={new Date().toISOString().split('T')[0]}
+                        onChange={(e) => setCustomDate(e.target.value)}
+                        className={cn(
+                          // Sizing & Spacing
+                          "h-7 text-xs w-full max-w-[180px]"
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          // Typography
+                          "text-[10px] text-muted-foreground"
+                        )}
+                      >
+                        (deletes back from date)
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isClearing}>Cancel</AlertDialogCancel>
-            <Button
+            <AlertDialogCancel size="xs" disabled={isClearing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
               size="xs"
               variant="destructive"
               disabled={isClearing}
               onClick={clearCalls}
             >
-              {isClearing ? (
-                <>
-                  <SpinnerGapIcon className="mr-1 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                'Clear All'
-              )}
-            </Button>
+              {isClearing && <CircleNotchIcon className="mr-1.5 size-3.5 animate-spin" />}
+              {isClearing ? 'Clearing…' : 'Clear Selected'}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

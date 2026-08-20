@@ -51,7 +51,7 @@ export function OpenBrowserButton() {
           "overflow-hidden whitespace-nowrap",
 
           // Sizing & Spacing
-          showLabel ? "max-w-32 ml-2" : "max-w-0",
+          showLabel ? "max-w-32" : "max-w-0",
 
           // Interactive & States
           "transition-all duration-300",

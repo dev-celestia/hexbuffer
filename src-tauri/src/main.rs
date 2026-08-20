@@ -66,6 +66,7 @@ fn main() {
             hexbuffer::commands::intercept::open_intercept_browser,
             hexbuffer::commands::intercept::trust_intercept_ca,
             hexbuffer::commands::history::clear_proxy_all,
+            hexbuffer::commands::history::clear_proxy_by_date,
             hexbuffer::commands::history::get_documents,
             hexbuffer::commands::history::save_document,
             hexbuffer::commands::history::delete_document,

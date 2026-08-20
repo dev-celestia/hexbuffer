@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, Button, Input } from '@celestia-project/ui';
 import {
   AsteriskIcon,
@@ -5,7 +6,11 @@ import {
   ArrowCounterClockwiseIcon,
   FloppyDiskIcon,
   TrashIcon,
+  CircleNotchIcon,
 } from '@phosphor-icons/react';
+import { invoke } from '@tauri-apps/api/core';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 import {
   MAX_PROXY_PORT,
@@ -21,6 +26,34 @@ interface GeneralSettingsTabProps {
   settings: SettingsPageState;
 }
 
+const DATABASE_CLEANUP_OPTIONS = [
+  {
+    id: 'today',
+    label: 'Keep Today',
+    description: 'Delete database records created before today (keep today\'s traffic).',
+  },
+  {
+    id: 'week',
+    label: 'Keep This Week',
+    description: 'Delete database records older than 7 days (keep this week\'s traffic).',
+  },
+  {
+    id: 'month',
+    label: 'Keep This Month',
+    description: 'Delete database records older than 30 days (keep this month\'s traffic).',
+  },
+  {
+    id: 'custom',
+    label: 'Choose Date Cutoff',
+    description: 'Delete database records created before a selected date.',
+  },
+  {
+    id: 'all',
+    label: 'Delete Entire Database',
+    description: 'Deletes the SQLite database and its WAL/SHM files. Recreates in a fresh state.',
+  },
+] as const;
+
 function formatBytes(bytes: number | undefined): string {
   if (bytes === undefined || bytes === null) return '—';
   if (bytes === 0) return '< 1 KB';
@@ -35,35 +68,193 @@ interface StorageRowDeleteProps {
   label: string;
   description: string;
   deletingArtifact: string | null;
-  onDelete: (artifact: string) => void;
+  onDelete: (artifact: string) => Promise<void> | void;
 }
 
 function StorageRowDelete({ artifact, label, description, deletingArtifact, onDelete }: StorageRowDeleteProps) {
+  const [open, setOpen] = React.useState(false);
+  const [selectedRange, setSelectedRange] = React.useState<'today' | 'week' | 'month' | 'custom' | 'all'>('today');
+  const [customDate, setCustomDate] = React.useState(() => {
+    const d = new Date();
+    return d.toISOString().split('T')[0];
+  });
   const isDeleting = deletingArtifact === artifact;
+
+  const handleConfirm = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      if (artifact === 'database' && selectedRange !== 'all') {
+        if (selectedRange === 'custom') {
+          if (!customDate) {
+            toast.error('Please choose a valid cutoff date');
+            return;
+          }
+          await invoke('clear_proxy_by_date', { keepRange: 'custom', customDate });
+          toast.success(`Cleared database records created before ${customDate}`);
+        } else {
+          await invoke('clear_proxy_by_date', { keepRange: selectedRange, customDate: null });
+          const labelMap: Record<string, string> = {
+            today: 'Kept today\'s database records (older records cleared)',
+            week: 'Kept this week\'s database records (older records cleared)',
+            month: 'Kept this month\'s database records (older records cleared)',
+          };
+          toast.success(labelMap[selectedRange] || 'Database records cleared');
+        }
+      } else {
+        await onDelete(artifact);
+      }
+      setOpen(false);
+    } catch (err) {
+      toast.error(`Failed to clear: ${err}`);
+    }
+  };
+
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={(next) => { if (!isDeleting) setOpen(next); }}>
       <AlertDialogTrigger asChild>
         <Button
           size="xs"
           variant="outline"
           disabled={isDeleting || deletingArtifact !== null}
         >
-          <TrashIcon className={`mr-1.5 size-3.5 ${isDeleting ? 'animate-pulse' : ''}`} />
+          {isDeleting ? (
+            <CircleNotchIcon className="mr-1.5 size-3.5 animate-spin" />
+          ) : (
+            <TrashIcon className="mr-1.5 size-3.5" />
+          )}
           {isDeleting ? 'Clearing…' : 'Clear'}
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent
+        className={cn(
+          // Sizing & Spacing
+          artifact === 'database' && "max-w-md"
+        )}
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>Clear {label}?</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogDescription>
+            {artifact === 'database'
+              ? 'Choose how much historical data in the SQLite database to keep.'
+              : description}
+          </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => onDelete(artifact)}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+
+        {artifact === 'database' && (
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-col",
+
+              // Sizing & Spacing
+              "gap-2 my-2"
+            )}
           >
-            Clear
+            {DATABASE_CLEANUP_OPTIONS.map((opt) => {
+              const isSelected = selectedRange === opt.id;
+              return (
+                <div
+                  key={opt.id}
+                  onClick={() => setSelectedRange(opt.id)}
+                  className={cn(
+                    // Layout & Positioning
+                    "flex flex-col cursor-pointer select-none",
+
+                    // Sizing & Spacing
+                    "p-2.5 rounded-md",
+
+                    // Backgrounds & Borders
+                    "border transition-all duration-150",
+                    isSelected
+                      ? "border-primary bg-primary/5 shadow-xs"
+                      : "border-border/60 hover:bg-muted/50"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      // Layout & Positioning
+                      "flex items-center justify-between"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        // Typography
+                        "text-xs font-medium",
+                        isSelected ? "text-primary font-semibold" : "text-foreground"
+                      )}
+                    >
+                      {opt.label}
+                    </span>
+                    {isSelected && (
+                      <span
+                        className={cn(
+                          // Typography
+                          "text-xs text-primary"
+                        )}
+                      >
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                  <span
+                    className={cn(
+                      // Sizing & Spacing
+                      "mt-0.5",
+
+                      // Typography
+                      "text-[11px] text-muted-foreground leading-tight"
+                    )}
+                  >
+                    {opt.description}
+                  </span>
+
+                  {opt.id === 'custom' && isSelected && (
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className={cn(
+                        // Layout & Positioning
+                        "flex items-center",
+
+                        // Sizing & Spacing
+                        "mt-2 gap-2"
+                      )}
+                    >
+                      <Input
+                        type="date"
+                        value={customDate}
+                        max={new Date().toISOString().split('T')[0]}
+                        onChange={(e) => setCustomDate(e.target.value)}
+                        className={cn(
+                          // Sizing & Spacing
+                          "h-7 text-xs w-full max-w-[180px]"
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          // Typography
+                          "text-[10px] text-muted-foreground"
+                        )}
+                      >
+                        (deletes back from date)
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <AlertDialogFooter>
+          <AlertDialogCancel size="xs" disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            size="xs"
+            variant="destructive"
+            disabled={isDeleting}
+            onClick={handleConfirm}
+          >
+            {isDeleting && <CircleNotchIcon className="mr-1.5 size-3.5 animate-spin" />}
+            {isDeleting ? 'Clearing…' : 'Clear'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -281,7 +472,11 @@ export function GeneralSettingsTab({ settings }: GeneralSettingsTabProps) {
                 variant="destructive"
                 disabled={deletingAllData}
               >
-                <TrashIcon className="mr-1.5 size-3.5" />
+                {deletingAllData ? (
+                  <CircleNotchIcon className="mr-1.5 size-3.5 animate-spin" />
+                ) : (
+                  <TrashIcon className="mr-1.5 size-3.5" />
+                )}
                 {deletingAllData ? 'Deleting…' : 'Delete'}
               </Button>
             </AlertDialogTrigger>
@@ -295,9 +490,10 @@ export function GeneralSettingsTab({ settings }: GeneralSettingsTabProps) {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteAllData} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  Delete
+                <AlertDialogCancel size="xs" disabled={deletingAllData}>Cancel</AlertDialogCancel>
+                <AlertDialogAction size="xs" variant="destructive" disabled={deletingAllData} onClick={handleDeleteAllData}>
+                  {deletingAllData && <CircleNotchIcon className="mr-1.5 size-3.5 animate-spin" />}
+                  {deletingAllData ? 'Deleting…' : 'Delete'}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

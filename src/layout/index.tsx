@@ -98,14 +98,29 @@ export function AppLayout({ children }: AppLayoutProps) {
       <ContextMenuContent
         className={cn(
           // Sizing & Spacing
-          "w-48"
+          "w-44 p-1",
+
+          // Typography
+          "text-xs font-sans"
         )}
       >
         <ContextMenuItem
           id="ctx-settings"
           onClick={() => navigate('/settings')}
+          className={cn(
+            // Sizing & Spacing
+            "py-1 px-1.5 gap-2",
+
+            // Typography
+            "text-xs"
+          )}
         >
-          <GearSixIcon className="size-4" />
+          <GearSixIcon
+            className={cn(
+              // Sizing & Spacing
+              "size-3.5"
+            )}
+          />
           Settings
         </ContextMenuItem>
 
@@ -113,27 +128,97 @@ export function AppLayout({ children }: AppLayoutProps) {
 
         {/* Appearance submenu */}
         <ContextMenuSub>
-          <ContextMenuSubTrigger id="ctx-appearance">
-            <MonitorIcon className="size-4 mr-2" />
+          <ContextMenuSubTrigger
+            id="ctx-appearance"
+            className={cn(
+              // Sizing & Spacing
+              "py-1 px-1.5 gap-2",
+
+              // Typography
+              "text-xs"
+            )}
+          >
+            <MonitorIcon
+              className={cn(
+                // Sizing & Spacing
+                "size-3.5"
+              )}
+            />
             Appearance
           </ContextMenuSubTrigger>
-          <ContextMenuSubContent>
+          <ContextMenuSubContent
+            className={cn(
+              // Sizing & Spacing
+              "w-44 p-1",
+
+              // Typography
+              "text-xs font-sans"
+            )}
+          >
             {/* Dark / Light mode */}
             <ContextMenuItem
               id="ctx-theme-light"
               onClick={() => setTheme('light')}
+              className={cn(
+                // Sizing & Spacing
+                "py-1 px-1.5 gap-2",
+
+                // Typography
+                "text-xs"
+              )}
             >
-              <SunIcon className="size-4" />
+              <SunIcon
+                className={cn(
+                  // Sizing & Spacing
+                  "size-3.5"
+                )}
+              />
               Light mode
-              {theme === 'light' && <span className="ml-auto text-primary text-xs">✓</span>}
+              {theme === 'light' && (
+                <span
+                  className={cn(
+                    // Layout & Positioning
+                    "ml-auto",
+
+                    // Typography
+                    "text-[10px] text-primary font-medium"
+                  )}
+                >
+                  ✓
+                </span>
+              )}
             </ContextMenuItem>
             <ContextMenuItem
               id="ctx-theme-dark"
               onClick={() => setTheme('dark')}
+              className={cn(
+                // Sizing & Spacing
+                "py-1 px-1.5 gap-2",
+
+                // Typography
+                "text-xs"
+              )}
             >
-              <MoonIcon className="size-4" />
+              <MoonIcon
+                className={cn(
+                  // Sizing & Spacing
+                  "size-3.5"
+                )}
+              />
               Dark mode
-              {theme === 'dark' && <span className="ml-auto text-primary text-xs">✓</span>}
+              {theme === 'dark' && (
+                <span
+                  className={cn(
+                    // Layout & Positioning
+                    "ml-auto",
+
+                    // Typography
+                    "text-[10px] text-primary font-medium"
+                  )}
+                >
+                  ✓
+                </span>
+              )}
             </ContextMenuItem>
 
             <ContextMenuSeparator />
@@ -142,8 +227,20 @@ export function AppLayout({ children }: AppLayoutProps) {
             <ContextMenuItem
               id="ctx-change-background"
               onClick={() => navigate('/settings?tab=appearance')}
+              className={cn(
+                // Sizing & Spacing
+                "py-1 px-1.5 gap-2",
+
+                // Typography
+                "text-xs"
+              )}
             >
-              <ImageIcon className="size-4" />
+              <ImageIcon
+                className={cn(
+                  // Sizing & Spacing
+                  "size-3.5"
+                )}
+              />
               Change Background…
             </ContextMenuItem>
           </ContextMenuSubContent>

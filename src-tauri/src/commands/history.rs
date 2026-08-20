@@ -14,6 +14,46 @@ pub async fn clear_proxy_all(
 }
 
 #[tauri::command]
+pub async fn clear_proxy_by_date(
+    history: State<'_, HistoryBridge>,
+    proxy_state: State<'_, ProxyState>,
+    keep_range: String,
+    custom_date: Option<String>,
+) -> Result<usize, String> {
+    if keep_range == "all" {
+        proxy_state.clear_records();
+        let _ = history.clear_websocket_all();
+        history.clear_all()?;
+        return Ok(0);
+    }
+
+    let now = chrono::Utc::now();
+    let cutoff = match keep_range.as_str() {
+        "today" => {
+            let date = now.date_naive();
+            let start_of_day = date.and_hms_opt(0, 0, 0).unwrap_or_default();
+            chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(start_of_day, chrono::Utc)
+        }
+        "week" => now - chrono::Duration::days(7),
+        "month" => now - chrono::Duration::days(30),
+        "custom" => {
+            let date_str = custom_date
+                .as_deref()
+                .ok_or_else(|| "custom_date is required when keep_range is 'custom'".to_string())?;
+            let naive_date = chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d")
+                .map_err(|e| format!("Invalid date format (expected YYYY-MM-DD): {}", e))?;
+            let start_of_day = naive_date.and_hms_opt(0, 0, 0).unwrap_or_default();
+            chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(start_of_day, chrono::Utc)
+        }
+        _ => return Err(format!("Unknown keep range: {}", keep_range)),
+    };
+
+    let cutoff_rfc3339 = cutoff.to_rfc3339();
+    proxy_state.clear_records_before(&cutoff);
+    history.clear_before(&cutoff_rfc3339)
+}
+
+#[tauri::command]
 pub async fn get_documents(
     history: State<'_, HistoryBridge>,
 ) -> Result<Vec<DocumentRecord>, String> {
