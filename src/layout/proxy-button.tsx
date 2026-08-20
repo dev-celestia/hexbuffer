@@ -10,10 +10,10 @@ export function ProxyButton() {
     <div
       className={cn(
         // Layout & Positioning
-        "group flex items-center",
+        "group flex items-center shrink-0",
 
         // Sizing & Spacing
-        "gap-2 pl-2"
+        "gap-1 sm:gap-2 pl-0.5 sm:pl-1"
       )}
       title={title}
     >

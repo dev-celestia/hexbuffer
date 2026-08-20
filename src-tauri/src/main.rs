@@ -216,23 +216,30 @@ fn main() {
         .plugin(tauri_plugin_pty::init())
         .plugin(tauri_plugin_notification::init())
         .on_window_event(|window, event| {
-            if let tauri::WindowEvent::CloseRequested { .. } = event {
-                // Only run close cleanup when the window is actually visible.
-                // Spurious CloseRequested events can fire during startup before the
-                // window is shown.
-                if !window.is_visible().unwrap_or(true) {
-                    return;
+            match event {
+                tauri::WindowEvent::ScaleFactorChanged { scale_factor: _, new_inner_size, .. } => {
+                    // Force the window to acknowledge the updated scale factor on wake
+                    let _ = window.set_size(tauri::Size::Physical(*new_inner_size));
                 }
+                tauri::WindowEvent::CloseRequested { .. } => {
+                    // Only run close cleanup when the window is actually visible.
+                    // Spurious CloseRequested events can fire during startup before the
+                    // window is shown.
+                    if !window.is_visible().unwrap_or(true) {
+                        return;
+                    }
 
-                if let Some(state) = window.try_state::<hexbuffer::AiBrowserState>() {
-                    hexbuffer::stop_all_active_crawls(window.app_handle(), state.inner());
-                }
+                    if let Some(state) = window.try_state::<hexbuffer::AiBrowserState>() {
+                        hexbuffer::stop_all_active_crawls(window.app_handle(), state.inner());
+                    }
 
-                if let Some(state) = window.try_state::<hexbuffer::BrowserProcessState>() {
-                    if let Err(error) = hexbuffer::stop_browser_process(state.inner()) {
-                        eprintln!("[main] Failed to stop browser process on close: {}", error);
+                    if let Some(state) = window.try_state::<hexbuffer::BrowserProcessState>() {
+                        if let Err(error) = hexbuffer::stop_browser_process(state.inner()) {
+                            eprintln!("[main] Failed to stop browser process on close: {}", error);
+                        }
                     }
                 }
+                _ => {}
             }
         })
         .run(tauri::generate_context!())

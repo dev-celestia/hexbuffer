@@ -17,11 +17,16 @@
         "label": "main",
         "title": "hexbuffer",
         "decorations": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "trafficLightPosition": {
+          "x": 16,
+          "y": 16
+        },
         "transparent": true,
         "visible": false,
-        "width": 1000,
-        "height": 800,
-        "maximized": true
+        "width": 1280,
+        "height": 850
       },
       {
         "label": "splashscreen",

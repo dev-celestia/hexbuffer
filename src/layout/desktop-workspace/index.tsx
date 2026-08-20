@@ -38,6 +38,7 @@ export function DesktopWorkspace({ activeChild }: DesktopWorkspaceProps) {
       `}</style>
       {/* Desktop Background (Desktop Dashboard) */}
       <div
+        data-tauri-drag-region
         className={cn(
           // Layout & Positioning
           "absolute inset-0 z-0 overflow-hidden",

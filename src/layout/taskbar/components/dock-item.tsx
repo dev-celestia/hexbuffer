@@ -28,13 +28,12 @@ export function DockItem({
 }: DockItemProps) {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <div className="relative size-7 group/dock-item touch-none">
-          <Link
+      <TooltipTrigger render={<div className="relative size-7 group/dock-item touch-none shrink-0" />}>
+        <Link
             to={item.href}
             onClick={onClick}
             className={cn(
-              "flex size-full items-center justify-center rounded-sm transition-all active:scale-95 duration-150 text-white border shadow-sm",
+              "flex size-full items-center justify-center rounded-sm transition-all active:scale-90 duration-150 text-white border shadow-xs select-none",
               item.colors ? `${item.colors.bg} ${item.colors.border}` : "bg-muted/40 border-transparent text-muted-foreground",
               active
                 ? "opacity-100 ring-2 ring-primary/40 ring-offset-1 ring-offset-background"
@@ -70,7 +69,6 @@ export function DockItem({
               <XIcon className="size-2.5" />
             </button>
           )}
-        </div>
       </TooltipTrigger>
       <TooltipContent side="top" sideOffset={12} className="flex items-center gap-1.5 font-sans">
         <span>{item.label}</span>
@@ -121,7 +119,7 @@ export function SortableDockItem({
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} className="shrink-0" {...attributes} {...listeners}>
       <DockItem
         item={item}
         active={active}

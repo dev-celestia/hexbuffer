@@ -1,7 +1,20 @@
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, Kbd, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  Dialog,
+  DialogContent,
+  Kbd,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@celestia-project/ui';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SquaresFourIcon, PushPinSimpleIcon, PushPinSimpleSlashIcon } from '@phosphor-icons/react';
+import { PushPinSimpleIcon, PushPinSimpleSlashIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
@@ -41,17 +54,16 @@ export function AppLauncher() {
   return (
     <>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className={cn(
-              'flex size-7 items-center justify-center rounded-sm text-muted-foreground transition-all hover:bg-muted/80 hover:text-foreground cursor-pointer',
-              open && 'bg-primary/15 text-primary',
-            )}
-          >
-            <TriangleLogo />
-          </button>
+        <TooltipTrigger
+          type="button"
+          onClick={() => setOpen(true)}
+          className={cn(
+            'flex size-7 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition-all hover:bg-muted/80 hover:text-foreground active:scale-95 cursor-pointer',
+            open && 'bg-primary/15 text-primary',
+          )}
+          aria-label="All Apps"
+        >
+          <TriangleLogo />
         </TooltipTrigger>
         <TooltipContent side="top" sideOffset={12} className="flex items-center gap-1.5">
           <span>All Apps</span>
@@ -61,7 +73,9 @@ export function AppLauncher() {
         </TooltipContent>
       </Tooltip>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="overflow-hidden p-0 max-w-lg shadow-2xl border bg-popover text-popover-foreground">
+          <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
         <CommandInput placeholder="Search apps…" autoFocus />
         <CommandList>
           <CommandEmpty>No apps found.</CommandEmpty>
@@ -132,7 +146,9 @@ export function AppLauncher() {
             })}
           </CommandGroup>
         </CommandList>
-      </CommandDialog>
+      </Command>
+    </DialogContent>
+  </Dialog>
     </>
   );
 }

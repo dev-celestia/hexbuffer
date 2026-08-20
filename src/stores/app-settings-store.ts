@@ -53,7 +53,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
       widgetOrder: DEFAULT_WIDGET_ORDER,
       setBg: (type, value) => set({ bgType: type, bgValue: value }),
       clearBg: () => set({ bgType: 'none', bgValue: '' }),
-      setTheme: (t) => set({ theme: t }),
+      setTheme: (t) => set({ theme: t, bgType: 'none', bgValue: '' }),
       toggleNavItem: (href) =>
         set((state) => ({
           hiddenNavItems: state.hiddenNavItems.includes(href)

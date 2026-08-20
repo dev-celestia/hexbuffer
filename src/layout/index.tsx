@@ -1,11 +1,11 @@
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from '@celestia-project/ui';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { convertFileSrc } from '@tauri-apps/api/core';
+import { convertFileSrc, invoke } from '@tauri-apps/api/core';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { useTheme } from '@/components/theme-provider';
 
-import { MonitorIcon, SunIcon, MoonIcon, ImageIcon, GearSixIcon } from '@phosphor-icons/react';
+import { MonitorIcon, SunIcon, MoonIcon, ImageIcon, GearSixIcon, DotsSixIcon } from '@phosphor-icons/react';
 import { AppSidebar } from './taskbar';
 import { DesktopWorkspace } from './desktop-workspace';
 import { cn } from '@/lib/utils';
@@ -82,11 +82,67 @@ export function AppLayout({ children }: AppLayoutProps) {
             "bg-background"
           )}
         >
+          {/* Top macOS Drag Bar & Apple-style Grab Visual Aid */}
+          <header
+            data-tauri-drag-region
+            role="region"
+            aria-label="Window drag region"
+            onMouseDown={(e) => {
+              if (e.buttons === 1) {
+                const target = e.target as HTMLElement;
+                if (!target.closest('button, a, input, select, textarea, [role="button"]')) {
+                  invoke('safe_start_dragging').catch(() => {});
+                }
+              }
+            }}
+            className={cn(
+              // Layout & Positioning
+              "absolute top-0 left-0 right-0 z-30 flex items-center justify-center select-none",
+
+              // Sizing & Spacing
+              "h-8 px-4",
+
+              // Interactive & States
+              "cursor-grab active:cursor-grabbing group"
+            )}
+          >
+            {/* Apple-style Translucent Grab Capsule */}
+            {/* <div
+              data-tauri-drag-region
+              className={cn(
+                // Layout & Positioning
+                "flex items-center justify-center gap-1 pointer-events-none",
+
+                // Sizing & Spacing
+                "px-3 py-1",
+
+                // Backgrounds & Borders
+                "bg-foreground/[0.04] dark:bg-foreground/[0.08] border border-border/40 rounded-xl backdrop-blur-md shadow-xs",
+
+                // Typography
+                "text-muted-foreground/50",
+
+                // Interactive & States
+                "transition-all duration-200 ease-out group-hover:text-foreground group-hover:bg-foreground/[0.08] group-hover:border-border/70 group-active:scale-95"
+              )}
+            > */}
+              <DotsSixIcon
+                weight="bold"
+                className={cn(
+                  // Sizing & Spacing
+                  "size-3.5",
+
+                  // Typography
+                  "opacity-70 group-hover:opacity-100"
+                )}
+              />
+            {/* </div> */}
+          </header>
           <BgLayer />
           <div
             className={cn(
               // Layout & Positioning
-              "relative z-10 flex-1 min-h-0"
+              "relative z-10 flex-1 min-h-0 pt-7"
             )}
           >
             <DesktopWorkspace activeChild={children} />
