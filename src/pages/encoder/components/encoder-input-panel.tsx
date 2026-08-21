@@ -28,7 +28,7 @@ export function EncoderInputPanel({
         "flex flex-col min-h-0",
 
         // Backgrounds & Borders
-        "border-b bg-background lg:border-b-0 lg:border-r"
+        "border-b lg:border-b-0 lg:border-r"
       )}
     >
       <div

@@ -47,7 +47,7 @@ export function AppSidebar() {
         // Sizing & Spacing
         "h-11 px-2 sm:px-3 py-1 gap-1.5 sm:gap-2.5 shrink-0 overflow-hidden",
         // Backgrounds & Borders
-        "border-t border-border/50 bg-background/80 dark:bg-background/75 backdrop-blur-xl shadow-xs"
+        "border-t backdrop-blur-sm shadow-xs"
       )}
     >
       {/* Left section: App launcher & quick tools */}
@@ -64,7 +64,7 @@ export function AppSidebar() {
         onWheel={handleWheelScroll}
         className={cn(
           // Layout & Positioning
-          "min-w-0 flex-1 flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide py-1 scroll-smooth"
+          "min-w-0 flex-1 flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide py-1 scroll-smooth px-2"
         )}
         style={{
           maskImage: isOverflowing

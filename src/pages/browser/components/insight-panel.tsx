@@ -80,9 +80,6 @@ function AiInsightsPanelComponent({
 
         // Sizing & Spacing
         "h-full",
-
-        // Backgrounds & Borders
-        "bg-background"
       )}
     >
       <div
@@ -94,7 +91,7 @@ function AiInsightsPanelComponent({
           "px-3 py-2",
 
           // Backgrounds & Borders
-          "border-b bg-background"
+          "border-b"
         )}
       >
         <div
@@ -302,7 +299,7 @@ function AiInsightsPanelComponent({
                 "max-w-full overflow-hidden",
 
                 // Backgrounds & Borders
-                "rounded-md border"
+                "rounded-md"
               )}
             >
               <AccordionTrigger
@@ -363,7 +360,7 @@ function AiInsightsPanelComponent({
                         "p-2",
 
                         // Backgrounds & Borders
-                        "rounded-md border bg-background",
+                        "rounded-md border",
 
                         // Interactive & States
                         "cursor-pointer transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -411,7 +408,7 @@ function AiInsightsPanelComponent({
                             "font-mono text-xs text-muted-foreground",
 
                             // Backgrounds & Borders
-                            "rounded border border-gray-500"
+                            "rounded border"
                           )}
                         >
                           <HighlightedText text={insight.type} query={searchQuery} />
@@ -609,7 +606,7 @@ function AiInsightsPanelComponent({
                       {detailItem.insight.severity}
                     </Badge>
                     <InsightSourceBadge insight={detailItem.insight} />
-                    <span className="max-w-full break-all rounded border border-gray-500 px-1 py-0.5 font-mono text-xs text-muted-foreground">
+                    <span className="max-w-full break-all rounded border px-1 py-0.5 font-mono text-xs text-muted-foreground">
                       <HighlightedText text={detailItem.insight.type} query={searchQuery} />
                     </span>
                     <span className="shrink-0 font-mono text-xs text-muted-foreground">

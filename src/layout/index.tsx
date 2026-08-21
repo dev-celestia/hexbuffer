@@ -76,17 +76,16 @@ export function AppLayout({ children }: AppLayoutProps) {
             "relative flex flex-col overflow-hidden",
 
             // Sizing & Spacing
-            "h-screen",
+            "h-screen h-[100dvh] w-full",
 
             // Backgrounds & Borders
-            "bg-background"
+            "bg-background border rounded-[11px]"
           )}
         >
           {/* Top macOS Drag Bar & Apple-style Grab Visual Aid */}
-          <header
+          <div
             data-tauri-drag-region
-            role="region"
-            aria-label="Window drag region"
+            aria-hidden="true"
             onMouseDown={(e) => {
               if (e.buttons === 1) {
                 const target = e.target as HTMLElement;
@@ -137,7 +136,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 )}
               />
             {/* </div> */}
-          </header>
+          </div>
           <BgLayer />
           <div
             className={cn(

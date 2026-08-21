@@ -17,7 +17,7 @@ export function CrawlOverviewPanel({ overview }: CrawlOverviewPanelProps) {
         "flex flex-col min-h-0",
 
         // Backgrounds & Borders
-        "border-b bg-background xl:border-b-0"
+        "border-b xl:border-b-0"
       )}
     >
       <div

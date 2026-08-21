@@ -98,7 +98,7 @@ function CrawlTreePanelComponent({
         "flex flex-col min-h-0 min-w-0",
 
         // Backgrounds & Borders
-        "border-b bg-background"
+        "border-b"
       )}
     >
       <div
@@ -110,7 +110,7 @@ function CrawlTreePanelComponent({
           "gap-2 px-3 py-1",
 
           // Backgrounds & Borders
-          "border-b bg-background"
+          "border-b"
         )}
       >
         <div

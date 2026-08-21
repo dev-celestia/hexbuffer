@@ -21,10 +21,7 @@ export function EncoderOutputPanel({
     <div
       className={cn(
         // Layout & Positioning
-        "flex flex-col min-h-0",
-
-        // Backgrounds & Borders
-        "bg-background"
+        "flex flex-col min-h-0"
       )}
     >
       <div

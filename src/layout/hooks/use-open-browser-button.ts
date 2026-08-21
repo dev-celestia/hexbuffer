@@ -8,33 +8,11 @@ import { useNavStore } from '@/stores/nav';
 
 export function useOpenBrowserButton() {
   const [isOpeningBrowser, setIsOpeningBrowser] = React.useState(false);
-  const [showLabel, setShowLabel] = React.useState(true);
-  const hideTimerRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const proxyPort = useAppStore((state) => state.proxyPort);
   const proxyDefaultPort = useAppStore((state) => state.proxyDefaultPort);
   const checkProxyStatus = useAppStore((state) => state.checkProxyStatus);
   const activeProxyPort = getEffectiveProxyPort({ proxyPort, proxyDefaultPort });
   const isDefaultPortChanged = proxyPort !== null && proxyPort !== proxyDefaultPort;
-
-  const startHideTimer = React.useCallback(() => {
-    clearTimeout(hideTimerRef.current);
-    hideTimerRef.current = setTimeout(() => setShowLabel(false), 30_000);
-  }, []);
-
-  React.useEffect(() => {
-    startHideTimer();
-    return () => clearTimeout(hideTimerRef.current);
-  }, [startHideTimer]);
-
-  const handleMouseEnter = React.useCallback(() => {
-    setShowLabel(true);
-    clearTimeout(hideTimerRef.current);
-  }, []);
-
-  const handleMouseLeave = React.useCallback(() => {
-    setShowLabel(false);
-    clearTimeout(hideTimerRef.current);
-  }, []);
 
   const openBrowserTitle = isDefaultPortChanged
     ? `Open browser through proxy on 127.0.0.1:${activeProxyPort}. Restart the proxy to use configured port ${proxyDefaultPort}.`
@@ -65,11 +43,8 @@ export function useOpenBrowserButton() {
   }, [checkProxyStatus]);
 
   return {
-    handleMouseEnter,
-    handleMouseLeave,
     isOpeningBrowser,
     openBrowser,
     openBrowserTitle,
-    showLabel,
   };
 }

@@ -26,7 +26,7 @@ export function EncoderPage() {
           "h-full",
 
           // Backgrounds & Borders
-          "border rounded-md"
+          "border bg-card rounded-md"
         )}
       >
         <EncoderToolbar
@@ -45,7 +45,10 @@ export function EncoderPage() {
         <main
           className={cn(
             // Layout & Positioning
-            "flex flex-col flex-1 min-h-0"
+            "flex flex-col flex-1 min-h-0",
+
+            // Backgrounds & Borders
+            "bg-card "
           )}
         >
           <section

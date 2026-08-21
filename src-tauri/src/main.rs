@@ -224,10 +224,6 @@ fn main() {
         .plugin(tauri_plugin_notification::init())
         .on_window_event(|window, event| {
             match event {
-                tauri::WindowEvent::ScaleFactorChanged { scale_factor: _, new_inner_size, .. } => {
-                    // Force the window to acknowledge the updated scale factor on wake
-                    let _ = window.set_size(tauri::Size::Physical(*new_inner_size));
-                }
                 tauri::WindowEvent::CloseRequested { .. } => {
                     // Only run close cleanup when the window is actually visible.
                     // Spurious CloseRequested events can fire during startup before the

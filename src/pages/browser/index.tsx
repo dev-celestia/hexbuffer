@@ -156,7 +156,7 @@ export function BrowserAutomationPage() {
           "flex-1 min-h-0 overflow-hidden",
 
           // Backgrounds & Borders
-          "border rounded-md bg-background"
+          "border rounded-md bg-card"
         )}
       >
         <div
@@ -166,9 +166,6 @@ export function BrowserAutomationPage() {
 
             // Sizing & Spacing
             "h-full",
-
-            // Backgrounds & Borders
-            "bg-background"
           )}
         >
           <header
