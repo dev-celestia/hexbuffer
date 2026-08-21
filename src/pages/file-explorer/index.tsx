@@ -20,7 +20,7 @@ import {
 } from '@phosphor-icons/react';
 
 import { cn } from '@/lib/utils';
-import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { useFileExplorerPage } from './hooks/use-file-explorer-page';
 import { ExplorerSidebar } from './components/explorer-sidebar';
 import { ExplorerDetailsPane } from './components/explorer-details-pane';

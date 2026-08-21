@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTerminalPage } from './hooks/use-terminal-page';
-import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { TerminalToolbar } from './components/terminal-toolbar';
 import { TerminalContainer } from './components/terminal-container';
 import { TerminalEmptyState } from './components/terminal-empty-state';

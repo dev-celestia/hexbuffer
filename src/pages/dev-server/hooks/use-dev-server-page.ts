@@ -3,7 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { toast } from 'sonner';
-import type { PageTabItem } from '@/components/tabs-layout/types';
+import type { PageTabItem } from '@/layout/tabs-layout/types';
 import type {
   NetworkInterfaceInfo,
   DevProcessStatus,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAutomationStore } from '@/stores/automation';
-import type { PageTabItem } from '@/components/tabs-layout/types';
+import type { PageTabItem } from '@/layout/tabs-layout/types';
 import { getWorkflowReadiness } from '../lib/workflow-readiness';
 import { isWorkflowProcessing } from '../lib/workflow-runtime';
 import type { Node } from '@xyflow/react';

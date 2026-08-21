@@ -1,7 +1,7 @@
 import { Badge, ResizableHandle, ResizablePanel, ResizablePanelGroup, TabsContent } from '@celestia-project/ui';
 import { ReactFlowProvider } from '@xyflow/react';
 
-import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { useRegressionPage } from './hooks/use-regression-page';
 import { RegressionHeader } from './components/regression-header';
 import { RegressionEmptyState } from './components/regression-empty-state';

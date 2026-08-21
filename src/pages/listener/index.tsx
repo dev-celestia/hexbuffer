@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { useListenerPage } from './hooks/use-listener-page';
 import { ListenerHosts } from './components/hosts-panel';
 import { ListenerInteractions } from './components/interactions-panel';
-import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 
 import type { ListenerSubTab } from './types';
 

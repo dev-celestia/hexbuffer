@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { useDevServerPage } from './hooks/use-dev-server-page';
 import { DevServerHeader } from './components/dev-server-header';
 import { DevServerProcessPane } from './components/dev-server-process-pane';

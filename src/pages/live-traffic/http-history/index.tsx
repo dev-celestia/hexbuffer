@@ -1,8 +1,8 @@
 import { Card, ContextMenuItem } from '@celestia-project/ui';
 import * as React from 'react';
 import { PushPinSimpleIcon } from '@phosphor-icons/react';
-import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
-import type { PageTabItem } from '@/components/tabs-layout/types';
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
+import type { PageTabItem } from '@/layout/tabs-layout/types';
 
 import { LogFilters, HttpHistoryView, CreateGroupDialog, TargetSelectorDialog } from './components';
 import {

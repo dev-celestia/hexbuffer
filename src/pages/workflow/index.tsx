@@ -2,7 +2,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-
 import { cn } from '@/lib/utils';
 
 import { ReactFlowProvider } from '@xyflow/react';
-import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { WorkflowCanvas } from './components/workflow-canvas';
 import { WorkflowToolbar } from './components/workflow-toolbar';
 import { ExecutionLogPanel } from './components/execution-log-panel';

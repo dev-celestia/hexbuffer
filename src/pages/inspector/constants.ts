@@ -1,5 +1,5 @@
 import type { ConsoleFilterLevel, InspectorTab, InspectorTopTab } from './types';
-import type { PageTabItem } from '@/components/tabs-layout/types';
+import type { PageTabItem } from '@/layout/tabs-layout/types';
 
 export const DEFAULT_DEBUGGING_PORT = 9222;
 

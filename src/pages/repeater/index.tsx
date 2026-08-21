@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { useRepeaterPage } from './hooks/use-repeater-page';
 import { WorkspacePanel } from './components/workspace-panel';
 import { ManageWorkspacesDialog } from './components/ManageWorkspacesDialog';

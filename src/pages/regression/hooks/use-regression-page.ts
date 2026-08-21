@@ -2,7 +2,7 @@ import React from 'react';
 import { useRegressionStore } from '@/stores/regression';
 import { useShallow } from 'zustand/react/shallow';
 import type { StepResult, TestCase } from '../types';
-import type { PageTabItem } from '@/components/tabs-layout/types';
+import type { PageTabItem } from '@/layout/tabs-layout/types';
 
 interface RegressionTab {
   id: string;

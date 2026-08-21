@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useTabState } from '@/components/tabs-layout/use-tab-state';
+import { useTabState } from '@/layout/tabs-layout/use-tab-state';
 import { useDocumentsStore } from '@/stores/documents';
 import { useTargetStore } from '@/stores/target';
 import { useFloatingBarUiStore } from '@/stores/floating-bar-ui';

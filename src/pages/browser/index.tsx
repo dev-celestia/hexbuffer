@@ -8,7 +8,7 @@ import { CrawlSetupScreen } from './components/setup-screen';
 import { CrawlTreePanel } from './components/tree-panel';
 import { PageDetailPanel } from './components/page-detail-panel';
 
-import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { getCrawlStatusColor } from '@/lib/status-colors';
 import { useProxyStart } from '@/hooks/use-proxy-start';
 import { useBrowserAutomationPage } from './hooks/use-page';

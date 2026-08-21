@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useTabState } from '@/components/tabs-layout/use-tab-state';
-import type { PageTabItem } from '@/components/tabs-layout/types';
+import { useTabState } from '@/layout/tabs-layout/use-tab-state';
+import type { PageTabItem } from '@/layout/tabs-layout/types';
 import { useTargetStore } from '@/stores/target';
 import { useFloatingBarUiStore } from '@/stores/floating-bar-ui';
 import { useWebSocketHistoryQueryStore } from '@/stores/history';

@@ -2,7 +2,7 @@ import { Alert, AlertAction, AlertDescription, Badge, Button, Input, ResizableHa
 import * as React from 'react';
 import { PauseIcon, PlayIcon, PlusIcon, XIcon } from '@phosphor-icons/react';
 
-import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { useProxyStart } from '@/hooks/use-proxy-start';
 import { InterceptQueuePanel } from './components/queue-panel';
 import { InterceptRequestPanel } from './components/request-panel';

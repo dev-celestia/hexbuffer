@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Card, Input } from '@celestia-project/ui';
-import { TabbedPageLayout } from "@/components/tabs-layout/tabbed-page-layout";
+import { TabbedPageLayout } from "@/layout/tabs-layout/tabbed-page-layout";
 
 import { TargetSelectorDialog } from "@/pages/live-traffic/components/target-selector";
 import { useWebSocketHistoryPage } from "./hooks/use-websocket-history-page";

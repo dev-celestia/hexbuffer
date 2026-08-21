@@ -1,6 +1,6 @@
 import { useMockForgePage } from './hooks/use-mock-forge-page';
 import { MockForgeContent } from './components/mock-forge-content';
-import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { MOCK_FORGE_SUB_TABS } from './constants';
 
 export function MockForgePage() {

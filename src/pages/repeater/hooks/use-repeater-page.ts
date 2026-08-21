@@ -2,7 +2,7 @@ import React from 'react';
 import { useRepeaterStore } from '@/stores/repeater';
 import { useCollectionsStore } from '@/stores/collections';
 import { invoke } from '@tauri-apps/api/core';
-import type { PageTabItem } from '@/components/tabs-layout/types';
+import type { PageTabItem } from '@/layout/tabs-layout/types';
 import {
   createWorkspace,
   renameWorkspace,

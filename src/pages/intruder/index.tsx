@@ -2,7 +2,7 @@ import { Alert, AlertDescription, Button } from '@celestia-project/ui';
 import * as React from 'react';
 
 import { InfoIcon, PlayIcon, SquareIcon } from '@phosphor-icons/react';
-import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { IntruderConfigDialog } from './components/intruder-config';
 import { IntruderPayloadDialog } from './components/payload-dialog';
 import { IntruderResultsPanel } from './components/results-panel';

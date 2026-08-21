@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFileExplorer } from './use-file-explorer';
 import { useLocalStorage, LOCAL_STORAGE_DIR_NAME } from './use-local-storage';
-import type { PageTabItem } from '@/components/tabs-layout/types';
+import type { PageTabItem } from '@/layout/tabs-layout/types';
 import type { FileItem } from '../components/file-grid';
 
 export type FileExplorerTabId = 'r2' | 'local' | 'wordlists';

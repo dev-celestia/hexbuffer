@@ -1,7 +1,7 @@
 
 
 import { Badge, Button, Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle, Input, ScrollArea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, TabsContent } from '@celestia-project/ui';
-import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 
 import { PlugsConnected, Bug, Terminal, WifiHigh, HardDrive, Browser, ArrowClockwise, Warning } from '@phosphor-icons/react';
 import { useInspectExternal } from './hooks/use-inspect-external';
