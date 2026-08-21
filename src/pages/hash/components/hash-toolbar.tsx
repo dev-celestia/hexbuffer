@@ -1,8 +1,6 @@
-
-
 import { Button, ButtonGroup } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
-import { CopyIcon, TrashIcon } from '@phosphor-icons/react';
+import { Copy, Trash } from '@phosphor-icons/react';
 import type { HashType } from '../types';
 import { HASH_OPTIONS } from '../constants';
 
@@ -24,47 +22,73 @@ export function HashToolbar({
   onClear,
 }: HashToolbarProps) {
   return (
-    <div className="flex h-11 shrink-0 items-center justify-between border-b bg-muted/20 px-3 gap-3 select-none">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex shrink-0 items-center justify-between",
+
+        // Sizing & Spacing
+        "h-10 px-3 gap-3",
+
+        // Backgrounds & Borders
+        "border-b border-border/40 bg-muted/10 backdrop-blur-md",
+
+        // Typography
+        "select-none"
+      )}
+    >
       {/* Hash Type Selector */}
-      <ButtonGroup>
-        {HASH_OPTIONS.map((opt) => (
-          <Button size="xs"
-            key={opt.value}
-            variant="outline"
-            className={cn(
-              'hover:text-green-500 h-6 text-xs px-2.5',
-              activeType === opt.value && 'text-green-500',
-            )}
-            data-state={activeType === opt.value ? 'on' : 'off'}
-            onClick={() => onTypeChange(opt.value)}
-          >
-            {opt.label}
-          </Button>
-        ))}
-      </ButtonGroup>
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center overflow-x-auto",
+
+          // Sizing & Spacing
+          "gap-1"
+        )}
+      >
+        <ButtonGroup>
+          {HASH_OPTIONS.map((opt) => (
+            <Button
+              key={opt.value}
+              size="xs"
+              variant={activeType === opt.value ? "secondary" : "outline"}
+              onClick={() => onTypeChange(opt.value)}
+            >
+              {opt.label}
+            </Button>
+          ))}
+        </ButtonGroup>
+      </div>
 
       {/* Action Controls */}
-      <div className="flex items-center gap-1.5">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center",
+
+          // Sizing & Spacing
+          "gap-1.5 shrink-0"
+        )}
+      >
         <Button
           variant="outline"
           size="xs"
           onClick={onCopy}
           disabled={!output}
-          className="h-7 text-[11px] gap-1 px-2.5 font-semibold transition-all border-border"
         >
-          <CopyIcon className="h-3.5 w-3.5" />
+          <Copy className="h-3.5 w-3.5" />
           Copy Output
         </Button>
-        
+
         <Button
           variant="destructive"
-          size="icon"
+          size="xs"
           onClick={onClear}
           disabled={isEmpty}
-          className="h-7 w-7"
           title="Clear inputs and outputs"
         >
-          <TrashIcon className="h-4 w-4" />
+          <Trash className="h-3.5 w-3.5" />
         </Button>
       </div>
     </div>

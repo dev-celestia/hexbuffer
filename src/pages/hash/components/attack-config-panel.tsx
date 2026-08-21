@@ -128,26 +128,39 @@ export function AttackConfigPanel({
     <div
       className={cn(
         // Layout & Positioning
-        "flex flex-col gap-4 overflow-y-auto",
+        "flex flex-col overflow-y-auto",
 
         // Sizing & Spacing
-        "w-full p-4",
+        "w-full p-4 gap-4",
 
         // Backgrounds & Borders
         "bg-background"
       )}
     >
       {/* Algorithm Selection */}
-      <div className="flex flex-col gap-2">
-        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col",
+
+          // Sizing & Spacing
+          "gap-1.5"
+        )}
+      >
+        <span
+          className={cn(
+            // Typography
+            "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+          )}
+        >
           Hash Algorithm
-        </Label>
+        </span>
         <Select
           value={algorithm}
           onValueChange={(v) => onAlgorithmChange(v as HashType)}
           disabled={disabled}
         >
-          <SelectTrigger className="h-9 text-sm">
+          <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -161,14 +174,30 @@ export function AttackConfigPanel({
       </div>
 
       {/* Attack Mode Selection */}
-      <div className="flex flex-col gap-2">
-        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col",
+
+          // Sizing & Spacing
+          "gap-1.5"
+        )}
+      >
+        <span
+          className={cn(
+            // Typography
+            "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+          )}
+        >
           Attack Mode
-        </Label>
+        </span>
         <div
           className={cn(
             // Layout & Positioning
-            "grid grid-cols-2 gap-2"
+            "grid grid-cols-2",
+
+            // Sizing & Spacing
+            "gap-2"
           )}
         >
           {ATTACK_MODE_OPTIONS.map((mode) => (
@@ -178,34 +207,42 @@ export function AttackConfigPanel({
               disabled={disabled}
               className={cn(
                 // Layout & Positioning
-                "flex flex-col items-start",
+                "flex flex-col items-start text-left",
 
                 // Sizing & Spacing
-                "p-3 gap-1",
-
-                // Typography
-                "text-left text-sm",
+                "p-2.5 gap-0.5",
 
                 // Backgrounds & Borders
                 "border rounded-md",
                 activeMode === mode.value
-                  ? "border-primary bg-primary/10 text-foreground"
-                  : "border-border bg-background text-muted-foreground",
+                  ? "border-primary bg-primary/10 text-foreground font-semibold"
+                  : "border-border/60 bg-background text-muted-foreground",
 
                 // Interactive & States
-                "hover:border-primary/50 transition-colors",
+                "hover:border-primary/50 transition-colors active:scale-98",
                 "disabled:opacity-50 disabled:cursor-not-allowed"
               )}
             >
-              <span className="font-semibold">{mode.label}</span>
-              <span className="text-xs opacity-80">{mode.description}</span>
+              <span className="text-xs font-semibold">{mode.label}</span>
+              <span className="text-[11px] opacity-75">{mode.description}</span>
             </button>
           ))}
         </div>
       </div>
 
       {/* Mode-Specific Configuration */}
-      <div className="flex flex-col gap-3 border-t border-border pt-4">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col",
+
+          // Sizing & Spacing
+          "gap-3 pt-3",
+
+          // Backgrounds & Borders
+          "border-t border-border/40"
+        )}
+      >
         {activeMode === 'straight' && (
           <>
             <WordlistPathPicker
@@ -215,10 +252,23 @@ export function AttackConfigPanel({
               disabled={disabled}
             />
 
-            <div className="flex flex-col gap-2">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col",
+
+                // Sizing & Spacing
+                "gap-1.5"
+              )}
+            >
+              <span
+                className={cn(
+                  // Typography
+                  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+                )}
+              >
                 Rule Preset
-              </Label>
+              </span>
               <Select
                 value={
                   RULE_PRESETS.find(
@@ -228,15 +278,20 @@ export function AttackConfigPanel({
                 onValueChange={handleRuleToggle}
                 disabled={disabled}
               >
-                <SelectTrigger className="h-9 text-sm">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {RULE_PRESETS.map((preset) => (
                     <SelectItem key={preset.id} value={preset.id}>
-                      <div className="flex flex-col">
-                        <span>{preset.name}</span>
-                        <span className="text-xs text-muted-foreground">
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "flex flex-col"
+                        )}
+                      >
+                        <span className="text-xs">{preset.name}</span>
+                        <span className="text-[10px] text-muted-foreground">
                           {preset.description} ({preset.rules.length} rules)
                         </span>
                       </div>
@@ -267,16 +322,28 @@ export function AttackConfigPanel({
 
         {activeMode === 'mask' && (
           <>
-            <div className="flex flex-col gap-2">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col",
+
+                // Sizing & Spacing
+                "gap-1.5"
+              )}
+            >
+              <span
+                className={cn(
+                  // Typography
+                  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+                )}
+              >
                 Mask Pattern
-              </Label>
+              </span>
               <Input
                 value={maskPattern}
                 onChange={(e) => handleMaskPatternChange(e.target.value)}
                 placeholder="?l?l?l?l?d?d"
                 disabled={disabled}
-                className="h-9 font-mono text-sm"
               />
               <div
                 className={cn(
@@ -287,17 +354,36 @@ export function AttackConfigPanel({
                   "text-xs",
 
                   // Backgrounds & Borders
-                  "bg-muted/30 rounded border border-border/50"
+                  "bg-muted/30 rounded-md border border-border/40"
                 )}
               >
-                <div className="flex items-start gap-2 mb-2">
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-start",
+
+                    // Sizing & Spacing
+                    "gap-1.5 mb-1.5"
+                  )}
+                >
                   <Info className="h-3.5 w-3.5 mt-0.5 shrink-0 text-muted-foreground" />
-                  <span className="text-muted-foreground">Available placeholders:</span>
+                  <span className="text-[11px] text-muted-foreground">Placeholders:</span>
                 </div>
-                <div className="grid grid-cols-2 gap-1 text-[11px]">
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "grid grid-cols-2",
+
+                    // Sizing & Spacing
+                    "gap-1",
+
+                    // Typography
+                    "text-[10px]"
+                  )}
+                >
                   {MASK_PLACEHOLDERS.map((ph) => (
-                    <div key={ph.symbol} className="flex gap-2">
-                      <code className="font-mono text-primary">{ph.symbol}</code>
+                    <div key={ph.symbol} className="flex gap-1.5">
+                      <code className="font-mono text-primary font-semibold">{ph.symbol}</code>
                       <span className="text-muted-foreground">{ph.description}</span>
                     </div>
                   ))}
@@ -305,11 +391,32 @@ export function AttackConfigPanel({
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col",
+
+                // Sizing & Spacing
+                "gap-2"
+              )}
+            >
+              <span
+                className={cn(
+                  // Typography
+                  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+                )}
+              >
                 Character Set
-              </Label>
-              <div className="grid grid-cols-2 gap-2">
+              </span>
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "grid grid-cols-2",
+
+                  // Sizing & Spacing
+                  "gap-2"
+                )}
+              >
                 <div className="flex items-center gap-2">
                   <Checkbox
                     checked={charset.lower}
@@ -319,7 +426,7 @@ export function AttackConfigPanel({
                     disabled={disabled}
                     id="charset-lower"
                   />
-                  <Label htmlFor="charset-lower" className="text-sm cursor-pointer">
+                  <Label htmlFor="charset-lower" className="text-xs cursor-pointer select-none">
                     Lowercase (a-z)
                   </Label>
                 </div>
@@ -332,7 +439,7 @@ export function AttackConfigPanel({
                     disabled={disabled}
                     id="charset-upper"
                   />
-                  <Label htmlFor="charset-upper" className="text-sm cursor-pointer">
+                  <Label htmlFor="charset-upper" className="text-xs cursor-pointer select-none">
                     Uppercase (A-Z)
                   </Label>
                 </div>
@@ -345,7 +452,7 @@ export function AttackConfigPanel({
                     disabled={disabled}
                     id="charset-digits"
                   />
-                  <Label htmlFor="charset-digits" className="text-sm cursor-pointer">
+                  <Label htmlFor="charset-digits" className="text-xs cursor-pointer select-none">
                     Digits (0-9)
                   </Label>
                 </div>
@@ -358,7 +465,7 @@ export function AttackConfigPanel({
                     disabled={disabled}
                     id="charset-special"
                   />
-                  <Label htmlFor="charset-special" className="text-sm cursor-pointer">
+                  <Label htmlFor="charset-special" className="text-xs cursor-pointer select-none">
                     Special (!@#$...)
                   </Label>
                 </div>
@@ -368,7 +475,6 @@ export function AttackConfigPanel({
                 onChange={(e) => handleCharsetChange({ custom: e.target.value })}
                 placeholder="Custom characters (optional)"
                 disabled={disabled}
-                className="h-8 text-sm font-mono"
               />
             </div>
           </>
@@ -382,16 +488,28 @@ export function AttackConfigPanel({
               onPathChange={(p) => handleWordlistPathChange('wordlistPath', p)}
               disabled={disabled}
             />
-            <div className="flex flex-col gap-2">
-              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col",
+
+                // Sizing & Spacing
+                "gap-1.5"
+              )}
+            >
+              <span
+                className={cn(
+                  // Typography
+                  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+                )}
+              >
                 Mask Suffix
-              </Label>
+              </span>
               <Input
                 value={maskPattern}
                 onChange={(e) => handleMaskPatternChange(e.target.value)}
                 placeholder="?d?d?d"
                 disabled={disabled}
-                className="h-9 font-mono text-sm"
               />
             </div>
           </>
@@ -428,39 +546,65 @@ function WordlistPathPicker({ label, path, onPathChange, disabled }: WordlistPat
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col",
+
+        // Sizing & Spacing
+        "gap-1.5"
+      )}
+    >
+      <span
+        className={cn(
+          // Typography
+          "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+        )}
+      >
         {label}
-      </Label>
-      <div className="flex gap-2">
-        <Input
-          value={path}
-          onChange={(e) => onPathChange(e.target.value)}
-          placeholder="/path/to/wordlist.txt"
-          disabled={disabled}
-          className="h-9 text-xs font-mono flex-1"
-        />
+      </span>
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center",
+
+          // Sizing & Spacing
+          "gap-1.5"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex-1 min-w-0"
+          )}
+        >
+          <Input
+            value={path}
+            onChange={(e) => onPathChange(e.target.value)}
+            placeholder="/path/to/wordlist.txt"
+            disabled={disabled}
+          />
+        </div>
         <Button
           type="button"
           variant="outline"
-          size="sm"
+          size="xs"
           onClick={handleBrowseFile}
           disabled={disabled}
-          className="h-9 gap-1.5 px-3 shrink-0"
         >
-          <FolderOpen className="h-4 w-4" />
+          <FolderOpen className="h-3.5 w-3.5" />
           Browse
         </Button>
         {path && (
           <Button
             type="button"
             variant="ghost"
-            size="icon"
+            size="xs"
             onClick={() => onPathChange('')}
             disabled={disabled}
-            className="h-9 w-9 shrink-0"
+            title="Clear path"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           </Button>
         )}
       </div>

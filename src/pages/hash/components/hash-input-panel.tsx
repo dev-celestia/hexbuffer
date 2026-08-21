@@ -1,7 +1,6 @@
-
-
-import { Button, Textarea } from '@celestia-project/ui';
-import { TrashIcon } from '@phosphor-icons/react';
+import { Button } from '@celestia-project/ui';
+import { Trash } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 
 interface HashInputPanelProps {
   input: string;
@@ -12,37 +11,104 @@ interface HashInputPanelProps {
 
 export function HashInputPanel({ input, isEmpty, onInputChange, onClear }: HashInputPanelProps) {
   return (
-    <div className="flex min-h-0 flex-col bg-background">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col min-h-0",
+
+        // Backgrounds & Borders
+        "bg-background"
+      )}
+    >
       {/* Header Panel */}
-      <div className="flex h-8 shrink-0 items-center justify-between border-b border-border/40 bg-muted/10 px-3 select-none">
-        <div className="flex items-baseline gap-2">
-          <span className="text-[11px] font-semibold uppercase text-muted-foreground tracking-wider">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between shrink-0",
+
+          // Sizing & Spacing
+          "h-9 px-3",
+
+          // Backgrounds & Borders
+          "border-b border-border/40 bg-muted/10",
+
+          // Typography
+          "select-none"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-baseline",
+
+            // Sizing & Spacing
+            "gap-2"
+          )}
+        >
+          <span
+            className={cn(
+              // Typography
+              "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+            )}
+          >
             Input Text
           </span>
-          <span className="text-[10px] text-muted-foreground/80 hidden sm:inline">
-            Enter plaintext below
+          <span
+            className={cn(
+              // Layout & Positioning
+              "hidden sm:inline",
+
+              // Typography
+              "text-[10px] text-muted-foreground/80"
+            )}
+          >
+            Enter plaintext to hash
           </span>
         </div>
+
         <Button
           variant="destructive"
-          size="icon"
+          size="xs"
           onClick={onClear}
           disabled={isEmpty}
-          className="h-6 w-6"
           title="Clear Input"
         >
-          <TrashIcon className="h-3.5 w-3.5" />
+          <Trash className="h-3.5 w-3.5" />
         </Button>
       </div>
 
       {/* Input Editor Area */}
-      <Textarea
-        className="min-h-0 flex-1 resize-none rounded-none border-0 font-mono text-[12px] shadow-none bg-transparent p-3
-          focus-visible:ring-0 placeholder:text-muted-foreground/50 text-foreground leading-relaxed"
-        placeholder="Enter text to hash here..."
-        value={input}
-        onChange={(e) => onInputChange(e.target.value)}
-      />
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex-1 min-h-0 flex flex-col",
+
+          // Sizing & Spacing
+          "p-3"
+        )}
+      >
+        <textarea
+          className={cn(
+            // Layout & Positioning
+            "flex-1 min-h-0 resize-none",
+
+            // Sizing & Spacing
+            "w-full p-0",
+
+            // Typography
+            "font-mono text-xs text-foreground leading-relaxed",
+
+            // Backgrounds & Borders
+            "border-0 bg-transparent shadow-none outline-none ring-0",
+
+            // Interactive & States
+            "placeholder:text-muted-foreground/50 focus:outline-none"
+          )}
+          placeholder="Enter text to hash here..."
+          value={input}
+          onChange={(e) => onInputChange(e.target.value)}
+        />
+      </div>
     </div>
   );
 }

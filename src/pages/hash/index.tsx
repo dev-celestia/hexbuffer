@@ -17,7 +17,7 @@ export function HashPage() {
   const tabs: { id: TabMode; label: string }[] = [
     { id: 'calculator', label: 'Hash Calculator' },
     { id: 'attack', label: 'Password Auditing' },
-    { id: 'results', label: 'Results' }
+    { id: 'results', label: 'Results' },
   ];
 
   return (
@@ -33,44 +33,52 @@ export function HashPage() {
         "bg-background"
       )}
     >
-      {/* Tab Bar */}
+      {/* Tab Navigation & Global Controls */}
       <div
         className={cn(
           // Layout & Positioning
-          "flex items-center justify-between",
-          
+          "flex items-center justify-between shrink-0",
+
           // Sizing & Spacing
-          "h-11 px-3 gap-3",
-          
+          "h-10 px-3 gap-3",
+
           // Backgrounds & Borders
-          "border-b border-border bg-muted/10",
-          
+          "border-b border-border/40 bg-muted/15 backdrop-blur-md",
+
           // Typography
           "select-none"
         )}
       >
-        <div className="flex items-center gap-1">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-1"
+          )}
+        >
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => page.setActiveTab(tab.id)}
               className={cn(
                 // Layout & Positioning
-                "relative",
-                
+                "relative flex items-center justify-center",
+
                 // Sizing & Spacing
-                "h-9 px-4",
-                
+                "h-7 px-3",
+
                 // Typography
-                "text-sm font-medium transition-colors",
-                
+                "text-xs font-medium tracking-tight transition-all",
+
                 // Backgrounds & Borders
                 "rounded-md",
-                
+
                 // Interactive & States
                 page.activeTab === tab.id
-                  ? "text-foreground bg-background shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  ? "text-foreground bg-background shadow-xs font-semibold"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40 active:scale-97"
               )}
             >
               {tab.label}
@@ -78,16 +86,16 @@ export function HashPage() {
                 <span
                   className={cn(
                     // Layout & Positioning
-                    "absolute -top-1 -right-1 flex items-center justify-center",
-                    
+                    "ml-1.5 flex items-center justify-center",
+
                     // Sizing & Spacing
-                    "h-5 min-w-5 px-1",
-                    
+                    "h-4 min-w-4 px-1",
+
                     // Typography
-                    "text-[10px] font-bold",
-                    
+                    "text-[9px] font-bold",
+
                     // Backgrounds & Borders
-                    "bg-green-500 text-white rounded-full"
+                    "bg-emerald-500 text-white rounded-full"
                   )}
                 >
                   {page.attackEngine.results.length}
@@ -97,17 +105,24 @@ export function HashPage() {
           ))}
         </div>
 
-        {/* Attack Controls (visible on attack/results tabs) */}
+        {/* Attack Execution Controls */}
         {(page.activeTab === 'attack' || page.activeTab === 'results') && (
-          <div className="flex items-center gap-1.5">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "gap-1.5"
+            )}
+          >
             {page.attackEngine.status === 'idle' && (
               <Button
-                size="sm"
+                size="xs"
                 onClick={page.handleStartAttack}
                 disabled={page.targets.length === 0 || !page.attackConfig}
-                className="h-8 gap-1.5 bg-green-600 hover:bg-green-700"
               >
-                <Play className="h-4 w-4" weight="fill" />
+                <Play className="h-3.5 w-3.5" weight="fill" />
                 Start Attack
               </Button>
             )}
@@ -116,20 +131,18 @@ export function HashPage() {
               <>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="xs"
                   onClick={page.handlePauseAttack}
-                  className="h-8 gap-1.5"
                 >
-                  <Pause className="h-4 w-4" weight="fill" />
+                  <Pause className="h-3.5 w-3.5" weight="fill" />
                   Pause
                 </Button>
                 <Button
                   variant="destructive"
-                  size="sm"
+                  size="xs"
                   onClick={page.handleStopAttack}
-                  className="h-8 gap-1.5"
                 >
-                  <Stop className="h-4 w-4" weight="fill" />
+                  <Stop className="h-3.5 w-3.5" weight="fill" />
                   Stop
                 </Button>
               </>
@@ -138,35 +151,32 @@ export function HashPage() {
             {page.attackEngine.status === 'paused' && (
               <>
                 <Button
-                  size="sm"
+                  size="xs"
                   onClick={page.handleResumeAttack}
-                  className="h-8 gap-1.5 bg-green-600 hover:bg-green-700"
                 >
-                  <Play className="h-4 w-4" weight="fill" />
+                  <Play className="h-3.5 w-3.5" weight="fill" />
                   Resume
                 </Button>
                 <Button
                   variant="destructive"
-                  size="sm"
+                  size="xs"
                   onClick={page.handleStopAttack}
-                  className="h-8 gap-1.5"
                 >
-                  <Stop className="h-4 w-4" weight="fill" />
+                  <Stop className="h-3.5 w-3.5" weight="fill" />
                   Stop
                 </Button>
               </>
             )}
 
-            {(page.attackEngine.status === 'stopped' || 
-              page.attackEngine.status === 'completed' || 
+            {(page.attackEngine.status === 'stopped' ||
+              page.attackEngine.status === 'completed' ||
               page.attackEngine.status === 'error') && (
               <Button
                 variant="outline"
-                size="sm"
+                size="xs"
                 onClick={page.handleResetAttack}
-                className="h-8 gap-1.5"
               >
-                <ArrowsClockwise className="h-4 w-4" />
+                <ArrowsClockwise className="h-3.5 w-3.5" />
                 Reset
               </Button>
             )}
@@ -202,7 +212,7 @@ export function HashPage() {
                 "h-full",
 
                 // Backgrounds & Borders
-                "divide-border bg-background"
+                "divide-border/40 bg-background"
               )}
             >
               <HashInputPanel
@@ -225,13 +235,13 @@ export function HashPage() {
           <div
             className={cn(
               // Layout & Positioning
-              "grid grid-cols-[400px_1fr] min-h-0",
-              
+              "grid grid-cols-[380px_1fr] min-h-0",
+
               // Sizing & Spacing
               "h-full",
-              
+
               // Backgrounds & Borders
-              "divide-x divide-border"
+              "divide-x divide-border/40"
             )}
           >
             {/* Left: Config Panel */}
@@ -239,7 +249,7 @@ export function HashPage() {
               className={cn(
                 // Layout & Positioning
                 "flex flex-col min-h-0",
-                
+
                 // Backgrounds & Borders
                 "bg-muted/5"
               )}
@@ -265,7 +275,12 @@ export function HashPage() {
                 status={page.attackEngine.status}
               />
 
-              <div className="flex-1 min-h-0">
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex-1 min-h-0"
+                )}
+              >
                 <TargetHashPanel
                   targets={page.targets}
                   defaultAlgorithm={page.attackAlgorithm}
@@ -283,7 +298,7 @@ export function HashPage() {
             className={cn(
               // Layout & Positioning
               "flex flex-col min-h-0",
-              
+
               // Sizing & Spacing
               "h-full"
             )}
@@ -293,7 +308,12 @@ export function HashPage() {
               status={page.attackEngine.status}
             />
 
-            <div className="flex-1 min-h-0">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex-1 min-h-0"
+              )}
+            >
               <ResultsPanel
                 results={page.attackEngine.results}
                 onExport={page.handleExportResults}

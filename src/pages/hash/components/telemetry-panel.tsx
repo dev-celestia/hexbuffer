@@ -41,9 +41,9 @@ export function TelemetryPanel({ telemetry, status }: TelemetryPanelProps) {
   const statusColor = useMemo(() => {
     switch (status) {
       case 'running':
-        return 'text-green-500';
+        return 'text-emerald-500';
       case 'paused':
-        return 'text-yellow-500';
+        return 'text-amber-500';
       case 'error':
         return 'text-red-500';
       case 'completed':
@@ -74,39 +74,68 @@ export function TelemetryPanel({ telemetry, status }: TelemetryPanelProps) {
     <div
       className={cn(
         // Layout & Positioning
-        "flex flex-col",
-        
+        "flex flex-col shrink-0",
+
         // Sizing & Spacing
-        "p-4 gap-4",
-        
+        "p-3.5 gap-3",
+
         // Backgrounds & Borders
-        "bg-muted/20 border-b border-border"
+        "bg-muted/15 border-b border-border/40 backdrop-blur-md"
       )}
     >
-      {/* Status Indicator */}
+      {/* Status Header */}
       <div
         className={cn(
           // Layout & Positioning
           "flex items-center justify-between"
         )}
       >
-        <div className="flex items-center gap-2">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-2"
+          )}
+        >
           <div
             className={cn(
               // Sizing & Spacing
               "h-2 w-2 rounded-full",
-              
+
               // Backgrounds & Borders
-              status === 'running' ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'
+              status === 'running'
+                ? 'bg-emerald-500 animate-pulse'
+                : status === 'paused'
+                ? 'bg-amber-500'
+                : 'bg-muted-foreground/50'
             )}
           />
-          <span className={cn("text-sm font-semibold", statusColor)}>
+          <span
+            className={cn(
+              // Typography
+              "text-xs font-semibold tracking-tight",
+              statusColor
+            )}
+          >
             {statusLabel}
           </span>
         </div>
-        
+
         {status === 'running' && telemetry.etaSeconds !== null && (
-          <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "gap-1",
+
+              // Typography
+              "text-[11px] text-muted-foreground font-mono"
+            )}
+          >
             <Clock className="h-3.5 w-3.5" />
             ETA: {formatTime(telemetry.etaSeconds)}
           </div>
@@ -117,35 +146,38 @@ export function TelemetryPanel({ telemetry, status }: TelemetryPanelProps) {
       <div
         className={cn(
           // Layout & Positioning
-          "grid grid-cols-2 md:grid-cols-4 gap-3"
+          "grid grid-cols-2 md:grid-cols-4",
+
+          // Sizing & Spacing
+          "gap-2.5"
         )}
       >
         <MetricCard
-          icon={<Lightning className="h-4 w-4" />}
+          icon={<Lightning className="h-3.5 w-3.5" />}
           label="Hash Rate"
           value={formatHashRate(telemetry.hashRate)}
           color="text-cyan-400"
           bgColor="bg-cyan-500/10"
         />
-        
+
         <MetricCard
-          icon={<CheckCircle className="h-4 w-4" />}
+          icon={<CheckCircle className="h-3.5 w-3.5" />}
           label="Matches"
           value={telemetry.matchesFound.toString()}
-          color="text-green-400"
-          bgColor="bg-green-500/10"
+          color="text-emerald-400"
+          bgColor="bg-emerald-500/10"
         />
-        
+
         <MetricCard
-          icon={<Percent className="h-4 w-4" />}
+          icon={<Percent className="h-3.5 w-3.5" />}
           label="Progress"
           value={`${telemetry.progressPercent.toFixed(1)}%`}
           color="text-blue-400"
           bgColor="bg-blue-500/10"
         />
-        
+
         <MetricCard
-          icon={<Clock className="h-4 w-4" />}
+          icon={<Clock className="h-3.5 w-3.5" />}
           label="Elapsed"
           value={formatTime(telemetry.elapsedSeconds)}
           color="text-purple-400"
@@ -157,53 +189,53 @@ export function TelemetryPanel({ telemetry, status }: TelemetryPanelProps) {
       <div
         className={cn(
           // Layout & Positioning
-          "flex items-center justify-between flex-wrap gap-3",
-          
+          "flex items-center justify-between flex-wrap",
+
           // Sizing & Spacing
-          "pt-3",
-          
+          "pt-2 gap-2",
+
           // Backgrounds & Borders
-          "border-t border-border/50"
+          "border-t border-border/30"
         )}
       >
         <StatItem
-          icon={<Database className="h-3.5 w-3.5" />}
+          icon={<Database className="h-3 w-3" />}
           label="Tested"
           value={formatNumber(telemetry.totalTested)}
         />
-        
+
         <StatItem
-          icon={<Cpu className="h-3.5 w-3.5" />}
+          icon={<Cpu className="h-3 w-3" />}
           label="CPU"
           value={`${telemetry.cpuUtilization.toFixed(1)}%`}
         />
-        
+
         <StatItem
-          icon={<Database className="h-3.5 w-3.5" />}
+          icon={<Database className="h-3 w-3" />}
           label="Memory"
           value={formatMemory(telemetry.memoryUsage)}
         />
       </div>
 
-      {/* Progress Bar */}
+      {/* Smooth Apple Progress Bar */}
       {status === 'running' && (
         <div
           className={cn(
             // Sizing & Spacing
-            "h-1.5 w-full rounded-full overflow-hidden",
-            
+            "h-1 w-full rounded-full overflow-hidden",
+
             // Backgrounds & Borders
-            "bg-muted/50"
+            "bg-muted/40"
           )}
         >
           <div
             className={cn(
               // Sizing & Spacing
               "h-full",
-              
+
               // Backgrounds & Borders
-              "bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500",
-              
+              "bg-gradient-to-r from-cyan-500 via-blue-500 to-emerald-500",
+
               // Interactive & States
               "transition-all duration-300 ease-out"
             )}
@@ -229,25 +261,42 @@ function MetricCard({ icon, label, value, color, bgColor }: MetricCardProps) {
       className={cn(
         // Layout & Positioning
         "flex flex-col",
-        
+
         // Sizing & Spacing
-        "p-3 gap-2",
-        
+        "p-2.5 gap-1",
+
         // Backgrounds & Borders
-        "rounded-lg border border-border/50",
+        "rounded-md border border-border/30",
         bgColor
       )}
     >
-      <div className="flex items-center gap-2">
-        <div className={cn(color, "opacity-80")}>
-          {icon}
-        </div>
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center",
+
+          // Sizing & Spacing
+          "gap-1.5"
+        )}
+      >
+        <div className={cn(color, "opacity-90")}>{icon}</div>
+        <span
+          className={cn(
+            // Typography
+            "text-[9px] uppercase tracking-wider text-muted-foreground font-semibold"
+          )}
+        >
           {label}
         </span>
       </div>
-      
-      <div className={cn("text-2xl font-mono font-bold", color)}>
+
+      <div
+        className={cn(
+          // Typography
+          "text-base font-mono font-bold tracking-tight",
+          color
+        )}
+      >
         {value}
       </div>
     </div>
@@ -262,15 +311,39 @@ interface StatItemProps {
 
 function StatItem({ icon, label, value }: StatItemProps) {
   return (
-    <div className="flex items-center gap-2">
-      <div className="text-muted-foreground">
-        {icon}
-      </div>
-      <div className="flex items-baseline gap-1.5">
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex items-center",
+
+        // Sizing & Spacing
+        "gap-1.5"
+      )}
+    >
+      <div className="text-muted-foreground/70">{icon}</div>
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-baseline",
+
+          // Sizing & Spacing
+          "gap-1"
+        )}
+      >
+        <span
+          className={cn(
+            // Typography
+            "text-[10px] uppercase tracking-wider text-muted-foreground"
+          )}
+        >
           {label}:
         </span>
-        <span className="text-xs font-mono font-semibold text-foreground">
+        <span
+          className={cn(
+            // Typography
+            "text-[11px] font-mono font-semibold text-foreground"
+          )}
+        >
           {value}
         </span>
       </div>

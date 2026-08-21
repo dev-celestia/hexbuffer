@@ -6,7 +6,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Textarea,
 } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 import { Plus, Trash, UploadSimple, Check, X } from '@phosphor-icons/react';
@@ -161,34 +160,59 @@ export function TargetHashPanel({
       <div
         className={cn(
           // Layout & Positioning
-          "flex items-center justify-between",
+          "flex items-center justify-between shrink-0",
 
           // Sizing & Spacing
-          "h-11 px-3 gap-2",
+          "h-10 px-3 gap-2",
 
           // Backgrounds & Borders
-          "border-b border-border bg-muted/20",
+          "border-b border-border/40 bg-muted/15 backdrop-blur-md",
 
           // Typography
           "select-none"
         )}
       >
-        <div className="flex items-baseline gap-3">
-          <span className="text-[11px] font-semibold uppercase text-muted-foreground tracking-wider">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-baseline",
+
+            // Sizing & Spacing
+            "gap-2.5"
+          )}
+        >
+          <span
+            className={cn(
+              // Typography
+              "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+            )}
+          >
             Target Hashes
           </span>
-          <span className="text-[10px] text-muted-foreground">
+          <span
+            className={cn(
+              // Typography
+              "text-[10px] text-muted-foreground font-mono"
+            )}
+          >
             {crackedCount > 0 ? `${crackedCount}/${totalCount} cracked` : `${totalCount} loaded`}
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-1"
+          )}
+        >
           <Button
             variant="ghost"
             size="xs"
             onClick={() => setBulkMode(!bulkMode)}
             disabled={disabled}
-            className="h-7 text-[11px] px-2"
           >
             {bulkMode ? 'Single' : 'Bulk'}
           </Button>
@@ -197,7 +221,6 @@ export function TargetHashPanel({
             size="xs"
             onClick={importFromFile}
             disabled={disabled}
-            className="h-7 text-[11px] gap-1 px-2"
           >
             <UploadSimple className="h-3.5 w-3.5" />
             Import
@@ -207,7 +230,6 @@ export function TargetHashPanel({
             size="xs"
             onClick={clearAll}
             disabled={disabled || totalCount === 0}
-            className="h-7 text-[11px] px-2"
           >
             Clear All
           </Button>
@@ -218,72 +240,129 @@ export function TargetHashPanel({
       <div
         className={cn(
           // Layout & Positioning
-          "flex flex-col",
+          "flex flex-col shrink-0",
 
           // Sizing & Spacing
-          "p-3 gap-3",
+          "p-3 gap-2.5",
 
           // Backgrounds & Borders
-          "border-b border-border/50 bg-muted/5"
+          "border-b border-border/40 bg-muted/5"
         )}
       >
-        <div className="flex gap-2">
-          <Select
-            value={inputAlgorithm}
-            onValueChange={(v) => setInputAlgorithm(v as HashType)}
-            disabled={disabled}
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-2"
+          )}
+        >
+          <div
+            className={cn(
+              // Sizing & Spacing
+              "w-48"
+            )}
           >
-            <SelectTrigger className="w-44 h-9 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {HASH_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <Select
+              value={inputAlgorithm}
+              onValueChange={(v) => setInputAlgorithm(v as HashType)}
+              disabled={disabled}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {HASH_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {!bulkMode ? (
-          <div className="flex gap-2">
-            <Input
-              value={inputHash}
-              onChange={(e) => setInputHash(e.target.value)}
-              placeholder="Enter hash value (hex or string)"
-              disabled={disabled}
-              onKeyDown={(e) => e.key === 'Enter' && addSingleHash()}
-              className="flex-1 h-9 text-xs font-mono"
-            />
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "gap-2"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex-1 min-w-0"
+              )}
+            >
+              <Input
+                value={inputHash}
+                onChange={(e) => setInputHash(e.target.value)}
+                placeholder="Enter hash value (hex string)..."
+                disabled={disabled}
+                onKeyDown={(e) => e.key === 'Enter' && addSingleHash()}
+              />
+            </div>
             <Button
-              size="sm"
+              size="xs"
               onClick={addSingleHash}
               disabled={disabled || !inputHash.trim()}
-              className="h-9 gap-1.5 px-3"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5" />
               Add
             </Button>
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
-            <Textarea
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-col",
+
+              // Sizing & Spacing
+              "gap-2"
+            )}
+          >
+            <textarea
               value={bulkInput}
               onChange={(e) => setBulkInput(e.target.value)}
               placeholder="Paste multiple hashes (one per line)..."
               disabled={disabled}
-              className="min-h-[120px] text-xs font-mono resize-none"
+              className={cn(
+                // Layout & Positioning
+                "w-full resize-none",
+
+                // Sizing & Spacing
+                "h-24 p-2",
+
+                // Typography
+                "font-mono text-xs text-foreground",
+
+                // Backgrounds & Borders
+                "rounded-md border border-border/60 bg-background",
+
+                // Interactive & States
+                "placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50"
+              )}
             />
-            <Button
-              size="sm"
-              onClick={addBulkHashes}
-              disabled={disabled || !bulkInput.trim()}
-              className="h-9 gap-1.5 self-end"
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex justify-end"
+              )}
             >
-              <Plus className="h-4 w-4" />
-              Add {bulkInput.split('\n').filter((l) => l.trim()).length} Hashes
-            </Button>
+              <Button
+                size="xs"
+                onClick={addBulkHashes}
+                disabled={disabled || !bulkInput.trim()}
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add {bulkInput.split('\n').filter((l) => l.trim()).length} Hashes
+              </Button>
+            </div>
           </div>
         )}
       </div>
@@ -295,7 +374,7 @@ export function TargetHashPanel({
           "flex flex-col flex-1 min-h-0 overflow-y-auto",
 
           // Sizing & Spacing
-          "p-2 gap-1"
+          "p-2 gap-1.5"
         )}
       >
         {targets.length === 0 ? (
@@ -311,9 +390,21 @@ export function TargetHashPanel({
               "text-center"
             )}
           >
-            <span className="text-sm text-muted-foreground">No target hashes added yet</span>
-            <span className="text-xs text-muted-foreground/70">
-              Add hashes manually or import from a file
+            <span
+              className={cn(
+                // Typography
+                "text-xs font-medium text-muted-foreground"
+              )}
+            >
+              No target hashes added yet
+            </span>
+            <span
+              className={cn(
+                // Typography
+                "text-[11px] text-muted-foreground/70"
+              )}
+            >
+              Add hashes individually, bulk paste, or import from wordlist file
             </span>
           </div>
         ) : (
@@ -325,31 +416,47 @@ export function TargetHashPanel({
                 "flex items-center justify-between",
 
                 // Sizing & Spacing
-                "p-2 gap-2",
+                "p-2.5 gap-2",
 
                 // Backgrounds & Borders
-                "rounded border",
+                "rounded-md border",
                 target.cracked
-                  ? "bg-green-500/10 border-green-500/30"
-                  : "bg-muted/30 border-border/50",
+                  ? "bg-emerald-500/10 border-emerald-500/30"
+                  : "bg-muted/20 border-border/40",
 
                 // Interactive & States
-                "hover:bg-muted/50 transition-colors group"
+                "hover:bg-muted/40 transition-colors group"
               )}
             >
-              <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center flex-1 min-w-0",
+
+                  // Sizing & Spacing
+                  "gap-2"
+                )}
+              >
                 {target.cracked ? (
-                  <Check className="h-4 w-4 text-green-500 shrink-0" />
+                  <Check className="h-4 w-4 text-emerald-500 shrink-0" />
                 ) : (
                   <X className="h-4 w-4 text-muted-foreground/40 shrink-0" />
                 )}
 
-                <div className="flex flex-col flex-1 min-w-0 gap-0.5">
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex flex-col flex-1 min-w-0",
+
+                    // Sizing & Spacing
+                    "gap-0.5"
+                  )}
+                >
                   <div
                     className={cn(
                       // Typography
                       "text-xs font-mono truncate",
-                      target.cracked ? "text-foreground" : "text-muted-foreground"
+                      target.cracked ? "text-foreground font-semibold" : "text-muted-foreground"
                     )}
                     title={target.hash}
                   >
@@ -357,12 +464,22 @@ export function TargetHashPanel({
                   </div>
 
                   {target.plaintext && (
-                    <div className="text-xs text-green-600 dark:text-green-400 font-mono truncate">
+                    <div
+                      className={cn(
+                        // Typography
+                        "text-xs text-emerald-600 dark:text-emerald-400 font-mono font-semibold truncate"
+                      )}
+                    >
                       → {target.plaintext}
                     </div>
                   )}
 
-                  <div className="text-[10px] text-muted-foreground/60 uppercase">
+                  <div
+                    className={cn(
+                      // Typography
+                      "text-[10px] text-muted-foreground/70 uppercase"
+                    )}
+                  >
                     {HASH_OPTIONS.find((h) => h.value === target.algorithm)?.label ||
                       target.algorithm}
                     {target.crackedAt && (
@@ -374,22 +491,25 @@ export function TargetHashPanel({
                 </div>
               </div>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => removeTarget(target.id)}
-                disabled={disabled}
+              <div
                 className={cn(
-                  // Sizing & Spacing
-                  "h-7 w-7 shrink-0",
+                  // Layout & Positioning
+                  "shrink-0",
 
                   // Interactive & States
-                  "opacity-0 group-hover:opacity-100 transition-opacity",
-                  "hover:bg-destructive/20 hover:text-destructive"
+                  "opacity-0 group-hover:opacity-100 transition-opacity"
                 )}
               >
-                <Trash className="h-3.5 w-3.5" />
-              </Button>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  onClick={() => removeTarget(target.id)}
+                  disabled={disabled}
+                  title="Remove target"
+                >
+                  <Trash className="h-3.5 w-3.5" />
+                </Button>
+              </div>
             </div>
           ))
         )}
@@ -400,21 +520,23 @@ export function TargetHashPanel({
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center justify-between",
+            "flex items-center justify-between shrink-0",
 
             // Sizing & Spacing
-            "h-9 px-3 gap-2",
+            "h-8 px-3 gap-2",
 
             // Backgrounds & Borders
-            "border-t border-border bg-muted/10",
+            "border-t border-border/40 bg-muted/10",
 
             // Typography
-            "text-xs text-muted-foreground"
+            "text-[11px] text-muted-foreground"
           )}
         >
           <span>Total: {totalCount}</span>
           <span>Pending: {totalCount - crackedCount}</span>
-          <span className="text-green-600 dark:text-green-400">Cracked: {crackedCount}</span>
+          <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+            Cracked: {crackedCount}
+          </span>
         </div>
       )}
     </div>
