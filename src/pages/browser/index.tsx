@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, AlertAction, AlertDescription, Button, Input, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
+import { Alert, AlertAction, AlertDescription, Badge, Button, Input, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 import { PlayIcon, SquareIcon, PauseIcon, ArrowCounterClockwiseIcon, InfoIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
 import { AiInsightsPanel } from './components/insight-panel';
@@ -9,7 +9,7 @@ import { CrawlTreePanel } from './components/tree-panel';
 import { PageDetailPanel } from './components/page-detail-panel';
 
 import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
-import { CrawlStatusBadge } from '@/components/status-badge';
+import { getCrawlStatusColor } from '@/lib/status-colors';
 import { useProxyStart } from '@/hooks/use-proxy-start';
 import { useBrowserAutomationPage } from './hooks/use-page';
 import { startBrowserCrawl, stopBrowserCrawl, toggleBrowserCrawl } from '@/triggers';
@@ -261,7 +261,23 @@ export function BrowserAutomationPage() {
                     "gap-2"
                   )}
                 >
-                  <CrawlStatusBadge status={page.status} />
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      // Sizing & Spacing
+                      "px-1 py-0.5",
+
+                      // Typography
+                      "text-[10px] font-mono font-semibold text-white",
+
+                      // Backgrounds & Borders
+                      "rounded shadow-none border-none",
+
+                      getCrawlStatusColor(page.status)
+                    )}
+                  >
+                    {page.status}
+                  </Badge>
 
                   {/* Start/Stop/Pause/Resume */}
                   {(page.status === 'idle' || page.status === 'completed' || page.status === 'failed' || page.status === 'stopped') && (

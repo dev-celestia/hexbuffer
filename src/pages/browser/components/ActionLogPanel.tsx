@@ -1,7 +1,7 @@
-import { Button, ScrollArea } from '@celestia-project/ui';
+import { Badge, Button, ScrollArea } from '@celestia-project/ui';
 import { memo } from 'react';
 
-import { ActivityStatusBadge } from '@/components/status-badge';
+import { getActivityStatusColor } from '@/lib/status-colors';
 import { cn } from '@/lib/utils';
 import type { ActionLogEntry } from '@/stores/browser-automation';
 import { useActionLogPanel } from './hooks/use-action-log-panel';
@@ -91,7 +91,27 @@ function ActionLogPanelComponent({ actions, onClear }: ActionLogPanelProps) {
                   "border-b border-border"
                 )}
               >
-                <ActivityStatusBadge status={mapTypeToActivity(action.type)} />
+                {(() => {
+                  const activity = mapTypeToActivity(action.type);
+                  return (
+                    <Badge
+                      className={cn(
+                        // Sizing & Spacing
+                        "px-1 py-0.5",
+
+                        // Typography
+                        "text-[10px] font-mono font-semibold text-white",
+
+                        // Backgrounds & Borders
+                        "rounded shadow-none border-none",
+
+                        getActivityStatusColor(activity)
+                      )}
+                    >
+                      {activity}
+                    </Badge>
+                  );
+                })()}
                 <span
                   className={cn(
                     // Typography

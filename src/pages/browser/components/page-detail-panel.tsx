@@ -1,8 +1,7 @@
-import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, ScrollArea, Tabs, TabsContent, TabsList, TabsTrigger, TextEditor } from '@celestia-project/ui';
+import { Badge, Button, Dialog, DialogContent, DialogHeader, DialogTitle, ScrollArea, Tabs, TabsContent, TabsList, TabsTrigger, TextEditor } from '@celestia-project/ui';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { memo } from 'react';
 import { CopyIcon, ArrowSquareOutIcon, SpinnerGapIcon, ArrowsOutIcon, StarIcon } from '@phosphor-icons/react';
-import { InterestingBadge } from '@/components/status-badge';
 import { HighlightedText } from '@/components/highlighted-text';
 import { useTheme } from '@/components/theme-provider';
 
@@ -209,7 +208,21 @@ function PageDetailPanelComponent({ page, searchQuery = '' }: PageDetailPanelPro
                 "shrink-0"
               )}
             >
-              <InterestingBadge />
+              <Badge
+                variant="outline"
+                className={cn(
+                  // Sizing & Spacing
+                  "px-1 py-0.5",
+
+                  // Typography
+                  "text-[10px] font-mono font-semibold text-white",
+
+                  // Backgrounds & Borders
+                  "rounded shadow-none border-none bg-yellow-600"
+                )}
+              >
+                Interesting
+              </Badge>
             </div>
           )}
         </div>

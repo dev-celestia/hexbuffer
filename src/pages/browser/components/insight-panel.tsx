@@ -5,7 +5,7 @@ import { CheckCircleIcon, ScanSmileyIcon } from '@phosphor-icons/react';
 import { HighlightedText } from '@/components/highlighted-text';
 
 import { cn } from '@/lib/utils';
-import { SeverityBadge } from '@/components/status-badge';
+import { getSeverityColor } from '@/lib/status-colors';
 import { formatTime } from '../lib/crawl-data';
 import type { AIInsight, CrawlPage } from '../types';
 import { useAiInsightsPanel, type SeverityFilter } from './hooks/use-ai-insights-panel';
@@ -184,7 +184,7 @@ function AiInsightsPanelComponent({
           )}
         >
           <Accordion
-            type="multiple"
+            multiple
             defaultValue={['interesting-pages', 'all-insights']}
             className={cn(
               // Layout & Positioning
@@ -381,7 +381,23 @@ function AiInsightsPanelComponent({
                           "gap-1.5"
                         )}
                       >
-                        <SeverityBadge severity={insight.severity} />
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            // Sizing & Spacing
+                            "px-1 py-0.5",
+
+                            // Typography
+                            "text-[10px] font-mono font-semibold text-white",
+
+                            // Backgrounds & Borders
+                            "rounded shadow-none border-none",
+
+                            getSeverityColor(insight.severity)
+                          )}
+                        >
+                          {insight.severity}
+                        </Badge>
                         <InsightSourceBadge insight={insight} />
                         <span
                           className={cn(
@@ -575,7 +591,23 @@ function AiInsightsPanelComponent({
               ) : detailItem?.type === 'insight' ? (
                 <>
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <SeverityBadge severity={detailItem.insight.severity} />
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        // Sizing & Spacing
+                        "px-1 py-0.5",
+
+                        // Typography
+                        "text-[10px] font-mono font-semibold text-white",
+
+                        // Backgrounds & Borders
+                        "rounded shadow-none border-none",
+
+                        getSeverityColor(detailItem.insight.severity)
+                      )}
+                    >
+                      {detailItem.insight.severity}
+                    </Badge>
                     <InsightSourceBadge insight={detailItem.insight} />
                     <span className="max-w-full break-all rounded border border-gray-500 px-1 py-0.5 font-mono text-xs text-muted-foreground">
                       <HighlightedText text={detailItem.insight.type} query={searchQuery} />

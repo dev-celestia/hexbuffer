@@ -9,7 +9,6 @@ import { AppLayout } from "@/layout";
 
 import { ResponseDetailWindow } from "@/pages/live-traffic/http-history/components/log-table/components/response-detail-window";
 import { suppressResizeObserverLoopErrors } from "@/lib/resize-observer-errors";
-import { useTauriFocusFix } from "@/hooks/useTauriFocusFix";
 import AppRoutes from "./App";
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
@@ -43,9 +42,8 @@ function MainWindowReadySignal() {
   return null;
 }
 
-function Root() {
-  useTauriFocusFix();
 
+function Root() {
   const responseDetailCallId = getResponseDetailCallId();
   if (responseDetailCallId) {
     return (

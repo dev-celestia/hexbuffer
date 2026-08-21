@@ -5,8 +5,10 @@ import {
   LockIcon,
   LockOpenIcon,
 } from "@phosphor-icons/react";
+import { Badge } from "@celestia-project/ui";
 import { HighlightedText } from "@/components/highlighted-text";
-import { StatusBadge, MethodBadge } from "@/components/status-badge";
+import { getMethodBadgeColor, getStatusColor } from "@/lib/status-colors";
+import { cn } from "@/lib/utils";
 import type { ApiCall } from "@/types";
 import type { GroupDefinition } from "@/stores/history";
 import { formatTimestamp, formatBytes, getCallHost } from "../utils";
@@ -55,8 +57,45 @@ export function useTrafficTableColumns({
         size: 105,
         cell: (call) => (
           <div className="flex items-center gap-1.5 shrink-0">
-            <MethodBadge method={call.method} />
-            <StatusBadge status={call.response_status} />
+            <Badge
+              className={cn(
+                // Layout & Positioning
+                "shrink-0",
+
+                // Sizing & Spacing
+                "px-1 py-0.5",
+
+                // Typography
+                "text-[10px] font-mono font-semibold uppercase",
+
+                // Backgrounds & Borders
+                "rounded shadow-none border",
+
+                getMethodBadgeColor(call.method)
+              )}
+            >
+              {call.method.toUpperCase()}
+            </Badge>
+            {call.response_status ? (
+              <Badge
+                className={cn(
+                  // Sizing & Spacing
+                  "px-1 py-0.5",
+
+                  // Typography
+                  "text-[10px] font-mono font-semibold text-white",
+
+                  // Backgrounds & Borders
+                  "rounded shadow-none border-none",
+
+                  getStatusColor(call.response_status)
+                )}
+              >
+                {call.response_status}
+              </Badge>
+            ) : (
+              <span className="text-muted-foreground">-</span>
+            )}
             {call.content_decoded && (
               <span title="Request body was decoded from gzip/br/deflate">
                 <WarningCircleIcon className="h-3 w-3 text-yellow-500 shrink-0" />

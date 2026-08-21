@@ -7,7 +7,7 @@ import {
 } from '@phosphor-icons/react';
 import { useCollectionsStore, type StashRecord, type StashEndpointRecord } from '@/stores/collections';
 import { useRepeaterStore } from '@/stores/repeater';
-import { getMethodColor } from '@/lib/method-colors';
+import { getMethodColor } from '@/lib/status-colors';
 import { cn } from '@/lib/utils';
 import folderIcon from '@/assets/explorer-icon/_folder.svg';
 import folderOpenIcon from '@/assets/explorer-icon/_folder_open.svg';

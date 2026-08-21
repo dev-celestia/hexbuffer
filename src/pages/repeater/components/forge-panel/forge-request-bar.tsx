@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 import { ColorizedUrlInput } from '@/components/select-env-input';
-import { METHOD_COLORS } from '@/lib/method-colors';
+import { METHOD_COLORS } from '@/lib/status-colors';
 import { useCollectionsStore } from '@/stores/collections';
 import { GearSixIcon, PaperPlaneTiltIcon, FloppyDiskIcon } from '@phosphor-icons/react';
 import { sendCraftRequest, saveActiveEndpoint } from '@/triggers/repeater/craft';

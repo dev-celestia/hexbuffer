@@ -231,7 +231,7 @@ export function TargetDialogForm({ target, onCancel, onSaved }: TargetDialogForm
       <DialogFooter className="pt-2 border-t border-border/40 flex items-center justify-between">
         {target ? (
           <AlertDialog>
-            <AlertDialogTrigger asChild>
+            <AlertDialogTrigger>
               <Button type="button" variant="destructive" size="xs" className="gap-1.5">
                 <TrashIcon className="h-3.5 w-3.5" />
                 Delete

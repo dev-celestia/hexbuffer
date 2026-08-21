@@ -26,7 +26,7 @@ const wrappedCellClass = 'py-1 px-2 font-mono whitespace-normal break-words [ove
 const MAX_COLLAPSED_VALUE_LENGTH = 120;
 type InspectorViewMode = 'text' | 'table';
 
-function ExpandableValue({ value }: { value: string }) {
+function ExpandableValue({ value }: Readonly<{ value: string }>) {
   const [isExpanded, setIsExpanded] = useState(false);
   const shouldCollapse = value.length > MAX_COLLAPSED_VALUE_LENGTH;
   const visibleValue = shouldCollapse && !isExpanded
@@ -88,7 +88,7 @@ export const InspectorSection = memo(function InspectorSection({
   const { theme } = useTheme();
 
   return (
-    <Accordion type="single" defaultValue={defaultOpen ? title : undefined} collapsible className="border rounded-md mb-2 min-w-0 overflow-hidden">
+    <Accordion defaultValue={defaultOpen ? [title] : undefined} className="border rounded-md mb-2 min-w-0 overflow-hidden">
       <AccordionItem value={title} className="last:border-b-0">
         <AccordionTrigger className="px-2 py-1.5 text-xs font-semibold hover:bg-muted/50 transition-colors">
           <span className="flex min-w-0 items-center gap-1">

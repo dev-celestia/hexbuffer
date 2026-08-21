@@ -11,6 +11,7 @@ pub mod port_scanner;
 pub mod proxy;
 pub mod sqli;
 pub mod tools;
+pub mod hash_engine;
 
 pub use ai::{
     clear_ai_api_key, get_ai_key_status, get_ai_settings, save_ai_settings,
@@ -63,4 +64,5 @@ pub use peer_sync::{
     get_discovered_peers, get_my_peer_info, ping_peer, set_device_name, set_peer_broadcast,
     share_data_to_peer, MyPeerInfo, PeerInfo, SharedDataPayload,
 };
+pub use commands::hash::HashEngineState;
 

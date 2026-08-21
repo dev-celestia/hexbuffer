@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { STATUS_ACTIVITY, type StatusActivityValue } from '@/components/status-badge';
+import { STATUS_ACTIVITY, type StatusActivityValue } from '@/lib/status-colors';
 import type { ActionLogEntry } from '@/stores/browser-automation';
 
 function mapTypeToActivity(type: ActionLogEntry['type']): StatusActivityValue {

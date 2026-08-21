@@ -7,6 +7,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  Badge,
   Button,
   Combobox,
   ComboboxContent,
@@ -19,7 +20,6 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { XIcon, TrashIcon, CircleNotchIcon, PlayIcon, PauseIcon, TargetIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
-import { CrawlStatusBadge } from '@/components/status-badge';
 import { cn } from '@/lib/utils';
 
 import { openTargetSelector } from '@/triggers';
@@ -285,7 +285,21 @@ export function LogFilters({
 
         <div className='flex gap-2 items-center'>
           {isStreamManuallyPaused && (
-            <CrawlStatusBadge status="paused" />
+            <Badge
+              variant="outline"
+              className={cn(
+                // Sizing & Spacing
+                "px-1 py-0.5",
+
+                // Typography
+                "text-[10px] font-mono font-semibold text-white",
+
+                // Backgrounds & Borders
+                "rounded shadow-none border-none bg-amber-600"
+              )}
+            >
+              paused
+            </Badge>
           )}
 
           {hasActiveFilters && (

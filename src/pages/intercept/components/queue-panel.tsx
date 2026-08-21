@@ -1,4 +1,4 @@
-import { Button, ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from '@celestia-project/ui';
+import { Badge, Button, ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from '@celestia-project/ui';
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -10,8 +10,7 @@ import {
   PauseIcon,
 } from "@phosphor-icons/react";
 
-import { MethodBadge } from "@/components/status-badge";
-
+import { getMethodBadgeColor } from "@/lib/status-colors";
 import { cn } from "@/lib/utils";
 import { formatRequestTime } from "../lib";
 import { useQueuePanel } from "./hooks/use-queue-panel";
@@ -21,19 +20,15 @@ export function InterceptQueuePanel() {
     isEnabled,
     activeTab,
     activeRequests,
-    hasSelection,
-    isBusy,
     selectedRequestId,
     removingIds,
     setSelectedRequestId,
     getRequestMeta,
-    handleForward,
     handleForwardRequest,
     handleInterceptResponse,
     handleDrop,
     handleDontCapture,
     handleAddCaptureHost,
-    handleToggleIntercept,
   } = useQueuePanel();
 
   return (
@@ -95,7 +90,7 @@ export function InterceptQueuePanel() {
 
                 return (
                   <ContextMenu key={request.id}>
-                    <ContextMenuTrigger asChild>
+                    <ContextMenuTrigger>
                       <div
                         role="button"
                         tabIndex={0}
@@ -177,10 +172,25 @@ export function InterceptQueuePanel() {
                                       {request.response?.status_code ?? "RES"}
                                     </span>
                                   ) : (
-                                    <MethodBadge
-                                      method={request.request.method}
-                                      className="shrink-0"
-                                    />
+                                    <Badge
+                                      className={cn(
+                                        // Layout & Positioning
+                                        "shrink-0",
+
+                                        // Sizing & Spacing
+                                        "px-1 py-0.5",
+
+                                        // Typography
+                                        "text-[10px] font-mono font-semibold uppercase",
+
+                                        // Backgrounds & Borders
+                                        "rounded shadow-none border",
+
+                                        getMethodBadgeColor(request.request.method)
+                                      )}
+                                    >
+                                      {request.request.method.toUpperCase()}
+                                    </Badge>
                                   )}
                                   <span className="min-w-0 flex-1">
                                     <span

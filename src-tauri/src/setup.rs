@@ -1,7 +1,7 @@
 use tauri::{AppHandle, Manager};
 use hexbuffer::commands::invoker::InvokerState;
 use hexbuffer::{
-    AiBrowserState, BrowserProcessState, CollaboratorPollingState, HistoryBridge,
+    AiBrowserState, BrowserProcessState, CollaboratorPollingState, HashEngineState, HistoryBridge,
     PortScanState, ProxyState, SqliScanState,
 };
 
@@ -38,6 +38,7 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     app.manage(database);
     app.manage(history);
     app.manage(hexbuffer::commands::vpn::VpnState::default());
+    app.manage(HashEngineState::default());
 
     // ponytail: manage MockForgeState
     let mock_forge = hexbuffer::commands::mock_forge::MockForgeState::new();

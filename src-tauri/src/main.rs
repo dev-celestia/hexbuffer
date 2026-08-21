@@ -205,6 +205,13 @@ fn main() {
             hexbuffer::peer_sync::set_device_name,
             hexbuffer::peer_sync::share_data_to_peer,
             hexbuffer::peer_sync::ping_peer,
+            hexbuffer::commands::hash::start_hash_attack,
+            hexbuffer::commands::hash::stop_hash_attack,
+            hexbuffer::commands::hash::pause_hash_attack,
+            hexbuffer::commands::hash::resume_hash_attack,
+            hexbuffer::commands::hash::get_hash_attack_status,
+            hexbuffer::commands::hash::compute_single_hash,
+            hexbuffer::commands::hash::get_available_hash_algorithms,
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
