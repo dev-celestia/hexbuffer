@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
-import { usePromptInputController } from '@/components/ai-elements/prompt-input';
+import { usePromptInputController } from '@celestia-project/ui';
 import { MAIN_NAV_ITEMS, type NavItem } from '@/layout/constants';
 
 interface MentionState {

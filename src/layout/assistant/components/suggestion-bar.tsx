@@ -1,5 +1,4 @@
-import { usePromptInputController } from '@/components/ai-elements/prompt-input';
-import { Suggestions, Suggestion } from '@/components/ai-elements/suggestion';
+import { usePromptInputController, Suggestions, Suggestion } from '@celestia-project/ui';
 import { SUGGESTION_PROMPTS } from '../constants';
 
 export function SuggestionBar() {

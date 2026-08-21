@@ -1,23 +1,14 @@
-import { Badge, Button, Separator } from '@celestia-project/ui';
-import { CheckCircleIcon, CaretDownIcon, CircleIcon, SpinnerGapIcon, SidebarIcon, ShieldWarningIcon, TriangleIcon, XIcon, XCircleIcon, StarFourIcon, FileTextIcon, PaperclipIcon } from '@phosphor-icons/react';
-import { useCallback } from 'react';
-import type { FileUIPart } from 'ai';
-
 import {
+  Badge,
+  Button,
   Conversation,
   ConversationContent,
   ConversationEmptyState,
   ConversationScrollButton,
-} from '@/components/ai-elements/conversation';
-import {
   Message,
   MessageContent,
   MessageResponse,
-} from '@/components/ai-elements/message';
-import {
   ModelSelectorLogo,
-} from '@/components/ai-elements/model-selector';
-import {
   PromptInput,
   PromptInputBody,
   PromptInputFooter,
@@ -30,19 +21,19 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
-  usePromptInputAttachments,
-} from '@/components/ai-elements/prompt-input';
-import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
-} from '@/components/ai-elements/reasoning';
-import { Shimmer } from '@/components/ai-elements/shimmer';
-import {
+  Separator,
+  Shimmer,
   Task,
-  TaskTrigger,
   TaskContent,
-} from '@/components/ai-elements/task';
+  TaskTrigger,
+  usePromptInputAttachments,
+} from '@celestia-project/ui';
+import { CheckCircleIcon, CaretDownIcon, CircleIcon, SpinnerGapIcon, SidebarIcon, ShieldWarningIcon, TriangleIcon, XIcon, XCircleIcon, StarFourIcon, FileTextIcon, PaperclipIcon } from '@phosphor-icons/react';
+import { useCallback } from 'react';
+import type { FileUIPart } from 'ai';
 import { ChatSessionList } from './components/chat-session-list';
 import { HumanSelectionCard } from './components/human-selection-card';
 import { IntentClarificationCard } from './components/intent-clarification-card';

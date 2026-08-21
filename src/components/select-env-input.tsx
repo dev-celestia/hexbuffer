@@ -31,7 +31,7 @@ export function ColorizedUrlInput(props: BaseProps) {
     <BaseColorizedUrlInput
       {...props}
       envVarKeys={props.envVarKeys ?? envVarKeys}
-      activeContextId={props.activeContextId ?? activeContextId}
+      activeContextId={(props.activeContextId ?? activeContextId) ?? undefined}
     />
   );
 }

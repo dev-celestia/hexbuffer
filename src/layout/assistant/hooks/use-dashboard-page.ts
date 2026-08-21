@@ -4,7 +4,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FileUIPart } from 'ai';
-import { usePromptInputController } from '@/components/ai-elements/prompt-input';
+import { usePromptInputController } from '@celestia-project/ui';
 import { useBrowserAutomationStore } from '@/stores/browser-automation';
 import { DASHBOARD_DEFAULT_AI_MODEL } from '../constants';
 import { DashboardSettingsChatTransport } from '../lib/dashboard-chat-transport';
