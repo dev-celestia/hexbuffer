@@ -1,4 +1,15 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, Button, Input } from '@celestia-project/ui';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Button,
+  Input,
+} from '@celestia-project/ui';
 import * as React from 'react';
 import { DatabaseIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
@@ -36,21 +47,90 @@ export function ExplorerSidebar({
   };
 
   return (
-    <div className="w-56 border-r border-border bg-background/50 flex flex-col shrink-0 justify-between">
-      <div className="flex-1 flex flex-col min-h-0">
-        <div className="p-3 border-b border-border">
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col shrink-0 justify-between select-none",
+
+        // Sizing & Spacing
+        "w-56 border-r",
+
+        // Backgrounds & Borders
+        "border-border bg-background/50"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col flex-1 min-h-0"
+        )}
+      >
+        {/* Header */}
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center justify-between",
+
+            // Sizing & Spacing
+            "p-3 border-b",
+
+            // Backgrounds & Borders
+            "border-border"
+          )}
+        >
+          <h2
+            className={cn(
+              // Typography
+              "text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+            )}
+          >
             R2 Buckets
           </h2>
+          <span
+            className={cn(
+              // Typography
+              "text-[10px] font-mono text-muted-foreground"
+            )}
+          >
+            {buckets.length}
+          </span>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-1 space-y-1">
+        {/* Bucket list */}
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex-1 overflow-y-auto space-y-0.5",
+
+            // Sizing & Spacing
+            "p-1.5"
+          )}
+        >
           {loading && buckets.length === 0 ? (
-            <div className="p-2 text-xs text-muted-foreground animate-pulse">
+            <div
+              className={cn(
+                // Sizing & Spacing
+                "p-3",
+
+                // Typography
+                "text-xs text-muted-foreground",
+
+                // Interactive & States
+                "animate-pulse"
+              )}
+            >
               Discovering buckets…
             </div>
           ) : buckets.length === 0 ? (
-            <div className="p-2 text-xs text-muted-foreground italic">
+            <div
+              className={cn(
+                // Sizing & Spacing
+                "p-3",
+
+                // Typography
+                "text-xs text-muted-foreground italic text-center"
+              )}
+            >
               No buckets discovered.
             </div>
           ) : (
@@ -58,22 +138,63 @@ export function ExplorerSidebar({
               const active = bucket === currentBucket;
 
               return (
-                <div key={bucket} className="group flex items-center gap-1">
+                <div
+                  key={bucket}
+                  className={cn(
+                    // Layout & Positioning
+                    "group flex items-center min-w-0",
+
+                    // Sizing & Spacing
+                    "gap-1"
+                  )}
+                >
                   <button
+                    type="button"
                     onClick={() => onSelectBucket(bucket)}
                     className={cn(
-                      'flex-1 flex items-center gap-2 px-3 py-1.5 rounded-md text-left text-xs font-medium transition-colors min-w-0',
+                      // Layout & Positioning
+                      "flex-1 flex items-center min-w-0 text-left",
+
+                      // Sizing & Spacing
+                      "px-2.5 py-1.5 rounded-md gap-2",
+
+                      // Typography
+                      "text-xs font-medium",
+
+                      // Backgrounds & Borders
                       active
-                        ? 'bg-muted text-foreground'
-                        : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                        ? "bg-muted text-foreground font-semibold"
+                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+
+                      // Interactive & States
+                      "transition-colors active:scale-[0.99]"
                     )}
                   >
-                    <DatabaseIcon className={cn('size-4 shrink-0', active ? 'text-primary' : 'text-muted-foreground')} />
+                    <DatabaseIcon
+                      className={cn(
+                        // Sizing & Spacing
+                        "size-3.5 shrink-0",
+
+                        // Typography & Colors
+                        active ? "text-primary" : "text-muted-foreground"
+                      )}
+                    />
                     <span className="truncate">{bucket}</span>
                   </button>
+
                   <button
+                    type="button"
                     onClick={(e) => handleRemoveClick(e, bucket)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:text-destructive text-muted-foreground shrink-0"
+                    className={cn(
+                      // Layout & Positioning
+                      "shrink-0 p-1 rounded",
+
+                      // Typography & Colors
+                      "text-muted-foreground hover:text-destructive",
+
+                      // Interactive & States
+                      "opacity-0 group-hover:opacity-100 transition-opacity"
+                    )}
                     title={`Delete ${bucket}`}
                   >
                     <TrashIcon className="size-3" />
@@ -86,15 +207,45 @@ export function ExplorerSidebar({
       </div>
 
       {/* Manual bucket registration input */}
-      <div className="p-3 border-t border-border bg-background/40">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col shrink-0",
+
+          // Sizing & Spacing
+          "p-3 border-t",
+
+          // Backgrounds & Borders
+          "border-border bg-background/40"
+        )}
+      >
         <form onSubmit={handleSubmit} className="flex gap-1">
           <Input
             value={newBucketName}
             onChange={(e) => setNewBucketName(e.target.value)}
             placeholder="Add bucket manually…"
-            className="text-[10px] h-7 w-full font-sans"
+            className={cn(
+              // Sizing & Spacing
+              "h-7 w-full",
+
+              // Typography
+              "text-xs font-sans bg-background"
+            )}
           />
-          <Button type="submit" size="xs" variant="outline" className="size-7 p-0 shrink-0">
+          <Button
+            type="submit"
+            size="xs"
+            variant="outline"
+            className={cn(
+              // Layout & Positioning
+              "shrink-0",
+
+              // Sizing & Spacing
+              "size-7 p-0"
+            )}
+            disabled={!newBucketName.trim()}
+            title="Add bucket"
+          >
             <PlusIcon className="size-3.5" />
           </Button>
         </form>
@@ -110,8 +261,9 @@ export function ExplorerSidebar({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel size="xs">Cancel</AlertDialogCancel>
             <AlertDialogAction
+              size="xs"
               variant="destructive"
               onClick={() => {
                 if (confirmRemove) {

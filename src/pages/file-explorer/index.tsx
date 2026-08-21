@@ -1,6 +1,12 @@
-import { Button, ButtonGroup, ContextMenuItem, ContextMenuSeparator, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
+import {
+  Button,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@celestia-project/ui';
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   HardDriveIcon,
   GearSixIcon,
@@ -14,270 +20,146 @@ import {
 } from '@phosphor-icons/react';
 
 import { cn } from '@/lib/utils';
-
-import { useFileExplorer } from './hooks/use-file-explorer';
-import { useLocalStorage, LOCAL_STORAGE_DIR_NAME } from './hooks/use-local-storage';
+import { TabbedPageLayout } from '@/components/tabs-layout/tabbed-page-layout';
+import { useFileExplorerPage } from './hooks/use-file-explorer-page';
 import { ExplorerSidebar } from './components/explorer-sidebar';
 import { ExplorerDetailsPane } from './components/explorer-details-pane';
 import { FileGrid } from './components/file-grid';
 import { FileToolbar } from './components/file-toolbar';
-
-type ActiveTab = 'r2' | 'local';
-type ViewMode = 'list' | 'grid';
+import { WordlistsTab } from './components/wordlists/wordlists-tab';
 
 export function FileExplorerPage() {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = React.useState<ActiveTab>('r2');
+  const page = useFileExplorerPage();
+  const { explorer, local } = page;
 
-  // Persist viewMode in localStorage across sessions
-  const [viewMode, setViewMode] = React.useState<ViewMode>(() => {
-    try {
-      const saved = localStorage.getItem('explorer_view_mode');
-      return (saved as ViewMode) === 'grid' ? 'grid' : 'list';
-    } catch {
-      return 'list';
-    }
-  });
-
-  const handleViewModeChange = React.useCallback((mode: ViewMode) => {
-    setViewMode(mode);
-    try {
-      localStorage.setItem('explorer_view_mode', mode);
-    } catch (e) {
-      console.warn('Failed to save view mode to localStorage:', e);
-    }
-  }, []);
-
-  const explorer = useFileExplorer();
-  const local = useLocalStorage();
-
-  const [localRenamingPath, setLocalRenamingPath] = React.useState<string | null>(null);
-  const [localRenameValue, setLocalRenameValue] = React.useState('');
-  const localRenameInputRef = React.useRef<HTMLInputElement>(null);
-
-  const {
-    loading,
-    credentials,
-    buckets,
-    currentBucket,
-    setCurrentBucket,
-    currentPrefix,
-    items,
-    selectedItem,
-    setSelectedItem,
-    uploadProgress,
-    cacheStatus,
-    searchQuery,
-    setSearchQuery,
-    navigateToFolder,
-    navigateUp,
-    handleCopyPublicUrl,
-    handleCopyPresignedUrl,
-    handleCreateFolder,
-    handleDeleteItem,
-    deletingKey,
-    handleUploadFile,
-    handleOpenFile,
-    handleAddCustomBucket,
-    handleRemoveBucket,
-    refreshList,
-  } = explorer;
-
-  // Build R2 breadcrumbs list
-  const r2Breadcrumbs = React.useMemo(() => {
-    const parts = currentPrefix.split('/').filter(Boolean);
-    const crumbs = [{ label: currentBucket || 'R2 Bucket', id: '' }];
-
-    let pathAcc = '';
-    parts.forEach((part) => {
-      pathAcc += `${part}/`;
-      crumbs.push({
-        label: part,
-        id: pathAcc,
-      });
-    });
-
-    return crumbs;
-  }, [currentBucket, currentPrefix]);
-
-  // Build Local breadcrumbs list with clickable navigation paths
-  const localBreadcrumbs = React.useMemo(() => {
-    if (!local.rootDir || !local.currentPath) {
-      return [{ label: LOCAL_STORAGE_DIR_NAME, id: local.rootDir }];
-    }
-    const relative = local.currentPath.slice(local.rootDir.length).replace(/^[/\\]/, '');
-    const parts = relative ? relative.split(/[/\\]/) : [];
-
-    const crumbs = [{ label: LOCAL_STORAGE_DIR_NAME, id: local.rootDir }];
-    let accPath = local.rootDir;
-
-    parts.forEach((part) => {
-      const sep = local.currentPath.includes('\\') ? '\\' : '/';
-      accPath = `${accPath}${sep}${part}`;
-      crumbs.push({
-        label: part,
-        id: accPath,
-      });
-    });
-
-    return crumbs;
-  }, [local.rootDir, local.currentPath]);
-
-  // Local renaming state management callbacks
-  const localStartRename = React.useCallback((e: React.MouseEvent, item: any) => {
-    e.stopPropagation();
-    setLocalRenamingPath(item.id);
-    setLocalRenameValue(item.name);
-    setTimeout(() => localRenameInputRef.current?.select(), 0);
-  }, []);
-
-  const localCommitRename = React.useCallback((item: any) => {
-    const orig = local.items.find(i => i.path === item.id);
-    if (orig && localRenameValue.trim() && localRenameValue !== orig.name) {
-      local.handleRenameItem(orig, localRenameValue);
-    }
-    setLocalRenamingPath(null);
-  }, [local.items, localRenameValue, local.handleRenameItem]);
-
-  const localCancelRename = React.useCallback(() => {
-    setLocalRenamingPath(null);
-  }, []);
-
-  // Render Onboarding state if credentials are not configured
-  if (!loading && !credentials && activeTab === 'r2') {
+  // Render Onboarding state if R2 credentials are not configured and on R2 tab
+  if (!explorer.loading && !explorer.credentials && page.activeTab === 'r2') {
     return (
-      <div
-        className={cn(
+      <TabbedPageLayout
+        tabs={page.tabs}
+        activeTabId={page.activeTab}
+        onTabChange={page.setActiveTab}
+        contentClassName={cn(
           // Layout & Positioning
-          "relative flex flex-col select-none overflow-hidden",
-
-          // Sizing & Spacing
-          "h-full",
+          "flex-1 min-h-0 overflow-hidden",
 
           // Backgrounds & Borders
-          "bg-background"
+          "border rounded-lg bg-card"
         )}
       >
-        {/* Tab bar even in the onboarding state so user can switch to Local */}
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center shrink-0",
+            "flex flex-1 items-center justify-center select-none",
 
             // Sizing & Spacing
-            "h-10 px-3",
+            "h-full p-6",
 
             // Backgrounds & Borders
-            "border-b border-border"
-          )}
-        >
-          <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
-        </div>
-        <div
-          className={cn(
-            // Layout & Positioning
-            "flex flex-1 items-center justify-center",
-
-            // Sizing & Spacing
-            "p-6"
+            "bg-background"
           )}
         >
           <div
             className={cn(
               // Layout & Positioning
-              "w-full max-w-md select-none text-center",
+              "flex flex-col items-center max-w-md text-center",
 
               // Sizing & Spacing
-              "p-6",
+              "p-6 rounded-lg border gap-3",
 
               // Backgrounds & Borders
-              "border border-border bg-muted/10 rounded-lg backdrop-blur-sm"
+              "border-border bg-muted/10 backdrop-blur-sm"
             )}
           >
-            <HardDriveIcon className="size-12 text-primary mx-auto mb-4 animate-pulse" />
-            <h2 className="text-base font-semibold text-foreground">
+            <HardDriveIcon className="size-10 text-primary animate-pulse" />
+            <h2
+              className={cn(
+                // Typography
+                "text-sm font-semibold text-foreground"
+              )}
+            >
               Cloudflare R2 Storage Not Configured
             </h2>
-            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+            <p
+              className={cn(
+                // Typography
+                "text-xs text-muted-foreground leading-relaxed"
+              )}
+            >
               R2 offers S3-compatible object storage with zero egress fees. To browse your buckets
-              and manage files, please set up your account credentials in Settings.
+              and manage remote files, configure your account credentials in Settings.
             </p>
-            <div className="mt-6 flex justify-center gap-3">
-              <Button size="xs"
-                onClick={() => navigate('/settings?tab=r2')}
-                className="text-xs font-semibold"
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex justify-center pt-2"
+              )}
+            >
+              <Button
+                size="xs"
+                variant="default"
+                onClick={() => page.navigate('/settings?tab=r2')}
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center",
+
+                  // Sizing & Spacing
+                  "h-7 px-3 gap-1.5",
+
+                  // Typography
+                  "text-xs font-semibold"
+                )}
               >
-                <GearSixIcon className="mr-1.5 size-4" />
-                Configure Credentials
+                <GearSixIcon className="size-3.5" />
+                <span>Configure Credentials</span>
               </Button>
             </div>
           </div>
         </div>
-      </div>
+      </TabbedPageLayout>
     );
   }
 
   return (
-    <div
-      className={cn(
+    <TabbedPageLayout
+      tabs={page.tabs}
+      activeTabId={page.activeTab}
+      onTabChange={page.setActiveTab}
+      contentClassName={cn(
         // Layout & Positioning
-        "relative flex flex-col select-none overflow-hidden",
-
-        // Sizing & Spacing
-        "h-full",
+        "flex-1 min-h-0 overflow-hidden",
 
         // Backgrounds & Borders
-        "bg-background"
+        "border rounded-lg bg-card"
       )}
     >
-      {/* Tab bar */}
       <div
         className={cn(
           // Layout & Positioning
-          "flex items-center shrink-0",
-
-          // Sizing & Spacing
-          "h-10 px-3 gap-3",
+          "relative flex flex-col flex-1 min-h-0",
 
           // Backgrounds & Borders
-          "border-b border-border"
+          "bg-background"
         )}
       >
-        <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
-        {activeTab === 'local' && local.rootDir && (
-          <span
+        {page.activeTab === 'r2' ? (
+          /* Cloudflare R2 Workspace */
+          <div
             className={cn(
               // Layout & Positioning
-              "truncate",
-
-              // Typography
-              "text-[10px] font-mono text-muted-foreground"
+              "relative flex flex-1 min-h-0"
             )}
           >
-            {local.rootDir}
-          </span>
-        )}
-      </div>
-
-      {/* Main workspace */}
-      <div
-        className={cn(
-          // Layout & Positioning
-          "relative flex flex-1 min-h-0"
-        )}
-      >
-        {activeTab === 'r2' ? (
-          <>
             <ExplorerSidebar
-              buckets={buckets}
-              currentBucket={currentBucket}
+              buckets={explorer.buckets}
+              currentBucket={explorer.currentBucket}
               onSelectBucket={(b) => {
-                setCurrentBucket(b);
-                setSelectedItem(null);
+                explorer.setCurrentBucket(b);
+                explorer.setSelectedItem(null);
               }}
-              onAddCustomBucket={handleAddCustomBucket}
-              onRemoveBucket={handleRemoveBucket}
-              loading={loading}
+              onAddCustomBucket={explorer.handleAddCustomBucket}
+              onRemoveBucket={explorer.handleRemoveBucket}
+              loading={explorer.loading}
             />
 
             <div
@@ -287,86 +169,97 @@ export function FileExplorerPage() {
               )}
             >
               <FileToolbar
-                breadcrumbs={r2Breadcrumbs}
-                isAtRoot={!currentPrefix}
-                onNavigateUp={navigateUp}
-                onNavigateTo={navigateToFolder}
-                onCreateFolder={handleCreateFolder}
+                breadcrumbs={page.r2Breadcrumbs}
+                isAtRoot={!explorer.currentPrefix}
+                onNavigateUp={explorer.navigateUp}
+                onNavigateTo={explorer.navigateToFolder}
+                onCreateFolder={explorer.handleCreateFolder}
                 actionLabel="Upload"
-                actionIcon={<UploadSimpleIcon className="mr-1.5 size-3.5" />}
-                onActionClick={handleUploadFile}
-                actionDisabled={!currentBucket}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                onRefresh={refreshList}
-                viewMode={viewMode}
-                onViewModeChange={handleViewModeChange}
-                loading={loading}
+                actionIcon={<UploadSimpleIcon className="size-3.5" />}
+                onActionClick={explorer.handleUploadFile}
+                actionDisabled={!explorer.currentBucket}
+                searchQuery={explorer.searchQuery}
+                onSearchChange={explorer.setSearchQuery}
+                onRefresh={explorer.refreshList}
+                viewMode={page.viewMode}
+                onViewModeChange={page.handleViewModeChange}
+                loading={explorer.loading}
               />
 
               <ResizablePanelGroup orientation="horizontal" className="flex-1 w-full min-h-0">
                 <ResizablePanel defaultSize={70} minSize={30}>
                   <FileGrid
-                    items={items.map((item) => ({ ...item, id: item.key }))}
-                    selectedItem={selectedItem ? { ...selectedItem, id: selectedItem.key } : null}
-                    loading={loading}
-                    deletingId={deletingKey}
-                    onSelectItem={(item) => setSelectedItem(items.find((i) => i.key === item.id) ?? null)}
+                    items={explorer.items.map((item) => ({ ...item, id: item.key }))}
+                    selectedItem={
+                      explorer.selectedItem
+                        ? { ...explorer.selectedItem, id: explorer.selectedItem.key }
+                        : null
+                    }
+                    loading={explorer.loading}
+                    deletingId={explorer.deletingKey}
+                    onSelectItem={(item) =>
+                      explorer.setSelectedItem(explorer.items.find((i) => i.key === item.id) ?? null)
+                    }
                     onDoubleClickItem={(item) => {
-                      const orig = items.find((i) => i.key === item.id);
+                      const orig = explorer.items.find((i) => i.key === item.id);
                       if (orig) {
                         if (orig.type === 'folder') {
-                          navigateToFolder(orig.key);
+                          explorer.navigateToFolder(orig.key);
                         } else {
-                          void handleOpenFile(orig);
+                          void explorer.handleOpenFile(orig);
                         }
                       }
                     }}
                     onDeleteItem={(item) => {
-                      const orig = items.find((i) => i.key === item.id);
-                      if (orig) void handleDeleteItem(orig);
+                      const orig = explorer.items.find((i) => i.key === item.id);
+                      if (orig) void explorer.handleDeleteItem(orig);
                     }}
-                    viewMode={viewMode}
+                    viewMode={page.viewMode}
                     emptyMessage="This folder contains no files or sub-directories."
                     renderGridStatusOverlay={(item) => {
-                      const cached = cacheStatus[item.id]?.isCached;
+                      const cached = explorer.cacheStatus[item.id]?.isCached;
                       if (item.type === 'folder') return null;
                       return (
                         <span className="absolute right-0 bottom-1">
                           <span
-                            className={`block size-1.5 rounded-full ${cached ? 'bg-green-500' : 'bg-zinc-500'}`}
+                            className={cn(
+                              "block size-1.5 rounded-full",
+                              cached ? "bg-green-500" : "bg-muted-foreground/40"
+                            )}
                             title={cached ? 'Local Cached' : 'R2 Remote'}
                           />
                         </span>
                       );
                     }}
                     renderSyncStatus={(item) => {
-                      const cached = cacheStatus[item.id]?.isCached;
+                      const cached = explorer.cacheStatus[item.id]?.isCached;
                       if (item.type === 'folder') return '—';
                       return cached ? (
-                        <span className="inline-flex items-center text-[10px] text-green-500 font-sans gap-1">
+                        <span className="inline-flex items-center text-[10px] text-green-600 dark:text-green-400 font-sans gap-1">
                           <CheckCircleIcon className="size-3.5" /> Local
                         </span>
                       ) : (
-                        <span className="inline-flex items-center text-[10px] text-zinc-500 font-sans gap-1">
+                        <span className="inline-flex items-center text-[10px] text-muted-foreground font-sans gap-1">
                           <CloudArrowDownIcon className="size-3.5" /> R2
                         </span>
                       );
                     }}
                     renderExtraContextMenuItems={(item) => {
-                      const orig = items.find((i) => i.key === item.id);
+                      const orig = explorer.items.find((i) => i.key === item.id);
                       if (item.type !== 'file' || !orig) return null;
                       return (
                         <>
                           <ContextMenuSeparator />
-                          {handleCopyPublicUrl && (
-                            <ContextMenuItem onClick={() => handleCopyPublicUrl(orig)}>
+                          {explorer.handleCopyPublicUrl && (
+                            <ContextMenuItem onClick={() => explorer.handleCopyPublicUrl(orig)}>
                               <CopyIcon className="mr-2 size-3.5" />
                               <span>Copy Public URL</span>
                             </ContextMenuItem>
                           )}
-                          {handleCopyPresignedUrl && (
-                            <ContextMenuItem onClick={() => handleCopyPresignedUrl(orig, 3600)}>
+                          {explorer.handleCopyPresignedUrl && (
+                            <ContextMenuItem
+                              onClick={() => explorer.handleCopyPresignedUrl(orig, 3600)}
+                            >
                               <LinkSimpleIcon className="mr-2 size-3.5" />
                               <span>Copy Presigned URL</span>
                             </ContextMenuItem>
@@ -381,18 +274,18 @@ export function FileExplorerPage() {
 
                 <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
                   <ExplorerDetailsPane
-                    item={selectedItem}
-                    cacheStatus={cacheStatus}
-                    onOpenFile={handleOpenFile}
-                    onCopyPublicUrl={handleCopyPublicUrl}
-                    onCopyPresignedUrl={handleCopyPresignedUrl}
+                    item={explorer.selectedItem}
+                    cacheStatus={explorer.cacheStatus}
+                    onOpenFile={explorer.handleOpenFile}
+                    onCopyPublicUrl={explorer.handleCopyPublicUrl}
+                    onCopyPresignedUrl={explorer.handleCopyPresignedUrl}
                   />
                 </ResizablePanel>
               </ResizablePanelGroup>
             </div>
-          </>
-        ) : (
-          /* Local Storage tab */
+          </div>
+        ) : page.activeTab === 'local' ? (
+          /* Local Storage Workspace */
           <div
             className={cn(
               // Layout & Positioning
@@ -400,19 +293,19 @@ export function FileExplorerPage() {
             )}
           >
             <FileToolbar
-              breadcrumbs={localBreadcrumbs}
+              breadcrumbs={page.localBreadcrumbs}
               isAtRoot={local.isAtRoot}
               onNavigateUp={local.navigateUp}
               onNavigateTo={local.navigateInto}
               onCreateFolder={local.handleCreateFolder}
               actionLabel="Import"
-              actionIcon={<DownloadSimpleIcon className="mr-1.5 size-3.5" />}
+              actionIcon={<DownloadSimpleIcon className="size-3.5" />}
               onActionClick={local.handleImportFile}
               searchQuery={local.searchQuery}
               onSearchChange={local.setSearchQuery}
               onRefresh={local.refresh}
-              viewMode={viewMode}
-              onViewModeChange={handleViewModeChange}
+              viewMode={page.viewMode}
+              onViewModeChange={page.handleViewModeChange}
               loading={local.loading}
             />
             <div
@@ -423,148 +316,122 @@ export function FileExplorerPage() {
             >
               <FileGrid
                 items={local.items.map((item) => ({ ...item, id: item.path }))}
-                selectedItem={local.selectedItem ? { ...local.selectedItem, id: local.selectedItem.path } : null}
+                selectedItem={
+                  local.selectedItem
+                    ? { ...local.selectedItem, id: local.selectedItem.path }
+                    : null
+                }
                 loading={local.loading}
                 deletingId={local.deletingPath}
-                onSelectItem={(item) => local.setSelectedItem(local.items.find((i) => i.path === item.id) ?? null)}
+                onSelectItem={(item) =>
+                  local.setSelectedItem(local.items.find((i) => i.path === item.id) ?? null)
+                }
                 onDoubleClickItem={(item) => {
-                  const orig = local.items.find((i) => i.path === item.path);
+                  const orig = local.items.find((i) => i.path === item.id);
                   if (orig) void local.handleOpenFile(orig);
                 }}
                 onDeleteItem={(item) => {
-                  const orig = local.items.find((i) => i.path === item.path);
+                  const orig = local.items.find((i) => i.path === item.id);
                   if (orig) void local.handleDeleteItem(orig);
                 }}
-                viewMode={viewMode}
+                viewMode={page.viewMode}
                 emptyMessage="Import files or create a sub-folder to get started."
-                renamingId={localRenamingPath}
-                renameValue={localRenameValue}
-                onRenameStart={localStartRename}
-                onRenameChange={setLocalRenameValue}
-                onRenameCommit={localCommitRename}
-                onRenameCancel={localCancelRename}
-                renameInputRef={localRenameInputRef}
+                renamingId={page.localRenamingPath}
+                renameValue={page.localRenameValue}
+                onRenameStart={page.localStartRename}
+                onRenameChange={page.setLocalRenameValue}
+                onRenameCommit={page.localCommitRename}
+                onRenameCancel={page.localCancelRename}
+                renameInputRef={page.localRenameInputRef}
               />
             </div>
           </div>
+        ) : (
+          /* Wordlists On-Demand Hub */
+          <WordlistsTab />
         )}
-      </div>
 
-      {/* Concurrent upload progress bar */}
-      {uploadProgress && activeTab === 'r2' && (
-        <div
-          className={cn(
-            // Layout & Positioning
-            "absolute bottom-4 right-4 z-50",
-
-            // Sizing & Spacing
-            "w-80 p-3",
-
-            // Backgrounds & Borders
-            "bg-muted border border-border shadow-md rounded-lg",
-
-            // Interactive & States
-            "animate-in fade-in slide-in-from-bottom-4 duration-200"
-          )}
-        >
+        {/* Floating concurrent upload progress card */}
+        {explorer.uploadProgress && page.activeTab === 'r2' && (
           <div
             className={cn(
               // Layout & Positioning
-              "flex items-center justify-between mb-1.5",
-
-              // Typography
-              "text-[11px] font-medium"
-            )}
-          >
-            <span className="truncate pr-4 text-foreground">{uploadProgress.fileName}</span>
-            <span className="shrink-0 text-primary">{uploadProgress.progress}%</span>
-          </div>
-          <div
-            className={cn(
-              // Layout & Positioning
-              "overflow-hidden w-full",
+              "absolute bottom-4 right-4 z-50",
 
               // Sizing & Spacing
-              "h-1.5",
+              "w-80 p-3 rounded-lg border shadow-lg gap-2",
 
               // Backgrounds & Borders
-              "bg-border rounded-full"
+              "bg-background/95 border-border backdrop-blur-md",
+
+              // Interactive & States
+              "animate-in fade-in slide-in-from-bottom-3 duration-200"
             )}
           >
             <div
               className={cn(
                 // Layout & Positioning
-                "h-full",
+                "flex items-center justify-between mb-1.5",
+
+                // Typography
+                "text-xs font-medium"
+              )}
+            >
+              <span className="truncate pr-3 text-foreground">
+                {explorer.uploadProgress.fileName}
+              </span>
+              <span className="shrink-0 text-primary font-mono text-[11px]">
+                {explorer.uploadProgress.progress}%
+              </span>
+            </div>
+
+            <div
+              className={cn(
+                // Layout & Positioning
+                "overflow-hidden w-full",
+
+                // Sizing & Spacing
+                "h-1.5 rounded-full",
 
                 // Backgrounds & Borders
-                "bg-primary rounded-full",
-
-                // Interactive & States
-                "transition-all duration-300"
+                "bg-muted"
               )}
-              style={{ width: `${uploadProgress.progress}%` }}
-            />
+            >
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "h-full rounded-full",
+
+                  // Backgrounds & Borders
+                  "bg-primary",
+
+                  // Interactive & States
+                  "transition-all duration-300 ease-out"
+                )}
+                style={{ width: `${explorer.uploadProgress.progress}%` }}
+              />
+            </div>
+
+            <p
+              className={cn(
+                // Layout & Positioning
+                "flex items-center mt-2",
+
+                // Sizing & Spacing
+                "gap-1.5",
+
+                // Typography
+                "text-[10px] text-muted-foreground"
+              )}
+            >
+              <ShieldWarningIcon className="size-3.5 text-primary shrink-0" />
+              <span>Uploading to R2 Storage bucket…</span>
+            </p>
           </div>
-          <p
-            className={cn(
-              // Layout & Positioning
-              "flex items-center mt-1.5",
-
-              // Sizing & Spacing
-              "gap-1",
-
-              // Typography
-              "text-[10px] text-muted-foreground"
-            )}
-          >
-            <ShieldWarningIcon className="size-3.5 text-primary shrink-0" />
-            Uploading to R2 Buckets concurrently…
-          </p>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </TabbedPageLayout>
   );
 }
 
-function TabBar({
-  activeTab,
-  onTabChange,
-}: {
-  activeTab: ActiveTab;
-  onTabChange: (tab: ActiveTab) => void;
-}) {
-  return (
-    <ButtonGroup>
-      <Button
-        variant="outline"
-        size="xs"
-        className={cn(
-          // Typography
-          "text-xs",
-
-          // Interactive & States
-          activeTab === 'r2' && 'text-primary'
-        )}
-        data-state={activeTab === 'r2' ? 'on' : 'off'}
-        onClick={() => onTabChange('r2')}
-      >
-        R2 Storage
-      </Button>
-      <Button
-        variant="outline"
-        size="xs"
-        className={cn(
-          // Typography
-          "text-xs",
-
-          // Interactive & States
-          activeTab === 'local' && 'text-primary'
-        )}
-        data-state={activeTab === 'local' ? 'on' : 'off'}
-        onClick={() => onTabChange('local')}
-      >
-        Local Files
-      </Button>
-    </ButtonGroup>
-  );
-}
+export default FileExplorerPage;

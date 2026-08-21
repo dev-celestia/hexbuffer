@@ -37,16 +37,17 @@ export function ExplorerGrid({
   deletingId,
 }: ExplorerGridProps) {
   // Map R2Item to FileItem shape
-  const gridItems = React.useMemo(() =>
-    items.map((item) => ({
-      ...item,
-      id: item.key, // Use key as id
-    })),
+  const gridItems = React.useMemo(
+    () =>
+      items.map((item) => ({
+        ...item,
+        id: item.key,
+      })),
     [items]
   );
 
-  const selectedGridItem = React.useMemo(() =>
-    selectedItem ? { ...selectedItem, id: selectedItem.key } : null,
+  const selectedGridItem = React.useMemo(
+    () => (selectedItem ? { ...selectedItem, id: selectedItem.key } : null),
     [selectedItem]
   );
 
@@ -71,7 +72,7 @@ export function ExplorerGrid({
         return (
           <span className="absolute right-0 bottom-1">
             <span
-              className={`block size-1.5 rounded-full ${cached ? 'bg-green-500' : 'bg-zinc-500'}`}
+              className={`block size-1.5 rounded-full ${cached ? 'bg-green-500' : 'bg-muted-foreground/50'}`}
               title={cached ? 'Local Cached' : 'R2 Remote'}
             />
           </span>
@@ -81,11 +82,11 @@ export function ExplorerGrid({
         const cached = cacheStatus[item.id]?.isCached;
         if (item.type === 'folder') return '—';
         return cached ? (
-          <span className="inline-flex items-center text-[10px] text-green-500 font-sans gap-1">
+          <span className="inline-flex items-center text-[10px] text-green-600 dark:text-green-400 font-sans gap-1">
             <CheckCircleIcon className="size-3.5" /> Local
           </span>
         ) : (
-          <span className="inline-flex items-center text-[10px] text-zinc-500 font-sans gap-1">
+          <span className="inline-flex items-center text-[10px] text-muted-foreground font-sans gap-1">
             <CloudArrowDownIcon className="size-3.5" /> R2
           </span>
         );

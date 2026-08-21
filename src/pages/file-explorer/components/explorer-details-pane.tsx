@@ -1,4 +1,12 @@
-import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@celestia-project/ui';
+import {
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Badge,
+} from '@celestia-project/ui';
 import * as React from 'react';
 import {
   FileIcon,
@@ -11,6 +19,7 @@ import {
 
 import { PRESIGNED_URL_EXPIRATIONS } from '../constants';
 import type { R2Item } from '../types';
+import { cn } from '@/lib/utils';
 
 interface ExplorerDetailsPaneProps {
   item: R2Item | null;
@@ -39,11 +48,25 @@ export function ExplorerDetailsPane({
 
   if (!item) {
     return (
-      <div className="w-full h-full flex-1 bg-background/30 flex flex-col items-center justify-center p-6 text-center text-muted-foreground select-none">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col flex-1 items-center justify-center select-none text-center",
+
+          // Sizing & Spacing
+          "h-full p-6",
+
+          // Backgrounds & Borders
+          "bg-background/30",
+
+          // Typography & Colors
+          "text-muted-foreground"
+        )}
+      >
         <FileIcon className="size-8 text-muted-foreground/35 mb-2" />
-        <p className="text-xs font-medium">No item selected</p>
-        <p className="text-[10px] text-muted-foreground/80 mt-0.5">
-          Select a file or folder to view its properties and actions.
+        <p className="text-xs font-medium text-foreground">No item selected</p>
+        <p className="text-[11px] text-muted-foreground mt-0.5 max-w-xs leading-relaxed">
+          Select a file or folder to view its properties, cache status, and access URLs.
         </p>
       </div>
     );
@@ -53,41 +76,88 @@ export function ExplorerDetailsPane({
   const localPath = cacheStatus[item.key]?.localPath;
 
   return (
-    <div className="w-full h-full flex-1 bg-background flex flex-col select-none overflow-y-auto">
-      {/* Header */}
-      <div className="p-4 border-b border-border flex flex-col items-center text-center">
-        {item.type === 'folder' ? (
-          <FolderIcon className="size-12 text-yellow-500 mb-2" />
-        ) : (
-          <FileIcon className="size-12 text-zinc-400 mb-2" />
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col flex-1 select-none overflow-y-auto",
+
+        // Sizing & Spacing
+        "h-full w-full",
+
+        // Backgrounds & Borders
+        "bg-background"
+      )}
+    >
+      {/* Header Info */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col items-center text-center",
+
+          // Sizing & Spacing
+          "p-4 border-b gap-2",
+
+          // Backgrounds & Borders
+          "border-border bg-muted/10"
         )}
-        <h3 className="text-sm font-semibold text-foreground break-all px-2">
-          {item.name}
-        </h3>
-        <span className="text-[10px] text-muted-foreground capitalize mt-0.5">
-          {item.type}
-        </span>
+      >
+        {item.type === 'folder' ? (
+          <FolderIcon className="size-10 text-amber-500/80" />
+        ) : (
+          <FileIcon className="size-10 text-muted-foreground/70" />
+        )}
+        <div className="min-w-0 w-full px-2">
+          <h3 className="text-xs font-semibold text-foreground break-all leading-snug">
+            {item.name}
+          </h3>
+          <div className="flex items-center justify-center gap-1.5 mt-1">
+            <Badge variant="secondary">
+              {item.type}
+            </Badge>
+            {item.type === 'file' && (
+              <Badge variant={cached ? 'outline' : 'secondary'}>
+                {cached ? 'Local Sync' : 'Remote Only'}
+              </Badge>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Properties list */}
-      <div className="p-4 border-b border-border space-y-3">
-        <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+      {/* Properties List */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col",
+
+          // Sizing & Spacing
+          "p-4 border-b space-y-2.5",
+
+          // Backgrounds & Borders
+          "border-border"
+        )}
+      >
+        <h4
+          className={cn(
+            // Typography
+            "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+          )}
+        >
           Properties
         </h4>
-        <div className="space-y-2 text-[11px]">
+        <div className="space-y-2 text-xs">
           <div>
-            <span className="text-muted-foreground block">Key</span>
-            <span className="font-mono text-foreground break-all">{item.key}</span>
+            <span className="text-[10px] text-muted-foreground block">Key / Path</span>
+            <span className="font-mono text-[11px] text-foreground break-all">{item.key}</span>
           </div>
           {item.type === 'file' && (
             <>
               <div>
-                <span className="text-muted-foreground block">Size</span>
-                <span className="font-mono text-foreground">{formatBytes(item.size)}</span>
+                <span className="text-[10px] text-muted-foreground block">Size</span>
+                <span className="font-mono text-[11px] text-foreground">{formatBytes(item.size)}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block">Last Modified</span>
-                <span className="text-foreground">
+                <span className="text-[10px] text-muted-foreground block">Last Modified</span>
+                <span className="text-[11px] text-foreground">
                   {item.lastModified ? new Date(item.lastModified).toLocaleString() : '—'}
                 </span>
               </div>
@@ -96,48 +166,75 @@ export function ExplorerDetailsPane({
         </div>
       </div>
 
-      {/* Actions / Cache Section */}
-      <div className="p-4 flex-1 flex flex-col gap-4">
+      {/* Actions & Cache Section */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex-1 flex flex-col",
+
+          // Sizing & Spacing
+          "p-4 gap-3.5"
+        )}
+      >
         {item.type === 'file' && (
           <>
-            {/* Cache Card */}
-            <div className="border border-border rounded-lg p-3 bg-muted/20">
-              <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                Cache Sync
+            {/* Cache Status Card */}
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col",
+
+                // Sizing & Spacing
+                "p-3 rounded-lg border gap-2.5",
+
+                // Backgrounds & Borders
+                "border-border bg-muted/20"
+              )}
+            >
+              <h4
+                className={cn(
+                  // Typography
+                  "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+                )}
+              >
+                Cache Synchronization
               </h4>
+
               {cached ? (
-                <div className="space-y-3">
-                  <div className="flex items-start gap-1.5 text-green-500 text-xs">
+                <div className="space-y-2.5">
+                  <div className="flex items-start gap-2 text-green-600 dark:text-green-400 text-xs">
                     <CheckCircleIcon className="size-4 mt-0.5 shrink-0" />
-                    <div>
+                    <div className="min-w-0">
                       <p className="font-semibold">Local Cached Sync</p>
                       <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed break-all font-mono">
                         {localPath}
                       </p>
                     </div>
                   </div>
-                  <Button size="xs"
+                  <Button
+                    size="xs"
                     variant="outline"
-                    className="w-full text-xs h-8 gap-1.5"
+                    className="w-full text-xs h-7 gap-1.5 font-medium"
                     onClick={() => onOpenFile(item)}
                   >
                     Open Local File
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  <div className="flex items-start gap-1.5 text-muted-foreground text-xs">
+                <div className="space-y-2.5">
+                  <div className="flex items-start gap-2 text-muted-foreground text-xs">
                     <CloudArrowDownIcon className="size-4 mt-0.5 shrink-0" />
                     <div>
                       <p className="font-medium text-foreground">Remote Object Only</p>
-                      <p className="text-[10px] mt-0.5 leading-relaxed">
-                        File is not cached locally. Click stream to download and open.
+                      <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+                        File is not cached locally. Click below to stream & download.
                       </p>
                     </div>
                   </div>
-                  <Button size="xs"
+                  <Button
+                    size="xs"
                     variant="default"
-                    className="w-full text-xs h-8 gap-1.5"
+                    className="w-full text-xs h-7 gap-1.5 font-medium"
                     onClick={() => onOpenFile(item)}
                   >
                     Stream & Open File
@@ -146,17 +243,30 @@ export function ExplorerDetailsPane({
               )}
             </div>
 
-            {/* Presigned URL copy card */}
-            <div className="border border-border rounded-lg p-3 bg-muted/10 space-y-3">
-              <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+            {/* Presigned URL card */}
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col",
+
+                // Sizing & Spacing
+                "p-3 rounded-lg border gap-2.5",
+
+                // Backgrounds & Borders
+                "border-border bg-muted/10"
+              )}
+            >
+              <h4
+                className={cn(
+                  // Typography
+                  "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+                )}
+              >
                 Temporary URL Access
               </h4>
               <div className="flex items-center gap-2">
-                <Select
-                  value={expiration}
-                  onValueChange={setExpiration}
-                >
-                  <SelectTrigger className="h-8 text-xs font-sans">
+                <Select value={expiration} onValueChange={(val) => { if (val) setExpiration(val); }}>
+                  <SelectTrigger className="h-7 text-xs font-sans">
                     <SelectValue placeholder="Expiration" />
                   </SelectTrigger>
                   <SelectContent className="font-sans text-xs">
@@ -170,7 +280,7 @@ export function ExplorerDetailsPane({
                 <Button
                   size="xs"
                   variant="outline"
-                  className="h-8 gap-1 shrink-0 text-xs"
+                  className="h-7 gap-1 shrink-0 text-xs font-medium"
                   onClick={() => onCopyPresignedUrl(item, parseInt(expiration, 10))}
                 >
                   <LinkSimpleIcon className="size-3.5" />
@@ -183,7 +293,7 @@ export function ExplorerDetailsPane({
             <Button
               variant="outline"
               size="xs"
-              className="w-full text-xs h-8 gap-1.5"
+              className="w-full text-xs h-7 gap-1.5 font-medium"
               onClick={() => onCopyPublicUrl(item)}
             >
               <CopyIcon className="size-3.5" />
@@ -193,11 +303,22 @@ export function ExplorerDetailsPane({
         )}
 
         {item.type === 'folder' && (
-          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-muted-foreground">
-            <FolderIcon className="size-8 text-yellow-500/60 mb-1.5" />
-            <p className="text-xs font-medium">Selected Folder</p>
-            <p className="text-[10px] text-muted-foreground/80 mt-0.5 leading-normal">
-              Folder path key: <span className="font-mono text-foreground">{item.key}</span>
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex-1 flex flex-col items-center justify-center text-center",
+
+              // Sizing & Spacing
+              "p-4 gap-1.5",
+
+              // Typography & Colors
+              "text-muted-foreground"
+            )}
+          >
+            <FolderIcon className="size-8 text-amber-500/60" />
+            <p className="text-xs font-medium text-foreground">Selected Folder</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 font-mono break-all leading-normal">
+              {item.key}
             </p>
           </div>
         )}

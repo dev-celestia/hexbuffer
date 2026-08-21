@@ -1,8 +1,18 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@celestia-project/ui';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@celestia-project/ui';
 import * as React from 'react';
-import { CircleNotchIcon } from '@phosphor-icons/react';
+import { CircleNotchIcon, FolderIcon } from '@phosphor-icons/react';
 import { FileGridCard } from './file-grid-card';
 import { FileListRow } from './file-list-row';
+import { cn } from '@/lib/utils';
 
 export interface FileItem {
   id: string;
@@ -21,11 +31,9 @@ interface FileGridProps<T extends FileItem> {
   onDeleteItem: (item: T) => void;
   viewMode: 'list' | 'grid';
   emptyMessage?: string;
-  // Extra elements
   renderSyncStatus?: (item: T) => React.ReactNode;
   renderExtraContextMenuItems?: (item: T) => React.ReactNode;
   renderGridStatusOverlay?: (item: T) => React.ReactNode;
-  // Rename Support
   renamingId?: string | null;
   renameValue?: string;
   onRenameStart?: (e: React.MouseEvent, item: T) => void;
@@ -61,31 +69,74 @@ export function FileGrid<T extends FileItem>({
 
   if (loading && items.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center p-8 text-xs text-muted-foreground">
-        Loading files…
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-1 items-center justify-center select-none",
+
+          // Sizing & Spacing
+          "h-full p-8 gap-2",
+
+          // Typography & Colors
+          "text-xs text-muted-foreground"
+        )}
+      >
+        <CircleNotchIcon className="size-5 animate-spin text-primary" />
+        <span>Loading files…</span>
       </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-background select-none">
-        <img
-          src="/src/assets/explorer-icon/_folder.svg"
-          alt=""
-          className="size-8 opacity-50 mb-2"
-        />
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-1 flex-col items-center justify-center select-none text-center",
+
+          // Sizing & Spacing
+          "h-full p-8 gap-2",
+
+          // Backgrounds & Borders
+          "bg-background"
+        )}
+      >
+        <FolderIcon className="size-10 text-muted-foreground/30 mb-1" />
         <p className="text-xs font-semibold text-foreground">Empty folder</p>
-        <p className="text-[11px] text-muted-foreground mt-0.5">{emptyMessage}</p>
+        <p className="text-[11px] text-muted-foreground max-w-xs">{emptyMessage}</p>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 relative">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "relative flex flex-col flex-1 min-h-0",
+
+        // Backgrounds & Borders
+        "bg-background"
+      )}
+    >
       {viewMode === 'grid' ? (
-        <div className="flex-1 overflow-auto p-2 bg-background select-none">
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(90px,1fr))] gap-3">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex-1 overflow-auto select-none",
+
+            // Sizing & Spacing
+            "p-3"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))]",
+
+              // Sizing & Spacing
+              "gap-3"
+            )}
+          >
             {items.map((item) => (
               <FileGridCard
                 key={item.id}
@@ -109,18 +160,45 @@ export function FileGrid<T extends FileItem>({
           </div>
         </div>
       ) : (
-        <div className="flex-1 overflow-auto bg-background">
-          <table className="w-full text-left border-collapse text-xs select-none">
-            <thead>
-              <tr className="border-b border-border bg-muted/30 sticky top-0 z-10">
-                <th className="px-4 py-2 font-medium text-muted-foreground w-1/2">Name</th>
-                <th className="px-4 py-2 font-medium text-muted-foreground w-16 text-center">Type</th>
-                <th className="px-4 py-2 font-medium text-muted-foreground w-24 text-right">Size</th>
-                <th className="px-4 py-2 font-medium text-muted-foreground w-36">Modified</th>
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex-1 overflow-auto min-h-0 select-none",
+
+            // Backgrounds & Borders
+            "bg-background"
+          )}
+        >
+          <table
+            className={cn(
+              // Layout & Positioning
+              "w-full text-left border-collapse",
+
+              // Typography
+              "text-xs"
+            )}
+          >
+            <thead
+              className={cn(
+                // Layout & Positioning
+                "sticky top-0 z-10",
+
+                // Backgrounds & Borders
+                "bg-muted/40 border-b border-border text-muted-foreground",
+
+                // Typography
+                "text-[10px] font-semibold uppercase tracking-wider select-none"
+              )}
+            >
+              <tr>
+                <th className="px-3 py-2 font-medium w-1/2">Name</th>
+                <th className="px-3 py-2 font-medium w-16 text-center">Type</th>
+                <th className="px-3 py-2 font-medium w-24 text-right">Size</th>
+                <th className="px-3 py-2 font-medium w-36 text-left">Modified</th>
                 {renderSyncStatus && (
-                  <th className="px-4 py-2 font-medium text-muted-foreground w-20 text-center">Sync</th>
+                  <th className="px-3 py-2 font-medium w-20 text-center">Sync</th>
                 )}
-                <th className="px-4 py-2 font-medium text-muted-foreground w-12 text-center" />
+                <th className="px-2 py-2 font-medium w-16 text-right" />
               </tr>
             </thead>
             <tbody className="divide-y divide-border/40 font-mono">
@@ -159,7 +237,9 @@ export function FileGrid<T extends FileItem>({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel size="xs" disabled={deletingId === itemToDelete?.id}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel size="xs" disabled={deletingId === itemToDelete?.id}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               size="xs"
               variant="destructive"

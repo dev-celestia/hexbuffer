@@ -24,14 +24,11 @@ interface FileToolbarProps {
   isAtRoot: boolean;
   onNavigateUp: () => void;
   onNavigateTo: (id: string) => void;
-  // Folder Creation
   onCreateFolder: (name: string) => void | Promise<void>;
-  // Action (Upload or Import)
   actionLabel: string;
   actionIcon: React.ReactNode;
   onActionClick: () => void;
   actionDisabled?: boolean;
-  // Search and Mode
   searchQuery: string;
   onSearchChange: (q: string) => void;
   onRefresh: () => void;
@@ -78,32 +75,33 @@ export function FileToolbar({
     <div
       className={cn(
         // Layout & Positioning
-        "flex flex-col shrink-0",
+        "flex flex-col shrink-0 select-none",
 
         // Sizing & Spacing
-        "p-3 gap-2",
+        "px-3 py-2 gap-2",
 
         // Backgrounds & Borders
-        "border-b border-border bg-background/50"
+        "border-b bg-muted/20"
       )}
     >
+      {/* Top Row: Breadcrumbs & Action Controls */}
       <div
         className={cn(
           // Layout & Positioning
           "flex items-center justify-between",
 
           // Sizing & Spacing
-          "gap-4"
+          "gap-3 min-h-7"
         )}
       >
-        {/* Breadcrumb path */}
+        {/* Navigation Breadcrumb Path */}
         <div
           className={cn(
             // Layout & Positioning
             "flex items-center overflow-x-auto min-w-0 scrollbar-none",
 
             // Sizing & Spacing
-            "gap-1.5 py-1"
+            "gap-1 py-0.5"
           )}
         >
           <Button
@@ -118,11 +116,15 @@ export function FileToolbar({
               // Sizing & Spacing
               "size-7 p-0",
 
-              // Visuals & Colors / Interactive & States
-              "text-muted-foreground hover:text-foreground"
+              // Typography & Colors
+              "text-muted-foreground",
+
+              // Interactive & States
+              "hover:text-foreground active:scale-[0.97] transition-all"
             )}
+            title="Navigate up"
           >
-            <ArrowLeftIcon className="size-4" />
+            <ArrowLeftIcon className="size-3.5" />
           </Button>
 
           <div
@@ -141,16 +143,22 @@ export function FileToolbar({
               const isLast = idx === breadcrumbs.length - 1;
               return (
                 <React.Fragment key={idx}>
-                  {idx > 0 && <CaretRightIcon className="size-3 text-border shrink-0" />}
+                  {idx > 0 && <CaretRightIcon className="size-3 text-muted-foreground/40 shrink-0" />}
                   <button
+                    type="button"
                     onClick={() => !isLast && onNavigateTo(crumb.id)}
                     disabled={isLast || loading}
                     className={cn(
-                      // Typography
-                      isLast ? 'text-foreground font-semibold' : 'hover:text-foreground hover:underline',
-
                       // Sizing & Spacing
-                      crumb.label ? 'truncate max-w-[160px]' : 'opacity-0'
+                      "truncate max-w-[180px] px-1 py-0.5 rounded",
+
+                      // Typography
+                      isLast
+                        ? "text-foreground font-semibold cursor-default"
+                        : "hover:text-foreground hover:bg-muted/40 cursor-pointer",
+
+                      // Interactive & States
+                      "transition-colors"
                     )}
                   >
                     {crumb.label}
@@ -161,7 +169,7 @@ export function FileToolbar({
           </div>
         </div>
 
-        {/* Global Actions */}
+        {/* Global Toolbar Actions */}
         <div
           className={cn(
             // Layout & Positioning
@@ -171,7 +179,7 @@ export function FileToolbar({
             "gap-2"
           )}
         >
-          {/* Create Folder trigger */}
+          {/* Create Folder form or trigger */}
           {showFolderInput ? (
             <form
               onSubmit={handleCreateSubmit}
@@ -192,7 +200,7 @@ export function FileToolbar({
                   "w-36 h-7",
 
                   // Typography
-                  "text-xs"
+                  "text-xs bg-background"
                 )}
                 disabled={creating}
                 autoFocus
@@ -208,7 +216,7 @@ export function FileToolbar({
                   // Sizing & Spacing
                   "size-7 p-0"
                 )}
-                disabled={creating}
+                disabled={creating || !folderNameInput.trim()}
               >
                 <CheckIcon className="size-3.5 text-primary" />
               </Button>
@@ -225,11 +233,14 @@ export function FileToolbar({
                   "shrink-0",
 
                   // Sizing & Spacing
-                  "size-7 p-0"
+                  "size-7 p-0",
+
+                  // Typography & Colors
+                  "text-muted-foreground"
                 )}
                 disabled={creating}
               >
-                <XIcon className="size-3.5 text-muted-foreground" />
+                <XIcon className="size-3.5" />
               </Button>
             </form>
           ) : (
@@ -238,19 +249,40 @@ export function FileToolbar({
               variant="outline"
               onClick={() => setShowFolderInput(true)}
               disabled={loading || actionDisabled}
+              className={cn(
+                // Layout & Positioning
+                "flex items-center",
+
+                // Sizing & Spacing
+                "h-7 px-2.5 gap-1.5",
+
+                // Typography
+                "text-xs font-medium"
+              )}
             >
-              <FolderPlusIcon className="mr-1.5 size-3.5" />
-              New Folder
+              <FolderPlusIcon className="size-3.5" />
+              <span>New Folder</span>
             </Button>
           )}
 
           <Button
             size="xs"
+            variant="default"
             onClick={onActionClick}
             disabled={loading || actionDisabled}
+            className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "h-7 px-2.5 gap-1.5",
+
+              // Typography
+              "text-xs font-medium"
+            )}
           >
             {actionIcon}
-            {actionLabel}
+            <span>{actionLabel}</span>
           </Button>
 
           <Button
@@ -263,49 +295,90 @@ export function FileToolbar({
               "shrink-0",
 
               // Sizing & Spacing
-              "size-7 p-0"
+              "size-7 p-0",
+
+              // Typography & Colors
+              "text-muted-foreground hover:text-foreground"
             )}
+            title="Refresh directory"
           >
-            <ArrowClockwiseIcon className={`size-4 ${loading ? 'animate-spin' : ''}`} />
+            <ArrowClockwiseIcon className={cn("size-3.5", loading && "animate-spin")} />
           </Button>
         </div>
       </div>
 
+      {/* Bottom Row: Search & View Mode Switcher */}
       <div
         className={cn(
           // Layout & Positioning
-          "flex items-center justify-between"
+          "flex items-center justify-between",
+
+          // Sizing & Spacing
+          "gap-3"
         )}
       >
-        {/* Search filtering */}
+        {/* Search input */}
         <div
           className={cn(
             // Layout & Positioning
-            "relative",
+            "relative flex items-center",
 
             // Sizing & Spacing
             "w-72"
           )}
         >
-          <MagnifyingGlassIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+          <MagnifyingGlassIcon
+            className={cn(
+              // Layout & Positioning
+              "absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none",
+
+              // Sizing & Spacing
+              "size-3.5",
+
+              // Typography & Colors
+              "text-muted-foreground"
+            )}
+          />
           <Input
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search files in current directory…"
             className={cn(
               // Sizing & Spacing
-              "h-7 w-full pl-8",
+              "h-7 w-full pl-8 pr-7",
 
               // Typography
-              "text-xs"
+              "text-xs font-sans bg-background",
+
+              // Backgrounds & Borders
+              "border-input",
+
+              // Interactive & States
+              "transition-all duration-150"
             )}
             disabled={actionDisabled}
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => onSearchChange('')}
+              className={cn(
+                // Layout & Positioning
+                "absolute right-2 top-1/2 -translate-y-1/2",
+
+                // Typography & Colors
+                "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <XIcon className="size-3" />
+            </button>
+          )}
         </div>
 
-        {/* View Mode Toggle */}
+        {/* View Mode Toggle ButtonGroup */}
         <ButtonGroup>
-          <Button size="xs"
+          <Button
+            size="xs"
             variant="outline"
             className={cn(
               // Sizing & Spacing
@@ -313,16 +386,17 @@ export function FileToolbar({
 
               // Interactive & States
               "hover:text-primary",
-              viewMode === 'list' && 'text-primary'
+              viewMode === 'list' && "text-primary bg-muted/60"
             )}
             data-state={viewMode === 'list' ? 'on' : 'off'}
             onClick={() => onViewModeChange('list')}
             title="List view"
             disabled={actionDisabled}
           >
-            <ListIcon className="size-4" />
+            <ListIcon className="size-3.5" />
           </Button>
-          <Button size="xs"
+          <Button
+            size="xs"
             variant="outline"
             className={cn(
               // Sizing & Spacing
@@ -330,14 +404,14 @@ export function FileToolbar({
 
               // Interactive & States
               "hover:text-primary",
-              viewMode === 'grid' && 'text-primary'
+              viewMode === 'grid' && "text-primary bg-muted/60"
             )}
             data-state={viewMode === 'grid' ? 'on' : 'off'}
             onClick={() => onViewModeChange('grid')}
             title="Grid view"
             disabled={actionDisabled}
           >
-            <SquaresFourIcon className="size-4" />
+            <SquaresFourIcon className="size-3.5" />
           </Button>
         </ButtonGroup>
       </div>

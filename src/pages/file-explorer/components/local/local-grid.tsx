@@ -11,6 +11,7 @@ interface LocalGridProps {
   onDeleteItem: (item: LocalItem) => void;
   onRenameItem: (item: LocalItem, newName: string) => void;
   viewMode: 'list' | 'grid';
+  deletingPath?: string | null;
 }
 
 export function LocalGrid({
@@ -22,22 +23,24 @@ export function LocalGrid({
   onDeleteItem,
   onRenameItem,
   viewMode,
+  deletingPath,
 }: LocalGridProps) {
   const [renamingPath, setRenamingPath] = React.useState<string | null>(null);
   const [renameValue, setRenameValue] = React.useState('');
   const renameInputRef = React.useRef<HTMLInputElement>(null);
 
   // Map LocalItem to FileItem shape
-  const gridItems = React.useMemo(() =>
-    items.map((item) => ({
-      ...item,
-      id: item.path, // Use path as id
-    })),
+  const gridItems = React.useMemo(
+    () =>
+      items.map((item) => ({
+        ...item,
+        id: item.path,
+      })),
     [items]
   );
 
-  const selectedGridItem = React.useMemo(() =>
-    selectedItem ? { ...selectedItem, id: selectedItem.path } : null,
+  const selectedGridItem = React.useMemo(
+    () => (selectedItem ? { ...selectedItem, id: selectedItem.path } : null),
     [selectedItem]
   );
 
@@ -67,6 +70,7 @@ export function LocalGrid({
       items={gridItems}
       selectedItem={selectedGridItem}
       loading={loading}
+      deletingId={deletingPath}
       onSelectItem={(item) => onSelectItem(getOriginalItem(item))}
       onDoubleClickItem={(item) => onDoubleClickItem(getOriginalItem(item))}
       onDeleteItem={(item) => onDeleteItem(getOriginalItem(item))}
