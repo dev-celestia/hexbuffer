@@ -3,23 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { toast } from 'sonner';
 
-import { useSidebarNav } from './use-taskbar-nav';
 import { useNavStore } from '@/stores/nav';
 import { useTheme } from '@/components/theme-provider';
 import { useUpdater } from '@/hooks/use-updater';
 import { formatBytes } from '@/lib/utils';
 import { ManualUpdateCommand } from '@/pages/settings/components/manual-update-command';
-import type { NavItem } from '../../constants';
 
 export interface UseSystemToolsReturn {
   timeString: string;
   dateString: string;
-  recentDockItems: NavItem[];
-  openedApps: string[];
-  isNavItemActive: (item: NavItem) => boolean;
-  closeWindow: (href: string) => void;
-  removeRecentApp: (href: string) => void;
-  handleAppClick: (href: string, label: string) => void;
   isAssistantOpen: boolean;
   isAssistantActive: boolean;
   toggleAssistantWindow: () => void;
@@ -39,13 +31,6 @@ export interface UseSystemToolsReturn {
 
 export function useSystemTools(): UseSystemToolsReturn {
   const navigate = useNavigate();
-  const {
-    recentDockItems,
-    openedApps,
-    isNavItemActive,
-    removeRecentApp,
-    closeWindow: closeNavWindow,
-  } = useSidebarNav();
 
   // ── Clock ─────────────────────────────────────────────────────────────
   const [time, setTime] = React.useState(() => new Date());
@@ -87,29 +72,6 @@ export function useSystemTools(): UseSystemToolsReturn {
       navStore.focusWindow(pathname, navigate);
     }
   }, [navigate]);
-
-  // ── App Click & Close ────────────────────────────────────────────────
-  const handleAppClick = React.useCallback(
-    (href: string, label: string) => {
-      const navStore = useNavStore.getState();
-      const winState = navStore.windows.find((w) => w.id === href);
-
-      if (winState) {
-        navStore.focusWindow(href, navigate);
-      } else {
-        navStore.openWindow(href, label);
-        navStore.focusWindow(href, navigate);
-      }
-    },
-    [navigate],
-  );
-
-  const closeWindow = React.useCallback(
-    (href: string) => {
-      closeNavWindow(href, navigate);
-    },
-    [closeNavWindow, navigate],
-  );
 
   // ── Theme & Settings ────────────────────────────────────────────────
   const { theme, toggleTheme } = useTheme();
@@ -176,12 +138,6 @@ export function useSystemTools(): UseSystemToolsReturn {
   return {
     timeString,
     dateString,
-    recentDockItems,
-    openedApps,
-    isNavItemActive,
-    closeWindow,
-    removeRecentApp,
-    handleAppClick,
     isAssistantOpen,
     isAssistantActive,
     toggleAssistantWindow,

@@ -10,6 +10,7 @@ import {
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { ALL_NAV_ITEMS } from '@/layout/constants';
 import { useNavStore } from '@/stores/nav';
+import { DESKTOP_WIDGETS } from '../constants';
 import {
   useAppSettingsStore,
   DEFAULT_WIDGET_ORDER,
@@ -47,7 +48,10 @@ export function useDesktopPage() {
 
   // Derive visible widgets according to current order, excluding hidden ones
   const visibleWidgetIds = React.useMemo(() => {
-    const currentOrder = [...(widgetOrder && widgetOrder.length > 0 ? widgetOrder : DEFAULT_WIDGET_ORDER)];
+    const validIds = new Set(DESKTOP_WIDGETS.map((w) => w.id));
+    const rawOrder = Array.isArray(widgetOrder) ? widgetOrder : DEFAULT_WIDGET_ORDER;
+    const currentOrder = rawOrder.filter((id): id is string => typeof id === 'string' && validIds.has(id));
+
     // Ensure all known widgets are accounted for in the order
     DEFAULT_WIDGET_ORDER.forEach((id) => {
       if (!currentOrder.includes(id)) {
@@ -55,7 +59,8 @@ export function useDesktopPage() {
       }
     });
 
-    return currentOrder.filter((id) => !hiddenWidgets.includes(id));
+    const hidden = Array.isArray(hiddenWidgets) ? hiddenWidgets : DEFAULT_HIDDEN_WIDGETS;
+    return currentOrder.filter((id) => typeof id === 'string' && validIds.has(id) && !hidden.includes(id));
   }, [widgetOrder, hiddenWidgets]);
 
   const sensors = useSensors(

@@ -2,6 +2,7 @@ import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogT
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useDesktopPage } from './hooks/use-desktop-page';
+import { RecentsWidget } from './components/recents-widget';
 import { ProxyWidget } from './components/proxy-widget';
 import { VpnWidget } from './components/vpn-widget';
 import { TargetWidget } from './components/target-widget';
@@ -18,6 +19,8 @@ import { cn } from '@/lib/utils';
 
 function renderWidget(id: string) {
   switch (id) {
+    case 'recents':
+      return <RecentsWidget />;
     case 'proxy':
       return <ProxyWidget />;
     case 'collections':
@@ -312,7 +315,7 @@ export function DesktopPage() {
                     "flex flex-col",
 
                     // Sizing & Spacing
-                    "gap-4"
+                    "gap-2"
                   )}
                 >
                   {visibleWidgetIds.map((widgetId) => (

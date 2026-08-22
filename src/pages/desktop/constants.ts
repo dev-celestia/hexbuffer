@@ -5,8 +5,9 @@ export interface DesktopWidgetOption {
 }
 
 export const DESKTOP_WIDGETS: DesktopWidgetOption[] = [
-  { id: 'collections', label: 'Collections Widget', description: 'Access request collections quickly.' },
+  { id: 'recents', label: 'Recent Apps', description: 'Quick access to recently opened applications.' },
   { id: 'proxy', label: 'Proxy Widget', description: 'Monitor and control the local proxy listener.' },
+  { id: 'collections', label: 'Collections Widget', description: 'Access request collections quickly.' },
   { id: 'vpn', label: 'VPN Widget', description: 'Manage OpenVPN configuration files and connect.' },
   { id: 'target', label: 'Target Widget', description: 'Manage and activate monitoring target scope.' },
   { id: 'scratchpad', label: 'Scratchpad Widget', description: 'Write down quick notes or scripts.' },
@@ -14,6 +15,7 @@ export const DESKTOP_WIDGETS: DesktopWidgetOption[] = [
 ];
 
 export const DEFAULT_WIDGET_ORDER: string[] = [
+  'recents',
   'proxy',
   'collections',
   'vpn',

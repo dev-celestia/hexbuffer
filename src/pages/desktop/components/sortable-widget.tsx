@@ -32,32 +32,27 @@ export function SortableWidget({ id, children }: SortableWidgetProps) {
       style={style}
       className={cn(
         // Layout & Positioning
-        "relative group/sortable-widget",
-
+        "relative flex flex-col group/sortable-widget select-none",
         // Interactive & States
-        isDragging && "opacity-60 scale-[1.01] shadow-xl ring-2 ring-primary/40 rounded-md"
+        isDragging && "opacity-60 scale-[1.01] shadow-xl ring-2 ring-primary/40 rounded-lg"
       )}
     >
-      {/* Drag handle button with grip icon */}
+      {/* Specific Drag Handle Button */}
       <button
         type="button"
         {...attributes}
         {...listeners}
         className={cn(
           // Layout & Positioning
-          "absolute top-2.5 right-2.5 z-20 flex items-center justify-center",
-
+          "absolute top-2.5 right-2.5 z-20 flex items-center justify-center shrink-0",
           // Sizing & Spacing
-          "size-5 p-0.5",
-
-          // Typography
-          "text-muted-foreground/40",
-
+          "size-5.5 rounded-[5px]",
           // Backgrounds & Borders
-          "rounded hover:bg-muted/60",
-
+          "bg-muted/60 border border-border/40 shadow-xs",
+          // Typography & Colors
+          "text-muted-foreground/60 hover:text-foreground",
           // Interactive & States
-          "opacity-0 group-hover/sortable-widget:opacity-100 transition-opacity cursor-grab active:cursor-grabbing hover:text-foreground active:scale-95"
+          "hover:bg-muted/90 active:bg-muted cursor-grab active:cursor-grabbing active:scale-95 transition-all"
         )}
         aria-label="Drag to reorder widget"
         title="Drag to reorder"
@@ -65,7 +60,10 @@ export function SortableWidget({ id, children }: SortableWidgetProps) {
         <DotsSixVerticalIcon className="size-3.5" />
       </button>
 
-      {children}
+      {/* Widget Content */}
+      <div className="flex-1 min-w-0">
+        {children}
+      </div>
     </div>
   );
 }

@@ -39,9 +39,7 @@ export function useSidebarNav() {
   const pinnedNavItems = useAppSettingsStore((s) => s.pinnedNavItems);
   const togglePinNavItem = useAppSettingsStore((s) => s.togglePinNavItem);
 
-  const recentApps = useAppSettingsStore((s) => s.recentApps);
   const addRecentApp = useAppSettingsStore((s) => s.addRecentApp);
-  const removeRecentApp = useAppSettingsStore((s) => s.removeRecentApp);
 
   const windows = useNavStore((state) => state.windows);
 
@@ -92,18 +90,6 @@ export function useSidebarNav() {
       .filter((item): item is NavItem => item != null);
   }, [visibleNavItems, pinnedNavItems]);
 
-  const recentDockItems = React.useMemo(() => {
-    return (recentApps || [])
-      .filter(
-        (href) =>
-          href !== '/' &&
-          href !== '/assistant' &&
-          href !== '/scratchpad'
-      )
-      .map((href) => visibleNavItems.find((item) => item.href === href))
-      .filter((item): item is NavItem => item != null);
-  }, [visibleNavItems, recentApps]);
-
   const unpinnedOpenedItems = React.useMemo(() => {
     return openedApps
       .filter(
@@ -150,7 +136,6 @@ export function useSidebarNav() {
     visibleNavItems,
     pinnedDockItems,
     unpinnedOpenedItems,
-    recentDockItems,
     pinnedNavItems,
     togglePinNavItem,
     isNavItemActive,
@@ -160,6 +145,5 @@ export function useSidebarNav() {
     closeWindow,
     minimizeWindow,
     focusWindow,
-    removeRecentApp,
   };
 }

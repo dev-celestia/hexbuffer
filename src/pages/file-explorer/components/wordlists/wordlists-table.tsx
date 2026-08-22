@@ -144,7 +144,7 @@ export function WordlistsTable({
             "sticky top-0 z-10 select-none",
 
             // Backgrounds & Borders
-            "bg-muted/50 border-b border-border text-muted-foreground",
+            "bg-background border-b border-border text-muted-foreground",
 
             // Typography
             "text-[10px] font-semibold uppercase tracking-wider"

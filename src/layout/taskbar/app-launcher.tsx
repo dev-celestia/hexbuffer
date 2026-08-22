@@ -1,4 +1,5 @@
 import {
+  Checkbox,
   Command,
   CommandEmpty,
   CommandGroup,
@@ -7,14 +8,17 @@ import {
   CommandList,
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
   Kbd,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@celestia-project/ui';
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PushPinSimpleIcon, PushPinSimpleSlashIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
@@ -58,8 +62,15 @@ export function AppLauncher() {
           type="button"
           onClick={() => setOpen(true)}
           className={cn(
-            'flex size-7 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition-all hover:bg-muted/80 hover:text-foreground active:scale-95 cursor-pointer',
-            open && 'bg-primary/15 text-primary',
+            // Layout & Positioning
+            "flex items-center justify-center shrink-0",
+            // Sizing & Spacing
+            "size-7 rounded-sm",
+            // Typography & Colors
+            "text-muted-foreground transition-all",
+            // Interactive & States
+            "hover:bg-muted/80 hover:text-foreground active:scale-95 cursor-pointer",
+            open && "bg-primary/15 text-primary"
           )}
           aria-label="All Apps"
         >
@@ -74,81 +85,181 @@ export function AppLauncher() {
       </Tooltip>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="overflow-hidden p-0 max-w-lg shadow-2xl border bg-popover text-popover-foreground">
-          <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
-        <CommandInput placeholder="Search apps…" autoFocus />
-        <CommandList>
-          <CommandEmpty>No apps found.</CommandEmpty>
-          <CommandGroup>
-            {launcherItems.map((item) => {
-              const isPinned = pinnedNavItems.includes(item.href);
+        <DialogContent
+          showCloseButton={false}
+          className={cn(
+            // Sizing & Spacing
+            "sm:max-w-2xl max-w-[calc(100%-2rem)] p-0 gap-0 overflow-hidden"
+          )}
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle>Applications</DialogTitle>
+            <DialogDescription>Search and launch apps or pin them to dock navbar</DialogDescription>
+          </DialogHeader>
 
-              return (
-                <CommandItem
-                  key={item.href}
-                  value={item.label}
-                  onSelect={() => {
-                    navigate(item.href);
-                    setOpen(false);
-                  }}
-                >
-                  <div
-                    role="button"
-                    tabIndex={-1}
-                    onPointerDown={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      if (!isPinned && isAtMax) {
-                        toast.error('Dock is full', {
-                          description: `Maximum ${MAX_PINNED + 1} apps. Unpin one first.`,
-                        });
-                        return;
-                      }
-                      togglePinNavItem(item.href);
-                    }}
-                    className={cn(
-                      'shrink-0 p-0.5 rounded-sm hover:bg-muted cursor-pointer mr-2',
-                      isPinned
-                        ? 'text-green-500'
-                        : 'text-muted-foreground/30 hover:text-muted-foreground',
-                    )}
-                    aria-label={isPinned ? `Unpin ${item.label}` : `Pin ${item.label}`}
-                  >
-                    {isPinned ? (
-                      <PushPinSimpleIcon className="size-3.5" />
-                    ) : (
-                      <PushPinSimpleSlashIcon className="size-3.5" />
-                    )}
-                  </div>
-                  <div className={cn(
-                    "size-5 rounded-sm flex items-center justify-center mr-2 border shadow-sm shrink-0 p-2",
-                    item.colors ? `${item.colors.bg} ${item.colors.border} text-white` : "bg-muted/40 border-transparent text-muted-foreground"
-                  )}>
-                    <item.icon className="size-3" />
-                  </div>
-                  <span>{item.label}</span>
-                  {item.flag && item.flag !== 'release' && (
-                    <span className={cn(
-                      "text-[8px] font-extrabold uppercase tracking-wider ml-1.5 px-1 rounded-sm leading-none py-0.5 pointer-events-none select-none shrink-0",
-                      item.flag === 'alpha'
-                        ? "bg-rose-500/20 text-rose-500 dark:text-rose-400"
-                        : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
-                    )}>
-                      {item.flag}
-                    </span>
-                  )}
-                </CommandItem>
-              );
-            })}
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    </DialogContent>
-  </Dialog>
+          <Command className="border-0 rounded-none bg-transparent">
+            <CommandInput placeholder="Search applications, tools, and workflows…" autoFocus />
+            <CommandList className="max-h-[420px] p-2">
+              <CommandEmpty>No applications found.</CommandEmpty>
+              <CommandGroup heading="Available Tools">
+                {launcherItems.map((item) => {
+                  const isPinned = pinnedNavItems.includes(item.href);
+
+                  return (
+                    <CommandItem
+                      key={item.href}
+                      value={`${item.label} ${item.description ?? ''}`}
+                      onSelect={() => {
+                        navigate(item.href);
+                        setOpen(false);
+                      }}
+                      className={cn(
+                        // Layout & Positioning
+                        "flex items-center justify-between gap-3",
+                        // Sizing & Spacing
+                        "py-2.5 px-3 rounded-lg my-0.5",
+                        // Interactive & States
+                        "cursor-pointer"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "flex items-center gap-3 min-w-0 flex-1"
+                        )}
+                      >
+                        <div
+                          role="button"
+                          tabIndex={-1}
+                          onPointerDown={(e) => {
+                            e.stopPropagation();
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            if (!isPinned && isAtMax) {
+                              toast.error('Dock is full', {
+                                description: `Maximum ${MAX_PINNED + 1} apps. Unpin one first.`,
+                              });
+                              return;
+                            }
+                            togglePinNavItem(item.href);
+                          }}
+                          className={cn(
+                            // Layout & Positioning
+                            "flex items-center justify-center shrink-0",
+                            // Sizing & Spacing
+                            "p-1 rounded-md",
+                            // Interactive & States
+                            "hover:bg-muted/70 cursor-pointer"
+                          )}
+                          aria-label={isPinned ? `Unpin ${item.label}` : `Pin ${item.label}`}
+                          title={isPinned ? "Unpin from dock navbar" : "Pin to dock navbar"}
+                        >
+                          <Checkbox
+                            checked={isPinned}
+                            tabIndex={-1}
+                            className="pointer-events-none"
+                          />
+                        </div>
+
+                        <div
+                          className={cn(
+                            // Layout & Positioning
+                            "flex items-center justify-center shrink-0 select-none",
+                            // Sizing & Spacing
+                            "size-8.5 rounded-lg",
+                            // Backgrounds & Borders
+                            item.colors
+                              ? `${item.colors.bg} border border-white/20 dark:border-white/10 shadow-xs text-white`
+                              : "bg-muted/60 border border-border/60 text-muted-foreground"
+                          )}
+                        >
+                          <item.icon className="size-4.5 shrink-0" />
+                        </div>
+
+                        <div
+                          className={cn(
+                            // Layout & Positioning
+                            "flex flex-col min-w-0 flex-1 space-y-0.5"
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              // Layout & Positioning
+                              "flex items-center gap-2"
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                // Typography
+                                "text-sm font-medium tracking-tight text-foreground truncate"
+                              )}
+                            >
+                              {item.label}
+                            </span>
+                            {item.flag && item.flag !== 'release' && (
+                              <span
+                                className={cn(
+                                  // Sizing & Spacing
+                                  "px-1.5 py-0.5 rounded-[4px] shrink-0 leading-none",
+                                  // Typography
+                                  "text-[8.5px] font-bold uppercase tracking-wider select-none",
+                                  // Backgrounds & Borders
+                                  item.flag === 'alpha'
+                                    ? "bg-rose-500/15 text-rose-500 dark:text-rose-400 border border-rose-500/20"
+                                    : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                                )}
+                              >
+                                {item.flag}
+                              </span>
+                            )}
+                          </div>
+                          {item.description && (
+                            <p
+                              className={cn(
+                                // Typography
+                                "text-xs text-muted-foreground line-clamp-1 leading-normal"
+                              )}
+                            >
+                              {item.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center justify-between gap-4 select-none",
+              // Sizing & Spacing
+              "px-4 py-2.5 border-t border-border/60",
+              // Backgrounds & Borders
+              "bg-muted/30 text-muted-foreground",
+              // Typography
+              "text-xs"
+            )}
+          >
+            <p className="line-clamp-1">
+              Click an application to open it. Check the box to pin it directly to your bottom dock navbar.
+            </p>
+            <span
+              className={cn(
+                // Typography
+                "font-medium text-foreground shrink-0 tabular-nums text-[11px]"
+              )}
+            >
+              {pinnedCount}/{MAX_PINNED} pinned
+            </span>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

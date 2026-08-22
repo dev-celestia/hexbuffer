@@ -28,6 +28,7 @@ interface AppSettingsState {
   reorderPinnedNavItems: (fromIndex: number, toIndex: number) => void
   addRecentApp: (href: string) => void
   removeRecentApp: (href: string) => void
+  clearRecentApps: () => void
   toggleWidget: (widgetId: string) => void
   reorderWidgets: (fromIndex: number, toIndex: number) => void
   setWidgetOrder: (order: string[]) => void
@@ -89,6 +90,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
         set((state) => ({
           recentApps: (state.recentApps || []).filter((h) => h !== href),
         })),
+      clearRecentApps: () => set({ recentApps: [] }),
       toggleWidget: (widgetId) =>
         set((state) => ({
           hiddenWidgets: (state.hiddenWidgets || []).includes(widgetId)
@@ -100,8 +102,15 @@ export const useAppSettingsStore = create<AppSettingsState>()(
           const current = state.widgetOrder && state.widgetOrder.length > 0
             ? [...state.widgetOrder]
             : [...DEFAULT_WIDGET_ORDER];
+          DEFAULT_WIDGET_ORDER.forEach((id) => {
+            if (!current.includes(id)) {
+              current.push(id);
+            }
+          });
           const [moved] = current.splice(fromIndex, 1);
-          current.splice(toIndex, 0, moved);
+          if (moved) {
+            current.splice(toIndex, 0, moved);
+          }
           return { widgetOrder: current };
         }),
       setWidgetOrder: (order) => set({ widgetOrder: order }),

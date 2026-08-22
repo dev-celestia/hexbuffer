@@ -11,19 +11,12 @@ import {
 
 import { cn } from '@/lib/utils';
 import { useSystemTools } from '../hooks/use-system-tools';
-import { DockItem } from './dock-item';
 import { UpdateDialog } from './update-dialog';
 
 export function SystemTools() {
   const {
     timeString,
     dateString,
-    recentDockItems,
-    openedApps,
-    isNavItemActive,
-    closeWindow,
-    removeRecentApp,
-    handleAppClick,
     isAssistantOpen,
     isAssistantActive,
     toggleAssistantWindow,
@@ -44,34 +37,6 @@ export function SystemTools() {
   return (
     <>
       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 justify-end">
-        {recentDockItems.length > 0 && (
-          <div className="hidden md:flex items-center gap-1 shrink-0">
-            <span className="hidden lg:inline text-[10px] text-muted-foreground/60 font-medium uppercase tracking-wider select-none mr-1">
-              Recent
-            </span>
-            {recentDockItems.map((item) => {
-              const isOpened = openedApps.includes(item.href);
-              return (
-                <DockItem
-                  key={item.href}
-                  item={item}
-                  active={isNavItemActive(item)}
-                  isOpened={isOpened}
-                  onClose={() => {
-                    if (isOpened) {
-                      closeWindow(item.href);
-                    } else {
-                      removeRecentApp(item.href);
-                    }
-                  }}
-                  onClick={() => handleAppClick(item.href, item.label)}
-                />
-              );
-            })}
-            <div className="h-4 w-px bg-border/60 mx-1 shrink-0" />
-          </div>
-        )}
-
         {/* AI Chat */}
         <Tooltip>
           <TooltipTrigger
