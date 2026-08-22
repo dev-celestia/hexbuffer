@@ -28,7 +28,7 @@ export function WordlistsTab() {
         "relative flex flex-col flex-1 min-h-0 min-w-0",
 
         // Sizing & Spacing
-        "h-full p-3"
+        "h-full"
       )}
     >
       <div
@@ -37,7 +37,7 @@ export function WordlistsTab() {
           "flex flex-1 min-h-0 min-w-0",
 
           // Sizing & Spacing
-          "h-full gap-3"
+          "h-full"
         )}
       >
         {/* Left Sidebar */}
@@ -69,7 +69,7 @@ export function WordlistsTab() {
             "flex flex-col flex-1 min-w-0 min-h-0 h-full overflow-hidden",
 
             // Backgrounds & Borders
-            "rounded-md border border-border bg-background"
+            "border-l"
           )}
         >
           {/* Top Wordlists Control Toolbar */}

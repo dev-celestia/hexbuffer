@@ -34,7 +34,7 @@ export function WordlistsSidebar({
         "flex flex-col h-full overflow-hidden select-none min-w-0 min-h-0",
 
         // Backgrounds & Borders
-        "rounded-md border border-border bg-background",
+        "rounded-md bg-background",
 
         className
       )}

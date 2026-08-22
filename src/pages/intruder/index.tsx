@@ -100,7 +100,7 @@ export function IntruderPage() {
           "flex-1 min-h-0 overflow-hidden",
 
           // Backgrounds & Borders
-          "border rounded-lg bg-card"
+          "border rounded-lg"
         )}
       >
         <div
