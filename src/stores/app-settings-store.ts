@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { DEFAULT_HIDDEN_WIDGETS, DEFAULT_WIDGET_ORDER } from '@/pages/desktop/constants'
+import { PrimaryColor } from '@/constants/theme'
 
 export { DEFAULT_HIDDEN_WIDGETS, DEFAULT_WIDGET_ORDER }
 
@@ -14,11 +15,13 @@ interface AppSettingsState {
   bgType: BgType
   bgValue: string // hex color or data URL
   theme: AppTheme
+  primaryColor: PrimaryColor
   hiddenWidgets: string[]
   widgetOrder: string[]
   setBg: (type: BgType, value: string) => void
   clearBg: () => void
   setTheme: (t: AppTheme) => void
+  setPrimaryColor: (color: PrimaryColor) => void
   toggleNavItem: (href: string) => void
   resetHiddenNavItems: () => void
   togglePinNavItem: (href: string) => void
@@ -31,7 +34,7 @@ interface AppSettingsState {
   resetHiddenWidgets: () => void
 }
 
-type PersistedSettings = Pick<AppSettingsState, 'hiddenNavItems' | 'pinnedNavItems' | 'recentApps' | 'bgType' | 'bgValue' | 'theme' | 'hiddenWidgets' | 'widgetOrder'>
+type PersistedSettings = Pick<AppSettingsState, 'hiddenNavItems' | 'pinnedNavItems' | 'recentApps' | 'bgType' | 'bgValue' | 'theme' | 'primaryColor' | 'hiddenWidgets' | 'widgetOrder'>
 
 export const useAppSettingsStore = create<AppSettingsState>()(
   persist<AppSettingsState, [], [], PersistedSettings>(
@@ -49,11 +52,13 @@ export const useAppSettingsStore = create<AppSettingsState>()(
       bgType: 'none',
       bgValue: '',
       theme: 'dark',
+      primaryColor: 'emerald',
       hiddenWidgets: DEFAULT_HIDDEN_WIDGETS,
       widgetOrder: DEFAULT_WIDGET_ORDER,
       setBg: (type, value) => set({ bgType: type, bgValue: value }),
       clearBg: () => set({ bgType: 'none', bgValue: '' }),
       setTheme: (t) => set({ theme: t, bgType: 'none', bgValue: '' }),
+      setPrimaryColor: (color) => set({ primaryColor: color }),
       toggleNavItem: (href) =>
         set((state) => ({
           hiddenNavItems: state.hiddenNavItems.includes(href)
@@ -115,12 +120,14 @@ export const useAppSettingsStore = create<AppSettingsState>()(
         bgType: state.bgType,
         bgValue: state.bgValue,
         theme: state.theme,
+        primaryColor: state.primaryColor,
         hiddenWidgets: state.hiddenWidgets,
         widgetOrder: state.widgetOrder,
       }),
       merge: (persisted, current): AppSettingsState => {
         const base = current as AppSettingsState
         const state = persisted as Partial<PersistedSettings> | undefined
+        const persistedColor = (state?.primaryColor as string) === 'neutral' ? 'emerald' : state?.primaryColor
         return {
           ...base,
           hiddenNavItems: state?.hiddenNavItems ?? base.hiddenNavItems,
@@ -129,6 +136,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
           bgType: state?.bgType ?? base.bgType,
           bgValue: state?.bgValue ?? base.bgValue,
           theme: state?.theme ?? base.theme,
+          primaryColor: persistedColor ?? base.primaryColor,
           hiddenWidgets: state?.hiddenWidgets ?? base.hiddenWidgets,
           widgetOrder: state?.widgetOrder ?? base.widgetOrder,
         }

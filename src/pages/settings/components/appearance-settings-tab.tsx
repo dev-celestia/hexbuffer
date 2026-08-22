@@ -9,13 +9,15 @@ import {
   ArrowCounterClockwiseIcon,
   SunIcon,
   MoonIcon,
+  CheckIcon,
 } from '@phosphor-icons/react';
 
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { useTheme } from '@/components/theme-provider';
-import { SettingsGroup, SettingsRow } from './settings-group';
+import { SettingsGroup, SettingsRow, SettingsRowSeparator } from './settings-group';
 import { ShortcutManager } from '@/pages/desktop/components/shortcut-manager';
 import { cn } from '@/lib/utils';
+import { PRIMARY_COLOR_PRESETS } from '@/constants/theme';
 
 import whiteWallpaper from '@/assets/white-wallpaper.png';
 import blackWallpaper from '@/assets/black-wallpaper.png';
@@ -27,7 +29,7 @@ const PRESET_COLORS = [
 ];
 
 export function AppearanceSettingsTab() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, primaryColor, setPrimaryColor } = useTheme();
   const bgType = useAppSettingsStore((s) => s.bgType);
   const bgValue = useAppSettingsStore((s) => s.bgValue);
   const setBg = useAppSettingsStore((s) => s.setBg);
@@ -60,12 +62,17 @@ export function AppearanceSettingsTab() {
 
   return (
     <>
-      <SettingsGroup label="Theme" description="Choose between dark and light appearance modes.">
+      <SettingsGroup label="Theme" description="Choose between dark and light appearance modes and accent colors.">
         <SettingsRow
           label="Dark mode"
           description={theme === 'dark' ? 'Dark theme is currently active.' : 'Light theme is currently active.'}
         >
-          <div className="flex items-center gap-2">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center gap-2"
+            )}
+          >
             <SunIcon
               className={cn(
                 // Sizing & Spacing
@@ -87,6 +94,61 @@ export function AppearanceSettingsTab() {
                 theme === 'dark' ? 'text-blue-400' : 'text-muted-foreground'
               )}
             />
+          </div>
+        </SettingsRow>
+        <SettingsRowSeparator />
+        <SettingsRow
+          label="Accent color"
+          description="Choose the primary accent color across buttons, highlights, and active controls."
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center gap-2",
+              // Sizing & Spacing
+              "py-0.5"
+            )}
+          >
+            {PRIMARY_COLOR_PRESETS.map((preset) => {
+              const isSelected = primaryColor === preset.id;
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  title={preset.name}
+                  onClick={() => setPrimaryColor(preset.id)}
+                  className={cn(
+                    // Layout & Positioning
+                    "relative flex items-center justify-center",
+                    // Sizing & Spacing
+                    "size-6 rounded-full",
+                    // Backgrounds & Borders
+                    "shadow-sm transition-all duration-150 ease-out",
+                    // Interactive & States
+                    "hover:scale-110 active:scale-95",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card",
+                    isSelected
+                      ? "ring-2 ring-foreground/30 ring-offset-2 ring-offset-card scale-105"
+                      : "opacity-85 hover:opacity-100"
+                  )}
+                  style={{
+                    backgroundColor: preset.swatchHex,
+                  }}
+                >
+                  {isSelected && (
+                    <CheckIcon
+                      weight="bold"
+                      className={cn(
+                        // Sizing & Spacing
+                        "size-3",
+                        // Typography
+                        preset.id === 'amber' ? "text-stone-900" : "text-white"
+                      )}
+                    />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </SettingsRow>
       </SettingsGroup>

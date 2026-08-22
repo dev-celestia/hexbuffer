@@ -38,7 +38,7 @@ export function TabbedPageLayout({
 }: TabbedPageLayoutProps) {
   return (
     <div className={className}>
-      <div className="border-b-2 border-primary">
+      <div className="border-b border-primary">
         <PageTabBar
           tabs={tabs}
           activeTabId={activeTabId}
