@@ -56,7 +56,7 @@ export function InterceptQueuePanel() {
             "flex-1 min-h-0 overflow-auto",
 
             // Backgrounds & Borders
-            "rounded-md border bg-background"
+            "rounded-md border"
           )}
         >
           {activeRequests.length === 0 ? (

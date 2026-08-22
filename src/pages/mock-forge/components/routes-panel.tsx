@@ -1,7 +1,24 @@
-import { Input, ScrollArea, Switch } from '@celestia-project/ui';
+import {
+  Badge,
+  Button,
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  Input,
+  ScrollArea,
+  Switch,
+} from '@celestia-project/ui';
+import {
+  CaretRightIcon,
+  GlobeIcon,
+  MagnifyingGlassIcon,
+  PencilSimpleIcon,
+  TreeStructureIcon,
+} from '@phosphor-icons/react';
 import { useState } from 'react';
-import { MagnifyingGlassIcon, GlobeIcon, PencilSimpleIcon, TreeStructureIcon, CaretRightIcon } from '@phosphor-icons/react';
 
+import { cn } from '@/lib/utils';
 import type { MockDomain, MockRoute } from '../types';
 import { useRoutesPanel } from './hooks/use-routes-panel';
 import { NewRouteDialog } from './new-route-dialog';
@@ -17,14 +34,14 @@ const METHOD_COLORS: Record<string, string> = {
 };
 
 interface RoutesProps {
-  domains: MockDomain[];
-  routes: MockRoute[];
-  selectedRouteId: string | null;
-  onSelect: (id: string) => void;
-  onAdd: (route: Omit<MockRoute, 'id'>) => void;
-  onUpdate: (id: string, patch: Partial<MockRoute>) => void;
-  onDelete: (id: string) => void;
-  onClone?: (route: Omit<MockRoute, 'id'>) => void;
+  readonly domains: MockDomain[];
+  readonly routes: MockRoute[];
+  readonly selectedRouteId: string | null;
+  readonly onSelect: (id: string) => void;
+  readonly onAdd: (route: Omit<MockRoute, 'id'>) => void;
+  readonly onUpdate: (id: string, patch: Partial<MockRoute>) => void;
+  readonly onDelete: (id: string) => void;
+  readonly onClone?: (route: Omit<MockRoute, 'id'>) => void;
 }
 
 export function RoutesPanel({
@@ -49,74 +66,320 @@ export function RoutesPanel({
     });
 
   return (
-    <div className="flex h-full min-h-0 flex-1">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-1 min-h-0",
+
+        // Sizing & Spacing
+        "h-full"
+      )}
+    >
       {/* Left: route tree */}
-      <div className="flex w-72 shrink-0 flex-col border-r bg-background">
-        <div className="flex flex-col gap-2 border-b p-2 bg-muted/10">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Mock Rules ({filteredRoutes.length})</h3>
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex shrink-0 flex-col",
+
+          // Sizing & Spacing
+          "w-72",
+
+          // Backgrounds & Borders
+          "border-r bg-background"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col",
+
+            // Sizing & Spacing
+            "gap-2 p-2",
+
+            // Backgrounds & Borders
+            "border-b bg-muted/10"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center justify-between"
+            )}
+          >
+            <h3
+              className={cn(
+                // Typography
+                "text-xs font-bold uppercase tracking-wider text-foreground"
+              )}
+            >
+              Mock Rules ({filteredRoutes.length})
+            </h3>
             <NewRouteDialog domains={domains} onAdd={onAdd} />
           </div>
-          <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-2.5 top-2.5 h-3 w-3 text-muted-foreground" />
+          <div
+            className={cn(
+              // Layout & Positioning
+              "relative"
+            )}
+          >
+            <MagnifyingGlassIcon
+              className={cn(
+                // Layout & Positioning
+                "absolute left-2.5 top-2.5",
+
+                // Sizing & Spacing
+                "h-3 w-3",
+
+                // Typography
+                "text-muted-foreground"
+              )}
+            />
             <Input
               placeholder="Filter routes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-7.5 h-7.5 text-xs bg-muted/30 focus-visible:ring-primary focus-visible:ring-1 border-border"
+              className={cn(
+                // Sizing & Spacing
+                "h-7.5 pl-7.5",
+
+                // Typography
+                "text-xs",
+
+                // Backgrounds & Borders
+                "border-border bg-muted/30",
+
+                // Interactive & States
+                "focus-visible:ring-1 focus-visible:ring-primary"
+              )}
             />
           </div>
         </div>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea
+          className={cn(
+            // Layout & Positioning
+            "flex-1"
+          )}
+        >
           {filteredRoutes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 py-16 text-muted-foreground">
-              <TreeStructureIcon className="h-8 w-8 opacity-40" />
-              <p className="text-sm font-medium">No matching routes</p>
-            </div>
+            <Empty
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col items-center justify-center",
+
+                // Sizing & Spacing
+                "py-16",
+
+                // Backgrounds & Borders
+                "border-none",
+
+                // Typography
+                "text-muted-foreground"
+              )}
+            >
+              <EmptyMedia
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center justify-center"
+                )}
+              >
+                <TreeStructureIcon
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-8 w-8",
+
+                    // Interactive & States
+                    "opacity-40"
+                  )}
+                />
+              </EmptyMedia>
+              <EmptyHeader>
+                <EmptyTitle
+                  className={cn(
+                    // Typography
+                    "text-sm font-medium"
+                  )}
+                >
+                  No matching routes
+                </EmptyTitle>
+              </EmptyHeader>
+            </Empty>
           ) : (
-            <div className="flex flex-col py-1">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col",
+
+                // Sizing & Spacing
+                "py-1"
+              )}
+            >
               {Object.entries(routesByDomain).map(([domainId, domainRoutes]) => {
                 const domain = domains.find((d) => d.id === domainId);
                 const isOpen = expandedDomains.has(domainId);
                 return (
-                  <div key={domainId} className="flex flex-col">
+                  <div
+                    key={domainId}
+                    className={cn(
+                      // Layout & Positioning
+                      "flex flex-col"
+                    )}
+                  >
                     {/* Folder header */}
-                    <button
+                    <Button
+                      variant="ghost"
                       onClick={() => toggle(domainId)}
-                      className="flex w-full min-w-0 bg-muted  border-b items-center gap-1.5 px-2 py-1.5 transition-colors text-left select-none"
+                      className={cn(
+                        // Layout & Positioning
+                        "flex w-full min-w-0 items-center justify-start text-left select-none rounded-none",
+
+                        // Sizing & Spacing
+                        "h-auto gap-1.5 px-2 py-1.5",
+
+                        // Backgrounds & Borders
+                        "border-b bg-muted hover:bg-muted/80",
+
+                        // Interactive & States
+                        "transition-colors"
+                      )}
                     >
                       <CaretRightIcon
-                        className={`h-3 w-3 shrink-0 text-muted-foreground transition-transform ${isOpen ? 'rotate-90' : ''}`}
+                        className={cn(
+                          // Layout & Positioning
+                          "shrink-0",
+
+                          // Sizing & Spacing
+                          "h-3 w-3",
+
+                          // Typography
+                          "text-muted-foreground",
+
+                          // Interactive & States
+                          "transition-transform",
+                          isOpen && "rotate-90"
+                        )}
                       />
-                      <GlobeIcon className="h-3 w-3 shrink-0 text-muted-foreground" />
-                      <span className="truncate text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-wider flex-1">
+                      <GlobeIcon
+                        className={cn(
+                          // Layout & Positioning
+                          "shrink-0",
+
+                          // Sizing & Spacing
+                          "h-3 w-3",
+
+                          // Typography
+                          "text-muted-foreground"
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          // Layout & Positioning
+                          "flex-1 truncate",
+
+                          // Typography
+                          "font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
+                        )}
+                      >
                         {domain ? domain.hostname : 'Fallback Host'}
                       </span>
-                      <span className="text-[9px] text-muted-foreground/60 font-mono shrink-0">{domainRoutes.length}</span>
-                    </button>
+                      <Badge
+                        variant="secondary"
+                        className={cn(
+                          // Layout & Positioning
+                          "shrink-0",
+
+                          // Sizing & Spacing
+                          "h-4 px-1",
+
+                          // Typography
+                          "font-mono text-[9px] text-muted-foreground/70"
+                        )}
+                      >
+                        {domainRoutes.length}
+                      </Badge>
+                    </Button>
 
                     {/* Routes inside folder */}
                     {isOpen && (
-                      <div className="flex flex-col">
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "flex flex-col"
+                        )}
+                      >
                         {domainRoutes.map((route) => {
                           const isSelected = selectedRouteId === route.id;
 
                           return (
                             <div
                               key={route.id}
-                              className={`group flex cursor-pointer items-center border-b gap-2 pl-6 pr-3 py-1 transition-colors hover:bg-muted/40 ${isSelected ? 'bg-muted/50' : ''} ${!route.enabled ? 'opacity-40' : ''}`}
+                              className={cn(
+                                // Layout & Positioning
+                                "group flex items-center cursor-pointer",
+
+                                // Sizing & Spacing
+                                "gap-2 py-1 pl-6 pr-3",
+
+                                // Backgrounds & Borders
+                                "border-b",
+                                isSelected && "bg-muted/50",
+
+                                // Interactive & States
+                                "transition-colors hover:bg-muted/40",
+                                !route.enabled && "opacity-40"
+                              )}
                               onClick={() => onSelect(route.id)}
                             >
-                              <span className={`text-[10px] mt-0.5 shrink-0 ${METHOD_COLORS[route.method] ?? ''}`}>{route.method}</span>
-                              <div className="min-w-0 flex-1 overflow-hidden pl-0.5">
-                                <p className="text-[11px] font-medium text-foreground text-elipsis-1">{route.path}</p>
+                              <span
+                                className={cn(
+                                  // Layout & Positioning
+                                  "shrink-0",
+
+                                  // Sizing & Spacing
+                                  "mt-0.5",
+
+                                  // Typography
+                                  "text-[10px]",
+                                  METHOD_COLORS[route.method] ?? ""
+                                )}
+                              >
+                                {route.method}
+                              </span>
+                              <div
+                                className={cn(
+                                  // Layout & Positioning
+                                  "min-w-0 flex-1 overflow-hidden",
+
+                                  // Sizing & Spacing
+                                  "pl-0.5"
+                                )}
+                              >
+                                <p
+                                  className={cn(
+                                    // Layout & Positioning
+                                    "truncate",
+
+                                    // Typography
+                                    "text-[11px] font-medium text-foreground"
+                                  )}
+                                >
+                                  {route.path}
+                                </p>
                               </div>
                               <Switch
                                 checked={route.enabled}
                                 onCheckedChange={(v) => onUpdate(route.id, { enabled: v })}
                                 onClick={(e) => e.stopPropagation()}
-                                className="mt-0.5 shrink-0 scale-75 cursor-pointer"
+                                className={cn(
+                                  // Layout & Positioning
+                                  "shrink-0",
+
+                                  // Sizing & Spacing
+                                  "mt-0.5 scale-75",
+
+                                  // Interactive & States
+                                  "cursor-pointer"
+                                )}
                               />
                             </div>
                           );
@@ -132,7 +395,15 @@ export function RoutesPanel({
       </div>
 
       {/* Right: route detail editor */}
-      <div className="flex min-w-0 flex-1 flex-col bg-background">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-1 flex-col min-w-0",
+
+          // Backgrounds & Borders
+          "bg-background"
+        )}
+      >
         {selectedRoute ? (
           <RouteEditor
             key={selectedRoute.id}
@@ -143,12 +414,48 @@ export function RoutesPanel({
             onAdd={onAdd}
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-muted-foreground bg-muted/5">
-            <div className="text-center">
-              <PencilSimpleIcon className="mx-auto mb-2 h-8 w-8 opacity-30 text-muted-foreground" />
-              <p className="text-sm font-medium">Select a mock route ruleset to configure</p>
-            </div>
-          </div>
+          <Empty
+            className={cn(
+              // Layout & Positioning
+              "flex h-full items-center justify-center",
+
+              // Backgrounds & Borders
+              "border-none bg-muted/5",
+
+              // Typography
+              "text-muted-foreground"
+            )}
+          >
+            <EmptyMedia
+              className={cn(
+                // Layout & Positioning
+                "flex items-center justify-center"
+              )}
+            >
+              <PencilSimpleIcon
+                className={cn(
+                  // Sizing & Spacing
+                  "h-8 w-8",
+
+                  // Typography
+                  "text-muted-foreground",
+
+                  // Interactive & States
+                  "opacity-30"
+                )}
+              />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle
+                className={cn(
+                  // Typography
+                  "text-sm font-medium"
+                )}
+              >
+                Select a mock route ruleset to configure
+              </EmptyTitle>
+            </EmptyHeader>
+          </Empty>
         )}
       </div>
     </div>

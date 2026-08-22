@@ -15,7 +15,7 @@ interface DesktopIconItemProps {
   onClick: (href: string) => void;
 }
 
-export function DesktopIconItem({ href, label, icon: IconComp, onClick }: DesktopIconItemProps) {
+export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Readonly<DesktopIconItemProps>) {
   const item = React.useMemo(() => {
     return ALL_NAV_ITEMS.find((i) => i.href === href);
   }, [href]);

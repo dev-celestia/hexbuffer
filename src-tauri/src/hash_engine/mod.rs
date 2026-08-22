@@ -9,8 +9,10 @@ pub mod types;
 pub use candidate::{CandidateBatchReader, CandidateSource};
 pub use hash_cpu::{compute_hash_bytes, compute_hash_string};
 pub use matcher::HashMatcher;
-pub use rules::{parse_rule_list, Rule, RuleSet};
-pub use types::{AttackConfig, AttackMode, AttackStatus, CrackedMatchRecord, HashAlgorithm, TelemetryData};
+pub use rules::{parse_rule_line, parse_rule_list, Rule, RuleSet};
+pub use types::{
+    AttackConfig, AttackMode, AttackStatus, CrackedMatchRecord, HashAlgorithm, TelemetryData,
+};
 
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
@@ -171,17 +173,17 @@ impl AttackEngine {
         // Set up Rayon thread pool if threads specified
         if let Some(t) = self.config.threads {
             if t > 0 {
-                let _ = rayon::ThreadPoolBuilder::new().num_threads(t).build_global();
+                let _ = rayon::ThreadPoolBuilder::new()
+                    .num_threads(t)
+                    .build_global();
             }
         }
 
         let rule_sets = parse_rule_list(&self.config.rules);
         let candidate_source = match &self.config.mode {
-            AttackMode::Straight { wordlist_path } => {
-                CandidateSource::Wordlist {
-                    path: wordlist_path.clone(),
-                }
-            }
+            AttackMode::Straight { wordlist_path } => CandidateSource::Wordlist {
+                path: wordlist_path.clone(),
+            },
             AttackMode::Combinator {
                 left_wordlist_path,
                 right_wordlist_path,
@@ -193,7 +195,10 @@ impl AttackEngine {
                 pattern: pattern.clone(),
                 charset: charset.clone(),
             },
-            AttackMode::Hybrid { wordlist_path, mask } => CandidateSource::Hybrid {
+            AttackMode::Hybrid {
+                wordlist_path,
+                mask,
+            } => CandidateSource::Hybrid {
                 wordlist: wordlist_path.clone(),
                 mask: mask.clone(),
             },
@@ -235,7 +240,9 @@ impl AttackEngine {
                     let current_tested = tested_counter.load(Ordering::Relaxed);
 
                     // Check bytes first (faster)
-                    if let Some(matched) = matcher.match_bytes(&hash_bytes, &plaintext, current_tested) {
+                    if let Some(matched) =
+                        matcher.match_bytes(&hash_bytes, &plaintext, current_tested)
+                    {
                         return Some(matched);
                     }
 
@@ -269,9 +276,7 @@ impl AttackEngine {
         let _ = telemetry_task;
 
         if let Err(e) = result {
-            *self.status.lock() = AttackStatus::Error {
-                error: e.clone(),
-            };
+            *self.status.lock() = AttackStatus::Error { error: e.clone() };
             let _ = app.emit("hash-error", &e);
             return Err(e);
         }
@@ -357,7 +362,11 @@ mod tests {
         assert_eq!(matched.unwrap().plaintext, "secret");
         assert_eq!(matcher.total_cracked(), 1);
 
-        let not_matched = matcher.match_bytes(&compute_hash_bytes(b"wrong", HashAlgorithm::Sha256), "wrong", 2);
+        let not_matched = matcher.match_bytes(
+            &compute_hash_bytes(b"wrong", HashAlgorithm::Sha256),
+            "wrong",
+            2,
+        );
         assert!(not_matched.is_none());
     }
 

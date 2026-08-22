@@ -53,7 +53,14 @@ export function ShortcutManager() {
         "gap-4"
       )}
     >
-      <Accordion type="multiple" defaultValue={['shortcuts', 'widgets']} className="w-full">
+      <Accordion
+        multiple
+        defaultValue={['shortcuts', 'widgets']}
+        className={cn(
+          // Sizing & Spacing
+          "w-full"
+        )}
+      >
         <AccordionItem
           value="shortcuts"
           className={cn(

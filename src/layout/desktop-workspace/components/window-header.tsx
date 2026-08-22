@@ -1,4 +1,4 @@
-import { Badge, Separator } from '@celestia-project/ui';
+import { Separator } from '@celestia-project/ui';
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -10,6 +10,7 @@ import {
   DotsSixIcon,
 } from "@phosphor-icons/react";
 
+import type { NavItem } from "@/layout/constants";
 import { useNavStore } from "@/stores/nav";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +19,7 @@ interface WindowHeaderProps {
   title: string;
   isFocused: boolean;
   isMaximized: boolean;
-  navItem?: any;
+  navItem?: NavItem | null;
   onDragMouseDown: React.MouseEventHandler;
   tileLeft: () => void;
   tileRight: () => void;
@@ -52,19 +53,20 @@ export const WindowHeader = React.memo(function WindowHeader({
       {/* Window Title */}
       <div className="flex gap-2 h-6 items-center">
         <DotsSixIcon size={16} className="text-muted-foreground/45 cursor-grab shrink-0 mr-1" />
-        {navItem && (
-          <navItem.icon className="size-4 text-muted-foreground shrink-0" />
-        )}
         <span className="text-xs font-semibold tracking-wide truncate max-w-[200px]">
           {title}
         </span>
         {navItem?.flag && navItem.flag !== 'release' && (
-          <Badge
-            variant={navItem.flag === 'alpha' ? 'destructive' : 'yellow'}
-            className="px-1 py-0 text-[8px] font-extrabold uppercase tracking-wider h-3.5 leading-none rounded-sm border-none pointer-events-none select-none shrink-0"
+          <span
+            className={cn(
+              "px-1 py-0.5 text-[8px] font-extrabold uppercase tracking-wider leading-none rounded-sm pointer-events-none select-none shrink-0",
+              navItem.flag === 'alpha'
+                ? "bg-rose-500/20 text-rose-500 dark:text-rose-400"
+                : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+            )}
           >
             {navItem.flag}
-          </Badge>
+          </span>
         )}
       </div>
 
