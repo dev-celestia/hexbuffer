@@ -35,8 +35,8 @@ function WordlistStatus({ item }: { item: WordlistItemWithStatus }) {
   switch (item.status) {
     case 'installed':
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] text-green-600 dark:text-green-400 font-medium">
-          <CheckCircleIcon className="size-3.5" />
+        <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded font-semibold">
+          <CheckCircleIcon className="size-3" />
           <span>Ready</span>
           {item.fileSize && (
             <span className="text-muted-foreground font-mono text-[9px]">
@@ -47,22 +47,22 @@ function WordlistStatus({ item }: { item: WordlistItemWithStatus }) {
       );
     case 'downloading':
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] text-primary font-medium animate-pulse">
-          <CircleNotchIcon className="size-3.5 animate-spin" />
+        <span className="inline-flex items-center gap-1 text-[10px] text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded font-semibold animate-pulse">
+          <CircleNotchIcon className="size-3 animate-spin" />
           <span>Downloading…</span>
         </span>
       );
     case 'error':
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] text-destructive font-medium">
-          <WarningCircleIcon className="size-3.5" />
+        <span className="inline-flex items-center gap-1 text-[10px] text-destructive bg-destructive/10 border border-destructive/20 px-1.5 py-0.5 rounded font-semibold">
+          <WarningCircleIcon className="size-3" />
           <span>Error</span>
         </span>
       );
     default:
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
-          <CloudArrowDownIcon className="size-3.5" />
+        <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted border border-muted-foreground/10 px-1.5 py-0.5 rounded font-semibold">
+          <CloudArrowDownIcon className="size-3" />
           <span>Cloud</span>
         </span>
       );
@@ -126,10 +126,7 @@ export function WordlistsTable({
     <div
       className={cn(
         // Layout & Positioning
-        "flex flex-col flex-1 min-h-0 min-w-0 select-none overflow-auto",
-
-        // Backgrounds & Borders
-        "bg-background"
+        "flex flex-col flex-1 min-h-0 min-w-0 select-none overflow-auto"
       )}
     >
       <table
@@ -144,13 +141,13 @@ export function WordlistsTable({
         <thead
           className={cn(
             // Layout & Positioning
-            "sticky top-0 z-10",
+            "sticky top-0 z-10 select-none",
 
             // Backgrounds & Borders
-            "bg-muted/40 border-b border-border text-muted-foreground",
+            "bg-muted/50 border-b border-border text-muted-foreground",
 
             // Typography
-            "text-[10px] font-semibold uppercase tracking-wider select-none"
+            "text-[10px] font-semibold uppercase tracking-wider"
           )}
         >
           <tr>
@@ -184,8 +181,8 @@ export function WordlistsTable({
 
                   // Backgrounds & Borders
                   isSelected
-                    ? "bg-primary/10 hover:bg-primary/15"
-                    : "hover:bg-muted/40",
+                    ? "bg-primary/10 hover:bg-primary/15 dark:bg-primary/15 dark:hover:bg-primary/20 text-foreground font-medium"
+                    : "hover:bg-muted/30",
 
                   // Interactive & States
                   "transition-colors"

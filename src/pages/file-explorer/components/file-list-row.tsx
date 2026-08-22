@@ -54,7 +54,7 @@ export function FileListRow<T extends FileItem>({
   onRenameCancel,
   renameInputRef,
   isDeleting,
-}: FileListRowProps<T>) {
+}: Readonly<FileListRowProps<T>>) {
   return (
     <ContextMenu>
       <ContextMenuTrigger
@@ -69,8 +69,8 @@ export function FileListRow<T extends FileItem>({
 
               // Backgrounds & Borders
               isSelected
-                ? "bg-primary/10 hover:bg-primary/15"
-                : "hover:bg-muted/40",
+                ? "bg-primary/10 hover:bg-primary/15 dark:bg-primary/15 dark:hover:bg-primary/20 text-foreground font-medium"
+                : "hover:bg-muted/30",
 
               // Interactive & States
               "transition-colors",

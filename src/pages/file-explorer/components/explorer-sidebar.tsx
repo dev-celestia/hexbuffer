@@ -50,160 +50,150 @@ export function ExplorerSidebar({
     <div
       className={cn(
         // Layout & Positioning
-        "flex flex-col shrink-0 justify-between select-none",
-
-        // Sizing & Spacing
-        "w-56 border-r",
+        "flex flex-col h-full overflow-hidden select-none",
 
         // Backgrounds & Borders
-        "border-border bg-background/50"
+        "rounded-md border border-border bg-background"
       )}
     >
+      {/* Header bar */}
       <div
         className={cn(
           // Layout & Positioning
-          "flex flex-col flex-1 min-h-0"
+          "flex items-center justify-between shrink-0",
+
+          // Sizing & Spacing
+          "px-3 py-1.5",
+
+          // Backgrounds & Borders
+          "border-b border-border bg-muted/40"
         )}
       >
-        {/* Header */}
-        <div
+        <span
           className={cn(
-            // Layout & Positioning
-            "flex items-center justify-between",
-
-            // Sizing & Spacing
-            "p-3 border-b",
-
-            // Backgrounds & Borders
-            "border-border"
+            // Typography
+            "text-xs font-semibold uppercase tracking-wider text-muted-foreground"
           )}
         >
-          <h2
-            className={cn(
-              // Typography
-              "text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-            )}
-          >
-            R2 Buckets
-          </h2>
-          <span
-            className={cn(
-              // Typography
-              "text-[10px] font-mono text-muted-foreground"
-            )}
-          >
-            {buckets.length}
-          </span>
-        </div>
-
-        {/* Bucket list */}
-        <div
+          R2 Buckets
+        </span>
+        <span
           className={cn(
-            // Layout & Positioning
-            "flex-1 overflow-y-auto space-y-0.5",
-
-            // Sizing & Spacing
-            "p-1.5"
+            // Typography
+            "text-[10px] font-mono text-muted-foreground"
           )}
         >
-          {loading && buckets.length === 0 ? (
-            <div
-              className={cn(
-                // Sizing & Spacing
-                "p-3",
+          {buckets.length}
+        </span>
+      </div>
 
-                // Typography
-                "text-xs text-muted-foreground",
+      {/* Bucket list */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex-1 overflow-y-auto space-y-0.5 min-h-0",
 
-                // Interactive & States
-                "animate-pulse"
-              )}
-            >
-              Discovering buckets…
-            </div>
-          ) : buckets.length === 0 ? (
-            <div
-              className={cn(
-                // Sizing & Spacing
-                "p-3",
+          // Sizing & Spacing
+          "p-1.5"
+        )}
+      >
+        {loading && buckets.length === 0 ? (
+          <div
+            className={cn(
+              // Sizing & Spacing
+              "p-3",
 
-                // Typography
-                "text-xs text-muted-foreground italic text-center"
-              )}
-            >
-              No buckets discovered.
-            </div>
-          ) : (
-            buckets.map((bucket) => {
-              const active = bucket === currentBucket;
+              // Typography
+              "text-xs text-muted-foreground",
 
-              return (
-                <div
-                  key={bucket}
+              // Interactive & States
+              "animate-pulse"
+            )}
+          >
+            Discovering buckets…
+          </div>
+        ) : buckets.length === 0 ? (
+          <div
+            className={cn(
+              // Sizing & Spacing
+              "p-3",
+
+              // Typography
+              "text-xs text-muted-foreground italic text-center"
+            )}
+          >
+            No buckets discovered.
+          </div>
+        ) : (
+          buckets.map((bucket) => {
+            const active = bucket === currentBucket;
+
+            return (
+              <div
+                key={bucket}
+                className={cn(
+                  // Layout & Positioning
+                  "group flex items-center min-w-0",
+
+                  // Sizing & Spacing
+                  "gap-1"
+                )}
+              >
+                <button
+                  type="button"
+                  onClick={() => onSelectBucket(bucket)}
                   className={cn(
                     // Layout & Positioning
-                    "group flex items-center min-w-0",
+                    "flex-1 flex items-center min-w-0 text-left",
 
                     // Sizing & Spacing
-                    "gap-1"
+                    "px-2.5 py-1.5 rounded-md gap-2",
+
+                    // Typography
+                    "text-xs font-medium",
+
+                    // Backgrounds & Borders
+                    active
+                      ? "bg-primary/10 text-foreground font-semibold dark:bg-primary/15"
+                      : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+
+                    // Interactive & States
+                    "transition-colors active:scale-[0.99]"
                   )}
                 >
-                  <button
-                    type="button"
-                    onClick={() => onSelectBucket(bucket)}
+                  <DatabaseIcon
                     className={cn(
-                      // Layout & Positioning
-                      "flex-1 flex items-center min-w-0 text-left",
-
                       // Sizing & Spacing
-                      "px-2.5 py-1.5 rounded-md gap-2",
-
-                      // Typography
-                      "text-xs font-medium",
-
-                      // Backgrounds & Borders
-                      active
-                        ? "bg-muted text-foreground font-semibold"
-                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-
-                      // Interactive & States
-                      "transition-colors active:scale-[0.99]"
-                    )}
-                  >
-                    <DatabaseIcon
-                      className={cn(
-                        // Sizing & Spacing
-                        "size-3.5 shrink-0",
-
-                        // Typography & Colors
-                        active ? "text-primary" : "text-muted-foreground"
-                      )}
-                    />
-                    <span className="truncate">{bucket}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={(e) => handleRemoveClick(e, bucket)}
-                    className={cn(
-                      // Layout & Positioning
-                      "shrink-0 p-1 rounded",
+                      "size-3.5 shrink-0",
 
                       // Typography & Colors
-                      "text-muted-foreground hover:text-destructive",
-
-                      // Interactive & States
-                      "opacity-0 group-hover:opacity-100 transition-opacity"
+                      active ? "text-primary" : "text-muted-foreground"
                     )}
-                    title={`Delete ${bucket}`}
-                  >
-                    <TrashIcon className="size-3" />
-                  </button>
-                </div>
-              );
-            })
-          )}
-        </div>
+                  />
+                  <span className="truncate">{bucket}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleRemoveClick(e, bucket)}
+                  className={cn(
+                    // Layout & Positioning
+                    "shrink-0 p-1 rounded",
+
+                    // Typography & Colors
+                    "text-muted-foreground hover:text-destructive",
+
+                    // Interactive & States
+                    "opacity-0 group-hover:opacity-100 transition-opacity"
+                  )}
+                  title={`Delete ${bucket}`}
+                >
+                  <TrashIcon className="size-3" />
+                </button>
+              </div>
+            );
+          })
+        )}
       </div>
 
       {/* Manual bucket registration input */}
@@ -213,10 +203,10 @@ export function ExplorerSidebar({
           "flex flex-col shrink-0",
 
           // Sizing & Spacing
-          "p-3 border-t",
+          "p-2.5",
 
           // Backgrounds & Borders
-          "border-border bg-background/40"
+          "border-t border-border bg-muted/20"
         )}
       >
         <form onSubmit={handleSubmit} className="flex gap-1">

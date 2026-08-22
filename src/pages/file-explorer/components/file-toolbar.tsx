@@ -53,12 +53,12 @@ export function FileToolbar({
   viewMode,
   onViewModeChange,
   loading,
-}: FileToolbarProps) {
+}: Readonly<FileToolbarProps>) {
   const [showFolderInput, setShowFolderInput] = React.useState(false);
   const [folderNameInput, setFolderNameInput] = React.useState('');
   const [creating, setCreating] = React.useState(false);
 
-  const handleCreateSubmit = async (e: React.FormEvent) => {
+  const handleCreateSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!folderNameInput.trim()) return;
     setCreating(true);
@@ -75,305 +75,177 @@ export function FileToolbar({
     <div
       className={cn(
         // Layout & Positioning
-        "flex flex-col shrink-0 select-none",
+        "flex items-center justify-between shrink-0 select-none",
 
         // Sizing & Spacing
-        "px-3 py-2 gap-2",
+        "px-3 py-2 gap-3",
 
         // Backgrounds & Borders
-        "border-b bg-muted/20"
+        "border-b border-border bg-muted/20"
       )}
     >
-      {/* Top Row: Breadcrumbs & Action Controls */}
+      {/* Left: Breadcrumbs Path & Navigate Up */}
       <div
         className={cn(
           // Layout & Positioning
-          "flex items-center justify-between",
+          "flex items-center overflow-x-auto min-w-0 scrollbar-none",
 
           // Sizing & Spacing
-          "gap-3 min-h-7"
+          "gap-1"
         )}
       >
-        {/* Navigation Breadcrumb Path */}
+        <Button
+          size="xs"
+          variant="ghost"
+          onClick={onNavigateUp}
+          disabled={isAtRoot || loading}
+          className={cn(
+            // Layout & Positioning
+            "shrink-0",
+
+            // Sizing & Spacing
+            "size-7 p-0",
+
+            // Typography & Colors
+            "text-muted-foreground",
+
+            // Interactive & States
+            "hover:text-foreground active:scale-[0.97] transition-all"
+          )}
+          title="Navigate up"
+        >
+          <ArrowLeftIcon className="size-3.5" />
+        </Button>
+
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center overflow-x-auto min-w-0 scrollbar-none",
+            "flex items-center min-w-0 whitespace-nowrap",
 
             // Sizing & Spacing
-            "gap-1 py-0.5"
+            "gap-1",
+
+            // Typography
+            "text-xs font-medium text-muted-foreground"
           )}
         >
-          <Button
-            size="xs"
-            variant="ghost"
-            onClick={onNavigateUp}
-            disabled={isAtRoot || loading}
-            className={cn(
-              // Layout & Positioning
-              "shrink-0",
+          {breadcrumbs.map((crumb, idx) => {
+            const isLast = idx === breadcrumbs.length - 1;
+            return (
+              <React.Fragment key={idx}>
+                {idx > 0 && <CaretRightIcon className="size-3 text-muted-foreground/40 shrink-0" />}
+                <button
+                  type="button"
+                  onClick={() => !isLast && onNavigateTo(crumb.id)}
+                  disabled={isLast || loading}
+                  className={cn(
+                    // Sizing & Spacing
+                    "truncate max-w-[180px] px-1.5 py-0.5 rounded",
 
-              // Sizing & Spacing
-              "size-7 p-0",
+                    // Typography
+                    isLast
+                      ? "text-foreground font-semibold cursor-default"
+                      : "hover:text-foreground hover:bg-muted/40 cursor-pointer",
 
-              // Typography & Colors
-              "text-muted-foreground",
-
-              // Interactive & States
-              "hover:text-foreground active:scale-[0.97] transition-all"
-            )}
-            title="Navigate up"
-          >
-            <ArrowLeftIcon className="size-3.5" />
-          </Button>
-
-          <div
-            className={cn(
-              // Layout & Positioning
-              "flex items-center min-w-0 whitespace-nowrap",
-
-              // Sizing & Spacing
-              "gap-1",
-
-              // Typography
-              "text-xs font-medium text-muted-foreground"
-            )}
-          >
-            {breadcrumbs.map((crumb, idx) => {
-              const isLast = idx === breadcrumbs.length - 1;
-              return (
-                <React.Fragment key={idx}>
-                  {idx > 0 && <CaretRightIcon className="size-3 text-muted-foreground/40 shrink-0" />}
-                  <button
-                    type="button"
-                    onClick={() => !isLast && onNavigateTo(crumb.id)}
-                    disabled={isLast || loading}
-                    className={cn(
-                      // Sizing & Spacing
-                      "truncate max-w-[180px] px-1 py-0.5 rounded",
-
-                      // Typography
-                      isLast
-                        ? "text-foreground font-semibold cursor-default"
-                        : "hover:text-foreground hover:bg-muted/40 cursor-pointer",
-
-                      // Interactive & States
-                      "transition-colors"
-                    )}
-                  >
-                    {crumb.label}
-                  </button>
-                </React.Fragment>
-              );
-            })}
-          </div>
+                    // Interactive & States
+                    "transition-colors"
+                  )}
+                >
+                  {crumb.label}
+                </button>
+              </React.Fragment>
+            );
+          })}
         </div>
+      </div>
 
-        {/* Global Toolbar Actions */}
-        <div
-          className={cn(
-            // Layout & Positioning
-            "flex items-center shrink-0",
+      {/* Right: Search, Actions, View Toggle, Refresh */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center shrink-0",
 
-            // Sizing & Spacing
-            "gap-2"
-          )}
-        >
-          {/* Create Folder form or trigger */}
-          {showFolderInput ? (
-            <form
-              onSubmit={handleCreateSubmit}
-              className={cn(
-                // Layout & Positioning
-                "flex items-center",
+          // Sizing & Spacing
+          "gap-2"
+        )}
+      >
+       
 
-                // Sizing & Spacing
-                "gap-1.5"
-              )}
-            >
-              <Input
-                value={folderNameInput}
-                onChange={(e) => setFolderNameInput(e.target.value)}
-                placeholder="Folder name"
-                className={cn(
-                  // Sizing & Spacing
-                  "w-36 h-7",
-
-                  // Typography
-                  "text-xs bg-background"
-                )}
-                disabled={creating}
-                autoFocus
-              />
-              <Button
-                type="submit"
-                size="xs"
-                variant="outline"
-                className={cn(
-                  // Layout & Positioning
-                  "shrink-0",
-
-                  // Sizing & Spacing
-                  "size-7 p-0"
-                )}
-                disabled={creating || !folderNameInput.trim()}
-              >
-                <CheckIcon className="size-3.5 text-primary" />
-              </Button>
-              <Button
-                type="button"
-                size="xs"
-                variant="ghost"
-                onClick={() => {
-                  setShowFolderInput(false);
-                  setFolderNameInput('');
-                }}
-                className={cn(
-                  // Layout & Positioning
-                  "shrink-0",
-
-                  // Sizing & Spacing
-                  "size-7 p-0",
-
-                  // Typography & Colors
-                  "text-muted-foreground"
-                )}
-                disabled={creating}
-              >
-                <XIcon className="size-3.5" />
-              </Button>
-            </form>
-          ) : (
-            <Button
-              size="xs"
-              variant="outline"
-              onClick={() => setShowFolderInput(true)}
-              disabled={loading || actionDisabled}
-              className={cn(
-                // Layout & Positioning
-                "flex items-center",
-
-                // Sizing & Spacing
-                "h-7 px-2.5 gap-1.5",
-
-                // Typography
-                "text-xs font-medium"
-              )}
-            >
-              <FolderPlusIcon className="size-3.5" />
-              <span>New Folder</span>
-            </Button>
-          )}
-
-          <Button
-            size="xs"
-            variant="default"
-            onClick={onActionClick}
-            disabled={loading || actionDisabled}
+        {/* Create Folder form or trigger */}
+        {showFolderInput ? (
+          <form
+            onSubmit={handleCreateSubmit}
             className={cn(
               // Layout & Positioning
               "flex items-center",
 
               // Sizing & Spacing
-              "h-7 px-2.5 gap-1.5",
-
-              // Typography
-              "text-xs font-medium"
+              "gap-1"
             )}
           >
-            {actionIcon}
-            <span>{actionLabel}</span>
-          </Button>
+            <Input
+              value={folderNameInput}
+              onChange={(e) => setFolderNameInput(e.target.value)}
+              placeholder="Folder name"
+              className={cn(
+                // Sizing & Spacing
+                "w-32 h-7",
 
-          <Button
-            size="xs"
-            variant="ghost"
-            onClick={onRefresh}
-            disabled={loading || actionDisabled}
-            className={cn(
-              // Layout & Positioning
-              "shrink-0",
-
-              // Sizing & Spacing
-              "size-7 p-0",
-
-              // Typography & Colors
-              "text-muted-foreground hover:text-foreground"
-            )}
-            title="Refresh directory"
-          >
-            <ArrowClockwiseIcon className={cn("size-3.5", loading && "animate-spin")} />
-          </Button>
-        </div>
-      </div>
-
-      {/* Bottom Row: Search & View Mode Switcher */}
-      <div
-        className={cn(
-          // Layout & Positioning
-          "flex items-center justify-between",
-
-          // Sizing & Spacing
-          "gap-3"
-        )}
-      >
-        {/* Search input */}
-        <div
-          className={cn(
-            // Layout & Positioning
-            "relative flex items-center",
-
-            // Sizing & Spacing
-            "w-72"
-          )}
-        >
-          <MagnifyingGlassIcon
-            className={cn(
-              // Layout & Positioning
-              "absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none",
-
-              // Sizing & Spacing
-              "size-3.5",
-
-              // Typography & Colors
-              "text-muted-foreground"
-            )}
-          />
-          <Input
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search files in current directory…"
-            className={cn(
-              // Sizing & Spacing
-              "h-7 w-full pl-8 pr-7",
-
-              // Typography
-              "text-xs font-sans bg-background",
-
-              // Backgrounds & Borders
-              "border-input",
-
-              // Interactive & States
-              "transition-all duration-150"
-            )}
-            disabled={actionDisabled}
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => onSearchChange('')}
+                // Typography
+                "text-xs bg-background"
+              )}
+              disabled={creating}
+              autoFocus
+            />
+            <Button
+              type="submit"
+              size="xs"
+              variant="outline"
               className={cn(
                 // Layout & Positioning
-                "absolute right-2 top-1/2 -translate-y-1/2",
+                "shrink-0",
 
-                // Typography & Colors
-                "text-muted-foreground hover:text-foreground"
+                // Sizing & Spacing
+                "size-7 p-0"
               )}
+              disabled={creating || !folderNameInput.trim()}
             >
-              <XIcon className="size-3" />
-            </button>
-          )}
-        </div>
+              <CheckIcon className="size-3.5 text-primary" />
+            </Button>
+            <Button
+              type="button"
+              size="xs"
+              variant="ghost"
+              onClick={() => {
+                setShowFolderInput(false);
+                setFolderNameInput('');
+              }}
+              disabled={creating}
+            >
+              <XIcon className="size-3.5" />
+            </Button>
+          </form>
+        ) : (
+          <Button
+            size="xs"
+            variant="outline"
+            onClick={() => setShowFolderInput(true)}
+            disabled={loading || actionDisabled}
+          >
+            <FolderPlusIcon className="size-3.5" />
+            <span>New Folder</span>
+          </Button>
+        )}
+
+        <Button
+          size="xs"
+          variant="default"
+          onClick={onActionClick}
+          disabled={loading || actionDisabled}
+        >
+          {actionIcon}
+          <span>{actionLabel}</span>
+        </Button>
 
         {/* View Mode Toggle ButtonGroup */}
         <ButtonGroup>
@@ -414,6 +286,71 @@ export function FileToolbar({
             <SquaresFourIcon className="size-3.5" />
           </Button>
         </ButtonGroup>
+
+         {/* Search input */}
+        <div
+          className={cn(
+            // Layout & Positioning
+            "relative flex items-center"
+          )}
+        >
+          <MagnifyingGlassIcon
+            className={cn(
+              // Layout & Positioning
+              "absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none",
+
+              // Sizing & Spacing
+              "size-3.5",
+
+              // Typography & Colors
+              "text-muted-foreground"
+            )}
+          />
+          <Input
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search files…"
+            className={cn(
+              // Sizing & Spacing
+              "h-7 w-44 pl-7 pr-7",
+
+              // Typography
+              "text-xs font-sans bg-background",
+
+              // Backgrounds & Borders
+              "border-input",
+
+              // Interactive & States
+              "focus:w-60 transition-all duration-150"
+            )}
+            disabled={actionDisabled}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => onSearchChange('')}
+              className={cn(
+                // Layout & Positioning
+                "absolute right-2 top-1/2 -translate-y-1/2",
+
+                // Typography & Colors
+                "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <XIcon className="size-3" />
+            </button>
+          )}
+        </div>
+
+        <Button
+          size="xs"
+          variant="ghost"
+          onClick={onRefresh}
+          disabled={loading || actionDisabled}
+          title="Refresh directory"
+        >
+          <ArrowClockwiseIcon className={cn("size-3.5", loading && "animate-spin")} />
+        </Button>
       </div>
     </div>
   );

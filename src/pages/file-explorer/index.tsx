@@ -2,9 +2,6 @@ import {
   Button,
   ContextMenuItem,
   ContextMenuSeparator,
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
 } from '@celestia-project/ui';
 import * as React from 'react';
 import {
@@ -44,7 +41,7 @@ export function FileExplorerPage() {
           "flex-1 min-h-0 overflow-hidden",
 
           // Backgrounds & Borders
-          "border rounded-lg bg-card"
+          "border rounded-lg"
         )}
       >
         <div
@@ -120,74 +117,83 @@ export function FileExplorerPage() {
     );
   }
 
-  return (
-    <TabbedPageLayout
-      tabs={page.tabs}
-      activeTabId={page.activeTab}
-      onTabChange={page.setActiveTab}
-      contentClassName={cn(
-        // Layout & Positioning
-        "flex-1 min-h-0 overflow-hidden",
-
-        // Backgrounds & Borders
-        "border rounded-lg bg-card"
-      )}
-    >
-      <div
-        className={cn(
-          // Layout & Positioning
-          "relative flex flex-col flex-1 min-h-0",
-
-          // Backgrounds & Borders
-          "bg-background"
-        )}
-      >
-        {page.activeTab === 'r2' ? (
+  const renderTabContent = () => {
+    switch (page.activeTab) {
+      case 'r2':
+        return (
           /* Cloudflare R2 Workspace */
           <div
             className={cn(
               // Layout & Positioning
-              "relative flex flex-1 min-h-0"
+              "flex flex-col flex-1 min-w-0 min-h-0"
             )}
           >
-            <ExplorerSidebar
-              buckets={explorer.buckets}
-              currentBucket={explorer.currentBucket}
-              onSelectBucket={(b) => {
-                explorer.setCurrentBucket(b);
-                explorer.setSelectedItem(null);
-              }}
-              onAddCustomBucket={explorer.handleAddCustomBucket}
-              onRemoveBucket={explorer.handleRemoveBucket}
+            <FileToolbar
+              breadcrumbs={page.r2Breadcrumbs}
+              isAtRoot={!explorer.currentPrefix}
+              onNavigateUp={explorer.navigateUp}
+              onNavigateTo={explorer.navigateToFolder}
+              onCreateFolder={explorer.handleCreateFolder}
+              actionLabel="Upload"
+              actionIcon={<UploadSimpleIcon className="size-3.5" />}
+              onActionClick={explorer.handleUploadFile}
+              actionDisabled={!explorer.currentBucket}
+              searchQuery={explorer.searchQuery}
+              onSearchChange={explorer.setSearchQuery}
+              onRefresh={explorer.refreshList}
+              viewMode={page.viewMode}
+              onViewModeChange={page.handleViewModeChange}
               loading={explorer.loading}
             />
 
             <div
               className={cn(
                 // Layout & Positioning
-                "flex flex-col flex-1 min-w-0 min-h-0"
+                "flex-1 min-h-0 min-w-0"
               )}
             >
-              <FileToolbar
-                breadcrumbs={page.r2Breadcrumbs}
-                isAtRoot={!explorer.currentPrefix}
-                onNavigateUp={explorer.navigateUp}
-                onNavigateTo={explorer.navigateToFolder}
-                onCreateFolder={explorer.handleCreateFolder}
-                actionLabel="Upload"
-                actionIcon={<UploadSimpleIcon className="size-3.5" />}
-                onActionClick={explorer.handleUploadFile}
-                actionDisabled={!explorer.currentBucket}
-                searchQuery={explorer.searchQuery}
-                onSearchChange={explorer.setSearchQuery}
-                onRefresh={explorer.refreshList}
-                viewMode={page.viewMode}
-                onViewModeChange={page.handleViewModeChange}
-                loading={explorer.loading}
-              />
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex min-h-0",
 
-              <ResizablePanelGroup orientation="horizontal" className="flex-1 w-full min-h-0">
-                <ResizablePanel defaultSize={70} minSize={30}>
+                  // Sizing & Spacing
+                  "h-full gap-3"
+                )}
+              >
+                {/* Left Buckets Sidebar */}
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "shrink-0",
+
+                    // Sizing & Spacing
+                    "w-56 h-full"
+                  )}
+                >
+                  <ExplorerSidebar
+                    buckets={explorer.buckets}
+                    currentBucket={explorer.currentBucket}
+                    onSelectBucket={(b) => {
+                      explorer.setCurrentBucket(b);
+                      explorer.setSelectedItem(null);
+                    }}
+                    onAddCustomBucket={explorer.handleAddCustomBucket}
+                    onRemoveBucket={explorer.handleRemoveBucket}
+                    loading={explorer.loading}
+                  />
+                </div>
+
+                {/* Center File Grid Area */}
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex-1 min-w-0 min-h-0",
+
+                    // Sizing & Spacing
+                    "h-full"
+                  )}
+                >
                   <FileGrid
                     items={explorer.items.map((item) => ({ ...item, id: item.key }))}
                     selectedItem={
@@ -224,7 +230,7 @@ export function FileExplorerPage() {
                           <span
                             className={cn(
                               "block size-1.5 rounded-full",
-                              cached ? "bg-green-500" : "bg-muted-foreground/40"
+                              cached ? "bg-emerald-500" : "bg-muted-foreground/40"
                             )}
                             title={cached ? 'Local Cached' : 'R2 Remote'}
                           />
@@ -235,12 +241,12 @@ export function FileExplorerPage() {
                       const cached = explorer.cacheStatus[item.id]?.isCached;
                       if (item.type === 'folder') return '—';
                       return cached ? (
-                        <span className="inline-flex items-center text-[10px] text-green-600 dark:text-green-400 font-sans gap-1">
-                          <CheckCircleIcon className="size-3.5" /> Local
+                        <span className="inline-flex items-center text-[10px] text-emerald-600 dark:text-emerald-400 font-sans gap-1 px-1.5 py-0.5 rounded border border-emerald-500/20 bg-emerald-500/10 font-semibold">
+                          <CheckCircleIcon className="size-3" /> Local
                         </span>
                       ) : (
-                        <span className="inline-flex items-center text-[10px] text-muted-foreground font-sans gap-1">
-                          <CloudArrowDownIcon className="size-3.5" /> R2
+                        <span className="inline-flex items-center text-[10px] text-muted-foreground font-sans gap-1 px-1.5 py-0.5 rounded border border-muted-foreground/10 bg-muted font-semibold">
+                          <CloudArrowDownIcon className="size-3" /> R2
                         </span>
                       );
                     }}
@@ -268,23 +274,34 @@ export function FileExplorerPage() {
                       );
                     }}
                   />
-                </ResizablePanel>
+                </div>
 
-                <ResizableHandle withHandle />
+                {/* Right Details Pane */}
+                {explorer.selectedItem && (
+                  <div
+                    className={cn(
+                      // Layout & Positioning
+                      "shrink-0",
 
-                <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
-                  <ExplorerDetailsPane
-                    item={explorer.selectedItem}
-                    cacheStatus={explorer.cacheStatus}
-                    onOpenFile={explorer.handleOpenFile}
-                    onCopyPublicUrl={explorer.handleCopyPublicUrl}
-                    onCopyPresignedUrl={explorer.handleCopyPresignedUrl}
-                  />
-                </ResizablePanel>
-              </ResizablePanelGroup>
+                      // Sizing & Spacing
+                      "w-72 h-full"
+                    )}
+                  >
+                    <ExplorerDetailsPane
+                      item={explorer.selectedItem}
+                      cacheStatus={explorer.cacheStatus}
+                      onOpenFile={explorer.handleOpenFile}
+                      onCopyPublicUrl={explorer.handleCopyPublicUrl}
+                      onCopyPresignedUrl={explorer.handleCopyPresignedUrl}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        ) : page.activeTab === 'local' ? (
+        );
+      case 'local':
+        return (
           /* Local Storage Workspace */
           <div
             className={cn(
@@ -311,7 +328,7 @@ export function FileExplorerPage() {
             <div
               className={cn(
                 // Layout & Positioning
-                "flex flex-1 min-h-0"
+                "flex-1 min-h-0 min-w-0"
               )}
             >
               <FileGrid
@@ -346,10 +363,38 @@ export function FileExplorerPage() {
               />
             </div>
           </div>
-        ) : (
+        );
+      default:
+        return (
           /* Wordlists On-Demand Hub */
           <WordlistsTab />
+        );
+    }
+  };
+
+  return (
+    <TabbedPageLayout
+      tabs={page.tabs}
+      activeTabId={page.activeTab}
+      onTabChange={page.setActiveTab}
+      contentClassName={cn(
+        // Layout & Positioning
+        "flex-1 min-h-0 overflow-hidden",
+
+        // Backgrounds & Borders
+        "border rounded-lg"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "relative flex flex-col flex-1 min-h-0",
+
+          // Sizing & Spacing
+          "h-full"
         )}
+      >
+        {renderTabContent()}
 
         {/* Floating concurrent upload progress card */}
         {explorer.uploadProgress && page.activeTab === 'r2' && (

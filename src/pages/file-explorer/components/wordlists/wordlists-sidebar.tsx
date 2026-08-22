@@ -31,203 +31,184 @@ export function WordlistsSidebar({
     <div
       className={cn(
         // Layout & Positioning
-        "flex flex-col flex-1 justify-between select-none min-w-0 min-h-0",
-
-        // Sizing & Spacing
-        "w-full h-full border-r",
+        "flex flex-col h-full overflow-hidden select-none min-w-0 min-h-0",
 
         // Backgrounds & Borders
-        "border-border bg-background/50",
+        "rounded-md border border-border bg-background",
 
         className
       )}
     >
+      {/* Header Summary */}
       <div
         className={cn(
           // Layout & Positioning
-          "flex flex-col flex-1 min-h-0"
+          "flex items-center justify-between shrink-0",
+
+          // Sizing & Spacing
+          "px-3 py-1.5",
+
+          // Backgrounds & Borders
+          "border-b border-border bg-muted/40"
         )}
       >
-        {/* Header Summary */}
-        <div
+        <span
+          className={cn(
+            // Typography
+            "text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+          )}
+        >
+          Categories ({tags.length})
+        </span>
+        <Badge
+          variant="outline"
+          className={cn(
+            // Typography
+            "text-[10px] font-mono"
+          )}
+        >
+          {totalInstalled}/{totalWordlists}
+        </Badge>
+      </div>
+
+      {/* Categories List */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex-1 overflow-y-auto space-y-0.5 min-h-0",
+
+          // Sizing & Spacing
+          "p-1.5"
+        )}
+      >
+        {/* "All" Tag Option */}
+        <button
+          type="button"
+          onClick={() => onSelectTag('all')}
           className={cn(
             // Layout & Positioning
-            "flex flex-col",
+            "w-full flex items-center justify-between min-w-0 text-left",
 
             // Sizing & Spacing
-            "p-3 border-b gap-1",
+            "px-2.5 py-1.5 rounded-md",
+
+            // Typography
+            "text-xs font-medium",
 
             // Backgrounds & Borders
-            "border-border"
+            selectedTag === 'all'
+              ? "bg-primary/10 text-foreground font-semibold dark:bg-primary/15"
+              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+
+            // Interactive & States
+            "transition-colors active:scale-[0.99]"
           )}
         >
           <div
             className={cn(
               // Layout & Positioning
-              "flex items-center justify-between"
-            )}
-          >
-            <h2
-              className={cn(
-                // Typography
-                "text-xs font-semibold uppercase tracking-wider text-muted-foreground"
-              )}
-            >
-              Categories & Tags
-            </h2>
-            <Badge variant="outline">
-              {totalInstalled}/{totalWordlists}
-            </Badge>
-          </div>
-          <p
-            className={cn(
-              // Typography
-              "text-[10px] text-muted-foreground"
-            )}
-          >
-            On-demand security wordlists
-          </p>
-        </div>
-
-        {/* Categories List */}
-        <div
-          className={cn(
-            // Layout & Positioning
-            "flex-1 overflow-y-auto space-y-0.5",
-
-            // Sizing & Spacing
-            "p-1.5"
-          )}
-        >
-          {/* "All" Tag Option */}
-          <button
-            type="button"
-            onClick={() => onSelectTag('all')}
-            className={cn(
-              // Layout & Positioning
-              "w-full flex items-center justify-between min-w-0 text-left",
+              "flex items-center min-w-0 truncate",
 
               // Sizing & Spacing
-              "px-2.5 py-1.5 rounded-md",
-
-              // Typography
-              "text-xs font-medium",
-
-              // Backgrounds & Borders
-              selectedTag === 'all'
-                ? "bg-muted text-foreground font-semibold"
-                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-
-              // Interactive & States
-              "transition-colors active:scale-[0.99]"
+              "gap-2"
             )}
           >
-            <div
+            <SparkleIcon
+              className={cn(
+                // Sizing & Spacing
+                "size-3.5 shrink-0",
+
+                // Typography & Colors
+                selectedTag === 'all' ? "text-primary" : "text-muted-foreground"
+              )}
+            />
+            <span className="truncate">All Wordlists</span>
+          </div>
+          <span
+            className={cn(
+              // Typography
+              "text-[10px] font-mono text-muted-foreground ml-1 shrink-0"
+            )}
+          >
+            {totalWordlists}
+          </span>
+        </button>
+
+        {/* Individual Tags */}
+        {tags.map((tag) => {
+          const active = selectedTag === tag.name;
+          const allInstalled = tag.installedCount === tag.count && tag.count > 0;
+
+          return (
+            <button
+              key={tag.name}
+              type="button"
+              onClick={() => onSelectTag(tag.name)}
               className={cn(
                 // Layout & Positioning
-                "flex items-center min-w-0 truncate",
+                "w-full flex items-center justify-between min-w-0 text-left",
 
                 // Sizing & Spacing
-                "gap-2"
-              )}
-            >
-              <SparkleIcon
-                className={cn(
-                  // Sizing & Spacing
-                  "size-3.5 shrink-0",
+                "px-2.5 py-1.5 rounded-md",
 
-                  // Typography & Colors
-                  selectedTag === 'all' ? "text-primary" : "text-muted-foreground"
-                )}
-              />
-              <span className="truncate">All Wordlists</span>
-            </div>
-            <span
-              className={cn(
                 // Typography
-                "text-[10px] font-mono text-muted-foreground ml-1 shrink-0"
+                "text-xs font-medium",
+
+                // Backgrounds & Borders
+                active
+                  ? "bg-primary/10 text-foreground font-semibold dark:bg-primary/15"
+                  : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+
+                // Interactive & States
+                "transition-colors active:scale-[0.99]"
               )}
             >
-              {totalWordlists}
-            </span>
-          </button>
-
-          {/* Individual Tags */}
-          {tags.map((tag) => {
-            const active = selectedTag === tag.name;
-            const allInstalled = tag.installedCount === tag.count && tag.count > 0;
-
-            return (
-              <button
-                key={tag.name}
-                type="button"
-                onClick={() => onSelectTag(tag.name)}
+              <div
                 className={cn(
                   // Layout & Positioning
-                  "w-full flex items-center justify-between min-w-0 text-left",
+                  "flex items-center min-w-0 truncate",
 
                   // Sizing & Spacing
-                  "px-2.5 py-1.5 rounded-md",
-
-                  // Typography
-                  "text-xs font-medium",
-
-                  // Backgrounds & Borders
-                  active
-                    ? "bg-muted text-foreground font-semibold"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-
-                  // Interactive & States
-                  "transition-colors active:scale-[0.99]"
+                  "gap-2"
                 )}
               >
-                <div
+                <TagIcon
                   className={cn(
-                    // Layout & Positioning
-                    "flex items-center min-w-0 truncate",
-
                     // Sizing & Spacing
-                    "gap-2"
-                  )}
-                >
-                  <TagIcon
-                    className={cn(
-                      // Sizing & Spacing
-                      "size-3.5 shrink-0",
+                    "size-3.5 shrink-0",
 
-                      // Typography & Colors
-                      active ? "text-primary" : "text-muted-foreground"
-                    )}
-                  />
-                  <span className="truncate capitalize">{tag.name}</span>
-                </div>
-                <div
-                  className={cn(
-                    // Layout & Positioning
-                    "flex items-center shrink-0",
+                    // Typography & Colors
+                    active ? "text-primary" : "text-muted-foreground"
+                  )}
+                />
+                <span className="truncate capitalize">{tag.name}</span>
+              </div>
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center shrink-0",
 
-                    // Sizing & Spacing
-                    "gap-1 ml-1"
-                  )}
-                >
-                  {allInstalled && (
-                    <span title="All installed">
-                      <CheckCircleIcon className="size-3 text-green-500 shrink-0" />
-                    </span>
-                  )}
-                  <span
-                    className={cn(
-                      // Typography
-                      "text-[10px] font-mono text-muted-foreground"
-                    )}
-                  >
-                    {tag.count}
+                  // Sizing & Spacing
+                  "gap-1 ml-1"
+                )}
+              >
+                {allInstalled && (
+                  <span title="All installed">
+                    <CheckCircleIcon className="size-3 text-emerald-500 shrink-0" />
                   </span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                )}
+                <span
+                  className={cn(
+                    // Typography
+                    "text-[10px] font-mono text-muted-foreground"
+                  )}
+                >
+                  {tag.count}
+                </span>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {/* Bundle Action Footer */}
@@ -237,10 +218,10 @@ export function WordlistsSidebar({
           "flex flex-col shrink-0",
 
           // Sizing & Spacing
-          "p-3 border-t gap-2",
+          "p-2.5 border-t gap-2",
 
           // Backgrounds & Borders
-          "border-border bg-background/40"
+          "border-border bg-muted/20"
         )}
       >
         <Button
@@ -253,10 +234,10 @@ export function WordlistsSidebar({
             "w-full flex items-center justify-center",
 
             // Sizing & Spacing
-            "h-6 gap-1 px-2",
+            "h-7 gap-1.5 px-2",
 
             // Typography
-            "text-[11px] font-medium"
+            "text-xs font-medium"
           )}
         >
           {bundleDownloading ? (

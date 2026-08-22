@@ -51,13 +51,13 @@ export function ExplorerDetailsPane({
       <div
         className={cn(
           // Layout & Positioning
-          "flex flex-col flex-1 items-center justify-center select-none text-center",
+          "flex flex-col flex-1 items-center justify-center select-none text-center h-full",
 
           // Sizing & Spacing
-          "h-full p-6",
+          "p-6",
 
           // Backgrounds & Borders
-          "bg-background/30",
+          "rounded-md border border-border bg-background",
 
           // Typography & Colors
           "text-muted-foreground"
@@ -79,249 +79,296 @@ export function ExplorerDetailsPane({
     <div
       className={cn(
         // Layout & Positioning
-        "flex flex-col flex-1 select-none overflow-y-auto",
-
-        // Sizing & Spacing
-        "h-full w-full",
+        "flex flex-col h-full overflow-hidden select-none",
 
         // Backgrounds & Borders
-        "bg-background"
+        "rounded-md border border-border bg-background"
       )}
     >
-      {/* Header Info */}
+      {/* Header bar */}
       <div
         className={cn(
           // Layout & Positioning
-          "flex flex-col items-center text-center",
+          "flex items-center justify-between shrink-0",
 
           // Sizing & Spacing
-          "p-4 border-b gap-2",
+          "px-3 py-1.5",
 
           // Backgrounds & Borders
-          "border-border bg-muted/10"
+          "border-b border-border bg-muted/40"
         )}
       >
-        {item.type === 'folder' ? (
-          <FolderIcon className="size-10 text-amber-500/80" />
-        ) : (
-          <FileIcon className="size-10 text-muted-foreground/70" />
-        )}
-        <div className="min-w-0 w-full px-2">
-          <h3 className="text-xs font-semibold text-foreground break-all leading-snug">
-            {item.name}
-          </h3>
-          <div className="flex items-center justify-center gap-1.5 mt-1">
-            <Badge variant="secondary">
-              {item.type}
-            </Badge>
-            {item.type === 'file' && (
-              <Badge variant={cached ? 'outline' : 'secondary'}>
-                {cached ? 'Local Sync' : 'Remote Only'}
-              </Badge>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Properties List */}
-      <div
-        className={cn(
-          // Layout & Positioning
-          "flex flex-col",
-
-          // Sizing & Spacing
-          "p-4 border-b space-y-2.5",
-
-          // Backgrounds & Borders
-          "border-border"
-        )}
-      >
-        <h4
+        <span
           className={cn(
             // Typography
-            "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+            "text-xs font-semibold uppercase tracking-wider text-muted-foreground"
           )}
         >
           Properties
-        </h4>
-        <div className="space-y-2 text-xs">
-          <div>
-            <span className="text-[10px] text-muted-foreground block">Key / Path</span>
-            <span className="font-mono text-[11px] text-foreground break-all">{item.key}</span>
-          </div>
-          {item.type === 'file' && (
-            <>
-              <div>
-                <span className="text-[10px] text-muted-foreground block">Size</span>
-                <span className="font-mono text-[11px] text-foreground">{formatBytes(item.size)}</span>
-              </div>
-              <div>
-                <span className="text-[10px] text-muted-foreground block">Last Modified</span>
-                <span className="text-[11px] text-foreground">
-                  {item.lastModified ? new Date(item.lastModified).toLocaleString() : '—'}
-                </span>
-              </div>
-            </>
+        </span>
+        <Badge
+          variant={cached ? 'outline' : 'secondary'}
+          className={cn(
+            // Typography
+            "text-[10px]"
           )}
-        </div>
+        >
+          {item.type}
+        </Badge>
       </div>
 
-      {/* Actions & Cache Section */}
+      {/* Main scrollable body */}
       <div
         className={cn(
           // Layout & Positioning
-          "flex-1 flex flex-col",
-
-          // Sizing & Spacing
-          "p-4 gap-3.5"
+          "flex-1 overflow-y-auto min-h-0"
         )}
       >
-        {item.type === 'file' && (
-          <>
-            {/* Cache Status Card */}
-            <div
-              className={cn(
-                // Layout & Positioning
-                "flex flex-col",
+        {/* Header summary box */}
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col items-center text-center",
 
-                // Sizing & Spacing
-                "p-3 rounded-lg border gap-2.5",
+            // Sizing & Spacing
+            "p-3.5 border-b gap-1.5",
 
-                // Backgrounds & Borders
-                "border-border bg-muted/20"
+            // Backgrounds & Borders
+            "border-border bg-muted/10"
+          )}
+        >
+          {item.type === 'folder' ? (
+            <FolderIcon className="size-8 text-amber-500/80" />
+          ) : (
+            <FileIcon className="size-8 text-muted-foreground/70" />
+          )}
+          <div className="min-w-0 w-full px-2">
+            <h3 className="text-xs font-semibold text-foreground break-all leading-snug">
+              {item.name}
+            </h3>
+            <div className="flex items-center justify-center gap-1.5 mt-1">
+              {item.type === 'file' && (
+                <span
+                  className={cn(
+                    // Sizing & Spacing
+                    "px-1.5 py-0.5 rounded",
+
+                    // Typography
+                    "text-[10px] font-semibold",
+
+                    // Backgrounds & Borders
+                    cached
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                      : "bg-muted text-muted-foreground border border-muted-foreground/10"
+                  )}
+                >
+                  {cached ? 'Local Sync' : 'Remote Only'}
+                </span>
               )}
-            >
-              <h4
+            </div>
+          </div>
+        </div>
+
+        {/* Properties List */}
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col",
+
+            // Sizing & Spacing
+            "p-3 border-b space-y-2.5",
+
+            // Backgrounds & Borders
+            "border-border"
+          )}
+        >
+          <span
+            className={cn(
+              // Typography
+              "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+            )}
+          >
+            File Details
+          </span>
+          <div className="space-y-2 text-xs">
+            <div>
+              <span className="text-[10px] text-muted-foreground block">Key / Path</span>
+              <span className="font-mono text-[11px] text-foreground break-all">{item.key}</span>
+            </div>
+            {item.type === 'file' && (
+              <>
+                <div>
+                  <span className="text-[10px] text-muted-foreground block">Size</span>
+                  <span className="font-mono text-[11px] text-foreground">{formatBytes(item.size)}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-muted-foreground block">Last Modified</span>
+                  <span className="text-[11px] text-foreground">
+                    {item.lastModified ? new Date(item.lastModified).toLocaleString() : '—'}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Actions & Cache Section */}
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col",
+
+            // Sizing & Spacing
+            "p-3 gap-3"
+          )}
+        >
+          {item.type === 'file' && (
+            <>
+              {/* Cache Status Card */}
+              <div
                 className={cn(
-                  // Typography
-                  "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+                  // Layout & Positioning
+                  "flex flex-col",
+
+                  // Sizing & Spacing
+                  "p-2.5 rounded-md border gap-2",
+
+                  // Backgrounds & Borders
+                  "border-border bg-muted/20"
                 )}
               >
-                Cache Synchronization
-              </h4>
+                <span
+                  className={cn(
+                    // Typography
+                    "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+                  )}
+                >
+                  Cache Synchronization
+                </span>
 
-              {cached ? (
-                <div className="space-y-2.5">
-                  <div className="flex items-start gap-2 text-green-600 dark:text-green-400 text-xs">
-                    <CheckCircleIcon className="size-4 mt-0.5 shrink-0" />
-                    <div className="min-w-0">
-                      <p className="font-semibold">Local Cached Sync</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed break-all font-mono">
-                        {localPath}
-                      </p>
+                {cached ? (
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2 text-emerald-600 dark:text-emerald-400 text-xs">
+                      <CheckCircleIcon className="size-4 mt-0.5 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-semibold">Local Cached Sync</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed break-all font-mono">
+                          {localPath}
+                        </p>
+                      </div>
                     </div>
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      className="w-full text-xs h-7 gap-1.5 font-medium"
+                      onClick={() => onOpenFile(item)}
+                    >
+                      Open Local File
+                    </Button>
                   </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2 text-muted-foreground text-xs">
+                      <CloudArrowDownIcon className="size-4 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="font-medium text-foreground">Remote Object Only</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+                          File is not cached locally. Click below to stream & download.
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      size="xs"
+                      variant="default"
+                      className="w-full text-xs h-7 gap-1.5 font-medium"
+                      onClick={() => onOpenFile(item)}
+                    >
+                      Stream & Open File
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Presigned URL card */}
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex flex-col",
+
+                  // Sizing & Spacing
+                  "p-2.5 rounded-md border gap-2",
+
+                  // Backgrounds & Borders
+                  "border-border bg-muted/10"
+                )}
+              >
+                <span
+                  className={cn(
+                    // Typography
+                    "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+                  )}
+                >
+                  Temporary URL Access
+                </span>
+                <div className="flex items-center gap-2">
+                  <Select value={expiration} onValueChange={(val) => { if (val) setExpiration(val); }}>
+                    <SelectTrigger className="h-7 text-xs font-sans">
+                      <SelectValue placeholder="Expiration" />
+                    </SelectTrigger>
+                    <SelectContent className="font-sans text-xs">
+                      {PRESIGNED_URL_EXPIRATIONS.map((opt) => (
+                        <SelectItem key={opt.seconds} value={opt.seconds.toString()}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button
                     size="xs"
                     variant="outline"
-                    className="w-full text-xs h-7 gap-1.5 font-medium"
-                    onClick={() => onOpenFile(item)}
+                    className="h-7 gap-1 shrink-0 text-xs font-medium"
+                    onClick={() => onCopyPresignedUrl(item, parseInt(expiration, 10))}
                   >
-                    Open Local File
+                    <LinkSimpleIcon className="size-3.5" />
+                    Presigned
                   </Button>
                 </div>
-              ) : (
-                <div className="space-y-2.5">
-                  <div className="flex items-start gap-2 text-muted-foreground text-xs">
-                    <CloudArrowDownIcon className="size-4 mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-medium text-foreground">Remote Object Only</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
-                        File is not cached locally. Click below to stream & download.
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    size="xs"
-                    variant="default"
-                    className="w-full text-xs h-7 gap-1.5 font-medium"
-                    onClick={() => onOpenFile(item)}
-                  >
-                    Stream & Open File
-                  </Button>
-                </div>
-              )}
-            </div>
+              </div>
 
-            {/* Presigned URL card */}
+              {/* Public URL copy action */}
+              <Button
+                variant="outline"
+                size="xs"
+                className="w-full text-xs h-7 gap-1.5 font-medium"
+                onClick={() => onCopyPublicUrl(item)}
+              >
+                <CopyIcon className="size-3.5" />
+                Copy Public URL
+              </Button>
+            </>
+          )}
+
+          {item.type === 'folder' && (
             <div
               className={cn(
                 // Layout & Positioning
-                "flex flex-col",
+                "flex-1 flex flex-col items-center justify-center text-center",
 
                 // Sizing & Spacing
-                "p-3 rounded-lg border gap-2.5",
+                "p-4 gap-1.5",
 
-                // Backgrounds & Borders
-                "border-border bg-muted/10"
+                // Typography & Colors
+                "text-muted-foreground"
               )}
             >
-              <h4
-                className={cn(
-                  // Typography
-                  "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
-                )}
-              >
-                Temporary URL Access
-              </h4>
-              <div className="flex items-center gap-2">
-                <Select value={expiration} onValueChange={(val) => { if (val) setExpiration(val); }}>
-                  <SelectTrigger className="h-7 text-xs font-sans">
-                    <SelectValue placeholder="Expiration" />
-                  </SelectTrigger>
-                  <SelectContent className="font-sans text-xs">
-                    {PRESIGNED_URL_EXPIRATIONS.map((opt) => (
-                      <SelectItem key={opt.seconds} value={opt.seconds.toString()}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  size="xs"
-                  variant="outline"
-                  className="h-7 gap-1 shrink-0 text-xs font-medium"
-                  onClick={() => onCopyPresignedUrl(item, parseInt(expiration, 10))}
-                >
-                  <LinkSimpleIcon className="size-3.5" />
-                  Presigned
-                </Button>
-              </div>
+              <FolderIcon className="size-8 text-amber-500/60" />
+              <p className="text-xs font-medium text-foreground">Selected Folder</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5 font-mono break-all leading-normal">
+                {item.key}
+              </p>
             </div>
-
-            {/* Public URL copy action */}
-            <Button
-              variant="outline"
-              size="xs"
-              className="w-full text-xs h-7 gap-1.5 font-medium"
-              onClick={() => onCopyPublicUrl(item)}
-            >
-              <CopyIcon className="size-3.5" />
-              Copy Public URL
-            </Button>
-          </>
-        )}
-
-        {item.type === 'folder' && (
-          <div
-            className={cn(
-              // Layout & Positioning
-              "flex-1 flex flex-col items-center justify-center text-center",
-
-              // Sizing & Spacing
-              "p-4 gap-1.5",
-
-              // Typography & Colors
-              "text-muted-foreground"
-            )}
-          >
-            <FolderIcon className="size-8 text-amber-500/60" />
-            <p className="text-xs font-medium text-foreground">Selected Folder</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5 font-mono break-all leading-normal">
-              {item.key}
-            </p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

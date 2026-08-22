@@ -26,7 +26,7 @@ export function ScratchpadPage() {
           "flex flex-1 min-h-0 overflow-hidden",
 
           // Backgrounds & Borders
-          "border rounded-md bg-background"
+          "border rounded-md"
         )}
       >
         {hook.isSidebarOpen && <ScratchpadSidebar hook={hook} />}

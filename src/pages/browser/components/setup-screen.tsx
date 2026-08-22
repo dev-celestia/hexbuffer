@@ -41,7 +41,7 @@ export function CrawlSetupScreen({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="xs" variant="outline" disabled={disabled}>
-          <GearSixIcon className="h-4 w-4" />
+          <GearSixIcon className="size-3.5" />
           Config
         </Button>
       </DialogTrigger>
@@ -64,12 +64,13 @@ export function CrawlSetupScreen({
             )}
           >
             <ButtonGroup>
-              <Button size="xs"
+              <Button
+                size="xs"
                 type="button"
                 variant="outline"
                 className={cn(
                   // Sizing & Spacing
-                  "h-8 px-3",
+                  "h-7 px-2.5",
 
                   // Typography
                   "text-xs",
@@ -83,12 +84,13 @@ export function CrawlSetupScreen({
               >
                 General
               </Button>
-              <Button size="xs"
+              <Button
+                size="xs"
                 type="button"
                 variant="outline"
                 className={cn(
                   // Sizing & Spacing
-                  "h-8 px-3",
+                  "h-7 px-2.5",
 
                   // Typography
                   "text-xs",
@@ -102,12 +104,13 @@ export function CrawlSetupScreen({
               >
                 Limits & Timing
               </Button>
-              <Button size="xs"
+              <Button
+                size="xs"
                 type="button"
                 variant="outline"
                 className={cn(
                   // Sizing & Spacing
-                  "h-8 px-3",
+                  "h-7 px-2.5",
 
                   // Typography
                   "text-xs",

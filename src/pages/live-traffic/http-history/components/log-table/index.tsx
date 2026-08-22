@@ -98,10 +98,7 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
               "flex items-center justify-center shrink-0 border-b",
 
               // Sizing & Spacing
-              "py-1",
-
-              // Backgrounds & Borders
-              "bg-muted/50"
+              "py-1"
             )}
           >
             <Button variant="outline" size="xs" onClick={actions.handleRefresh}>
@@ -136,7 +133,7 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
                 "text-xs font-semibold text-muted-foreground",
 
                 // Backgrounds & Borders
-                "bg-muted"
+                "bg-card"
               )}
             >
               <div className="flex items-center w-full min-w-0">

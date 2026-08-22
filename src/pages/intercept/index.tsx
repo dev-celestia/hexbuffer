@@ -99,7 +99,7 @@ export function InterceptPage() {
           "flex-1 min-h-0 overflow-hidden",
 
           // Backgrounds & Borders
-          "rounded-lg border bg-card"
+          "rounded-lg border"
         )}
       >
         <div

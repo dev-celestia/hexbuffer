@@ -112,10 +112,10 @@ export function FileGrid<T extends FileItem>({
     <div
       className={cn(
         // Layout & Positioning
-        "relative flex flex-col flex-1 min-h-0",
+        "relative flex flex-col flex-1 h-full min-h-0 overflow-hidden",
 
         // Backgrounds & Borders
-        "bg-background"
+        "rounded-md border border-border bg-background"
       )}
     >
       {viewMode === 'grid' ? (
@@ -163,10 +163,7 @@ export function FileGrid<T extends FileItem>({
         <div
           className={cn(
             // Layout & Positioning
-            "flex-1 overflow-auto min-h-0 select-none",
-
-            // Backgrounds & Borders
-            "bg-background"
+            "flex-1 overflow-auto min-h-0 select-none"
           )}
         >
           <table
@@ -181,13 +178,13 @@ export function FileGrid<T extends FileItem>({
             <thead
               className={cn(
                 // Layout & Positioning
-                "sticky top-0 z-10",
+                "sticky top-0 z-10 select-none",
 
                 // Backgrounds & Borders
-                "bg-muted/40 border-b border-border text-muted-foreground",
+                "bg-muted/50 border-b border-border text-muted-foreground",
 
                 // Typography
-                "text-[10px] font-semibold uppercase tracking-wider select-none"
+                "text-[10px] font-semibold uppercase tracking-wider"
               )}
             >
               <tr>
@@ -244,10 +241,9 @@ export function FileGrid<T extends FileItem>({
               size="xs"
               variant="destructive"
               disabled={deletingId === itemToDelete?.id}
-              onClick={async (e) => {
+              onClick={() => {
                 if (itemToDelete) {
-                  e.preventDefault();
-                  await onDeleteItem(itemToDelete);
+                  onDeleteItem(itemToDelete);
                   setItemToDelete(null);
                 }
               }}

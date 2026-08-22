@@ -60,13 +60,13 @@ export function WordlistPreviewPane({
       <div
         className={cn(
           // Layout & Positioning
-          "flex flex-col flex-1 items-center justify-center select-none text-center min-w-0",
+          "flex flex-col flex-1 items-center justify-center select-none text-center min-w-0 h-full",
 
           // Sizing & Spacing
-          "h-full p-6 gap-2",
+          "p-6 gap-2",
 
           // Backgrounds & Borders
-          "bg-background/30",
+          "rounded-md border border-border bg-background",
 
           // Typography & Colors
           "text-muted-foreground"
@@ -88,234 +88,262 @@ export function WordlistPreviewPane({
     <div
       className={cn(
         // Layout & Positioning
-        "flex flex-col flex-1 select-none overflow-hidden min-w-0",
-
-        // Sizing & Spacing
-        "h-full min-h-0",
+        "flex flex-col h-full overflow-hidden select-none min-w-0 min-h-0",
 
         // Backgrounds & Borders
-        "bg-background"
+        "rounded-md border border-border bg-background"
       )}
     >
-      {/* Header Info */}
+      {/* Header bar */}
       <div
         className={cn(
           // Layout & Positioning
-          "flex flex-col shrink-0",
+          "flex items-center justify-between shrink-0",
 
           // Sizing & Spacing
-          "p-4 border-b gap-3",
+          "px-3 py-1.5",
 
           // Backgrounds & Borders
-          "border-border bg-muted/10"
+          "border-b border-border bg-muted/40"
         )}
       >
-        <div
+        <span
           className={cn(
-            // Layout & Positioning
-            "flex items-start justify-between",
-
-            // Sizing & Spacing
-            "gap-2"
+            // Typography
+            "text-xs font-semibold uppercase tracking-wider text-muted-foreground"
           )}
         >
-          <div className="min-w-0 flex-1">
-            <h3 className="text-xs font-semibold text-foreground truncate">{item.name}</h3>
-            <p className="text-[10px] font-mono text-muted-foreground truncate mt-0.5">
-              {item.href}
-            </p>
-          </div>
-          {isInstalled ? (
-            <Badge variant="outline">
-              <CheckCircleIcon className="size-3" />
-              Installed
-            </Badge>
-          ) : (
-            <Badge variant="secondary">
-              <CloudArrowDownIcon className="size-3" />
-              Cloud
-            </Badge>
-          )}
-        </div>
-
-        {/* Metadata Grid */}
-        <div
-          className={cn(
-            // Layout & Positioning
-            "grid grid-cols-2",
-
-            // Sizing & Spacing
-            "gap-2 p-2.5 rounded-md",
-
-            // Backgrounds & Borders
-            "bg-muted/30 border border-border/50"
-          )}
-        >
-          <div className="flex items-center gap-1.5 min-w-0">
-            <RowsIcon className="size-3.5 text-muted-foreground shrink-0" />
-            <div className="min-w-0">
-              <span className="text-[9px] text-muted-foreground block">Lines</span>
-              <span className="text-[11px] font-mono font-medium text-foreground">
-                {item.lines.toLocaleString()}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5 min-w-0">
-            <HardDriveIcon className="size-3.5 text-muted-foreground shrink-0" />
-            <div className="min-w-0">
-              <span className="text-[9px] text-muted-foreground block">File Size</span>
-              <span className="text-[11px] font-mono font-medium text-foreground">
-                {formatBytes(item.fileSize)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Tags */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <TagIcon className="size-3 text-muted-foreground shrink-0" />
-          {item.tags.map((tag) => (
-            <Badge key={tag} variant="secondary">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-1.5 pt-0.5">
-          {isInstalled ? (
-            <>
-              <Button
-                size="xs"
-                variant="outline"
-                onClick={() => onOpen(item)}
-                className="flex-1 text-[11px] gap-1 h-6 px-2 font-medium"
-              >
-                <FolderOpenIcon className="size-3.5" />
-                <span>Reveal in Files</span>
-              </Button>
-              <Button
-                size="xs"
-                variant="ghost"
-                onClick={() => onDelete(item)}
-                className="text-[11px] text-destructive hover:bg-destructive/10 h-6 px-2 shrink-0"
-                title="Delete from local files"
-              >
-                <TrashIcon className="size-3.5" />
-              </Button>
-            </>
-          ) : (
-            <Button
-              size="xs"
-              variant="default"
-              disabled={isDownloading}
-              onClick={() => onDownload(item)}
-              className="flex-1 text-[11px] gap-1.5 h-6 px-2 font-medium"
-            >
-              {isDownloading ? (
-                <>
-                  <CircleNotchIcon className="size-3.5 animate-spin" />
-                  <span>Downloading…</span>
-                </>
-              ) : (
-                <>
-                  <CloudArrowDownIcon className="size-3.5" />
-                  <span>Download to Local</span>
-                </>
-              )}
-            </Button>
-          )}
-
-          <Button
-            size="xs"
-            variant="outline"
-            onClick={handleCopyUrl}
-            className="text-[11px] h-6 px-2 shrink-0"
-            title="Copy Raw GitHub URL"
-          >
-            <GlobeIcon className="size-3.5" />
-          </Button>
-        </div>
+          Wordlist Preview
+        </span>
+        {isInstalled ? (
+          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded font-semibold">
+            <CheckCircleIcon className="size-3" />
+            Ready
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted border border-muted-foreground/10 px-1.5 py-0.5 rounded font-semibold">
+            <CloudArrowDownIcon className="size-3" />
+            Cloud
+          </span>
+        )}
       </div>
 
-      {/* Preview Content Section */}
+      {/* Main scrollable body */}
       <div
         className={cn(
           // Layout & Positioning
-          "flex flex-col flex-1 min-h-0",
-
-          // Sizing & Spacing
-          "p-3 gap-2"
+          "flex-1 overflow-y-auto min-h-0 flex flex-col"
         )}
       >
+        {/* Header Info Box */}
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center justify-between"
-          )}
-        >
-          <span
-            className={cn(
-              // Typography
-              "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
-            )}
-          >
-            Preview (First 100 Lines)
-          </span>
-          {previewContent && (
-            <button
-              type="button"
-              onClick={handleCopyPreview}
-              className={cn(
-                // Layout & Positioning
-                "inline-flex items-center",
-
-                // Sizing & Spacing
-                "gap-1",
-
-                // Typography & Colors
-                "text-[10px] text-muted-foreground hover:text-foreground",
-
-                // Interactive & States
-                "transition-colors"
-              )}
-            >
-              <CopyIcon className="size-3" />
-              <span>Copy</span>
-            </button>
-          )}
-        </div>
-
-        <div
-          className={cn(
-            // Layout & Positioning
-            "flex-1 overflow-auto",
+            "flex flex-col shrink-0",
 
             // Sizing & Spacing
-            "p-2.5 rounded-md",
+            "p-3 border-b gap-2.5",
 
             // Backgrounds & Borders
-            "bg-muted/20 border border-border/60",
-
-            // Typography
-            "font-mono text-[11px] leading-relaxed text-muted-foreground"
+            "border-border bg-muted/10"
           )}
         >
-          {loading ? (
-            <div className="flex items-center justify-center h-full gap-2 text-xs text-muted-foreground">
-              <CircleNotchIcon className="size-4 animate-spin text-primary" />
-              <span>Loading preview…</span>
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-start justify-between min-w-0",
+
+              // Sizing & Spacing
+              "gap-2"
+            )}
+          >
+            <div className="min-w-0 flex-1">
+              <h3 className="text-xs font-semibold text-foreground truncate">{item.name}</h3>
+              <p className="text-[10px] font-mono text-muted-foreground truncate mt-0.5">
+                {item.href}
+              </p>
             </div>
-          ) : previewContent ? (
-            <pre className="whitespace-pre-wrap break-all font-mono text-[11px]">
-              {previewContent}
-            </pre>
-          ) : (
-            <div className="flex items-center justify-center h-full text-xs text-muted-foreground italic">
-              Click a wordlist to load preview
+          </div>
+
+          {/* Metadata Grid */}
+          <div
+            className={cn(
+              // Layout & Positioning
+              "grid grid-cols-2",
+
+              // Sizing & Spacing
+              "gap-2 p-2 rounded-md",
+
+              // Backgrounds & Borders
+              "bg-muted/30 border border-border/50"
+            )}
+          >
+            <div className="flex items-center gap-1.5 min-w-0">
+              <RowsIcon className="size-3.5 text-muted-foreground shrink-0" />
+              <div className="min-w-0">
+                <span className="text-[9px] text-muted-foreground block">Lines</span>
+                <span className="text-[11px] font-mono font-medium text-foreground">
+                  {item.lines.toLocaleString()}
+                </span>
+              </div>
             </div>
+
+            <div className="flex items-center gap-1.5 min-w-0">
+              <HardDriveIcon className="size-3.5 text-muted-foreground shrink-0" />
+              <div className="min-w-0">
+                <span className="text-[9px] text-muted-foreground block">File Size</span>
+                <span className="text-[11px] font-mono font-medium text-foreground">
+                  {formatBytes(item.fileSize)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Tags */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <TagIcon className="size-3 text-muted-foreground shrink-0" />
+            {item.tags.map((tag) => (
+              <Badge key={tag} variant="secondary">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-1.5 pt-0.5">
+            {isInstalled ? (
+              <>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  onClick={() => onOpen(item)}
+                  className="flex-1 text-[11px] gap-1 h-7 px-2 font-medium"
+                >
+                  <FolderOpenIcon className="size-3.5" />
+                  <span>Reveal in Files</span>
+                </Button>
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  onClick={() => onDelete(item)}
+                  className="text-[11px] text-destructive hover:bg-destructive/10 h-7 px-2 shrink-0"
+                  title="Delete from local files"
+                >
+                  <TrashIcon className="size-3.5" />
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="xs"
+                variant="default"
+                disabled={isDownloading}
+                onClick={() => onDownload(item)}
+                className="flex-1 text-[11px] gap-1.5 h-7 px-2 font-medium"
+              >
+                {isDownloading ? (
+                  <>
+                    <CircleNotchIcon className="size-3.5 animate-spin" />
+                    <span>Downloading…</span>
+                  </>
+                ) : (
+                  <>
+                    <CloudArrowDownIcon className="size-3.5" />
+                    <span>Download to Local</span>
+                  </>
+                )}
+              </Button>
+            )}
+
+            <Button
+              size="xs"
+              variant="outline"
+              onClick={handleCopyUrl}
+              className="text-[11px] h-7 px-2 shrink-0"
+              title="Copy Raw GitHub URL"
+            >
+              <GlobeIcon className="size-3.5" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Preview Content Section */}
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col flex-1 min-h-0",
+
+            // Sizing & Spacing
+            "p-3 gap-2"
           )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center justify-between"
+            )}
+          >
+            <span
+              className={cn(
+                // Typography
+                "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+              )}
+            >
+              Preview (First 100 Lines)
+            </span>
+            {previewContent && (
+              <button
+                type="button"
+                onClick={handleCopyPreview}
+                className={cn(
+                  // Layout & Positioning
+                  "inline-flex items-center",
+
+                  // Sizing & Spacing
+                  "gap-1",
+
+                  // Typography & Colors
+                  "text-[10px] text-muted-foreground hover:text-foreground",
+
+                  // Interactive & States
+                  "transition-colors"
+                )}
+              >
+                <CopyIcon className="size-3" />
+                <span>Copy</span>
+              </button>
+            )}
+          </div>
+
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex-1 overflow-auto min-h-[140px]",
+
+              // Sizing & Spacing
+              "p-2.5 rounded-md",
+
+              // Backgrounds & Borders
+              "bg-muted/20 border border-border/60",
+
+              // Typography
+              "font-mono text-[11px] leading-relaxed text-muted-foreground"
+            )}
+          >
+            {loading ? (
+              <div className="flex items-center justify-center h-full gap-2 text-xs text-muted-foreground">
+                <CircleNotchIcon className="size-4 animate-spin text-primary" />
+                <span>Loading preview…</span>
+              </div>
+            ) : previewContent ? (
+              <pre className="whitespace-pre-wrap break-all font-mono text-[11px]">
+                {previewContent}
+              </pre>
+            ) : (
+              <div className="flex items-center justify-center h-full text-xs text-muted-foreground italic">
+                Click a wordlist to load preview
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

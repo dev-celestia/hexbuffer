@@ -4,7 +4,10 @@ import { PushPinSimpleIcon } from '@phosphor-icons/react';
 import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import type { PageTabItem } from '@/layout/tabs-layout/types';
 
-import { LogFilters, HttpHistoryView, CreateGroupDialog, TargetSelectorDialog } from './components';
+import { HttpHistoryView } from './components/http-history-view';
+import { LogFilters } from './components/log-filters';
+import { CreateGroupDialog } from './components/group-dialog';
+import { TargetSelectorDialog } from '../components/target-selector';
 import {
   useHttpHistoryPage,
   ALL_HISTORY_TAB_ID,
