@@ -139,7 +139,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/hash',
     description: 'Generate and verify cryptographic hash functions.',
     colors: { bg: 'bg-red-500 dark:bg-red-500', hoverBg: 'group-hover:bg-red-500 dark:group-hover:bg-red-500', border: 'border-red-500 dark:border-red-500' },
-    flag: 'release'
+    flag: 'alpha'
   },
   {
     label: 'Comparer',

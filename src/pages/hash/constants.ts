@@ -1,4 +1,4 @@
-import type { HashType, AttackMode, RuleDefinition, CharsetConfig } from './types';
+import type { HashType, AttackMode, RuleDefinition } from './types';
 
 export const HASH_OPTIONS: { value: HashType; label: string; cryptoMethod: string }[] = [
   { value: 'sha256', label: 'SHA-256', cryptoMethod: 'SHA256' },
@@ -29,16 +29,6 @@ export const ATTACK_MODE_OPTIONS: { value: AttackMode; label: string; descriptio
     value: 'combinator',
     label: 'Combinator',
     description: 'Combine words from two wordlists'
-  },
-  {
-    value: 'mask',
-    label: 'Mask',
-    description: 'Brute-force using character patterns'
-  },
-  {
-    value: 'hybrid',
-    label: 'Hybrid',
-    description: 'Dictionary + mask combination'
   }
 ];
 
@@ -116,52 +106,7 @@ export const RULE_PRESETS: RuleDefinition[] = [
   }
 ];
 
-export const DEFAULT_CHARSET: CharsetConfig = {
-  lower: true,
-  upper: true,
-  digits: true,
-  special: false,
-  custom: ''
-};
 
-export const CHARSET_PRESETS: { name: string; charset: CharsetConfig }[] = [
-  {
-    name: 'Alphanumeric',
-    charset: { lower: true, upper: true, digits: true, special: false, custom: '' }
-  },
-  {
-    name: 'Lowercase + Digits',
-    charset: { lower: true, upper: false, digits: true, special: false, custom: '' }
-  },
-  {
-    name: 'Uppercase + Digits',
-    charset: { lower: false, upper: true, digits: true, special: false, custom: '' }
-  },
-  {
-    name: 'All Printable',
-    charset: { lower: true, upper: true, digits: true, special: true, custom: '' }
-  },
-  {
-    name: 'Digits Only',
-    charset: { lower: false, upper: false, digits: true, special: false, custom: '' }
-  }
-];
-
-export const MASK_PLACEHOLDERS = [
-  { symbol: '?l', description: 'Lowercase letter (a-z)' },
-  { symbol: '?u', description: 'Uppercase letter (A-Z)' },
-  { symbol: '?d', description: 'Digit (0-9)' },
-  { symbol: '?s', description: 'Special character (!@#$...)' },
-  { symbol: '?a', description: 'All printable ASCII' }
-];
-
-export const MASK_EXAMPLES = [
-  { pattern: '?l?l?l?l?d?d', description: 'Four letters + two digits (e.g., pass12)' },
-  { pattern: '?u?l?l?l?l?d?d?d', description: 'Capitalized word + three digits' },
-  { pattern: '?d?d?d?d', description: 'Four-digit PIN' },
-  { pattern: '?l?l?l?l?l?l?l?l', description: 'Eight lowercase letters' },
-  { pattern: 'pass?d?d?d?d', description: 'Fixed prefix + four digits' }
-];
 
 export const INITIAL_TELEMETRY = {
   hashRate: 0,

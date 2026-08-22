@@ -25,7 +25,8 @@ export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Deskto
   const description = item?.description || '';
 
   return (
-    <div
+    <button
+      type="button"
       data-desktop-icon
       onClick={(e) => {
         e.stopPropagation();
@@ -37,17 +38,19 @@ export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Deskto
 
         // Sizing & Spacing
         CONTAINER_SIZE,
+        "p-0",
 
         // Typography
         "text-center",
 
         // Backgrounds & Borders
-        "rounded-sm",
+        "rounded-sm border-0 bg-transparent",
 
         // Interactive & States
-        "transition-all duration-200"
+        "transition-all duration-200 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
       )}
       title={description}
+      aria-label={label}
     >
       <div
         className={cn(
@@ -126,7 +129,7 @@ export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Deskto
       >
         {label}
       </span>
-    </div>
+    </button>
   );
 }
 

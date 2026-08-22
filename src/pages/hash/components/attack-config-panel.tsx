@@ -5,19 +5,15 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Label,
   Input,
-  Checkbox,
 } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
-import { FolderOpen, Info, X } from '@phosphor-icons/react';
+import { FolderOpen, X } from '@phosphor-icons/react';
 import { open } from '@tauri-apps/plugin-dialog';
-import type { AttackMode, AttackConfig, HashType, CharsetConfig } from '../types';
+import type { AttackMode, AttackConfig, HashType } from '../types';
 import {
   ATTACK_MODE_OPTIONS,
   RULE_PRESETS,
-  CHARSET_PRESETS,
-  MASK_PLACEHOLDERS,
   HASH_OPTIONS,
 } from '../constants';
 import { useState } from 'react';
@@ -41,12 +37,6 @@ export function AttackConfigPanel({
   const [selectedRules, setSelectedRules] = useState<string[]>(
     config?.mode === 'straight' ? config.rules : []
   );
-  const [maskPattern, setMaskPattern] = useState(
-    config?.mode === 'mask' ? config.pattern : '?l?l?l?l?d?d'
-  );
-  const [charset, setCharset] = useState<CharsetConfig>(
-    config?.mode === 'mask' ? config.charset : CHARSET_PRESETS[0].charset
-  );
 
   const handleModeChange = (mode: AttackMode) => {
     setActiveMode(mode);
@@ -66,20 +56,6 @@ export function AttackConfigPanel({
           rightWordlistPath: '',
         });
         break;
-      case 'mask':
-        onConfigChange({
-          mode: 'mask',
-          pattern: maskPattern,
-          charset,
-        });
-        break;
-      case 'hybrid':
-        onConfigChange({
-          mode: 'hybrid',
-          wordlistPath: config && 'wordlistPath' in config ? config.wordlistPath : '',
-          mask: maskPattern,
-        });
-        break;
     }
   };
 
@@ -93,8 +69,6 @@ export function AttackConfigPanel({
       onConfigChange({ ...config, wordlistPath: path });
     } else if (config.mode === 'combinator') {
       onConfigChange({ ...config, [field]: path });
-    } else if (config.mode === 'hybrid' && field === 'wordlistPath') {
-      onConfigChange({ ...config, wordlistPath: path });
     }
   };
 
@@ -105,23 +79,6 @@ export function AttackConfigPanel({
     const newRules = preset.rules;
     setSelectedRules(newRules);
     onConfigChange({ ...config, rules: newRules });
-  };
-
-  const handleMaskPatternChange = (pattern: string) => {
-    setMaskPattern(pattern);
-    if (config?.mode === 'mask') {
-      onConfigChange({ ...config, pattern });
-    } else if (config?.mode === 'hybrid') {
-      onConfigChange({ ...config, mask: pattern });
-    }
-  };
-
-  const handleCharsetChange = (updates: Partial<CharsetConfig>) => {
-    const newCharset = { ...charset, ...updates };
-    setCharset(newCharset);
-    if (config?.mode === 'mask') {
-      onConfigChange({ ...config, charset: newCharset });
-    }
   };
 
   return (
@@ -317,201 +274,6 @@ export function AttackConfigPanel({
               onPathChange={(p) => handleWordlistPathChange('rightWordlistPath', p)}
               disabled={disabled}
             />
-          </>
-        )}
-
-        {activeMode === 'mask' && (
-          <>
-            <div
-              className={cn(
-                // Layout & Positioning
-                "flex flex-col",
-
-                // Sizing & Spacing
-                "gap-1.5"
-              )}
-            >
-              <span
-                className={cn(
-                  // Typography
-                  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
-                )}
-              >
-                Mask Pattern
-              </span>
-              <Input
-                value={maskPattern}
-                onChange={(e) => handleMaskPatternChange(e.target.value)}
-                placeholder="?l?l?l?l?d?d"
-                disabled={disabled}
-              />
-              <div
-                className={cn(
-                  // Sizing & Spacing
-                  "p-2 gap-1",
-
-                  // Typography
-                  "text-xs",
-
-                  // Backgrounds & Borders
-                  "bg-muted/30 rounded-md border border-border/40"
-                )}
-              >
-                <div
-                  className={cn(
-                    // Layout & Positioning
-                    "flex items-start",
-
-                    // Sizing & Spacing
-                    "gap-1.5 mb-1.5"
-                  )}
-                >
-                  <Info className="h-3.5 w-3.5 mt-0.5 shrink-0 text-muted-foreground" />
-                  <span className="text-[11px] text-muted-foreground">Placeholders:</span>
-                </div>
-                <div
-                  className={cn(
-                    // Layout & Positioning
-                    "grid grid-cols-2",
-
-                    // Sizing & Spacing
-                    "gap-1",
-
-                    // Typography
-                    "text-[10px]"
-                  )}
-                >
-                  {MASK_PLACEHOLDERS.map((ph) => (
-                    <div key={ph.symbol} className="flex gap-1.5">
-                      <code className="font-mono text-primary font-semibold">{ph.symbol}</code>
-                      <span className="text-muted-foreground">{ph.description}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div
-              className={cn(
-                // Layout & Positioning
-                "flex flex-col",
-
-                // Sizing & Spacing
-                "gap-2"
-              )}
-            >
-              <span
-                className={cn(
-                  // Typography
-                  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
-                )}
-              >
-                Character Set
-              </span>
-              <div
-                className={cn(
-                  // Layout & Positioning
-                  "grid grid-cols-2",
-
-                  // Sizing & Spacing
-                  "gap-2"
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={charset.lower}
-                    onCheckedChange={(checked) =>
-                      handleCharsetChange({ lower: checked as boolean })
-                    }
-                    disabled={disabled}
-                    id="charset-lower"
-                  />
-                  <Label htmlFor="charset-lower" className="text-xs cursor-pointer select-none">
-                    Lowercase (a-z)
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={charset.upper}
-                    onCheckedChange={(checked) =>
-                      handleCharsetChange({ upper: checked as boolean })
-                    }
-                    disabled={disabled}
-                    id="charset-upper"
-                  />
-                  <Label htmlFor="charset-upper" className="text-xs cursor-pointer select-none">
-                    Uppercase (A-Z)
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={charset.digits}
-                    onCheckedChange={(checked) =>
-                      handleCharsetChange({ digits: checked as boolean })
-                    }
-                    disabled={disabled}
-                    id="charset-digits"
-                  />
-                  <Label htmlFor="charset-digits" className="text-xs cursor-pointer select-none">
-                    Digits (0-9)
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={charset.special}
-                    onCheckedChange={(checked) =>
-                      handleCharsetChange({ special: checked as boolean })
-                    }
-                    disabled={disabled}
-                    id="charset-special"
-                  />
-                  <Label htmlFor="charset-special" className="text-xs cursor-pointer select-none">
-                    Special (!@#$...)
-                  </Label>
-                </div>
-              </div>
-              <Input
-                value={charset.custom || ''}
-                onChange={(e) => handleCharsetChange({ custom: e.target.value })}
-                placeholder="Custom characters (optional)"
-                disabled={disabled}
-              />
-            </div>
-          </>
-        )}
-
-        {activeMode === 'hybrid' && (
-          <>
-            <WordlistPathPicker
-              label="Wordlist Path"
-              path={config?.mode === 'hybrid' ? config.wordlistPath : ''}
-              onPathChange={(p) => handleWordlistPathChange('wordlistPath', p)}
-              disabled={disabled}
-            />
-            <div
-              className={cn(
-                // Layout & Positioning
-                "flex flex-col",
-
-                // Sizing & Spacing
-                "gap-1.5"
-              )}
-            >
-              <span
-                className={cn(
-                  // Typography
-                  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
-                )}
-              >
-                Mask Suffix
-              </span>
-              <Input
-                value={maskPattern}
-                onChange={(e) => handleMaskPatternChange(e.target.value)}
-                placeholder="?d?d?d"
-                disabled={disabled}
-              />
-            </div>
           </>
         )}
       </div>

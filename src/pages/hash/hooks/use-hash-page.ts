@@ -88,19 +88,6 @@ export function useHashPage() {
       return;
     }
 
-    if (attackConfig.mode === 'mask' && !attackConfig.pattern?.trim()) {
-      toast.error('Please enter a mask pattern');
-      return;
-    }
-
-    if (
-      attackConfig.mode === 'hybrid' &&
-      (!attackConfig.wordlistPath?.trim() || !attackConfig.mask?.trim())
-    ) {
-      toast.error('Please select a wordlist and enter a mask');
-      return;
-    }
-
     attackEngine.startAttack(attackConfig, targets, attackAlgorithm);
   }, [attackConfig, targets, attackAlgorithm, attackEngine]);
 

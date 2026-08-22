@@ -82,20 +82,6 @@ export function useAttackEngine() {
               rightWordlistPath: config.rightWordlistPath,
             };
             break;
-          case 'mask':
-            rustMode = {
-              mode: 'mask',
-              pattern: config.pattern,
-              charset: config.charset,
-            };
-            break;
-          case 'hybrid':
-            rustMode = {
-              mode: 'hybrid',
-              wordlistPath: config.wordlistPath,
-              mask: config.mask,
-            };
-            break;
         }
 
         const rustConfig = {

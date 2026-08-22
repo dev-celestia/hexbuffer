@@ -31,7 +31,7 @@ export function HashToolbar({
         "h-10 px-3 gap-3",
 
         // Backgrounds & Borders
-        "border-b border-border/40 bg-muted/10 backdrop-blur-md",
+        "border-b bg-muted/20",
 
         // Typography
         "select-none"
