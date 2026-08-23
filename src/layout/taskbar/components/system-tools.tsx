@@ -6,7 +6,6 @@ import {
   SunIcon,
   ArrowUpIcon,
   DotsThreeIcon,
-  StarFourIcon,
 } from '@phosphor-icons/react';
 
 import { cn } from '@/lib/utils';
@@ -17,9 +16,6 @@ export function SystemTools() {
   const {
     timeString,
     dateString,
-    isAssistantOpen,
-    isAssistantActive,
-    toggleAssistantWindow,
     theme,
     toggleTheme,
     openSettings,
@@ -37,31 +33,6 @@ export function SystemTools() {
   return (
     <>
       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 justify-end">
-        {/* AI Chat */}
-        <Tooltip>
-          <TooltipTrigger
-            type="button"
-            className={cn(
-              "relative flex size-7 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition-all hover:bg-muted/80 hover:text-foreground hover:scale-105 active:scale-95 cursor-pointer",
-              isAssistantActive && "bg-primary/15 text-primary scale-105",
-            )}
-            onClick={toggleAssistantWindow}
-            aria-label="AI Assistant"
-          >
-            <StarFourIcon className="size-4" />
-            {isAssistantOpen && (
-              <span
-                className={cn(
-                  "absolute bottom-[1.5px] left-1/2 -translate-x-1/2 size-1 rounded-full bg-primary transition-all duration-200",
-                  isAssistantActive ? "bg-primary w-2 h-1 shadow-[0_0_4px_rgba(59,130,246,0.6)]" : "bg-muted-foreground/60 scale-75"
-                )}
-              />
-            )}
-          </TooltipTrigger>
-          <TooltipContent side="top" sideOffset={12}>
-            AI Assistant
-          </TooltipContent>
-        </Tooltip>
 
         {/* Update badge */}
         {updateAvailable && !updateInstalled && (

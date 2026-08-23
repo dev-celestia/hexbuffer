@@ -1,6 +1,31 @@
 import React from 'react';
 import { HouseIcon, ArrowsDownUpIcon, BugIcon, PauseCircleIcon, FlaskIcon, BinaryIcon, AppWindowIcon, DatabaseIcon, FingerprintIcon, GearSixIcon, GitDiffIcon, LightningIcon, WifiHighIcon, SpinnerIcon, BlueprintIcon, MarkdownLogoIcon, InfinityIcon, StarFourIcon, CloverIcon, CubeFocusIcon, TargetIcon, SquaresFourIcon, BroadcastIcon, PencilIcon, HardDriveIcon, FolderOpenIcon, TerminalWindowIcon } from '@phosphor-icons/react';
 
+import httpHistoryIcon from '@/assets/app/http-history.png';
+import interceptIcon from '@/assets/app/Intercept.png';
+import intruderIcon from '@/assets/app/intruder.png';
+import notesIcon from '@/assets/app/notes.png';
+import repeaterIcon from '@/assets/app/repeater.png';
+import settingsIcon from '@/assets/app/settings.png';
+
+export type ImageSource = string | { src: string };
+
+export const APP_ICON_IMAGES: Record<string, ImageSource> = {
+  '/http-history': httpHistoryIcon,
+  '/intercept': interceptIcon,
+  '/intruder': intruderIcon,
+  '/scratchpad': notesIcon,
+  '/notes': notesIcon,
+  '/repeater': repeaterIcon,
+  '/settings': settingsIcon,
+};
+
+export function getAppIconImage(href: string, label?: string): string | undefined {
+  const raw = APP_ICON_IMAGES[href] || (label ? APP_ICON_IMAGES[label.toLowerCase()] : undefined);
+  if (!raw) return undefined;
+  return typeof raw === 'string' ? raw : raw.src;
+}
+
 export interface NavItem {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -50,7 +75,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/browser',
     description: 'Control an automated browser session to crawl websites and capture elements.',
     colors: { bg: 'bg-sky-500 dark:bg-sky-500', hoverBg: 'group-hover:bg-sky-500 dark:group-hover:bg-sky-500', border: 'border-sky-500 dark:border-sky-500' },
-    flag: 'beta'
+    flag: 'alpha'
   },
   {
     label: 'Intercept',
@@ -66,10 +91,10 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/assistant',
     description: 'Interact with AI to analyze web traffic and write exploits.',
     colors: { bg: 'bg-violet-500 dark:bg-violet-500', hoverBg: 'group-hover:bg-violet-500 dark:group-hover:bg-violet-500', border: 'border-violet-500 dark:border-violet-500' },
-    flag: 'beta'
+    flag: 'alpha'
   },
   {
-    label: 'Scratchpad',
+    label: 'Notes',
     icon: PencilIcon,
     href: '/scratchpad',
     description: 'Write quick notes, scripts, or documentation.',
@@ -82,7 +107,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/kanban',
     description: 'Visual project board: track tasks across status, priority, or assignee swimlanes with WIP limits.',
     colors: { bg: 'bg-rose-500 dark:bg-rose-500', hoverBg: 'group-hover:bg-rose-500 dark:group-hover:bg-rose-500', border: 'border-rose-500 dark:border-rose-500' },
-    flag: 'beta'
+    flag: 'alpha'
   },
   {
     label: 'Intruder',
@@ -92,14 +117,13 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     colors: { bg: 'bg-indigo-500 dark:bg-indigo-500', hoverBg: 'group-hover:bg-indigo-500 dark:group-hover:bg-indigo-500', border: 'border-indigo-500 dark:border-indigo-500' },
     flag: 'release'
   },
-
   {
     label: 'Repeater',
     icon: InfinityIcon,
     href: '/repeater',
     description: 'Modify HTTP requests, reissue them, and analyze responses side-by-side.',
     colors: { bg: 'bg-cyan-500 dark:bg-cyan-500', hoverBg: 'group-hover:bg-cyan-500 dark:group-hover:bg-cyan-500', border: 'border-cyan-500 dark:border-cyan-500' },
-    flag: 'beta'
+    flag: 'release'
   },
   {
     label: 'MockForge',
@@ -107,7 +131,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/mock-forge',
     description: 'Mock HTTP endpoints, responses, and simulate server behaviors.',
     colors: { bg: 'bg-teal-600 dark:bg-teal-600', hoverBg: 'group-hover:bg-teal-600 dark:group-hover:bg-teal-600', border: 'border-teal-600 dark:border-teal-600' },
-    flag: 'beta'
+    flag: 'alpha'
   },
   {
     label: 'Listener',
@@ -123,7 +147,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/documents',
     description: 'Create markdown documents, API definitions, and manage target scopes.',
     colors: { bg: 'bg-orange-500 dark:bg-orange-500', hoverBg: 'group-hover:bg-orange-500 dark:group-hover:bg-orange-500', border: 'border-orange-500 dark:border-orange-500' },
-    flag: 'release'
+    flag: 'alpha'
   },
   {
     label: 'Encoder',
@@ -131,7 +155,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/encoder',
     description: 'Access encoders, decoders, hashes, and other payload helper utilities.',
     colors: { bg: 'bg-teal-500 dark:bg-teal-500', hoverBg: 'group-hover:bg-teal-500 dark:group-hover:bg-teal-500', border: 'border-teal-500 dark:border-teal-500' },
-    flag: 'release'
+    flag: 'alpha'
   },
   {
     label: 'Hash',
@@ -147,7 +171,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/comparer',
     description: 'Compare files, requests, or text side-by-side.',
     colors: { bg: 'bg-fuchsia-500 dark:bg-fuchsia-500', hoverBg: 'group-hover:bg-fuchsia-500 dark:group-hover:bg-fuchsia-500', border: 'border-fuchsia-500 dark:border-fuchsia-500' },
-    flag: 'release'
+    flag: 'alpha'
   },
   {
     label: 'Port Scanner',
@@ -155,7 +179,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/port-scanner',
     description: 'Scan host ports for open services and network vulnerabilities.',
     colors: { bg: 'bg-pink-500 dark:bg-pink-500', hoverBg: 'group-hover:bg-pink-500 dark:group-hover:bg-pink-500', border: 'border-pink-500 dark:border-pink-500' },
-    flag: 'beta'
+    flag: 'alpha'
   },
   {
     label: 'JWT',
@@ -163,7 +187,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/jwt',
     description: 'Decode, edit, and sign JSON Web Tokens.',
     colors: { bg: 'bg-lime-700 dark:bg-lime-700', hoverBg: 'group-hover:bg-lime-700 dark:group-hover:bg-lime-700', border: 'border-lime-700 dark:border-lime-700' },
-    flag: 'release'
+    flag: 'alpha'
   },
   {
     label: 'XSS',
@@ -171,7 +195,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/xss-generator',
     description: 'Generate cross-site scripting payloads and templates.',
     colors: { bg: 'bg-yellow-500 dark:bg-yellow-500', hoverBg: 'group-hover:bg-yellow-500 dark:group-hover:bg-yellow-500', border: 'border-yellow-500 dark:border-yellow-500' },
-    flag: 'beta'
+    flag: 'alpha'
   },
   {
     label: 'SQL Inject',
@@ -205,7 +229,6 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     colors: { bg: 'bg-indigo-600 dark:bg-indigo-600', hoverBg: 'group-hover:bg-indigo-600 dark:group-hover:bg-indigo-600', border: 'border-indigo-600 dark:border-indigo-600' },
     flag: 'alpha'
   },
-
   {
     label: 'File Explorer',
     icon: FolderOpenIcon,

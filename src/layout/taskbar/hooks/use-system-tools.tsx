@@ -12,9 +12,6 @@ import { ManualUpdateCommand } from '@/pages/settings/components/manual-update-c
 export interface UseSystemToolsReturn {
   timeString: string;
   dateString: string;
-  isAssistantOpen: boolean;
-  isAssistantActive: boolean;
-  toggleAssistantWindow: () => void;
   theme: string;
   toggleTheme: () => void;
   openSettings: () => void;
@@ -47,31 +44,6 @@ export function useSystemTools(): UseSystemToolsReturn {
     day: 'numeric',
     year: 'numeric',
   });
-
-  // ── AI Assistant Window ──────────────────────────────────────────────
-  const windows = useNavStore((state) => state.windows);
-  const activeWindowId = useNavStore((state) => state.activeWindowId);
-
-  const isAssistantOpen = windows.some((w) => w.id === '/assistant' && w.isOpen);
-  const isAssistantActive = activeWindowId === '/assistant';
-
-  const toggleAssistantWindow = React.useCallback(() => {
-    const navStore = useNavStore.getState();
-    const pathname = '/assistant';
-    const winState = navStore.windows.find((w) => w.id === pathname);
-    const isActive = navStore.activeWindowId === pathname;
-
-    if (winState && winState.isOpen) {
-      if (isActive) {
-        navStore.closeWindow(pathname, navigate);
-      } else {
-        navStore.focusWindow(pathname, navigate);
-      }
-    } else {
-      navStore.openWindow(pathname, 'AI Assistant');
-      navStore.focusWindow(pathname, navigate);
-    }
-  }, [navigate]);
 
   // ── Theme & Settings ────────────────────────────────────────────────
   const { theme, toggleTheme } = useTheme();
@@ -138,9 +110,6 @@ export function useSystemTools(): UseSystemToolsReturn {
   return {
     timeString,
     dateString,
-    isAssistantOpen,
-    isAssistantActive,
-    toggleAssistantWindow,
     theme,
     toggleTheme,
     openSettings,

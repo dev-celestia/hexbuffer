@@ -1,4 +1,4 @@
-import { WarningCircleIcon, GitBranchIcon, ChatCircleIcon } from '@phosphor-icons/react';
+import { WarningCircleIcon } from '@phosphor-icons/react';
 
 export const INSTALLATION_GUIDES = [
   {
@@ -116,16 +116,3 @@ export const AI_MODEL_OPTIONS_BY_PROVIDER: Record<string, string[]> = {
 export const AI_API_KEY_PLACEHOLDERS: Record<string, string> = {
   deepseek: 'sk-...',
 };
-
-export const PROFILE_LINKS = [
-  {
-    label: 'Threads',
-    href: 'https://www.threads.com/@arhamymr',
-    Icon: ChatCircleIcon,
-  },
-  {
-    label: 'GitHub',
-    href: 'https://github.com/arhamymr',
-    Icon: GitBranchIcon,
-  },
-];

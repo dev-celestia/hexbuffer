@@ -173,7 +173,7 @@ export function LogFilters({
   const removeHighlight = useHighlightStore((s) => s.removeHighlight);
 
   return (
-    <div className="bg-muted p-1 px-2">
+    <div className="p-1 px-2">
       <div className="flex items-center gap-2 justify-between w-full">
         <div className='flex gap-2 items-center'>
           <div

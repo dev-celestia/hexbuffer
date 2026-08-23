@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { useNavStore } from '@/stores/nav';
-import { MAIN_NAV_ITEMS, type NavItem } from '@/layout/constants';
+import { getAppIconImage, MAIN_NAV_ITEMS, type NavItem } from '@/layout/constants';
 import { cn } from '@/lib/utils';
 
 export function RecentsWidget() {
@@ -42,48 +42,67 @@ export function RecentsWidget() {
       )}
     >
       {recentItems.length > 0 ? (
-        recentItems.map((item) => (
-          <div
-            key={item.href}
-            className={cn(
-              // Layout & Positioning
-              "group flex items-center justify-between gap-2",
-              // Sizing & Spacing
-              "py-1 px-1.5 rounded-md",
-              // Interactive & States
-              "hover:bg-muted/70 active:bg-muted/90 transition-colors cursor-pointer"
-            )}
-            onClick={() => handleOpenApp(item)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleOpenApp(item);
-              }
-            }}
-          >
+        recentItems.map((item) => {
+          const imageSrc = getAppIconImage(item.href, item.label);
+
+          return (
             <div
+              key={item.href}
               className={cn(
                 // Layout & Positioning
-                "flex items-center gap-1.5 min-w-0 flex-1"
+                "group flex items-center justify-between gap-2",
+                // Sizing & Spacing
+                "py-1 px-1.5 rounded-md",
+                // Interactive & States
+                "hover:bg-muted/70 active:bg-muted/90 transition-colors cursor-pointer"
               )}
+              onClick={() => handleOpenApp(item)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleOpenApp(item);
+                }
+              }}
             >
-              {/* Apple squircle app icon badge */}
               <div
                 className={cn(
                   // Layout & Positioning
-                  "flex items-center justify-center shrink-0 select-none",
-                  // Sizing & Spacing
-                  "size-4.5 rounded-[4px]",
-                  // Backgrounds & Borders
-                  item.colors
-                    ? `${item.colors.bg} border border-white/20 dark:border-white/10 shadow-xs text-white`
-                    : "bg-muted/60 border border-border/60 text-muted-foreground"
+                  "flex items-center gap-1.5 min-w-0 flex-1"
                 )}
               >
-                <item.icon className="size-2.5 shrink-0" />
-              </div>
+                {/* Apple squircle app icon badge */}
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-center justify-center shrink-0 select-none overflow-hidden",
+                    // Sizing & Spacing
+                    "size-4.5 rounded-[4px]",
+                    // Backgrounds & Borders
+                    item.colors
+                      ? `${item.colors.bg} border border-white/20 dark:border-white/10 shadow-xs text-white`
+                      : "bg-muted/60 border border-border/60 text-muted-foreground"
+                  )}
+                >
+                  {imageSrc ? (
+                    <img
+                      src={imageSrc}
+                      alt={item.label}
+                      draggable={false}
+                      className={cn(
+                        // Layout & Positioning
+                        "object-cover",
+                        // Sizing & Spacing
+                        "size-full",
+                        // Interactive & States
+                        "select-none"
+                      )}
+                    />
+                  ) : (
+                    <item.icon className="size-2.5 shrink-0" />
+                  )}
+                </div>
 
               {/* App Label */}
               <span
@@ -111,9 +130,10 @@ export function RecentsWidget() {
                   {item.flag}
                 </span>
               )}
+              </div>
             </div>
-          </div>
-        ))
+          );
+        })
       ) : (
         <div
           className={cn(

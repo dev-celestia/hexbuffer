@@ -22,7 +22,7 @@ const InspectorPage = React.lazy(() => import("@/pages/inspector").then((m) => (
 const WorkflowPage = React.lazy(() => import("@/pages/workflow").then((m) => ({ default: m.AutomationPage })));
 const RegressionPage = React.lazy(() => import("@/pages/regression").then((m) => ({ default: m.RegressionPage })));
 const AssistantPage = React.lazy(() => import("@/layout/assistant").then((m) => ({ default: m.AssistantPage })));
-const ScratchpadPage = React.lazy(() => import("@/pages/scratchpad").then((m) => ({ default: m.ScratchpadPage })));
+const ScratchpadPage = React.lazy(() => import("@/pages/notes").then((m) => ({ default: m.ScratchpadPage })));
 const MockForgePage = React.lazy(() => import("@/pages/mock-forge").then((m) => ({ default: m.MockForgePage })));
 const TerminalPage = React.lazy(() => import("@/pages/terminal").then((m) => ({ default: m.TerminalPage })));
 const DevServerPage = React.lazy(() => import("@/pages/dev-server").then((m) => ({ default: m.DevServerPage })));

@@ -71,7 +71,7 @@ const AssistantPage = React.lazy(() =>
   import("@/layout/assistant").then((m) => ({ default: m.AssistantPage }))
 );
 const ScratchpadPage = React.lazy(() =>
-  import("@/pages/scratchpad").then((m) => ({ default: m.ScratchpadPage }))
+  import("@/pages/notes").then((m) => ({ default: m.ScratchpadPage }))
 );
 const MockForgePage = React.lazy(() =>
   import("@/pages/mock-forge").then((m) => ({ default: m.MockForgePage }))

@@ -23,7 +23,7 @@ import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
 
-import { MAIN_NAV_ITEMS } from '../constants';
+import { getAppIconImage, MAIN_NAV_ITEMS } from '../constants';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 
 import { TriangleLogo } from '../triangle-logo';
@@ -104,6 +104,7 @@ export function AppLauncher() {
               <CommandGroup heading="Available Tools">
                 {launcherItems.map((item) => {
                   const isPinned = pinnedNavItems.includes(item.href);
+                  const imageSrc = getAppIconImage(item.href, item.label);
 
                   return (
                     <CommandItem
@@ -166,7 +167,7 @@ export function AppLauncher() {
                         <div
                           className={cn(
                             // Layout & Positioning
-                            "flex items-center justify-center shrink-0 select-none",
+                            "flex items-center justify-center shrink-0 select-none overflow-hidden",
                             // Sizing & Spacing
                             "size-8.5 rounded-lg",
                             // Backgrounds & Borders
@@ -175,7 +176,23 @@ export function AppLauncher() {
                               : "bg-muted/60 border border-border/60 text-muted-foreground"
                           )}
                         >
-                          <item.icon className="size-4.5 shrink-0" />
+                          {imageSrc ? (
+                            <img
+                              src={imageSrc}
+                              alt={item.label}
+                              draggable={false}
+                              className={cn(
+                                // Layout & Positioning
+                                "object-cover",
+                                // Sizing & Spacing
+                                "size-full",
+                                // Interactive & States
+                                "select-none"
+                              )}
+                            />
+                          ) : (
+                            <item.icon className="size-4.5 shrink-0" />
+                          )}
                         </div>
 
                         <div

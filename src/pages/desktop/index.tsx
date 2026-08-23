@@ -119,7 +119,7 @@ export function DesktopPage() {
                     )}
                   >
                     <GearSixIcon className="mr-1 size-3.5" />
-                    Manage
+                    Manage Widgets
                   </Button>
                 </DialogTrigger>
                 <DialogContent
@@ -129,9 +129,9 @@ export function DesktopPage() {
                   )}
                 >
                   <DialogHeader>
-                    <DialogTitle>Manage Desktop</DialogTitle>
+                    <DialogTitle>Desktop Widgets</DialogTitle>
                     <DialogDescription>
-                      Toggle visibility of shortcuts and widgets on your desktop workspace.
+                      Toggle visibility of widgets on your desktop workspace.
                     </DialogDescription>
                   </DialogHeader>
                   <div
@@ -140,7 +140,7 @@ export function DesktopPage() {
                       "mt-2"
                     )}
                   >
-                    <ShortcutManager />
+                    <ShortcutManager mode="widgets" />
                   </div>
                 </DialogContent>
               </Dialog>

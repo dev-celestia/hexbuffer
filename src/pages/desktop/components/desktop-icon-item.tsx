@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ALL_NAV_ITEMS } from '@/layout/constants';
+import { ALL_NAV_ITEMS, getAppIconImage } from '@/layout/constants';
 import { DEFAULT_ICON_COLORS } from '../constants';
 import { cn } from '@/lib/utils';
 
@@ -23,6 +23,7 @@ export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Readon
   const CustomIcon = item?.icon || IconComp;
   const colors = item?.colors || DEFAULT_ICON_COLORS;
   const description = item?.description || '';
+  const imageSrc = getAppIconImage(href, label);
 
   return (
     <button
@@ -61,32 +62,49 @@ export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Readon
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center justify-center",
+            "flex items-center justify-center overflow-hidden",
 
             // Sizing & Spacing
             INNER_SIZE,
 
             // Backgrounds & Borders
-            "rounded-sm border shadow-sm",
-            colors.bg,
+            "rounded-sm shadow-sm border",
 
             // Interactive & States
             "transition-all duration-200",
             colors.hoverBg
           )}
         >
-          <CustomIcon
-            className={cn(
-              // Sizing & Spacing
-              ICON_SIZE,
+          {imageSrc ? (
+            <img
+              src={imageSrc}
+              alt={label}
+              draggable={false}
+              className={cn(
+                // Layout & Positioning
+                "object-cover",
 
-              // Typography
-              "text-white",
+                // Sizing & Spacing
+                "size-full",
 
-              // Interactive & States
-              "transition-colors duration-200"
-            )}
-          />
+                // Interactive & States
+                "select-none"
+              )}
+            />
+          ) : (
+            <CustomIcon
+              className={cn(
+                // Sizing & Spacing
+                ICON_SIZE,
+
+                // Typography
+                "text-white",
+
+                // Interactive & States
+                "transition-colors duration-200"
+              )}
+            />
+          )}
         </div>
         {item?.flag && item.flag !== 'release' && (
           <span
@@ -132,4 +150,5 @@ export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Readon
     </button>
   );
 }
+
 

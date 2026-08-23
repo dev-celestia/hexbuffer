@@ -7,7 +7,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 import { cn } from '@/lib/utils';
 
-import type { NavItem } from '../../constants';
+import { getAppIconImage, type NavItem } from '../../constants';
 
 export interface DockItemProps {
   item: NavItem;
@@ -26,6 +26,8 @@ export function DockItem({
   onClick,
   children,
 }: DockItemProps) {
+  const imageSrc = getAppIconImage(item.href, item.label);
+
   return (
     <Tooltip>
       <TooltipTrigger render={<div className="relative size-7 group/dock-item touch-none shrink-0" />}>
@@ -33,21 +35,59 @@ export function DockItem({
             to={item.href}
             onClick={onClick}
             className={cn(
-              "flex size-full items-center justify-center rounded-sm transition-all active:scale-90 duration-150 text-white border shadow-xs select-none",
+              // Layout & Positioning
+              "flex size-full items-center justify-center overflow-hidden",
+
+              // Sizing & Spacing
+              "rounded-sm",
+
+              // Backgrounds & Borders
+              "border shadow-xs select-none",
               item.colors ? `${item.colors.bg} ${item.colors.border}` : "bg-muted/40 border-transparent text-muted-foreground",
+
+              // Interactive & States
+              "transition-all active:scale-90 duration-150 text-white",
               active
                 ? "opacity-100 ring-2 ring-primary/40 ring-offset-1 ring-offset-background"
                 : "opacity-85 hover:opacity-100 hover:scale-105"
             )}
           >
             {children}
-            <item.icon className="size-5 transition-transform duration-150 group-hover/dock-item:scale-110" />
+            {imageSrc ? (
+              <img
+                src={imageSrc}
+                alt={item.label}
+                draggable={false}
+                className={cn(
+                  // Layout & Positioning
+                  "object-cover",
+
+                  // Sizing & Spacing
+                  "size-full",
+
+                  // Interactive & States
+                  "transition-transform duration-150 group-hover/dock-item:scale-110 select-none"
+                )}
+              />
+            ) : (
+              <item.icon className="size-5 transition-transform duration-150 group-hover/dock-item:scale-110" />
+            )}
 
             {/* OS-style open indicator dot */}
             {isOpened && (
               <span
                 className={cn(
-                  "absolute bottom-[-10px] left-1/2 -translate-x-1/2 size-1 rounded-full bg-primary transition-all duration-200",
+                  // Layout & Positioning
+                  "absolute bottom-[-10px] left-1/2 -translate-x-1/2",
+
+                  // Sizing & Spacing
+                  "size-1 rounded-full",
+
+                  // Backgrounds & Borders
+                  "bg-primary",
+
+                  // Interactive & States
+                  "transition-all duration-200",
                   active ? "bg-primary w-3 h-1 shadow-[0_0_4px_rgba(59,130,246,0.6)]" : "bg-muted-foreground/60 scale-75"
                 )}
               />

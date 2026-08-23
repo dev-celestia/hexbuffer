@@ -1,14 +1,18 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, Input, Label, Switch } from '@celestia-project/ui';
 import * as React from 'react';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
-import { MAIN_NAV_ITEMS } from '@/layout/constants';
+import { getAppIconImage, MAIN_NAV_ITEMS } from '@/layout/constants';
 
 import { ArrowCounterClockwiseIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 
 import { DESKTOP_WIDGETS, DEFAULT_HIDDEN_WIDGETS } from '../constants';
 import { cn } from '@/lib/utils';
 
-export function ShortcutManager() {
+interface ShortcutManagerProps {
+  mode?: 'all' | 'widgets' | 'shortcuts';
+}
+
+export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>) {
   const hiddenNavItems = useAppSettingsStore((s) => s.hiddenNavItems);
   const toggleNavItem = useAppSettingsStore((s) => s.toggleNavItem);
   const resetHiddenNavItems = useAppSettingsStore((s) => s.resetHiddenNavItems);
@@ -36,12 +40,123 @@ export function ShortcutManager() {
   const isWidgetsModified =
     hiddenWidgets.length !== DEFAULT_HIDDEN_WIDGETS.length ||
     DEFAULT_HIDDEN_WIDGETS.some((id) => !hiddenWidgets.includes(id));
-  const hasModifiedItems = isNavModified || isWidgetsModified;
+  
+  const hasModifiedItems = mode === 'widgets'
+    ? isWidgetsModified
+    : mode === 'shortcuts'
+    ? isNavModified
+    : isNavModified || isWidgetsModified;
 
-  const handleResetAll = React.useCallback(() => {
-    resetHiddenNavItems();
-    resetHiddenWidgets();
-  }, [resetHiddenNavItems, resetHiddenWidgets]);
+  const handleReset = React.useCallback(() => {
+    if (mode === 'widgets') {
+      resetHiddenWidgets();
+    } else if (mode === 'shortcuts') {
+      resetHiddenNavItems();
+    } else {
+      resetHiddenNavItems();
+      resetHiddenWidgets();
+    }
+  }, [mode, resetHiddenNavItems, resetHiddenWidgets]);
+
+  if (mode === 'widgets') {
+    return (
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col select-none text-left",
+
+          // Sizing & Spacing
+          "gap-4"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "divide-y divide-border/40",
+
+            // Backgrounds & Borders
+            "border border-border/60 rounded-md bg-background"
+          )}
+        >
+          {DESKTOP_WIDGETS.map((widget) => {
+            const isHidden = hiddenWidgets.includes(widget.id);
+            return (
+              <div
+                key={widget.id}
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center justify-between",
+
+                  // Sizing & Spacing
+                  "gap-4 p-2",
+
+                  // Interactive & States
+                  "hover:bg-muted/30 transition-colors"
+                )}
+              >
+                <div className="min-w-0">
+                  <Label
+                    htmlFor={`widget-toggle-${widget.id}`}
+                    className={cn(
+                      // Layout & Positioning
+                      "block cursor-pointer",
+
+                      // Typography
+                      "text-xs font-medium"
+                    )}
+                  >
+                    {widget.label}
+                  </Label>
+                  <span
+                    className={cn(
+                      // Typography
+                      "text-[10px] text-muted-foreground line-clamp-1"
+                    )}
+                  >
+                    {widget.description}
+                  </span>
+                </div>
+                <Switch
+                  id={`widget-toggle-${widget.id}`}
+                  checked={!isHidden}
+                  onCheckedChange={() => toggleWidget(widget.id)}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center justify-between",
+
+            // Sizing & Spacing
+            "gap-4 pt-3.5 mt-1",
+
+            // Backgrounds & Borders
+            "border-t border-border/60"
+          )}
+        >
+          <div className="space-y-0.5">
+            <p className="text-xs font-medium">Reset customized state</p>
+            <p className="text-[10px] text-muted-foreground">
+              Restore default visibility of desktop widgets.
+            </p>
+          </div>
+          <Button
+            size="xs"
+            variant="outline"
+            onClick={handleReset}
+            disabled={!hasModifiedItems}
+          >
+            <ArrowCounterClockwiseIcon className="mr-1.5 size-3" />
+            Reset
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -162,6 +277,8 @@ export function ShortcutManager() {
                 filteredItems.map((item) => {
                   const Icon = item.icon;
                   const isHidden = hiddenNavItems.includes(item.href);
+                  const imageSrc = getAppIconImage(item.href, item.label);
+
                   return (
                     <div
                       key={item.href}
@@ -188,10 +305,10 @@ export function ShortcutManager() {
                         <div
                           className={cn(
                             // Layout & Positioning
-                            "shrink-0",
+                            "flex items-center justify-center shrink-0 select-none overflow-hidden",
 
                             // Sizing & Spacing
-                            "p-1",
+                            "size-5.5",
 
                             // Typography
                             "text-white",
@@ -201,7 +318,23 @@ export function ShortcutManager() {
                             item.colors?.bg ?? 'bg-muted'
                           )}
                         >
-                          <Icon className="size-3.5" />
+                          {imageSrc ? (
+                            <img
+                              src={imageSrc}
+                              alt={item.label}
+                              draggable={false}
+                              className={cn(
+                                // Layout & Positioning
+                                "object-cover",
+                                // Sizing & Spacing
+                                "size-full",
+                                // Interactive & States
+                                "select-none"
+                              )}
+                            />
+                          ) : (
+                            <Icon className="size-3.5" />
+                          )}
                         </div>
                         <div className="min-w-0">
                           <Label
@@ -365,7 +498,7 @@ export function ShortcutManager() {
         <Button
           size="xs"
           variant="outline"
-          onClick={handleResetAll}
+          onClick={handleReset}
           disabled={!hasModifiedItems}
         >
           <ArrowCounterClockwiseIcon className="mr-1.5 size-3" />
@@ -375,4 +508,5 @@ export function ShortcutManager() {
     </div>
   );
 }
+
 
