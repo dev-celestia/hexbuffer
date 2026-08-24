@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { SpinnerGapIcon } from '@phosphor-icons/react';
 
 import { cn } from '@/lib/utils';
 import { PAGE_COMPONENT_MAP } from './page-lazy-imports';
@@ -9,7 +10,7 @@ interface DesktopWorkspaceProps {
   activeChild: React.ReactNode;
 }
 
-export function DesktopWorkspace({ activeChild }: DesktopWorkspaceProps) {
+export function DesktopWorkspace({ activeChild }: Readonly<DesktopWorkspaceProps>) {
   const { openWindows, activeWindowId, handleWorkspaceClick } = useDesktopWorkspace();
   const DesktopComponent = PAGE_COMPONENT_MAP['/'];
 
@@ -52,7 +53,7 @@ export function DesktopWorkspace({ activeChild }: DesktopWorkspaceProps) {
             <div
               className={cn(
                 // Layout & Positioning
-                "flex items-center justify-center",
+                "flex items-center justify-center gap-2",
 
                 // Sizing & Spacing
                 "h-full",
@@ -61,6 +62,15 @@ export function DesktopWorkspace({ activeChild }: DesktopWorkspaceProps) {
                 "text-muted-foreground text-sm"
               )}
             >
+              <SpinnerGapIcon
+                className={cn(
+                  // Layout & Positioning
+                  "animate-spin shrink-0",
+
+                  // Sizing & Spacing
+                  "size-4"
+                )}
+              />
               Loading desktop…
             </div>
           }

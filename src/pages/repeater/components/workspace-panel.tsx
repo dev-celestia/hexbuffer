@@ -22,9 +22,10 @@ export function WorkspacePanel({ workspaceId }: { workspaceId: string }) {
     >
       {/* Left: Collections Tree (filtered to this workspace) */}
       <ResizablePanel
-        defaultSize={20}
-        minSize={15}
-        maxSize={40}
+        id="repeater-collections-panel"
+        defaultSize="260px"
+        minSize="200px"
+        maxSize="500px"
         className={cn(
           // Layout & Positioning
           "min-w-0"
@@ -37,8 +38,8 @@ export function WorkspacePanel({ workspaceId }: { workspaceId: string }) {
 
       {/* Right: Forge Content */}
       <ResizablePanel
-        defaultSize={80}
-        minSize={50}
+        id="repeater-forge-panel"
+        minSize="400px"
         className={cn(
           // Layout & Positioning
           "min-w-0 h-full flex flex-col"

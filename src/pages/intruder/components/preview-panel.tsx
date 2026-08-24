@@ -121,6 +121,8 @@ export function IntruderPreviewPane() {
                 <TextEditor
                   value={buildRawAttackResponse(selectedResult)}
                   options={{ readOnly: true }}
+                  language="markdown"
+                  className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
                   theme={theme}
                 />
               </div>

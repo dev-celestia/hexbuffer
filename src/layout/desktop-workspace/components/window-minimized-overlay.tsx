@@ -3,53 +3,159 @@ import { useNavigate } from "react-router-dom";
 import { XIcon } from "@phosphor-icons/react";
 
 import { useNavStore } from "@/stores/nav";
+import { getAppIconImage, type NavItem } from "@/layout/constants";
+import { cn } from "@/lib/utils";
 
 interface WindowMinimizedOverlayProps {
   id: string;
-  navItem?: any;
-  currentScale: number;
+  title?: string;
+  navItem?: NavItem;
 }
 
 export const WindowMinimizedOverlay = React.memo(function WindowMinimizedOverlay({
   id,
+  title,
   navItem,
-  currentScale,
 }: WindowMinimizedOverlayProps) {
   const navigate = useNavigate();
   const closeWindow = useNavStore((s) => s.closeWindow);
+  const focusWindow = useNavStore((s) => s.focusWindow);
+
+  const displayTitle = title || navItem?.label || id.replace("/", "");
+  const imageSrc = getAppIconImage(id, navItem?.label);
+  const CustomIcon = navItem?.icon;
+
+  const handleCardClick = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      focusWindow(id, navigate);
+    },
+    [focusWindow, id, navigate]
+  );
+
+  const handleCloseClick = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      closeWindow(id, navigate);
+    },
+    [closeWindow, id, navigate]
+  );
 
   return (
-    <div className="absolute inset-0 z-50 cursor-pointer bg-black/10 hover:bg-black/5 transition-colors flex items-center justify-center">
-      <div 
-        className="bg-background/95 p-2.5 rounded-full shadow-xl border border-border/60 flex items-center justify-center"
-        style={{ transform: 'scale(8)' }}
-      >
-        {navItem && (
-          <navItem.icon className="size-4 text-primary shrink-0" />
+    <div
+      onClick={handleCardClick}
+      className={cn(
+        // Layout & Positioning
+        "group/min relative flex flex-col justify-between",
+
+        // Sizing & Spacing
+        "w-full h-full p-2",
+
+        // Backgrounds & Borders
+        "bg-card/95 hover:bg-card backdrop-blur-md",
+
+        // Interactive & States
+        "cursor-pointer select-none transition-colors duration-150 animate-minimize-appear"
+      )}
+    >
+      {/* Top row: App Icon & Close Button */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between",
+
+          // Sizing & Spacing
+          "w-full gap-1"
         )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center justify-center shrink-0",
+
+            // Sizing & Spacing
+            "size-5",
+
+            // Backgrounds & Borders
+            "rounded-xs bg-muted/60 border border-border/40 p-0.5 shadow-2xs"
+          )}
+        >
+          {imageSrc ? (
+            <img
+              src={imageSrc}
+              alt={displayTitle}
+              draggable={false}
+              className={cn(
+                // Layout & Positioning
+                "object-cover",
+
+                // Sizing & Spacing
+                "size-full",
+
+                // Backgrounds & Borders
+                "rounded-2xs",
+
+                // Interactive & States
+                "select-none"
+              )}
+            />
+          ) : CustomIcon ? (
+            <CustomIcon
+              className={cn(
+                // Sizing & Spacing
+                "size-3",
+
+                // Typography
+                "text-primary"
+              )}
+            />
+          ) : null}
+        </div>
+
+        <button
+          type="button"
+          onClick={handleCloseClick}
+          className={cn(
+            // Layout & Positioning
+            "flex items-center justify-center shrink-0",
+
+            // Sizing & Spacing
+            "size-4",
+
+            // Typography
+            "text-muted-foreground",
+
+            // Backgrounds & Borders
+            "rounded-full bg-transparent",
+
+            // Interactive & States
+            "hover:bg-destructive hover:text-destructive-foreground transition-all active:scale-95 duration-100 opacity-60 group-hover/min:opacity-100"
+          )}
+          title="Close Window"
+        >
+          <XIcon className="size-2.5 stroke-[2.5]" />
+        </button>
       </div>
 
-      {/* Close button for minimized window */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          closeWindow(id, navigate);
-        }}
-        className="flex items-center justify-center rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg border border-background/40 transition-all active:scale-95 duration-100"
-        style={{ 
-          position: 'absolute',
-          top: `${6 / currentScale}px`,
-          right: `${6 / currentScale}px`,
-          width: '18px',
-          height: '18px',
-          transform: 'scale(7)',
-          transformOrigin: 'center',
-        }}
-        title="Close Window"
+      {/* Bottom row: Title */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col min-w-0",
+
+          // Sizing & Spacing
+          "mt-auto"
+        )}
       >
-        <XIcon className="size-2.5 stroke-[2.5]" />
-      </button>
+        <span
+          className={cn(
+            // Typography
+            "text-[11px] font-medium text-foreground truncate leading-tight group-hover/min:text-primary transition-colors"
+          )}
+        >
+          {displayTitle}
+        </span>
+      </div>
     </div>
   );
 });

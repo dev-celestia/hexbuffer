@@ -1,4 +1,12 @@
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   Button,
   ButtonGroup,
   Select,
@@ -9,13 +17,15 @@ import {
   SelectValue,
 } from '@celestia-project/ui';
 import * as React from 'react';
+import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
 import { ColorizedUrlInput } from '@/pages/repeater/components/select-env-input';
 import { METHOD_COLORS } from '@/lib/status-colors';
 import { useCollectionsStore } from '@/stores/collections';
-import { PlusIcon, PaperPlaneTiltIcon, FloppyDiskIcon, GearSixIcon } from '@phosphor-icons/react';
+import { PlusIcon, PaperPlaneTiltIcon, FloppyDiskIcon, GearSixIcon, TrashIcon } from '@phosphor-icons/react';
 import { sendCraftRequest, saveActiveEndpoint } from '@/triggers/repeater/craft';
+import { deleteEndpoint } from '@/triggers/repeater/management';
 import { ContextsDialog } from '../ContextsDialog';
 
 interface ForgeRequestBarProps {
@@ -38,10 +48,34 @@ export function ForgeRequestBar({
   const activeContextId = useCollectionsStore((s) => s.activeContextId);
   const contexts = useCollectionsStore((s) => s.contexts);
   const [contextsDialogOpen, setContextsDialogOpen] = React.useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+
+  const handleDelete = React.useCallback(async () => {
+    if (!activeEndpoint) return;
+    const endpointName = activeEndpoint.name;
+    try {
+      await deleteEndpoint(activeEndpoint.id);
+      toast.success(`Request "${endpointName}" deleted`);
+      setDeleteDialogOpen(false);
+    } catch {
+      toast.error(`Failed to delete request "${endpointName}"`);
+    }
+  }, [activeEndpoint]);
 
   return (
     <>
-      <div className="flex space-x-2 shrink-0 w-full min-w-0 justify-end">
+      <div className="flex space-x-2 shrink-0 w-full min-w-0 justify-between">
+        <div className="flex gap-2">
+        <Button
+          size="icon"
+          variant="outline"
+          className="h-7 w-7"
+          title="Environment Settings"
+          onClick={() => setContextsDialogOpen(true)}
+        >
+          <GearSixIcon className="size-3.5" />
+        </Button>
+
         <Select
           value={activeContextId || 'no-context'}
           onValueChange={(val) => {
@@ -71,31 +105,35 @@ export function ForgeRequestBar({
             </SelectItem>
           </SelectContent>
         </Select>
+        
+        </div>
+        
 
-        <Button
-          size="icon"
-          variant="outline"
-          className="h-7 w-7"
-          title="Environment Settings"
-          onClick={() => setContextsDialogOpen(true)}
-        >
-          <GearSixIcon className="size-3.5" />
-        </Button>
-
-          {activeEndpoint && (
+        <div className='flex gap-2'>
+ {activeEndpoint && (
+          <div className='flex gap-2'>
             <Button
               size="sm"
-              variant={"outline"}
+              variant="outline"
               onClick={() => { void saveActiveEndpoint(); }}
             >
               <FloppyDiskIcon className="size-3.5" />
-
               Save
             </Button>
-          )}
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              <TrashIcon className="size-3.5" />
+            </Button>
+          </div>
+        )}
+        </div>
+       
       </div>
 
-    <div className="flex space-x-2 shrink-0 w-full min-w-0 items-start">
+      <div className="flex space-x-2 shrink-0 w-full min-w-0 items-start">
         <Select value={method} onValueChange={onMethodChange}>
           <SelectTrigger className="w-28 font-semibold h-8">
             {method ? (
@@ -120,20 +158,33 @@ export function ForgeRequestBar({
           onChange={onUrlChange}
         />
 
-      
-          <Button
-            size="sm"
-            onClick={() => { void sendCraftRequest(); }}
-            className={"h-6"}
-          >
-            <PaperPlaneTiltIcon className="size-3.5" /> Send
-          </Button>
-          
+        <Button
+          size="sm"
+          onClick={() => { void sendCraftRequest(); }}
+          className="h-6"
+        >
+          <PaperPlaneTiltIcon className="size-3.5" /> Send
+        </Button>
       </div>
 
-    
-
       <ContextsDialog open={contextsDialogOpen} onOpenChange={setContextsDialogOpen} />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete request?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This request will be permanently deleted. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={() => { void handleDelete(); }}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

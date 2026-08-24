@@ -13,12 +13,12 @@ function replaceMarkedValues(text: string, payloadValues: Record<string, string>
   let positionIndex = 0;
 
   while (true) {
-    const start = text.indexOf('$', searchStart);
+    const start = text.indexOf('§', searchStart);
     if (start === -1) {
       break;
     }
 
-    const end = text.indexOf('$', start + 1);
+    const end = text.indexOf('§', start + 1);
     if (end === -1) {
       break;
     }
@@ -134,6 +134,8 @@ export function IntruderResultInspector({
             <TextEditor
               value={modifiedRequest}
               options={{ readOnly: true }}
+              language="markdown"
+              className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
               theme={theme}
             />
           </div>
@@ -151,6 +153,8 @@ export function IntruderResultInspector({
             <TextEditor
               value={rawResponse}
               options={{ readOnly: true }}
+              language="markdown"
+              className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
               theme={theme}
             />
           </div>

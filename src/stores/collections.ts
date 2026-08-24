@@ -455,9 +455,18 @@ export const useCollectionsStore = create<CollectionsState>()(
     },
 
     deleteEndpoint: async (id) => {
-      set((s) => ({
-        endpoints: s.endpoints.filter((ep) => ep.id !== id),
-      }));
+      set((s) => {
+        const isSelected = s.selectedNodeId === `ep-${id}`;
+        return {
+          endpoints: s.endpoints.filter((ep) => ep.id !== id),
+          ...(isSelected
+            ? {
+                selectedNodeId: null,
+                activeRequest: defaultActiveRequest(),
+              }
+            : {}),
+        };
+      });
       try {
         await invoke('delete_stash_endpoint', { id });
       } catch (e) {

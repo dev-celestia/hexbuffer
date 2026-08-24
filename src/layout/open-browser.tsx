@@ -12,6 +12,8 @@ export function OpenBrowserButton() {
     openBrowserTitle,
   } = useOpenBrowserButton();
 
+  const chromeIconSrc = typeof chromeIcon === 'string' ? chromeIcon : (chromeIcon as { src: string }).src;
+
   return (
     <Button
       variant="outline"
@@ -19,6 +21,7 @@ export function OpenBrowserButton() {
       onClick={openBrowser}
       disabled={isOpeningBrowser}
       title={openBrowserTitle}
+      className={"flex gap-2"}
     >
       {isOpeningBrowser ? (
         <SpinnerGapIcon
@@ -32,7 +35,7 @@ export function OpenBrowserButton() {
         />
       ) : (
         <img
-          src={chromeIcon}
+          src={chromeIconSrc}
           alt="Chrome"
           className={cn(
             // Layout & Positioning
@@ -43,7 +46,7 @@ export function OpenBrowserButton() {
           )}
         />
       )}
-      <span>OPEN BROWSER</span>
+      <span>BROWSER</span>
     </Button>
   );
 }

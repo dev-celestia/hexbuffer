@@ -12,22 +12,28 @@ interface UseDesktopWindowProps {
   isFocused: boolean;
 }
 
+export const MINIMIZED_CARD_WIDTH = 104;
+export const MINIMIZED_CARD_HEIGHT = 52;
+export const MINIMIZED_CARD_GAP = 8;
+export const MINIMIZED_MARGIN_LEFT = 12;
+export const MINIMIZED_MARGIN_BOTTOM = 12;
+
 function getWindowStyle({
   isMaximized,
   isMinimized,
+  isHovered,
   zIndex,
   mIndex,
   size,
   position,
-  currentScale,
 }: {
   isMaximized: boolean;
   isMinimized: boolean;
+  isHovered: boolean;
   zIndex: number;
   mIndex: number;
   size: { width: number; height: number };
   position: { x: number; y: number };
-  currentScale: number;
 }): React.CSSProperties {
   if (isMaximized && !isMinimized) {
     return {
@@ -37,13 +43,14 @@ function getWindowStyle({
   }
 
   if (isMinimized) {
+    const x = mIndex * (MINIMIZED_CARD_WIDTH + MINIMIZED_CARD_GAP) + MINIMIZED_MARGIN_LEFT;
+    const y = -MINIMIZED_CARD_HEIGHT - MINIMIZED_MARGIN_BOTTOM - (isHovered ? 4 : 0);
     return {
       left: 0,
       top: "100%",
-      transform: `translate3d(${mIndex * 120 + 4}px, ${-size.height * currentScale - 4}px, 0) scale(${currentScale})`,
-      transformOrigin: "top left",
-      width: size.width,
-      height: size.height,
+      transform: `translate3d(${x}px, ${y}px, 0)`,
+      width: MINIMIZED_CARD_WIDTH,
+      height: MINIMIZED_CARD_HEIGHT,
       zIndex: zIndex + 100,
       willChange: "transform, opacity",
       contain: "strict",
@@ -66,7 +73,7 @@ function getWindowStyle({
 
 function getWindowBorderClassName(isMinimized: boolean, isFocused: boolean): string {
   if (isMinimized) {
-    return "cursor-pointer border-[3px] border-border/85";
+    return "cursor-pointer border border-border/80 hover:border-primary/60 shadow-lg hover:shadow-xl";
   }
   if (isFocused) {
     return "border border-primary/60";
@@ -92,9 +99,9 @@ function getWindowClassName({
       : "";
   const interactionClassName = isInteracting
     ? "select-none"
-    : "transition-[transform,opacity,border-color] duration-200 cubic-bezier(0.16, 1, 0.3, 1)";
+    : "transition-[transform,opacity,border-color,box-shadow] duration-200 cubic-bezier(0.16, 1, 0.3, 1)";
 
-  return `absolute rounded-sm flex flex-col overflow-hidden bg-background shadow-2xl select-text pointer-events-auto ${borderClassName} ${maximizedClassName} ${interactionClassName}`;
+  return `absolute rounded-md flex flex-col overflow-hidden bg-background select-text pointer-events-auto ${borderClassName} ${maximizedClassName} ${interactionClassName}`;
 }
 
 export function useDesktopWindow({ win, isFocused }: UseDesktopWindowProps) {
@@ -136,10 +143,12 @@ export function useDesktopWindow({ win, isFocused }: UseDesktopWindowProps) {
   });
 
   const handleWindowClick = React.useCallback(() => {
-    if (!isFocused) {
+    if (isMinimized) {
+      focusWindow(id, navigate);
+    } else if (!isFocused) {
       focusWindow(id, navigate);
     }
-  }, [focusWindow, id, isFocused, navigate]);
+  }, [focusWindow, id, isFocused, isMinimized, navigate]);
 
   const tileLeft = React.useCallback(() => {
     const parent = windowRef.current?.parentElement;
@@ -180,8 +189,6 @@ export function useDesktopWindow({ win, isFocused }: UseDesktopWindowProps) {
   });
   const mIndex = Math.max(0, minimizedIndex);
 
-  const minimizedScale = isHovered ? 0.12 : 0.1;
-  const currentScale = isMinimized ? minimizedScale : 1;
   const isInteracting = isDragging || isResizing;
 
   const windowClassName = getWindowClassName({
@@ -194,11 +201,11 @@ export function useDesktopWindow({ win, isFocused }: UseDesktopWindowProps) {
   const windowStyle = getWindowStyle({
     isMaximized,
     isMinimized,
+    isHovered,
     zIndex,
     mIndex,
     size,
     position,
-    currentScale,
   });
 
   const handleMouseEnter = isMinimized ? () => setIsHovered(true) : undefined;
@@ -209,7 +216,6 @@ export function useDesktopWindow({ win, isFocused }: UseDesktopWindowProps) {
     navItem,
     isCurrentRoute,
     StaticComponent,
-    currentScale,
     windowClassName,
     windowStyle,
     isInteracting,

@@ -1,6 +1,6 @@
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from '@celestia-project/ui';
 import { useCallback, type MouseEvent, type ReactNode } from 'react';
-import { WarningCircleIcon, CheckCircleIcon, SpinnerGapIcon, PlusIcon, XIcon, GearSixIcon } from '@phosphor-icons/react';
+import { WarningCircleIcon, CheckCircleIcon, SpinnerGapIcon, PlusIcon, XIcon } from '@phosphor-icons/react';
 
 import { cn } from '@/lib/utils';
 import { useTabBar } from './use-tab-bar';
@@ -14,7 +14,6 @@ interface PageTabBarProps {
   onTabRename?: (id: string, name: string) => void;
   onTabClose?: (id: string) => void;
   onTabAdd?: () => void;
-  onTabManage?: () => void;
   onCloseTabsToLeft?: (id: string) => void;
   onCloseTabsToRight?: (id: string) => void;
   renderTabContextMenuItems?: (tab: PageTabItem) => ReactNode;
@@ -27,11 +26,10 @@ export function PageTabBar({
   onTabRename,
   onTabClose,
   onTabAdd,
-  onTabManage,
   onCloseTabsToLeft,
   onCloseTabsToRight,
   renderTabContextMenuItems,
-}: PageTabBarProps) {
+}: Readonly<PageTabBarProps>) {
   const {
     scrollContainerRef,
     editingInputRef,
@@ -178,7 +176,7 @@ export function PageTabBar({
 
             return (
               <ContextMenu key={tab.id}>
-                <ContextMenuTrigger asChild>{renderTab(tab)}</ContextMenuTrigger>
+                <ContextMenuTrigger>{renderTab(tab)}</ContextMenuTrigger>
                 <ContextMenuContent>
                   {customContextMenuItems}
                   {hasCustomContextMenuItems && (canRename || canClose) && <ContextMenuSeparator />}
@@ -220,17 +218,6 @@ export function PageTabBar({
               aria-label="Add tab"
             >
               <PlusIcon className="h-3.5 w-3.5" />
-            </button>
-          )}
-          {onTabManage && (
-            <button
-              type="button"
-              className="mb-0.5 flex h-5.5 w-7 shrink-0 items-center justify-center rounded-t-md border text-muted-foreground hover:bg-muted hover:text-foreground"
-              onClick={onTabManage}
-              aria-label="Manage workspaces"
-              title="Manage Workspaces"
-            >
-              <GearSixIcon className="h-3.5 w-3.5" />
             </button>
           )}
         </div>

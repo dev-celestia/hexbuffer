@@ -23,7 +23,7 @@ export function ProxyButton() {
         onClick={() => onToggleProxy(!isConnected)}
         disabled={!canToggle}
       >
-        {isConnected ? 'Stop' : 'Start'}
+        {isConnected ? 'STOP' : 'START'}
       </Button>
     </div>
   );

@@ -564,6 +564,22 @@
     opacity: 0.5;
   }
 
+  /* Minimized window appear animation */
+  @keyframes minimize-appear {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .animate-minimize-appear {
+    animation: minimize-appear 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
   .bg-border-beam {
     background: conic-gradient(from 0deg,
         transparent 0deg,
@@ -612,4 +628,29 @@
 /* ponytail: clean 3D shadow class for destructive buttons using relative color mixing */
 .shadow-destructive-3d {
   box-shadow: 0 2px 0 0 color-mix(in oklch, var(--destructive) 70%, black);
+}
+
+/* ===== CodeMirror / TextEditor syntax error & lint suppression ===== */
+.cm-editor .tok-invalid,
+.cm-editor .cm-invalidChar {
+  color: inherit !important;
+  background: transparent !important;
+  border: none !important;
+  text-decoration: none !important;
+}
+
+.cm-editor .cm-lintRange,
+.cm-editor .cm-lintRange-error,
+.cm-editor .cm-lintRange-warning,
+.cm-editor .cm-lint-marker,
+.cm-editor .cm-lint-marker-error,
+.cm-editor .cm-lint-marker-warning,
+.cm-editor .cm-diagnostic,
+.cm-editor .cm-diagnostic-error,
+.cm-editor .cm-diagnostic-warning,
+.cm-editor .cm-lintGutter {
+  background: transparent !important;
+  border: none !important;
+  text-decoration: none !important;
+  display: none !important;
 }

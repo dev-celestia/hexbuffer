@@ -24,7 +24,6 @@ const DesktopWindow = React.memo(function DesktopWindow({
     navItem,
     isCurrentRoute,
     StaticComponent,
-    currentScale,
     windowClassName,
     windowStyle,
     isInteracting,
@@ -54,29 +53,31 @@ const DesktopWindow = React.memo(function DesktopWindow({
       {isMinimized && (
         <WindowMinimizedOverlay
           id={id}
+          title={title}
           navItem={navItem}
-          currentScale={currentScale}
         />
       )}
 
       {/* Window Header */}
-      <WindowHeader
-        id={id}
-        title={title}
-        isFocused={isFocused}
-        isMaximized={isMaximized}
-        navItem={navItem}
-        onDragMouseDown={handleMouseDown}
-        tileLeft={tileLeft}
-        tileRight={tileRight}
-      />
+      {!isMinimized && (
+        <WindowHeader
+          id={id}
+          title={title}
+          isFocused={isFocused}
+          isMaximized={isMaximized}
+          navItem={navItem}
+          onDragMouseDown={handleMouseDown}
+          tileLeft={tileLeft}
+          tileRight={tileRight}
+        />
+      )}
 
       {/* Window Body Container */}
       <div
         className="flex-1 min-h-0 bg-background overflow-hidden relative"
         aria-hidden={isMinimized}
         style={{
-          visibility: isMinimized ? "hidden" : "visible",
+          display: isMinimized ? "none" : undefined,
         }}
       >
         {/* Interaction overlay blocks iframes/canvases during drag/resize to prevent reflow jank */}

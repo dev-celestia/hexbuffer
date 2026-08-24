@@ -37,9 +37,9 @@ function findMarkerRanges(text: string) {
   let searchStart = 0;
 
   while (true) {
-    const start = text.indexOf('$', searchStart);
+    const start = text.indexOf('§', searchStart);
     if (start === -1) break;
-    const end = text.indexOf('$', start + 1);
+    const end = text.indexOf('§', start + 1);
     if (end === -1) break;
     ranges.push({ start, end: end + 1 });
     searchStart = end + 1;
@@ -86,7 +86,7 @@ function applyMarkers(text: string, suggestions: InvokerMarkerSuggestion[]) {
       const before = nextText.slice(0, suggestion.start);
       const value = nextText.slice(suggestion.start, suggestion.end);
       const after = nextText.slice(suggestion.end);
-      return `${before}$${value}$${after}`;
+      return `${before}§${value}§${after}`;
     }, text);
 }
 
@@ -186,10 +186,17 @@ export function RequestTab() {
 
     const selectedText = view.state.sliceDoc(from, to);
     view.dispatch({
-      changes: { from, to, insert: `$${selectedText}$` },
+      changes: { from, to, insert: `§${selectedText}§` },
     });
     view.focus();
     updateRawRequest(view.state.doc.toString());
+  };
+
+  const clearAllMarkers = () => {
+    if (!rawRequestDraft.includes('§')) return;
+    const next = rawRequestDraft.replace(/§/g, '');
+    editRef.current = true;
+    updateRawRequest(next);
   };
 
   const handleAutoMark = async () => {
@@ -283,7 +290,7 @@ export function RequestTab() {
                 ) : (
                   <AsteriskIcon className="mr-1 h-4 w-4" />
                 )}
-                Auto
+                Auto §
               </Button>
               <Button
                 type="button"
@@ -293,7 +300,16 @@ export function RequestTab() {
                 disabled={isRunning}
               >
                 <TargetIcon className="mr-1 h-4 w-4" />
-                Mark
+                Add §
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={clearAllMarkers}
+                disabled={isRunning || config.positions.length === 0}
+              >
+                Clear §
               </Button>
             </ButtonGroup>
             <Tooltip>
@@ -303,7 +319,7 @@ export function RequestTab() {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="max-w-[320px]">
-                Select a URL, header, or body value and mark it as the payload insertion point.
+                Select a URL, header, or body value and mark it with § as the payload insertion point.
               </TooltipContent>
             </Tooltip>
           </div>
@@ -318,6 +334,8 @@ export function RequestTab() {
             onMount={(editor) => {
               rawRequestEditorRef.current = editor;
             }}
+            language="markdown"
+            className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
             theme={theme}
           />
         </div>

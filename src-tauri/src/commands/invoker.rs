@@ -212,7 +212,7 @@ pub fn validate_invoker_config(config: &InvokerAttackConfig) -> Result<(), Strin
     }
 
     if count_markers(&config.base_request) == 0 {
-        return Err("Add at least one payload position with $ markers".to_string());
+        return Err("Add at least one payload position with § markers".to_string());
     }
 
     if config
@@ -766,12 +766,12 @@ pub fn marker_defaults(request: &InvokerHttpRequest) -> Vec<String> {
 
 pub fn collect_marked_values(text: &str, values: &mut Vec<String>) {
     let mut search_start = 0;
-    while let Some(start) = text[search_start..].find('$') {
+    while let Some(start) = text[search_start..].find('§') {
         let absolute_start = search_start + start;
-        if let Some(end) = text[absolute_start + '$'.len_utf8()..].find('$') {
-            let absolute_end = absolute_start + '$'.len_utf8() + end;
-            values.push(text[absolute_start + '$'.len_utf8()..absolute_end].to_string());
-            search_start = absolute_end + '$'.len_utf8();
+        if let Some(end) = text[absolute_start + '§'.len_utf8()..].find('§') {
+            let absolute_end = absolute_start + '§'.len_utf8() + end;
+            values.push(text[absolute_start + '§'.len_utf8()..absolute_end].to_string());
+            search_start = absolute_end + '§'.len_utf8();
         } else {
             break;
         }
@@ -787,12 +787,12 @@ pub fn replace_marked_values(
     let mut search_start = 0;
     let mut position_index = 0;
 
-    while let Some(start) = text[search_start..].find('$') {
+    while let Some(start) = text[search_start..].find('§') {
         let absolute_start = search_start + start;
-        let Some(end) = text[absolute_start + '$'.len_utf8()..].find('$') else {
+        let Some(end) = text[absolute_start + '§'.len_utf8()..].find('§') else {
             break;
         };
-        let absolute_end = absolute_start + '$'.len_utf8() + end;
+        let absolute_end = absolute_start + '§'.len_utf8() + end;
         let position_key = format!("position_{}", position_index + 1);
         let replacement = payload_values
             .get(&position_key)
@@ -801,7 +801,7 @@ pub fn replace_marked_values(
 
         output.push_str(&text[search_start..absolute_start]);
         output.push_str(&replacement);
-        search_start = absolute_end + '$'.len_utf8();
+        search_start = absolute_end + '§'.len_utf8();
         position_index += 1;
     }
 
@@ -1012,7 +1012,7 @@ mod tests {
             mode: InvokerAttackMode::Sniper,
             base_request: InvokerHttpRequest {
                 method: "GET".to_string(),
-                url: "https://example.test/login?u=$user$&p=$pass$".to_string(),
+                url: "https://example.test/login?u=§user§&p=§pass§".to_string(),
                 headers: HashMap::new(),
                 body: String::new(),
                 follow_redirects: true,
