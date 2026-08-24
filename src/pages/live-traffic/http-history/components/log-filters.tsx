@@ -9,16 +9,28 @@ import {
   AlertDialogTitle,
   Badge,
   Button,
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
+  ButtonGroup,
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
   Input,
 } from '@celestia-project/ui';
 import { useEffect, useRef, useState } from 'react';
-import { XIcon, TrashIcon, CircleNotchIcon, PlayIcon, PauseIcon, TargetIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
+import {
+  CaretDownIcon,
+  CircleNotchIcon,
+  MagnifyingGlassIcon,
+  PauseIcon,
+  PlayIcon,
+  TargetIcon,
+  TrashIcon,
+  XIcon,
+} from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -123,6 +135,28 @@ export function LogFilters({
     setFilter({ ...filter, search: '' });
   };
 
+  const handleToggleMethod = (method: string, checked?: boolean) => {
+    const next = new Set(filter.methods);
+    const shouldAdd = checked !== undefined ? checked : !next.has(method);
+    if (shouldAdd) {
+      next.add(method);
+    } else {
+      next.delete(method);
+    }
+    setFilter({ ...filter, methods: next });
+  };
+
+  const handleToggleStatus = (statusLabel: string, checked?: boolean) => {
+    const next = new Set(filter.statusCodes);
+    const shouldAdd = checked !== undefined ? checked : !next.has(statusLabel);
+    if (shouldAdd) {
+      next.add(statusLabel);
+    } else {
+      next.delete(statusLabel);
+    }
+    setFilter({ ...filter, statusCodes: next });
+  };
+
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -163,9 +197,6 @@ export function LogFilters({
     }
   });
 
-  const hasActiveFilters =
-    filter.search || filter.pathFilter || filter.methods.size > 0 || filter.statusCodes.size > 0;
-
   const blacklistRules = useBlacklistStore((s) => s.rules);
   const removeBlacklistRule = useBlacklistStore((s) => s.removeRule);
 
@@ -174,8 +205,24 @@ export function LogFilters({
 
   return (
     <div className="p-1 px-2">
-      <div className="flex items-center gap-2 justify-between w-full">
-        <div className='flex gap-2 items-center'>
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between",
+
+          // Sizing & Spacing
+          "w-full gap-2"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-2"
+          )}
+        >
           <div
             className={cn(
               // Layout & Positioning
@@ -230,60 +277,84 @@ export function LogFilters({
             )}
           </div>
 
-          <span className="text-xs text-muted-foreground">Method:</span>
-          <Combobox
-            multiple
-            value={Array.from(filter.methods)}
-            onValueChange={(values) =>
-              setFilter({ ...filter, methods: new Set(values as string[]) })
-            }
-          >
-            <ComboboxInput
-              placeholder="Method..."
-              showTrigger
-              showClear
-              className="h-7 text-xs w-32 bg-background"
-            />
-            <ComboboxContent>
-              <ComboboxList>
-                <ComboboxEmpty>No method</ComboboxEmpty>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="xs">
+                <span>Method{filter.methods.size > 0 ? ` (${filter.methods.size})` : ''}</span>
+                <CaretDownIcon />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Filter by Method</DropdownMenuLabel>
+                <DropdownMenuSeparator />
                 {METHOD_FILTERS.map((method) => (
-                  <ComboboxItem key={method} value={method}>
+                  <DropdownMenuCheckboxItem
+                    key={method}
+                    checked={filter.methods.has(method)}
+                    onCheckedChange={(checked) => handleToggleMethod(method, !!checked)}
+                  >
                     {method}
-                  </ComboboxItem>
+                  </DropdownMenuCheckboxItem>
                 ))}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+              </DropdownMenuGroup>
+              {filter.methods.size > 0 && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => setFilter({ ...filter, methods: new Set() })}
+                  >
+                    Clear methods
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          <span className="text-xs text-muted-foreground">Status:</span>
-          <Combobox
-            multiple
-            value={Array.from(filter.statusCodes)}
-            onValueChange={(values) =>
-              setFilter({ ...filter, statusCodes: new Set(values as string[]) })
-            }
-          >
-            <ComboboxInput
-              placeholder="Status..."
-              showTrigger
-              showClear
-              className="h-7 text-xs w-32 bg-background"
-            />
-            <ComboboxContent>
-              <ComboboxList>
-                <ComboboxEmpty>No status</ComboboxEmpty>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="xs">
+                <span>Status{filter.statusCodes.size > 0 ? ` (${filter.statusCodes.size})` : ''}</span>
+                <CaretDownIcon />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                <DropdownMenuSeparator />
                 {STATUS_FILTERS.map((status) => (
-                  <ComboboxItem key={status.label} value={status.label}>
+                  <DropdownMenuCheckboxItem
+                    key={status.label}
+                    checked={filter.statusCodes.has(status.label)}
+                    onCheckedChange={(checked) => handleToggleStatus(status.label, !!checked)}
+                  >
                     {status.label}
-                  </ComboboxItem>
+                  </DropdownMenuCheckboxItem>
                 ))}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+              </DropdownMenuGroup>
+              {filter.statusCodes.size > 0 && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => setFilter({ ...filter, statusCodes: new Set() })}
+                  >
+                    Clear status
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        <div className='flex gap-2 items-center'>
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-2"
+          )}
+        >
           {isStreamManuallyPaused && (
             <Badge
               variant="outline"
@@ -302,35 +373,47 @@ export function LogFilters({
             </Badge>
           )}
 
-          {hasActiveFilters && (
-            <Button size="xs" variant="destructive" onClick={clearFilters}>
-              <XIcon className="h-4 w-4 mr-1" />
-              Clear
+          <ButtonGroup>
+            <Button
+              size="xs"
+              variant="secondary"
+              onClick={() => {
+                const store = useHttpHistoryQueryStore.getState();
+                const wasPaused = store.isStreamManuallyPaused;
+                store.setStreamManuallyPaused(!wasPaused);
+                if (wasPaused) store.triggerRefresh();
+              }}
+            >
+              {isStreamManuallyPaused ? (
+                <>
+                  <PlayIcon />
+                  Resume
+                </>
+              ) : (
+                <>
+                  <PauseIcon />
+                  Pause
+                </>
+              )}
             </Button>
-          )}
+
+            <Button
+              size="xs"
+              variant="secondary"
+              onClick={openTargetSelector}
+            >
+              <TargetIcon />
+              Target
+            </Button>
+          </ButtonGroup>
 
           <Button
             size="xs"
-            variant={"secondary"}
-            onClick={() => {
-              const store = useHttpHistoryQueryStore.getState();
-              const wasPaused = store.isStreamManuallyPaused;
-              store.setStreamManuallyPaused(!wasPaused);
-              if (wasPaused) store.triggerRefresh();
-            }}
+            variant="destructive"
+            onClick={() => setClearDialogOpen(true)}
+            title="Clear history"
           >
-            {isStreamManuallyPaused
-              ? <><PlayIcon className="size-3" /> Resume</>
-              : <><PauseIcon className="size-3" /> Pause</>}
-          </Button>
-
-          <Button size="xs" variant={"secondary"} onClick={openTargetSelector}>
-            <TargetIcon className="size-3" />
-            Target
-          </Button>
-
-          <Button size="xs" variant={"destructive"} onClick={() => setClearDialogOpen(true)}>
-            <TrashIcon className="size-3" />
+            <TrashIcon />
           </Button>
         </div>
       </div>
