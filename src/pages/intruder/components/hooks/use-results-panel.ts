@@ -19,20 +19,32 @@ export function getStatusStyle(result: AttackResult): string {
 }
 
 export function useResultsPanel() {
-  const { filterSearch, filteredResults, resultsCount, setFilterSearch, clearResults } =
-    useIntruderFilters();
-
-  const isRunning = useIntruderStore((s) => {
-    const tab = s.tabs.find((t) => t.id === s.activeTabId);
-    return tab?.isRunning ?? false;
-  });
-
-  const selectedResult = useIntruderStore((s) => {
-    const tab = s.tabs.find((t) => t.id === s.activeTabId);
-    return tab?.selectedResult ?? null;
-  });
+  const activeTab = useIntruderStore((s) => s.tabs.find((t) => t.id === s.activeTabId));
+  const results = activeTab?.results ?? [];
+  const isRunning = activeTab?.isRunning ?? false;
+  const selectedResult = activeTab?.selectedResult ?? null;
+  const isFullWidthResults = activeTab?.isFullWidthResults ?? false;
+  const isGrepMatchConfigured = Boolean(activeTab?.config?.grep_match?.enabled);
 
   const setSelectedResult = useIntruderStore((s) => s.setSelectedResult);
+  const toggleFullWidthResults = useIntruderStore((s) => s.toggleFullWidthResults);
+
+  const {
+    filterSearch,
+    filterStatusCodes,
+    filterOnlyGrepMatch,
+    filterOnlyErrors,
+    hasActiveFilters,
+    filteredResults,
+    resultsCount,
+    setFilterSearch,
+    toggleFilterStatusCode,
+    clearFilterStatusCodes,
+    setFilterOnlyGrepMatch,
+    setFilterOnlyErrors,
+    clearAllFilters,
+    clearResults,
+  } = useIntruderFilters();
 
   const [localSearch, setLocalSearch] = React.useState(filterSearch);
   const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -71,19 +83,58 @@ export function useResultsPanel() {
     [setSelectedResult]
   );
 
+  const statusCounts = React.useMemo(() => {
+    const counts: Record<string, number> = {
+      '2xx': 0,
+      '3xx': 0,
+      '4xx': 0,
+      '5xx': 0,
+      errors: 0,
+    };
+    results.forEach((r) => {
+      if (r.error) counts.errors += 1;
+      if (r.status !== undefined) {
+        if (r.status >= 200 && r.status < 300) counts['2xx'] += 1;
+        else if (r.status >= 300 && r.status < 400) counts['3xx'] += 1;
+        else if (r.status >= 400 && r.status < 500) counts['4xx'] += 1;
+        else if (r.status >= 500 && r.status < 600) counts['5xx'] += 1;
+      }
+    });
+    return counts;
+  }, [results]);
+
+  const grepMatchCount = React.useMemo(() => {
+    return results.filter((r) => r.grep_match).length;
+  }, [results]);
+
   return {
     isRunning,
     selectedResult,
     setSelectedResult,
     handleSelectResult,
+    isFullWidthResults,
+    toggleFullWidthResults,
     localSearch,
+    filterStatusCodes,
+    filterOnlyGrepMatch,
+    filterOnlyErrors,
+    hasActiveFilters,
+    statusCounts,
+    grepMatchCount,
+    isGrepMatchConfigured,
     filteredResults,
     resultsCount,
     handleSearchChange,
     handleClearSearch,
+    toggleFilterStatusCode,
+    clearFilterStatusCodes,
+    setFilterOnlyGrepMatch,
+    setFilterOnlyErrors,
+    clearAllFilters,
     clearResults,
     getStatusStyle,
   };
 }
 
 export const useInvokerResultsPanel = useResultsPanel;
+

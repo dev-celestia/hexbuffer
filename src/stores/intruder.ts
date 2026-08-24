@@ -38,6 +38,11 @@ export interface IntruderTab {
   selectedResult: AttackResult | null;
   startError: string | null;
   filterSearch: string;
+  filterStatusCodes: string[];
+  filterOnlyGrepMatch: boolean;
+  filterOnlyErrors: boolean;
+  isFullWidthResults: boolean;
+  isInspectorMaximized: boolean;
   payloadDialogOpen: boolean;
   payloadDialogPositionName: string | null;
   rawRequestDialogOpen: boolean;
@@ -80,6 +85,15 @@ export interface IntruderState extends InterceptBypassState {
   setSelectedResult: (result: AttackResult | null) => void;
   setPendingRequest: (request: AttackConfig['base_request'] | null) => void;
   setFilterSearch: (search: string) => void;
+  toggleFilterStatusCode: (status: string) => void;
+  clearFilterStatusCodes: () => void;
+  setFilterOnlyGrepMatch: (enabled: boolean) => void;
+  setFilterOnlyErrors: (enabled: boolean) => void;
+  clearAllFilters: () => void;
+  setIsFullWidthResults: (isFull: boolean) => void;
+  toggleFullWidthResults: () => void;
+  setIsInspectorMaximized: (isMax: boolean) => void;
+  toggleInspectorMaximized: () => void;
   setPayloadDialogOpen: (open: boolean, positionName?: string | null) => void;
   setRawRequestDialogOpen: (open: boolean) => void;
   setRawRequestContent: (content: string) => void;
@@ -116,6 +130,11 @@ function createAttackTab(index: number, config = createDefaultAttackConfig()): I
     selectedResult: null,
     startError: null,
     filterSearch: '',
+    filterStatusCodes: [],
+    filterOnlyGrepMatch: false,
+    filterOnlyErrors: false,
+    isFullWidthResults: false,
+    isInspectorMaximized: false,
     payloadDialogOpen: false,
     payloadDialogPositionName: null,
     rawRequestDialogOpen: false,
@@ -353,6 +372,36 @@ export const useIntruderStore = create<IntruderState>((set, get) => ({
   setPendingRequest: (request) => set({ pendingRequest: request }),
 
   setFilterSearch: (search) => updateActiveTab(set, (tab) => ({ ...tab, filterSearch: search })),
+  toggleFilterStatusCode: (status) =>
+    updateActiveTab(set, (tab) => {
+      const exists = tab.filterStatusCodes.includes(status);
+      const next = exists
+        ? tab.filterStatusCodes.filter((s) => s !== status)
+        : [...tab.filterStatusCodes, status];
+      return { ...tab, filterStatusCodes: next };
+    }),
+  clearFilterStatusCodes: () =>
+    updateActiveTab(set, (tab) => ({ ...tab, filterStatusCodes: [] })),
+  setFilterOnlyGrepMatch: (enabled) =>
+    updateActiveTab(set, (tab) => ({ ...tab, filterOnlyGrepMatch: enabled })),
+  setFilterOnlyErrors: (enabled) =>
+    updateActiveTab(set, (tab) => ({ ...tab, filterOnlyErrors: enabled })),
+  clearAllFilters: () =>
+    updateActiveTab(set, (tab) => ({
+      ...tab,
+      filterSearch: '',
+      filterStatusCodes: [],
+      filterOnlyGrepMatch: false,
+      filterOnlyErrors: false,
+    })),
+  setIsFullWidthResults: (isFull) =>
+    updateActiveTab(set, (tab) => ({ ...tab, isFullWidthResults: isFull })),
+  toggleFullWidthResults: () =>
+    updateActiveTab(set, (tab) => ({ ...tab, isFullWidthResults: !tab.isFullWidthResults })),
+  setIsInspectorMaximized: (isMax) =>
+    updateActiveTab(set, (tab) => ({ ...tab, isInspectorMaximized: isMax })),
+  toggleInspectorMaximized: () =>
+    updateActiveTab(set, (tab) => ({ ...tab, isInspectorMaximized: !tab.isInspectorMaximized })),
   setPayloadDialogOpen: (open, positionName = null) =>
     updateActiveTab(set, (tab) => ({
       ...tab,

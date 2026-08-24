@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { useTheme } from '@/components/theme-provider';
 import { buildRawHttpRequest, buildRawHttpResponse } from '@/lib/http-message';
+import { useIntruderStore } from '@/stores/intruder';
 import { replaceRequestMarkedValues, type AttackConfig, type AttackResult } from '../../types';
+import { getStatusStyle } from './use-results-panel';
 
 export function buildModifiedRequest(config: AttackConfig, result: AttackResult) {
   const request = replaceRequestMarkedValues(config.base_request, result.payload_values);
@@ -32,6 +34,13 @@ export function useResultInspector({
   const { theme } = useTheme();
   const [isStacked, setIsStacked] = React.useState(false);
 
+  const activeTab = useIntruderStore((s) => s.tabs.find((t) => t.id === s.activeTabId));
+  const isInspectorMaximized = activeTab?.isInspectorMaximized ?? false;
+  const isFullWidthResults = activeTab?.isFullWidthResults ?? false;
+
+  const toggleInspectorMaximized = useIntruderStore((s) => s.toggleInspectorMaximized);
+  const toggleFullWidthResults = useIntruderStore((s) => s.toggleFullWidthResults);
+
   const modifiedRequest = React.useMemo(() => {
     return buildModifiedRequest(config, selectedResult);
   }, [config, selectedResult]);
@@ -46,6 +55,10 @@ export function useResultInspector({
       : '';
   }, [selectedResult.payload_values]);
 
+  const statusStyle = React.useMemo(() => {
+    return getStatusStyle(selectedResult);
+  }, [selectedResult]);
+
   const toggleStacked = React.useCallback(() => {
     setIsStacked((prev) => !prev);
   }, []);
@@ -54,6 +67,11 @@ export function useResultInspector({
     theme,
     isStacked,
     toggleStacked,
+    isInspectorMaximized,
+    toggleInspectorMaximized,
+    isFullWidthResults,
+    toggleFullWidthResults,
+    statusStyle,
     modifiedRequest,
     rawResponse,
     payloadSummary,
@@ -61,3 +79,4 @@ export function useResultInspector({
 }
 
 export const useInvokerResultInspector = useResultInspector;
+

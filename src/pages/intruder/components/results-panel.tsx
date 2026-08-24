@@ -1,6 +1,30 @@
-import { Button, Input } from '@celestia-project/ui';
+import {
+  Badge,
+  Button,
+  ButtonGroup,
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Input,
+} from '@celestia-project/ui';
 import { formatPayloadValues, getResultUrl } from '../lib/utils';
-import { TrashIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
+import { INTRUDER_STATUS_FILTERS } from '../constants';
+import {
+  TrashIcon,
+  MagnifyingGlassIcon,
+  XIcon,
+  CaretDownIcon,
+  ArrowsOutSimpleIcon,
+  ArrowsInSimpleIcon,
+  FunnelSimpleIcon,
+  CheckCircleIcon,
+  WarningCircleIcon,
+} from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { useResultsPanel } from './hooks/use-results-panel';
 
@@ -9,23 +33,78 @@ export function IntruderResultsPanel() {
     isRunning,
     selectedResult,
     handleSelectResult,
+    isFullWidthResults,
+    toggleFullWidthResults,
     localSearch,
+    filterStatusCodes,
+    filterOnlyGrepMatch,
+    filterOnlyErrors,
+    hasActiveFilters,
+    statusCounts,
+    grepMatchCount,
+    isGrepMatchConfigured,
     filteredResults,
     resultsCount,
     handleSearchChange,
     handleClearSearch,
+    toggleFilterStatusCode,
+    clearFilterStatusCodes,
+    setFilterOnlyGrepMatch,
+    setFilterOnlyErrors,
+    clearAllFilters,
     clearResults,
     getStatusStyle,
   } = useResultsPanel();
 
+  const hasStatusFilters = filterStatusCodes.length > 0;
+
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-md border border-border bg-background">
-      {/* Header bar */}
-      <div className="flex justify-between items-center bg-muted/40 px-3 py-1.5 border-b border-border shrink-0 gap-2">
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Results ({filteredResults.length})
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col min-h-0 overflow-hidden",
+
+        // Sizing & Spacing
+        "h-full",
+
+        // Backgrounds & Borders
+        "rounded-md border border-border bg-background"
+      )}
+    >
+      {/* Header toolbar */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between shrink-0 select-none",
+
+          // Sizing & Spacing
+          "px-3 py-1.5 gap-2",
+
+          // Backgrounds & Borders
+          "border-b border-border bg-muted/40"
+        )}
+      >
+        {/* Left side: Count and Search input */}
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-2"
+          )}
+        >
+          <span
+            className={cn(
+              // Typography
+              "text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap"
+            )}
+          >
+            Results ({filteredResults.length}
+            {filteredResults.length !== resultsCount ? `/${resultsCount}` : ''})
           </span>
+
+          {/* Quick Search */}
           <div
             className={cn(
               // Layout & Positioning
@@ -48,13 +127,13 @@ export function IntruderResultsPanel() {
               type="text"
               value={localSearch}
               onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder="Search status or payload…"
+              placeholder="Search status, payload, URL…"
               className={cn(
                 // Sizing & Spacing
-                "h-7 w-44 pl-7 pr-7 text-xs bg-background",
+                "h-7 w-44 pl-7 pr-7 text-xs",
 
                 // Backgrounds & Borders
-                "border-input",
+                "bg-background border-input",
 
                 // Interactive & States
                 "focus:w-56 transition-all duration-150"
@@ -64,6 +143,7 @@ export function IntruderResultsPanel() {
               <button
                 type="button"
                 onClick={handleClearSearch}
+                aria-label="Clear search"
                 className={cn(
                   // Layout & Positioning
                   "absolute right-2 top-1/2 -translate-y-1/2",
@@ -75,37 +155,383 @@ export function IntruderResultsPanel() {
                   "hover:text-foreground"
                 )}
               >
-                <XIcon className="size-3" />
+                <XIcon
+                  className={cn(
+                    // Sizing & Spacing
+                    "size-3"
+                  )}
+                />
               </button>
             )}
           </div>
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={clearResults}
-          disabled={resultsCount === 0}
+        {/* Right side: Filters, Full-width Toggle, Clear */}
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-1.5"
+          )}
         >
-          <TrashIcon className="h-3.5 w-3.5 mr-1" />
-          Clear
-        </Button>
+          {/* Status Dropdown Filter */}
+          <ButtonGroup>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    data-state={hasStatusFilters ? 'on' : 'off'}
+                    className={cn(
+                      // Typography
+                      "text-xs",
+
+                      // Interactive & States
+                      hasStatusFilters && "text-primary font-medium"
+                    )}
+                  >
+                    <FunnelSimpleIcon
+                      className={cn(
+                        // Sizing & Spacing
+                        "size-3.5 mr-1"
+                      )}
+                    />
+                    <span>Status{hasStatusFilters ? ` (${filterStatusCodes.length})` : ''}</span>
+                    <CaretDownIcon
+                      className={cn(
+                        // Sizing & Spacing
+                        "size-3 ml-0.5"
+                      )}
+                    />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {INTRUDER_STATUS_FILTERS.map((status) => {
+                    const count = statusCounts[status.label] ?? 0;
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={status.label}
+                        checked={filterStatusCodes.includes(status.label)}
+                        onCheckedChange={() => toggleFilterStatusCode(status.label)}
+                      >
+                        <div
+                          className={cn(
+                            // Layout & Positioning
+                            "flex items-center justify-between",
+
+                            // Sizing & Spacing
+                            "w-full gap-4"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              // Typography
+                              "font-mono font-medium"
+                            )}
+                          >
+                            {status.label}
+                          </span>
+                          <span
+                            className={cn(
+                              // Typography
+                              "text-xs text-muted-foreground"
+                            )}
+                          >
+                            {count > 0 ? `(${count})` : ''}
+                          </span>
+                        </div>
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+                </DropdownMenuGroup>
+                {hasStatusFilters && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={clearFilterStatusCodes}>
+                      Clear status filter
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Grep Match Filter (if grep match configured or matches exist) */}
+            {(isGrepMatchConfigured || grepMatchCount > 0) && (
+              <Button
+                variant="outline"
+                size="sm"
+                data-state={filterOnlyGrepMatch ? 'on' : 'off'}
+                onClick={() => setFilterOnlyGrepMatch(!filterOnlyGrepMatch)}
+                className={cn(
+                  // Typography
+                  "text-xs",
+
+                  // Interactive & States
+                  filterOnlyGrepMatch && "text-emerald-500 font-medium"
+                )}
+                title="Show only grep keyword match results"
+              >
+                <CheckCircleIcon
+                  className={cn(
+                    // Sizing & Spacing
+                    "size-3.5 mr-1",
+
+                    // Typography
+                    filterOnlyGrepMatch ? "text-emerald-500" : "text-muted-foreground"
+                  )}
+                />
+                <span>Match{grepMatchCount > 0 ? ` (${grepMatchCount})` : ''}</span>
+              </Button>
+            )}
+
+            {/* Errors Only Quick Toggle */}
+            {statusCounts.errors > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                data-state={filterOnlyErrors ? 'on' : 'off'}
+                onClick={() => setFilterOnlyErrors(!filterOnlyErrors)}
+                className={cn(
+                  // Typography
+                  "text-xs",
+
+                  // Interactive & States
+                  filterOnlyErrors && "text-destructive font-medium"
+                )}
+                title="Show only failed / error requests"
+              >
+                <WarningCircleIcon
+                  className={cn(
+                    // Sizing & Spacing
+                    "size-3.5 mr-1",
+
+                    // Typography
+                    filterOnlyErrors ? "text-destructive" : "text-muted-foreground"
+                  )}
+                />
+                <span>Errors ({statusCounts.errors})</span>
+              </Button>
+            )}
+          </ButtonGroup>
+
+          {/* Reset all filters button */}
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearAllFilters}
+              className={cn(
+                // Sizing & Spacing
+                "h-7 px-2",
+
+                // Typography
+                "text-xs text-muted-foreground",
+
+                // Interactive & States
+                "hover:text-foreground"
+              )}
+              title="Reset all active filters"
+            >
+              <XIcon
+                className={cn(
+                  // Sizing & Spacing
+                  "size-3 mr-1"
+                )}
+              />
+              Reset
+            </Button>
+          )}
+
+          {/* Layout Toggle: Wider / Full-width Layout */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleFullWidthResults}
+            data-state={isFullWidthResults ? 'on' : 'off'}
+            className={cn(
+              // Sizing & Spacing
+              "h-7 px-2",
+
+              // Typography
+              "text-xs",
+
+              // Interactive & States
+              isFullWidthResults && "text-primary"
+            )}
+            title={isFullWidthResults ? "Restore 50/50 split layout" : "Expand results to full window width"}
+          >
+            {isFullWidthResults ? (
+              <>
+                <ArrowsInSimpleIcon
+                  className={cn(
+                    // Sizing & Spacing
+                    "size-3.5 mr-1"
+                  )}
+                />
+                <span>Split</span>
+              </>
+            ) : (
+              <>
+                <ArrowsOutSimpleIcon
+                  className={cn(
+                    // Sizing & Spacing
+                    "size-3.5 mr-1"
+                  )}
+                />
+                <span>Full Width</span>
+              </>
+            )}
+          </Button>
+
+          {/* Clear Results */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={clearResults}
+            disabled={resultsCount === 0}
+            className={cn(
+              // Sizing & Spacing
+              "h-7 px-2",
+
+              // Typography
+              "text-xs"
+            )}
+            title="Clear all results"
+          >
+            <TrashIcon
+              className={cn(
+                // Sizing & Spacing
+                "size-3.5 mr-1"
+              )}
+            />
+            Clear
+          </Button>
+        </div>
       </div>
 
       {/* Table Area */}
-      <div className="min-h-0 flex-1 overflow-auto">
-        <table className="w-full text-[12px] border-collapse">
-          <thead className="bg-muted/50 sticky top-0 border-b border-border z-10">
-            <tr className="select-none">
-              <th className="px-3 py-2 text-left font-medium text-muted-foreground w-12">#</th>
-              <th className="px-3 py-2 text-left font-medium text-muted-foreground w-1/3">Payload</th>
-              <th className="px-3 py-2 text-left font-medium text-muted-foreground w-1/3">URL</th>
-              <th className="px-3 py-2 text-left font-medium text-muted-foreground w-20">Status</th>
-              <th className="px-3 py-2 text-right font-medium text-muted-foreground w-20">Length</th>
-              <th className="px-3 py-2 text-right font-medium text-muted-foreground w-20">Time</th>
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex-1 min-h-0 overflow-auto"
+        )}
+      >
+        <table
+          className={cn(
+            // Sizing & Spacing
+            "w-full",
+
+            // Typography
+            "text-[12px] border-collapse"
+          )}
+        >
+          <thead
+            className={cn(
+              // Layout & Positioning
+              "sticky top-0 z-10 select-none",
+
+              // Backgrounds & Borders
+              "border-b border-border bg-muted/50"
+            )}
+          >
+            <tr>
+              <th
+                className={cn(
+                  // Sizing & Spacing
+                  "px-3 py-2 w-12",
+
+                  // Typography
+                  "text-left font-medium text-muted-foreground"
+                )}
+              >
+                #
+              </th>
+              <th
+                className={cn(
+                  // Sizing & Spacing
+                  "px-3 py-2 w-1/4",
+
+                  // Typography
+                  "text-left font-medium text-muted-foreground"
+                )}
+              >
+                Payload
+              </th>
+              <th
+                className={cn(
+                  // Sizing & Spacing
+                  "px-3 py-2 w-1/3",
+
+                  // Typography
+                  "text-left font-medium text-muted-foreground"
+                )}
+              >
+                URL
+              </th>
+              <th
+                className={cn(
+                  // Sizing & Spacing
+                  "px-3 py-2 w-20",
+
+                  // Typography
+                  "text-left font-medium text-muted-foreground"
+                )}
+              >
+                Status
+              </th>
+              <th
+                className={cn(
+                  // Sizing & Spacing
+                  "px-3 py-2 w-20",
+
+                  // Typography
+                  "text-right font-medium text-muted-foreground"
+                )}
+              >
+                Length
+              </th>
+              <th
+                className={cn(
+                  // Sizing & Spacing
+                  "px-3 py-2 w-20",
+
+                  // Typography
+                  "text-right font-medium text-muted-foreground"
+                )}
+              >
+                Time
+              </th>
+              {(isGrepMatchConfigured || grepMatchCount > 0) && (
+                <th
+                  className={cn(
+                    // Sizing & Spacing
+                    "px-3 py-2 w-16",
+
+                    // Typography
+                    "text-center font-medium text-muted-foreground"
+                  )}
+                >
+                  Match
+                </th>
+              )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/40 font-mono">
+          <tbody
+            className={cn(
+              // Typography
+              "font-mono",
+
+              // Backgrounds & Borders
+              "divide-y divide-border/40"
+            )}
+          >
             {filteredResults.map((result, index) => {
               const isSelected = selectedResult?.id === result.id;
               const hasError = Boolean(result.error);
@@ -114,59 +540,207 @@ export function IntruderResultsPanel() {
               return (
                 <tr
                   key={result.id}
-                  className={`cursor-pointer hover:bg-muted/30 transition-colors ${
-                    isSelected 
-                      ? 'bg-primary/10 hover:bg-primary/15 dark:bg-primary/15 dark:hover:bg-primary/20 text-foreground font-medium' 
-                      : hasError 
-                      ? 'bg-destructive/5 text-destructive hover:bg-destructive/10' 
-                      : ''
-                  }`}
+                  className={cn(
+                    // Interactive & States
+                    "cursor-pointer transition-colors hover:bg-muted/30",
+                    isSelected &&
+                      "bg-primary/10 hover:bg-primary/15 dark:bg-primary/15 dark:hover:bg-primary/20 text-foreground font-medium",
+                    hasError && !isSelected &&
+                      "bg-destructive/5 text-destructive hover:bg-destructive/10"
+                  )}
                   onClick={() => handleSelectResult(result)}
                 >
                   {/* Row Number */}
-                  <td className="px-3 py-1.5 text-muted-foreground select-none">{index + 1}</td>
-                  
+                  <td
+                    className={cn(
+                      // Layout & Positioning
+                      "select-none",
+
+                      // Sizing & Spacing
+                      "px-3 py-1.5",
+
+                      // Typography
+                      "text-muted-foreground"
+                    )}
+                  >
+                    {index + 1}
+                  </td>
+
                   {/* Payload values */}
-                  <td className="px-3 py-1.5 max-w-0 truncate font-semibold" title={formatPayloadValues(result.payload_values)}>
+                  <td
+                    className={cn(
+                      // Layout & Positioning
+                      "max-w-0 truncate",
+
+                      // Sizing & Spacing
+                      "px-3 py-1.5",
+
+                      // Typography
+                      "font-semibold"
+                    )}
+                    title={formatPayloadValues(result.payload_values)}
+                  >
                     {formatPayloadValues(result.payload_values)}
                   </td>
-                  
+
                   {/* Result URL */}
-                  <td className="px-3 py-1.5 max-w-0 truncate text-muted-foreground" title={getResultUrl(result)}>
+                  <td
+                    className={cn(
+                      // Layout & Positioning
+                      "max-w-0 truncate",
+
+                      // Sizing & Spacing
+                      "px-3 py-1.5",
+
+                      // Typography
+                      "text-muted-foreground"
+                    )}
+                    title={getResultUrl(result)}
+                  >
                     {getResultUrl(result) || '-'}
                   </td>
-                  
+
                   {/* Status Badge */}
-                  <td className="px-3 py-1.5">
+                  <td
+                    className={cn(
+                      // Sizing & Spacing
+                      "px-3 py-1.5"
+                    )}
+                  >
                     {result.status ? (
-                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${statusClass}`}>
+                      <span
+                        className={cn(
+                          // Layout & Positioning
+                          "inline-flex items-center",
+
+                          // Sizing & Spacing
+                          "px-1.5 py-0.5",
+
+                          // Typography
+                          "text-[10px] font-semibold",
+
+                          // Backgrounds & Borders
+                          "rounded border",
+                          statusClass
+                        )}
+                      >
                         {result.status}
                       </span>
                     ) : hasError ? (
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border bg-destructive/15 text-destructive border-destructive/20">
+                      <span
+                        className={cn(
+                          // Layout & Positioning
+                          "inline-flex items-center",
+
+                          // Sizing & Spacing
+                          "px-1.5 py-0.5",
+
+                          // Typography
+                          "text-[10px] font-semibold text-destructive",
+
+                          // Backgrounds & Borders
+                          "rounded border bg-destructive/15 border-destructive/20"
+                        )}
+                      >
                         Error
                       </span>
                     ) : (
-                      <span className="text-muted-foreground">-</span>
+                      <span
+                        className={cn(
+                          // Typography
+                          "text-muted-foreground"
+                        )}
+                      >
+                        -
+                      </span>
                     )}
                   </td>
-                  
+
                   {/* Response Length */}
-                  <td className="px-3 py-1.5 text-right text-muted-foreground">
+                  <td
+                    className={cn(
+                      // Sizing & Spacing
+                      "px-3 py-1.5",
+
+                      // Typography
+                      "text-right text-muted-foreground"
+                    )}
+                  >
                     {result.response_length != null ? result.response_length.toLocaleString() : '-'}
                   </td>
-                  
+
                   {/* Response Time */}
-                  <td className="px-3 py-1.5 text-right text-muted-foreground">
+                  <td
+                    className={cn(
+                      // Sizing & Spacing
+                      "px-3 py-1.5",
+
+                      // Typography
+                      "text-right text-muted-foreground"
+                    )}
+                  >
                     {result.response_time_ms != null ? `${result.response_time_ms}ms` : '-'}
                   </td>
+
+                  {/* Match Column */}
+                  {(isGrepMatchConfigured || grepMatchCount > 0) && (
+                    <td
+                      className={cn(
+                        // Sizing & Spacing
+                        "px-3 py-1.5",
+
+                        // Typography
+                        "text-center"
+                      )}
+                    >
+                      {result.grep_match ? (
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            // Sizing & Spacing
+                            "px-1.5 py-0.2",
+
+                            // Typography
+                            "text-[10px] font-semibold text-emerald-600 dark:text-emerald-400",
+
+                            // Backgrounds & Borders
+                            "border-emerald-500/30 bg-emerald-500/10"
+                          )}
+                        >
+                          Match
+                        </Badge>
+                      ) : (
+                        <span
+                          className={cn(
+                            // Typography
+                            "text-muted-foreground/50"
+                          )}
+                        >
+                          -
+                        </span>
+                      )}
+                    </td>
+                  )}
                 </tr>
               );
             })}
             {filteredResults.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-3 py-12 text-center text-muted-foreground font-sans">
-                  {isRunning ? 'Running attack...' : 'No results available.'}
+                <td
+                  colSpan={isGrepMatchConfigured || grepMatchCount > 0 ? 7 : 6}
+                  className={cn(
+                    // Sizing & Spacing
+                    "px-3 py-12",
+
+                    // Typography
+                    "text-center font-sans text-muted-foreground"
+                  )}
+                >
+                  {isRunning
+                    ? 'Running attack...'
+                    : hasActiveFilters
+                      ? 'No results match the current filter criteria.'
+                      : 'No results available.'}
                 </td>
               </tr>
             )}
@@ -178,3 +752,4 @@ export function IntruderResultsPanel() {
 }
 
 export const InvokerResultsPanel = IntruderResultsPanel;
+

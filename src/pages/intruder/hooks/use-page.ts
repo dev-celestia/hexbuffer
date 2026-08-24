@@ -131,6 +131,16 @@ export function useIntruderPage() {
     startAttack();
   }, [config, startAttack, updateConfig]);
 
+  const selectedResult = activeTab?.selectedResult ?? null;
+  const isFullWidthResults = activeTab?.isFullWidthResults ?? false;
+  const isInspectorMaximized = activeTab?.isInspectorMaximized ?? false;
+
+  const setSelectedResult = useIntruderStore((s) => s.setSelectedResult);
+  const toggleFullWidthResults = useIntruderStore((s) => s.toggleFullWidthResults);
+  const toggleInspectorMaximized = useIntruderStore((s) => s.toggleInspectorMaximized);
+  const setIsFullWidthResults = useIntruderStore((s) => s.setIsFullWidthResults);
+  const setIsInspectorMaximized = useIntruderStore((s) => s.setIsInspectorMaximized);
+
   return {
     tabs: tabs.map((tab) => ({ id: tab.id, name: tab.name })),
     activeTabId,
@@ -142,6 +152,14 @@ export function useIntruderPage() {
     progress,
     canStart,
     startBlockedReason,
+    selectedResult,
+    setSelectedResult,
+    isFullWidthResults,
+    isInspectorMaximized,
+    toggleFullWidthResults,
+    toggleInspectorMaximized,
+    setIsFullWidthResults,
+    setIsInspectorMaximized,
     stopAttack,
     clearStartError,
     handleStartAttack,
@@ -153,4 +171,5 @@ export function useIntruderPage() {
 }
 
 export const useInvokerPage = useIntruderPage;
+
 
