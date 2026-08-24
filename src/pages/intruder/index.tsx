@@ -8,19 +8,11 @@ import { IntruderResultsPanel } from './components/results-panel';
 import { IntruderResultInspector } from './components/result-inspector';
 import { useIntruderPage } from './hooks/use-page';
 import { stopIntruderUiAttack } from '@/triggers';
-import { useIntruderStore } from '@/stores/intruder';
 
 import { cn } from '@/lib/utils';
 
 export function IntruderPage() {
   const page = useIntruderPage();
-  
-  // Read state directly from the store for selectedResult to wire up the inspector
-  const selectedResult = useIntruderStore((s) => {
-    const tab = s.tabs.find((t) => t.id === s.activeTabId);
-    return tab?.selectedResult ?? null;
-  });
-  const setSelectedResult = useIntruderStore((s) => s.setSelectedResult);
 
   if (!page.activeTab) {
     return null;
@@ -237,91 +229,89 @@ export function IntruderPage() {
             )}
           </div>
 
-          {/* Main workspace (Simplified 50/50 Grid layout) */}
+          {/* Main workspace (Split vs Full-width layout) */}
           <div
             className={cn(
               // Layout & Positioning
               "flex-1 min-h-0 min-w-0"
             )}
           >
-            <div
-              className={cn(
-                // Layout & Positioning
-                "grid grid-cols-2 divide-x min-h-0",
-
-                // Sizing & Spacing
-                "h-full",
-
-                // Backgrounds & Borders
-                "divide-border"
-              )}
-            >
-              {/* Left Column: Attack configurations and Request templates */}
+            {page.isFullWidthResults ? (
+              /* Full-Width Results & Inspector Layout */
               <div
                 className={cn(
                   // Layout & Positioning
-                  "flex flex-col min-h-0 overflow-auto",
+                  "flex flex-col min-h-0",
 
                   // Sizing & Spacing
-                  "p-3"
+                  "h-full p-3"
                 )}
               >
-                <IntruderConfigDialog 
-                  isRunning={page.isRunning} 
-                  progress={page.progress} 
-                  startBlockedReason={page.startBlockedReason} 
-                />
-              </div>
-
-              {/* Right Column: Results & inspector view */}
-              <div
-                className={cn(
-                  // Layout & Positioning
-                  "flex flex-col min-h-0 overflow-hidden"
-                )}
-              >
-                {selectedResult ? (
-                  <div
-                    className={cn(
-                      // Layout & Positioning
-                      "grid grid-rows-2 divide-y min-h-0",
-
-                      // Sizing & Spacing
-                      "h-full",
-
-                      // Backgrounds & Borders
-                      "divide-border"
-                    )}
-                  >
-                    {/* Top Row: Results list table */}
+                {page.selectedResult ? (
+                  page.isInspectorMaximized ? (
                     <div
                       className={cn(
                         // Layout & Positioning
-                        "flex flex-col min-h-0",
+                        "flex flex-col min-h-0 overflow-hidden",
 
                         // Sizing & Spacing
-                        "p-3 pb-1.5"
-                      )}
-                    >
-                      <IntruderResultsPanel />
-                    </div>
+                        "h-full",
 
-                    {/* Bottom Row: Inline Request / Response inspector */}
-                    <div
-                      className={cn(
-                        // Layout & Positioning
-                        "flex flex-col min-h-0"
+                        // Backgrounds & Borders
+                        "rounded-md border border-border"
                       )}
                     >
                       {page.activeTab.config && (
-                        <IntruderResultInspector 
-                          selectedResult={selectedResult} 
-                          config={page.activeTab.config} 
-                          onClose={() => setSelectedResult(null)} 
+                        <IntruderResultInspector
+                          selectedResult={page.selectedResult}
+                          config={page.activeTab.config}
+                          onClose={() => page.setSelectedResult(null)}
                         />
                       )}
                     </div>
-                  </div>
+                  ) : (
+                    <div
+                      className={cn(
+                        // Layout & Positioning
+                        "grid grid-rows-2 divide-y min-h-0",
+
+                        // Sizing & Spacing
+                        "h-full",
+
+                        // Backgrounds & Borders
+                        "divide-border"
+                      )}
+                    >
+                      {/* Top Row: Results list table */}
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "flex flex-col min-h-0",
+
+                          // Sizing & Spacing
+                          "pb-1.5"
+                        )}
+                      >
+                        <IntruderResultsPanel />
+                      </div>
+
+                      {/* Bottom Row: Inline Request / Response inspector */}
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "flex flex-col min-h-0 pt-1.5"
+                        )}
+                      >
+                        {page.activeTab.config && (
+                          <IntruderResultInspector
+                            selectedResult={page.selectedResult}
+                            config={page.activeTab.config}
+                            onClose={() => page.setSelectedResult(null)}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  )
                 ) : (
                   <div
                     className={cn(
@@ -329,14 +319,129 @@ export function IntruderPage() {
                       "w-full min-h-0",
 
                       // Sizing & Spacing
-                      "h-full p-3"
+                      "h-full"
                     )}
                   >
                     <IntruderResultsPanel />
                   </div>
                 )}
               </div>
-            </div>
+            ) : (
+              /* Standard 50/50 Split Layout */
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "grid grid-cols-2 divide-x min-h-0",
+
+                  // Sizing & Spacing
+                  "h-full",
+
+                  // Backgrounds & Borders
+                  "divide-border"
+                )}
+              >
+                {/* Left Column: Attack configurations and Request templates */}
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex flex-col min-h-0 overflow-auto",
+
+                    // Sizing & Spacing
+                    "p-3"
+                  )}
+                >
+                  <IntruderConfigDialog
+                    isRunning={page.isRunning}
+                    progress={page.progress}
+                    startBlockedReason={page.startBlockedReason}
+                  />
+                </div>
+
+                {/* Right Column: Results & inspector view */}
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex flex-col min-h-0 overflow-hidden"
+                  )}
+                >
+                  {page.selectedResult ? (
+                    page.isInspectorMaximized ? (
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "flex flex-col min-h-0",
+
+                          // Sizing & Spacing
+                          "h-full p-3"
+                        )}
+                      >
+                        {page.activeTab.config && (
+                          <IntruderResultInspector
+                            selectedResult={page.selectedResult}
+                            config={page.activeTab.config}
+                            onClose={() => page.setSelectedResult(null)}
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "grid grid-rows-2 divide-y min-h-0",
+
+                          // Sizing & Spacing
+                          "h-full",
+
+                          // Backgrounds & Borders
+                          "divide-border"
+                        )}
+                      >
+                        {/* Top Row: Results list table */}
+                        <div
+                          className={cn(
+                            // Layout & Positioning
+                            "flex flex-col min-h-0",
+
+                            // Sizing & Spacing
+                            "p-3 pb-1.5"
+                          )}
+                        >
+                          <IntruderResultsPanel />
+                        </div>
+
+                        {/* Bottom Row: Inline Request / Response inspector */}
+                        <div
+                          className={cn(
+                            // Layout & Positioning
+                            "flex flex-col min-h-0"
+                          )}
+                        >
+                          {page.activeTab.config && (
+                            <IntruderResultInspector
+                              selectedResult={page.selectedResult}
+                              config={page.activeTab.config}
+                              onClose={() => page.setSelectedResult(null)}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    )
+                  ) : (
+                    <div
+                      className={cn(
+                        // Layout & Positioning
+                        "w-full min-h-0",
+
+                        // Sizing & Spacing
+                        "h-full p-3"
+                      )}
+                    >
+                      <IntruderResultsPanel />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </TabbedPageLayout>
