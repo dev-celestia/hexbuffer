@@ -107,6 +107,12 @@ pub struct MockForgeState {
     pub logs: Mutex<Vec<RequestLog>>,
 }
 
+impl Default for MockForgeState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MockForgeState {
     pub fn new() -> Self {
         Self {

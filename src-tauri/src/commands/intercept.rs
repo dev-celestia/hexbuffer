@@ -242,14 +242,14 @@ pub async fn remove_intercept_bypass_pattern(
 pub fn browser_candidates() -> Vec<PathBuf> {
     #[cfg(target_os = "macos")]
     {
-        return vec![
+        vec![
             PathBuf::from("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"),
             PathBuf::from("/Applications/Chromium.app/Contents/MacOS/Chromium"),
             PathBuf::from(
                 "/Applications/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
             ),
             PathBuf::from("/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary"),
-        ];
+        ]
     }
 
     #[cfg(target_os = "windows")]

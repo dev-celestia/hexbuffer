@@ -871,7 +871,7 @@ fn normalize_scan_host(input: &str) -> Result<String, String> {
     };
     let host = candidate
         .split('@')
-        .last()
+        .next_back()
         .unwrap_or_default()
         .split(':')
         .next()
@@ -1070,7 +1070,7 @@ fn encode_hex(bytes: &[u8]) -> String {
 
 fn decode_hex(value: &str) -> Result<String, String> {
     let trimmed = value.trim();
-    if trimmed.len() % 2 != 0 {
+    if !trimmed.len().is_multiple_of(2) {
         return Err("Hex input length must be even".to_string());
     }
     let mut bytes = Vec::new();

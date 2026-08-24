@@ -35,7 +35,7 @@ function MainWindowReadySignal() {
       invoke("show_main_window").catch((error) => {
         console.error("Failed to show main window:", error);
       });
-    }, 250);
+    }, 2200);
 
     return () => window.clearTimeout(timeoutId);
   }, []);

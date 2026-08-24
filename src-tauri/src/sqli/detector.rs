@@ -90,7 +90,7 @@ impl SqliDetector {
         if !vulnerabilities.is_empty() {
             let first_vuln = vulnerabilities.first().unwrap();
             if let Some(db_list) = self
-                .extract_databases(config, &first_vuln, &progress_callback)
+                .extract_databases(config, first_vuln, &progress_callback)
                 .await
             {
                 databases = db_list;
@@ -158,7 +158,7 @@ impl SqliDetector {
                 }
                 SqliParamLocation::Body => {
                     if !body.is_empty() {
-                        body.push_str("&");
+                        body.push('&');
                     }
                     body.push_str(&format!("{}={}", param.name, urlencoding::encode(&value)));
                 }

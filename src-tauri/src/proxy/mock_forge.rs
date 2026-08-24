@@ -36,7 +36,7 @@ pub async fn try_intercept(
     let query_map: HashMap<String, String> = if let Some(ref u) = uri_parsed {
         u.query_pairs().into_owned().collect()
     } else if let Some(pos) = ctx.req_uri.find('?') {
-        url::form_urlencoded::parse(ctx.req_uri[pos + 1..].as_bytes())
+        url::form_urlencoded::parse(&ctx.req_uri.as_bytes()[pos + 1..])
             .into_owned()
             .collect()
     } else {

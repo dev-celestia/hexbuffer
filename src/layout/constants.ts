@@ -1,4 +1,31 @@
-import { HouseIcon, ArrowsDownUpIcon, BugIcon, PauseCircleIcon, FlaskIcon, BinaryIcon, AppWindowIcon, DatabaseIcon, FingerprintIcon, GearSixIcon, GitDiffIcon, LightningIcon, WifiHighIcon, SpinnerIcon, BlueprintIcon, InfinityIcon, StarFourIcon, CloverIcon, CubeFocusIcon, TargetIcon, SquaresFourIcon, BroadcastIcon, PencilIcon, HardDriveIcon, FolderOpenIcon, TerminalWindowIcon } from '@phosphor-icons/react';
+import {
+  HouseIcon,
+  ArrowsDownUpIcon,
+  PauseCircleIcon,
+  CubeFocusIcon,
+  InfinityIcon,
+  PencilIcon,
+  GearSixIcon,
+  BugIcon,
+  FlaskIcon,
+  BinaryIcon,
+  AppWindowIcon,
+  DatabaseIcon,
+  FingerprintIcon,
+  GitDiffIcon,
+  LightningIcon,
+  WifiHighIcon,
+  SpinnerIcon,
+  BlueprintIcon,
+  StarFourIcon,
+  CloverIcon,
+  TargetIcon,
+  SquaresFourIcon,
+  BroadcastIcon,
+  FolderOpenIcon,
+  TerminalWindowIcon,
+  SparkleIcon,
+} from '@phosphor-icons/react';
 
 import httpHistoryIcon from '@/assets/app/http-history.png';
 import interceptIcon from '@/assets/app/Intercept.png';
@@ -35,14 +62,14 @@ export interface NavItem {
   flag?: 'alpha' | 'beta' | 'release';
 }
 
-export const ALL_NAV_ITEMS: NavItem[] = [
+export const RELEASE_NAV_ITEMS: NavItem[] = [
   {
     label: 'Desktop',
     icon: HouseIcon,
     href: '/',
     description: 'Overview of all tools and features.',
     colors: { bg: 'bg-slate-500 dark:bg-slate-500', hoverBg: 'group-hover:bg-slate-500 dark:group-hover:bg-slate-500', border: 'border-slate-500 dark:border-slate-500' },
-    flag: 'release'
+    flag: 'release',
   },
   {
     label: 'HTTP',
@@ -50,31 +77,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/http-history',
     description: 'Capture and inspect real-time HTTP/HTTPS network traffic.',
     colors: { bg: 'bg-white dark:bg-white', hoverBg: 'group-hover:bg-white dark:group-hover:bg-white', border: 'border-white dark:border-white' },
-    flag: 'release'
-  },
-  {
-    label: 'WebSocket',
-    icon: WifiHighIcon,
-    href: '/websocket-history',
-    description: 'Capture and inspect real-time WebSocket network traffic.',
-    colors: { bg: 'bg-blue-500 dark:bg-blue-500', hoverBg: 'group-hover:bg-blue-500 dark:group-hover:bg-blue-500', border: 'border-blue-500 dark:border-blue-500' },
-    flag: 'alpha'
-  },
-  {
-    label: 'Workflow',
-    icon: SpinnerIcon,
-    href: '/automation',
-    description: 'Build and execute automated visual workflows for target reconnaissance.',
-    colors: { bg: 'bg-purple-500 dark:bg-purple-500', hoverBg: 'group-hover:bg-purple-500 dark:group-hover:bg-purple-500', border: 'border-purple-500 dark:border-purple-500' },
-    flag: 'alpha'
-  },
-  {
-    label: 'Browser',
-    icon: AppWindowIcon,
-    href: '/browser',
-    description: 'Control an automated browser session to crawl websites and capture elements.',
-    colors: { bg: 'bg-sky-500 dark:bg-sky-500', hoverBg: 'group-hover:bg-sky-500 dark:group-hover:bg-sky-500', border: 'border-sky-500 dark:border-sky-500' },
-    flag: 'alpha'
+    flag: 'release',
   },
   {
     label: 'Intercept',
@@ -82,15 +85,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/intercept',
     description: 'Pause incoming or outgoing requests to modify headers, parameters, and bodies.',
     colors: { bg: 'bg-green-500 dark:bg-green-500', hoverBg: 'group-hover:bg-green-500 dark:group-hover:bg-green-500', border: 'border-green-500 dark:border-green-500' },
-    flag: 'release'
-  },
-  {
-    label: 'AI Assistant',
-    icon: StarFourIcon,
-    href: '/assistant',
-    description: 'Interact with AI to analyze web traffic and write exploits.',
-    colors: { bg: 'bg-violet-500 dark:bg-violet-500', hoverBg: 'group-hover:bg-violet-500 dark:group-hover:bg-violet-500', border: 'border-violet-500 dark:border-violet-500' },
-    flag: 'alpha'
+    flag: 'release',
   },
   {
     label: 'Notes',
@@ -98,15 +93,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/scratchpad',
     description: 'Write quick notes, scripts, or documentation.',
     colors: { bg: 'bg-amber-500 dark:bg-amber-500', hoverBg: 'group-hover:bg-amber-500 dark:group-hover:bg-amber-500', border: 'border-amber-500 dark:border-amber-500' },
-    flag: 'release'
-  },
-  {
-    label: 'Kanban',
-    icon: SquaresFourIcon,
-    href: '/kanban',
-    description: 'Visual project board: track tasks across status, priority, or assignee swimlanes with WIP limits.',
-    colors: { bg: 'bg-rose-500 dark:bg-rose-500', hoverBg: 'group-hover:bg-rose-500 dark:group-hover:bg-rose-500', border: 'border-rose-500 dark:border-rose-500' },
-    flag: 'alpha'
+    flag: 'release',
   },
   {
     label: 'Intruder',
@@ -114,7 +101,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/intruder',
     description: 'Generate client-side requests, perform attacks, and trigger endpoints.',
     colors: { bg: 'bg-indigo-500 dark:bg-indigo-500', hoverBg: 'group-hover:bg-indigo-500 dark:group-hover:bg-indigo-500', border: 'border-indigo-500 dark:border-indigo-500' },
-    flag: 'release'
+    flag: 'release',
   },
   {
     label: 'Repeater',
@@ -122,79 +109,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/repeater',
     description: 'Modify HTTP requests, reissue them, and analyze responses side-by-side.',
     colors: { bg: 'bg-cyan-500 dark:bg-cyan-500', hoverBg: 'group-hover:bg-cyan-500 dark:group-hover:bg-cyan-500', border: 'border-cyan-500 dark:border-cyan-500' },
-    flag: 'release'
-  },
-  {
-    label: 'MockForge',
-    icon: BlueprintIcon,
-    href: '/mock-forge',
-    description: 'Mock HTTP endpoints, responses, and simulate server behaviors.',
-    colors: { bg: 'bg-teal-600 dark:bg-teal-600', hoverBg: 'group-hover:bg-teal-600 dark:group-hover:bg-teal-600', border: 'border-teal-600 dark:border-teal-600' },
-    flag: 'alpha'
-  },
-  {
-    label: 'Listener',
-    icon: BroadcastIcon,
-    href: '/listener',
-    description: 'Generate out-of-band (OOB) payloads and monitor incoming DNS, HTTP, and HTTPS interactions.',
-    colors: { bg: 'bg-green-500 dark:bg-green-500', hoverBg: 'group-hover:bg-green-500 dark:group-hover:bg-green-500', border: 'border-green-500 dark:border-green-500' },
-    flag: 'alpha'
-  },
-  {
-    label: 'Encoder',
-    icon: BinaryIcon,
-    href: '/encoder',
-    description: 'Access encoders, decoders, hashes, and other payload helper utilities.',
-    colors: { bg: 'bg-teal-500 dark:bg-teal-500', hoverBg: 'group-hover:bg-teal-500 dark:group-hover:bg-teal-500', border: 'border-teal-500 dark:border-teal-500' },
-    flag: 'alpha'
-  },
-  {
-    label: 'Hash',
-    icon: FingerprintIcon,
-    href: '/hash',
-    description: 'Generate and verify cryptographic hash functions.',
-    colors: { bg: 'bg-red-500 dark:bg-red-500', hoverBg: 'group-hover:bg-red-500 dark:group-hover:bg-red-500', border: 'border-red-500 dark:border-red-500' },
-    flag: 'alpha'
-  },
-  {
-    label: 'Comparer',
-    icon: GitDiffIcon,
-    href: '/comparer',
-    description: 'Compare files, requests, or text side-by-side.',
-    colors: { bg: 'bg-fuchsia-500 dark:bg-fuchsia-500', hoverBg: 'group-hover:bg-fuchsia-500 dark:group-hover:bg-fuchsia-500', border: 'border-fuchsia-500 dark:border-fuchsia-500' },
-    flag: 'alpha'
-  },
-  {
-    label: 'Port Scanner',
-    icon: TargetIcon,
-    href: '/port-scanner',
-    description: 'Scan host ports for open services and network vulnerabilities.',
-    colors: { bg: 'bg-pink-500 dark:bg-pink-500', hoverBg: 'group-hover:bg-pink-500 dark:group-hover:bg-pink-500', border: 'border-pink-500 dark:border-pink-500' },
-    flag: 'alpha'
-  },
-  {
-    label: 'JWT',
-    icon: CloverIcon,
-    href: '/jwt',
-    description: 'Decode, edit, and sign JSON Web Tokens.',
-    colors: { bg: 'bg-lime-700 dark:bg-lime-700', hoverBg: 'group-hover:bg-lime-700 dark:group-hover:bg-lime-700', border: 'border-lime-700 dark:border-lime-700' },
-    flag: 'alpha'
-  },
-  {
-    label: 'XSS',
-    icon: LightningIcon,
-    href: '/xss-generator',
-    description: 'Generate cross-site scripting payloads and templates.',
-    colors: { bg: 'bg-yellow-500 dark:bg-yellow-500', hoverBg: 'group-hover:bg-yellow-500 dark:group-hover:bg-yellow-500', border: 'border-yellow-500 dark:border-yellow-500' },
-    flag: 'alpha'
-  },
-  {
-    label: 'SQL Inject',
-    icon: DatabaseIcon,
-    href: '/sql-injection',
-    description: 'Test databases for SQL injection vulnerabilities.',
-    colors: { bg: 'bg-cyan-600 dark:bg-cyan-600', hoverBg: 'group-hover:bg-cyan-600 dark:group-hover:bg-cyan-600', border: 'border-cyan-600 dark:border-cyan-600' },
-    flag: 'alpha'
+    flag: 'release',
   },
   {
     label: 'Settings',
@@ -202,50 +117,177 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/settings',
     description: 'Configure proxy certificate, theme, and application preferences.',
     colors: { bg: 'bg-slate-500 dark:bg-slate-500', hoverBg: 'group-hover:bg-slate-500 dark:group-hover:bg-slate-500', border: 'border-slate-500 dark:border-slate-500' },
-    flag: 'release'
+    flag: 'release',
   },
-  {
-    label: 'Inspector',
-    icon: BugIcon,
-    href: '/inspector',
-    description: 'Inspect external browser pages, network traffic, cookies, and console logs via CDP.',
-    colors: { bg: 'bg-zinc-500 dark:bg-zinc-500', hoverBg: 'group-hover:bg-zinc-500 dark:group-hover:bg-zinc-500', border: 'border-zinc-500 dark:border-zinc-500' },
-    flag: 'alpha'
-  },
-  {
-    label: 'Regression',
-    icon: FlaskIcon,
-    href: '/regression',
-    description: 'Execute automated regression tests on target endpoints.',
-    colors: { bg: 'bg-indigo-600 dark:bg-indigo-600', hoverBg: 'group-hover:bg-indigo-600 dark:group-hover:bg-indigo-600', border: 'border-indigo-600 dark:border-indigo-600' },
-    flag: 'alpha'
-  },
-  {
-    label: 'File Explorer',
-    icon: FolderOpenIcon,
-    href: '/file-explorer',
-    description: 'Browse, stream, and manage Cloudflare R2 object storage files.',
-    colors: { bg: 'bg-zinc-900 dark:bg-zinc-900', hoverBg: 'group-hover:bg-zinc-900 dark:group-hover:bg-zinc-900', border: 'border-zinc-900 dark:border-zinc-900' },
-    flag: 'alpha'
-  },
-  {
-    label: 'Terminal',
-    icon: TerminalWindowIcon,
-    href: '/terminal',
-    description: 'Interactive command-line shell with multi-tab support.',
-    colors: { bg: 'bg-slate-700 dark:bg-slate-700', hoverBg: 'group-hover:bg-slate-700 dark:group-hover:bg-slate-700', border: 'border-slate-700 dark:border-slate-700' },
-    flag: 'alpha'
-  },
-  {
-    label: 'Dev Server',
-    icon: BroadcastIcon,
-    href: '/dev-server',
-    description: 'Host and serve development servers or static builds over tethered networks & hotspots.',
-    colors: { bg: 'bg-emerald-600 dark:bg-emerald-600', hoverBg: 'group-hover:bg-emerald-600 dark:group-hover:bg-emerald-600', border: 'border-emerald-600 dark:border-emerald-600' },
-    flag: 'alpha'
-  }
 ];
 
-export const MAIN_NAV_ITEMS = import.meta.env.PROD
-  ? ALL_NAV_ITEMS.filter((item) => item.flag !== 'alpha')
-  : ALL_NAV_ITEMS;
+export const ALPHA_NAV_ITEMS: NavItem[] = import.meta.env.PROD
+  ? []
+  : [
+      {
+        label: 'WebSocket',
+        icon: WifiHighIcon,
+        href: '/websocket-history',
+        description: 'Capture and inspect real-time WebSocket network traffic.',
+        colors: { bg: 'bg-blue-500 dark:bg-blue-500', hoverBg: 'group-hover:bg-blue-500 dark:group-hover:bg-blue-500', border: 'border-blue-500 dark:border-blue-500' },
+        flag: 'alpha',
+      },
+      {
+        label: 'Workflow',
+        icon: SpinnerIcon,
+        href: '/automation',
+        description: 'Build and execute automated visual workflows for target reconnaissance.',
+        colors: { bg: 'bg-purple-500 dark:bg-purple-500', hoverBg: 'group-hover:bg-purple-500 dark:group-hover:bg-purple-500', border: 'border-purple-500 dark:border-purple-500' },
+        flag: 'alpha',
+      },
+      {
+        label: 'Browser',
+        icon: AppWindowIcon,
+        href: '/browser',
+        description: 'Control an automated browser session to crawl websites and capture elements.',
+        colors: { bg: 'bg-sky-500 dark:bg-sky-500', hoverBg: 'group-hover:bg-sky-500 dark:group-hover:bg-sky-500', border: 'border-sky-500 dark:border-sky-500' },
+        flag: 'alpha',
+      },
+      {
+        label: 'AI Assistant',
+        icon: StarFourIcon,
+        href: '/assistant',
+        description: 'Interact with AI to analyze web traffic and write exploits.',
+        colors: { bg: 'bg-violet-500 dark:bg-violet-500', hoverBg: 'group-hover:bg-violet-500 dark:group-hover:bg-violet-500', border: 'border-violet-500 dark:border-violet-500' },
+        flag: 'alpha',
+      },
+      {
+        label: 'Kanban',
+        icon: SquaresFourIcon,
+        href: '/kanban',
+        description: 'Visual project board: track tasks across status, priority, or assignee swimlanes with WIP limits.',
+        colors: { bg: 'bg-rose-500 dark:bg-rose-500', hoverBg: 'group-hover:bg-rose-500 dark:group-hover:bg-rose-500', border: 'border-rose-500 dark:border-rose-500' },
+        flag: 'alpha',
+      },
+      {
+        label: 'MockForge',
+        icon: BlueprintIcon,
+        href: '/mock-forge',
+        description: 'Mock HTTP endpoints, responses, and simulate server behaviors.',
+        colors: { bg: 'bg-teal-600 dark:bg-teal-600', hoverBg: 'group-hover:bg-teal-600 dark:group-hover:bg-teal-600', border: 'border-teal-600 dark:border-teal-600' },
+        flag: 'alpha',
+      },
+      {
+        label: 'Listener',
+        icon: BroadcastIcon,
+        href: '/listener',
+        description: 'Generate out-of-band (OOB) payloads and monitor incoming DNS, HTTP, and HTTPS interactions.',
+        colors: { bg: 'bg-green-500 dark:bg-green-500', hoverBg: 'group-hover:bg-green-500 dark:group-hover:bg-green-500', border: 'border-green-500 dark:border-green-500' },
+        flag: 'alpha',
+      },
+      {
+        label: 'Encoder',
+        icon: BinaryIcon,
+        href: '/encoder',
+        description: 'Access encoders, decoders, hashes, and other payload helper utilities.',
+        colors: { bg: 'bg-teal-500 dark:bg-teal-500', hoverBg: 'group-hover:bg-teal-500 dark:group-hover:bg-teal-500', border: 'border-teal-500 dark:border-teal-500' },
+        flag: 'alpha',
+      },
+      {
+        label: 'Hash',
+        icon: FingerprintIcon,
+        href: '/hash',
+        description: 'Generate and verify cryptographic hash functions.',
+        colors: { bg: 'bg-red-500 dark:bg-red-500', hoverBg: 'group-hover:bg-red-500 dark:group-hover:bg-red-500', border: 'border-red-500 dark:border-red-500' },
+        flag: 'alpha',
+      },
+      {
+        label: 'Comparer',
+        icon: GitDiffIcon,
+        href: '/comparer',
+        description: 'Compare files, requests, or text side-by-side.',
+        colors: { bg: 'bg-fuchsia-500 dark:bg-fuchsia-500', hoverBg: 'group-hover:bg-fuchsia-500 dark:group-hover:bg-fuchsia-500', border: 'border-fuchsia-500 dark:border-fuchsia-500' },
+        flag: 'alpha',
+      },
+      {
+        label: 'Port Scanner',
+        icon: TargetIcon,
+        href: '/port-scanner',
+        description: 'Scan host ports for open services and network vulnerabilities.',
+        colors: { bg: 'bg-pink-500 dark:bg-pink-500', hoverBg: 'group-hover:bg-pink-500 dark:group-hover:bg-pink-500', border: 'border-pink-500 dark:border-pink-500' },
+        flag: 'alpha',
+      },
+      {
+        label: 'JWT',
+        icon: CloverIcon,
+        href: '/jwt',
+        description: 'Decode, edit, and sign JSON Web Tokens.',
+        colors: { bg: 'bg-lime-700 dark:bg-lime-700', hoverBg: 'group-hover:bg-lime-700 dark:group-hover:bg-lime-700', border: 'border-lime-700 dark:border-lime-700' },
+        flag: 'alpha',
+      },
+      {
+        label: 'XSS',
+        icon: LightningIcon,
+        href: '/xss-generator',
+        description: 'Generate cross-site scripting payloads and templates.',
+        colors: { bg: 'bg-yellow-500 dark:bg-yellow-500', hoverBg: 'group-hover:bg-yellow-500 dark:group-hover:bg-yellow-500', border: 'border-yellow-500 dark:border-yellow-500' },
+        flag: 'alpha',
+      },
+      {
+        label: 'SQL Inject',
+        icon: DatabaseIcon,
+        href: '/sql-injection',
+        description: 'Test databases for SQL injection vulnerabilities.',
+        colors: { bg: 'bg-cyan-600 dark:bg-cyan-600', hoverBg: 'group-hover:bg-cyan-600 dark:group-hover:bg-cyan-600', border: 'border-cyan-600 dark:border-cyan-600' },
+        flag: 'alpha',
+      },
+      {
+        label: 'Inspector',
+        icon: BugIcon,
+        href: '/inspector',
+        description: 'Inspect external browser pages, network traffic, cookies, and console logs via CDP.',
+        colors: { bg: 'bg-zinc-500 dark:bg-zinc-500', hoverBg: 'group-hover:bg-zinc-500 dark:group-hover:bg-zinc-500', border: 'border-zinc-500 dark:border-zinc-500' },
+        flag: 'alpha',
+      },
+      {
+        label: 'Regression',
+        icon: FlaskIcon,
+        href: '/regression',
+        description: 'Execute automated regression tests on target endpoints.',
+        colors: { bg: 'bg-indigo-600 dark:bg-indigo-600', hoverBg: 'group-hover:bg-indigo-600 dark:group-hover:bg-indigo-600', border: 'border-indigo-600 dark:border-indigo-600' },
+        flag: 'alpha',
+      },
+      {
+        label: 'File Explorer',
+        icon: FolderOpenIcon,
+        href: '/file-explorer',
+        description: 'Browse, stream, and manage Cloudflare R2 object storage files.',
+        colors: { bg: 'bg-zinc-900 dark:bg-zinc-900', hoverBg: 'group-hover:bg-zinc-900 dark:group-hover:bg-zinc-900', border: 'border-zinc-900 dark:border-zinc-900' },
+        flag: 'alpha',
+      },
+      {
+        label: 'Terminal',
+        icon: TerminalWindowIcon,
+        href: '/terminal',
+        description: 'Interactive command-line shell with multi-tab support.',
+        colors: { bg: 'bg-slate-700 dark:bg-slate-700', hoverBg: 'group-hover:bg-slate-700 dark:group-hover:bg-slate-700', border: 'border-slate-700 dark:border-slate-700' },
+        flag: 'alpha',
+      },
+      {
+        label: 'Dev Server',
+        icon: BroadcastIcon,
+        href: '/dev-server',
+        description: 'Host and serve development servers or static builds over tethered networks & hotspots.',
+        colors: { bg: 'bg-emerald-600 dark:bg-emerald-600', hoverBg: 'group-hover:bg-emerald-600 dark:group-hover:bg-emerald-600', border: 'border-emerald-600 dark:border-emerald-600' },
+        flag: 'alpha',
+      },
+      {
+        label: 'Splash Preview',
+        icon: SparkleIcon,
+        href: '/splash-preview',
+        description: 'Interactive debugger and customizer for the application splash screen.',
+        colors: { bg: 'bg-emerald-500 dark:bg-emerald-500', hoverBg: 'group-hover:bg-emerald-500 dark:group-hover:bg-emerald-500', border: 'border-emerald-500 dark:border-emerald-500' },
+        flag: 'alpha',
+      },
+    ];
+
+export const ALL_NAV_ITEMS: NavItem[] = import.meta.env.PROD
+  ? RELEASE_NAV_ITEMS
+  : [...RELEASE_NAV_ITEMS, ...ALPHA_NAV_ITEMS];
+
+export const MAIN_NAV_ITEMS: NavItem[] = ALL_NAV_ITEMS;

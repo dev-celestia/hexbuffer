@@ -287,7 +287,7 @@ impl Database {
                     if i > 0 {
                         sql.push_str(", ");
                     }
-                    sql.push_str("?");
+                    sql.push('?');
                     params_vec.push(Box::new(m.clone()));
                 }
                 sql.push(')');
@@ -301,7 +301,7 @@ impl Database {
                     if i > 0 {
                         sql.push_str(", ");
                     }
-                    sql.push_str("?");
+                    sql.push('?');
                     params_vec.push(Box::new(*s as i64));
                 }
                 sql.push(')');
@@ -648,7 +648,7 @@ impl Database {
                     if i > 0 {
                         sql.push_str(", ");
                     }
-                    sql.push_str("?");
+                    sql.push('?');
                     params_vec.push(Box::new(m.clone()));
                 }
                 sql.push(')');
@@ -662,7 +662,7 @@ impl Database {
                     if i > 0 {
                         sql.push_str(", ");
                     }
-                    sql.push_str("?");
+                    sql.push('?');
                     params_vec.push(Box::new(*s as i64));
                 }
                 sql.push(')');

@@ -399,20 +399,18 @@ pub async fn start_vpn(
     let state_stdout = state_inner.clone();
     std::thread::spawn(move || {
         let reader = BufReader::new(stdout);
-        for line in reader.lines() {
-            if let Ok(line_str) = line {
-                // ── Fix #10: cap log size ──────────────────────────────────
-                push_log(&state_stdout.logs, line_str.clone());
-                let _ = app_stdout.emit("vpn:log", line_str.clone());
+        for line_str in reader.lines().map_while(Result::ok) {
+            // ── Fix #10: cap log size ──────────────────────────────────
+            push_log(&state_stdout.logs, line_str.clone());
+            let _ = app_stdout.emit("vpn:log", line_str.clone());
 
-                if line_str.contains("Initialization Sequence Completed") {
-                    let mut status_guard = state_stdout.status.lock().unwrap();
-                    *status_guard = "connected".to_string();
-                    let _ = app_stdout.emit("vpn:status", serde_json::json!({
-                        "status": "connected",
-                        "error": null,
-                    }));
-                }
+            if line_str.contains("Initialization Sequence Completed") {
+                let mut status_guard = state_stdout.status.lock().unwrap();
+                *status_guard = "connected".to_string();
+                let _ = app_stdout.emit("vpn:status", serde_json::json!({
+                    "status": "connected",
+                    "error": null,
+                }));
             }
         }
     });
@@ -422,12 +420,10 @@ pub async fn start_vpn(
     let state_stderr = state_inner.clone();
     std::thread::spawn(move || {
         let reader = BufReader::new(stderr);
-        for line in reader.lines() {
-            if let Ok(line_str) = line {
-                let formatted = format!("[ERROR] {}", line_str);
-                push_log(&state_stderr.logs, formatted.clone());
-                let _ = app_stderr.emit("vpn:log", formatted);
-            }
+        for line_str in reader.lines().map_while(Result::ok) {
+            let formatted = format!("[ERROR] {}", line_str);
+            push_log(&state_stderr.logs, formatted.clone());
+            let _ = app_stderr.emit("vpn:log", formatted);
         }
     });
 
@@ -675,7 +671,7 @@ pub async fn request_vpn_permissions() -> Result<(), String> {
             return Err("OpenVPN binary not found. Please install OpenVPN (brew install openvpn).".to_string());
         }
         ensure_setuid_root(&bin)?;
-        return Ok(());
+        Ok(())
     }
     #[cfg(not(target_os = "macos"))]
     {

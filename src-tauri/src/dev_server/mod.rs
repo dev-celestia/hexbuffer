@@ -189,9 +189,9 @@ fn patch_next_config_file(path: &Path, active_ips: &[String]) -> Result<bool, St
         let mut modified = false;
         let mut new_content = content.clone();
 
+        let re = Regex::new(r"allowedDevOrigins\s*:\s*\[([^\]]*)\]").unwrap();
         for ip in active_ips {
             if !new_content.contains(ip) {
-                let re = Regex::new(r"allowedDevOrigins\s*:\s*\[([^\]]*)\]").unwrap();
                 if let Some(caps) = re.captures(&new_content) {
                     if let Some(inner) = caps.get(1) {
                         let existing = inner.as_str().trim();

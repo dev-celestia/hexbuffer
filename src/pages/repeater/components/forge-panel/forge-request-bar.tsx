@@ -26,7 +26,7 @@ import { useCollectionsStore } from '@/stores/collections';
 import { PlusIcon, PaperPlaneTiltIcon, FloppyDiskIcon, GearSixIcon, TrashIcon } from '@phosphor-icons/react';
 import { sendCraftRequest, saveActiveEndpoint } from '@/triggers/repeater/craft';
 import { deleteEndpoint } from '@/triggers/repeater/management';
-import { ContextsDialog } from '../ContextsDialog';
+import { ContextsDialog } from '../contexts-dialog';
 
 interface ForgeRequestBarProps {
   method: string;

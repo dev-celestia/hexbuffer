@@ -273,7 +273,7 @@ impl AttackEngine {
         });
 
         self.is_running.store(false, Ordering::SeqCst);
-        let _ = telemetry_task;
+        telemetry_task.abort();
 
         if let Err(e) = result {
             *self.status.lock() = AttackStatus::Error { error: e.clone() };

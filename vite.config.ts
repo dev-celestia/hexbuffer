@@ -55,7 +55,8 @@ export default defineConfig({
     ],
   },
   build: {
-    emptyOutDir: false,
+    outDir: "dist-app",
+    emptyOutDir: true,
     chunkSizeWarningLimit: 900,
     rollupOptions: {
       input: {
@@ -65,19 +66,18 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            // Heavy standalone packages
-            if (id.includes("shiki")) return "vendor-shiki";
+            // Heavy standalone packages isolated for route-level / on-demand loading
             if (id.includes("monaco-editor")) return "vendor-monaco";
             if (id.includes("jspdf")) return "vendor-jspdf";
-            if (id.includes("@rive-app")) return "vendor-rive";
             if (id.includes("@mdxeditor")) return "vendor-mdxeditor";
             if (id.includes("xterm") || id.includes("@xterm")) return "vendor-xterm";
             if (id.includes("@xyflow") || id.includes("reactflow")) return "vendor-reactflow";
             if (id.includes("motion")) return "vendor-motion";
             if (id.includes("@tauri-apps")) return "vendor-tauri";
             if (id.includes("@tanstack")) return "vendor-tanstack";
+            if (id.includes("@phosphor-icons")) return "vendor-phosphor";
             if (id.includes("lucide-react")) return "vendor-lucide";
-            return "vendor";
+            if (id.includes("@codemirror") || id.includes("codemirror")) return "vendor-codemirror";
           }
         },
       },

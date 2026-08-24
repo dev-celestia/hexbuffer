@@ -115,7 +115,7 @@ static PEER_SYNC_STATE: std::sync::LazyLock<Arc<RwLock<PeerSyncState>>> =
         };
 
         let my_name = format!("{}'s {}", user, os_display);
-        let my_id = format!("hex-{}", uuid::Uuid::new_v4().to_string()[..8].to_string());
+        let my_id = format!("hex-{}", &uuid::Uuid::new_v4().to_string()[..8]);
 
         Arc::new(RwLock::new(PeerSyncState {
             my_id,
@@ -259,7 +259,7 @@ async fn handle_incoming_share(
     Json(mut payload): Json<SharedDataPayload>,
 ) -> impl IntoResponse {
     if payload.id.is_empty() {
-        payload.id = format!("share-{}", uuid::Uuid::new_v4().to_string()[..8].to_string());
+        payload.id = format!("share-{}", &uuid::Uuid::new_v4().to_string()[..8]);
     }
     if payload.timestamp.is_empty() {
         payload.timestamp = get_now_iso_string();
@@ -496,7 +496,7 @@ pub async fn share_data_to_peer(
     };
 
     let body = SharedDataPayload {
-        id: format!("share-{}", uuid::Uuid::new_v4().to_string()[..8].to_string()),
+        id: format!("share-{}", &uuid::Uuid::new_v4().to_string()[..8]),
         sender_id: my_id,
         sender_name: my_name,
         sender_os: my_os,

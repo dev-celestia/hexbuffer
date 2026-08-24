@@ -102,7 +102,7 @@ pub async fn open_cdp_browser(app: tauri::AppHandle, port: u16) -> Result<(), St
             #[cfg(unix)]
             {
                 if let Ok(output) = std::process::Command::new("lsof")
-                    .args(&["-t", "-i", &format!("tcp:{}", port)])
+                    .args(["-t", "-i", &format!("tcp:{}", port)])
                     .output()
                 {
                     let pid_str = String::from_utf8_lossy(&output.stdout);

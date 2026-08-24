@@ -7,7 +7,7 @@
     "beforeDevCommand": "pnpm dev:clean",
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "pnpm build",
-    "frontendDist": "../dist"
+    "frontendDist": "../dist-app"
   },
   "app": {
     "macOSPrivateApi": true,
@@ -37,8 +37,8 @@
         "resizable": false,
         "center": true,
         "visible": true,
-        "width": 492,
-        "height": 199
+        "width": 360,
+        "height": 140
       }
     ],
     "security": {

@@ -47,7 +47,7 @@ fn normalize_scan_host(input: &str) -> Result<String, String> {
     let host = parsed
         .unwrap_or_default()
         .split('@')
-        .last()
+        .next_back()
         .unwrap_or_default()
         .split(':')
         .next()

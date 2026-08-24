@@ -1109,7 +1109,7 @@ pub fn stop_all_active_crawls(app: &AppHandle, state: &AiBrowserState) {
 
         let _ = update_session(app, state, session_id, "stopped", Some(now()));
 
-        let _ = add_log(
+        add_log(
             app,
             state,
             ActivityLog {

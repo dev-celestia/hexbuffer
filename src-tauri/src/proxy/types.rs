@@ -36,17 +36,14 @@ pub struct ProxyRecord {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Default)]
 pub enum WebSocketConnectionState {
     Open,
+    #[default]
     Closed,
     Error,
 }
 
-impl Default for WebSocketConnectionState {
-    fn default() -> Self {
-        Self::Closed
-    }
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum WebSocketMessageDirection {

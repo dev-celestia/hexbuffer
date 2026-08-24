@@ -85,6 +85,9 @@ const TerminalPage = React.lazy(() =>
 const DevServerPage = React.lazy(() =>
   import("@/pages/dev-server").then((m) => ({ default: m.DevServerPage }))
 );
+const SplashPreviewPage = React.lazy(() =>
+  import("@/pages/splash-preview").then((m) => ({ default: m.SplashPreviewPage }))
+);
 
 
 
@@ -137,6 +140,8 @@ function AppRoutes() {
           <Route path="/file-explorer" element={<FileExplorerPage />} />
           <Route path="/terminal" element={<TerminalPage />} />
           <Route path="/dev-server" element={<DevServerPage />} />
+          <Route path="/splash-preview" element={<SplashPreviewPage />} />
+          <Route path="/splash" element={<SplashPreviewPage />} />
         </Routes>
       </React.Suspense>
     </>

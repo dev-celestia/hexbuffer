@@ -415,11 +415,10 @@ fn matches_live_traffic_trigger(
     }
 
     let method = config_string(config, "method");
-    if !method.trim().is_empty() && !method.eq_ignore_ascii_case("ANY") {
-        if !record.request.method.eq_ignore_ascii_case(&method) {
+    if !method.trim().is_empty() && !method.eq_ignore_ascii_case("ANY")
+        && !record.request.method.eq_ignore_ascii_case(&method) {
             return false;
         }
-    }
 
     let whitelisted_hosts = parse_host_whitelist(config.get("host").and_then(Value::as_str));
     if whitelisted_hosts.is_empty() {
