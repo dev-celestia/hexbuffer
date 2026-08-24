@@ -60,7 +60,7 @@ export function JwtPage() {
             )}
           >
             <ButtonGroup>
-              <Button size="xs"
+              <Button size="sm"
                 variant="outline"
                 className={cn(
                   // Sizing & Spacing
@@ -77,7 +77,7 @@ export function JwtPage() {
               >
                 Decode
               </Button>
-              <Button size="xs"
+              <Button size="sm"
                 variant="outline"
                 className={cn(
                   // Sizing & Spacing
@@ -144,7 +144,7 @@ export function JwtPage() {
               <>
                 <Button
                   variant="outline"
-                  size="xs"
+                  size="sm"
                   onClick={() => page.handleCopy(page.tokenInput)}
                   disabled={!page.tokenInput}
                   className={cn(
@@ -179,7 +179,7 @@ export function JwtPage() {
               <>
                 <Button
                   variant="outline"
-                  size="xs"
+                  size="sm"
                   onClick={() => page.handleCopy(page.generatedToken)}
                   disabled={!page.generatedToken}
                   className={cn(

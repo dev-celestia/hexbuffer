@@ -93,7 +93,7 @@ export function R2SettingsTab({ settings }: R2SettingsTabProps) {
       <SettingsRow label="Actions">
         <div className="flex items-center gap-2">
           <Button
-            size="xs"
+            size="sm"
             onClick={handleSaveR2Settings}
             disabled={r2Loading || r2Saving}
           >
@@ -101,7 +101,7 @@ export function R2SettingsTab({ settings }: R2SettingsTabProps) {
             {r2Saving ? 'Saving…' : 'Save'}
           </Button>
           <Button
-            size="xs"
+            size="sm"
             variant="outline"
             onClick={handleClearR2Credentials}
             disabled={r2Loading || r2Saving || (!r2AccountId && !r2HasSecretKey)}

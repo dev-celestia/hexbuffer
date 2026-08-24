@@ -47,7 +47,7 @@ export function NavSettingsCard() {
           </p>
         </div>
         <Button
-          size="xs"
+          size="sm"
           variant="outline"
           onClick={resetHiddenNavItems}
           disabled={!hasHiddenItems}

@@ -299,7 +299,7 @@ export function RelationalDashboard() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <Button
                       variant="ghost"
-                      size="xs"
+                      size="sm"
                       onClick={() => setSelectedRun(null)}
                       className="h-7 text-xs px-2 active:scale-[0.97] transition-all"
                     >

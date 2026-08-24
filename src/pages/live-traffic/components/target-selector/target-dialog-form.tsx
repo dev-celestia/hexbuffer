@@ -232,7 +232,7 @@ export function TargetDialogForm({ target, onCancel, onSaved }: TargetDialogForm
         {target ? (
           <AlertDialog>
             <AlertDialogTrigger>
-              <Button type="button" variant="destructive" size="xs" className="gap-1.5">
+              <Button type="button" variant="destructive" size="sm" className="gap-1.5">
                 <TrashIcon className="h-3.5 w-3.5" />
                 Delete
               </Button>
@@ -260,10 +260,10 @@ export function TargetDialogForm({ target, onCancel, onSaved }: TargetDialogForm
           <div />
         )}
         <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" size="xs" onClick={onCancel}>
+          <Button type="button" variant="outline" size="sm" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="button" size="xs" disabled={isSubmitting} onClick={() => void saveTarget()} className="gap-1.5">
+          <Button type="button" size="sm" disabled={isSubmitting} onClick={() => void saveTarget()} className="gap-1.5">
             {target ? (
               <>
                 <CheckIcon className="h-3.5 w-3.5" />

@@ -10,7 +10,7 @@ import {
   DotsSixIcon,
 } from "@phosphor-icons/react";
 
-import type { NavItem } from "@/layout/constants";
+import { ALL_NAV_ITEMS, getAppIconImage, type NavItem } from "@/layout/constants";
 import { useNavStore } from "@/stores/nav";
 import { cn } from "@/lib/utils";
 
@@ -40,32 +40,120 @@ export const WindowHeader = React.memo(function WindowHeader({
   const minimizeWindow = useNavStore((s) => s.minimizeWindow);
   const maximizeWindow = useNavStore((s) => s.maximizeWindow);
 
+  const resolvedNavItem =
+    navItem ||
+    ALL_NAV_ITEMS.find(
+      (item) => item.href === id || item.label.toLowerCase() === title.toLowerCase()
+    );
+  const imageSrc = getAppIconImage(resolvedNavItem?.href || id, resolvedNavItem?.label || title);
+  const IconComponent = resolvedNavItem?.icon;
+
   return (
     <div
       onMouseDown={onDragMouseDown}
       className={cn(
-        "flex h-8 shrink-0 items-center cursor-pointer justify-between px-2 border-b cursor-grab select-none",
+        // Layout & Positioning
+        "flex shrink-0 items-center justify-between",
+
+        // Sizing & Spacing
+        "h-8 px-2",
+
+        // Backgrounds & Borders
+        "border-b",
         isFocused
           ? "bg-muted/70 border-border/80 text-foreground"
-          : "bg-muted/30 border-border/40 text-muted-foreground"
+          : "bg-muted/30 border-border/40 text-muted-foreground",
+
+        // Interactive & States
+        "cursor-pointer cursor-grab select-none"
       )}
     >
       {/* Window Title */}
-      <div className="flex gap-2 h-6 items-center">
-        <DotsSixIcon size={16} className="text-muted-foreground/45 cursor-grab shrink-0 mr-1" />
-        <span className="text-xs font-semibold tracking-wide truncate max-w-[200px]">
-          {title}
-        </span>
-        {navItem?.flag && navItem.flag !== 'release' && (
-          <span
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center",
+
+          // Sizing & Spacing
+          "gap-1.5 h-6"
+        )}
+      >
+        <DotsSixIcon size={16} className="text-muted-foreground/45 cursor-grab shrink-0 mr-0.5" />
+
+        {imageSrc ? (
+          <div
             className={cn(
-              "px-1 py-0.5 text-[8px] font-extrabold uppercase tracking-wider leading-none rounded-sm pointer-events-none select-none shrink-0",
-              navItem.flag === 'alpha'
-                ? "bg-rose-500/20 text-rose-500 dark:text-rose-400"
-                : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+              // Layout & Positioning
+              "flex items-center justify-center shrink-0 overflow-hidden select-none",
+
+              // Sizing & Spacing
+              "size-4 rounded-xs",
+
+              // Backgrounds & Borders
+              resolvedNavItem?.colors
+                ? `${resolvedNavItem.colors.bg} border border-white/20 dark:border-white/10 shadow-2xs`
+                : "bg-muted/60 border border-border/60 text-muted-foreground"
             )}
           >
-            {navItem.flag}
+            <img
+              src={imageSrc}
+              alt={title}
+              draggable={false}
+              className={cn(
+                // Layout & Positioning
+                "object-cover select-none",
+
+                // Sizing & Spacing
+                "size-full"
+              )}
+            />
+          </div>
+        ) : IconComponent ? (
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center justify-center shrink-0 select-none",
+
+              // Sizing & Spacing
+              "size-4 rounded-xs",
+
+              // Backgrounds & Borders
+              resolvedNavItem?.colors
+                ? `${resolvedNavItem.colors.bg} text-white shadow-2xs`
+                : "text-muted-foreground"
+            )}
+          >
+            <IconComponent className="size-2.5 shrink-0" />
+          </div>
+        ) : null}
+
+        <span
+          className={cn(
+            // Typography
+            "text-xs font-semibold tracking-wide truncate max-w-[200px]"
+          )}
+        >
+          {title}
+        </span>
+        {resolvedNavItem?.flag && resolvedNavItem.flag !== 'release' && (
+          <span
+            className={cn(
+              // Sizing & Spacing
+              "px-1 py-0.5 rounded-sm shrink-0 leading-none",
+
+              // Typography
+              "text-[8px] font-extrabold uppercase tracking-wider",
+
+              // Backgrounds & Borders
+              resolvedNavItem.flag === 'alpha'
+                ? "bg-rose-500/20 text-rose-500 dark:text-rose-400"
+                : "bg-amber-500/20 text-amber-600 dark:text-amber-400",
+
+              // Interactive & States
+              "pointer-events-none select-none"
+            )}
+          >
+            {resolvedNavItem.flag}
           </span>
         )}
       </div>

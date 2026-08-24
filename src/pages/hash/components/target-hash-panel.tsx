@@ -210,7 +210,7 @@ export function TargetHashPanel({
         >
           <Button
             variant="ghost"
-            size="xs"
+            size="sm"
             onClick={() => setBulkMode(!bulkMode)}
             disabled={disabled}
           >
@@ -218,7 +218,7 @@ export function TargetHashPanel({
           </Button>
           <Button
             variant="ghost"
-            size="xs"
+            size="sm"
             onClick={importFromFile}
             disabled={disabled}
           >
@@ -227,7 +227,7 @@ export function TargetHashPanel({
           </Button>
           <Button
             variant="destructive"
-            size="xs"
+            size="sm"
             onClick={clearAll}
             disabled={disabled || totalCount === 0}
           >
@@ -308,7 +308,7 @@ export function TargetHashPanel({
               />
             </div>
             <Button
-              size="xs"
+              size="sm"
               onClick={addSingleHash}
               disabled={disabled || !inputHash.trim()}
             >
@@ -355,7 +355,7 @@ export function TargetHashPanel({
               )}
             >
               <Button
-                size="xs"
+                size="sm"
                 onClick={addBulkHashes}
                 disabled={disabled || !bulkInput.trim()}
               >
@@ -502,7 +502,7 @@ export function TargetHashPanel({
               >
                 <Button
                   variant="ghost"
-                  size="xs"
+                  size="sm"
                   onClick={() => removeTarget(target.id)}
                   disabled={disabled}
                   title="Remove target"

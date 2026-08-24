@@ -150,7 +150,7 @@ export function ParametersPanel({
             />
           </div>
           <Button 
-            size="xs" 
+            size="sm" 
             onClick={onAddParameter} 
             disabled={!newParamName.trim()}
             className="w-full h-7 text-xs gap-1 font-semibold"

@@ -102,7 +102,7 @@ export function DevServerProcessPane({
             />
             <Button
               variant="outline"
-              size="xs"
+              size="sm"
               onClick={onBrowseProjectDir}
               disabled={processStatus.is_running}
               className="flex items-center gap-1.5 transition-transform duration-150 active:scale-[0.97]"
@@ -148,7 +148,7 @@ export function DevServerProcessPane({
             {processStatus.is_running ? (
               <Button
                 variant="destructive"
-                size="xs"
+                size="sm"
                 onClick={onStopProcess}
                 className="flex items-center gap-1.5 transition-transform duration-150 active:scale-[0.97]"
               >
@@ -158,7 +158,7 @@ export function DevServerProcessPane({
             ) : (
               <Button
                 variant="default"
-                size="xs"
+                size="sm"
                 onClick={onStartProcess}
                 disabled={isStartingProcess || !customCommand.trim()}
                 className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white transition-transform duration-150 active:scale-[0.97]"
@@ -242,7 +242,7 @@ export function DevServerProcessPane({
 
             <Button
               variant={autoScroll ? 'default' : 'outline'}
-              size="xs"
+              size="sm"
               onClick={() => setAutoScroll(!autoScroll)}
               className="h-7 px-2 text-xs flex items-center gap-1"
               title="Auto-scroll on new output"
@@ -253,7 +253,7 @@ export function DevServerProcessPane({
 
             <Button
               variant="ghost"
-              size="xs"
+              size="sm"
               onClick={onClearLogs}
               disabled={rawProcessLogsCount === 0}
               className="h-7 px-2 text-xs flex items-center gap-1"

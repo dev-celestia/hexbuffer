@@ -109,11 +109,11 @@ function ArtifactActions({ label, path, onView }: { label: string; path?: string
         )}
       >
         {onView && (
-          <Button size="xs" variant="outline" onClick={onView}>
+          <Button size="sm" variant="outline" onClick={onView}>
             <ArrowsOutIcon className="h-3.5 w-3.5" />
           </Button>
         )}
-        <Button size="xs" variant="outline" onClick={() => copyText(path)}>
+        <Button size="sm" variant="outline" onClick={() => copyText(path)}>
           <CopyIcon className="h-3.5 w-3.5" />
         </Button>
       </div>
@@ -372,13 +372,13 @@ function PageDetailPanelComponent({ page, searchQuery = '' }: PageDetailPanelPro
             "gap-1.5"
           )}
         >
-          <Button size="xs" variant="outline" onClick={handleOpenPage}>
+          <Button size="sm" variant="outline" onClick={handleOpenPage}>
             <ArrowSquareOutIcon className="h-3.5 w-3.5" />
           </Button>
-          <Button size="xs" variant="outline" onClick={handleCopyUrl}>
+          <Button size="sm" variant="outline" onClick={handleCopyUrl}>
             <CopyIcon className="h-3.5 w-3.5" />
           </Button>
-          <Button size="xs"
+          <Button size="sm"
             variant={page.interesting ? 'secondary' : 'outline'}
             onClick={handleMarkPage}
           >

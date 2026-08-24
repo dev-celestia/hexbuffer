@@ -151,15 +151,15 @@ export function TestSuiteEditor({ testCase, isNew, onSave, onDraftChange, onCanc
           </h2>
         </div>
         <div className="flex items-center gap-1.5">
-          <Button size="xs" variant="outline" onClick={() => setConfigOpen(true)} className="gap-1">
+          <Button size="sm" variant="outline" onClick={() => setConfigOpen(true)} className="gap-1">
             <GearSixIcon className="size-3.5" />
             Config
           </Button>
-          <Button size="xs" variant="ghost" onClick={onCancel} className="gap-1">
+          <Button size="sm" variant="ghost" onClick={onCancel} className="gap-1">
             <XIcon className="size-3.5" />
             Cancel
           </Button>
-          <Button size="xs"
+          <Button size="sm"
             onClick={handleSave}
             disabled={!canSave || isSaving}
             className="gap-1"
@@ -192,7 +192,7 @@ export function TestSuiteEditor({ testCase, isNew, onSave, onDraftChange, onCanc
                 targetUrl={targetUrl}
                 onStepsGenerated={handleStepsGenerated}
               />
-              <Button size="xs"
+              <Button size="sm"
                 variant="outline"
                 onClick={handleAddStep}
                 className="gap-1"
@@ -209,7 +209,7 @@ export function TestSuiteEditor({ testCase, isNew, onSave, onDraftChange, onCanc
             onAddStep={handleAddStep}
             emptyActions={
               <>
-                <Button size="xs" variant="outline" onClick={handleAddStep} className="gap-1">
+                <Button size="sm" variant="outline" onClick={handleAddStep} className="gap-1">
                   <PlusIcon className="size-3.5" />
                   Add Step
                 </Button>
@@ -319,7 +319,7 @@ export function TestSuiteEditor({ testCase, isNew, onSave, onDraftChange, onCanc
           </div>
 
           <DialogFooter>
-            <Button size="xs" onClick={handleConfigDone} disabled={!canSave}>
+            <Button size="sm" onClick={handleConfigDone} disabled={!canSave}>
               Done
             </Button>
           </DialogFooter>

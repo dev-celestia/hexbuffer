@@ -70,7 +70,7 @@ export function ListenerHosts({
         <span className="text-xs font-mono font-medium text-muted-foreground">
           {servers.length} host{servers.length !== 1 ? 's' : ''} configured
         </span>
-        <Button size="xs" variant="outline" className="h-7 gap-1 text-xs" onClick={startAdd}>
+        <Button size="sm" variant="outline" className="h-7 gap-1 text-xs" onClick={startAdd}>
           <PlusIcon className="h-3.5 w-3.5" />
           Add Host
         </Button>
@@ -133,7 +133,7 @@ export function ListenerHosts({
                             className="h-8 text-xs flex-1"
                           />
                         </FormControl>
-                        <Button size="xs"
+                        <Button size="sm"
                           type="button"
                           variant="outline"
                           className="h-8 w-8 p-0"
@@ -146,7 +146,7 @@ export function ListenerHosts({
                             <EyeIcon className="h-3.5 w-3.5" />
                           )}
                         </Button>
-                        <Button size="xs"
+                        <Button size="sm"
                           type="button"
                           variant="outline"
                           className="h-8 w-8 p-0"
@@ -169,7 +169,7 @@ export function ListenerHosts({
                     {form.formState.errors.root.message}
                   </p>
                 )}
-                <Button size="xs"
+                <Button size="sm"
                   type="submit"
                   disabled={form.formState.isSubmitting}
                   className="h-8 w-full text-xs mt-2"
@@ -263,7 +263,7 @@ export function ListenerHosts({
                         </span>
                         <Button
                           variant="ghost"
-                          size="xs"
+                          size="sm"
                           className="h-5 gap-1 px-1.5 text-[10px] text-muted-foreground hover:text-foreground"
                           onClick={() => handleGeneratePayload(s)}
                           disabled={generating === s.id}
@@ -329,7 +329,7 @@ export function ListenerHosts({
                     <div className="flex gap-2 pt-2 border-t border-border/40">
                       <Button
                         variant="outline"
-                        size="xs"
+                        size="sm"
                         className="h-6 flex-1 gap-1 text-[10px]"
                         onClick={() => handleCheck(s.id)}
                         disabled={checking === s.id}
@@ -341,7 +341,7 @@ export function ListenerHosts({
                       </Button>
                       <Button
                         variant="outline"
-                        size="xs"
+                        size="sm"
                         className="h-6 flex-1 gap-1 text-[10px]"
                         onClick={() => startEdit(s)}
                       >
@@ -350,7 +350,7 @@ export function ListenerHosts({
                       </Button>
                       <Button
                         variant="ghost"
-                        size="xs"
+                        size="sm"
                         className="h-6 px-2 text-[10px] text-destructive hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => onDeleteServer(s.id)}
                       >
@@ -457,7 +457,7 @@ X-Forwarded-For: https://YOUR_CALLBACK_URL
           </pre>
         </div>
 
-        <Button size="xs" className="h-8 w-full gap-1.5 text-xs" onClick={onAddHost}>
+        <Button size="sm" className="h-8 w-full gap-1.5 text-xs" onClick={onAddHost}>
           <PlusIcon className="h-3.5 w-3.5" />
           Add your first host
         </Button>

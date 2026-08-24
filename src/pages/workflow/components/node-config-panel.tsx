@@ -57,7 +57,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onRun }: No
           {onDelete && (
             <Button
               variant="ghost"
-              size="xs"
+              size="sm"
               className="h-6 w-6 p-0 text-red-500 hover:text-red-600 hover:bg-red-500/10"
               onClick={() => onDelete(node.id)}
               aria-label="Delete node"
@@ -67,7 +67,7 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onRun }: No
           )}
           <Button
             variant="ghost"
-            size="xs"
+            size="sm"
             className="h-6 w-6 p-0"
             onClick={onClose}
             aria-label="Close"

@@ -214,7 +214,7 @@ export function WordlistPreviewPane({
             {isInstalled ? (
               <>
                 <Button
-                  size="xs"
+                  size="sm"
                   variant="outline"
                   onClick={() => onOpen(item)}
                   className="flex-1 text-[11px] gap-1 h-7 px-2 font-medium"
@@ -223,7 +223,7 @@ export function WordlistPreviewPane({
                   <span>Reveal in Files</span>
                 </Button>
                 <Button
-                  size="xs"
+                  size="sm"
                   variant="ghost"
                   onClick={() => onDelete(item)}
                   className="text-[11px] text-destructive hover:bg-destructive/10 h-7 px-2 shrink-0"
@@ -234,7 +234,7 @@ export function WordlistPreviewPane({
               </>
             ) : (
               <Button
-                size="xs"
+                size="sm"
                 variant="default"
                 disabled={isDownloading}
                 onClick={() => onDownload(item)}
@@ -255,7 +255,7 @@ export function WordlistPreviewPane({
             )}
 
             <Button
-              size="xs"
+              size="sm"
               variant="outline"
               onClick={handleCopyUrl}
               className="text-[11px] h-7 px-2 shrink-0"

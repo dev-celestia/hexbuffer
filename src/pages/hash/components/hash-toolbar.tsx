@@ -51,7 +51,7 @@ export function HashToolbar({
           {HASH_OPTIONS.map((opt) => (
             <Button
               key={opt.value}
-              size="xs"
+              size="sm"
               variant={activeType === opt.value ? "secondary" : "outline"}
               onClick={() => onTypeChange(opt.value)}
             >
@@ -73,7 +73,7 @@ export function HashToolbar({
       >
         <Button
           variant="outline"
-          size="xs"
+          size="sm"
           onClick={onCopy}
           disabled={!output}
         >
@@ -83,7 +83,7 @@ export function HashToolbar({
 
         <Button
           variant="destructive"
-          size="xs"
+          size="sm"
           onClick={onClear}
           disabled={isEmpty}
           title="Clear inputs and outputs"

@@ -75,7 +75,7 @@ export function RegressionHeader({
             {activeTabRunCount || totalRuns} run{(activeTabRunCount || totalRuns) !== 1 ? 's' : ''}
           </Badge>
           {isQueueActive ? (
-            <Button size="xs"
+            <Button size="sm"
               variant="destructive"
               onClick={onStopQueue}
               className="gap-1.5 active:scale-[0.97] transition-transform"
@@ -84,7 +84,7 @@ export function RegressionHeader({
               Stop Queue
             </Button>
           ) : (
-            <Button size="xs"
+            <Button size="sm"
               variant="outline"
               onClick={onRunAll}
               disabled={isRunning || activeTestEnabledCount === 0}
@@ -95,7 +95,7 @@ export function RegressionHeader({
             </Button>
           )}
           {isRunning ? (
-            <Button size="xs"
+            <Button size="sm"
               variant="destructive"
               onClick={onAbort}
               className="active:scale-[0.97] transition-transform gap-1.5"
@@ -104,7 +104,7 @@ export function RegressionHeader({
               Stop
             </Button>
           ) : (
-            <Button size="xs"
+            <Button size="sm"
               onClick={onRun}
               disabled={!activeTabTestCase || activeTab?.isEditing}
               className="active:scale-[0.97] transition-transform gap-1.5"

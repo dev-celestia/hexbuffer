@@ -73,7 +73,7 @@ export const CONNECTIONS_COLUMNS: (
       const conn = row.original;
       return (
         <div className="flex items-center gap-1">
-          <Button variant="ghost" className="h-5 w-5 p-0" asChild>
+          <Button size="sm" variant="ghost" className="h-5 w-5 p-0" asChild>
             <a
               href={`https://${conn.host}`}
               target="_blank"
@@ -83,7 +83,7 @@ export const CONNECTIONS_COLUMNS: (
             </a>
           </Button>
           <div className="relative group">
-            <Button variant="ghost" className="h-5 w-5 p-0">
+            <Button size="sm" variant="ghost" className="h-5 w-5 p-0">
               <PlusIcon className="h-3 w-3" />
             </Button>
             <div className="absolute right-0 top-full mt-1 z-10 hidden group-hover:block">

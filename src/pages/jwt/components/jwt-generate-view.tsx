@@ -132,7 +132,7 @@ export function JwtGenerateView({
                 </Select>
               </div>
             </div>
-            <Button size="xs"
+            <Button size="sm"
               className="w-full h-8 text-xs gap-1.5 mt-2"
               onClick={onGenerate}
               disabled={generating || !genSecret}

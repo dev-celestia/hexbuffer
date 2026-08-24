@@ -106,7 +106,7 @@ export function NetworkMonitor({
             />
           </div>
 
-          <Button variant="outline" size="xs" onClick={clearNetwork} className="h-8 gap-1 px-2.5">
+          <Button variant="outline" size="sm" onClick={clearNetwork} className="h-8 gap-1 px-2.5">
             <Trash className="size-3.5" />
             Clear
           </Button>
@@ -256,7 +256,7 @@ export function NetworkMonitor({
                   </span>
                   <Button
                     variant="ghost"
-                    size="xs"
+                    size="sm"
                     onClick={() => setSelectedRequestId(null)}
                     className="h-6 w-6 p-0 hover:bg-muted"
                   >

@@ -103,7 +103,7 @@ export function DevServerHeader({
         {/* Kill Port Button */}
         <Button
           variant="outline"
-          size="xs"
+          size="sm"
           onClick={() => onKillPort(targetPort)}
           disabled={isKillingPort}
           title={`Terminate any process holding port ${targetPort}`}
@@ -116,7 +116,7 @@ export function DevServerHeader({
         {isProcessRunning && (
           <Button
             variant="outline"
-            size="xs"
+            size="sm"
             onClick={handleOpenBrowser}
             className="h-8 px-2.5 text-xs flex items-center gap-1.5 transition-transform duration-150 active:scale-[0.97]"
           >
@@ -128,7 +128,7 @@ export function DevServerHeader({
         {isProcessRunning ? (
           <Button
             variant="destructive"
-            size="xs"
+            size="sm"
             onClick={onStopProcess}
             className="h-8 px-3 text-xs flex items-center gap-1.5 transition-transform duration-150 active:scale-[0.97]"
           >
@@ -138,7 +138,7 @@ export function DevServerHeader({
         ) : (
           <Button
             variant="default"
-            size="xs"
+            size="sm"
             onClick={onStartProcess}
             disabled={isStartingProcess}
             className="h-8 px-3 text-xs flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white transition-transform duration-150 active:scale-[0.97]"

@@ -160,7 +160,7 @@ function LogDetail({
             </Badge>
             <Button
               variant="outline"
-              size="xs"
+              size="sm"
               className="h-7 px-2 text-xs border-border cursor-pointer"
               onClick={handleSendToRepeater}
             >

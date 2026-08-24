@@ -139,7 +139,7 @@ export function ComparerToolbar({
         {/* Toggle Inputs */}
         <Button
           variant="outline"
-          size="xs"
+          size="sm"
           onClick={toggleShowInputs}
           className={cn(
             // Sizing & Spacing
@@ -156,7 +156,7 @@ export function ComparerToolbar({
         {/* Swap */}
         <Button
           variant="outline"
-          size="xs"
+          size="sm"
           onClick={handleSwap}
           disabled={!hasContent}
           className={cn(
@@ -184,7 +184,7 @@ export function ComparerToolbar({
         {/* Copy original/modified */}
         <Button
           variant="ghost"
-          size="xs"
+          size="sm"
           onClick={handleCopyA}
           disabled={!valueA}
           className={cn(
@@ -200,7 +200,7 @@ export function ComparerToolbar({
         </Button>
         <Button
           variant="ghost"
-          size="xs"
+          size="sm"
           onClick={handleCopyB}
           disabled={!valueB}
           className={cn(
@@ -218,7 +218,7 @@ export function ComparerToolbar({
         {/* Copy Unified Diff */}
         <Button
           variant="ghost"
-          size="xs"
+          size="sm"
           onClick={handleCopy}
           disabled={!hasDiff}
           className={cn(
@@ -236,7 +236,7 @@ export function ComparerToolbar({
         {/* Clear */}
         <Button
           variant="outline"
-          size="xs"
+          size="sm"
           onClick={handleClear}
           disabled={!hasContent}
           className={cn(

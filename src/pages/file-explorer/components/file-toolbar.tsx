@@ -95,7 +95,7 @@ export function FileToolbar({
         )}
       >
         <Button
-          size="xs"
+          size="sm"
           variant="ghost"
           onClick={onNavigateUp}
           disabled={isAtRoot || loading}
@@ -199,7 +199,7 @@ export function FileToolbar({
             />
             <Button
               type="submit"
-              size="xs"
+              size="sm"
               variant="outline"
               className={cn(
                 // Layout & Positioning
@@ -214,7 +214,7 @@ export function FileToolbar({
             </Button>
             <Button
               type="button"
-              size="xs"
+              size="sm"
               variant="ghost"
               onClick={() => {
                 setShowFolderInput(false);
@@ -227,7 +227,7 @@ export function FileToolbar({
           </form>
         ) : (
           <Button
-            size="xs"
+            size="sm"
             variant="outline"
             onClick={() => setShowFolderInput(true)}
             disabled={loading || actionDisabled}
@@ -238,7 +238,7 @@ export function FileToolbar({
         )}
 
         <Button
-          size="xs"
+          size="sm"
           variant="default"
           onClick={onActionClick}
           disabled={loading || actionDisabled}
@@ -250,7 +250,7 @@ export function FileToolbar({
         {/* View Mode Toggle ButtonGroup */}
         <ButtonGroup>
           <Button
-            size="xs"
+            size="sm"
             variant="outline"
             className={cn(
               // Sizing & Spacing
@@ -268,7 +268,7 @@ export function FileToolbar({
             <ListIcon className="size-3.5" />
           </Button>
           <Button
-            size="xs"
+            size="sm"
             variant="outline"
             className={cn(
               // Sizing & Spacing
@@ -343,7 +343,7 @@ export function FileToolbar({
         </div>
 
         <Button
-          size="xs"
+          size="sm"
           variant="ghost"
           onClick={onRefresh}
           disabled={loading || actionDisabled}

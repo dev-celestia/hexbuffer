@@ -145,7 +145,7 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
             </p>
           </div>
           <Button
-            size="xs"
+            size="sm"
             variant="outline"
             onClick={handleReset}
             disabled={!hasModifiedItems}
@@ -496,7 +496,7 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
           </p>
         </div>
         <Button
-          size="xs"
+          size="sm"
           variant="outline"
           onClick={handleReset}
           disabled={!hasModifiedItems}

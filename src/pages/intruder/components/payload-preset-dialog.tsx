@@ -175,10 +175,10 @@ export function IntruderPayloadPresetDialog({
         </div>
 
         <DialogFooter className="border-t px-4 py-3">
-          <Button size="xs" variant="outline" onClick={() => onOpenChange(false)}>
+          <Button size="sm" variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button size="xs" onClick={handleUsePayload} disabled={!selectedPayload}>
+          <Button size="sm" onClick={handleUsePayload} disabled={!selectedPayload}>
             Use Payload
           </Button>
         </DialogFooter>

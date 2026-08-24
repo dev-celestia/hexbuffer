@@ -112,7 +112,7 @@ export function IntruderResultsPanel() {
 
         <Button
           variant="outline"
-          size="xs"
+          size="sm"
           onClick={clearResults}
           disabled={resultsCount === 0}
         >

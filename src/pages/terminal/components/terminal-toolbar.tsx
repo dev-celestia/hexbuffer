@@ -53,7 +53,7 @@ export function TerminalToolbar({
       <div className="flex items-center gap-1.5 shrink-0">
         {/* Toggle Command History Sidebar */}
         <Button
-          size="xs"
+          size="sm"
           variant="ghost"
           onClick={toggleSidebar}
           className={cn(
@@ -69,7 +69,7 @@ export function TerminalToolbar({
 
         {/* Clear Buffer */}
         <Button
-          size="xs"
+          size="sm"
           variant="ghost"
           onClick={clearActiveSessionBuffer}
           className="h-7 px-2 text-muted-foreground hover:text-foreground hover:bg-accent/40 active:scale-[0.97] transition-transform"
@@ -83,7 +83,7 @@ export function TerminalToolbar({
         <Popover>
           <PopoverTrigger asChild>
             <Button
-              size="xs"
+              size="sm"
               variant="ghost"
               className="h-7 w-7 p-0 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/40 active:scale-[0.97] transition-transform"
               title="Terminal Settings"
@@ -108,7 +108,7 @@ export function TerminalToolbar({
                     className="h-7 text-xs bg-input/20 border-border text-foreground font-mono"
                     placeholder="/bin/zsh"
                   />
-                  <Button type="submit" size="xs" className="h-7 text-[11px]">
+                  <Button type="submit" size="sm" className="h-7 text-[11px]">
                     Save
                   </Button>
                 </div>
@@ -128,7 +128,7 @@ export function TerminalToolbar({
                   />
                   <div className="flex gap-1 shrink-0">
                     <Button
-                      size="xs"
+                      size="sm"
                       variant="outline"
                       onClick={() => setFontSize(fontSize - 1)}
                       className="h-6 w-6 p-0 flex items-center justify-center font-mono border-border bg-input/10 hover:bg-accent"
@@ -136,7 +136,7 @@ export function TerminalToolbar({
                       -
                     </Button>
                     <Button
-                      size="xs"
+                      size="sm"
                       variant="outline"
                       onClick={() => setFontSize(fontSize + 1)}
                       className="h-6 w-6 p-0 flex items-center justify-center font-mono border-border bg-input/10 hover:bg-accent"

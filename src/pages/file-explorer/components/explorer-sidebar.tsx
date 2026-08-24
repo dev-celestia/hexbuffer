@@ -224,7 +224,7 @@ export function ExplorerSidebar({
           />
           <Button
             type="submit"
-            size="xs"
+            size="sm"
             variant="outline"
             className={cn(
               // Layout & Positioning

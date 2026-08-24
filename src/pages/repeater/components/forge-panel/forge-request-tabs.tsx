@@ -34,7 +34,7 @@ function KeyValueEditor({
         <span className="text-[10px] uppercase font-bold text-muted-foreground">
           {noun}
         </span>
-        <Button variant="ghost" size="xs" className="h-7 px-2" onClick={onAdd}>
+        <Button variant="ghost" size="sm" className="h-7 px-2" onClick={onAdd}>
           <PlusIcon className="h-3.5 w-3.5 mr-1" /> Add
         </Button>
       </div>
@@ -195,7 +195,7 @@ export function ForgeRequestTabs({
             <Button
               key={t}
               variant="outline"
-              size="xs"
+              size="sm"
               className={cn("uppercase text-xs", activeReqTab === t && "text-primary")}
               onClick={() => onReqTabChange(t)}
             >
@@ -303,7 +303,7 @@ export function ForgeRequestTabs({
                       <div className="flex items-center space-x-2">
                         <Button
                           variant="outline"
-                          size="xs"
+                          size="sm"
                           onClick={() => fileInputRef.current?.click()}
                         >
                           <UploadSimpleIcon className="h-4 w-4 mr-1.5" />
@@ -311,7 +311,7 @@ export function ForgeRequestTabs({
                         </Button>
                         <Button
                           variant="ghost"
-                          size="xs"
+                          size="sm"
                           className="text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={() => onBodyChange("")}
                         >
@@ -340,7 +340,7 @@ export function ForgeRequestTabs({
                         </p>
                       </div>
                       <Button
-                        size="xs"
+                        size="sm"
                         onClick={() => fileInputRef.current?.click()}
                       >
                         Choose File

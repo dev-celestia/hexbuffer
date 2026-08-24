@@ -45,7 +45,7 @@ export function KanbanToolbar({ groupBy, onGroupByChange, totalCards, doneCards,
         </div>
 
         {/* Add Card Primary Button */}
-        <Button size="xs"
+        <Button size="sm"
           onClick={onAddCardClick}
           className="h-7"
         >

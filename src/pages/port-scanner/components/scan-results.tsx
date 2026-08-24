@@ -193,7 +193,7 @@ export function ScanResults({
               <>
                 <Button
                   variant="outline"
-                  size="xs"
+                  size="sm"
                   onClick={handleCopy}
                 >
                   {copied ? (
@@ -210,14 +210,14 @@ export function ScanResults({
                 </Button>
                 <Button
                   variant="outline"
-                  size="xs"
+                  size="sm"
                   onClick={onExportJson}
                 >
                   Export JSON
                 </Button>
                 <Button
                   variant="outline"
-                  size="xs"
+                  size="sm"
                   onClick={onExportCsv}
                 >
                   Export CSV
@@ -242,7 +242,7 @@ export function ScanResults({
       {error && (
         <div className="px-4 py-2 border-b bg-destructive/10 text-destructive font-mono text-[11px] flex items-center justify-between">
           <span>Error: {error}</span>
-          <Button variant="ghost" size="xs" onClick={onClear} className="h-5 px-1.5 text-[10px] text-destructive hover:bg-destructive/10">
+          <Button variant="ghost" size="sm" onClick={onClear} className="h-5 px-1.5 text-[10px] text-destructive hover:bg-destructive/10">
             Dismiss
           </Button>
         </div>

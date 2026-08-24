@@ -12,7 +12,7 @@ export function ExecutionLogToggle({ showExecutionLog, onToggle }: ExecutionLogT
   return (
     <Button
       variant="ghost"
-      size="xs"
+      size="sm"
       className={cn(
         'absolute bottom-2 left-2 z-20 h-7 w-7 rounded-md p-0',
         'bg-background/80 backdrop-blur-sm border',

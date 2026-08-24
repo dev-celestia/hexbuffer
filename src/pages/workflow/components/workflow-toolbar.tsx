@@ -82,10 +82,10 @@ export function WorkflowToolbar() {
               if (e.key === 'Escape') cancelEdit();
             }}
           />
-          <Button size="xs" variant="ghost" onClick={confirmEdit}>
+          <Button size="sm" variant="ghost" onClick={confirmEdit}>
             <CheckIcon className="size-3.5" />
           </Button>
-          <Button size="xs" variant="ghost" onClick={cancelEdit}>
+          <Button size="sm" variant="ghost" onClick={cancelEdit}>
             <XIcon className="size-3.5" />
           </Button>
         </div>
@@ -94,7 +94,7 @@ export function WorkflowToolbar() {
           <span className="truncate text-xs font-medium max-w-[200px]">
             {workflow.name}
           </span>
-          <Button size="xs" variant="ghost" className="h-6 w-6 p-0" onClick={startEdit}>
+          <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={startEdit}>
             <PencilIcon className="size-3" />
           </Button>
         </div>
@@ -127,7 +127,7 @@ export function WorkflowToolbar() {
         {isThisWorkflowRunning && (
           <Button
             variant="outline"
-            size="xs"
+            size="sm"
             className="h-7 border-amber-500/30 text-amber-600 hover:text-amber-700 dark:text-amber-300"
             onClick={handleAbort}
             title="Abort this workflow run"
@@ -139,7 +139,7 @@ export function WorkflowToolbar() {
         {hasLiveTrafficTrigger && (
           <Button
             variant="outline"
-            size="xs"
+            size="sm"
             className="h-7"
             onClick={handleToggleListening}
             title={workflow.enabled ? 'PauseIcon live-traffic listening' : 'Start live-traffic listening'}
@@ -154,7 +154,7 @@ export function WorkflowToolbar() {
         )}
         <Button
           variant="ghost"
-          size="xs"
+          size="sm"
           className="h-7 text-destructive hover:text-destructive"
           onClick={handleDelete}
         >

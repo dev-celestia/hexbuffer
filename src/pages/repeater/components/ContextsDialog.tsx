@@ -349,14 +349,14 @@ export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
                           </span>
                           <ButtonGroup>
                             <Button
-                              size="xs"
+                              size="sm"
                               variant="destructive"
                               onClick={() => handleConfirmDelete(ctx.id)}
                             >
                               Confirm
                             </Button>
                             <Button
-                              size="xs"
+                              size="sm"
                               variant="outline"
                               onClick={() => setDeletingContextId(null)}
                             >
@@ -493,7 +493,7 @@ export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
                     </span>
                     {!searchQuery && (
                       <Button
-                        size="xs"
+                        size="sm"
                         variant="outline"
                         onClick={handleStartCreate}
                       >
@@ -558,7 +558,7 @@ export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
                       )}
                     >
                       <Button
-                        size="xs"
+                        size="sm"
                         variant="outline"
                         onClick={handleAddVar}
                       >
@@ -684,7 +684,7 @@ export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
                               Add variables to refer to endpoint URLs, tokens, and other workspace settings dynamically.
                             </span>
                             <Button
-                              size="xs"
+                              size="sm"
                               variant="outline"
                               onClick={handleAddVar}
                             >
@@ -731,14 +731,14 @@ export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
                   >
                     <ButtonGroup>
                       <Button
-                        size="xs"
+                        size="sm"
                         variant="outline"
                         onClick={handleCancel}
                       >
                         Cancel
                       </Button>
                       <Button
-                        size="xs"
+                        size="sm"
                         onClick={handleSave}
                         disabled={!name.trim()}
                       >
@@ -786,7 +786,7 @@ export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
                     <code className="font-mono bg-muted px-1 rounded">{'{{base_url}}'}</code>.
                   </p>
                   <Button
-                    size="xs"
+                    size="sm"
                     onClick={handleStartCreate}
                     className={"mt-2"}
                   >

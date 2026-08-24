@@ -68,7 +68,7 @@ export function ForgeRequestBar({
 
         <ButtonGroup>
           <Button
-            size="xs"
+            size="sm"
             onClick={() => { void sendCraftRequest(); }}
             className={"h-6"}
           >
@@ -76,7 +76,7 @@ export function ForgeRequestBar({
           </Button>
           {activeEndpoint && (
             <Button
-              size="xs"
+              size="sm"
               variant={"outline"}
               onClick={() => { void saveActiveEndpoint(); }}
               className={"h-6"}

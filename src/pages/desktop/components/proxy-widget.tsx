@@ -128,7 +128,7 @@ export function ProxyWidget() {
         </div>
 
         <Button
-          size="xs"
+          size="sm"
           onClick={handleProxyToggle}
           disabled={isPending}
           variant={proxyStatus === 'connected' ? 'destructive' : 'default'}

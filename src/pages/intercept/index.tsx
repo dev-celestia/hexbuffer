@@ -67,7 +67,7 @@ export function InterceptPage() {
             <AlertAction>
               <Button
                 variant="outline"
-                size="xs"
+                size="sm"
                 onClick={handleStartProxy}
                 disabled={isStarting || proxyStatus === 'starting'}
               >
@@ -136,7 +136,7 @@ export function InterceptPage() {
             >
               <Button
                 variant={isEnabled ? 'default' : 'outline'}
-                size="xs"
+                size="sm"
                 onClick={() => void toggleIntercept(!isEnabled)}
               >
                 {isEnabled ? (
@@ -287,7 +287,7 @@ export function InterceptPage() {
                 />
                 <Button
                   variant="outline"
-                  size="xs"
+                  size="sm"
                   className={cn(
                     // Sizing & Spacing
                     "h-6"

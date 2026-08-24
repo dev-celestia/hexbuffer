@@ -274,7 +274,7 @@ export function RequestTab() {
               <Button
                 type="button"
                 variant="outline"
-                size="xs"
+                size="sm"
                 onClick={handleAutoMark}
                 disabled={isRunning || autoMarkLoading}
               >
@@ -288,7 +288,7 @@ export function RequestTab() {
               <Button
                 type="button"
                 variant="outline"
-                size="xs"
+                size="sm"
                 onClick={markRawRequestTarget}
                 disabled={isRunning}
               >
@@ -298,7 +298,7 @@ export function RequestTab() {
             </ButtonGroup>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="xs" type="button" variant="ghost" className="shrink-0">
+                <Button size="sm" type="button" variant="ghost" className="shrink-0">
                   <Info className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -342,7 +342,7 @@ export function RequestTab() {
                   <Button
                     type="button"
                     variant="ghost"
-                    size="xs"
+                    size="sm"
                     onClick={() => setSelectedSuggestionIds(new Set(suggestions.map((item) => item.id)))}
                   >
                     All
@@ -350,7 +350,7 @@ export function RequestTab() {
                   <Button
                     type="button"
                     variant="ghost"
-                    size="xs"
+                    size="sm"
                     onClick={() => setSelectedSuggestionIds(new Set())}
                   >
                     None
@@ -389,12 +389,12 @@ export function RequestTab() {
           </div>
 
           <DialogFooter>
-            <Button size="xs" type="button" variant="outline" onClick={() => setSuggestionsDialogOpen(false)}>
+            <Button size="sm" type="button" variant="outline" onClick={() => setSuggestionsDialogOpen(false)}>
               Cancel
             </Button>
             <Button
               type="button"
-              size="xs"
+              size="sm"
               onClick={handleApplyAutoMarkers}
               disabled={selectedSuggestions.length === 0}
             >

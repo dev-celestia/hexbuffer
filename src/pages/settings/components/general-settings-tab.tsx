@@ -113,7 +113,7 @@ function StorageRowDelete({ artifact, label, description, deletingArtifact, onDe
     <AlertDialog open={open} onOpenChange={(next) => { if (!isDeleting) setOpen(next); }}>
       <AlertDialogTrigger asChild>
         <Button
-          size="xs"
+          size="sm"
           variant="outline"
           disabled={isDeleting || deletingArtifact !== null}
         >
@@ -318,7 +318,7 @@ export function GeneralSettingsTab({ settings }: GeneralSettingsTabProps) {
               className="w-28"
             />
             <Button
-              size="xs"
+              size="sm"
               variant="outline"
               onClick={handleSaveProxyDefaultPort}
               disabled={!proxyPortIsChanged && !proxyRuntimeDiffers}
@@ -327,7 +327,7 @@ export function GeneralSettingsTab({ settings }: GeneralSettingsTabProps) {
               Save
             </Button>
             <Button
-              size="xs"
+              size="sm"
               variant="ghost"
               onClick={handleResetProxyDefaultPort}
               disabled={proxyDefaultPort === proxyFactoryDefaultPort}
@@ -342,7 +342,7 @@ export function GeneralSettingsTab({ settings }: GeneralSettingsTabProps) {
         <SettingsRow label="Check for updates">
           <div className="flex items-center gap-2">
             <Button
-              size="xs"
+              size="sm"
               variant="outline"
               onClick={handleCheckForUpdates}
               disabled={updateChecking || updateDownloading}
@@ -352,7 +352,7 @@ export function GeneralSettingsTab({ settings }: GeneralSettingsTabProps) {
             </Button>
             {updateAvailable && (
               <Button
-                size="xs"
+                size="sm"
                 onClick={handleInstallUpdate}
                 disabled={updateDownloading}
               >
@@ -468,7 +468,7 @@ export function GeneralSettingsTab({ settings }: GeneralSettingsTabProps) {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
-                size="xs"
+                size="sm"
                 variant="destructive"
                 disabled={deletingAllData}
               >

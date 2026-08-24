@@ -101,7 +101,7 @@ export function TriggerConfigForm({ config, onChange, onRun }: TriggerConfigForm
           </p>
           <Button
             variant="outline"
-            size="xs"
+            size="sm"
             className="h-7 w-full text-xs"
             onClick={onRun}
           >
@@ -384,7 +384,7 @@ function LiveTrafficHostList({
         {items.length > 0 && (
           <Button
             variant="ghost"
-            size="xs"
+            size="sm"
             className="h-6 w-6 shrink-0 p-0"
             onClick={onClear}
             title={clearTitle}

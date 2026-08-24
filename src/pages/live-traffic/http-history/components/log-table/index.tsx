@@ -101,7 +101,7 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
               "py-1"
             )}
           >
-            <Button variant="outline" size="xs" onClick={actions.handleRefresh}>
+            <Button variant="outline" size="sm" onClick={actions.handleRefresh}>
               {newEventsCount} new request{newEventsCount > 1 ? "s" : ""} - Click to refresh
             </Button>
           </div>

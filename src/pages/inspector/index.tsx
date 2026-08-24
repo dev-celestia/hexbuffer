@@ -86,7 +86,7 @@ export function InspectorPage() {
           </div>
 
           {cdp.connectionStatus === 'connected' && cdp.selectedTarget ? (
-            <Button size="xs"
+            <Button size="sm"
               variant="outline"
               onClick={cdp.disconnect}
             >
@@ -105,7 +105,7 @@ export function InspectorPage() {
                 />
               </div>
 
-              <Button size="xs"
+              <Button size="sm"
                 variant="outline"
                 onClick={cdp.openBrowser}
                 disabled={cdp.connectionStatus === 'connecting'}
@@ -114,7 +114,7 @@ export function InspectorPage() {
                 Open Browser
               </Button>
 
-              <Button size="xs"
+              <Button size="sm"
                 variant="outline"
                 onClick={cdp.fetchTargets}
                 disabled={cdp.connectionStatus === 'connecting'}
@@ -227,7 +227,7 @@ export function InspectorPage() {
                 </span>
                 <Button
                   variant="outline"
-                  size="xs"
+                  size="sm"
                   onClick={cdp.clearConsole}
                   className="h-8 gap-1 active:scale-[0.97] transition-transform duration-100 ease-out"
                 >

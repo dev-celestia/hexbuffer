@@ -75,7 +75,7 @@ export function TargetSelector({
               </div>
             </div>
 
-            <Button size="xs"
+            <Button size="sm"
               className="h-10 px-5 gap-2 w-full sm:w-auto font-medium active:scale-[0.97] transition-transform duration-100 ease-out"
               onClick={async () => {
                 setLoading(true);
@@ -88,7 +88,7 @@ export function TargetSelector({
               Open Browser
             </Button>
 
-            <Button size="xs"
+            <Button size="sm"
               variant="outline"
               className="h-10 px-5 gap-2 w-full sm:w-auto font-medium active:scale-[0.97] transition-transform duration-100 ease-out"
               onClick={handleRefresh}
@@ -171,7 +171,7 @@ export function TargetSelector({
                     </div>
 
                     <Button
-                      size="xs"
+                      size="sm"
                       className="gap-1.5 shrink-0 active:scale-[0.97] transition-transform duration-100 ease-out"
                       onClick={() => connect(target)}
                       disabled={connectionStatus === 'connecting'}

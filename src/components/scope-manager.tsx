@@ -21,7 +21,7 @@ export function ScopeManager({ target, targets, onScopeUpdated }: ScopeManagerPr
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button size="sm" variant="outline">
           <GearSixIcon className="mr-2 h-4 w-4" />
           Manage Scope
         </Button>
@@ -37,7 +37,7 @@ export function ScopeManager({ target, targets, onScopeUpdated }: ScopeManagerPr
           <ScopeTable targets={targets} onTargetsUpdated={onScopeUpdated} />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button size="sm" variant="outline" onClick={() => setOpen(false)}>
             Close
           </Button>
         </DialogFooter>

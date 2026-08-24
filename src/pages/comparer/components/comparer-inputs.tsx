@@ -80,7 +80,7 @@ export function ComparerInputs({
           >
             <Button
               variant="ghost"
-              size="xs"
+              size="sm"
               onClick={handlePasteA}
               className={cn(
                 // Sizing & Spacing
@@ -95,7 +95,7 @@ export function ComparerInputs({
             </Button>
             <Button
               variant="ghost"
-              size="xs"
+              size="sm"
               onClick={handleClearA}
               disabled={!valueA}
               className={cn(
@@ -180,7 +180,7 @@ export function ComparerInputs({
           >
             <Button
               variant="ghost"
-              size="xs"
+              size="sm"
               onClick={handlePasteB}
               className={cn(
                 // Sizing & Spacing
@@ -195,7 +195,7 @@ export function ComparerInputs({
             </Button>
             <Button
               variant="ghost"
-              size="xs"
+              size="sm"
               onClick={handleClearB}
               disabled={!valueB}
               className={cn(

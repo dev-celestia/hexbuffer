@@ -14,7 +14,7 @@ export function OpenBrowserButton() {
   return (
     <Button
       variant="outline"
-      size="xs"
+      size="sm"
       onClick={openBrowser}
       disabled={isOpeningBrowser}
       title={openBrowserTitle}

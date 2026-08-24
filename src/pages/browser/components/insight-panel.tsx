@@ -484,7 +484,7 @@ function AiInsightsPanelComponent({
                         )}
                       >
                         <Button
-                          size="xs"
+                          size="sm"
                           variant="ghost"
                           className={cn(
                             // Sizing & Spacing
@@ -623,7 +623,7 @@ function AiInsightsPanelComponent({
           </ScrollArea>
 
           <DialogFooter>
-            <Button size="xs" variant="outline" onClick={handleDetailOpenPage} disabled={!detailPage}>
+            <Button size="sm" variant="outline" onClick={handleDetailOpenPage} disabled={!detailPage}>
               Open Page
             </Button>
           </DialogFooter>

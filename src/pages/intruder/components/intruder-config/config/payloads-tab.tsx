@@ -228,7 +228,7 @@ export function PayloadsTab() {
                     key={payloadType}
                     type="button"
                     variant={payload.payload_type === payloadType ? 'default' : 'outline'}
-                    size="xs"
+                    size="sm"
                     onClick={() => updatePayloadType(payloadType)}
                   >
                     {getPayloadTypeLabel(payloadType)}
@@ -262,7 +262,7 @@ export function PayloadsTab() {
                   <div className="flex flex-wrap items-center gap-2">
                     <Button
                       variant="outline"
-                      size="xs"
+                      size="sm"
                       onClick={() => {
                         setActivePositionName(position.name);
                         setPresetDialogOpen(true);
@@ -430,7 +430,7 @@ function PayloadFileButton({ positionName }: { positionName: string }) {
 
   return (
     <>
-      <Button size="xs" variant="outline" onClick={() => inputRef.current?.click()}>
+      <Button size="sm" variant="outline" onClick={() => inputRef.current?.click()}>
         Load from File
       </Button>
       <input

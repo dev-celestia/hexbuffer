@@ -269,7 +269,7 @@ export function TargetWidget() {
                 >
                   <Button
                     type="button"
-                    size="xs"
+                    size="sm"
                     variant="ghost"
                     onClick={handleCancelCreate}
                     aria-label="Back to target list"
@@ -328,7 +328,7 @@ export function TargetWidget() {
                   </span>
                   <Button
                     variant="default"
-                    size="xs"
+                    size="sm"
                     onClick={handleCreateNew}
                   >
                     <PlusIcon className="h-3 w-3" />

@@ -79,7 +79,7 @@ export function IntruderPage() {
             </div>
             <Button
               variant="outline"
-              size="xs"
+              size="sm"
               aria-label="Dismiss safety notice"
               onClick={() => page.setIntruderSafetyAlertDismissed(true)}
             >
@@ -136,7 +136,7 @@ export function IntruderPage() {
             >
               {page.isRunning ? (
                 <Button 
-                  size="xs" 
+                  size="sm" 
                   variant="destructive" 
                   onClick={stopIntruderUiAttack}
                 >
@@ -144,7 +144,7 @@ export function IntruderPage() {
                 </Button>
               ) : (
                 <Button 
-                  size="xs" 
+                  size="sm" 
                   variant="default"
                   onClick={page.handleStartAttack} 
                   disabled={!!page.startBlockedReason}

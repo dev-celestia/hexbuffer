@@ -100,7 +100,7 @@ export function DevServerQrCard({
 
         <Button
           variant="outline"
-          size="xs"
+          size="sm"
           onClick={handleCopy}
           className="h-7 px-2.5 text-xs flex items-center gap-1.5 shrink-0 transition-transform duration-150 active:scale-[0.97]"
         >

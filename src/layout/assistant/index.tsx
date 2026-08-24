@@ -76,7 +76,7 @@ function PromptInputAttachmentsBar() {
         <Button
           type="button"
           variant="ghost"
-          size="xs"
+          size="sm"
           onClick={attachments.clear}
           className={cn(
             // Layout & Positioning
@@ -563,7 +563,7 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                   </div>
                   <Button
                     variant="ghost"
-                    size="xs"
+                    size="sm"
                     onClick={clearMentionedPages}
                     className="h-6 px-1.5 text-xs text-muted-foreground hover:text-foreground shrink-0"
                   >

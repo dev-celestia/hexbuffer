@@ -137,7 +137,7 @@ export function AiSettingsTab({ settings }: AiSettingsTabProps) {
       <SettingsRow label="Actions">
         <div className="flex items-center gap-2">
           <Button
-            size="xs"
+            size="sm"
             onClick={handleSaveAiSettings}
             disabled={aiSettingsLoading || aiSettingsSaving || !canSaveAiSettings}
           >
@@ -145,7 +145,7 @@ export function AiSettingsTab({ settings }: AiSettingsTabProps) {
             {aiSettingsSaving ? 'Saving…' : 'Save'}
           </Button>
           <Button
-            size="xs"
+            size="sm"
             variant="outline"
             onClick={handleClearAiApiKey}
             disabled={aiSettingsLoading || aiSettingsSaving || !aiSettings.hasApiKey}

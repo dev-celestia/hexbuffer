@@ -68,7 +68,7 @@ export function HashInputPanel({ input, isEmpty, onInputChange, onClear }: HashI
 
         <Button
           variant="destructive"
-          size="xs"
+          size="sm"
           onClick={onClear}
           disabled={isEmpty}
           title="Clear Input"

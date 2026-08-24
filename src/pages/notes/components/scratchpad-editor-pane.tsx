@@ -54,7 +54,7 @@ export function ScratchpadEditorPane({ hook }: ScratchpadEditorPaneProps) {
           {!isSidebarOpen && (
             <Button
               variant="ghost"
-              size="xs"
+              size="sm"
               onClick={toggleSidebar}
               title="Expand sidebar"
               className="size-7 p-0 shrink-0 hover:bg-muted active:scale-95 transition-all text-muted-foreground hover:text-foreground mr-1"
@@ -82,7 +82,7 @@ export function ScratchpadEditorPane({ hook }: ScratchpadEditorPaneProps) {
               <Button
                 type="submit"
                 variant="outline"
-                size="xs"
+                size="sm"
                 title="Save name"
                 className="h-7 w-7 p-0 text-primary active:scale-95 transition-all"
               >
@@ -91,7 +91,7 @@ export function ScratchpadEditorPane({ hook }: ScratchpadEditorPaneProps) {
               <Button
                 type="button"
                 variant="outline"
-                size="xs"
+                size="sm"
                 onClick={handleRenameCancel}
                 title="Cancel rename"
                 className="h-7 w-7 p-0 text-muted-foreground active:scale-95 transition-all"
@@ -110,7 +110,7 @@ export function ScratchpadEditorPane({ hook }: ScratchpadEditorPaneProps) {
               </span>
               <Button
                 variant="ghost"
-                size="xs"
+                size="sm"
                 onClick={() => handleStartRename(activePad.id, activePad.name)}
                 className="size-6 p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-muted-foreground hover:text-foreground hover:bg-muted"
                 title="Rename scratchpad"

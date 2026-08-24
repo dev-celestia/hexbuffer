@@ -15,7 +15,7 @@ export function TerminalEmptyState({ createSession }: TerminalEmptyStateProps) {
         All terminal shells have been closed. Open a new shell process to start.
       </p>
       <Button
-        size="xs"
+        size="sm"
         onClick={createSession}
         className="mt-4 px-4 font-mono active:scale-[0.97] transition-transform"
       >

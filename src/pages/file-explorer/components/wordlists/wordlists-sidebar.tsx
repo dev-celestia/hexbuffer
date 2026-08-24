@@ -225,7 +225,7 @@ export function WordlistsSidebar({
         )}
       >
         <Button
-          size="xs"
+          size="sm"
           variant="outline"
           disabled={bundleDownloading}
           onClick={() => onDownloadBundle(selectedTag)}

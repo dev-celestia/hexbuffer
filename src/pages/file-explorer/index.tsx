@@ -93,7 +93,7 @@ export function FileExplorerPage() {
               )}
             >
               <Button
-                size="xs"
+                size="sm"
                 variant="default"
                 onClick={() => page.navigate('/settings?tab=r2')}
                 className={cn(

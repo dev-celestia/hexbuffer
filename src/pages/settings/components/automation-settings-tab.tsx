@@ -86,7 +86,7 @@ export function AutomationSettingsTab() {
         description="Changes are saved automatically and apply to new scheduling decisions."
       >
         <Button
-          size="xs"
+          size="sm"
           variant="outline"
           onClick={resetAutomationSettings}
           disabled={isDefault}

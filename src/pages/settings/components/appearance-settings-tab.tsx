@@ -159,12 +159,12 @@ export function AppearanceSettingsTab() {
           description="Upload a custom image. It will be displayed as cover."
         >
           <div className="flex items-center gap-2">
-            <Button size="xs" variant="outline" onClick={handlePickImage}>
+            <Button size="sm" variant="outline" onClick={handlePickImage}>
               <ImageIcon className="mr-1.5 size-3.5" />
               {bgType === 'image' && bgValue !== 'default-light' && bgValue !== 'default-dark' ? 'Change image' : 'Pick image'}
             </Button>
             {bgType !== 'none' && (
-              <Button size="xs" variant="ghost" onClick={clearBg}>
+              <Button size="sm" variant="ghost" onClick={clearBg}>
                 <TrashIcon className="size-3.5" />
               </Button>
             )}
@@ -256,7 +256,7 @@ export function AppearanceSettingsTab() {
 
         {bgType !== 'none' && (
           <SettingsRow label="Reset background" description="Restore the default light/dark theme wallpaper.">
-            <Button size="xs" variant="outline" onClick={clearBg}>
+            <Button size="sm" variant="outline" onClick={clearBg}>
               <ArrowCounterClockwiseIcon className="mr-1.5 size-3.5" />
               Reset to default
             </Button>

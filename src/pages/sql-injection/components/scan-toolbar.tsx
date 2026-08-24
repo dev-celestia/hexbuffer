@@ -93,7 +93,7 @@ export function ScanToolbar({
           <div className="flex items-center gap-1.5">
             <Button
               variant="outline"
-              size="xs"
+              size="sm"
               onClick={onExportJson}
               disabled={vulnerabilitiesCount === 0}
               className="h-7 text-[11px] gap-1.5 px-2.5 transition-colors font-medium"
@@ -103,7 +103,7 @@ export function ScanToolbar({
             </Button>
             <Button
               variant="outline"
-              size="xs"
+              size="sm"
               onClick={onExportCsv}
               disabled={vulnerabilitiesCount === 0}
               className="h-7 text-[11px] gap-1.5 px-2.5 transition-colors font-medium"
@@ -127,7 +127,7 @@ export function ScanToolbar({
             {isRunning ? (
               <Button
                 variant="destructive"
-                size="xs"
+                size="sm"
                 onClick={onStop}
                 className="h-8 text-[11px] gap-1.5 px-3.5 font-semibold shadow-sm"
               >
@@ -136,7 +136,7 @@ export function ScanToolbar({
               </Button>
             ) : (
               <Button
-                size="xs"
+                size="sm"
                 onClick={onStart}
                 disabled={!hasUrlAndParams}
                 className="h-8 text-[11px] gap-1.5 px-3.5 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-sm disabled:bg-muted disabled:text-muted-foreground"

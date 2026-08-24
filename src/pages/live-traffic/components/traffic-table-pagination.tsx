@@ -37,7 +37,7 @@ export function TrafficTablePagination({
       </div>
       <div className="flex items-center gap-2">
         <Button
-          size="xs"
+          size="sm"
           variant="outline"
           onClick={onPreviousPage}
           disabled={!hasPreviousPage || isLoading}
@@ -50,7 +50,7 @@ export function TrafficTablePagination({
           Page {page} of {totalPages}
         </span>
         <Button
-          size="xs"
+          size="sm"
           variant="outline"
           onClick={onNextPage}
           disabled={!hasNextPage || isLoading}

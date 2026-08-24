@@ -121,7 +121,7 @@ export function ExecutionLogPanel({ workflowId }: ExecutionLogPanelProps) {
           {logs.length > 0 && (
             <Button
               variant="ghost"
-              size="xs"
+              size="sm"
               className="h-5 w-5 p-0"
               onClick={() => clearLogs(workflowId ?? undefined)}
               title="Clear this workflow log"

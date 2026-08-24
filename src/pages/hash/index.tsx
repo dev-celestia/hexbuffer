@@ -120,7 +120,7 @@ export function HashPage() {
             >
               {page.attackEngine.status === 'idle' && (
                 <Button
-                  size="xs"
+                  size="sm"
                   onClick={page.handleStartAttack}
                   disabled={page.targets.length === 0 || !page.attackConfig}
                 >
@@ -133,7 +133,7 @@ export function HashPage() {
                 <>
                   <Button
                     variant="outline"
-                    size="xs"
+                    size="sm"
                     onClick={page.handlePauseAttack}
                   >
                     <PauseIcon className="size-3.5" weight="fill" />
@@ -141,7 +141,7 @@ export function HashPage() {
                   </Button>
                   <Button
                     variant="destructive"
-                    size="xs"
+                    size="sm"
                     onClick={page.handleStopAttack}
                   >
                     <SquareIcon className="size-3.5" weight="fill" />
@@ -153,7 +153,7 @@ export function HashPage() {
               {page.attackEngine.status === 'paused' && (
                 <>
                   <Button
-                    size="xs"
+                    size="sm"
                     onClick={page.handleResumeAttack}
                   >
                     <PlayIcon className="size-3.5" weight="fill" />
@@ -161,7 +161,7 @@ export function HashPage() {
                   </Button>
                   <Button
                     variant="destructive"
-                    size="xs"
+                    size="sm"
                     onClick={page.handleStopAttack}
                   >
                     <SquareIcon className="size-3.5" weight="fill" />
@@ -175,7 +175,7 @@ export function HashPage() {
                 page.attackEngine.status === 'error') && (
                 <Button
                   variant="outline"
-                  size="xs"
+                  size="sm"
                   onClick={page.handleResetAttack}
                 >
                   <ArrowsClockwiseIcon className="size-3.5" />

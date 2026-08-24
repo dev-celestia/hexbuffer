@@ -276,74 +276,6 @@ export function LogFilters({
               </button>
             )}
           </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="xs">
-                <span>Method{filter.methods.size > 0 ? ` (${filter.methods.size})` : ''}</span>
-                <CaretDownIcon />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Filter by Method</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {METHOD_FILTERS.map((method) => (
-                  <DropdownMenuCheckboxItem
-                    key={method}
-                    checked={filter.methods.has(method)}
-                    onCheckedChange={(checked) => handleToggleMethod(method, !!checked)}
-                  >
-                    {method}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuGroup>
-              {filter.methods.size > 0 && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => setFilter({ ...filter, methods: new Set() })}
-                  >
-                    Clear methods
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="xs">
-                <span>Status{filter.statusCodes.size > 0 ? ` (${filter.statusCodes.size})` : ''}</span>
-                <CaretDownIcon />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {STATUS_FILTERS.map((status) => (
-                  <DropdownMenuCheckboxItem
-                    key={status.label}
-                    checked={filter.statusCodes.has(status.label)}
-                    onCheckedChange={(checked) => handleToggleStatus(status.label, !!checked)}
-                  >
-                    {status.label}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuGroup>
-              {filter.statusCodes.size > 0 && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => setFilter({ ...filter, statusCodes: new Set() })}
-                  >
-                    Clear status
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
 
         <div
@@ -355,6 +287,76 @@ export function LogFilters({
             "gap-2"
           )}
         >
+          <ButtonGroup>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <span>Method{filter.methods.size > 0 ? ` (${filter.methods.size})` : ''}</span>
+                  <CaretDownIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Filter by Method</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {METHOD_FILTERS.map((method) => (
+                    <DropdownMenuCheckboxItem
+                      key={method}
+                      checked={filter.methods.has(method)}
+                      onCheckedChange={(checked) => handleToggleMethod(method, !!checked)}
+                    >
+                      {method}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuGroup>
+                {filter.methods.size > 0 && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setFilter({ ...filter, methods: new Set() })}
+                    >
+                      Clear methods
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <span>Status{filter.statusCodes.size > 0 ? ` (${filter.statusCodes.size})` : ''}</span>
+                  <CaretDownIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {STATUS_FILTERS.map((status) => (
+                    <DropdownMenuCheckboxItem
+                      key={status.label}
+                      checked={filter.statusCodes.has(status.label)}
+                      onCheckedChange={(checked) => handleToggleStatus(status.label, !!checked)}
+                    >
+                      {status.label}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuGroup>
+                {filter.statusCodes.size > 0 && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setFilter({ ...filter, statusCodes: new Set() })}
+                    >
+                      Clear status
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </ButtonGroup>
+
           {isStreamManuallyPaused && (
             <Badge
               variant="outline"
@@ -375,7 +377,7 @@ export function LogFilters({
 
           <ButtonGroup>
             <Button
-              size="xs"
+              size="sm"
               variant="secondary"
               onClick={() => {
                 const store = useHttpHistoryQueryStore.getState();
@@ -398,7 +400,7 @@ export function LogFilters({
             </Button>
 
             <Button
-              size="xs"
+              size="sm"
               variant="secondary"
               onClick={openTargetSelector}
             >
@@ -408,7 +410,7 @@ export function LogFilters({
           </ButtonGroup>
 
           <Button
-            size="xs"
+            size="sm"
             variant="destructive"
             onClick={() => setClearDialogOpen(true)}
             title="Clear history"

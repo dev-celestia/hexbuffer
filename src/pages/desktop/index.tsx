@@ -105,7 +105,7 @@ export function DesktopPage() {
               <Dialog>
                 <DialogTrigger>
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="ghost"
                     className={cn(
                       // Sizing & Spacing
@@ -270,7 +270,7 @@ export function DesktopPage() {
               >
                 Try searching for another keyword or clear the search input.
               </p>
-              <Button size="xs"
+              <Button size="sm"
                 variant="link"
                 onClick={handleClearSearch}
                 className={cn(

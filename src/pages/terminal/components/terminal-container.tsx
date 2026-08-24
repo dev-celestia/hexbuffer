@@ -66,7 +66,7 @@ export const TerminalContainer = React.memo(({
             </p>
           </div>
           <Button
-            size="xs"
+            size="sm"
             onClick={onRestart}
             className="font-mono text-xs px-4 border-emerald-500/20 hover:bg-emerald-500/10 hover:text-emerald-500 active:scale-[0.97] transition-all"
             variant="outline"

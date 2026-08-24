@@ -265,7 +265,7 @@ export function WordlistsTable({
                     {isInstalled ? (
                       <>
                         <Button
-                          size="xs"
+                          size="sm"
                           variant="ghost"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -283,7 +283,7 @@ export function WordlistsTable({
                           <EyeIcon className="size-3.5" />
                         </Button>
                         <Button
-                          size="xs"
+                          size="sm"
                           variant="ghost"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -301,7 +301,7 @@ export function WordlistsTable({
                           <FolderOpenIcon className="size-3.5" />
                         </Button>
                         <Button
-                          size="xs"
+                          size="sm"
                           variant="ghost"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -321,7 +321,7 @@ export function WordlistsTable({
                       </>
                     ) : (
                       <Button
-                        size="xs"
+                        size="sm"
                         variant="outline"
                         disabled={isDownloading}
                         onClick={(e) => {

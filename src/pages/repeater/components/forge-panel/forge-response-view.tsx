@@ -132,7 +132,7 @@ export function ForgeResponseView({
 
                 <Button
                   variant="ghost"
-                  size="xs"
+                  size="sm"
                   className="h-6 px-2 text-xs flex items-center gap-1.5 transition-transform active:scale-95 text-muted-foreground hover:text-foreground cursor-pointer"
                   onClick={handleCopy}
                   title="Copy response body"
@@ -160,7 +160,7 @@ export function ForgeResponseView({
                 <Button
                   key={t}
                   variant="outline"
-                  size="xs"
+                  size="sm"
                   className={cn('text-xs uppercase', activeResTab === t && 'text-primary')}
                   onClick={() => onResTabChange(t)}
                 >

@@ -66,7 +66,7 @@ export function HashOutputPanel({ output, onCopy }: HashOutputPanelProps) {
 
         <Button
           variant="outline"
-          size="xs"
+          size="sm"
           onClick={onCopy}
           disabled={!output}
           title="Copy Output"

@@ -44,7 +44,7 @@ function ActionLogPanelComponent({ actions, onClear }: ActionLogPanelProps) {
         >
           Action Log
         </span>
-        <Button size="xs" variant="ghost" onClick={onClear}>
+        <Button size="sm" variant="ghost" onClick={onClear}>
           Clear
         </Button>
       </div>

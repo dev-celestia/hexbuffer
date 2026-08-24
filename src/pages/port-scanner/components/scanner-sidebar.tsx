@@ -61,7 +61,7 @@ export function ScannerSidebar({
         {/* Action Footer */}
         <div className="flex flex-end">
           {isRunning ? (
-            <Button size="xs"
+            <Button size="sm"
               variant="destructive"
               onClick={() => onStop()}
             >
@@ -69,7 +69,7 @@ export function ScannerSidebar({
               Stop Port Scan
             </Button>
           ) : (
-            <Button size="xs"
+            <Button size="sm"
               disabled={!canScan}
               onClick={() => onStart()}
             >

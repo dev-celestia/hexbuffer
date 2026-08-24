@@ -36,7 +36,7 @@ export function TargetSelectorDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {!isExternallyControlled && (
         <DialogTrigger>
-          <Button variant="outline" size="xs" className="gap-1.5 active:scale-[0.97] transition-all">
+          <Button variant="outline" size="sm" className="gap-1.5 active:scale-[0.97] transition-all">
             <TargetIcon className="h-3.5 w-3.5 text-primary" />
             Manage Target
           </Button>
@@ -108,7 +108,7 @@ export function TargetSelectorDialog({
               </span>
               <Button
                 variant="default"
-                size="xs"
+                size="sm"
                 onClick={handleCreateNew}
                 className="gap-1.5 active:scale-[0.98] transition-all"
               >

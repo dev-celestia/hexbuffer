@@ -64,7 +64,7 @@ export function TerminalSidebar({
         </div>
         {activeTab === 'recent' && recentCommands.length > 0 && (
           <Button
-            size="xs"
+            size="sm"
             variant="ghost"
             onClick={clearRecentCommands}
             className="h-6 px-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 active:scale-[0.97] transition-all"
@@ -81,7 +81,7 @@ export function TerminalSidebar({
         <ButtonGroup className="w-full">
           <Button
             variant="outline"
-            size="xs"
+            size="sm"
             className={cn(
               'flex-1 text-[10px] font-mono h-6',
               activeTab === 'recent' && 'text-emerald-500 border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 hover:text-emerald-500',
@@ -93,7 +93,7 @@ export function TerminalSidebar({
           </Button>
           <Button
             variant="outline"
-            size="xs"
+            size="sm"
             className={cn(
               'flex-1 text-[10px] font-mono h-6',
               activeTab === 'common' && 'text-emerald-500 border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 hover:text-emerald-500',
@@ -135,7 +135,7 @@ export function TerminalSidebar({
                 {/* Hover Actions overlay */}
                 <div className="absolute right-1.5 opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity duration-150 pointer-events-auto">
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="outline"
                     className="h-5 w-5 p-0 flex items-center justify-center bg-background border-border hover:bg-accent active:scale-[0.95]"
                     onClick={(e) => {
@@ -147,7 +147,7 @@ export function TerminalSidebar({
                     <CopyIcon className="size-3 text-muted-foreground" />
                   </Button>
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="outline"
                     className="h-5 w-5 p-0 flex items-center justify-center bg-background border-border hover:bg-emerald-500/10 hover:text-emerald-500 hover:border-emerald-500/30 active:scale-[0.95]"
                     onClick={(e) => {
@@ -186,7 +186,7 @@ export function TerminalSidebar({
                 {/* Hover Actions overlay */}
                 <div className="absolute right-1.5 opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity duration-150 pointer-events-auto">
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="outline"
                     className="h-5 w-5 p-0 flex items-center justify-center bg-background border-border hover:bg-accent active:scale-[0.95]"
                     onClick={(e) => {
@@ -198,7 +198,7 @@ export function TerminalSidebar({
                     <CopyIcon className="size-3 text-muted-foreground" />
                   </Button>
                   <Button
-                    size="xs"
+                    size="sm"
                     variant="outline"
                     className="h-5 w-5 p-0 flex items-center justify-center bg-background border-border hover:bg-emerald-500/10 hover:text-emerald-500 hover:border-emerald-500/30 active:scale-[0.95]"
                     onClick={(e) => {

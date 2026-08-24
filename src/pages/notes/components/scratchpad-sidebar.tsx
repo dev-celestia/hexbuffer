@@ -47,7 +47,7 @@ export function ScratchpadSidebar({ hook }: ScratchpadSidebarProps) {
       {/* Sidebar Header */}
       <div className="p-3 border-b flex items-center justify-between shrink-0 bg-muted/5">
 
-        <Button size="xs"
+        <Button size="sm"
           variant="ghost"
           onClick={handleAdd}
           disabled={scratchpads.length >= 20}
@@ -60,7 +60,7 @@ export function ScratchpadSidebar({ hook }: ScratchpadSidebarProps) {
         <div className="flex items-center gap-1.5">
           <Button
             variant="ghost"
-            size="xs"
+            size="sm"
             onClick={toggleSidebar}
             title="Collapse sidebar"
             className="size-6 p-0 hover:bg-muted active:scale-95 transition-all text-muted-foreground hover:text-foreground shrink-0"
@@ -129,7 +129,7 @@ export function ScratchpadSidebar({ hook }: ScratchpadSidebarProps) {
                     <Button
                       type="submit"
                       variant="outline"
-                      size="xs"
+                      size="sm"
                       className="size-6 p-0 text-primary active:scale-95"
                     >
                       <CheckIcon className="size-3" />
@@ -137,7 +137,7 @@ export function ScratchpadSidebar({ hook }: ScratchpadSidebarProps) {
                     <Button
                       type="button"
                       variant="outline"
-                      size="xs"
+                      size="sm"
                       onClick={handleRenameCancel}
                       className="size-6 p-0 text-muted-foreground active:scale-95"
                     >
@@ -163,7 +163,7 @@ export function ScratchpadSidebar({ hook }: ScratchpadSidebarProps) {
                     >
                       <Button
                         variant="ghost"
-                        size="xs"
+                        size="sm"
                         onClick={() => handleStartRename(pad.id, pad.name)}
                         className="size-5 p-0 text-muted-foreground hover:text-foreground hover:bg-muted"
                         title="Rename"
@@ -172,7 +172,7 @@ export function ScratchpadSidebar({ hook }: ScratchpadSidebarProps) {
                       </Button>
                       <Button
                         variant="ghost"
-                        size="xs"
+                        size="sm"
                         disabled={scratchpads.length <= 1}
                         onClick={() => handleDelete(pad.id, pad.name)}
                         className="size-5 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 disabled:opacity-30 disabled:pointer-events-none"

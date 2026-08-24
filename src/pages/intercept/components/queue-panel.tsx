@@ -271,7 +271,7 @@ export function InterceptQueuePanel() {
                             {direction === "request" && (
                               <Button
                                 variant="outline"
-                                size="xs"
+                                size="sm"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleInterceptResponse(request);
@@ -284,7 +284,7 @@ export function InterceptQueuePanel() {
                             )}
                             <Button
                               variant="default"
-                              size="xs"
+                              size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleForwardRequest(request);

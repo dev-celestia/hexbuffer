@@ -90,7 +90,7 @@ export function BrowserAutomationPage() {
             <AlertAction>
               <Button
                 variant="outline"
-                size="xs"
+                size="sm"
                 className={cn(
                   // Sizing & Spacing
                   "h-6",
@@ -133,7 +133,7 @@ export function BrowserAutomationPage() {
               The browser automation will interact with external websites. Only scan targets you own or are authorized to assess. Unauthorized scanning may violate terms of service or applicable laws.
             </AlertDescription>
             <AlertAction>
-              <Button size="xs"
+              <Button size="sm"
                 variant="outline"
                 aria-label="Dismiss safety notice"
                 onClick={() => page.setBrowserAutomationSafetyAlertDismissed(true)}
@@ -278,26 +278,26 @@ export function BrowserAutomationPage() {
 
                   {/* Start/Stop/Pause/Resume */}
                   {(page.status === 'idle' || page.status === 'completed' || page.status === 'failed' || page.status === 'stopped') && (
-                    <Button size="xs" onClick={startBrowserCrawl}>
+                    <Button size="sm" onClick={startBrowserCrawl}>
                       <PlayIcon className="size-3" /> Start
                     </Button>
                   )}
                   {page.status === 'running' && (
                     <>
-                      <Button size="xs" variant="outline" onClick={toggleBrowserCrawl}>
+                      <Button size="sm" variant="outline" onClick={toggleBrowserCrawl}>
                         <PauseIcon className="size-3" /> Pause
                       </Button>
-                      <Button size="xs" variant="destructive" onClick={stopBrowserCrawl}>
+                      <Button size="sm" variant="destructive" onClick={stopBrowserCrawl}>
                         <SquareIcon className="size-3" /> Stop
                       </Button>
                     </>
                   )}
                   {page.status === 'paused' && (
                     <>
-                      <Button size="xs" variant="outline" onClick={toggleBrowserCrawl}>
+                      <Button size="sm" variant="outline" onClick={toggleBrowserCrawl}>
                         <ArrowCounterClockwiseIcon className="size-3" /> Resume
                       </Button>
-                      <Button size="xs" variant="destructive" onClick={stopBrowserCrawl}>
+                      <Button size="sm" variant="destructive" onClick={stopBrowserCrawl}>
                         <SquareIcon className="size-3" /> Stop
                       </Button>
                     </>

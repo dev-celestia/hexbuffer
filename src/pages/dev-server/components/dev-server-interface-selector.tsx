@@ -123,7 +123,7 @@ export function DevServerInterfaceSelector({
         {onRefreshIps && (
           <Button
             variant="outline"
-            size="xs"
+            size="sm"
             onClick={onRefreshIps}
             disabled={isLoadingIps}
             className="flex items-center gap-1.5 text-xs h-8"

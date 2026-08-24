@@ -468,7 +468,7 @@ export function AiStepGenerator({ targetUrl, onStepsGenerated }: AiStepGenerator
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button size="xs" variant="outline" className="gap-1.5">
+        <Button size="sm" variant="outline" className="gap-1.5">
           <SparkleIcon className="size-3.5" />
           Generate with AI
         </Button>
@@ -697,10 +697,10 @@ export function AiStepGenerator({ targetUrl, onStepsGenerated }: AiStepGenerator
         </div>
 
         <DialogFooter>
-          <Button size="xs" variant="outline" onClick={() => setOpen(false)} disabled={isRunning}>
+          <Button size="sm" variant="outline" onClick={() => setOpen(false)} disabled={isRunning}>
             Cancel
           </Button>
-          <Button size="xs"
+          <Button size="sm"
             onClick={handleGenerate}
             disabled={isRunning || !hasInput || !targetUrl}
             className="gap-1.5"

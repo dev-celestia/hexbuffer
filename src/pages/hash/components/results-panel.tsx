@@ -107,7 +107,7 @@ export function ResultsPanel({ results, onExport }: ResultsPanelProps) {
             <>
               <Button
                 variant="ghost"
-                size="xs"
+                size="sm"
                 onClick={copyAllResults}
               >
                 <Copy className="h-3.5 w-3.5" />
@@ -115,7 +115,7 @@ export function ResultsPanel({ results, onExport }: ResultsPanelProps) {
               </Button>
               <Button
                 variant="ghost"
-                size="xs"
+                size="sm"
                 onClick={onExport}
               >
                 <DownloadSimple className="h-3.5 w-3.5" />
@@ -355,7 +355,7 @@ function ResultCard({ result, onCopy }: ResultCardProps) {
           >
             <Button
               variant="ghost"
-              size="xs"
+              size="sm"
               onClick={onCopy}
               title="Copy result"
             >

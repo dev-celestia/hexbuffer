@@ -166,7 +166,7 @@ export function StorageAuditor({
               />
             </div>
 
-            <Button variant="outline" size="xs" onClick={refreshStorage} className="h-8 gap-1 px-2.5">
+            <Button variant="outline" size="sm" onClick={refreshStorage} className="h-8 gap-1 px-2.5">
               <ArrowsClockwise className="size-3.5" />
               Refresh
             </Button>
@@ -177,7 +177,7 @@ export function StorageAuditor({
               Origin: {origin}
             </span>
 
-            <Button variant="outline" size="xs" onClick={clearStorage} className="h-8 gap-1.5 border-rose-500/30 text-rose-500 hover:bg-rose-500/5 px-2.5">
+            <Button variant="outline" size="sm" onClick={clearStorage} className="h-8 gap-1.5 border-rose-500/30 text-rose-500 hover:bg-rose-500/5 px-2.5">
               <Trash className="size-3.5" />
               Wipe Origin Storage
             </Button>
@@ -219,7 +219,7 @@ export function StorageAuditor({
                         <div className="text-right">
                           <Button
                             variant="ghost"
-                            size="xs"
+                            size="sm"
                             onClick={() => deleteCookie(cookie.name, cookie.domain)}
                             className="h-6 w-6 p-0 text-muted-foreground hover:text-rose-500"
                           >
@@ -261,7 +261,7 @@ export function StorageAuditor({
                           <div className="text-right" onClick={(e) => e.stopPropagation()}>
                             <Button
                               variant="ghost"
-                              size="xs"
+                              size="sm"
                               onClick={() => deleteStorageItem(item.key, selectedSection === 'local')}
                               className="h-6 w-6 p-0 text-muted-foreground hover:text-rose-500"
                             >
@@ -286,7 +286,7 @@ export function StorageAuditor({
                     <span className="text-xs font-semibold truncate text-foreground pr-2" title={selectedItem.key}>
                       Inspector: {selectedItem.key}
                     </span>
-                    <Button variant="ghost" size="xs" className="h-6 w-6 p-0" onClick={() => setSelectedItem(null)}>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setSelectedItem(null)}>
                       &times;
                     </Button>
                   </div>

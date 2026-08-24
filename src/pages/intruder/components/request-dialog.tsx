@@ -50,10 +50,10 @@ export function IntruderRequestDialog() {
           </div>
         </div>
         <DialogFooter>
-          <Button size="xs" variant="outline" onClick={() => setRawRequestDialogOpen(false)}>
+          <Button size="sm" variant="outline" onClick={() => setRawRequestDialogOpen(false)}>
             Cancel
           </Button>
-          <Button size="xs" onClick={handleImport} disabled={!rawRequestContent.trim()}>
+          <Button size="sm" onClick={handleImport} disabled={!rawRequestContent.trim()}>
             Import
           </Button>
         </DialogFooter>

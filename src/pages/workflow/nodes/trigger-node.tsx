@@ -139,7 +139,7 @@ function TriggerNodeComponent({ id, data, selected }: NodeProps) {
                 <span className="flex-1">Manual trigger</span>
                 <Button
                   type="button"
-                  size="xs"
+                  size="sm"
                   variant="outline"
                   className="nodrag nopan h-6 px-2 text-[10px]"
                   disabled={isExecuting}

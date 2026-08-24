@@ -225,7 +225,7 @@ export function DevServerPeersPane({
         >
           <Button
             variant="outline"
-            size="xs"
+            size="sm"
             onClick={() => onToggleBroadcast(!myInfo?.is_broadcasting)}
             className={
               // Layout & Positioning
@@ -240,7 +240,7 @@ export function DevServerPeersPane({
 
           <Button
             variant="outline"
-            size="xs"
+            size="sm"
             onClick={onRefreshPeers}
             disabled={isLoadingPeers}
             className={
@@ -444,7 +444,7 @@ export function DevServerPeersPane({
                     >
                       <Button
                         variant="ghost"
-                        size="xs"
+                        size="sm"
                         onClick={() => onPingPeer(peer)}
                         disabled={isPeerPinging}
                         className={
@@ -464,7 +464,7 @@ export function DevServerPeersPane({
 
                       <Button
                         variant="outline"
-                        size="xs"
+                        size="sm"
                         onClick={() => onShareActiveDevServer(peer, hostUrl)}
                         className={
                           // Layout & Positioning
@@ -480,7 +480,7 @@ export function DevServerPeersPane({
                       </Button>
 
                       <Button
-                        size="xs"
+                        size="sm"
                         onClick={() => onOpenShareModal(peer, hostUrl)}
                         className={
                           // Layout & Positioning
@@ -681,7 +681,7 @@ export function DevServerPeersPane({
                         {item.payload?.url && (
                           <Button
                             variant="outline"
-                            size="xs"
+                            size="sm"
                             onClick={() => window.open(item.payload.url, '_blank')}
                             className={
                               // Sizing & Spacing
@@ -694,7 +694,7 @@ export function DevServerPeersPane({
 
                         <Button
                           variant="ghost"
-                          size="xs"
+                          size="sm"
                           onClick={() => handleCopyText(item.id, displayPayload)}
                           className={
                             // Layout & Positioning
@@ -780,14 +780,14 @@ export function DevServerPeersPane({
             <div className="flex items-center justify-end gap-2 mt-2">
               <Button
                 variant="outline"
-                size="xs"
+                size="sm"
                 onClick={() => setIsShareModalOpen(false)}
                 className="text-xs"
               >
                 Cancel
               </Button>
               <Button
-                size="xs"
+                size="sm"
                 onClick={onSendCustomShare}
                 disabled={isSending || !shareTitle.trim() || !shareContent.trim()}
                 className="text-xs flex items-center gap-1.5"
@@ -827,13 +827,13 @@ export function DevServerPeersPane({
             <div className="flex items-center justify-end gap-2 mt-2">
               <Button
                 variant="outline"
-                size="xs"
+                size="sm"
                 onClick={() => setIsEditNameModalOpen(false)}
                 className="text-xs"
               >
                 Cancel
               </Button>
-              <Button size="xs" onClick={onUpdateDeviceName} className="text-xs">
+              <Button size="sm" onClick={onUpdateDeviceName} className="text-xs">
                 Save Name
               </Button>
             </div>

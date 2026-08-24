@@ -153,7 +153,7 @@ export function WordlistsTab() {
               </span>
 
               <Button
-                size="xs"
+                size="sm"
                 variant="outline"
                 disabled={hub.loading}
                 onClick={() => hub.fetchManifest(true)}

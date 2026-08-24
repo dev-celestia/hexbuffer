@@ -126,7 +126,7 @@ export function ManageWorkspacesDialog({
 
             {/* ponytail: remove input check to simplify the delete flow */}
             <div className="flex items-center justify-end gap-2 pt-2">
-              <Button size="xs"
+              <Button size="sm"
                 variant="ghost"
                 className="h-8 px-3 text-xs"
                 onClick={() => {
@@ -136,7 +136,7 @@ export function ManageWorkspacesDialog({
               >
                 Cancel
               </Button>
-              <Button size="xs"
+              <Button size="sm"
                 variant="destructive"
                 className="h-8 px-3 text-xs font-medium"
                 onClick={() => void handleConfirmDelete(confirmDeleteId)}
@@ -210,7 +210,7 @@ export function ManageWorkspacesDialog({
                             </div>
 
                             <div className="flex items-center gap-1">
-                              <Button size="xs"
+                              <Button size="sm"
                                 variant="ghost"
                                 className="h-7 w-7 p-0 text-muted-foreground hover:bg-muted hover:text-foreground"
                                 onClick={() => handleStartRename(ws.id, ws.name)}
@@ -218,7 +218,7 @@ export function ManageWorkspacesDialog({
                               >
                                 <PencilSimpleIcon className="h-3.5 w-3.5" />
                               </Button>
-                              <Button size="xs"
+                              <Button size="sm"
                                 variant="ghost"
                                 className="h-7 w-7 p-0 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 disabled:opacity-40 disabled:hover:bg-transparent"
                                 disabled={workspaces.length <= 1}
@@ -241,7 +241,7 @@ export function ManageWorkspacesDialog({
               )}
             </ScrollArea>
             <div className="flex justify-end pt-2">
-              <Button size="xs" variant="outline" className="h-8 text-xs px-3" onClick={() => onOpenChange(false)}>
+              <Button size="sm" variant="outline" className="h-8 text-xs px-3" onClick={() => onOpenChange(false)}>
                 Close
               </Button>
             </div>

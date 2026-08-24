@@ -152,11 +152,11 @@ export function RouteEditor({ route, domains, onUpdate, onDelete, onAdd }: Route
                   <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Incoming Matcher</h4>
                   {isWriteMethod && (
                     <div className="flex items-center gap-1.5">
-                      <Button size="xs" variant="outline" className="h-6 px-2 text-[10px] border-border cursor-pointer" onClick={formatReqBody}>
+                      <Button size="sm" variant="outline" className="h-6 px-2 text-[10px] border-border cursor-pointer" onClick={formatReqBody}>
                         <CodeIcon className="mr-1 h-3 w-3" />
                         Prettier
                       </Button>
-                      <Button size="xs" className="bg-primary hover:bg-primary-dark text-black font-semibold h-6 text-[10px] rounded cursor-pointer" onClick={saveReqBody}>
+                      <Button size="sm" className="bg-primary hover:bg-primary-dark text-black font-semibold h-6 text-[10px] rounded cursor-pointer" onClick={saveReqBody}>
                         Save Matcher
                       </Button>
                     </div>
@@ -174,7 +174,7 @@ export function RouteEditor({ route, domains, onUpdate, onDelete, onAdd }: Route
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label className="text-xs text-muted-foreground">Expected Query Parameters</Label>
-                      <Button size="xs" variant="ghost" className="h-6 px-1.5 text-xs text-primary hover:bg-primary/10 rounded cursor-pointer" onClick={handleAddParam}>
+                      <Button size="sm" variant="ghost" className="h-6 px-1.5 text-xs text-primary hover:bg-primary/10 rounded cursor-pointer" onClick={handleAddParam}>
                         <PlusIcon className="mr-1 h-3 w-3 stroke-[2]" /> Add Param
                       </Button>
                     </div>
@@ -237,11 +237,11 @@ export function RouteEditor({ route, domains, onUpdate, onDelete, onAdd }: Route
               <div className="flex items-center justify-between shrink-0">
                 <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Response Body</h4>
                 <div className="flex items-center gap-2">
-                  <Button size="xs" variant="outline" className="h-7 text-xs border-border cursor-pointer" onClick={formatBody}>
+                  <Button size="sm" variant="outline" className="h-7 text-xs border-border cursor-pointer" onClick={formatBody}>
                     <CodeIcon className="mr-1 h-3.5 w-3.5" />
                     Prettier JSON
                   </Button>
-                  <Button size="xs" onClick={saveBody} className="h-7 text-xs cursor-pointer">
+                  <Button size="sm" onClick={saveBody} className="h-7 text-xs cursor-pointer">
                     <FloppyDiskIcon className="mr-1 h-3.5 w-3.5" />
                     Save Response
                   </Button>
@@ -287,8 +287,8 @@ export function RouteEditor({ route, domains, onUpdate, onDelete, onAdd }: Route
               className="h-7 flex-1 font-mono text-xs bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
               autoFocus
             />
-            <Button size="xs" className="h-7 px-2 text-xs cursor-pointer" onClick={handleSaveHeader}>Save</Button>
-            <Button size="xs" variant="ghost" className="h-7 px-2 text-xs cursor-pointer" onClick={handleCancelHeader}>Cancel</Button>
+            <Button size="sm" className="h-7 px-2 text-xs cursor-pointer" onClick={handleSaveHeader}>Save</Button>
+            <Button size="sm" variant="ghost" className="h-7 px-2 text-xs cursor-pointer" onClick={handleCancelHeader}>Cancel</Button>
           </div>
         ) : (
           <div className="flex items-center gap-3 p-2">
@@ -305,11 +305,11 @@ export function RouteEditor({ route, domains, onUpdate, onDelete, onAdd }: Route
             </Button>
             <div className="ml-auto flex items-center gap-2">
               <span className="text-xs font-semibold text-muted-foreground">HTTP {route.statusCode}</span>
-              <Button variant="outline" size="xs" className="h-7 px-2 text-xs cursor-pointer border-border" onClick={handleSendToRepeater}>
+              <Button variant="outline" size="sm" className="h-7 px-2 text-xs cursor-pointer border-border" onClick={handleSendToRepeater}>
                 <ArrowSquareOutIcon className="mr-1 h-3.5 w-3.5" />
                 To Repeater
               </Button>
-              <Button variant="outline" size="xs" className="h-7 px-2 text-xs cursor-pointer border-border" onClick={handleClone} title="Clone this route">
+              <Button variant="outline" size="sm" className="h-7 px-2 text-xs cursor-pointer border-border" onClick={handleClone} title="Clone this route">
                 <CopyIcon className="mr-1 h-3.5 w-3.5" />
                 Clone
               </Button>

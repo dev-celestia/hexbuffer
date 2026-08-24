@@ -82,7 +82,7 @@ export function TestRunner({
         </div>
         <div className="flex items-center gap-1.5 shrink-0 select-none">
           <Button
-            size="xs"
+            size="sm"
             onClick={() => onRun(testCase.id)}
             disabled={isRunning}
             className="gap-1.5 shrink-0 active:scale-[0.97]"

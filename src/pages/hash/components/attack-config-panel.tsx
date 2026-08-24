@@ -350,7 +350,7 @@ function WordlistPathPicker({ label, path, onPathChange, disabled }: WordlistPat
         <Button
           type="button"
           variant="outline"
-          size="xs"
+          size="sm"
           onClick={handleBrowseFile}
           disabled={disabled}
         >
@@ -361,7 +361,7 @@ function WordlistPathPicker({ label, path, onPathChange, disabled }: WordlistPat
           <Button
             type="button"
             variant="ghost"
-            size="xs"
+            size="sm"
             onClick={() => onPathChange('')}
             disabled={disabled}
             title="Clear path"

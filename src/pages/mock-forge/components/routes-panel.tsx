@@ -226,8 +226,7 @@ export function RoutesPanel({
                     )}
                   >
                     {/* Folder header */}
-                    <Button
-                      variant="ghost"
+                    <Button size="sm" variant="ghost"
                       onClick={() => toggle(domainId)}
                       className={cn(
                         // Layout & Positioning

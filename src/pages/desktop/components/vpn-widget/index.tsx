@@ -113,7 +113,7 @@ export function VpnWidget() {
           </p>
         </div>
         <Button
-          size="xs"
+          size="sm"
           variant="outline"
           onClick={handleSelectFile}
           disabled={isActive}
@@ -287,7 +287,7 @@ export function VpnWidget() {
         )}
       >
         <Button
-          size="xs"
+          size="sm"
           onClick={handleConnectToggle}
           variant={isActive ? 'destructive' : 'default'}
         >
@@ -306,7 +306,7 @@ export function VpnWidget() {
         {/* Cancel button — visible only while connecting */}
         {status === 'connecting' && (
           <Button
-            size="xs"
+            size="sm"
             variant="outline"
             onClick={handleConnectToggle}
           >
@@ -316,7 +316,7 @@ export function VpnWidget() {
         )}
 
         <Button
-          size="xs"
+          size="sm"
           variant="outline"
           onClick={() => setShowLogs(!showLogs)}
         >
