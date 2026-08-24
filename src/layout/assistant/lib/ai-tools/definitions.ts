@@ -8,7 +8,6 @@ import { INTRUDER_AI_TOOL_DEFINITION } from './intruder';
 import { INTERCEPT_AI_TOOL_DEFINITION } from './intercept';
 import { BROWSER_AI_TOOL_DEFINITION } from './browser';
 import { TERMINAL_AI_TOOL_DEFINITION } from './terminal';
-import { DOCUMENTS_AI_TOOL_DEFINITION } from './documents';
 import type { AppAiToolDefinition } from './types';
 
 export const APP_AI_TOOL_DEFINITIONS: AppAiToolDefinition[] = [
@@ -20,6 +19,5 @@ export const APP_AI_TOOL_DEFINITIONS: AppAiToolDefinition[] = [
   INTERCEPT_AI_TOOL_DEFINITION,
   BROWSER_AI_TOOL_DEFINITION,
   TERMINAL_AI_TOOL_DEFINITION,
-  DOCUMENTS_AI_TOOL_DEFINITION,
 ];
 

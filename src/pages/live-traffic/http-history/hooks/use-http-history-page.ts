@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useTabState } from '@/layout/tabs-layout/use-tab-state';
-import { useDocumentsStore } from '@/stores/documents';
 import { useTargetStore } from '@/stores/target';
+import { useScratchpadStore } from '@/stores/scratchpad';
 import { useFloatingBarUiStore } from '@/stores/floating-bar-ui';
 import { toast } from 'sonner';
 import {
@@ -115,7 +115,7 @@ export function useHttpHistoryPage() {
     }
   }, [activeTab?.scope, setActiveScope, isPinnedTabActive, isGroupTabActive]);
 
-  const sendScopeToDocuments = React.useCallback((targetId: string) => {
+  const sendScopeToNotes = React.useCallback((targetId: string) => {
     const target = activeTargets.find((activeTarget) => activeTarget.id === targetId);
 
     if (!target) {
@@ -128,20 +128,12 @@ export function useHttpHistoryPage() {
       return;
     }
 
-    const documentsStore = useDocumentsStore.getState();
-    const scopeBlock = [`## ${target.name}`, ...target.scope].join('\n');
-
-    documentsStore.updateDocument(documentsStore.activeDocumentId, (document) => ({
-      ...document,
-      sections: {
-        ...document.sections,
-        scope: document.sections.scope.trim()
-          ? `${document.sections.scope.trimEnd()}\n\n${scopeBlock}`
-          : scopeBlock,
-      },
-      updatedAt: new Date().toISOString(),
-    }));
-    toast.success('Sent scope to active document');
+    const scopeBlock = [`## Scope: ${target.name}`, ...target.scope.map((s) => `- \`${s}\``)].join('\n');
+    const store = useScratchpadStore.getState();
+    const currentNote = store.note;
+    const newNote = currentNote.trim() ? `${currentNote.trimEnd()}\n\n${scopeBlock}` : scopeBlock;
+    store.setNote(newNote);
+    toast.success('Sent scope to Notes');
   }, [activeTargets]);
 
   const isTargetSelectorOpen = useFloatingBarUiStore((s) => s.isTargetSelectorOpen);
@@ -153,7 +145,7 @@ export function useHttpHistoryPage() {
     removeTab,
     renameTab: handleRenameTab,
     addGroup,
-    sendScopeToDocuments,
+    sendScopeToNotes,
     deleteGroup,
     isPinnedTabActive,
     isGroupTabActive,

@@ -5,7 +5,7 @@ import { TrashIcon, PlusIcon, UploadSimpleIcon, ImageSquareIcon } from '@phospho
 import type { KeyValuePair, ActiveRequestState } from "@/stores/collections";
 import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
-import { ColorizedUrlInput } from "@/components/select-env-input";
+import { ColorizedUrlInput } from "@/pages/repeater/components/select-env-input";
 
 // ── Shared key-value list editor ──
 
@@ -47,13 +47,13 @@ function KeyValueEditor({
           <div className="flex-1 flex min-w-0">
             <ColorizedUrlInput
               placeholder="Name"
-              className="font-mono rounded-none text-xs border-r-0 flex-1 w-0 min-w-0"
+              className="font-mono rounded-none text-xs border-r-0"
               value={item.key}
               onChange={(v) => onItemChange(index, "key", v)}
             />
             <ColorizedUrlInput
               placeholder="Value"
-              className="font-mono text-xs rounded-none flex-1 w-0 min-w-0"
+              className="font-mono text-xs rounded-none"
               value={item.value}
               onChange={(v) => onItemChange(index, "value", v)}
             />

@@ -8,7 +8,6 @@ import { executeStartIntruderAttackAiTool } from './intruder';
 import { executeToggleInterceptAiTool } from './intercept';
 import { executeTriggerScanAiTool } from './browser';
 import { executeRunTerminalCommandAiTool } from './terminal';
-import { executeWriteDocumentAiTool } from './documents';
 import { addTrackedAction, completeTrackedAction } from './tracker';
 
 async function dispatchToolExecution(toolName: string, args: Record<string, any>): Promise<any> {
@@ -38,9 +37,6 @@ async function dispatchToolExecution(toolName: string, args: Record<string, any>
 
     case 'run_terminal_command':
       return executeRunTerminalCommandAiTool(args);
-
-    case 'write_document':
-      return executeWriteDocumentAiTool(args);
 
     default:
       throw new Error(`Unknown AI Tool capability: ${toolName}`);

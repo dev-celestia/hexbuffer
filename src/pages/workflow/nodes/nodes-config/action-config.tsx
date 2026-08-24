@@ -231,30 +231,6 @@ function ExportJsonForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function CreateDocumentForm({ params, updateParam }: ActionParams) {
-  return (
-    <>
-      <Field label="Title" value={params.title} onChange={(v) => updateParam('title', v)} placeholder="Automation Document" />
-      <SelectField
-        label="Template"
-        value={params.template}
-        fallback="blank"
-        onChange={(v) => updateParam('template', v)}
-        options={['blank', 'developer', 'qa', 'security-researcher'].map((value) => ({ value, label: value }))}
-      />
-    </>
-  );
-}
-
-function AddToDocumentForm({ params, updateParam }: ActionParams) {
-  return (
-    <>
-      <Field label="Document ID" value={params.documentId} onChange={(v) => updateParam('documentId', v)} placeholder="Leave blank to use active document" />
-      <Field label="Section" value={params.section} onChange={(v) => updateParam('section', v)} placeholder="e.g. potentialVulnerabilities" />
-      <TextField label="Content" value={params.content} onChange={(v) => updateParam('content', v)} placeholder="Content to add. Supports {{url}}, {{host}}, {{status}}." />
-    </>
-  );
-}
 
 function AddToReportForm({ params, updateParam }: ActionParams) {
   return (
@@ -304,8 +280,6 @@ const ACTION_CONFIG_MAP: Record<string, React.FC<ActionParams>> = {
   'action:encode-decode': EncodeDecodeForm,
   'action:hash-data': HashDataForm,
   'action:export-json': ExportJsonForm,
-  'action:create-document': CreateDocumentForm,
-  'action:add-to-document': AddToDocumentForm,
   'action:connect-cdp': ConnectCdpForm,
 };
 

@@ -18,7 +18,6 @@ const actionLabels: Record<string, string> = {
   toggle_intercept: 'Toggling proxy interception',
   trigger_scan: 'Launching browser scan',
   run_terminal_command: 'Executing terminal command',
-  write_document: 'Saving findings to document',
 };
 
 

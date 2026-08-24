@@ -271,42 +271,6 @@ export const ACTION_NODE_PROFILES: Partial<Record<AutomationNodeType, NodeProfil
       ],
     },
   },
-  'action:create-document': {
-    type: 'action:create-document',
-    category: 'action',
-    wired: true,
-    reason: null,
-    sourceHandleIds: [],
-    sourceHandleLabels: {},
-    targetHandleRequired: true,
-    dataSchema: {
-      input: [
-        { key: 'url', label: 'URL', type: 'string', description: 'Related URL' },
-        { key: 'host', label: 'Host', type: 'string', description: 'Target host' },
-      ],
-      output: [
-        ...ACTION_OUTPUT_BASE,
-        { key: 'documentId', label: 'Document ID', type: 'string', description: 'ID of the created document' },
-      ],
-    },
-  },
-  'action:add-to-document': {
-    type: 'action:add-to-document',
-    category: 'action',
-    wired: true,
-    reason: null,
-    sourceHandleIds: [],
-    sourceHandleLabels: {},
-    targetHandleRequired: true,
-    dataSchema: {
-      input: HTTP_CONTEXT_INPUT,
-      output: [
-        ...ACTION_OUTPUT_BASE,
-        { key: 'documentId', label: 'Document ID', type: 'string', description: 'ID of the updated document' },
-        { key: 'sectionId', label: 'Section ID', type: 'string', description: 'Section the content was added to' },
-      ],
-    },
-  },
   'action:connect-cdp': {
     type: 'action:connect-cdp',
     category: 'action',

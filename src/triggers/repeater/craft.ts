@@ -1,13 +1,20 @@
 import { useCollectionsStore, type KeyValuePair } from '@/stores/collections';
 import { runScriptSandbox } from '../../pages/repeater/lib/script-sandbox';
 
+function encodeParamPreservingVars(str: string): string {
+  if (!str) return '';
+  return encodeURIComponent(str)
+    .replace(/%7B%7B/gi, '{{')
+    .replace(/%7D%7D/gi, '}}');
+}
+
 function buildUrlWithQueryParams(baseUrl: string, params: KeyValuePair[]): string {
   try {
     const urlWithoutQuery = baseUrl.split('?')[0];
     const activeParams = params.filter((p) => p.enabled && p.key);
     if (activeParams.length === 0) return urlWithoutQuery;
     const query = activeParams
-      .map((p) => `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value)}`)
+      .map((p) => `${encodeParamPreservingVars(p.key)}=${encodeParamPreservingVars(p.value)}`)
       .join('&');
     return `${urlWithoutQuery}?${query}`;
   } catch {

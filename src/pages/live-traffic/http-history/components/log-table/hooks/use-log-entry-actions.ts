@@ -4,7 +4,7 @@ import type { ApiCall } from '@/types';
 import { getHttpLogDetail } from '../../../api';
 import { createDefaultAttackConfig, findRequestPayloadPositions } from '@/pages/intruder/types';
 import { useIntruderStore } from '@/stores/intruder';
-import { useDocumentsStore } from '@/stores/documents';
+import { useScratchpadStore } from '@/stores/scratchpad';
 import { useBrowserAutomationStore } from '@/stores/browser-automation';
 import {
   useHttpHistoryQueryStore,
@@ -395,26 +395,30 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
     }
   }, [call.id]);
 
-  const handleSaveToDocuments = useCallback(async () => {
+
+  const handleSendToNotes = useCallback(async () => {
     try {
       const detail = await getHttpLogDetail(call.id);
       const request = adaptProxyRecordToApiCall(detail);
-      useDocumentsStore.getState().addApiEntryToActiveDocument({
-        sourceHistoryId: request.id,
-        method: request.method,
-        url: request.url,
-        host: request.host,
-        path: request.path,
-        headers: request.headers,
-        requestBody: request.request_body,
-        responseStatus: request.response_status,
-        responseContentType: request.response_content_type,
-        capturedAt: request.timestamp,
-      });
-      toast.success('Saved API to active document');
+      const host = extractCallHost(request) || request.host;
+      const lines = [
+        `### ${request.method} ${request.url || `${host}${request.path}`}`,
+        `- **Host:** ${host}`,
+        `- **Path:** ${request.path}`,
+        `- **Status:** ${request.response_status || 'N/A'}`,
+      ];
+      if (request.request_body) {
+        lines.push('', '#### Request Body', '```', request.request_body, '```');
+      }
+      const entryText = lines.join('\n');
+      const store = useScratchpadStore.getState();
+      const currentNote = store.note;
+      const newNote = currentNote.trim() ? `${currentNote.trimEnd()}\n\n${entryText}` : entryText;
+      store.setNote(newNote);
+      toast.success('Sent to Notes');
     } catch (error) {
-      console.error('Failed to save API to documents:', error);
-      toast.error('Failed to save API to documents');
+      console.error('Failed to send to notes:', error);
+      toast.error('Failed to send to Notes');
     }
   }, [call.id]);
 
@@ -482,7 +486,7 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
     handleSendToIntercept,
     handleSendToMockForge,
     handleOpenInBrowserAutomation,
-    handleSaveToDocuments,
+    handleSendToNotes,
     handleDelete,
     handleBlacklistHost,
     handleBlacklistHostAndPath,

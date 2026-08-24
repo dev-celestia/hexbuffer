@@ -291,22 +291,6 @@ export const NODE_TYPE_REGISTRY: Record<AutomationNodeType, NodeTypeDef> = {
     description: 'Export workflow data as a JSON file',
     defaultConfig: { actionType: 'action:export-json', params: { filename: '', format: 'pretty', source: 'payload' } },
   },
-  'action:create-document': {
-    type: 'action:create-document',
-    label: 'Create Document',
-    category: 'action',
-    iconName: 'FilePlus',
-    description: 'Create a new document from a template',
-    defaultConfig: { actionType: 'action:create-document', params: { title: 'Automation Document', template: 'blank' } },
-  },
-  'action:add-to-document': {
-    type: 'action:add-to-document',
-    label: 'Add to Document',
-    category: 'action',
-    iconName: 'FileText',
-    description: 'Append data to an existing document section',
-    defaultConfig: { actionType: 'action:add-to-document', params: { documentId: '', section: '', content: '' } },
-  },
   'action:connect-cdp': {
     type: 'action:connect-cdp',
     label: 'Connect Inspector',

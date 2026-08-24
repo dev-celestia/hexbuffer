@@ -24,10 +24,7 @@ export function RepeaterPage() {
           "flex flex-col min-h-0",
 
           // Sizing & Spacing
-          "h-full",
-
-          // Backgrounds & Borders
-          "bg-background"
+          "h-full"
         )}
         contentClassName={cn(
           // Layout & Positioning
@@ -37,7 +34,7 @@ export function RepeaterPage() {
           "m-2",
 
           // Backgrounds & Borders
-          "border rounded-md bg-card"
+          "border rounded-md"
         )}
       >
         {page.activeWorkspaceId && (

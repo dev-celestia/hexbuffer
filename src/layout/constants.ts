@@ -1,5 +1,4 @@
-import React from 'react';
-import { HouseIcon, ArrowsDownUpIcon, BugIcon, PauseCircleIcon, FlaskIcon, BinaryIcon, AppWindowIcon, DatabaseIcon, FingerprintIcon, GearSixIcon, GitDiffIcon, LightningIcon, WifiHighIcon, SpinnerIcon, BlueprintIcon, MarkdownLogoIcon, InfinityIcon, StarFourIcon, CloverIcon, CubeFocusIcon, TargetIcon, SquaresFourIcon, BroadcastIcon, PencilIcon, HardDriveIcon, FolderOpenIcon, TerminalWindowIcon } from '@phosphor-icons/react';
+import { HouseIcon, ArrowsDownUpIcon, BugIcon, PauseCircleIcon, FlaskIcon, BinaryIcon, AppWindowIcon, DatabaseIcon, FingerprintIcon, GearSixIcon, GitDiffIcon, LightningIcon, WifiHighIcon, SpinnerIcon, BlueprintIcon, InfinityIcon, StarFourIcon, CloverIcon, CubeFocusIcon, TargetIcon, SquaresFourIcon, BroadcastIcon, PencilIcon, HardDriveIcon, FolderOpenIcon, TerminalWindowIcon } from '@phosphor-icons/react';
 
 import httpHistoryIcon from '@/assets/app/http-history.png';
 import interceptIcon from '@/assets/app/Intercept.png';
@@ -139,14 +138,6 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     href: '/listener',
     description: 'Generate out-of-band (OOB) payloads and monitor incoming DNS, HTTP, and HTTPS interactions.',
     colors: { bg: 'bg-green-500 dark:bg-green-500', hoverBg: 'group-hover:bg-green-500 dark:group-hover:bg-green-500', border: 'border-green-500 dark:border-green-500' },
-    flag: 'alpha'
-  },
-  {
-    label: 'Markdown',
-    icon: MarkdownLogoIcon,
-    href: '/documents',
-    description: 'Create markdown documents, API definitions, and manage target scopes.',
-    colors: { bg: 'bg-orange-500 dark:bg-orange-500', hoverBg: 'group-hover:bg-orange-500 dark:group-hover:bg-orange-500', border: 'border-orange-500 dark:border-orange-500' },
     flag: 'alpha'
   },
   {

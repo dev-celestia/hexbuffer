@@ -91,8 +91,6 @@ export {
 } from './repeater';
 export type { SendToRepeaterOptions, SendToCollectionOptions, CollectionNode } from './repeater';
 
-export { writeDocument } from './documents';
-export type { WriteDocumentOptions } from './documents';
 export { openApp } from './navigation';
 
 export {

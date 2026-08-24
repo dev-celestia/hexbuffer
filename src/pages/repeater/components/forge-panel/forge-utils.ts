@@ -1,12 +1,34 @@
 import type { KeyValuePair } from '@/stores/collections';
 
+export function encodeParamPreservingVars(str: string): string {
+  if (!str) return '';
+  return encodeURIComponent(str)
+    .replace(/%7B%7B/gi, '{{')
+    .replace(/%7D%7D/gi, '}}');
+}
+
 export function getQueryParams(url: string): KeyValuePair[] {
+  if (!url || !url.includes('?')) return [];
   try {
-    const urlObj = new URL(url);
+    const queryString = url.substring(url.indexOf('?') + 1);
+    if (!queryString) return [];
     const params: KeyValuePair[] = [];
-    urlObj.searchParams.forEach((value, key) => {
+    const pairs = queryString.split('&');
+    for (const pair of pairs) {
+      if (!pair) continue;
+      const eqIdx = pair.indexOf('=');
+      let key = eqIdx !== -1 ? pair.substring(0, eqIdx) : pair;
+      let value = eqIdx !== -1 ? pair.substring(eqIdx + 1) : '';
+      try {
+        key = decodeURIComponent(key);
+      } catch {}
+      try {
+        value = decodeURIComponent(value);
+      } catch {}
+      key = key.replace(/%7B%7B/gi, '{{').replace(/%7D%7D/gi, '}}');
+      value = value.replace(/%7B%7B/gi, '{{').replace(/%7D%7D/gi, '}}');
       params.push({ key, value, enabled: true });
-    });
+    }
     return params;
   } catch {
     return [];
@@ -23,7 +45,7 @@ export function rebuildUrl(
     const activeParams = params.filter((p) => p.enabled && p.key);
     if (activeParams.length > 0) {
       const query = activeParams
-        .map((p) => `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value)}`)
+        .map((p) => `${encodeParamPreservingVars(p.key)}=${encodeParamPreservingVars(p.value)}`)
         .join('&');
       baseUrl = `${baseUrl}?${query}`;
     }

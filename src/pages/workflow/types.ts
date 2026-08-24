@@ -40,8 +40,6 @@ export type ActionType =
   | 'action:encode-decode'
   | 'action:hash-data'
   | 'action:export-json'
-  | 'action:create-document'
-  | 'action:add-to-document'
   | 'action:connect-cdp';
 
 export type AutomationNodeType = TriggerType | ConditionType | ActionType;

@@ -58,12 +58,12 @@ export function HttpHistoryPage() {
         );
       }
       return (
-        <ContextMenuItem onClick={() => page.sendScopeToDocuments(tab.id)}>
-          Send scope to Documents
+        <ContextMenuItem onClick={() => page.sendScopeToNotes(tab.id)}>
+          Send scope to Notes
         </ContextMenuItem>
       );
     },
-    [page.deleteGroup, page.setActiveTabId, page.sendScopeToDocuments]
+    [page.deleteGroup, page.setActiveTabId, page.sendScopeToNotes]
   );
 
   return (

@@ -47,7 +47,6 @@ export const useAppSettingsStore = create<AppSettingsState>()(
         '/intercept',
         '/repeater',
         '/browser',
-        '/documents',
       ],
       recentApps: [],
       bgType: 'none',

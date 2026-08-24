@@ -1,11 +1,20 @@
-import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@celestia-project/ui';
+import {
+  Button,
+  ButtonGroup,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from '@celestia-project/ui';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
-import { ColorizedUrlInput } from '@/components/select-env-input';
+import { ColorizedUrlInput } from '@/pages/repeater/components/select-env-input';
 import { METHOD_COLORS } from '@/lib/status-colors';
 import { useCollectionsStore } from '@/stores/collections';
-import { GearSixIcon, PaperPlaneTiltIcon, FloppyDiskIcon } from '@phosphor-icons/react';
+import { PlusIcon, PaperPlaneTiltIcon, FloppyDiskIcon } from '@phosphor-icons/react';
 import { sendCraftRequest, saveActiveEndpoint } from '@/triggers/repeater/craft';
 import { ContextsDialog } from '../ContextsDialog';
 
@@ -52,60 +61,60 @@ export function ForgeRequestBar({
 
         <ColorizedUrlInput
           placeholder="Enter request URL (e.g. https://api.example.com/v1/users)"
-          className="flex-1 w-0 text-sm"
+          className="text-sm"
           value={url}
           onChange={onUrlChange}
         />
 
-        <div className="flex items-center space-x-1.5 shrink-0">
+        <ButtonGroup>
           <Button
             size="xs"
-            className="h-7 text-xs font-semibold gap-2"
             onClick={() => { void sendCraftRequest(); }}
+            className={"h-6"}
           >
             <PaperPlaneTiltIcon className="size-3.5" /> Send
           </Button>
           {activeEndpoint && (
             <Button
               size="xs"
-              variant="outline"
-              className="h-7 text-xs font-semibold gap-2"
+              variant={"outline"}
               onClick={() => { void saveActiveEndpoint(); }}
+              className={"h-6"}
             >
               <FloppyDiskIcon className="size-3.5" />
             </Button>
           )}
-        </div>
+        </ButtonGroup>
 
-        <div className="flex items-center space-x-1.5 shrink-0">
-          <Select
-            value={activeContextId || 'no-context'}
-            onValueChange={(val) =>
-              useCollectionsStore.getState().setActiveContextId(val === 'no-context' ? null : val)
+        <Select
+          value={activeContextId || 'no-context'}
+          onValueChange={(val) => {
+            if (val === '__manage_envs__') {
+              setContextsDialogOpen(true);
+              return;
             }
-          >
-            <SelectTrigger className="h-8 w-40 font-medium text-xs">
-              <SelectValue placeholder="No Environment" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="no-context">No Environment</SelectItem>
-              {contexts.map((ctx) => (
-                <SelectItem key={ctx.id} value={ctx.id}>
-                  {ctx.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0 transition-transform active:scale-95"
-            onClick={() => setContextsDialogOpen(true)}
-            title="Manage Environments"
-          >
-            <GearSixIcon className="h-4 w-4" />
-          </Button>
-        </div>
+            useCollectionsStore.getState().setActiveContextId(val === 'no-context' ? null : val);
+          }}
+        >
+          <SelectTrigger className="h-7 w-32 font-medium text-xs">
+            <SelectValue placeholder="No Env">
+              {contexts.find((c) => c.id === activeContextId)?.name || 'No Env'}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="no-context">No Env</SelectItem>
+            {contexts.map((ctx) => (
+              <SelectItem key={ctx.id} value={ctx.id}>
+                {ctx.name}
+              </SelectItem>
+            ))}
+            <SelectSeparator />
+            <SelectItem value="__manage_envs__">
+              <PlusIcon className="size-3.5" />
+              Add Env
+            </SelectItem>
+          </SelectContent>
+        </Select>
 
       </div>
 

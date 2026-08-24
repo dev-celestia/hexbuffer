@@ -40,8 +40,6 @@ export const NODE_TYPES = {
   'action:encode-decode': ActionNode,
   'action:hash-data': ActionNode,
   'action:export-json': ActionNode,
-  'action:create-document': ActionNode,
-  'action:add-to-document': ActionNode,
   'action:connect-cdp': ActionNode,
 };
 

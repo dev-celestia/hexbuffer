@@ -21,7 +21,7 @@ export function WorkspacePanel({ workspaceId }: { workspaceId: string }) {
           <ForgePanel key={selectedNodeId || ''} />
         </div>
       ) : (
-        <div className="flex-1 flex flex-col items-center justify-center space-y-3 bg-muted/5">
+        <div className="flex-1 flex flex-col items-center justify-center space-y-3">
           <FolderStarIcon className="h-10 w-10 text-muted-foreground/30" />
           <div className="text-center space-y-1">
             <h3 className="font-semibold text-sm">No Request Selected</h3>

@@ -5,7 +5,6 @@ import {
   CopyIcon,
   PlusIcon,
   TrashIcon,
-  FilePlusIcon,
   PushPinSimpleIcon,
   PushPinSimpleSlashIcon,
   ProhibitIcon,
@@ -43,7 +42,7 @@ export const CallActionCell = memo(function CallActionCell({
     handleSendToIntercept,
     handleSendToMockForge,
     handleOpenInBrowserAutomation,
-    handleSaveToDocuments,
+    handleSendToNotes,
     handleDelete,
     handleBlacklistHost,
     handleBlacklistHostAndPath,
@@ -166,8 +165,8 @@ export const CallActionCell = memo(function CallActionCell({
         <DropdownMenuItem onClick={handleOpenInBrowserAutomation} className="text-xs">
           <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Automate Browser
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleSaveToDocuments} className="text-xs">
-          <FilePlusIcon className="mr-2 size-4" /> Save to Documents
+        <DropdownMenuItem onClick={handleSendToNotes} className="text-xs">
+          <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Notes
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuSub>

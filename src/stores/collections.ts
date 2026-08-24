@@ -104,6 +104,13 @@ function timestampNow(): string {
   return new Date().toISOString();
 }
 
+function encodeParamPreservingVars(str: string): string {
+  if (!str) return '';
+  return encodeURIComponent(str)
+    .replace(/%7B%7B/gi, '{{')
+    .replace(/%7D%7D/gi, '}}');
+}
+
 function parseQueryParams(url: string): KeyValuePair[] {
   if (!url || !url.includes('?')) return [];
   try {
@@ -122,6 +129,8 @@ function parseQueryParams(url: string): KeyValuePair[] {
       try {
         value = decodeURIComponent(value);
       } catch {}
+      key = key.replace(/%7B%7B/gi, '{{').replace(/%7D%7D/gi, '}}');
+      value = value.replace(/%7B%7B/gi, '{{').replace(/%7D%7D/gi, '}}');
       params.push({ key, value, enabled: true });
     }
     return params;
@@ -494,7 +503,7 @@ export const useCollectionsStore = create<CollectionsState>()(
           const base = activeRequest.url.split('?')[0];
           const active = activeRequest.queryParams.filter((p) => p.enabled && p.key);
           if (active.length === 0) return base;
-          const q = active.map((p) => `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value)}`).join('&');
+          const q = active.map((p) => `${encodeParamPreservingVars(p.key)}=${encodeParamPreservingVars(p.value)}`).join('&');
           return `${base}?${q}`;
         } catch { return activeRequest.url; }
       })();
@@ -549,7 +558,7 @@ export const useCollectionsStore = create<CollectionsState>()(
           const baseUrl = s.activeRequest.url.split('?')[0];
           const active = patch.queryParams.filter((p) => p.enabled && p.key);
           if (active.length > 0) {
-            const q = active.map((p) => `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value)}`).join('&');
+            const q = active.map((p) => `${encodeParamPreservingVars(p.key)}=${encodeParamPreservingVars(p.value)}`).join('&');
             next.url = `${baseUrl}?${q}`;
           } else {
             next.url = baseUrl;

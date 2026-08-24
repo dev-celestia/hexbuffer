@@ -1,7 +1,7 @@
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from '@celestia-project/ui';
 import { memo } from 'react';
 
-import { CopyIcon, PlusIcon, TrashIcon, PaperPlaneTiltIcon, FilePlusIcon, PushPinSimpleIcon, PushPinSimpleSlashIcon, ProhibitIcon, PaletteIcon } from '@phosphor-icons/react';
+import { CopyIcon, PlusIcon, TrashIcon, PaperPlaneTiltIcon, PushPinSimpleIcon, PushPinSimpleSlashIcon, ProhibitIcon, PaletteIcon } from '@phosphor-icons/react';
 import type { ApiCall } from '@/types';
 import { useLogContextMenu } from './hooks/use-log-context-menu';
 import { CollectionPickerSubmenu } from '@/triggers/repeater/collection-picker-submenu';
@@ -35,9 +35,9 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
     handleOpenInInvoker,
     handleSendToCollection,
     handleSendToIntercept,
-    handleSendToMockForge,
-    handleOpenInBrowserAutomation,
-    handleSaveToDocuments,
+    // handleSendToMockForge,
+    // handleOpenInBrowserAutomation,
+    handleSendToNotes,
     handleDelete,
     handleBlacklistHost,
     handleBlacklistHostAndPath,
@@ -134,14 +134,14 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
         <ContextMenuItem onClick={handleSendToIntercept} className='text-xs py-1 px-1.5'>
           <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Intercept
         </ContextMenuItem>
-        <ContextMenuItem onClick={handleSendToMockForge} className='text-xs py-1 px-1.5'>
+        {/* <ContextMenuItem onClick={handleSendToMockForge} className='text-xs py-1 px-1.5'>
           <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Mock Forge
         </ContextMenuItem>
         <ContextMenuItem onClick={handleOpenInBrowserAutomation} className='text-xs py-1 px-1.5'>
           <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Automate Browser
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleSaveToDocuments} className='text-xs py-1 px-1.5'>
-          <FilePlusIcon className="mr-1.5 size-3" /> Save to Documents
+        </ContextMenuItem> */}
+        <ContextMenuItem onClick={handleSendToNotes} className='text-xs py-1 px-1.5'>
+          <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Notes
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuSub>

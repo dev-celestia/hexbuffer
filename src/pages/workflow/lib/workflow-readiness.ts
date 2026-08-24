@@ -71,13 +71,8 @@ function getNodeIssue(node: AutomationNode): string | null {
         return isBlank(params.target) ? 'Port Scan action needs a target host' : null;
       case 'action:export-json':
         return isBlank(params.filename) ? 'Export JSON action needs a filename' : null;
-      case 'action:create-document':
-        return isBlank(params.title) ? 'Create Document action needs a title' : null;
       case 'action:add-to-report':
         return isBlank(params.content) ? 'Add to Report action needs content' : null;
-      case 'action:add-to-document':
-        if (isBlank(params.section)) return 'Add to Document action needs a section';
-        return isBlank(params.content) ? 'Add to Document action needs content' : null;
       case 'action:connect-cdp':
         return isBlank(params.targetUrl) ? 'Connect Inspector action needs a target URL' : null;
       default:

@@ -66,8 +66,6 @@ pub(crate) async fn execute_runtime_action(
         "action:encode-decode" => Some(execute_encode_decode(node, input_data)),
         "action:hash-data" => Some(execute_hash_data(node, input_data)),
         "action:export-json" => Some(execute_export_json(app, node, input_data)),
-        "action:create-document" => Some(execute_create_document(app, node, input_data)),
-        "action:add-to-document" => Some(execute_add_to_document(app, node, input_data)),
         "action:ai-analyze" => Some(execute_ai_analyze(app, node, input_data).await),
         "action:script-analyze" => Some(execute_script_analyze(node, input_data)),
         _ => None,
@@ -271,85 +269,6 @@ async fn execute_send_webhook(node: &AutomationNode, input_data: &Value) -> Resu
     ))
 }
 
-fn execute_create_document(
-    app: &AppHandle,
-    node: &AutomationNode,
-    input_data: &Value,
-) -> Result<Value, String> {
-    let Some(history) = app.try_state::<HistoryBridge>() else {
-        return Err("Document storage is unavailable".to_string());
-    };
-    let params = action_params(node);
-    let title = resolve_template(
-        &param_string(&params, "title", "Automation Document"),
-        input_data,
-    );
-    let template = param_string(&params, "template", "blank");
-    let now = Utc::now().to_rfc3339();
-    let document = DocumentRecord {
-        id: Uuid::new_v4().to_string(),
-        name: title.clone(),
-        title: title.clone(),
-        sections: json!({}),
-        custom_sections: json!([]),
-        removed_built_in_sections: json!([]),
-        api_entries: json!([]),
-        created_at: now.clone(),
-        updated_at: now,
-    };
-
-    history.save_document(&document)?;
-
-    Ok(merge_action_output(
-        input_data,
-        json!({
-            "type": "action:create-document",
-            "status": "created",
-            "documentId": document.id,
-            "title": title,
-            "template": template,
-        }),
-    ))
-}
-
-fn execute_add_to_document(
-    app: &AppHandle,
-    node: &AutomationNode,
-    input_data: &Value,
-) -> Result<Value, String> {
-    let params = action_params(node);
-    let document_id = params
-        .get("documentId")
-        .and_then(Value::as_str)
-        .filter(|value| !value.trim().is_empty())
-        .map(str::to_string);
-    let section_key = param_string(&params, "section", "automation-output");
-    let content = resolve_template(&param_string(&params, "content", ""), input_data);
-    if content.trim().is_empty() {
-        return Err("Document content is required".to_string());
-    }
-
-    let document = upsert_document_section(
-        app,
-        document_id,
-        "Automation Document",
-        &section_key,
-        &section_key,
-        &content,
-        "append",
-        "Automation workflow output",
-    )?;
-
-    Ok(merge_action_output(
-        input_data,
-        json!({
-            "type": "action:add-to-document",
-            "status": "updated",
-            "documentId": document.id,
-            "section": section_key,
-        }),
-    ))
-}
 
 fn execute_create_finding(
     app: &AppHandle,

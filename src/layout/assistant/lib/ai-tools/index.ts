@@ -8,5 +8,4 @@ export * from './intruder';
 export * from './intercept';
 export * from './browser';
 export * from './terminal';
-export * from './documents';
 
