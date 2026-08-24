@@ -1,154 +1,31 @@
 import { Badge, Button, Input, Label, Tabs, TabsContent, TabsList, TabsTrigger, TextEditor } from '@celestia-project/ui';
-import * as React from 'react';
-
-import { useTheme } from '@/components/theme-provider';
-import { useIntruderStore } from '@/stores/intruder';
 import { createDefaultPayloadConfig, type PayloadConfig, type PayloadType } from '../../../types';
 import { IntruderPayloadPresetDialog } from '../../payload-preset-dialog';
-
-
-const NUMBER_RANGE_PREVIEW_LIMIT = 8;
-
-function getNumberRangeValidation(payload: PayloadConfig) {
-  const errors: string[] = [];
-  const step = payload.number_step;
-  const start = payload.number_start;
-  const end = payload.number_end;
-  const paddingWidth = getPaddingWidth(payload.number_format);
-
-  if (start === undefined || Number.isNaN(start)) {
-    errors.push('Start is required.');
-  }
-
-  if (end === undefined || Number.isNaN(end)) {
-    errors.push('End is required.');
-  }
-
-  if (step === undefined || Number.isNaN(step)) {
-    errors.push('Step is required.');
-  } else if (step === 0) {
-    errors.push('Step cannot be 0.');
-  }
-
-  if (paddingWidth && (!Number.isInteger(Number(paddingWidth)) || Number(paddingWidth) < 0)) {
-    errors.push('Padding must be 0 or greater.');
-  }
-
-  if (
-    start !== undefined &&
-    end !== undefined &&
-    step !== undefined &&
-    !Number.isNaN(start) &&
-    !Number.isNaN(end) &&
-    !Number.isNaN(step) &&
-    step !== 0 &&
-    ((step > 0 && start > end) || (step < 0 && start < end))
-  ) {
-    errors.push(step > 0 ? 'Use a negative step for descending ranges.' : 'Use a positive step for ascending ranges.');
-  }
-
-  return errors;
-}
-
-function isNumberRangeValid(payload: PayloadConfig) {
-  return getNumberRangeValidation(payload).length === 0;
-}
-
-function getNumberRangeValues(payload: PayloadConfig, limit = Number.POSITIVE_INFINITY) {
-  if (!isNumberRangeValid(payload)) {
-    return [];
-  }
-
-  const start = payload.number_start!;
-  const end = payload.number_end!;
-  const step = payload.number_step!;
-  const values: string[] = [];
-  let current = start;
-
-  while (step > 0 ? current <= end : current >= end) {
-    values.push(formatNumberPayload(current, payload.number_format));
-
-    if (values.length >= limit) {
-      break;
-    }
-
-    current += step;
-  }
-
-  return values;
-}
-
-function getNumberRangeCount(payload: PayloadConfig) {
-  if (!isNumberRangeValid(payload)) {
-    return 0;
-  }
-
-  const start = payload.number_start!;
-  const end = payload.number_end!;
-  const step = payload.number_step!;
-
-  return Math.floor(Math.abs((end - start) / step)) + 1;
-}
-
-function getPayloadCount(payload: PayloadConfig) {
-  return payload.payload_type === 'NumberRange' ? getNumberRangeCount(payload) : payload.values.length;
-}
-
-function formatNumberPayload(value: number, format = '{}') {
-  const widthMatch = format.match(/^\{:0(\d+)\}$/);
-
-  if (widthMatch) {
-    const width = Number(widthMatch[1]);
-
-    if (value < 0) {
-      return `-${String(Math.abs(value)).padStart(Math.max(width - 1, 0), '0')}`;
-    }
-
-    return String(value).padStart(width, '0');
-  }
-
-  return format.replace('{}', String(value));
-}
-
-function getPaddingWidth(format?: string) {
-  return format?.match(/^\{:0(\d+)\}$/)?.[1] ?? '';
-}
-
-function parseOptionalNumber(value: string) {
-  return value === '' ? undefined : Number(value);
-}
-
-function getPayloadTypeLabel(payloadType: PayloadType) {
-  switch (payloadType) {
-    case 'NumberRange':
-      return 'Number range';
-    case 'RuntimeFile':
-      return 'Runtime file';
-    case 'SimpleList':
-    default:
-      return 'Simple list';
-  }
-}
+import {
+  getPayloadCount,
+  getPayloadTypeLabel,
+  getNumberRangeValues,
+  NUMBER_RANGE_PREVIEW_LIMIT,
+  usePayloadsTab,
+  useNumberRangePayloadEditor,
+  usePayloadFileButton,
+} from '../../hooks/use-payloads-tab';
 
 export function PayloadsTab() {
-  const { theme } = useTheme();
-  const [presetDialogOpen, setPresetDialogOpen] = React.useState(false);
-  const [activePositionName, setActivePositionName] = React.useState<string | null>(null);
-  const config = useIntruderStore((s) => {
-    const tab = s.tabs.find((t) => t.id === s.activeTabId);
-    return tab?.config;
-  });
-  const updatePositionPayload = useIntruderStore((s) => s.updatePositionPayload);
-
-  const positions = config?.positions ?? [];
-  const selectedPositionName = activePositionName ?? positions[0]?.name ?? '';
-
-
-  React.useEffect(() => {
-    if (!positions.some((position) => position.name === selectedPositionName)) {
-      setActivePositionName(positions[0]?.name ?? null);
-    }
-  }, [positions, selectedPositionName]);
+  const {
+    theme,
+    config,
+    positions,
+    selectedPositionName,
+    setActivePositionName,
+    presetDialogOpen,
+    setPresetDialogOpen,
+    updatePositionPayload,
+    updatePayloadType,
+    handleSimpleListTextChange,
+    handleUsePreset,
+    openPresetDialogForPosition,
+  } = usePayloadsTab();
 
   if (!config) return null;
 
@@ -194,22 +71,6 @@ export function PayloadsTab() {
               ? getNumberRangeValues(payload, NUMBER_RANGE_PREVIEW_LIMIT)
               : [];
 
-          const updatePayloadType = (payloadType: PayloadType) => {
-            updatePositionPayload(position.name, {
-              payload_type: payloadType,
-              ...(payloadType === 'NumberRange'
-                ? {
-                    values: [],
-                    file_path: undefined,
-                    number_start: payload.number_start ?? 1,
-                    number_end: payload.number_end ?? 100,
-                    number_step: payload.number_step ?? 1,
-                    number_format: payload.number_format,
-                  }
-                : {}),
-            });
-          };
-
           return (
             <TabsContent key={position.name} value={position.name} className="space-y-3">
               <div className="flex items-center justify-between gap-2">
@@ -229,7 +90,7 @@ export function PayloadsTab() {
                     type="button"
                     variant={payload.payload_type === payloadType ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => updatePayloadType(payloadType)}
+                    onClick={() => updatePayloadType(position.name, payload, payloadType)}
                   >
                     {getPayloadTypeLabel(payloadType)}
                   </Button>
@@ -248,13 +109,7 @@ export function PayloadsTab() {
                   <div className="h-36 overflow-hidden rounded-md border">
                     <TextEditor
                       value={payload.values.join('\n')}
-                      onChange={(value) =>
-                        updatePositionPayload(position.name, {
-                          payload_type: 'SimpleList',
-                          values: (value ?? '').split('\n').filter((line) => line.trim()),
-                          file_path: undefined,
-                        })
-                      }
+                      onChange={(value) => handleSimpleListTextChange(position.name, value)}
                       language="markdown"
                       className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
                       theme={theme}
@@ -266,10 +121,7 @@ export function PayloadsTab() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                        setActivePositionName(position.name);
-                        setPresetDialogOpen(true);
-                      }}
+                      onClick={() => openPresetDialogForPosition(position.name)}
                     >
                       Browse Presets
                     </Button>
@@ -290,18 +142,7 @@ export function PayloadsTab() {
       <IntruderPayloadPresetDialog
         open={presetDialogOpen}
         onOpenChange={setPresetDialogOpen}
-
-        onUsePayload={(payload) => {
-          if (!selectedPositionName) {
-            return;
-          }
-
-          updatePositionPayload(selectedPositionName, {
-            payload_type: 'SimpleList',
-            values: payload.values,
-            file_path: `Preset: ${payload.name}`,
-          });
-        }}
+        onUsePayload={handleUsePreset}
       />
     </div>
   );
@@ -318,9 +159,20 @@ function NumberRangePayloadEditor({
   payloadCount: number;
   onChange: (updates: Partial<PayloadConfig>) => void;
 }) {
-  const paddingWidth = getPaddingWidth(payload.number_format);
-  const validationErrors = getNumberRangeValidation(payload);
-  const hasValidationErrors = validationErrors.length > 0;
+  const {
+    paddingWidth,
+    validationErrors,
+    hasValidationErrors,
+    handleStartChange,
+    handleEndChange,
+    handleStepChange,
+    handlePaddingChange,
+    handleFormatChange,
+    isStartInvalid,
+    isEndInvalid,
+    isStepInvalid,
+    isPaddingInvalid,
+  } = useNumberRangePayloadEditor({ payload, onChange });
 
   return (
     <div className="space-y-3 rounded-md border bg-muted/20 p-3">
@@ -330,8 +182,8 @@ function NumberRangePayloadEditor({
           <Input
             type="number"
             value={payload.number_start ?? ''}
-            aria-invalid={payload.number_start === undefined || Number.isNaN(payload.number_start)}
-            onChange={(event) => onChange({ number_start: parseOptionalNumber(event.target.value) })}
+            aria-invalid={isStartInvalid}
+            onChange={(event) => handleStartChange(event.target.value)}
           />
         </div>
         <div className="grid gap-1.5">
@@ -339,8 +191,8 @@ function NumberRangePayloadEditor({
           <Input
             type="number"
             value={payload.number_end ?? ''}
-            aria-invalid={payload.number_end === undefined || Number.isNaN(payload.number_end)}
-            onChange={(event) => onChange({ number_end: parseOptionalNumber(event.target.value) })}
+            aria-invalid={isEndInvalid}
+            onChange={(event) => handleEndChange(event.target.value)}
           />
         </div>
         <div className="grid gap-1.5">
@@ -348,12 +200,8 @@ function NumberRangePayloadEditor({
           <Input
             type="number"
             value={payload.number_step ?? ''}
-            aria-invalid={
-              payload.number_step === undefined ||
-              Number.isNaN(payload.number_step) ||
-              payload.number_step === 0
-            }
-            onChange={(event) => onChange({ number_step: parseOptionalNumber(event.target.value) })}
+            aria-invalid={isStepInvalid}
+            onChange={(event) => handleStepChange(event.target.value)}
           />
         </div>
         <div className="grid gap-1.5">
@@ -363,14 +211,8 @@ function NumberRangePayloadEditor({
             min={0}
             placeholder="0"
             value={paddingWidth}
-            aria-invalid={Boolean(paddingWidth) && Number(paddingWidth) < 0}
-            onChange={(event) => {
-              const widthText = event.target.value;
-              const width = Number(widthText);
-              onChange({
-                number_format: widthText && width > 0 ? `{:0${width}}` : undefined,
-              });
-            }}
+            aria-invalid={isPaddingInvalid}
+            onChange={(event) => handlePaddingChange(event.target.value)}
           />
         </div>
       </div>
@@ -380,11 +222,7 @@ function NumberRangePayloadEditor({
         <Input
           value={payload.number_format ?? '{}'}
           placeholder="{}"
-          onChange={(event) =>
-            onChange({
-              number_format: event.target.value.trim() ? event.target.value : undefined,
-            })
-          }
+          onChange={(event) => handleFormatChange(event.target.value)}
         />
       </div>
 
@@ -408,32 +246,12 @@ function NumberRangePayloadEditor({
 }
 
 function PayloadFileButton({ positionName }: { positionName: string }) {
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const updatePositionPayload = useIntruderStore((s) => s.updatePositionPayload);
-
-
-  const handleLoadPayloads = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (loadEvent) => {
-      const content = loadEvent.target?.result as string;
-      updatePositionPayload(positionName, {
-        payload_type: 'SimpleList',
-        values: content.split(/\r?\n/).filter((line) => line.trim()),
-        file_path: file.name,
-      });
-    };
-    reader.readAsText(file);
-    event.target.value = '';
-  };
+  const { inputRef, triggerFileSelect, handleLoadPayloads } =
+    usePayloadFileButton(positionName);
 
   return (
     <>
-      <Button size="sm" variant="outline" onClick={() => inputRef.current?.click()}>
+      <Button size="sm" variant="outline" onClick={triggerFileSelect}>
         Load from File
       </Button>
       <input
@@ -446,3 +264,5 @@ function PayloadFileButton({ positionName }: { positionName: string }) {
     </>
   );
 }
+
+export const InvokerPayloadsTab = PayloadsTab;

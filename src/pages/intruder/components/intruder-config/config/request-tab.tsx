@@ -10,100 +10,16 @@ import {
   DialogTitle,
   Label,
   TextEditor,
-  type TextEditorInstance,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@celestia-project/ui';
 import * as React from 'react';
-import { invoke } from '@tauri-apps/api/core';
-import { AsteriskIcon, Info, SpinnerGapIcon, TargetIcon } from '@phosphor-icons/react';
-
-import { useTheme } from '@/components/theme-provider';
-import { useIntruderStore } from '@/stores/intruder';
+import { AsteriskIcon, InfoIcon, SpinnerGapIcon, TargetIcon } from '@phosphor-icons/react';
 import {
-  buildRawRequest,
-  findRequestPayloadPositions,
-  parseRawRequest,
-} from '../../../types';
-import { toast } from 'sonner';
-
-interface InvokerMarkerSuggestion {
-  id: string;
-  start: number;
-  end: number;
-  value: string;
-  category: string;
-  location: string;
-  confidence: number;
-  reason: string;
-}
-
-interface InvokerMarkerSuggestionResponse {
-  provider: string;
-  model: string;
-  suggestions: InvokerMarkerSuggestion[];
-  candidateCount: number;
-}
-
-
-function findMarkerRanges(text: string) {
-  const ranges: Array<{ start: number; end: number }> = [];
-  let searchStart = 0;
-
-  while (true) {
-    const start = text.indexOf('§', searchStart);
-    if (start === -1) break;
-    const end = text.indexOf('§', start + 1);
-    if (end === -1) break;
-    ranges.push({ start, end: end + 1 });
-    searchStart = end + 1;
-  }
-
-  return ranges;
-}
-
-function rangesOverlap(a: { start: number; end: number }, b: { start: number; end: number }) {
-  return a.start < b.end && a.end > b.start;
-}
-
-function validateSuggestions(text: string, suggestions: InvokerMarkerSuggestion[]) {
-  const markerRanges = findMarkerRanges(text);
-  const usedRanges: Array<{ start: number; end: number }> = [];
-
-  return suggestions.filter((suggestion) => {
-    if (suggestion.start < 0 || suggestion.end <= suggestion.start || suggestion.end > text.length) {
-      return false;
-    }
-
-    if (text.slice(suggestion.start, suggestion.end) !== suggestion.value) {
-      return false;
-    }
-
-    const range = { start: suggestion.start, end: suggestion.end };
-    if (markerRanges.some((markerRange) => rangesOverlap(range, markerRange))) {
-      return false;
-    }
-
-    if (usedRanges.some((usedRange) => rangesOverlap(range, usedRange))) {
-      return false;
-    }
-
-    usedRanges.push(range);
-    return true;
-  });
-}
-
-function applyMarkers(text: string, suggestions: InvokerMarkerSuggestion[]) {
-  return [...suggestions]
-    .sort((a, b) => b.start - a.start)
-    .reduce((nextText, suggestion) => {
-      const before = nextText.slice(0, suggestion.start);
-      const value = nextText.slice(suggestion.start, suggestion.end);
-      const after = nextText.slice(suggestion.end);
-      return `${before}§${value}§${after}`;
-    }, text);
-}
+  useRequestTab,
+  type InvokerMarkerSuggestion,
+} from '../../hooks/use-request-tab';
 
 function HighlightedRequestPreview({
   text,
@@ -143,216 +59,42 @@ function HighlightedRequestPreview({
 }
 
 export function RequestTab() {
-  const { theme } = useTheme();
-  const config = useIntruderStore((s) => {
-    const tab = s.tabs.find((t) => t.id === s.activeTabId);
-    return tab?.config;
-  });
-  const isRunning = useIntruderStore((s) => {
-    const tab = s.tabs.find((t) => t.id === s.activeTabId);
-    return tab?.isRunning ?? false;
-  });
-  const updateConfig = useIntruderStore((s) => s.updateConfig);
-
-
-  const [rawRequestDraft, setRawRequestDraft] = React.useState(() =>
-    config ? buildRawRequest(config.base_request) : ''
-  );
-  const [autoMarkLoading, setAutoMarkLoading] = React.useState(false);
-  const [suggestionsDialogOpen, setSuggestionsDialogOpen] = React.useState(false);
-  const [suggestions, setSuggestions] = React.useState<InvokerMarkerSuggestion[]>([]);
-  const [selectedSuggestionIds, setSelectedSuggestionIds] = React.useState<Set<string>>(
-    () => new Set()
-  );
-  const rawRequestEditorRef = React.useRef<TextEditorInstance | null>(null);
-  const editRef = React.useRef(false);
-
-  React.useEffect(() => {
-    if (!config) return;
-    if (editRef.current) {
-      editRef.current = false;
-      return;
-    }
-    setRawRequestDraft(buildRawRequest(config.base_request));
-  }, [config?.base_request]);
+  const {
+    theme,
+    config,
+    isRunning,
+    rawRequestDraft,
+    autoMarkLoading,
+    suggestionsDialogOpen,
+    setSuggestionsDialogOpen,
+    suggestions,
+    selectedSuggestions,
+    selectedSuggestionIds,
+    handleEditorChange,
+    setEditorRef,
+    markRawRequestTarget,
+    clearAllMarkers,
+    handleAutoMark,
+    handleApplyAutoMarkers,
+    toggleSuggestion,
+    selectAllSuggestions,
+    selectNoneSuggestions,
+    markedPositionsCount,
+  } = useRequestTab();
 
   if (!config) return null;
-
-  const updateRawRequest = (value: string) => {
-    setRawRequestDraft(value);
-    const parsed = parseRawRequest(value);
-    if (parsed) {
-      updateConfig({
-        base_request: {
-          ...config.base_request,
-          ...parsed,
-        },
-        positions: findRequestPayloadPositions(parsed),
-      });
-    }
-  };
-
-  const markRawRequestTarget = () => {
-    const editor = rawRequestEditorRef.current;
-    if (!editor) return;
-
-    const selection = editor.getSelection();
-    const model = editor.getModel();
-    if (!selection || !model) return;
-
-    if (selection.isEmpty()) {
-      editor.executeEdits('marker-action', [
-        {
-          range: selection,
-          text: '§§',
-          forceMoveMarkers: true,
-        },
-      ]);
-      const pos = editor.getPosition();
-      if (pos) {
-        editor.setPosition({
-          lineNumber: pos.lineNumber,
-          column: pos.column - 1,
-        });
-      }
-    } else {
-      const selectedText = model.getValueInRange(selection);
-      if (selectedText.startsWith('§') && selectedText.endsWith('§') && selectedText.length >= 2) {
-        editor.executeEdits('marker-action', [
-          {
-            range: selection,
-            text: selectedText.slice(1, -1),
-            forceMoveMarkers: true,
-          },
-        ]);
-      } else {
-        editor.executeEdits('marker-action', [
-          {
-            range: selection,
-            text: `§${selectedText}§`,
-            forceMoveMarkers: true,
-          },
-        ]);
-      }
-    }
-    editor.focus();
-    const nextDoc = model.getValue();
-    editRef.current = true;
-    updateRawRequest(nextDoc);
-  };
-
-  const clearAllMarkers = () => {
-    const editor = rawRequestEditorRef.current;
-    const model = editor?.getModel();
-    const currentDoc = model ? model.getValue() : rawRequestDraft;
-    if (!currentDoc.includes('§')) return;
-    const next = currentDoc.replace(/§/g, '');
-    if (editor && model) {
-      editor.executeEdits('marker-action', [
-        {
-          range: model.getFullModelRange(),
-          text: next,
-          forceMoveMarkers: true,
-        },
-      ]);
-      editor.focus();
-    }
-    editRef.current = true;
-    updateRawRequest(next);
-  };
-
-  const handleAutoMark = async () => {
-    if (!rawRequestDraft.trim()) {
-      toast.error('Add a raw request before using Auto mark');
-      return;
-    }
-
-    const parsed = parseRawRequest(rawRequestDraft);
-    if (!parsed) {
-      toast.error('Fix the raw request before using Auto mark');
-      return;
-    }
-
-    setAutoMarkLoading(true);
-    try {
-      const response = await invoke<InvokerMarkerSuggestionResponse>('suggest_invoker_markers', {
-        request: { rawRequest: rawRequestDraft },
-      });
-      const validSuggestions = validateSuggestions(rawRequestDraft, response.suggestions);
-
-      if (validSuggestions.length === 0) {
-        toast.info(
-          response.candidateCount > 0
-            ? 'AI did not find any marker suggestions to apply'
-            : 'No fuzzable request inputs were found'
-        );
-        return;
-      }
-
-      setSuggestions(validSuggestions);
-      setSelectedSuggestionIds(new Set(validSuggestions.map((suggestion) => suggestion.id)));
-      setSuggestionsDialogOpen(true);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : String(error));
-    } finally {
-      setAutoMarkLoading(false);
-    }
-  };
-
-  const selectedSuggestions = React.useMemo(
-    () => suggestions.filter((suggestion) => selectedSuggestionIds.has(suggestion.id)),
-    [selectedSuggestionIds, suggestions]
-  );
-
-  const handleApplyAutoMarkers = () => {
-    const nextSuggestions = validateSuggestions(rawRequestDraft, selectedSuggestions);
-    if (nextSuggestions.length === 0) {
-      toast.error('Select at least one valid marker suggestion');
-      return;
-    }
-
-    const nextRequest = applyMarkers(rawRequestDraft, nextSuggestions);
-    const editor = rawRequestEditorRef.current;
-    const model = editor?.getModel();
-    if (editor && model) {
-      editor.executeEdits('marker-action', [
-        {
-          range: model.getFullModelRange(),
-          text: nextRequest,
-          forceMoveMarkers: true,
-        },
-      ]);
-      editor.focus();
-    }
-    editRef.current = true;
-    updateRawRequest(nextRequest);
-    setSuggestionsDialogOpen(false);
-    toast.success(`Applied ${nextSuggestions.length} marker${nextSuggestions.length === 1 ? '' : 's'}`);
-  };
-
-  const toggleSuggestion = (id: string, checked: boolean) => {
-    setSelectedSuggestionIds((current) => {
-      const next = new Set(current);
-      if (checked) {
-        next.add(id);
-      } else {
-        next.delete(id);
-      }
-      return next;
-    });
-  };
 
   return (
     <div className="space-y-4">
       <div className="grid gap-2">
-        <div className="flex items-center justify-between">
+        <div className="sticky top-0 bg-background z-10 flex items-center justify-between py-1">
           <Label>Raw Request</Label>
           <div className="flex items-center gap-2">
-            <Badge variant={config.positions.length > 0 ? 'default' : 'secondary'}>
-              {config.positions.length} marked
+            <Badge variant={markedPositionsCount > 0 ? 'default' : 'secondary'}>
+              {markedPositionsCount} marked
             </Badge>
             <ButtonGroup>
-              <Button
+              {/* <Button
                 type="button"
                 variant="outline"
                 size="sm"
@@ -365,7 +107,7 @@ export function RequestTab() {
                   <AsteriskIcon className="mr-1 h-4 w-4" />
                 )}
                 Auto §
-              </Button>
+              </Button> */}
               <Button
                 type="button"
                 variant="outline"
@@ -373,42 +115,25 @@ export function RequestTab() {
                 onClick={markRawRequestTarget}
                 disabled={isRunning}
               >
-                <TargetIcon className="mr-1 h-4 w-4" />
-                Add §
+                Add Mark §
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={clearAllMarkers}
-                disabled={isRunning || config.positions.length === 0}
+                disabled={isRunning || markedPositionsCount === 0}
               >
                 Clear §
               </Button>
             </ButtonGroup>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" type="button" variant="ghost" className="shrink-0">
-                  <Info className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-[320px]">
-                Select a URL, header, or body value and mark it with § as the payload insertion point.
-              </TooltipContent>
-            </Tooltip>
           </div>
         </div>
         <div className="h-[460px] overflow-hidden rounded-md border">
           <TextEditor
             value={rawRequestDraft}
-            onChange={(value) => {
-              editRef.current = true;
-              updateRawRequest(value ?? '');
-            }}
-            onMount={(editor) => {
-              rawRequestEditorRef.current = editor;
-            }}
-            language="markdown"
+            onChange={handleEditorChange}
+            onMount={setEditorRef}
             className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
             theme={theme}
             disableValidation
@@ -436,7 +161,7 @@ export function RequestTab() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => setSelectedSuggestionIds(new Set(suggestions.map((item) => item.id)))}
+                    onClick={selectAllSuggestions}
                   >
                     All
                   </Button>
@@ -444,7 +169,7 @@ export function RequestTab() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => setSelectedSuggestionIds(new Set())}
+                    onClick={selectNoneSuggestions}
                   >
                     None
                   </Button>
@@ -499,3 +224,5 @@ export function RequestTab() {
     </div>
   );
 }
+
+export const InvokerRequestTab = RequestTab;

@@ -1,51 +1,22 @@
-import React, { useEffect, useRef, useState } from 'react';
 import { Button, Input } from '@celestia-project/ui';
-import { useIntruderStore } from '@/stores/intruder';
 import { formatPayloadValues, getResultUrl } from '../lib/utils';
-import { useIntruderFilters } from '../hooks/use-filters';
-
 import { TrashIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
+import { useResultsPanel } from './hooks/use-results-panel';
 
 export function IntruderResultsPanel() {
-  const { filterSearch, filteredResults, resultsCount, setFilterSearch, clearResults } = useIntruderFilters();
-  const isRunning = useIntruderStore((s) => {
-    const tab = s.tabs.find((t) => t.id === s.activeTabId);
-    return tab?.isRunning ?? false;
-  });
-  const selectedResult = useIntruderStore((s) => {
-    const tab = s.tabs.find((t) => t.id === s.activeTabId);
-    return tab?.selectedResult ?? null;
-  });
-  const setSelectedResult = useIntruderStore((s) => s.setSelectedResult);
-
-
-  const [localSearch, setLocalSearch] = useState(filterSearch);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    setLocalSearch(filterSearch);
-  }, [filterSearch]);
-
-  const handleSearchChange = (val: string) => {
-    setLocalSearch(val);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setFilterSearch(val);
-    }, 200);
-  };
-
-  const handleClearSearch = () => {
-    setLocalSearch('');
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    setFilterSearch('');
-  };
-
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, []);
+  const {
+    isRunning,
+    selectedResult,
+    handleSelectResult,
+    localSearch,
+    filteredResults,
+    resultsCount,
+    handleSearchChange,
+    handleClearSearch,
+    clearResults,
+    getStatusStyle,
+  } = useResultsPanel();
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-md border border-border bg-background">
@@ -137,19 +108,8 @@ export function IntruderResultsPanel() {
           <tbody className="divide-y divide-border/40 font-mono">
             {filteredResults.map((result, index) => {
               const isSelected = selectedResult?.id === result.id;
-              const hasError = !!result.error;
-              
-              // Custom soft colors for HTTP statuses
-              let statusClass = 'bg-muted text-muted-foreground border-muted-foreground/10';
-              if (result.status) {
-                if (result.status >= 200 && result.status < 300) {
-                  statusClass = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
-                } else if (result.status >= 300 && result.status < 400) {
-                  statusClass = 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20';
-                } else if (result.status >= 400) {
-                  statusClass = 'bg-destructive/10 text-destructive border-destructive/20';
-                }
-              }
+              const hasError = Boolean(result.error);
+              const statusClass = getStatusStyle(result);
 
               return (
                 <tr
@@ -161,7 +121,7 @@ export function IntruderResultsPanel() {
                       ? 'bg-destructive/5 text-destructive hover:bg-destructive/10' 
                       : ''
                   }`}
-                  onClick={() => setSelectedResult(result)}
+                  onClick={() => handleSelectResult(result)}
                 >
                   {/* Row Number */}
                   <td className="px-3 py-1.5 text-muted-foreground select-none">{index + 1}</td>
@@ -218,4 +178,3 @@ export function IntruderResultsPanel() {
 }
 
 export const InvokerResultsPanel = IntruderResultsPanel;
-

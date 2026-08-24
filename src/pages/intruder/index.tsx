@@ -4,7 +4,6 @@ import * as React from 'react';
 import { InfoIcon, PlayIcon, SquareIcon } from '@phosphor-icons/react';
 import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { IntruderConfigDialog } from './components/intruder-config';
-import { IntruderPayloadDialog } from './components/payload-dialog';
 import { IntruderResultsPanel } from './components/results-panel';
 import { IntruderResultInspector } from './components/result-inspector';
 import { useIntruderPage } from './hooks/use-page';
@@ -339,9 +338,6 @@ export function IntruderPage() {
               </div>
             </div>
           </div>
-
-          {/* Dialog helpers rendered off-canvas */}
-          <IntruderPayloadDialog />
         </div>
       </TabbedPageLayout>
     </>

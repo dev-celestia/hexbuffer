@@ -1,59 +1,16 @@
-
-
 import { Badge, Label, TextEditor } from '@celestia-project/ui';
-import { buildRawHttpResponse } from '@/lib/http-message';
 import { WarningCircleIcon } from '@phosphor-icons/react';
-import { useTheme } from '@/components/theme-provider';
-import { useIntruderStore } from '@/stores/intruder';
-import type { AttackResult } from '../types';
-import { formatPayloadValues, getResultUrl } from '../lib/utils';
-
-function buildRawAttackResponse(result: AttackResult) {
-  if (result.error) {
-    return `Error\n\n${result.error}`;
-  }
-
-  if (!result.response) {
-    return 'No response captured.';
-  }
-
-  return buildRawHttpResponse(result.response, { prettyJsonBody: true });
-}
+import { usePreviewPanel } from './hooks/use-preview-panel';
 
 export function IntruderPreviewPane() {
-  const { theme } = useTheme();
-  const selectedResult = useIntruderStore((s) => {
-    const tab = s.tabs.find((t) => t.id === s.activeTabId);
-    return tab?.selectedResult ?? null;
-  });
-
-
-  const renderStatusBadge = () => {
-    if (!selectedResult) return null;
-
-    if (selectedResult.error) {
-      return (
-        <Badge variant="destructive" className="text-xs">
-          Error
-        </Badge>
-      );
-    }
-
-    if (!selectedResult.status) return null;
-
-    const statusVariant =
-      selectedResult.status >= 200 && selectedResult.status < 300
-        ? 'default'
-        : selectedResult.status >= 400
-          ? 'destructive'
-          : 'secondary';
-
-    return (
-      <Badge variant={statusVariant} className="text-xs">
-        {selectedResult.status}
-      </Badge>
-    );
-  };
+  const {
+    theme,
+    selectedResult,
+    rawResponse,
+    url,
+    formattedPayload,
+    statusBadge,
+  } = usePreviewPanel();
 
   return (
     <div className="border rounded-lg overflow-hidden flex flex-col flex-1 min-h-0">
@@ -61,7 +18,11 @@ export function IntruderPreviewPane() {
         <span className="text-sm font-medium">Response Detail</span>
         {selectedResult && (
           <div className="flex min-w-0 items-center gap-3">
-            {renderStatusBadge()}
+            {statusBadge && (
+              <Badge variant={statusBadge.variant} className="text-xs">
+                {statusBadge.label}
+              </Badge>
+            )}
             <span className="text-xs text-muted-foreground">
               {selectedResult.response_time_ms ? `${selectedResult.response_time_ms}ms` : '-'}
             </span>
@@ -74,17 +35,14 @@ export function IntruderPreviewPane() {
             <div className="space-y-2 text-sm">
               <div className="grid grid-cols-[72px_1fr] gap-2">
                 <span className="text-muted-foreground">URL</span>
-                <span className="min-w-0 truncate font-mono text-xs" title={getResultUrl(selectedResult)}>
-                  {getResultUrl(selectedResult) || '-'}
+                <span className="min-w-0 truncate font-mono text-xs" title={url}>
+                  {url || '-'}
                 </span>
               </div>
               <div className="grid grid-cols-[72px_1fr] gap-2">
                 <span className="text-muted-foreground">Payload</span>
-                <span
-                  className="min-w-0 truncate font-mono text-xs"
-                  title={formatPayloadValues(selectedResult.payload_values)}
-                >
-                  {formatPayloadValues(selectedResult.payload_values)}
+                <span className="min-w-0 truncate font-mono text-xs" title={formattedPayload}>
+                  {formattedPayload || '-'}
                 </span>
               </div>
               <div className="grid grid-cols-3 gap-2">
@@ -119,7 +77,7 @@ export function IntruderPreviewPane() {
               <Label className="text-xs text-muted-foreground mb-1 block">Raw Response</Label>
               <div className="flex-1 min-h-0 overflow-hidden rounded-md border">
                 <TextEditor
-                  value={buildRawAttackResponse(selectedResult)}
+                  value={rawResponse}
                   options={{ readOnly: true }}
                   language="markdown"
                   className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
@@ -140,4 +98,3 @@ export function IntruderPreviewPane() {
 }
 
 export const InvokerPreviewPane = IntruderPreviewPane;
-

@@ -1,13 +1,8 @@
 import { Badge, Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Input, ScrollArea } from '@celestia-project/ui';
-import * as React from 'react';
 import { FileTextIcon, FolderIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
-
 import { cn } from '@/lib/utils';
-import {
-  PAYLOAD_CATEGORIES,
-  PREDEFINED_PAYLOADS,
-  type PredefinedPayload,
-} from '../data/predefined-payloads';
+import { PAYLOAD_CATEGORIES, type PredefinedPayload } from '../data/predefined-payloads';
+import { usePayloadPresetDialog } from './hooks/use-payload-preset-dialog';
 
 export interface IntruderPayloadPresetDialogProps {
   open: boolean;
@@ -22,55 +17,20 @@ export function IntruderPayloadPresetDialog({
   onOpenChange,
   onUsePayload,
 }: IntruderPayloadPresetDialogProps) {
-
-  const [selectedCategory, setSelectedCategory] = React.useState(PAYLOAD_CATEGORIES[0] ?? '');
-  const [selectedPayloadId, setSelectedPayloadId] = React.useState(
-    PREDEFINED_PAYLOADS[0]?.id ?? ''
-  );
-  const [search, setSearch] = React.useState('');
-
-  const visiblePayloads = React.useMemo(() => {
-    const query = search.trim().toLowerCase();
-
-    return PREDEFINED_PAYLOADS.filter((payload) => {
-      const matchesCategory = payload.category === selectedCategory;
-      if (!query) {
-        return matchesCategory;
-      }
-
-      return (
-        matchesCategory &&
-        `${payload.name} ${payload.description}`.toLowerCase().includes(query)
-      );
-    });
-  }, [search, selectedCategory]);
-
-  const selectedPayload =
-    PREDEFINED_PAYLOADS.find((payload) => payload.id === selectedPayloadId) ??
-    visiblePayloads[0] ??
-    PREDEFINED_PAYLOADS[0];
-  const previewValues = selectedPayload?.values.slice(0, 500) ?? [];
-  const hiddenPreviewCount = selectedPayload
-    ? Math.max(0, selectedPayload.values.length - previewValues.length)
-    : 0;
-
-  React.useEffect(() => {
-    if (
-      visiblePayloads.length > 0 &&
-      !visiblePayloads.some((payload) => payload.id === selectedPayloadId)
-    ) {
-      setSelectedPayloadId(visiblePayloads[0].id);
-    }
-  }, [selectedPayloadId, visiblePayloads]);
-
-  const handleUsePayload = () => {
-    if (!selectedPayload) {
-      return;
-    }
-
-    onUsePayload(selectedPayload);
-    onOpenChange(false);
-  };
+  const {
+    selectedCategory,
+    selectedPayloadId,
+    search,
+    setSearch,
+    visiblePayloads,
+    selectedPayload,
+    previewValues,
+    hiddenPreviewCount,
+    handleCategorySelect,
+    setSelectedPayloadId,
+    handleUsePayload,
+    handleClose,
+  } = usePayloadPresetDialog({ onUsePayload, onOpenChange });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -87,13 +47,7 @@ export function IntruderPayloadPresetDialog({
                 <button
                   key={category}
                   type="button"
-                  onClick={() => {
-                    setSelectedCategory(category);
-                    setSearch('');
-                    setSelectedPayloadId(
-                      PREDEFINED_PAYLOADS.find((payload) => payload.category === category)?.id ?? ''
-                    );
-                  }}
+                  onClick={() => handleCategorySelect(category)}
                   className={cn(
                     'flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-background',
                     selectedCategory === category && 'bg-background shadow-sm'
@@ -112,7 +66,7 @@ export function IntruderPayloadPresetDialog({
               <Input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="MagnifyingGlassIcon presets"
+                placeholder="Search presets"
                 className="h-8 pl-7 text-xs"
               />
             </div>
@@ -175,7 +129,7 @@ export function IntruderPayloadPresetDialog({
         </div>
 
         <DialogFooter className="border-t px-4 py-3">
-          <Button size="sm" variant="outline" onClick={() => onOpenChange(false)}>
+          <Button size="sm" variant="outline" onClick={handleClose}>
             Cancel
           </Button>
           <Button size="sm" onClick={handleUsePayload} disabled={!selectedPayload}>
@@ -188,4 +142,3 @@ export function IntruderPayloadPresetDialog({
 }
 
 export const InvokerPayloadPresetDialog = IntruderPayloadPresetDialog;
-

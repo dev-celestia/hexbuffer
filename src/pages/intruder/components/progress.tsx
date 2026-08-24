@@ -1,16 +1,11 @@
-import { useIntruderStore } from '@/stores/intruder';
+import { useProgress } from './hooks/use-progress';
 
 export function IntruderProgress() {
-  const progress = useIntruderStore((s) => {
-    const tab = s.tabs.find((t) => t.id === s.activeTabId);
-    return tab?.progress ?? null;
-  });
+  const { progress, percentage } = useProgress();
 
   if (!progress) {
     return null;
   }
-
-  const percentage = Math.round((progress.current / progress.total) * 100);
 
   return (
     <div className="mt-2 p-2">
@@ -23,7 +18,7 @@ export function IntruderProgress() {
       <div className="h-2 bg-muted rounded-full overflow-hidden">
         <div
           className="h-full bg-primary transition-all duration-300"
-          style={{ width: `${(progress.current / progress.total) * 100}%` }}
+          style={{ width: `${percentage}%` }}
         />
       </div>
     </div>
@@ -31,4 +26,3 @@ export function IntruderProgress() {
 }
 
 export const InvokerProgress = IntruderProgress;
-

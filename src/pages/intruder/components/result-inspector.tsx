@@ -1,28 +1,8 @@
 // ponytail: simplify layout by using inline split inspector instead of full-screen drawer overlay
 import { Button, TextEditor } from '@celestia-project/ui';
-import * as React from 'react';
-
-import { X, ArrowsIn, ArrowsOut } from '@phosphor-icons/react';
-import { useTheme } from '@/components/theme-provider';
-import { buildRawHttpRequest, buildRawHttpResponse } from '@/lib/http-message';
-import { replaceRequestMarkedValues, type AttackConfig, type AttackResult } from '../types';
-
-function buildModifiedRequest(config: AttackConfig, result: AttackResult) {
-  const request = replaceRequestMarkedValues(config.base_request, result.payload_values);
-  return buildRawHttpRequest(request);
-}
-
-function buildRawAttackResponse(result: AttackResult) {
-  if (result.error) {
-    return `Error\n\n${result.error}`;
-  }
-
-  if (!result.response) {
-    return 'No response captured.';
-  }
-
-  return buildRawHttpResponse(result.response, { prettyJsonBody: true });
-}
+import { XIcon, ArrowsInIcon, ArrowsOutIcon } from '@phosphor-icons/react';
+import type { AttackConfig, AttackResult } from '../types';
+import { useResultInspector } from './hooks/use-result-inspector';
 
 export interface IntruderResultInspectorProps {
   selectedResult: AttackResult;
@@ -37,17 +17,14 @@ export function IntruderResultInspector({
   config,
   onClose,
 }: IntruderResultInspectorProps) {
-
-  const { theme } = useTheme();
-  const [isStacked, setIsStacked] = React.useState(false);
-
-  const modifiedRequest = React.useMemo(() => {
-    return buildModifiedRequest(config, selectedResult);
-  }, [config, selectedResult]);
-
-  const rawResponse = React.useMemo(() => {
-    return buildRawAttackResponse(selectedResult);
-  }, [selectedResult]);
+  const {
+    theme,
+    isStacked,
+    toggleStacked,
+    modifiedRequest,
+    rawResponse,
+    payloadSummary,
+  } = useResultInspector({ selectedResult, config });
 
   return (
     <div className="flex h-full min-h-0 flex-col border-t bg-background">
@@ -57,7 +34,7 @@ export function IntruderResultInspector({
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Result #{selectedResult.id}</span>
           <span className="text-xs text-border">|</span>
           <span className="text-xs text-muted-foreground truncate max-w-[200px] font-mono">
-            {selectedResult.payload_values ? Object.values(selectedResult.payload_values).join(', ') : ''}
+            {payloadSummary}
           </span>
           {selectedResult.response_time_ms && (
             <>
@@ -71,16 +48,16 @@ export function IntruderResultInspector({
             variant="ghost"
             size="icon"
             title={isStacked ? "Split side-by-side" : "Stack vertically"}
-            onClick={() => setIsStacked(!isStacked)}
+            onClick={toggleStacked}
           >
-            {isStacked ? <ArrowsOut className="size-3.5" /> : <ArrowsIn className="size-3.5" />}
+            {isStacked ? <ArrowsOutIcon className="size-3.5" /> : <ArrowsInIcon className="size-3.5" />}
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
           >
-            <X className="size-3.5" />
+            <XIcon className="size-3.5" />
           </Button>
         </div>
       </div>
@@ -129,4 +106,3 @@ export function IntruderResultInspector({
 }
 
 export const InvokerResultInspector = IntruderResultInspector;
-
