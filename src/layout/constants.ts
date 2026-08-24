@@ -276,14 +276,6 @@ export const ALPHA_NAV_ITEMS: NavItem[] = import.meta.env.PROD
         colors: { bg: 'bg-emerald-600 dark:bg-emerald-600', hoverBg: 'group-hover:bg-emerald-600 dark:group-hover:bg-emerald-600', border: 'border-emerald-600 dark:border-emerald-600' },
         flag: 'alpha',
       },
-      {
-        label: 'Splash Preview',
-        icon: SparkleIcon,
-        href: '/splash-preview',
-        description: 'Interactive debugger and customizer for the application splash screen.',
-        colors: { bg: 'bg-emerald-500 dark:bg-emerald-500', hoverBg: 'group-hover:bg-emerald-500 dark:group-hover:bg-emerald-500', border: 'border-emerald-500 dark:border-emerald-500' },
-        flag: 'alpha',
-      },
     ];
 
 export const ALL_NAV_ITEMS: NavItem[] = import.meta.env.PROD

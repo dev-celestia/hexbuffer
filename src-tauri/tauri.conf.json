@@ -37,8 +37,8 @@
         "resizable": false,
         "center": true,
         "visible": true,
-        "width": 360,
-        "height": 140
+        "width": 300,
+        "height": 120
       }
     ],
     "security": {

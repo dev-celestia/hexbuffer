@@ -1,6 +1,5 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { TriangleLogo } from '@/layout/triangle-logo';
 import { cn } from '@/lib/utils';
 import { getImageSrc } from './constants';
 import { useSplashScreen, UseSplashScreenOptions } from './hooks/use-splash-screen';
@@ -101,74 +100,36 @@ export function SplashScreen({
         </AnimatePresence>
       </main>
 
-      {/* Bottom Footer: Dots & Hexbuffer Brand */}
+      {/* Minimal Dot Indicators */}
       <footer
         className={cn(
           // Layout & Positioning
-          'relative z-10 flex flex-col items-center justify-center',
+          'relative z-10 flex items-center justify-center',
           // Sizing & Spacing
-          'gap-1.5'
+          'gap-1.5 pt-1'
         )}
       >
-        {/* Minimal Dot Indicators */}
-        <div
-          className={cn(
-            // Layout & Positioning
-            'flex items-center justify-center',
-            // Sizing & Spacing
-            'gap-1.5'
-          )}
-        >
-          {activeSlides.map((slide, idx) => {
-            const isActive = idx === currentIndex;
-            return (
-              <button
-                key={slide.id}
-                onClick={() => goToSlide(idx)}
-                aria-label={`Go to ${slide.name}`}
-                className={cn(
-                  // Sizing & Spacing
-                  'h-1 rounded-full',
-                  isActive ? 'w-3.5' : 'w-1',
-                  // Backgrounds & Borders
-                  isActive
-                    ? 'bg-emerald-500 shadow-sm shadow-emerald-500/50'
-                    : 'bg-white/20 hover:bg-white/40',
-                  // Interactive & States
-                  'transition-all duration-300 cursor-pointer'
-                )}
-              />
-            );
-          })}
-        </div>
-
-        {/* Smaller Triangle Logo + Hexbuffer */}
-        <div
-          className={cn(
-            // Layout & Positioning
-            'flex items-center justify-center',
-            // Sizing & Spacing
-            'gap-1.5 opacity-80'
-          )}
-        >
-          <TriangleLogo
-            size="small"
-            className={cn(
-              // Sizing & Spacing
-              'w-3 h-3',
-              // Typography
-              'text-emerald-500'
-            )}
-          />
-          <span
-            className={cn(
-              // Typography
-              'text-[11px] font-medium tracking-tight text-white/80'
-            )}
-          >
-            Hexbuffer
-          </span>
-        </div>
+        {activeSlides.map((slide, idx) => {
+          const isActive = idx === currentIndex;
+          return (
+            <button
+              key={slide.id}
+              onClick={() => goToSlide(idx)}
+              aria-label={`Go to ${slide.name}`}
+              className={cn(
+                // Sizing & Spacing
+                'h-1 rounded-full',
+                isActive ? 'w-3.5' : 'w-1',
+                // Backgrounds & Borders
+                isActive
+                  ? 'bg-emerald-500 shadow-sm shadow-emerald-500/50'
+                  : 'bg-white/20 hover:bg-white/40',
+                // Interactive & States
+                'transition-all duration-300 cursor-pointer'
+              )}
+            />
+          );
+        })}
       </footer>
     </div>
   );

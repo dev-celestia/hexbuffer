@@ -53,7 +53,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 14px 8px;
+      padding: 14px 14px 10px;
       box-shadow: none;
       overflow: hidden;
     }
@@ -63,7 +63,7 @@
       position: absolute;
       width: 100px;
       height: 100px;
-      top: 38%;
+      top: 42%;
       left: 50%;
       transform: translate(-50%, -50%);
       background: radial-gradient(circle, var(--primary-glow) 0%, rgba(0, 201, 80, 0) 70%);
@@ -129,26 +129,20 @@
     }
 
     .slide-image {
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       object-fit: contain;
       filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4));
       border-radius: 8px;
     }
 
-    /* Footer with Triangle Logo + Hexbuffer */
-    .footer-bar {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      z-index: 1;
-    }
-
+    /* Minimal Dot Indicators */
     .dots-container {
       display: flex;
       align-items: center;
       gap: 5px;
+      z-index: 1;
+      padding-top: 2px;
     }
 
     .dot {
@@ -164,64 +158,6 @@
       width: 14px;
       background: var(--primary);
       box-shadow: 0 0 8px var(--primary-glow);
-    }
-
-    .brand-group {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      opacity: 0.85;
-    }
-
-    .triangle-logo-sm {
-      position: relative;
-      display: inline-flex;
-      width: 0.8rem;
-      height: 0.8rem;
-      color: var(--primary);
-      flex-shrink: 0;
-      animation: triangle-pulse 2.8s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-    }
-
-    .triangle-icon {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      display: block;
-      transform-origin: center;
-      stroke: currentColor;
-      will-change: opacity, transform;
-    }
-
-    .triangle-icon.solid {
-      animation: triangle-solid 2.8s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-    }
-
-    .triangle-icon.dashed {
-      animation: triangle-dashed 2.8s cubic-bezier(0.45, 0, 0.2, 1) infinite;
-    }
-
-    .brand-name {
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: -0.01em;
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    @keyframes triangle-pulse {
-      0%, 100% { transform: scale(1); }
-      45% { transform: scale(1.08); }
-    }
-
-    @keyframes triangle-solid {
-      0%, 38%, 100% { opacity: 1; transform: rotate(0deg) scale(1); }
-      50%, 88% { opacity: 0; transform: rotate(8deg) scale(0.88); }
-    }
-
-    @keyframes triangle-dashed {
-      0%, 38%, 100% { opacity: 0; transform: rotate(-8deg) scale(0.88); }
-      50%, 88% { opacity: 1; transform: rotate(0deg) scale(1); }
     }
   </style>
 </head>
@@ -275,30 +211,15 @@
       </div>
     </main>
 
-    <!-- Bottom Footer: Dots & Hexbuffer Brand -->
-    <footer class="footer-bar" data-tauri-drag-region>
-      <div class="dots-container" id="dotsContainer" data-tauri-drag-region>
-        <div class="dot active" data-index="0"></div>
-        <div class="dot" data-index="1"></div>
-        <div class="dot" data-index="2"></div>
-        <div class="dot" data-index="3"></div>
-        <div class="dot" data-index="4"></div>
-        <div class="dot" data-index="5"></div>
-      </div>
-      <div class="brand-group" data-tauri-drag-region>
-        <div class="triangle-logo-sm" aria-hidden="true" data-tauri-drag-region>
-          <svg class="triangle-icon solid" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor">
-            <path
-              d="M236.8,188.09,149.35,36.22a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.34,24.34,0,0,0,40.55,224h174.9a24.34,24.34,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8Z" />
-          </svg>
-          <svg class="triangle-icon dashed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor">
-            <path
-              d="M160,216a8,8,0,0,1-8,8H104a8,8,0,0,1,0-16h48A8,8,0,0,1,160,216Zm76.8-27.91L232.14,180a8,8,0,0,0-13.86,8l4.65,8.09a7.59,7.59,0,0,1,0,7.72,8.5,8.5,0,0,1-7.48,4.2H192a8,8,0,0,0,0,16h23.45a24.34,24.34,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM64,208H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L37.72,188a8,8,0,1,0-13.86-8l-4.66,8.08a23.51,23.51,0,0,0,0,23.72A24.34,24.34,0,0,0,40.55,224H64a8,8,0,0,0,0-16Zm138.18-56a8,8,0,0,0,6.93-12l-23-40a8,8,0,0,0-13.86,8l23,40A8,8,0,0,0,202.18,152ZM149.35,36.22a24.76,24.76,0,0,0-42.7,0L93,60a8,8,0,1,0,13.86,8l13.7-23.78a8.75,8.75,0,0,1,15,0L149.18,68a8,8,0,0,0,6.94,4,7.91,7.91,0,0,0,4-1.07A8,8,0,0,0,163,60ZM80.85,97.07A8,8,0,0,0,69.93,100l-23,40a8,8,0,0,0,13.87,8l23-40A8,8,0,0,0,80.85,97.07Z" />
-          </svg>
-        </div>
-        <span class="brand-name" data-tauri-drag-region>Hexbuffer</span>
-      </div>
-    </footer>
+    <!-- Minimal Dot Indicators -->
+    <div class="dots-container" id="dotsContainer" data-tauri-drag-region>
+      <div class="dot active" data-index="0"></div>
+      <div class="dot" data-index="1"></div>
+      <div class="dot" data-index="2"></div>
+      <div class="dot" data-index="3"></div>
+      <div class="dot" data-index="4"></div>
+      <div class="dot" data-index="5"></div>
+    </div>
   </div>
 
   <script>
