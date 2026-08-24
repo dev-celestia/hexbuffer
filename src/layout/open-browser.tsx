@@ -1,6 +1,7 @@
 import { Button } from '@celestia-project/ui';
-import { GlobeIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { SpinnerGapIcon } from '@phosphor-icons/react';
 
+import chromeIcon from '@/assets/icons/chrome.png';
 import { cn } from '@/lib/utils';
 import { useOpenBrowserButton } from './hooks/use-open-browser-button';
 
@@ -30,13 +31,15 @@ export function OpenBrowserButton() {
           )}
         />
       ) : (
-        <GlobeIcon
+        <img
+          src={chromeIcon}
+          alt="Chrome"
           className={cn(
             // Layout & Positioning
             "shrink-0",
 
             // Sizing & Spacing
-            "h-4 w-4"
+            "size-3.5"
           )}
         />
       )}

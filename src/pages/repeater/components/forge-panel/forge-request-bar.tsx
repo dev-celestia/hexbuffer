@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { ColorizedUrlInput } from '@/pages/repeater/components/select-env-input';
 import { METHOD_COLORS } from '@/lib/status-colors';
 import { useCollectionsStore } from '@/stores/collections';
-import { PlusIcon, PaperPlaneTiltIcon, FloppyDiskIcon } from '@phosphor-icons/react';
+import { PlusIcon, PaperPlaneTiltIcon, FloppyDiskIcon, GearSixIcon } from '@phosphor-icons/react';
 import { sendCraftRequest, saveActiveEndpoint } from '@/triggers/repeater/craft';
 import { ContextsDialog } from '../ContextsDialog';
 
@@ -52,13 +52,13 @@ export function ForgeRequestBar({
             useCollectionsStore.getState().setActiveContextId(val === 'no-context' ? null : val);
           }}
         >
-          <SelectTrigger className="h-7 w-32 font-medium text-xs">
-            <SelectValue placeholder="No Env">
-              {contexts.find((c) => c.id === activeContextId)?.name || 'No Env'}
+          <SelectTrigger className="h-7 w-36 font-medium text-xs">
+            <SelectValue placeholder="No Environment">
+              {contexts.find((c) => c.id === activeContextId)?.name || 'No Environment'}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="no-context">No Env</SelectItem>
+            <SelectItem value="no-context">No Environment</SelectItem>
             {contexts.map((ctx) => (
               <SelectItem key={ctx.id} value={ctx.id}>
                 {ctx.name}
@@ -67,11 +67,20 @@ export function ForgeRequestBar({
             <SelectSeparator />
             <SelectItem value="__manage_envs__">
               <PlusIcon className="size-3.5" />
-              Add Env
+              Add Environment
             </SelectItem>
           </SelectContent>
         </Select>
 
+        <Button
+          size="icon"
+          variant="outline"
+          className="h-7 w-7"
+          title="Environment Settings"
+          onClick={() => setContextsDialogOpen(true)}
+        >
+          <GearSixIcon className="size-3.5" />
+        </Button>
 
           {activeEndpoint && (
             <Button

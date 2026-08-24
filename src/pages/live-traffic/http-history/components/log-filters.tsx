@@ -57,7 +57,7 @@ export function LogFilters(props: LogFiltersProps) {
     <div
       className={cn(
         // Sizing & Spacing
-        "p-1 px-2"
+        "p-2 px-2"
       )}
     >
       <div

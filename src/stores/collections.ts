@@ -269,7 +269,10 @@ export const useCollectionsStore = create<CollectionsState>()(
           invoke<ContextRecord[]>('get_contexts'),
           invoke<ChronicleLogRecord[]>('get_chronicle_logs', { limit: 500 }),
         ]);
-        set({ stashes, endpoints, contexts, chronicleLogs, isHydrated: true });
+        const currentActive = get().activeContextId;
+        const validActive = currentActive && contexts.some((c) => c.id === currentActive);
+        const activeContextId = validActive ? currentActive : (contexts.length > 0 ? contexts[0].id : null);
+        set({ stashes, endpoints, contexts, chronicleLogs, activeContextId, isHydrated: true });
       } catch (e) {
         console.error('Failed to load collections from DB:', e);
         set({ isHydrated: true });
@@ -584,7 +587,10 @@ export const useCollectionsStore = create<CollectionsState>()(
       } catch (e) {
         console.error('Failed to save context:', e);
       }
-      set((s) => ({ contexts: [...s.contexts, record] }));
+      set((s) => ({
+        contexts: [...s.contexts, record],
+        activeContextId: s.activeContextId || record.id,
+      }));
     },
 
     updateContext: async (id, name, variables) => {
@@ -607,9 +613,16 @@ export const useCollectionsStore = create<CollectionsState>()(
     },
 
     deleteContext: async (id) => {
-      set((s) => ({
-        contexts: s.contexts.filter((c) => c.id !== id),
-      }));
+      set((s) => {
+        const nextContexts = s.contexts.filter((c) => c.id !== id);
+        const nextActive = s.activeContextId === id
+          ? (nextContexts.length > 0 ? nextContexts[0].id : null)
+          : s.activeContextId;
+        return {
+          contexts: nextContexts,
+          activeContextId: nextActive,
+        };
+      });
       try {
         await invoke('delete_context', { id });
       } catch (e) {

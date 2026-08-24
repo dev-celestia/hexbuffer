@@ -75,7 +75,7 @@ export function WebSocketMessageCard({ message, formatDateTime }: WebSocketMessa
         "flex flex-col",
 
         // Backgrounds & Borders
-        "rounded-md border bg-card/60 backdrop-blur-xs transition-shadow hover:shadow-xs",
+        "rounded-md border backdrop-blur-xs transition-shadow hover:shadow-xs",
         isDirectionOutbound
           ? "border-l-[3px] border-l-blue-500/80"
           : "border-l-[3px] border-l-emerald-500/80"

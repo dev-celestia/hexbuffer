@@ -84,7 +84,7 @@ export function ForgeResponseView({
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="h-full flex flex-col items-center justify-center space-y-2">
+        <div className="h-full flex-1 flex flex-col items-center justify-center space-y-2">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           <span className="text-xs font-medium text-muted-foreground">
             Executing endpoint request...
@@ -95,7 +95,7 @@ export function ForgeResponseView({
 
     if (error || response) {
       return (
-        <div className="h-full flex flex-col min-h-0">
+        <div className="h-full flex-1 flex flex-col min-h-0">
           {/* Status / Error bar */}
           {error ? (
             <div className="flex items-center space-x-2 border-b pb-2 shrink-0 text-xs bg-destructive/5 p-2 rounded border border-destructive/20 mb-2">
@@ -322,7 +322,7 @@ export function ForgeResponseView({
 
     // No response yet
     return (
-      <div className="h-full flex flex-col items-center justify-center text-center p-4">
+      <div className="h-full flex-1 flex flex-col items-center justify-center text-center p-4">
         <span className="text-sm font-medium text-muted-foreground">
           No response received yet.
         </span>
@@ -334,7 +334,7 @@ export function ForgeResponseView({
   };
 
   return (
-    <div className="border rounded-lg p-2 bg-background/50 flex flex-col min-h-0">
+    <div className="h-full flex-1 border rounded-lg p-2 bg-background/50 flex flex-col min-h-0">
       {renderContent()}
     </div>
   );

@@ -99,7 +99,7 @@ export function TargetSearchList({
           "rounded-md",
 
           // Backgrounds & Borders
-          "border border-border bg-card/50"
+          "border border-border"
         )}
       >
         {filteredTargets.length === 0 ? (

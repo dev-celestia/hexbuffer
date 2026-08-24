@@ -128,6 +128,7 @@ export function ForgeRequestTabs({
   onTestScriptChange,
 }: ForgeRequestTabsProps) {
   const { theme } = useTheme();
+  const [activeScriptTab, setActiveScriptTab] = useState<'pre' | 'test'>('pre');
   const [isImageMode, setIsImageMode] = useState(() => {
     // ponytail: default to image mode if the body is already an image data URL
     return req.body.startsWith("data:image/");
@@ -185,7 +186,7 @@ export function ForgeRequestTabs({
 
   const fileInfo = getFileInfo();
   return (
-    <div className="border rounded-lg p-2 bg-background/50 flex flex-col min-h-0">
+    <div className="h-full flex-1 border rounded-lg p-2 bg-background/50 flex flex-col min-h-0">
       <div className="flex-1 flex flex-col min-h-0">
         <ButtonGroup
           orientation="horizontal"
@@ -279,7 +280,7 @@ export function ForgeRequestTabs({
 
             <div className="flex-1 min-h-0 border rounded-md overflow-hidden bg-background">
               {req.bodyType === "none" ? (
-                <div className="h-full flex items-center justify-center text-xs text-muted-foreground font-medium">
+                <div className="h-full flex flex-col items-center justify-center text-xs text-muted-foreground font-medium p-8">
                   This request does not have a body payload.
                 </div>
               ) : isImageMode ? (
@@ -368,32 +369,50 @@ export function ForgeRequestTabs({
 
         {/* ── Scripts tab ── */}
         {activeReqTab === "scripts" && (
-          <div className="flex-1 min-h-0 mt-2 flex flex-col space-y-4">
-            <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
-              <div className="flex flex-col min-h-0 space-y-1">
-                <Label className="text-[10px] uppercase font-bold text-muted-foreground">
+          <div className="flex-1 min-h-0 mt-2 flex flex-col">
+            <div className="flex items-center justify-between mb-2 shrink-0">
+              <ButtonGroup orientation="horizontal" className="h-auto p-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "text-xs uppercase",
+                    activeScriptTab === "pre" && "text-primary font-semibold"
+                  )}
+                  onClick={() => setActiveScriptTab("pre")}
+                >
                   Pre-Request Script
-                </Label>
-                <div className="flex-1 min-h-0 border rounded-md overflow-hidden bg-background">
-                  <TextEditor
-                    value={req.preScript}
-                    onChange={(val) => onPreScriptChange(val || "")}
-                    theme={theme}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col min-h-0 space-y-1">
-                <Label className="text-[10px] uppercase font-bold text-muted-foreground">
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "text-xs uppercase",
+                    activeScriptTab === "test" && "text-primary font-semibold"
+                  )}
+                  onClick={() => setActiveScriptTab("test")}
+                >
                   Test / Assertion Script
-                </Label>
-                <div className="flex-1 min-h-0 border rounded-md overflow-hidden bg-background">
-                  <TextEditor
-                    value={req.testScript}
-                    onChange={(val) => onTestScriptChange(val || "")}
-                    theme={theme}
-                  />
-                </div>
-              </div>
+                </Button>
+              </ButtonGroup>
+            </div>
+
+            <div className="flex-1 min-h-0 border rounded-md overflow-hidden bg-background">
+              {activeScriptTab === "pre" ? (
+                <TextEditor
+                  value={req.preScript}
+                  onChange={(val) => onPreScriptChange(val || "")}
+                  theme={theme}
+                />
+              ) : (
+                <TextEditor
+                  value={req.testScript}
+                  onChange={(val) => onTestScriptChange(val || "")}
+                  theme={theme}
+                />
+              )}
             </div>
           </div>
         )}

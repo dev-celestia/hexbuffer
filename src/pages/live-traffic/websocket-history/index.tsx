@@ -112,9 +112,8 @@ export function WebSocketHistoryPage() {
 
             // Sizing & Spacing
             "p-1 px-2",
-
-            // Backgrounds & Borders
-            "bg-muted/40 border-b"
+            
+            "border-b"
           )}
         >
           <div

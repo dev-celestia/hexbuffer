@@ -261,7 +261,7 @@ export function EnvSuggestionDropdown({
           'bg-muted/30',
         )}
       >
-        <span>Env Variables</span>
+        <span>Environment Variables</span>
         {activeContextName && (
           <span
             className={cn(
@@ -297,7 +297,7 @@ export function EnvSuggestionDropdown({
             )}
           >
             {!activeContextName ? (
-              <span>No active env selected</span>
+              <span>No active environment selected</span>
             ) : (
               <span>No matching variables</span>
             )}

@@ -49,7 +49,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     icon: ArrowsDownUpIcon,
     href: '/http-history',
     description: 'Capture and inspect real-time HTTP/HTTPS network traffic.',
-    colors: { bg: 'bg-emerald-500 dark:bg-emerald-500', hoverBg: 'group-hover:bg-emerald-500 dark:group-hover:bg-emerald-500', border: 'border-emerald-500 dark:border-emerald-500' },
+    colors: { bg: 'bg-white dark:bg-white', hoverBg: 'group-hover:bg-white dark:group-hover:bg-white', border: 'border-white dark:border-white' },
     flag: 'release'
   },
   {
@@ -81,7 +81,7 @@ export const ALL_NAV_ITEMS: NavItem[] = [
     icon: PauseCircleIcon,
     href: '/intercept',
     description: 'Pause incoming or outgoing requests to modify headers, parameters, and bodies.',
-    colors: { bg: 'bg-rose-500 dark:bg-rose-500', hoverBg: 'group-hover:bg-rose-500 dark:group-hover:bg-rose-500', border: 'border-rose-500 dark:border-rose-500' },
+    colors: { bg: 'bg-green-500 dark:bg-green-500', hoverBg: 'group-hover:bg-green-500 dark:group-hover:bg-green-500', border: 'border-green-500 dark:border-green-500' },
     flag: 'release'
   },
   {

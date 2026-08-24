@@ -132,8 +132,7 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
                 // Typography
                 "text-xs font-semibold text-muted-foreground",
 
-                // Backgrounds & Borders
-                "bg-card"
+    
               )}
             >
               <div className="flex items-center w-full min-w-0">
