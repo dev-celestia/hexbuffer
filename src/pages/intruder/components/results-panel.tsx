@@ -193,12 +193,12 @@ export function IntruderResultsPanel() {
                   
                   {/* Response Length */}
                   <td className="px-3 py-1.5 text-right text-muted-foreground">
-                    {result.response_length !== undefined ? result.response_length.toLocaleString() : '-'}
+                    {result.response_length != null ? result.response_length.toLocaleString() : '-'}
                   </td>
                   
                   {/* Response Time */}
                   <td className="px-3 py-1.5 text-right text-muted-foreground">
-                    {result.response_time_ms ? `${result.response_time_ms}ms` : '-'}
+                    {result.response_time_ms != null ? `${result.response_time_ms}ms` : '-'}
                   </td>
                 </tr>
               );

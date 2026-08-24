@@ -124,6 +124,7 @@ export function IntruderPreviewPane() {
                   language="markdown"
                   className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
                   theme={theme}
+                  disableValidation
                 />
               </div>
             </div>

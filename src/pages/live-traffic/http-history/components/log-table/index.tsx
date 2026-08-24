@@ -130,7 +130,7 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
                 "w-full",
 
                 // Typography
-                "text-xs font-semibold text-muted-foreground",
+                "text-xs font-semibold text-muted-foreground bg-background",
 
     
               )}

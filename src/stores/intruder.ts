@@ -126,10 +126,32 @@ function createAttackTab(index: number, config = createDefaultAttackConfig()): I
 const initialTab = createAttackTab(1);
 
 function cleanupTabListeners(tabId: string) {
-  unlistenProgressByTab.get(tabId)?.();
-  unlistenResultByTab.get(tabId)?.();
+  const unlistenProgress = unlistenProgressByTab.get(tabId);
+  const unlistenResult = unlistenResultByTab.get(tabId);
   unlistenProgressByTab.delete(tabId);
   unlistenResultByTab.delete(tabId);
+
+  if (typeof unlistenProgress === 'function') {
+    try {
+      const res = unlistenProgress();
+      if (res && typeof (res as any).catch === 'function') {
+        (res as any).catch(() => {});
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  if (typeof unlistenResult === 'function') {
+    try {
+      const res = unlistenResult();
+      if (res && typeof (res as any).catch === 'function') {
+        (res as any).catch(() => {});
+      }
+    } catch {
+      // ignore
+    }
+  }
 }
 
 function getActiveTab(state: IntruderState) {

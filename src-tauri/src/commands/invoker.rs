@@ -410,16 +410,35 @@ pub async fn send_invoker_request_once(
 ) -> Result<InvokerAttackResult, String> {
     let method = reqwest::Method::from_bytes(config.base_request.method.as_bytes())
         .map_err(|error| format!("Invalid HTTP method: {}", error))?;
-    let url = replace_marked_values(&config.base_request.url, payload_values, defaults);
-    let body = replace_marked_values(&config.base_request.body, payload_values, defaults);
+    let mut position_index = 0;
+    let url = replace_marked_values_tracked(
+        &config.base_request.url,
+        payload_values,
+        defaults,
+        &mut position_index,
+    );
+    let mut sorted_headers: Vec<_> = config
+        .base_request
+        .headers
+        .iter()
+        .filter(|(k, _)| !k.eq_ignore_ascii_case("host"))
+        .collect();
+    sorted_headers.sort_by_key(|(k, _)| k.to_lowercase());
     let mut headers = HashMap::new();
 
-    for (name, value) in &config.base_request.headers {
+    for (name, value) in sorted_headers {
         headers.insert(
-            replace_marked_values(name, payload_values, defaults),
-            replace_marked_values(value, payload_values, defaults),
+            replace_marked_values_tracked(name, payload_values, defaults, &mut position_index),
+            replace_marked_values_tracked(value, payload_values, defaults, &mut position_index),
         );
     }
+
+    let body = replace_marked_values_tracked(
+        &config.base_request.body,
+        payload_values,
+        defaults,
+        &mut position_index,
+    );
 
     if config.session_handling.enabled {
         if let (Some(header_name), Ok(current_session)) = (
@@ -756,7 +775,13 @@ pub fn count_markers(request: &InvokerHttpRequest) -> usize {
 pub fn marker_defaults(request: &InvokerHttpRequest) -> Vec<String> {
     let mut defaults = Vec::new();
     collect_marked_values(&request.url, &mut defaults);
-    for (name, value) in &request.headers {
+    let mut sorted_headers: Vec<_> = request
+        .headers
+        .iter()
+        .filter(|(k, _)| !k.eq_ignore_ascii_case("host"))
+        .collect();
+    sorted_headers.sort_by_key(|(k, _)| k.to_lowercase());
+    for (name, value) in sorted_headers {
         collect_marked_values(name, &mut defaults);
         collect_marked_values(value, &mut defaults);
     }
@@ -778,14 +803,14 @@ pub fn collect_marked_values(text: &str, values: &mut Vec<String>) {
     }
 }
 
-pub fn replace_marked_values(
+pub fn replace_marked_values_tracked(
     text: &str,
     payload_values: &HashMap<String, String>,
     defaults: &[String],
+    position_index: &mut usize,
 ) -> String {
     let mut output = String::with_capacity(text.len());
     let mut search_start = 0;
-    let mut position_index = 0;
 
     while let Some(start) = text[search_start..].find('§') {
         let absolute_start = search_start + start;
@@ -793,20 +818,29 @@ pub fn replace_marked_values(
             break;
         };
         let absolute_end = absolute_start + '§'.len_utf8() + end;
-        let position_key = format!("position_{}", position_index + 1);
+        let position_key = format!("position_{}", *position_index + 1);
         let replacement = payload_values
             .get(&position_key)
             .cloned()
-            .unwrap_or_else(|| defaults.get(position_index).cloned().unwrap_or_default());
+            .unwrap_or_else(|| defaults.get(*position_index).cloned().unwrap_or_default());
 
         output.push_str(&text[search_start..absolute_start]);
         output.push_str(&replacement);
         search_start = absolute_end + '§'.len_utf8();
-        position_index += 1;
+        *position_index += 1;
     }
 
     output.push_str(&text[search_start..]);
     output
+}
+
+pub fn replace_marked_values(
+    text: &str,
+    payload_values: &HashMap<String, String>,
+    defaults: &[String],
+) -> String {
+    let mut position_index = 0;
+    replace_marked_values_tracked(text, payload_values, defaults, &mut position_index)
 }
 
 pub fn response_matches(body: &str, config: &InvokerGrepMatchConfig) -> bool {
@@ -1118,5 +1152,45 @@ mod tests {
             Some("legacy-a")
         );
         assert!(!rows[0].contains_key("position_2"));
+    }
+
+    #[test]
+    fn sequential_marker_tracking_across_url_headers_and_body() {
+        let mut headers = HashMap::new();
+        headers.insert("Authorization".to_string(), "Bearer §token123§".to_string());
+
+        let req = InvokerHttpRequest {
+            method: "POST".to_string(),
+            url: "https://example.com/api?id=§id123§".to_string(),
+            headers,
+            body: "{\"user\":\"§alice§\"}".to_string(),
+            follow_redirects: true,
+            max_hops: 10,
+        };
+
+        let defaults = marker_defaults(&req);
+        assert_eq!(defaults, vec!["id123", "token123", "alice"]);
+
+        let mut payload_values = HashMap::new();
+        payload_values.insert("position_1".to_string(), "999".to_string());
+        payload_values.insert("position_2".to_string(), "secret_jwt".to_string());
+        payload_values.insert("position_3".to_string(), "bob".to_string());
+
+        let mut position_index = 0;
+        let url = replace_marked_values_tracked(&req.url, &payload_values, &defaults, &mut position_index);
+        assert_eq!(url, "https://example.com/api?id=999");
+        assert_eq!(position_index, 1);
+
+        let mut sorted_headers: Vec<_> = req.headers.iter().collect();
+        sorted_headers.sort_by_key(|(k, _)| k.to_lowercase());
+        for (_name, value) in sorted_headers {
+            let replaced_h = replace_marked_values_tracked(value, &payload_values, &defaults, &mut position_index);
+            assert_eq!(replaced_h, "Bearer secret_jwt");
+        }
+        assert_eq!(position_index, 2);
+
+        let body = replace_marked_values_tracked(&req.body, &payload_values, &defaults, &mut position_index);
+        assert_eq!(body, "{\"user\":\"bob\"}");
+        assert_eq!(position_index, 3);
     }
 }

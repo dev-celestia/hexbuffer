@@ -236,13 +236,67 @@ export function findRequestPayloadPositions(request: Partial<HttpRequest>): Payl
   };
 
   collect(request.url);
-  Object.entries(request.headers ?? {}).forEach(([name, value]) => {
-    collect(name);
-    collect(value);
-  });
+  Object.entries(request.headers ?? {})
+    .filter(([name]) => name.toLowerCase() !== 'host')
+    .sort(([a], [b]) => a.toLowerCase().localeCompare(b.toLowerCase()))
+    .forEach(([name, value]) => {
+      collect(name);
+      collect(value);
+    });
   collect(request.body);
 
   return positions;
+}
+
+export function replaceTextMarkedValuesTracked(
+  text: string,
+  payloadValues: Record<string, string>,
+  positionTracker: { index: number }
+): string {
+  let output = '';
+  let searchStart = 0;
+
+  while (true) {
+    const start = text.indexOf('§', searchStart);
+    if (start === -1) break;
+
+    const end = text.indexOf('§', start + 1);
+    if (end === -1) break;
+
+    const positionKey = `position_${positionTracker.index + 1}`;
+    const defaultValue = text.slice(start + 1, end);
+    output += text.slice(searchStart, start);
+    output += payloadValues[positionKey] ?? defaultValue;
+    searchStart = end + 1;
+    positionTracker.index += 1;
+  }
+
+  return output + text.slice(searchStart);
+}
+
+export function replaceRequestMarkedValues(
+  request: HttpRequest,
+  payloadValues: Record<string, string>
+): HttpRequest {
+  const tracker = { index: 0 };
+  const url = replaceTextMarkedValuesTracked(request.url, payloadValues, tracker);
+  const sortedHeaders = Object.entries(request.headers ?? {})
+    .filter(([name]) => name.toLowerCase() !== 'host')
+    .sort(([a], [b]) => a.toLowerCase().localeCompare(b.toLowerCase()));
+  const headers: Record<string, string> = {};
+  for (const [name, value] of sortedHeaders) {
+    const replacedName = replaceTextMarkedValuesTracked(name, payloadValues, tracker);
+    const replacedValue = replaceTextMarkedValuesTracked(value, payloadValues, tracker);
+    headers[replacedName] = replacedValue;
+  }
+  const body = replaceTextMarkedValuesTracked(request.body ?? '', payloadValues, tracker);
+
+  return {
+    ...request,
+    url,
+    headers,
+    body,
+  };
 }
 
 export function applyPayloadToPosition(

@@ -1,6 +1,7 @@
-import { Button, Checkbox, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@celestia-project/ui';
+import { Button, Checkbox, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@celestia-project/ui';
 import * as React from 'react';
 import { WarningCircleIcon, EyeIcon, EyeSlashIcon, FloppyDiskIcon } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 
 import {
   AI_API_KEY_PLACEHOLDERS,
@@ -11,10 +12,10 @@ import type { SettingsPageState } from '../hooks/use-settings-page';
 import { SettingsGroup, SettingsRow } from './settings-group';
 
 interface AiSettingsTabProps {
-  settings: SettingsPageState;
+  readonly settings: SettingsPageState;
 }
 
-export function AiSettingsTab({ settings }: AiSettingsTabProps) {
+export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
   const {
     aiSettings,
     aiSettingsLoading,
@@ -51,7 +52,13 @@ export function AiSettingsTab({ settings }: AiSettingsTabProps) {
           onValueChange={updateAiProvider}
           disabled={aiSettingsLoading}
         >
-          <SelectTrigger id="ai-provider" className="w-40">
+          <SelectTrigger
+            id="ai-provider"
+            className={cn(
+              // Sizing & Spacing
+              "w-40"
+            )}
+          >
             <SelectValue placeholder="Select provider" />
           </SelectTrigger>
           <SelectContent>
@@ -66,10 +73,20 @@ export function AiSettingsTab({ settings }: AiSettingsTabProps) {
       <SettingsRow label="Model">
         <Select
           value={aiSettings.model}
-          onValueChange={(model) => updateAiSettings({ model })}
+          onValueChange={(model) => {
+            if (model) {
+              updateAiSettings({ model });
+            }
+          }}
           disabled={aiSettingsLoading}
         >
-          <SelectTrigger id="ai-model" className="w-40">
+          <SelectTrigger
+            id="ai-model"
+            className={cn(
+              // Sizing & Spacing
+              "w-40"
+            )}
+          >
             <SelectValue placeholder="Select model" />
           </SelectTrigger>
           <SelectContent>
@@ -89,7 +106,15 @@ export function AiSettingsTab({ settings }: AiSettingsTabProps) {
             : 'No key saved yet. Provider and model are saved locally; API keys are kept in the OS credential store.'
         }
       >
-        <div className="relative w-56">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "relative",
+
+            // Sizing & Spacing
+            "w-56"
+          )}
+        >
           <Input
             type={showApiKey ? 'text' : 'password'}
             value={apiKeyInput}
@@ -100,32 +125,106 @@ export function AiSettingsTab({ settings }: AiSettingsTabProps) {
                 : (AI_API_KEY_PLACEHOLDERS[aiSettings.provider] ?? 'API key')
             }
             disabled={aiSettingsLoading}
-            className="pr-9"
+            className={cn(
+              // Sizing & Spacing
+              "pr-9"
+            )}
           />
           <button
             type="button"
             onClick={() => setShowApiKey((prev) => !prev)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:text-foreground"
+            className={cn(
+              // Layout & Positioning
+              "absolute right-2 top-1/2 -translate-y-1/2",
+
+              // Sizing & Spacing
+              "rounded p-0.5",
+
+              // Typography
+              "text-muted-foreground",
+
+              // Interactive & States
+              "hover:text-foreground"
+            )}
             tabIndex={-1}
           >
-            {showApiKey ? <EyeSlashIcon className="size-4" /> : <EyeIcon className="size-4" />}
+            {showApiKey ? (
+              <EyeSlashIcon
+                className={cn(
+                  // Sizing & Spacing
+                  "size-4"
+                )}
+              />
+            ) : (
+              <EyeIcon
+                className={cn(
+                  // Sizing & Spacing
+                  "size-4"
+                )}
+              />
+            )}
           </button>
         </div>
       </SettingsRow>
 
-      <div className="px-4 py-3">
-        <label className="flex items-start gap-3 rounded-md border border-amber-500/40 bg-amber-500/10 dark:border-amber-500/30 dark:bg-amber-500/10 p-3">
+      <div
+        className={cn(
+          // Sizing & Spacing
+          "px-4 py-3"
+        )}
+      >
+        <label
+          className={cn(
+            // Layout & Positioning
+            "flex items-start gap-3",
+
+            // Sizing & Spacing
+            "p-3 rounded-md",
+
+            // Backgrounds & Borders
+            "border border-amber-500/40 bg-amber-500/10 dark:border-amber-500/30 dark:bg-amber-500/10"
+          )}
+        >
           <Checkbox
             checked={aiSettings.allowThirdPartyAiSharing}
             onCheckedChange={(checked) => updateAiSettings({ allowThirdPartyAiSharing: checked === true })}
             disabled={aiSettingsLoading}
           />
-          <span className="min-w-0 space-y-1">
-            <span className="flex items-center gap-2 text-sm font-medium">
-              <WarningCircleIcon className="size-4 text-amber-600 dark:text-amber-400" />
+          <span
+            className={cn(
+              // Layout & Positioning
+              "min-w-0 space-y-1"
+            )}
+          >
+            <span
+              className={cn(
+                // Layout & Positioning
+                "flex items-center gap-2",
+
+                // Typography
+                "text-sm font-medium"
+              )}
+            >
+              <WarningCircleIcon
+                className={cn(
+                  // Sizing & Spacing
+                  "size-4",
+
+                  // Typography
+                  "text-amber-600 dark:text-amber-400"
+                )}
+              />
               Allow third-party AI data sharing
             </span>
-            <span className="block text-xs leading-relaxed text-muted-foreground">
+            <span
+              className={cn(
+                // Layout & Positioning
+                "block",
+
+                // Typography
+                "text-xs leading-relaxed text-muted-foreground"
+              )}
+            >
               Optional AI features may send selected prompts, chat messages, crawl context, page summaries,
               logs, insights, URLs, and analysis context to {selectedProviderLabel}. Do not enable this for
               sensitive data unless you are authorized to share it.
@@ -135,13 +234,23 @@ export function AiSettingsTab({ settings }: AiSettingsTabProps) {
       </div>
 
       <SettingsRow label="Actions">
-        <div className="flex items-center gap-2">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center gap-2"
+          )}
+        >
           <Button
             size="sm"
             onClick={handleSaveAiSettings}
             disabled={aiSettingsLoading || aiSettingsSaving || !canSaveAiSettings}
           >
-            <FloppyDiskIcon className="mr-1.5 size-3.5" />
+            <FloppyDiskIcon
+              className={cn(
+                // Sizing & Spacing
+                "mr-1.5 size-3.5"
+              )}
+            />
             {aiSettingsSaving ? 'Saving…' : 'Save'}
           </Button>
           <Button
@@ -156,8 +265,18 @@ export function AiSettingsTab({ settings }: AiSettingsTabProps) {
       </SettingsRow>
 
       {!canSaveAiSettings && (
-        <div className="px-4 py-2">
-          <p className="text-xs text-amber-700 dark:text-amber-300">
+        <div
+          className={cn(
+            // Sizing & Spacing
+            "px-4 py-2"
+          )}
+        >
+          <p
+            className={cn(
+              // Typography
+              "text-xs text-amber-700 dark:text-amber-300"
+            )}
+          >
             Enable third-party AI data sharing before saving or using an API key.
           </p>
         </div>

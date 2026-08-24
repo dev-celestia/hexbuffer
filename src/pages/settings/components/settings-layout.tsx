@@ -81,7 +81,7 @@ function CategoryContent({ settings, active }: CategoryContentProps) {
   );
 }
 
-const VALID_TABS: SettingsCategory[] = ['general', 'ca-cert', 'appearance'];
+const VALID_TABS: SettingsCategory[] = ['general', 'ca-cert', 'ai', 'appearance'];
 
 export function SettingsLayout({ settings }: SettingsLayoutProps) {
   const [searchParams] = useSearchParams();

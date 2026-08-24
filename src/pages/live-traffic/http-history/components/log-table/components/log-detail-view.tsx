@@ -141,7 +141,7 @@ export function LogDetailView() {
                 "rounded-md border"
               )}
             >
-              <TextEditor value={rawRequest} theme={theme} />
+              <TextEditor value={rawRequest} theme={theme} disableValidation/>
             </div>
           </div>
         ) : (
@@ -272,7 +272,7 @@ export function LogDetailView() {
                 "rounded-md border"
               )}
             >
-              <TextEditor value={rawResponse} theme={theme} />
+              <TextEditor value={rawResponse} theme={theme} disableValidation />
             </div>
           </div>
         ) : (

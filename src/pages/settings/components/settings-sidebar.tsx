@@ -2,6 +2,7 @@ import type { Icon } from '@phosphor-icons/react';
 import {
   GearIcon,
   ShieldCheckIcon,
+  SparkleIcon,
   PaletteIcon,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
@@ -17,6 +18,7 @@ interface SettingsNavItem {
 const NAV_ITEMS: SettingsNavItem[] = [
   { id: 'general', label: 'General', Icon: GearIcon },
   { id: 'ca-cert', label: 'CA Certificate', Icon: ShieldCheckIcon },
+  { id: 'ai', label: 'AI', Icon: SparkleIcon },
   { id: 'appearance', label: 'Appearance', Icon: PaletteIcon },
 ];
 
@@ -27,7 +29,18 @@ interface SettingsSidebarProps {
 
 export function SettingsSidebar({ active, onSelect }: SettingsSidebarProps) {
   return (
-    <nav className="flex w-52 shrink-0 flex-col gap-0.5 border-r bg-muted/30 p-3">
+    <nav
+      className={cn(
+        // Layout & Positioning
+        "flex shrink-0 flex-col",
+
+        // Sizing & Spacing
+        "w-52 gap-0.5 p-3",
+
+        // Backgrounds & Borders
+        "border-r bg-muted/30"
+      )}
+    >
       {NAV_ITEMS.map((item) => {
         const isActive = active === item.id;
         return (
@@ -36,21 +49,41 @@ export function SettingsSidebar({ active, onSelect }: SettingsSidebarProps) {
             type="button"
             onClick={() => onSelect(item.id)}
             className={cn(
-              'group relative flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm font-medium transition-colors duration-150',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              // Layout & Positioning
+              "group relative flex w-full items-center",
+
+              // Sizing & Spacing
+              "gap-2.5 rounded-md px-3 py-2",
+
+              // Typography
+              "text-left text-sm font-medium",
+
+              // Interactive & States
+              "transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               isActive
-                ? 'bg-accent text-accent-foreground'
-                : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
+                ? "bg-accent text-accent-foreground"
+                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
             )}
           >
             <item.Icon
               className={cn(
-                'size-4 shrink-0 transition-colors duration-150',
-                isActive ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground',
+                // Sizing & Spacing
+                "size-4 shrink-0",
+
+                // Interactive & States
+                "transition-colors duration-150",
+                isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
               )}
-              weight={isActive ? 'fill' : 'regular'}
+              weight={isActive ? "fill" : "regular"}
             />
-            <span className="truncate">{item.label}</span>
+            <span
+              className={cn(
+                // Layout & Positioning
+                "truncate"
+              )}
+            >
+              {item.label}
+            </span>
           </button>
         );
       })}

@@ -5,48 +5,10 @@ import * as React from 'react';
 import { X, ArrowsIn, ArrowsOut } from '@phosphor-icons/react';
 import { useTheme } from '@/components/theme-provider';
 import { buildRawHttpRequest, buildRawHttpResponse } from '@/lib/http-message';
-import type { AttackConfig, AttackResult, HttpRequest } from '../types';
-
-function replaceMarkedValues(text: string, payloadValues: Record<string, string>) {
-  let output = '';
-  let searchStart = 0;
-  let positionIndex = 0;
-
-  while (true) {
-    const start = text.indexOf('§', searchStart);
-    if (start === -1) {
-      break;
-    }
-
-    const end = text.indexOf('§', start + 1);
-    if (end === -1) {
-      break;
-    }
-
-    const positionName = `position_${positionIndex + 1}`;
-    const defaultValue = text.slice(start + 1, end);
-    output += text.slice(searchStart, start);
-    output += payloadValues[positionName] ?? defaultValue;
-    searchStart = end + 1;
-    positionIndex += 1;
-  }
-
-  return output + text.slice(searchStart);
-}
+import { replaceRequestMarkedValues, type AttackConfig, type AttackResult } from '../types';
 
 function buildModifiedRequest(config: AttackConfig, result: AttackResult) {
-  const request: HttpRequest = {
-    ...config.base_request,
-    url: replaceMarkedValues(config.base_request.url, result.payload_values),
-    body: replaceMarkedValues(config.base_request.body, result.payload_values),
-    headers: Object.fromEntries(
-      Object.entries(config.base_request.headers).map(([name, value]) => [
-        replaceMarkedValues(name, result.payload_values),
-        replaceMarkedValues(value, result.payload_values),
-      ])
-    ),
-  };
-
+  const request = replaceRequestMarkedValues(config.base_request, result.payload_values);
   return buildRawHttpRequest(request);
 }
 
@@ -137,6 +99,7 @@ export function IntruderResultInspector({
               language="markdown"
               className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
               theme={theme}
+              disableValidation
             />
           </div>
         </div>
@@ -156,6 +119,7 @@ export function IntruderResultInspector({
               language="markdown"
               className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
               theme={theme}
+              disableValidation
             />
           </div>
         </div>

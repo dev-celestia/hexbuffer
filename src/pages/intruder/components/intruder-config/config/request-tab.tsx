@@ -1,8 +1,23 @@
-import { Badge, Button, ButtonGroup, Checkbox, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Label, TextEditor, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
+import {
+  Badge,
+  Button,
+  ButtonGroup,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Label,
+  TextEditor,
+  type TextEditorInstance,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@celestia-project/ui';
 import * as React from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { AsteriskIcon, Info, SpinnerGapIcon, SparkleIcon, TargetIcon } from '@phosphor-icons/react';
-import type { EditorView } from '@codemirror/view';
+import { AsteriskIcon, Info, SpinnerGapIcon, TargetIcon } from '@phosphor-icons/react';
 
 import { useTheme } from '@/components/theme-provider';
 import { useIntruderStore } from '@/stores/intruder';
@@ -149,7 +164,7 @@ export function RequestTab() {
   const [selectedSuggestionIds, setSelectedSuggestionIds] = React.useState<Set<string>>(
     () => new Set()
   );
-  const rawRequestEditorRef = React.useRef<EditorView | null>(null);
+  const rawRequestEditorRef = React.useRef<TextEditorInstance | null>(null);
   const editRef = React.useRef(false);
 
   React.useEffect(() => {
@@ -178,23 +193,70 @@ export function RequestTab() {
   };
 
   const markRawRequestTarget = () => {
-    const view = rawRequestEditorRef.current;
-    if (!view) return;
+    const editor = rawRequestEditorRef.current;
+    if (!editor) return;
 
-    const { from, to } = view.state.selection.main;
-    if (from === to) return; // no selection
+    const selection = editor.getSelection();
+    const model = editor.getModel();
+    if (!selection || !model) return;
 
-    const selectedText = view.state.sliceDoc(from, to);
-    view.dispatch({
-      changes: { from, to, insert: `§${selectedText}§` },
-    });
-    view.focus();
-    updateRawRequest(view.state.doc.toString());
+    if (selection.isEmpty()) {
+      editor.executeEdits('marker-action', [
+        {
+          range: selection,
+          text: '§§',
+          forceMoveMarkers: true,
+        },
+      ]);
+      const pos = editor.getPosition();
+      if (pos) {
+        editor.setPosition({
+          lineNumber: pos.lineNumber,
+          column: pos.column - 1,
+        });
+      }
+    } else {
+      const selectedText = model.getValueInRange(selection);
+      if (selectedText.startsWith('§') && selectedText.endsWith('§') && selectedText.length >= 2) {
+        editor.executeEdits('marker-action', [
+          {
+            range: selection,
+            text: selectedText.slice(1, -1),
+            forceMoveMarkers: true,
+          },
+        ]);
+      } else {
+        editor.executeEdits('marker-action', [
+          {
+            range: selection,
+            text: `§${selectedText}§`,
+            forceMoveMarkers: true,
+          },
+        ]);
+      }
+    }
+    editor.focus();
+    const nextDoc = model.getValue();
+    editRef.current = true;
+    updateRawRequest(nextDoc);
   };
 
   const clearAllMarkers = () => {
-    if (!rawRequestDraft.includes('§')) return;
-    const next = rawRequestDraft.replace(/§/g, '');
+    const editor = rawRequestEditorRef.current;
+    const model = editor?.getModel();
+    const currentDoc = model ? model.getValue() : rawRequestDraft;
+    if (!currentDoc.includes('§')) return;
+    const next = currentDoc.replace(/§/g, '');
+    if (editor && model) {
+      editor.executeEdits('marker-action', [
+        {
+          range: model.getFullModelRange(),
+          text: next,
+          forceMoveMarkers: true,
+        },
+      ]);
+      editor.focus();
+    }
     editRef.current = true;
     updateRawRequest(next);
   };
@@ -250,6 +312,18 @@ export function RequestTab() {
     }
 
     const nextRequest = applyMarkers(rawRequestDraft, nextSuggestions);
+    const editor = rawRequestEditorRef.current;
+    const model = editor?.getModel();
+    if (editor && model) {
+      editor.executeEdits('marker-action', [
+        {
+          range: model.getFullModelRange(),
+          text: nextRequest,
+          forceMoveMarkers: true,
+        },
+      ]);
+      editor.focus();
+    }
     editRef.current = true;
     updateRawRequest(nextRequest);
     setSuggestionsDialogOpen(false);
@@ -337,6 +411,7 @@ export function RequestTab() {
             language="markdown"
             className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
             theme={theme}
+            disableValidation
           />
         </div>
       </div>
