@@ -13,5 +13,6 @@ export {
 } from './http-blacklist';
 export type { BlacklistRule } from './http-blacklist';
 export { useHighlightStore, HIGHLIGHT_COLORS, HIGHLIGHT_COLOR_LABELS } from './http-highlight';
+export { useHttpSessionStore } from './http-session';
 export { useWebSocketHistoryQueryStore } from './websocket-query';
 export type { WebSocketFilterState } from './websocket-query';

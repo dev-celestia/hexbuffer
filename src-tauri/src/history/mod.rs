@@ -7,18 +7,21 @@ use crate::{
         CollaboratorServer,
     },
     commands::browser::{AIInsight, ActivityLog, CrawlPage, CrawlSession},
-    db::repository::{Database, DocumentRecord, PaginatedResponse, TreeNode},
+    db::repository::{
+        Database, DocumentRecord, HttpSessionRecord, HttpSessionSummary, PaginatedResponse,
+        TreeNode,
+    },
     proxy::state::{
         ProxyFilter, ProxyRecord, WebSocketConnectionRecord, WebSocketFilter,
         WebSocketMessageRecord,
     },
-
 };
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProxyLogSummary {
     pub id: String,
+    pub session_id: String,
     pub timestamp: String,
     pub method: String,
     pub url: String,
@@ -35,6 +38,7 @@ pub struct ProxyLogSummary {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WebSocketConnectionSummary {
     pub id: String,
+    pub session_id: String,
     pub timestamp: String,
     pub url: String,
     pub host: String,
@@ -50,7 +54,6 @@ pub struct WebSocketConnectionDetail {
     pub connection: WebSocketConnectionRecord,
     pub messages: Vec<WebSocketMessageRecord>,
 }
-
 
 pub struct HistoryBridge {
     db: Database,
@@ -72,9 +75,54 @@ impl HistoryBridge {
         self.db.reopen_and_init().map_err(|e| e.to_string())
     }
 
+    // ── HTTP Sessions ──────────────────────────────────────────────
 
-    pub fn insert_record(&self, record: &ProxyRecord) -> Result<(), String> {
-        self.db.insert_log(record).map_err(|e| e.to_string())
+    pub fn create_http_session(
+        &self,
+        name: &str,
+        description: Option<&str>,
+    ) -> Result<HttpSessionRecord, String> {
+        self.db
+            .create_http_session(name, description)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn list_http_sessions(&self) -> Result<Vec<HttpSessionSummary>, String> {
+        self.db.list_http_sessions().map_err(|e| e.to_string())
+    }
+
+    pub fn get_active_http_session(&self) -> Result<Option<HttpSessionRecord>, String> {
+        self.db.get_active_http_session().map_err(|e| e.to_string())
+    }
+
+    pub fn set_active_http_session(&self, session_id: &str) -> Result<(), String> {
+        self.db
+            .set_active_http_session(session_id)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn delete_http_session(&self, session_id: &str) -> Result<(), String> {
+        self.db
+            .delete_http_session(session_id)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn rename_http_session(&self, session_id: &str, name: &str) -> Result<(), String> {
+        self.db
+            .rename_http_session(session_id, name)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn clear_http_session_logs(&self, session_id: &str) -> Result<usize, String> {
+        self.db
+            .clear_http_session_logs(session_id)
+            .map_err(|e| e.to_string())
+    }
+
+    // ── Logs ───────────────────────────────────────────────────────
+
+    pub fn insert_record(&self, record: &ProxyRecord, session_id: Option<&str>) -> Result<(), String> {
+        self.db.insert_log(record, session_id).map_err(|e| e.to_string())
     }
 
     pub fn upsert_ai_browser_session(&self, session: &CrawlSession) -> Result<(), String> {
@@ -143,10 +191,6 @@ impl HistoryBridge {
             .map_err(|e| e.to_string())
     }
 
-
-
-
-
     pub fn get_documents(&self) -> Result<Vec<DocumentRecord>, String> {
         self.db.get_documents().map_err(|e| e.to_string())
     }
@@ -213,7 +257,6 @@ impl HistoryBridge {
         self.db.clear_chronicle_logs().map_err(|e| e.to_string())
     }
 
-
     pub fn clear_all(&self) -> Result<(), String> {
         self.db.clear_logs().map_err(|e| e.to_string())
     }
@@ -258,7 +301,10 @@ impl HistoryBridge {
             Some(filter) if self.has_active_filters(&filter) => self
                 .db
                 .get_filtered_summary_paginated(&filter, page, per_page, sort_order),
-            _ => self.db.get_summary_paginated(page, per_page, sort_order),
+            Some(ref filter) if filter.session_id.is_some() => self
+                .db
+                .get_filtered_summary_paginated(filter, page, per_page, sort_order),
+            _ => self.db.get_summary_paginated(None, page, per_page, sort_order),
         }?;
 
         Ok(PaginatedResponse {
@@ -267,6 +313,7 @@ impl HistoryBridge {
                 .into_iter()
                 .map(|r| ProxyLogSummary {
                     id: r.id,
+                    session_id: r.session_id,
                     timestamp: r.timestamp,
                     method: r.method,
                     url: r.url,
@@ -375,6 +422,7 @@ impl HistoryBridge {
             methods: normalize_string_vec(filter.methods),
             status_codes: normalize_u16_vec(filter.status_codes),
             scope: normalize_string_vec(filter.scope),
+            session_id: normalize_optional_string(filter.session_id),
         }
     }
 
@@ -391,6 +439,7 @@ impl HistoryBridge {
             search: normalize_optional_string(filter.search),
             scope: normalize_string_vec(filter.scope),
             states: normalize_string_vec(filter.states),
+            session_id: normalize_optional_string(filter.session_id),
         }
     }
 
@@ -576,58 +625,11 @@ fn normalize_u16_vec(values: Option<Vec<u16>>) -> Option<Vec<u16>> {
     values.and_then(|items| if items.is_empty() { None } else { Some(items) })
 }
 
-impl From<ProxyRecord> for ProxyLogSummary {
-    fn from(record: ProxyRecord) -> Self {
-        let response_content_type = record
-            .response
-            .as_ref()
-            .and_then(|response| response.headers.get("content-type").cloned());
-
-        let user_agent = record.request.headers.get("user-agent").cloned();
-        let host = record
-            .request
-            .headers
-            .get("host")
-            .or_else(|| record.request.headers.get("Host"))
-            .or_else(|| record.request.headers.get(":authority"))
-            .cloned();
-
-        let response_body_size = record
-            .response
-            .as_ref()
-            .map(|response| response.body.len())
-            .unwrap_or(0);
-
-        let response_status = record
-            .response
-            .as_ref()
-            .map(|response| response.status_code);
-        let response_status_text = record
-            .response
-            .as_ref()
-            .map(|response| response.status_text.clone());
-
-        Self {
-            id: record.id.to_string(),
-            timestamp: record.timestamp.to_rfc3339(),
-            method: record.request.method,
-            url: record.request.uri,
-            response_status,
-            response_status_text,
-            response_content_type,
-            request_body_size: record.request.body.len(),
-            response_body_size,
-            server_addr: record.server_addr,
-            user_agent,
-            host,
-        }
-    }
-}
-
 impl From<WebSocketConnectionRecord> for WebSocketConnectionSummary {
     fn from(record: WebSocketConnectionRecord) -> Self {
         Self {
             id: record.id.to_string(),
+            session_id: record.session_id,
             timestamp: record.timestamp.to_rfc3339(),
             url: record.url,
             host: record.host,
@@ -639,4 +641,3 @@ impl From<WebSocketConnectionRecord> for WebSocketConnectionSummary {
         }
     }
 }
-

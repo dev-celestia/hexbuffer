@@ -41,51 +41,7 @@ export function ForgeRequestBar({
 
   return (
     <>
-      <div className="flex space-x-2 shrink-0 w-full min-w-0 items-start">
-        <Select value={method} onValueChange={onMethodChange}>
-          <SelectTrigger className="w-28 font-semibold h-8">
-            {method ? (
-              <span className={METHOD_COLORS[method]}>{method}</span>
-            ) : (
-              <SelectValue />
-            )}
-          </SelectTrigger>
-          <SelectContent>
-            {METHODS.map((m) => (
-              <SelectItem key={m} value={m} className={cn('font-semibold', METHOD_COLORS[m])}>
-                {m}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <ColorizedUrlInput
-          placeholder="Enter request URL (e.g. https://api.example.com/v1/users)"
-          className="text-sm"
-          value={url}
-          onChange={onUrlChange}
-        />
-
-        <ButtonGroup>
-          <Button
-            size="sm"
-            onClick={() => { void sendCraftRequest(); }}
-            className={"h-6"}
-          >
-            <PaperPlaneTiltIcon className="size-3.5" /> Send
-          </Button>
-          {activeEndpoint && (
-            <Button
-              size="sm"
-              variant={"outline"}
-              onClick={() => { void saveActiveEndpoint(); }}
-              className={"h-6"}
-            >
-              <FloppyDiskIcon className="size-3.5" />
-            </Button>
-          )}
-        </ButtonGroup>
-
+      <div className="flex space-x-2 shrink-0 w-full min-w-0 justify-end">
         <Select
           value={activeContextId || 'no-context'}
           onValueChange={(val) => {
@@ -116,7 +72,57 @@ export function ForgeRequestBar({
           </SelectContent>
         </Select>
 
+
+          {activeEndpoint && (
+            <Button
+              size="sm"
+              variant={"outline"}
+              onClick={() => { void saveActiveEndpoint(); }}
+            >
+              <FloppyDiskIcon className="size-3.5" />
+
+              Save
+            </Button>
+          )}
       </div>
+
+    <div className="flex space-x-2 shrink-0 w-full min-w-0 items-start">
+        <Select value={method} onValueChange={onMethodChange}>
+          <SelectTrigger className="w-28 font-semibold h-8">
+            {method ? (
+              <span className={METHOD_COLORS[method]}>{method}</span>
+            ) : (
+              <SelectValue />
+            )}
+          </SelectTrigger>
+          <SelectContent>
+            {METHODS.map((m) => (
+              <SelectItem key={m} value={m} className={cn('font-semibold', METHOD_COLORS[m])}>
+                {m}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <ColorizedUrlInput
+          placeholder="Enter request URL (e.g. https://api.example.com/v1/users)"
+          className="text-sm"
+          value={url}
+          onChange={onUrlChange}
+        />
+
+      
+          <Button
+            size="sm"
+            onClick={() => { void sendCraftRequest(); }}
+            className={"h-6"}
+          >
+            <PaperPlaneTiltIcon className="size-3.5" /> Send
+          </Button>
+          
+      </div>
+
+    
 
       <ContextsDialog open={contextsDialogOpen} onOpenChange={setContextsDialogOpen} />
     </>

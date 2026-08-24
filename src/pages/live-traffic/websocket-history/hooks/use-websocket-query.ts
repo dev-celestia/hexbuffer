@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useWebSocketHistoryQueryStore } from '@/stores/history';
+import { useWebSocketHistoryQueryStore, useHttpSessionStore } from '@/stores/history';
 import { useShallow } from 'zustand/react/shallow';
 
 export interface WebSocketHistoryQuery {
@@ -9,10 +9,12 @@ export interface WebSocketHistoryQuery {
     search: string | null;
     scope: string[] | null;
     states: string[] | null;
+    session_id: string | null;
   };
 }
 
 export function useWebSocketQuery() {
+  const activeSessionId = useHttpSessionStore((state) => state.activeSessionId);
   const { filter, activeScope, page, perPage } = useWebSocketHistoryQueryStore(
     useShallow((state) => ({
       filter: state.filter,
@@ -30,14 +32,16 @@ export function useWebSocketQuery() {
         search: filter.search?.trim() ? filter.search.trim() : null,
         scope: activeScope && activeScope.length > 0 ? activeScope : null,
         states: null,
+        session_id: activeSessionId?.trim() ? activeSessionId.trim() : null,
       },
     }),
-    [filter.search, activeScope, page, perPage]
+    [filter.search, activeScope, activeSessionId, page, perPage]
   );
 
   return {
     filter,
     activeScope,
+    activeSessionId,
     page,
     perPage,
     query,

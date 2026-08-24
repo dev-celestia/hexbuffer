@@ -2,7 +2,65 @@ use crate::{
     DocumentRecord, HistoryBridge, PaginatedResponse, ProxyFilter, ProxyLogSummary, ProxyRecord,
     ProxyState, TreeNode, WebSocketConnectionDetail, WebSocketConnectionSummary, WebSocketFilter,
 };
+use crate::db::repository::{HttpSessionRecord, HttpSessionSummary};
 use tauri::State;
+
+// ── HTTP Sessions ──────────────────────────────────────────────────
+
+#[tauri::command]
+pub async fn get_http_sessions(
+    history: State<'_, HistoryBridge>,
+) -> Result<Vec<HttpSessionSummary>, String> {
+    history.list_http_sessions()
+}
+
+#[tauri::command]
+pub async fn create_http_session(
+    history: State<'_, HistoryBridge>,
+    name: String,
+    description: Option<String>,
+) -> Result<HttpSessionRecord, String> {
+    history.create_http_session(&name, description.as_deref())
+}
+
+#[tauri::command]
+pub async fn set_active_http_session(
+    history: State<'_, HistoryBridge>,
+    session_id: String,
+) -> Result<(), String> {
+    history.set_active_http_session(&session_id)
+}
+
+#[tauri::command]
+pub async fn delete_http_session(
+    history: State<'_, HistoryBridge>,
+    proxy_state: State<'_, ProxyState>,
+    session_id: String,
+) -> Result<(), String> {
+    proxy_state.clear_records();
+    history.delete_http_session(&session_id)
+}
+
+#[tauri::command]
+pub async fn rename_http_session(
+    history: State<'_, HistoryBridge>,
+    session_id: String,
+    name: String,
+) -> Result<(), String> {
+    history.rename_http_session(&session_id, &name)
+}
+
+#[tauri::command]
+pub async fn clear_http_session_logs(
+    history: State<'_, HistoryBridge>,
+    proxy_state: State<'_, ProxyState>,
+    session_id: String,
+) -> Result<usize, String> {
+    proxy_state.clear_records();
+    history.clear_http_session_logs(&session_id)
+}
+
+// ── Proxy Logs ─────────────────────────────────────────────────────
 
 #[tauri::command]
 pub async fn clear_proxy_all(

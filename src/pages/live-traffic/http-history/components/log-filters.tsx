@@ -21,13 +21,12 @@ import {
   PauseIcon,
   PlayIcon,
   TargetIcon,
-  TrashIcon,
   XIcon,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { METHOD_FILTERS, STATUS_FILTERS } from './log-table/utils';
-import { ClearHistoryDialog } from './clear-history-dialog';
 import { FilterChips } from './filter-chips';
+import { SessionSelector } from './session-selector';
 import { useLogFilters, type UseLogFiltersProps } from '../hooks/use-log-filters';
 
 export type LogFiltersProps = UseLogFiltersProps;
@@ -45,14 +44,6 @@ export function LogFilters(props: LogFiltersProps) {
     isStreamManuallyPaused,
     handleToggleStreamPause,
     openTargetSelector,
-    clearDialogOpen,
-    setClearDialogOpen,
-    selectedRange,
-    setSelectedRange,
-    customDate,
-    setCustomDate,
-    isClearing,
-    handleClearCalls,
     blacklistRules,
     removeBlacklistRule,
     highlightedHosts,
@@ -87,6 +78,7 @@ export function LogFilters(props: LogFiltersProps) {
             "gap-2"
           )}
         >
+          <SessionSelector />
           <InputGroup
             className={cn(
               // Sizing & Spacing
@@ -278,15 +270,6 @@ export function LogFilters(props: LogFiltersProps) {
               Target
             </Button>
           </ButtonGroup>
-
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => setClearDialogOpen(true)}
-            title="Clear history"
-          >
-            <TrashIcon />
-          </Button>
         </div>
       </div>
 
@@ -295,17 +278,6 @@ export function LogFilters(props: LogFiltersProps) {
         onRemoveBlacklistRule={removeBlacklistRule}
         highlightedHosts={highlightedHosts}
         onRemoveHighlight={removeHighlight}
-      />
-
-      <ClearHistoryDialog
-        open={clearDialogOpen}
-        onOpenChange={setClearDialogOpen}
-        selectedRange={selectedRange}
-        onSelectRange={setSelectedRange}
-        customDate={customDate}
-        onCustomDateChange={setCustomDate}
-        isClearing={isClearing}
-        onConfirmClear={handleClearCalls}
       />
     </div>
   );

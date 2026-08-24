@@ -1,5 +1,11 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { ProxyRecord, ProxyLogSummary, PaginatedResponse } from '@/types';
+import type {
+  ProxyRecord,
+  ProxyLogSummary,
+  PaginatedResponse,
+  HttpSessionSummary,
+  HttpSessionRecord,
+} from '@/types';
 
 declare global {
   interface Window {
@@ -50,6 +56,31 @@ export interface ProxyFilter {
   methods: string[] | null;
   status_codes: number[] | null;
   scope: string[] | null;
+  session_id?: string | null;
+}
+
+export async function getHttpSessions(): Promise<HttpSessionSummary[]> {
+  return invokeTauri('get_http_sessions');
+}
+
+export async function createHttpSession(name: string, description?: string): Promise<HttpSessionRecord> {
+  return invokeTauri('create_http_session', { name, description });
+}
+
+export async function setActiveHttpSession(sessionId: string): Promise<void> {
+  return invokeTauri('set_active_http_session', { sessionId });
+}
+
+export async function deleteHttpSession(sessionId: string): Promise<void> {
+  return invokeTauri('delete_http_session', { sessionId });
+}
+
+export async function renameHttpSession(sessionId: string, name: string): Promise<void> {
+  return invokeTauri('rename_http_session', { sessionId, name });
+}
+
+export async function clearHttpSessionLogs(sessionId: string): Promise<number> {
+  return invokeTauri('clear_http_session_logs', { sessionId });
 }
 
 export async function getHttpLogs(
@@ -87,3 +118,4 @@ export async function saveCaCert(path: string, content: string): Promise<void> {
 export async function trustInterceptCa(): Promise<string> {
   return invokeTauri<string>('trust_intercept_ca');
 }
+

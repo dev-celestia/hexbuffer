@@ -48,10 +48,12 @@ export interface WebSocketFilter {
   search: string | null;
   scope: string[] | null;
   states?: string[] | null;
+  session_id?: string | null;
 }
 
 export interface WebSocketConnectionSummary {
   id: string;
+  session_id?: string;
   timestamp: string;
   url: string;
   host: string;
@@ -64,6 +66,7 @@ export interface WebSocketConnectionSummary {
 
 export interface WebSocketConnectionRecord {
   id: string;
+  session_id?: string;
   timestamp: string;
   url: string;
   host: string;
@@ -113,4 +116,8 @@ export async function getWebSocketDetail(connectionId: string): Promise<WebSocke
 
 export async function deleteWebSocket(connectionId: string): Promise<void> {
   await invokeTauri('delete_websocket_by_id', { connectionId });
+}
+
+export async function clearWebSocketAll(): Promise<void> {
+  await invokeTauri('clear_websocket_all');
 }

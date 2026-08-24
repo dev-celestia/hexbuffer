@@ -3,12 +3,14 @@ pub mod chat_sessions;
 pub mod collaborator;
 pub mod api_collection;
 pub mod documents;
+pub mod http_sessions;
 pub mod proxy_logs;
 pub mod regression;
 pub mod types;
 pub mod websocket;
 pub mod mock_forge;
 
+pub use http_sessions::*;
 pub use types::*;
 
 use rusqlite::{Connection, Result as SqlResult};
@@ -52,6 +54,7 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         conn.execute_batch("PRAGMA foreign_keys = ON;")?;
         conn.execute_batch("PRAGMA journal_mode = WAL;")?;
+        conn.execute_batch(crate::db::schema::CREATE_HTTP_SESSIONS_TABLE)?;
         conn.execute_batch(crate::db::schema::CREATE_HTTP_LOGS_TABLE)?;
         conn.execute_batch(crate::db::schema::CREATE_WEBSOCKET_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_DOCUMENTS_TABLE)?;
@@ -63,6 +66,12 @@ impl Database {
         conn.execute_batch(crate::db::schema::CREATE_CONTEXTS_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_CHRONICLE_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_MOCK_FORGE_TABLES)?;
+
+        Self::ensure_column(&conn, "http_logs", "session_id", "TEXT NOT NULL DEFAULT ''")?;
+        Self::ensure_column(&conn, "websocket_connections", "session_id", "TEXT NOT NULL DEFAULT ''")?;
+        let _ = Self::ensure_default_http_session(&conn)?;
+        let _ = conn.execute("CREATE INDEX IF NOT EXISTS idx_http_logs_session_ts ON http_logs(session_id, timestamp DESC)", []);
+        let _ = conn.execute("CREATE INDEX IF NOT EXISTS idx_websocket_connections_session ON websocket_connections(session_id)", []);
 
         Self::ensure_column(
             &conn,

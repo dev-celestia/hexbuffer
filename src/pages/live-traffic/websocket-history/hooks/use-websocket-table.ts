@@ -131,10 +131,21 @@ export function useWebSocketTable() {
     };
   }, [baseQueryKey, fetchPage, query.page, setPage]);
 
+  const activeSessionIdRef = useRef(query.filter.session_id);
+
+  useEffect(() => {
+    activeSessionIdRef.current = query.filter.session_id;
+  }, [query.filter.session_id]);
+
   useEffect(() => {
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const handleEvent = () => {
+    const handleEvent = (event: { payload?: { session_id?: string } }) => {
+      const record = event?.payload;
+      if (activeSessionIdRef.current && record?.session_id && record.session_id !== activeSessionIdRef.current) {
+        return;
+      }
+
       pendingEventsCountRef.current += 1;
       if (debounceTimer) clearTimeout(debounceTimer);
 
@@ -147,10 +158,10 @@ export function useWebSocketTable() {
         } else {
           await fetchPage(1);
         }
-      }, 500);
+      }, 300);
     };
 
-    const unlistenPromise = listen('websocket-connection', handleEvent);
+    const unlistenPromise = listen<{ session_id?: string }>('websocket-connection', handleEvent);
 
     return () => {
       unlistenPromise.then((unlisten) => unlisten());

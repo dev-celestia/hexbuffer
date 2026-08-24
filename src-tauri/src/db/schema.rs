@@ -1,6 +1,21 @@
+pub const CREATE_HTTP_SESSIONS_TABLE: &str = r#"
+CREATE TABLE IF NOT EXISTS http_sessions (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    description TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_http_sessions_active ON http_sessions(is_active);
+CREATE INDEX IF NOT EXISTS idx_http_sessions_updated_at ON http_sessions(updated_at);
+"#;
+
 pub const CREATE_HTTP_LOGS_TABLE: &str = r#"
 CREATE TABLE IF NOT EXISTS http_logs (
     id TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL DEFAULT '',
     timestamp TEXT NOT NULL,
     method TEXT NOT NULL,
     url TEXT NOT NULL,
@@ -12,7 +27,8 @@ CREATE TABLE IF NOT EXISTS http_logs (
     response_body BLOB,
     client_addr TEXT,
     server_addr TEXT,
-    duration_ms INTEGER
+    duration_ms INTEGER,
+    FOREIGN KEY(session_id) REFERENCES http_sessions(id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_http_logs_timestamp ON http_logs(timestamp);
@@ -25,6 +41,7 @@ CREATE INDEX IF NOT EXISTS idx_http_logs_server_addr ON http_logs(server_addr);
 pub const CREATE_WEBSOCKET_TABLES: &str = r#"
 CREATE TABLE IF NOT EXISTS websocket_connections (
     id TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL DEFAULT '',
     timestamp TEXT NOT NULL,
     url TEXT NOT NULL,
     host TEXT NOT NULL,
@@ -36,7 +53,8 @@ CREATE TABLE IF NOT EXISTS websocket_connections (
     server_addr TEXT,
     state TEXT NOT NULL,
     message_count INTEGER NOT NULL DEFAULT 0,
-    last_activity_at TEXT NOT NULL
+    last_activity_at TEXT NOT NULL,
+    FOREIGN KEY(session_id) REFERENCES http_sessions(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS websocket_messages (

@@ -1,8 +1,23 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, Badge, Button, DialogFooter, Input, Textarea } from '@celestia-project/ui';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  Badge,
+  Button,
+  DialogFooter,
+  Input,
+  Textarea,
+} from '@celestia-project/ui';
 import * as React from 'react';
-
 import { useTargetStore } from '@/stores/target';
 import { TrashIcon, CheckIcon, PlusIcon, GlobeIcon, TagIcon } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 import type { Target } from '@/types';
 
 interface TargetDialogFormProps {
@@ -149,49 +164,175 @@ export function TargetDialogForm({ target, onCancel, onSaved }: TargetDialogForm
   };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 py-1">
-      <div className="space-y-3.5">
-        <div className="space-y-1">
-          <label htmlFor="name" className="text-xs font-semibold text-foreground flex items-center justify-between">
+    <form
+      onSubmit={onSubmit}
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col",
+
+        // Sizing & Spacing
+        "gap-4 py-1"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col",
+
+          // Sizing & Spacing
+          "gap-3.5"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col",
+
+            // Sizing & Spacing
+            "gap-1"
+          )}
+        >
+          <label
+            htmlFor="name"
+            className={cn(
+              // Layout & Positioning
+              "flex items-center justify-between",
+
+              // Typography
+              "text-xs font-semibold text-foreground"
+            )}
+          >
             Target Name
-            <span className="text-[10px] text-muted-foreground font-normal">Required</span>
+            <span
+              className={cn(
+                // Typography
+                "text-[10px] font-normal text-muted-foreground"
+              )}
+            >
+              Required
+            </span>
           </label>
           <Input
             id="name"
             placeholder="e.g., Production API & Web"
             value={values.name}
             onChange={updateValue('name')}
-            className="h-8 text-xs focus-visible:ring-1"
+            className={cn(
+              // Sizing & Spacing
+              "h-8 text-xs"
+            )}
           />
           {errors.name && (
-            <p className="text-[11px] font-medium text-destructive mt-1">{errors.name}</p>
+            <p
+              className={cn(
+                // Sizing & Spacing
+                "mt-1",
+
+                // Typography
+                "text-[11px] font-medium text-destructive"
+              )}
+            >
+              {errors.name}
+            </p>
           )}
         </div>
 
-        <div className="space-y-1">
-          <label htmlFor="description" className="text-xs font-semibold text-foreground flex items-center justify-between">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col",
+
+            // Sizing & Spacing
+            "gap-1"
+          )}
+        >
+          <label
+            htmlFor="description"
+            className={cn(
+              // Layout & Positioning
+              "flex items-center justify-between",
+
+              // Typography
+              "text-xs font-semibold text-foreground"
+            )}
+          >
             Description
-            <span className="text-[10px] text-muted-foreground font-normal">Optional</span>
+            <span
+              className={cn(
+                // Typography
+                "text-[10px] font-normal text-muted-foreground"
+              )}
+            >
+              Optional
+            </span>
           </label>
           <Input
             id="description"
             placeholder="e.g., Main customer portal scope definition"
             value={values.description}
             onChange={updateValue('description')}
-            className="h-8 text-xs focus-visible:ring-1"
+            className={cn(
+              // Sizing & Spacing
+              "h-8 text-xs"
+            )}
           />
         </div>
 
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label htmlFor="scope" className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-              <GlobeIcon className="h-3.5 w-3.5 text-muted-foreground" />
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col",
+
+            // Sizing & Spacing
+            "gap-1.5"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center justify-between"
+            )}
+          >
+            <label
+              htmlFor="scope"
+              className={cn(
+                // Layout & Positioning
+                "flex items-center",
+
+                // Sizing & Spacing
+                "gap-1.5",
+
+                // Typography
+                "text-xs font-semibold text-foreground"
+              )}
+            >
+              <GlobeIcon
+                className={cn(
+                  // Sizing & Spacing
+                  "size-3.5",
+
+                  // Typography
+                  "text-muted-foreground"
+                )}
+              />
               Scope Patterns
             </label>
             {parsedPatterns.length > 0 && (
-              <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+              <Badge
+                variant="outline"
+                className={cn(
+                  // Sizing & Spacing
+                  "px-1.5 py-0.5",
+
+                  // Typography
+                  "text-[10px] font-medium text-primary",
+
+                  // Backgrounds & Borders
+                  "border-primary/20 bg-primary/10"
+                )}
+              >
                 {parsedPatterns.length} rule{parsedPatterns.length === 1 ? '' : 's'} parsed
-              </span>
+              </Badge>
             )}
           </div>
           <Textarea
@@ -200,25 +341,88 @@ export function TargetDialogForm({ target, onCancel, onSaved }: TargetDialogForm
             rows={3}
             value={values.scope}
             onChange={updateValue('scope')}
-            className="text-xs font-mono resize-none focus-visible:ring-1"
+            className={cn(
+              // Sizing & Spacing
+              "resize-none",
+
+              // Typography
+              "font-mono text-xs"
+            )}
           />
           {errors.scope ? (
-            <p className="text-[11px] font-medium text-destructive">{errors.scope}</p>
+            <p
+              className={cn(
+                // Typography
+                "text-[11px] font-medium text-destructive"
+              )}
+            >
+              {errors.scope}
+            </p>
           ) : (
-            <p className="text-[11px] text-muted-foreground/80">
+            <p
+              className={cn(
+                // Typography
+                "text-[11px] text-muted-foreground/80"
+              )}
+            >
               Separate multiple wildcard patterns or domain names with new lines or commas.
             </p>
           )}
 
-          {/* Dynamic Scope Tag Chips Preview */}
           {parsedPatterns.length > 0 && (
-            <div className="mt-2 pt-2 border-t border-border/50">
-              <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                <TagIcon className="h-3 w-3" /> Scope Preview
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col",
+
+                // Sizing & Spacing
+                "mt-2 pt-2 gap-1.5",
+
+                // Backgrounds & Borders
+                "border-t border-border/50"
+              )}
+            >
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center",
+
+                  // Sizing & Spacing
+                  "gap-1",
+
+                  // Typography
+                  "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+                )}
+              >
+                <TagIcon
+                  className={cn(
+                    // Sizing & Spacing
+                    "size-3"
+                  )}
+                />
+                Scope Preview
               </div>
-              <div className="flex flex-wrap gap-1 max-h-[64px] overflow-y-auto">
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex flex-wrap overflow-y-auto",
+
+                  // Sizing & Spacing
+                  "max-h-[64px] gap-1"
+                )}
+              >
                 {parsedPatterns.map((pattern, i) => (
-                  <Badge key={i} variant="secondary" className="text-[10px] font-mono py-0 px-1.5 bg-muted/80 text-foreground border-border/40">
+                  <Badge
+                    key={i}
+                    variant="secondary"
+                    className={cn(
+                      // Sizing & Spacing
+                      "px-1.5 py-0",
+
+                      // Typography
+                      "font-mono text-[10px] text-foreground"
+                    )}
+                  >
                     {pattern}
                   </Badge>
                 ))}
@@ -228,26 +432,41 @@ export function TargetDialogForm({ target, onCancel, onSaved }: TargetDialogForm
         </div>
       </div>
 
-      <DialogFooter className="pt-2 border-t border-border/40 flex items-center justify-between">
+      <DialogFooter
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between sm:justify-between",
+
+          // Sizing & Spacing
+          "pt-2",
+
+          // Backgrounds & Borders
+          "border-t border-border/40"
+        )}
+      >
         {target ? (
           <AlertDialog>
-            <AlertDialogTrigger>
-              <Button type="button" variant="destructive" size="sm" className="gap-1.5">
-                <TrashIcon className="h-3.5 w-3.5" />
-                Delete
-              </Button>
-            </AlertDialogTrigger>
+            <AlertDialogTrigger
+              render={
+                <Button type="button" variant="destructive" size="sm">
+                  <TrashIcon />
+                  <span>Delete</span>
+                </Button>
+              }
+            />
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle className="text-base font-semibold">Delete Target?</AlertDialogTitle>
-                <AlertDialogDescription className="text-xs text-muted-foreground">
-                  This action cannot be undone. Permanent removal of <span className="font-semibold text-foreground">{target.name}</span> will clear its stored scope rules.
+                <AlertDialogTitle>Delete Target?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. Permanent removal of{' '}
+                  <span className="font-semibold text-foreground">{target.name}</span> will clear
+                  its stored scope rules.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
+                <AlertDialogCancel size="xs">Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  type="button"
+                  size="xs"
                   variant="destructive"
                   onClick={deleteTarget}
                 >
@@ -259,20 +478,33 @@ export function TargetDialogForm({ target, onCancel, onSaved }: TargetDialogForm
         ) : (
           <div />
         )}
-        <div className="flex items-center gap-2">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-2"
+          )}
+        >
           <Button type="button" variant="outline" size="sm" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="button" size="sm" disabled={isSubmitting} onClick={() => void saveTarget()} className="gap-1.5">
+          <Button
+            type="button"
+            size="sm"
+            disabled={isSubmitting}
+            onClick={() => void saveTarget()}
+          >
             {target ? (
               <>
-                <CheckIcon className="h-3.5 w-3.5" />
-                Save Changes
+                <CheckIcon />
+                <span>Save Changes</span>
               </>
             ) : (
               <>
-                <PlusIcon className="h-3.5 w-3.5" />
-                Create Target
+                <PlusIcon />
+                <span>Create Target</span>
               </>
             )}
           </Button>
@@ -281,4 +513,3 @@ export function TargetDialogForm({ target, onCancel, onSaved }: TargetDialogForm
     </form>
   );
 }
-

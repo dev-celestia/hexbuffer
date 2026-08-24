@@ -470,9 +470,17 @@ impl hexbuffer_proxy::WebSocketHandler for AppHandler {
             .unwrap()
             .insert(key, connection_id);
 
+        let mut session_id = String::new();
+        if let Some(history) = self.app_handle.try_state::<crate::HistoryBridge>() {
+            if let Ok(Some(active)) = history.get_active_http_session() {
+                session_id = active.id;
+            }
+        }
+
         let now = chrono::Utc::now();
         let record = crate::proxy::state::WebSocketConnectionRecord {
             id: connection_id,
+            session_id,
             timestamp: now,
             url,
             host,

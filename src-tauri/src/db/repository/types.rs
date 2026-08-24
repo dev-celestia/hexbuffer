@@ -34,6 +34,7 @@ pub struct PaginatedResponse<T> {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProxySummaryRow {
     pub id: String,
+    pub session_id: String,
     pub timestamp: String,
     pub method: String,
     pub url: String,

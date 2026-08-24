@@ -1,10 +1,16 @@
 import { Badge, Button } from '@celestia-project/ui';
-import { useState, useMemo, useCallback } from 'react';
-import { CopyIcon, CheckIcon } from '@phosphor-icons/react';
+import * as React from 'react';
+import {
+  ArrowDownLeftIcon,
+  ArrowUpRightIcon,
+  CheckIcon,
+  CopyIcon,
+} from '@phosphor-icons/react';
 
 import type { WebSocketMessage } from '../../hooks/use-websocket-detail';
 import { formatBytes } from '../../../http-history/components/log-table/utils';
 import { formatHexDump } from '../../utils';
+import { cn } from '@/lib/utils';
 
 interface WebSocketMessageCardProps {
   message: WebSocketMessage;
@@ -12,10 +18,10 @@ interface WebSocketMessageCardProps {
 }
 
 export function WebSocketMessageCard({ message, formatDateTime }: WebSocketMessageCardProps) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = React.useState(false);
 
-  // CheckIcon if payload is valid JSON and pretty print it
-  const jsonPayload = useMemo(() => {
+  // Check if payload is valid JSON and pretty print it
+  const jsonPayload = React.useMemo(() => {
     if (!message.payload) return null;
     const trimmed = message.payload.trim();
     if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return null;
@@ -28,16 +34,16 @@ export function WebSocketMessageCard({ message, formatDateTime }: WebSocketMessa
   }, [message.payload]);
 
   // Determine initial view mode based on message type and JSON validity
-  const initialMode = useMemo(() => {
+  const initialMode = React.useMemo(() => {
     if (message.type.toLowerCase() === 'binary') {
       return 'hex';
     }
     return jsonPayload ? 'json' : 'text';
   }, [message.type, jsonPayload]);
 
-  const [viewMode, setViewMode] = useState<'text' | 'json' | 'hex'>(initialMode);
+  const [viewMode, setViewMode] = React.useState<'text' | 'json' | 'hex'>(initialMode);
 
-  const handleCopy = useCallback(() => {
+  const handleCopy = React.useCallback(() => {
     let textToCopy = message.payload;
     if (viewMode === 'json' && jsonPayload) {
       textToCopy = jsonPayload;
@@ -50,7 +56,7 @@ export function WebSocketMessageCard({ message, formatDateTime }: WebSocketMessa
     setTimeout(() => setCopied(false), 2000);
   }, [viewMode, jsonPayload, message.payload, message.rawPayload]);
 
-  const renderedContent = useMemo(() => {
+  const renderedContent = React.useMemo(() => {
     if (viewMode === 'json' && jsonPayload) {
       return jsonPayload;
     }
@@ -63,69 +69,231 @@ export function WebSocketMessageCard({ message, formatDateTime }: WebSocketMessa
   const isDirectionOutbound = message.direction === 'outbound';
 
   return (
-    <div className={`rounded-md border bg-background transition-shadow hover:shadow-sm ${isDirectionOutbound ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-green-500'
-      }`}>
-      <div className="flex items-center gap-2 border-b px-3 py-1.5 text-xs bg-muted/10">
-        <span
-          className={`rounded font-semibold px-1.5 py-0.5 text-[10px] uppercase tracking-wider ${isDirectionOutbound
-              ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-              : 'bg-green-500/10 text-green-600 dark:text-green-400'
-            }`}
-        >
-          {message.direction}
-        </span>
-        <span className="uppercase font-mono text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-          {message.type}
-        </span>
-        <span className="text-muted-foreground text-[10px]">{formatBytes(message.size)}</span>
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col",
 
-        {/* View Mode Tabs */}
-        <div className="flex items-center ml-2 border rounded overflow-hidden divide-x bg-background scale-[0.9] origin-left">
-          <button
-            type="button"
-            onClick={() => setViewMode('text')}
-            className={`px-2 py-0.5 text-[10px] transition-colors ${viewMode === 'text' ? 'bg-muted font-medium' : 'hover:bg-muted/40'
-              }`}
+        // Backgrounds & Borders
+        "rounded-md border bg-card/60 backdrop-blur-xs transition-shadow hover:shadow-xs",
+        isDirectionOutbound
+          ? "border-l-[3px] border-l-blue-500/80"
+          : "border-l-[3px] border-l-emerald-500/80"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center justify-between",
+
+          // Sizing & Spacing
+          "gap-2 px-2.5 py-1.5",
+
+          // Typography
+          "text-xs",
+
+          // Backgrounds & Borders
+          "border-b bg-muted/20"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-2 min-w-0"
+          )}
+        >
+          {/* Direction Pill with Icon */}
+          <span
+            className={cn(
+              // Layout & Positioning
+              "inline-flex items-center",
+
+              // Sizing & Spacing
+              "gap-1 px-1.5 py-0.5",
+
+              // Typography
+              "font-mono text-[10px] font-semibold uppercase tracking-wider",
+
+              // Backgrounds & Borders
+              "rounded border",
+              isDirectionOutbound
+                ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
+                : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+            )}
           >
-            Text
-          </button>
-          {jsonPayload && (
+            {isDirectionOutbound ? (
+              <ArrowUpRightIcon className="size-3" />
+            ) : (
+              <ArrowDownLeftIcon className="size-3" />
+            )}
+            {message.direction}
+          </span>
+
+          <span
+            className={cn(
+              // Sizing & Spacing
+              "px-1.5 py-0.5",
+
+              // Typography
+              "font-mono text-[10px] uppercase text-muted-foreground",
+
+              // Backgrounds & Borders
+              "bg-muted/70 rounded border border-border/40"
+            )}
+          >
+            {message.type}
+          </span>
+
+          <span
+            className={cn(
+              // Typography
+              "font-mono text-[10px] text-muted-foreground"
+            )}
+          >
+            {formatBytes(message.size)}
+          </span>
+
+          {/* View Mode Switcher */}
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "ml-1 p-0.5",
+
+              // Backgrounds & Borders
+              "border rounded bg-background/80"
+            )}
+          >
             <button
               type="button"
-              onClick={() => setViewMode('json')}
-              className={`px-2 py-0.5 text-[10px] transition-colors ${viewMode === 'json' ? 'bg-muted font-medium' : 'hover:bg-muted/40'
-                }`}
+              onClick={() => setViewMode('text')}
+              className={cn(
+                // Sizing & Spacing
+                "px-1.5 py-0.5",
+
+                // Typography
+                "text-[10px] transition-colors rounded-xs",
+                viewMode === 'text'
+                  ? "bg-muted text-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Text
+            </button>
+            {jsonPayload && (
+              <button
+                type="button"
+                onClick={() => setViewMode('json')}
+                className={cn(
+                  // Sizing & Spacing
+                  "px-1.5 py-0.5",
+
+                  // Typography
+                  "text-[10px] transition-colors rounded-xs",
+                  viewMode === 'json'
+                    ? "bg-muted text-foreground font-medium"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                JSON
+              </button>
+            )}
+            {message.rawPayload && message.rawPayload.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setViewMode('hex')}
+                className={cn(
+                  // Sizing & Spacing
+                  "px-1.5 py-0.5",
+
+                  // Typography
+                  "text-[10px] transition-colors rounded-xs",
+                  viewMode === 'hex'
+                    ? "bg-muted text-foreground font-medium"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Hex
+              </button>
+            )}
+          </div>
+
+          {jsonPayload && (
+            <Badge
+              variant="secondary"
+              className={cn(
+                // Sizing & Spacing
+                "h-4 px-1",
+
+                // Typography
+                "font-mono text-[9px]",
+
+                // Backgrounds & Borders
+                "bg-primary/10 text-primary border-primary/20"
+              )}
             >
               JSON
-            </button>
-          )}
-          {message.rawPayload && message.rawPayload.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setViewMode('hex')}
-              className={`px-2 py-0.5 text-[10px] transition-colors ${viewMode === 'hex' ? 'bg-muted font-medium' : 'hover:bg-muted/40'
-                }`}
-            >
-              Hex
-            </button>
+            </Badge>
           )}
         </div>
 
-        {jsonPayload && <Badge variant="secondary" className="scale-[0.8] origin-left font-mono">JSON</Badge>}
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
 
-        <span className="ml-auto font-mono text-[10px] text-muted-foreground">{formatDateTime(message.timestamp)}</span>
-
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={handleCopy}
-          className="size-5 ml-1 text-muted-foreground hover:text-foreground shrink-0"
-          title="Copy payload"
+            // Sizing & Spacing
+            "gap-2 shrink-0"
+          )}
         >
-          {copied ? <CheckIcon className="size-3 text-green-600" /> : <CopyIcon className="size-3" />}
-        </Button>
+          <span
+            className={cn(
+              // Typography
+              "font-mono text-[10px] text-muted-foreground"
+            )}
+          >
+            {formatDateTime(message.timestamp)}
+          </span>
+
+          <Button
+            size="icon-xs"
+            variant="ghost"
+            onClick={handleCopy}
+            className={cn(
+              // Sizing & Spacing
+              "size-5",
+
+              // Typography
+              "text-muted-foreground hover:text-foreground"
+            )}
+            title="Copy payload"
+          >
+            {copied ? (
+              <CheckIcon className="size-3 text-emerald-500 font-bold" />
+            ) : (
+              <CopyIcon className="size-3" />
+            )}
+          </Button>
+        </div>
       </div>
-      <pre className="p-3 text-[11px] font-mono whitespace-pre-wrap break-all max-h-60 overflow-auto bg-muted/5 text-foreground leading-relaxed selection:bg-primary/20">
+
+      <pre
+        className={cn(
+          // Sizing & Spacing
+          "p-2.5 max-h-60 overflow-auto",
+
+          // Typography
+          "text-[11px] font-mono whitespace-pre-wrap break-all leading-relaxed",
+
+          // Backgrounds & Borders
+          "bg-muted/5 text-foreground selection:bg-primary/20"
+        )}
+      >
         {renderedContent}
       </pre>
     </div>

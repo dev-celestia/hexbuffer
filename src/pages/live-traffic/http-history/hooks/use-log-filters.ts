@@ -1,6 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
-import { toast } from 'sonner';
 import { useShallow } from 'zustand/react/shallow';
 import {
   type HistoryFilterState,
@@ -9,42 +7,27 @@ import {
   useHighlightStore,
 } from '@/stores/history';
 import { openTargetSelector } from '@/triggers';
-import type { DateRangeId } from '../constants';
 
 export interface UseLogFiltersProps {
   filter?: HistoryFilterState;
   onFilterChange?: (filter: HistoryFilterState) => void;
   onClearFilters?: () => void;
-  clearCalls?: () => void;
 }
 
 export function useLogFilters({
   filter: filterProp,
   onFilterChange,
   onClearFilters,
-  clearCalls: clearCallsProp,
 }: UseLogFiltersProps = {}) {
-  const [clearDialogOpen, setClearDialogOpen] = useState(false);
-  const [selectedRange, setSelectedRange] = useState<DateRangeId>('today');
-  const [customDate, setCustomDate] = useState(() => {
-    const d = new Date();
-    return d.toISOString().split('T')[0];
-  });
-  const [isClearing, setIsClearing] = useState(false);
-
   const isStreamManuallyPaused = useHttpHistoryQueryStore((s) => s.isStreamManuallyPaused);
 
   const {
     filter: storeFilter,
     clearFilters: storeClearFilters,
-    triggerRefresh,
-    setSelectedCallId: storeSetSelectedCallId,
   } = useHttpHistoryQueryStore(
     useShallow((state) => ({
       filter: state.filter,
       clearFilters: state.clearFilters,
-      triggerRefresh: state.triggerRefresh,
-      setSelectedCallId: state.setSelectedCallId,
     }))
   );
 
@@ -118,45 +101,6 @@ export function useLogFilters({
     };
   }, []);
 
-  const handleClearCalls = useCallback(async (e?: React.MouseEvent) => {
-    if (e) e.preventDefault();
-    if (clearCallsProp) {
-      clearCallsProp();
-      return;
-    }
-
-    setIsClearing(true);
-    try {
-      if (selectedRange === 'all') {
-        await invoke('clear_proxy_all');
-        toast.success('All history cleared successfully');
-      } else if (selectedRange === 'custom') {
-        if (!customDate) {
-          toast.error('Please choose a valid cutoff date');
-          setIsClearing(false);
-          return;
-        }
-        await invoke('clear_proxy_by_date', { keepRange: 'custom', customDate });
-        toast.success(`Cleared logs recorded before ${customDate}`);
-      } else {
-        await invoke('clear_proxy_by_date', { keepRange: selectedRange, customDate: null });
-        const labelMap: Record<string, string> = {
-          today: "Kept today's history (older logs cleared)",
-          week: "Kept this week's history (older logs cleared)",
-          month: "Kept this month's history (older logs cleared)",
-        };
-        toast.success(labelMap[selectedRange] || 'History cleared');
-      }
-      storeSetSelectedCallId(null);
-      triggerRefresh();
-      setClearDialogOpen(false);
-    } catch {
-      toast.error('Failed to clear history');
-    } finally {
-      setIsClearing(false);
-    }
-  }, [clearCallsProp, customDate, selectedRange, storeSetSelectedCallId, triggerRefresh]);
-
   const blacklistRules = useBlacklistStore((s) => s.rules);
   const removeBlacklistRule = useBlacklistStore((s) => s.removeRule);
 
@@ -177,14 +121,6 @@ export function useLogFilters({
     isStreamManuallyPaused,
     handleToggleStreamPause,
     openTargetSelector,
-    clearDialogOpen,
-    setClearDialogOpen,
-    selectedRange,
-    setSelectedRange,
-    customDate,
-    setCustomDate,
-    isClearing,
-    handleClearCalls,
     blacklistRules,
     removeBlacklistRule,
     highlightedHosts,

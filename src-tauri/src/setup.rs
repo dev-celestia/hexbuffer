@@ -23,8 +23,17 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     crate::log(&format!("Opening database at {:?}", db_path));
     let database = hexbuffer::db::repository::Database::new(db_path.clone())
         .expect("Failed to initialize database");
-    database.init().expect("Failed to initialize database schema");
-    let history = HistoryBridge::new(db_path).expect("Failed to initialize history bridge");
+    if let Err(e) = database.init() {
+        crate::log(&format!("FATAL: Failed to initialize database schema: {}", e));
+        panic!("Failed to initialize database schema: {}", e);
+    }
+    let history = match HistoryBridge::new(db_path) {
+        Ok(h) => h,
+        Err(e) => {
+            crate::log(&format!("FATAL: Failed to initialize history bridge: {}", e));
+            panic!("Failed to initialize history bridge: {}", e);
+        }
+    };
     crate::log("History bridge initialized");
 
     app.manage(ProxyState::new());

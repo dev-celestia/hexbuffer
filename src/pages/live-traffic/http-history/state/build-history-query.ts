@@ -12,6 +12,7 @@ export interface HistoryQuery {
 export function buildHistoryQuery(input: {
   filter: HistoryFilterState;
   activeScope: string[] | null;
+  sessionId?: string | null;
   sortOrder: 'asc' | 'desc';
   page: number;
   perPage: number;
@@ -62,6 +63,7 @@ export function buildHistoryQuery(input: {
       methods,
       status_codes: statusCodes,
       scope,
+      session_id: normalizeString(input.sessionId ?? null),
     },
   };
 }

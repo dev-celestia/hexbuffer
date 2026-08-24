@@ -1,7 +1,20 @@
-
-
-import { Badge, Button, Input, ScrollArea } from '@celestia-project/ui';
-import { PencilIcon, MagnifyingGlassIcon, XIcon, TargetIcon, CheckCircleIcon } from '@phosphor-icons/react';
+import {
+  Badge,
+  Button,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+  ScrollArea,
+} from '@celestia-project/ui';
+import {
+  PencilIcon,
+  MagnifyingGlassIcon,
+  XIcon,
+  TargetIcon,
+  CheckCircleIcon,
+} from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 import type { Target } from '@/types';
 
 interface TargetSearchListProps {
@@ -21,48 +34,129 @@ export function TargetSearchList({
   filteredTargets,
   onSelectTarget,
   onEditTarget,
-  listHeight = 'h-[220px]',
+  listHeight = 'h-[260px]',
 }: TargetSearchListProps) {
   const showSearch = targetCount >= 5 || searchQuery.length > 0;
 
   return (
-    <div className="space-y-3">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col",
+
+        // Sizing & Spacing
+        "gap-3"
+      )}
+    >
       {showSearch && (
-        <div className="relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input
+        <InputGroup>
+          <InputGroupAddon align="inline-start">
+            <MagnifyingGlassIcon
+              className={cn(
+                // Sizing & Spacing
+                "size-3.5",
+
+                // Typography
+                "text-muted-foreground"
+              )}
+            />
+          </InputGroupAddon>
+          <InputGroupInput
             placeholder="Filter targets by name or pattern..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-8 h-8 text-xs focus-visible:ring-1"
+            className={cn(
+              // Sizing & Spacing
+              "h-8 text-xs"
+            )}
           />
           {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded-sm"
-              aria-label="Clear search"
-            >
-              <XIcon className="h-3 w-3" />
-            </button>
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                size="icon-xs"
+                variant="ghost"
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear search"
+              >
+                <XIcon
+                  className={cn(
+                    // Sizing & Spacing
+                    "size-3"
+                  )}
+                />
+              </InputGroupButton>
+            </InputGroupAddon>
           )}
-        </div>
+        </InputGroup>
       )}
 
-      <div className="rounded-md border border-border bg-card/50 overflow-hidden">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "overflow-hidden",
+
+          // Sizing & Spacing
+          "rounded-md",
+
+          // Backgrounds & Borders
+          "border border-border bg-card/50"
+        )}
+      >
         {filteredTargets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground px-4">
-            <TargetIcon className="h-8 w-8 text-muted-foreground/40 mb-2 stroke-[1.5]" />
-            <p className="text-xs font-medium">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-col items-center justify-center text-center",
+
+              // Sizing & Spacing
+              "px-4 py-8",
+
+              // Typography
+              "text-muted-foreground"
+            )}
+          >
+            <TargetIcon
+              className={cn(
+                // Sizing & Spacing
+                "mb-2 size-8",
+
+                // Typography
+                "text-muted-foreground/40"
+              )}
+            />
+            <p
+              className={cn(
+                // Typography
+                "text-xs font-medium"
+              )}
+            >
               {searchQuery ? 'No targets match your query' : 'No targets configured yet'}
             </p>
-            <p className="text-[11px] text-muted-foreground/70 mt-1">
-              {searchQuery ? 'Try typing a different keyword or create a target.' : 'Click below to add your first monitoring target.'}
+            <p
+              className={cn(
+                // Sizing & Spacing
+                "mt-1",
+
+                // Typography
+                "text-[11px] text-muted-foreground/70"
+              )}
+            >
+              {searchQuery
+                ? 'Try typing a different keyword or create a target.'
+                : 'Click below to add your first monitoring target.'}
             </p>
           </div>
         ) : (
           <ScrollArea className={listHeight}>
-            <div className="p-1.5 space-y-1">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col",
+
+                // Sizing & Spacing
+                "gap-1 p-1.5"
+              )}
+            >
               {filteredTargets.map((target) => {
                 const primaryScope = target.scope[0];
                 const extraScopeCount = target.scope.length - 1;
@@ -70,33 +164,129 @@ export function TargetSearchList({
                 return (
                   <div
                     key={target.id}
-                    className="group relative flex items-center justify-between gap-2 rounded-sm border border-transparent p-2 hover:border-border/60 hover:bg-accent/50 active:scale-[0.985] transition-all duration-150 ease-out cursor-pointer"
+                    className={cn(
+                      // Layout & Positioning
+                      "group relative flex items-center justify-between cursor-pointer",
+
+                      // Sizing & Spacing
+                      "gap-2 rounded-md p-2",
+
+                      // Backgrounds & Borders
+                      "border border-transparent hover:border-border/60 hover:bg-accent/50",
+
+                      // Interactive & States
+                      "transition-all duration-150"
+                    )}
                     onClick={() => onSelectTarget(target)}
                   >
-                    <div className="flex-1 min-w-0 space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-xs text-foreground truncate">
+                    <div
+                      className={cn(
+                        // Layout & Positioning
+                        "flex-1 min-w-0",
+
+                        // Sizing & Spacing
+                        "space-y-0.5"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "flex items-center",
+
+                          // Sizing & Spacing
+                          "gap-2"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            // Layout & Positioning
+                            "truncate",
+
+                            // Typography
+                            "text-xs font-semibold text-foreground"
+                          )}
+                        >
                           {target.name}
                         </span>
                         {target.tabActive && (
-                          <Badge variant="outline" className="h-4 px-1.5 text-[10px] gap-1 border-primary/30 bg-primary/10 text-primary font-normal">
-                            <CheckCircleIcon className="h-2.5 w-2.5 fill-primary text-primary-foreground" />
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              // Layout & Positioning
+                              "inline-flex items-center",
+
+                              // Sizing & Spacing
+                              "gap-1 px-1.5 py-0",
+
+                              // Typography
+                              "text-[10px] text-primary font-normal",
+
+                              // Backgrounds & Borders
+                              "border-primary/30 bg-primary/10"
+                            )}
+                          >
+                            <CheckCircleIcon
+                              className={cn(
+                                // Sizing & Spacing
+                                "size-2.5"
+                              )}
+                            />
                             Active
                           </Badge>
                         )}
                       </div>
 
-                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "flex items-center truncate",
+
+                          // Sizing & Spacing
+                          "gap-1.5",
+
+                          // Typography
+                          "text-[11px] text-muted-foreground"
+                        )}
+                      >
                         {primaryScope ? (
-                          <span className="font-mono text-[10.5px] bg-muted/60 px-1 py-0.2 rounded text-muted-foreground truncate">
+                          <span
+                            className={cn(
+                              // Layout & Positioning
+                              "truncate",
+
+                              // Sizing & Spacing
+                              "rounded px-1 py-0.5",
+
+                              // Typography
+                              "font-mono text-[10.5px] text-muted-foreground",
+
+                              // Backgrounds & Borders
+                              "bg-muted/60"
+                            )}
+                          >
                             {primaryScope}
                           </span>
                         ) : (
-                          <span className="italic text-muted-foreground/60">No scope specified</span>
+                          <span
+                            className={cn(
+                              // Typography
+                              "italic text-muted-foreground/60"
+                            )}
+                          >
+                            No scope specified
+                          </span>
                         )}
 
                         {extraScopeCount > 0 && (
-                          <span className="text-[10px] font-medium text-muted-foreground/80 shrink-0">
+                          <span
+                            className={cn(
+                              // Layout & Positioning
+                              "shrink-0",
+
+                              // Typography
+                              "text-[10px] font-medium text-muted-foreground/80"
+                            )}
+                          >
                             +{extraScopeCount} more
                           </span>
                         )}
@@ -105,16 +295,15 @@ export function TargetSearchList({
 
                     <Button
                       type="button"
-                      size="icon-sm"
+                      size="icon-xs"
                       variant="ghost"
-                      className="h-7 w-7 shrink-0 opacity-80 group-hover:opacity-100 hover:bg-background/80 active:scale-95 transition-all"
                       aria-label={`Edit ${target.name}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         onEditTarget(target);
                       }}
                     >
-                      <PencilIcon className="h-3.5 w-3.5" />
+                      <PencilIcon />
                     </Button>
                   </div>
                 );
@@ -126,4 +315,3 @@ export function TargetSearchList({
     </div>
   );
 }
-

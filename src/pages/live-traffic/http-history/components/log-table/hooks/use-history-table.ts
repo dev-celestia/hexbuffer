@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ProxyLogSummary, ProxyRecord, ApiCall } from '@/types';
 
 import { getHttpLogs } from '../../../api';
-import { useHttpHistoryQueryStore } from '@/stores/history';
+import { useHttpHistoryQueryStore, useHttpSessionStore } from '@/stores/history';
 import { useShallow } from 'zustand/react/shallow';
 import { buildHistoryQuery, hasActiveHistoryFilters } from '../../../state/build-history-query';
 
@@ -38,6 +38,9 @@ interface UseHistoryTableOptions {
 }
 
 export function useHistoryTable({ isStreamPaused = false, activeTabId }: UseHistoryTableOptions = {}) {
+  const activeSessionId = useHttpSessionStore((state) => state.activeSessionId);
+  const incrementSessionStats = useHttpSessionStore((state) => state.incrementSessionStats);
+
   const {
     filter,
     activeScope,
@@ -69,11 +72,12 @@ export function useHistoryTable({ isStreamPaused = false, activeTabId }: UseHist
       buildHistoryQuery({
         filter,
         activeScope,
+        sessionId: activeSessionId,
         sortOrder,
         page,
         perPage,
       }),
-    [filter, activeScope, sortOrder, page, perPage]
+    [filter, activeScope, activeSessionId, sortOrder, page, perPage]
   );
 
   const hasActiveFilters = useMemo(
@@ -92,11 +96,16 @@ export function useHistoryTable({ isStreamPaused = false, activeTabId }: UseHist
   const isStreamPausedRef = useRef(isHistoryStreamPaused);
   const lastBaseQueryRef = useRef<string>('');
   const currentPageRef = useRef(page);
+  const activeSessionIdRef = useRef(activeSessionId);
   const isFetchingRef = useRef(false);
 
   useEffect(() => {
     currentPageRef.current = page;
   }, [page]);
+
+  useEffect(() => {
+    activeSessionIdRef.current = activeSessionId;
+  }, [activeSessionId]);
 
   useEffect(() => {
     isStreamPausedRef.current = isHistoryStreamPaused;
@@ -108,12 +117,13 @@ export function useHistoryTable({ isStreamPaused = false, activeTabId }: UseHist
   const baseQueryKey = useMemo(
     () =>
       JSON.stringify({
+        sessionId: activeSessionId,
         filter: query.filter,
         sortOrder: query.sortOrder,
         perPage: query.perPage,
         refreshKey,
       }),
-    [query, refreshKey]
+    [activeSessionId, query, refreshKey]
   );
 
   const fetchPage = useCallback(
@@ -161,7 +171,16 @@ export function useHistoryTable({ isStreamPaused = false, activeTabId }: UseHist
   useEffect(() => {
     let batchTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const handleEvent = () => {
+    const handleEvent = (event: { payload: ProxyLogSummary }) => {
+      const record = event.payload;
+      if (record && record.session_id) {
+        incrementSessionStats(record.session_id, (record.request_body_size || 0) + (record.response_body_size || 0));
+      }
+
+      if (activeSessionIdRef.current && record?.session_id && record.session_id !== activeSessionIdRef.current) {
+        return;
+      }
+
       pendingEventsCountRef.current += 1;
 
       if (!batchTimer) {
@@ -185,7 +204,7 @@ export function useHistoryTable({ isStreamPaused = false, activeTabId }: UseHist
       unlistenPromise.then((unlisten) => unlisten());
       if (batchTimer) clearTimeout(batchTimer);
     };
-  }, [fetchPage]);
+  }, [fetchPage, incrementSessionStats]);
 
   const totalPages = Math.max(1, Math.ceil(pagination.total / pagination.perPage));
   const hasNextPage = page < totalPages;

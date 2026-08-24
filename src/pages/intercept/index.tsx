@@ -67,7 +67,7 @@ export function InterceptPage() {
             <AlertAction>
               <Button
                 variant="outline"
-                size="sm"
+                size="xs"
                 onClick={handleStartProxy}
                 disabled={isStarting || proxyStatus === 'starting'}
               >

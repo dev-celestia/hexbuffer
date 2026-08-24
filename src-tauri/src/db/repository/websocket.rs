@@ -8,9 +8,17 @@ use uuid::Uuid;
 use super::types::PaginatedResponse;
 use super::Database;
 
+pub const SELECT_WS_CONNECTION_COLS: &str = "id, session_id, timestamp, url, host, path, handshake_request_headers, handshake_response_status, handshake_response_headers, client_addr, server_addr, state, message_count, last_activity_at";
+
 impl Database {
     pub fn insert_websocket_connection(&self, record: &WebSocketConnectionRecord) -> SqlResult<()> {
         let conn = self.conn.lock().unwrap();
+        let session_id = if !record.session_id.is_empty() {
+            record.session_id.clone()
+        } else {
+            Database::get_active_session_id(&conn).unwrap_or_default()
+        };
+
         let request_headers =
             serde_json::to_string(&record.handshake_request_headers).unwrap_or_default();
         let response_headers =
@@ -18,12 +26,13 @@ impl Database {
 
         conn.execute(
             r#"INSERT INTO websocket_connections (
-                id, timestamp, url, host, path,
+                id, session_id, timestamp, url, host, path,
                 handshake_request_headers, handshake_response_status, handshake_response_headers,
                 client_addr, server_addr, state, message_count, last_activity_at
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)"#,
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)"#,
             params![
                 record.id.to_string(),
+                session_id,
                 record.timestamp.to_rfc3339(),
                 record.url,
                 record.host,
@@ -95,7 +104,7 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         let offset = (page - 1) * per_page;
 
-        let mut sql = String::from("SELECT * FROM websocket_connections WHERE 1=1");
+        let mut sql = format!("SELECT {} FROM websocket_connections WHERE 1=1", SELECT_WS_CONNECTION_COLS);
         let mut params_vec: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
 
         if let Some(filter) = filter {
@@ -105,24 +114,30 @@ impl Database {
         sql.push_str(" ORDER BY timestamp DESC LIMIT ? OFFSET ?");
 
         let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
+        let per_page_i64 = per_page as i64;
+        let offset_i64 = offset as i64;
         let mut all_params: Vec<&dyn rusqlite::ToSql> =
             params_vec.iter().map(|value| value.as_ref()).collect();
-        all_params.push(&per_page as &dyn rusqlite::ToSql);
-        all_params.push(&offset as &dyn rusqlite::ToSql);
+        all_params.push(&per_page_i64 as &dyn rusqlite::ToSql);
+        all_params.push(&offset_i64 as &dyn rusqlite::ToSql);
 
         let rows = stmt
             .query_map(all_params.as_slice(), row_to_websocket_connection_record)
             .map_err(|e| e.to_string())?;
 
-        let records = collect_websocket_connections(rows);
+        let records: Vec<WebSocketConnectionRecord> = rows.filter_map(Result::ok).collect();
 
         let mut count_sql = String::from("SELECT COUNT(*) FROM websocket_connections WHERE 1=1");
+        let mut count_params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
         if let Some(filter) = filter {
-            append_websocket_filter_count_sql(filter, &mut count_sql);
+            append_websocket_filter_sql(filter, &mut count_sql, &mut count_params);
         }
 
+        let count_params_slice: Vec<&dyn rusqlite::ToSql> =
+            count_params.iter().map(|v| v.as_ref()).collect();
+
         let total: i64 = conn
-            .query_row(&count_sql, [], |row| row.get(0))
+            .query_row(&count_sql, count_params_slice.as_slice(), |row| row.get(0))
             .map_err(|e| e.to_string())?;
 
         let has_more = (offset as usize + records.len()) < total as usize;
@@ -141,8 +156,9 @@ impl Database {
         id: &str,
     ) -> Result<Option<WebSocketConnectionRecord>, String> {
         let conn = self.conn.lock().unwrap();
+        let sql = format!("SELECT {} FROM websocket_connections WHERE id = ?1 LIMIT 1", SELECT_WS_CONNECTION_COLS);
         let mut stmt = conn
-            .prepare("SELECT * FROM websocket_connections WHERE id = ?1 LIMIT 1")
+            .prepare(&sql)
             .map_err(|e| e.to_string())?;
         let mut rows = stmt.query(params![id]).map_err(|e| e.to_string())?;
 
@@ -161,14 +177,14 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn
             .prepare(
-                "SELECT * FROM websocket_messages WHERE connection_id = ?1 ORDER BY timestamp ASC",
+                "SELECT id, connection_id, timestamp, direction, message_type, payload, payload_size FROM websocket_messages WHERE connection_id = ?1 ORDER BY timestamp ASC",
             )
             .map_err(|e| e.to_string())?;
         let rows = stmt
             .query_map(params![connection_id], row_to_websocket_message_record)
             .map_err(|e| e.to_string())?;
 
-        Ok(collect_websocket_messages(rows))
+        Ok(rows.filter_map(Result::ok).collect())
     }
 }
 
@@ -176,21 +192,23 @@ impl Database {
 
 fn row_to_websocket_connection_record(row: &rusqlite::Row) -> SqlResult<WebSocketConnectionRecord> {
     let id: String = row.get(0)?;
-    let timestamp: String = row.get(1)?;
-    let url: String = row.get(2)?;
-    let host: String = row.get(3)?;
-    let path: String = row.get(4)?;
-    let handshake_request_headers: Option<String> = row.get(5)?;
-    let handshake_response_status: Option<i64> = row.get(6)?;
-    let handshake_response_headers: Option<String> = row.get(7)?;
-    let client_addr: Option<String> = row.get(8)?;
-    let server_addr: Option<String> = row.get(9)?;
-    let state: String = row.get(10)?;
-    let message_count: i64 = row.get(11)?;
-    let last_activity_at: String = row.get(12)?;
+    let session_id: String = row.get(1)?;
+    let timestamp: String = row.get(2)?;
+    let url: String = row.get(3)?;
+    let host: String = row.get(4)?;
+    let path: String = row.get(5)?;
+    let handshake_request_headers: Option<String> = row.get(6)?;
+    let handshake_response_status: Option<i64> = row.get(7)?;
+    let handshake_response_headers: Option<String> = row.get(8)?;
+    let client_addr: Option<String> = row.get(9)?;
+    let server_addr: Option<String> = row.get(10)?;
+    let state: String = row.get(11)?;
+    let message_count: i64 = row.get(12)?;
+    let last_activity_at: String = row.get(13)?;
 
     Ok(WebSocketConnectionRecord {
         id: Uuid::parse_str(&id).map_err(|_| rusqlite::Error::InvalidQuery)?,
+        session_id,
         timestamp: chrono::DateTime::parse_from_rfc3339(&timestamp)
             .map_err(|_| rusqlite::Error::InvalidQuery)?
             .with_timezone(&chrono::Utc),
@@ -198,17 +216,11 @@ fn row_to_websocket_connection_record(row: &rusqlite::Row) -> SqlResult<WebSocke
         host,
         path,
         handshake_request_headers: handshake_request_headers
-            .as_deref()
-            .map(serde_json::from_str)
-            .transpose()
-            .unwrap_or_default()
+            .and_then(|raw| serde_json::from_str(&raw).ok())
             .unwrap_or_default(),
-        handshake_response_status: handshake_response_status.map(|value| value as u16),
+        handshake_response_status: handshake_response_status.map(|status| status as u16),
         handshake_response_headers: handshake_response_headers
-            .as_deref()
-            .map(serde_json::from_str)
-            .transpose()
-            .unwrap_or_default()
+            .and_then(|raw| serde_json::from_str(&raw).ok())
             .unwrap_or_default(),
         client_addr: client_addr.unwrap_or_default(),
         server_addr: server_addr.unwrap_or_default(),
@@ -226,7 +238,7 @@ fn row_to_websocket_message_record(row: &rusqlite::Row) -> SqlResult<WebSocketMe
     let timestamp: String = row.get(2)?;
     let direction: String = row.get(3)?;
     let message_type: String = row.get(4)?;
-    let payload: Option<Vec<u8>> = row.get(5)?;
+    let payload: Vec<u8> = row.get(5)?;
     let payload_size: i64 = row.get(6)?;
 
     Ok(WebSocketMessageRecord {
@@ -238,46 +250,10 @@ fn row_to_websocket_message_record(row: &rusqlite::Row) -> SqlResult<WebSocketMe
             .with_timezone(&chrono::Utc),
         direction: websocket_message_direction_from_str(&direction),
         message_type: websocket_message_type_from_str(&message_type),
-        payload: payload.unwrap_or_default(),
+        payload,
         payload_size: payload_size as usize,
     })
 }
-
-// ── Collect helpers ──────────────────────────────────────────
-
-fn collect_websocket_connections<I>(rows: I) -> Vec<WebSocketConnectionRecord>
-where
-    I: IntoIterator<Item = SqlResult<WebSocketConnectionRecord>>,
-{
-    let mut records = Vec::new();
-
-    for row in rows {
-        match row {
-            Ok(record) => records.push(record),
-            Err(err) => eprintln!("[db] skipping malformed websocket_connections row: {}", err),
-        }
-    }
-
-    records
-}
-
-fn collect_websocket_messages<I>(rows: I) -> Vec<WebSocketMessageRecord>
-where
-    I: IntoIterator<Item = SqlResult<WebSocketMessageRecord>>,
-{
-    let mut records = Vec::new();
-
-    for row in rows {
-        match row {
-            Ok(record) => records.push(record),
-            Err(err) => eprintln!("[db] skipping malformed websocket_messages row: {}", err),
-        }
-    }
-
-    records
-}
-
-// ── Conversion helpers ──────────────────────────────────────
 
 fn websocket_connection_state_to_str(state: &WebSocketConnectionState) -> &'static str {
     match state {
@@ -288,7 +264,7 @@ fn websocket_connection_state_to_str(state: &WebSocketConnectionState) -> &'stat
 }
 
 fn websocket_connection_state_from_str(value: &str) -> WebSocketConnectionState {
-    match value {
+    match value.to_lowercase().as_str() {
         "open" => WebSocketConnectionState::Open,
         "error" => WebSocketConnectionState::Error,
         _ => WebSocketConnectionState::Closed,
@@ -303,9 +279,9 @@ fn websocket_message_direction_to_str(direction: &WebSocketMessageDirection) -> 
 }
 
 fn websocket_message_direction_from_str(value: &str) -> WebSocketMessageDirection {
-    match value {
-        "outbound" => WebSocketMessageDirection::Outbound,
-        _ => WebSocketMessageDirection::Inbound,
+    match value.to_lowercase().as_str() {
+        "inbound" => WebSocketMessageDirection::Inbound,
+        _ => WebSocketMessageDirection::Outbound,
     }
 }
 
@@ -336,6 +312,14 @@ fn append_websocket_filter_sql(
     sql: &mut String,
     params_vec: &mut Vec<Box<dyn rusqlite::ToSql>>,
 ) {
+    if let Some(ref session_id) = filter.session_id {
+        let trimmed = session_id.trim();
+        if !trimmed.is_empty() {
+            sql.push_str(" AND session_id = ?");
+            params_vec.push(Box::new(trimmed.to_string()));
+        }
+    }
+
     if let Some(ref search) = filter.search {
         if !search.is_empty() {
             let search_pattern = format!("%{}%", search);
@@ -382,51 +366,6 @@ fn append_websocket_filter_sql(
                     params_vec.push(Box::new(format!("%{}%", pattern)));
                 }
             }
-            sql.push(')');
-        }
-    }
-}
-
-fn append_websocket_filter_count_sql(filter: &WebSocketFilter, sql: &mut String) {
-    if let Some(ref search) = filter.search {
-        if !search.is_empty() {
-            sql.push_str(&format!(
-                " AND (url LIKE '%{0}%' OR host LIKE '%{0}%' OR path LIKE '%{0}%')",
-                search
-            ));
-        }
-    }
-
-    if let Some(ref states) = filter.states {
-        if !states.is_empty() {
-            let values = states
-                .iter()
-                .map(|state| format!("'{}'", state))
-                .collect::<Vec<_>>()
-                .join(",");
-            sql.push_str(&format!(" AND state IN ({})", values));
-        }
-    }
-
-    if let Some(ref scope) = filter.scope {
-        let clauses: Vec<String> = scope
-            .iter()
-            .filter_map(|pattern| {
-                let value = pattern.trim();
-                if value.is_empty() {
-                    return None;
-                }
-                if let Some(domain) = value.strip_prefix("*.") {
-                    Some(format!("(host = '{}' OR host LIKE '%.{}')", domain, domain))
-                } else {
-                    Some(format!("host LIKE '%{}%'", value))
-                }
-            })
-            .collect();
-
-        if !clauses.is_empty() {
-            sql.push_str(" AND (");
-            sql.push_str(&clauses.join(" OR "));
             sql.push(')');
         }
     }

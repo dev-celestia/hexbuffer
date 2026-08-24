@@ -1,10 +1,22 @@
-import { Alert, AlertDescription, AlertTitle, Checkbox, Empty, EmptyDescription, EmptyTitle, Input } from '@celestia-project/ui';
-import { useState, useRef, useEffect } from 'react';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Checkbox,
+  Empty,
+  EmptyDescription,
+  EmptyTitle,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@celestia-project/ui';
+import * as React from 'react';
 import { MagnifyingGlassIcon } from '@phosphor-icons/react';
 
 import { useWebSocketDetail } from '../../hooks/use-websocket-detail';
 import { InspectorSection, buildHeadersList } from '@/pages/live-traffic/components/inspector';
 import { WebSocketMessageCard } from './websocket-message-card';
+import { cn } from '@/lib/utils';
 
 interface WebSocketEntryViewProps {
   selectedConnectionId: string | null;
@@ -30,9 +42,9 @@ function formatDateTime(value: string) {
 function stateClassName(state: string) {
   switch (state.toLowerCase()) {
     case 'open':
-      return 'bg-green-500/10 text-green-600 border-green-500/30';
+      return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
     case 'error':
-      return 'bg-red-500/10 text-red-600 border-red-500/30';
+      return 'bg-destructive/10 text-destructive border-destructive/20';
     default:
       return 'bg-muted text-muted-foreground border-border';
   }
@@ -53,11 +65,11 @@ export function WebSocketEntryView({ selectedConnectionId }: WebSocketEntryViewP
     setHideHeartbeats,
   } = useWebSocketDetail(selectedConnectionId);
 
-  const [autoScroll, setAutoScroll] = useState(true);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const [autoScroll, setAutoScroll] = React.useState(true);
+  const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
 
-  // Auto-scroll logic (ponytail: keep scroll-to-bottom clean and conditional)
-  useEffect(() => {
+  // Auto-scroll logic
+  React.useEffect(() => {
     if (autoScroll && scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
     }
@@ -68,7 +80,7 @@ export function WebSocketEntryView({ selectedConnectionId }: WebSocketEntryViewP
       <div className="h-full flex items-center justify-center">
         <Empty>
           <EmptyTitle>No WebSocket connection selected</EmptyTitle>
-          <EmptyDescription>Select a WebSocket connection to inspect its handshake and messages.</EmptyDescription>
+          <EmptyDescription>Select a WebSocket connection to inspect its handshake and message frames.</EmptyDescription>
         </Empty>
       </div>
     );
@@ -78,7 +90,7 @@ export function WebSocketEntryView({ selectedConnectionId }: WebSocketEntryViewP
     return (
       <div className="h-full flex items-center justify-center">
         <Empty>
-          <EmptyTitle>Loading...</EmptyTitle>
+          <EmptyTitle>Loading…</EmptyTitle>
         </Empty>
       </div>
     );
@@ -107,124 +119,339 @@ export function WebSocketEntryView({ selectedConnectionId }: WebSocketEntryViewP
   }
 
   return (
-    <div className="h-full grid grid-cols-2 gap-0 min-h-0 p-1">
-      <div className="border rounded-l-md border-r-0 overflow-hidden flex flex-col">
-        <div className="p-3 border-b bg-muted/30">
-          <div className="flex items-center gap-2">
-            <span className={`text-xs rounded border px-1.5 py-0.5 uppercase ${stateClassName(connection.state)}`}>
+    <div
+      className={cn(
+        // Layout & Positioning
+        "h-full grid grid-cols-2 gap-0 min-h-0",
+
+        // Sizing & Spacing
+        "p-1"
+      )}
+    >
+      {/* Left Pane: Handshake & Metadata */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col overflow-hidden",
+
+          // Backgrounds & Borders
+          "border rounded-l-md border-r-0 bg-background"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col",
+
+            // Sizing & Spacing
+            "p-3 gap-2",
+
+            // Backgrounds & Borders
+            "border-b bg-muted/20"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "gap-2"
+            )}
+          >
+            <span
+              className={cn(
+                // Sizing & Spacing
+                "px-1.5 py-0.5",
+
+                // Typography
+                "text-[10px] font-mono font-semibold uppercase tracking-wider",
+
+                // Backgrounds & Borders
+                "rounded border",
+                stateClassName(connection.state)
+              )}
+            >
               {connection.state}
             </span>
-            <span className="text-xs font-mono truncate flex-1" title={connection.url}>
+            <span
+              className={cn(
+                // Typography
+                "text-xs font-mono truncate flex-1 font-medium text-foreground"
+              )}
+              title={connection.url}
+            >
               {connection.url}
             </span>
           </div>
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-wrap items-center",
+
+              // Sizing & Spacing
+              "gap-x-3 gap-y-1",
+
+              // Typography
+              "text-[11px] font-mono text-muted-foreground"
+            )}
+          >
             <span>{formatDateTime(connection.timestamp)}</span>
-            <span>{connection.client_addr || '-'} to {connection.server_addr || '-'}</span>
-            {connection.handshake_response_status && <span>Status {connection.handshake_response_status}</span>}
+            <span>{connection.client_addr || '-'} → {connection.server_addr || '-'}</span>
+            {connection.handshake_response_status && (
+              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                Status {connection.handshake_response_status}
+              </span>
+            )}
           </div>
         </div>
 
-        <div className="p-3 flex-1 overflow-auto">
-          <InspectorSection title="Request Headers" items={buildHeadersList(connection.handshake_request_headers)} />
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex-1 overflow-auto",
+
+            // Sizing & Spacing
+            "p-3 space-y-3"
+          )}
+        >
           <InspectorSection
-            title="Response Headers"
+            title="Handshake Request Headers"
+            items={buildHeadersList(connection.handshake_request_headers)}
+          />
+          <InspectorSection
+            title="Handshake Response Headers"
             items={buildHeadersList(connection.handshake_response_headers)}
-            defaultOpen={false}
+            defaultOpen={true}
           />
         </div>
       </div>
 
-      <div className="border rounded-r-md overflow-hidden flex flex-col">
-        <div className="p-3 border-b bg-muted/30 flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-xs font-semibold">Messages</div>
-            <div className="text-xs text-muted-foreground">
+      {/* Right Pane: Message Frames Stream */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col overflow-hidden",
+
+          // Backgrounds & Borders
+          "border rounded-r-md bg-background"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col",
+
+            // Sizing & Spacing
+            "p-2.5 gap-2",
+
+            // Backgrounds & Borders
+            "border-b bg-muted/20"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center justify-between",
+
+              // Sizing & Spacing
+              "gap-2"
+            )}
+          >
+            <div
+              className={cn(
+                // Typography
+                "text-xs font-semibold tracking-tight text-foreground"
+              )}
+            >
+              Frames ({messages.length})
+            </div>
+            <div
+              className={cn(
+                // Typography
+                "text-[11px] font-mono text-muted-foreground"
+              )}
+            >
               {filteredMessages.length !== messages.length
-                ? `${filteredMessages.length} of ${messages.length} shown`
+                ? `${filteredMessages.length} of ${messages.length} displayed`
                 : `${messages.length} captured`}
             </div>
           </div>
 
           {/* Messages Toolbar Filters */}
-          <div className="flex flex-wrap items-center gap-3">
-            {/* MagnifyingGlassIcon Input */}
-            <div className="relative flex-1 min-w-[120px]">
-              <MagnifyingGlassIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3 text-muted-foreground" />
-              <Input
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-wrap items-center",
+
+              // Sizing & Spacing
+              "gap-2"
+            )}
+          >
+            <InputGroup
+              className={cn(
+                // Sizing & Spacing
+                "flex-1 min-w-[120px]"
+              )}
+            >
+              <InputGroupAddon align="inline-start">
+                <MagnifyingGlassIcon className="size-3 text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
                 type="text"
-                placeholder="MagnifyingGlassIcon messages..."
+                placeholder="Search frames…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-7 pr-2 h-7 text-xs bg-background"
+                className="h-7 text-xs"
               />
-            </div>
+            </InputGroup>
 
-            {/* Direction FunnelIcon Toggles */}
-            <div className="flex items-center border rounded h-7 overflow-hidden bg-background divide-x">
+            {/* Direction Segmented Toggles */}
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center",
+
+                // Sizing & Spacing
+                "h-7 p-0.5",
+
+                // Backgrounds & Borders
+                "border rounded bg-muted/50"
+              )}
+            >
               <button
                 type="button"
                 onClick={() => setDirectionFilter('all')}
-                className={`px-2 py-0.5 text-[10px] uppercase font-semibold transition-colors ${
-                  directionFilter === 'all' ? 'bg-muted' : 'hover:bg-muted/45'
-                }`}
+                className={cn(
+                  // Sizing & Spacing
+                  "px-2 py-0.5",
+
+                  // Typography
+                  "text-[10px] uppercase font-semibold font-mono transition-colors rounded-xs",
+                  directionFilter === 'all'
+                    ? "bg-background text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
               >
                 All
               </button>
               <button
                 type="button"
                 onClick={() => setDirectionFilter('outbound')}
-                className={`px-2 py-0.5 text-[10px] uppercase font-semibold transition-colors ${
-                  directionFilter === 'outbound' ? 'bg-muted text-blue-600 dark:text-blue-400' : 'hover:bg-muted/45'
-                }`}
+                className={cn(
+                  // Sizing & Spacing
+                  "px-2 py-0.5",
+
+                  // Typography
+                  "text-[10px] uppercase font-semibold font-mono transition-colors rounded-xs",
+                  directionFilter === 'outbound'
+                    ? "bg-background text-blue-600 dark:text-blue-400 shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
               >
                 Out
               </button>
               <button
                 type="button"
                 onClick={() => setDirectionFilter('inbound')}
-                className={`px-2 py-0.5 text-[10px] uppercase font-semibold transition-colors ${
-                  directionFilter === 'inbound' ? 'bg-muted text-green-600 dark:text-green-400' : 'hover:bg-muted/45'
-                }`}
+                className={cn(
+                  // Sizing & Spacing
+                  "px-2 py-0.5",
+
+                  // Typography
+                  "text-[10px] uppercase font-semibold font-mono transition-colors rounded-xs",
+                  directionFilter === 'inbound'
+                    ? "bg-background text-emerald-600 dark:text-emerald-400 shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
               >
                 In
               </button>
             </div>
 
             {/* Hide Heartbeats Checkbox */}
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center",
+
+                // Sizing & Spacing
+                "gap-1.5 shrink-0"
+              )}
+            >
               <Checkbox
                 id="hide-heartbeats"
                 checked={hideHeartbeats}
-                onCheckedChange={(checked) => setHideHeartbeats(!!checked)}
+                onCheckedChange={(checked) => setHideHeartbeats(Boolean(checked))}
                 className="size-3.5"
               />
-              <label htmlFor="hide-heartbeats" className="text-[10px] text-muted-foreground select-none cursor-pointer">
+              <label
+                htmlFor="hide-heartbeats"
+                className={cn(
+                  // Typography
+                  "text-[11px] text-muted-foreground select-none cursor-pointer"
+                )}
+              >
                 Hide heartbeats
               </label>
             </div>
 
             {/* Auto Scroll Checkbox */}
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center",
+
+                // Sizing & Spacing
+                "gap-1.5 shrink-0"
+              )}
+            >
               <Checkbox
                 id="auto-scroll"
                 checked={autoScroll}
-                onCheckedChange={(checked) => setAutoScroll(!!checked)}
+                onCheckedChange={(checked) => setAutoScroll(Boolean(checked))}
                 className="size-3.5"
               />
-              <label htmlFor="auto-scroll" className="text-[10px] text-muted-foreground select-none cursor-pointer">
+              <label
+                htmlFor="auto-scroll"
+                className={cn(
+                  // Typography
+                  "text-[11px] text-muted-foreground select-none cursor-pointer"
+                )}
+              >
                 Auto-scroll
               </label>
             </div>
           </div>
         </div>
 
-        <div ref={scrollContainerRef} className="p-3 flex-1 overflow-auto space-y-2">
+        <div
+          ref={scrollContainerRef}
+          className={cn(
+            // Layout & Positioning
+            "flex-1 overflow-auto",
+
+            // Sizing & Spacing
+            "p-2.5 space-y-2"
+          )}
+        >
           {filteredMessages.length === 0 ? (
-            <div className="bg-background p-3 rounded-md border text-xs text-muted-foreground">
+            <div
+              className={cn(
+                // Sizing & Spacing
+                "p-4",
+
+                // Typography
+                "text-xs text-muted-foreground text-center",
+
+                // Backgrounds & Borders
+                "rounded-md border border-dashed bg-muted/10"
+              )}
+            >
               {messages.length === 0
-                ? 'No WebSocket messages captured for this connection.'
-                : 'No messages match active filters.'}
+                ? 'No WebSocket frames captured for this connection yet.'
+                : 'No frames match the active filters.'}
             </div>
           ) : (
             filteredMessages.map((message) => (

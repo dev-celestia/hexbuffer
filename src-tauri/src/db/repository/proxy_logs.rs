@@ -41,9 +41,16 @@ fn build_scope_sql_clause(scope: &[String]) -> Option<String> {
     }
 }
 
+const SELECT_PROXY_RECORD_COLS: &str = "id, timestamp, method, url, request_headers, request_body, response_status, response_status_text, response_headers, response_body, client_addr, server_addr";
+
 impl Database {
-    pub fn insert_log(&self, record: &ProxyRecord) -> SqlResult<()> {
+    pub fn insert_log(&self, record: &ProxyRecord, session_id: Option<&str>) -> SqlResult<()> {
         let conn = self.conn.lock().unwrap();
+        let target_session_id = match session_id {
+            Some(s) if !s.trim().is_empty() => s.trim().to_string(),
+            _ => Self::ensure_default_http_session(&conn)?,
+        };
+
         let request_headers = serde_json::to_string(&record.request.headers).unwrap_or_default();
         let response_headers = record
             .response
@@ -53,14 +60,15 @@ impl Database {
 
         conn.execute(
             r#"INSERT INTO http_logs (
-                id, timestamp, method, url,
+                id, session_id, timestamp, method, url,
                 request_headers, request_body,
                 response_status, response_status_text,
                 response_headers, response_body,
                 client_addr, server_addr, duration_ms
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)"#,
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)"#,
             params![
                 record.id.to_string(),
+                target_session_id,
                 record.timestamp.to_rfc3339(),
                 record.request.method,
                 record.request.uri,
@@ -80,7 +88,7 @@ impl Database {
 
     pub fn get_all(&self) -> SqlResult<Vec<ProxyRecord>> {
         let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare("SELECT * FROM http_logs ORDER BY timestamp DESC")?;
+        let mut stmt = conn.prepare(&format!("SELECT {} FROM http_logs ORDER BY timestamp DESC", SELECT_PROXY_RECORD_COLS))?;
         let rows = stmt.query_map([], row_to_proxy_record)?;
 
         Ok(collect_records(rows))
@@ -88,8 +96,14 @@ impl Database {
 
     pub fn get_filtered(&self, filter: &ProxyFilter) -> SqlResult<Vec<ProxyRecord>> {
         let conn = self.conn.lock().unwrap();
-        let mut sql = String::from("SELECT * FROM http_logs WHERE 1=1");
+        let mut sql = format!("SELECT {} FROM http_logs WHERE 1=1", SELECT_PROXY_RECORD_COLS);
         let mut conditions = Vec::new();
+
+        if let Some(ref session_id) = filter.session_id {
+            if !session_id.is_empty() {
+                conditions.push(format!("session_id = '{}'", session_id.replace('\'', "''")));
+            }
+        }
 
         if let Some(ref search) = filter.search {
             if !search.is_empty() {
@@ -141,7 +155,7 @@ impl Database {
 
     pub fn get_by_id(&self, id: &str) -> SqlResult<Option<ProxyRecord>> {
         let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare("SELECT * FROM http_logs WHERE id = ?1 LIMIT 1")?;
+        let mut stmt = conn.prepare(&format!("SELECT {} FROM http_logs WHERE id = ?1 LIMIT 1", SELECT_PROXY_RECORD_COLS))?;
         let mut rows = stmt.query(params![id])?;
 
         match rows.next()? {
@@ -153,6 +167,8 @@ impl Database {
     pub fn clear_logs(&self) -> SqlResult<()> {
         let conn = self.conn.lock().unwrap();
         conn.execute("DELETE FROM http_logs", [])?;
+        drop(conn);
+        let _ = self.vacuum();
         Ok(())
     }
 
@@ -170,11 +186,14 @@ impl Database {
             "DELETE FROM websocket_connections WHERE timestamp < ?1",
             params![cutoff_rfc3339],
         );
+        drop(conn);
+        let _ = self.vacuum();
         Ok(rows)
     }
 
     pub fn get_paginated(
         &self,
+        session_id: Option<&str>,
         page: u32,
         per_page: u32,
         sort_order: &str,
@@ -182,21 +201,34 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         let offset = (page - 1) * per_page;
 
+        let (where_clause, params_vec): (String, Vec<Box<dyn rusqlite::ToSql>>) = match session_id {
+            Some(sid) if !sid.is_empty() => (" WHERE session_id = ?".to_string(), vec![Box::new(sid.to_string())]),
+            _ => (String::new(), Vec::new()),
+        };
+
         let mut stmt = conn
             .prepare(&format!(
-                "SELECT * FROM http_logs ORDER BY timestamp {} LIMIT ? OFFSET ?",
-                sort_order
+                "SELECT {} FROM http_logs{} ORDER BY timestamp {} LIMIT ? OFFSET ?",
+                SELECT_PROXY_RECORD_COLS, where_clause, sort_order
             ))
             .map_err(|e| e.to_string())?;
 
+        let per_page_i64 = per_page as i64;
+        let offset_i64 = offset as i64;
+        let mut all_params: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
+        all_params.push(&per_page_i64 as &dyn rusqlite::ToSql);
+        all_params.push(&offset_i64 as &dyn rusqlite::ToSql);
+
         let rows = stmt
-            .query_map(params![per_page as i64, offset as i64], row_to_proxy_record)
+            .query_map(all_params.as_slice(), row_to_proxy_record)
             .map_err(|e| e.to_string())?;
 
         let records = collect_records(rows);
 
+        let count_sql = format!("SELECT COUNT(*) FROM http_logs{}", where_clause);
+        let count_params: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
         let total: i64 = conn
-            .query_row("SELECT COUNT(*) FROM http_logs", [], |row| row.get(0))
+            .query_row(&count_sql, count_params.as_slice(), |row| row.get(0))
             .map_err(|e| e.to_string())?;
 
         let has_more = (offset as usize + records.len()) < total as usize;
@@ -220,8 +252,15 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         let offset = (page - 1) * per_page;
 
-        let mut sql = String::from("SELECT * FROM http_logs WHERE 1=1");
+        let mut sql = format!("SELECT {} FROM http_logs WHERE 1=1", SELECT_PROXY_RECORD_COLS);
         let mut params_vec: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
+
+        if let Some(ref sid) = filter.session_id {
+            if !sid.is_empty() {
+                sql.push_str(" AND session_id = ?");
+                params_vec.push(Box::new(sid.clone()));
+            }
+        }
 
         if let Some(ref search) = filter.search {
             if !search.is_empty() {
@@ -294,36 +333,58 @@ impl Database {
         let records = collect_records(rows);
 
         let mut count_sql = String::from("SELECT COUNT(*) FROM http_logs WHERE 1=1");
+        let mut count_params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
+
+        if let Some(ref sid) = filter.session_id {
+            if !sid.is_empty() {
+                count_sql.push_str(" AND session_id = ?");
+                count_params.push(Box::new(sid.clone()));
+            }
+        }
 
         if let Some(ref search) = filter.search {
             if !search.is_empty() {
-                count_sql.push_str(&format!(
-                    " AND (url LIKE '%{}%' OR method LIKE '%{}%' OR server_addr LIKE '%{}%' OR request_headers LIKE '%{}%')",
-                    search, search, search, search
-                ));
+                let search_pattern = format!("%{}%", search);
+                count_sql.push_str(" AND (url LIKE ? OR method LIKE ? OR server_addr LIKE ? OR request_headers LIKE ?)");
+                count_params.push(Box::new(search_pattern.clone()));
+                count_params.push(Box::new(search_pattern.clone()));
+                count_params.push(Box::new(search_pattern.clone()));
+                count_params.push(Box::new(search_pattern));
             }
         }
 
         if let Some(ref path) = filter.path {
             if !path.is_empty() {
-                count_sql.push_str(&format!(" AND url LIKE '%{}%'", path));
+                count_sql.push_str(" AND url LIKE ?");
+                count_params.push(Box::new(format!("%{}%", path)));
             }
         }
 
         if let Some(ref methods) = filter.methods {
             if !methods.is_empty() {
-                let method_list: Vec<String> = methods.iter().map(|m| format!("'{}'", m)).collect();
-                count_sql.push_str(&format!(" AND method IN ({})", method_list.join(",")));
+                count_sql.push_str(" AND method IN (");
+                for (i, m) in methods.iter().enumerate() {
+                    if i > 0 {
+                        count_sql.push_str(", ");
+                    }
+                    count_sql.push('?');
+                    count_params.push(Box::new(m.clone()));
+                }
+                count_sql.push(')');
             }
         }
 
         if let Some(ref status_codes) = filter.status_codes {
             if !status_codes.is_empty() {
-                let status_list: Vec<String> = status_codes.iter().map(|s| s.to_string()).collect();
-                count_sql.push_str(&format!(
-                    " AND response_status IN ({})",
-                    status_list.join(",")
-                ));
+                count_sql.push_str(" AND response_status IN (");
+                for (i, s) in status_codes.iter().enumerate() {
+                    if i > 0 {
+                        count_sql.push_str(", ");
+                    }
+                    count_sql.push('?');
+                    count_params.push(Box::new(*s as i64));
+                }
+                count_sql.push(')');
             }
         }
 
@@ -333,8 +394,9 @@ impl Database {
             }
         }
 
+        let count_params_ref: Vec<&dyn rusqlite::ToSql> = count_params.iter().map(|b| b.as_ref()).collect();
         let total: i64 = conn
-            .query_row(&count_sql, [], |row| row.get(0))
+            .query_row(&count_sql, count_params_ref.as_slice(), |row| row.get(0))
             .map_err(|e| e.to_string())?;
 
         let has_more = (offset as usize + records.len()) < total as usize;
@@ -349,33 +411,43 @@ impl Database {
     }
 
     /// Optimized paginated query that skips request/response BLOBs and headers.
-    /// Only selects lightweight columns needed for the summary table view.
     pub fn get_summary_paginated(
         &self,
+        session_id: Option<&str>,
         page: u32,
         per_page: u32,
         sort_order: &str,
     ) -> Result<PaginatedResponse<ProxySummaryRow>, String> {
         let conn = self.conn.lock().unwrap();
         let offset = (page - 1) * per_page;
-
         let limit = per_page + 1;
 
+        let (where_clause, params_vec): (String, Vec<Box<dyn rusqlite::ToSql>>) = match session_id {
+            Some(sid) if !sid.is_empty() => (" WHERE session_id = ?".to_string(), vec![Box::new(sid.to_string())]),
+            _ => (String::new(), Vec::new()),
+        };
+
         let sql = format!(
-            "SELECT id, timestamp, method, url, response_status, response_status_text,
+            "SELECT id, session_id, timestamp, method, url, response_status, response_status_text,
                     COALESCE(LENGTH(request_body), 0),
                     COALESCE(LENGTH(response_body), 0),
                     COALESCE(server_addr, ''),
                     request_headers,
                     response_headers
-             FROM http_logs
+             FROM http_logs{}
              ORDER BY timestamp {} LIMIT ? OFFSET ?",
-            sort_order
+            where_clause, sort_order
         );
 
         let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
+        let limit_i64 = limit as i64;
+        let offset_i64 = offset as i64;
+        let mut all_params: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
+        all_params.push(&limit_i64 as &dyn rusqlite::ToSql);
+        all_params.push(&offset_i64 as &dyn rusqlite::ToSql);
+
         let mut rows = stmt
-            .query(params![limit as i64, offset as i64])
+            .query(all_params.as_slice())
             .map_err(|e| e.to_string())?;
         let mut records: Vec<ProxySummaryRow> = Vec::new();
         while let Some(row) = rows.next().map_err(|e| e.to_string())? {
@@ -403,7 +475,6 @@ impl Database {
     }
 
     /// Optimized filtered paginated query that skips request/response BLOBs.
-    /// Uses parameterized queries for both data and count to allow SQLite plan caching.
     pub fn get_filtered_summary_paginated(
         &self,
         filter: &ProxyFilter,
@@ -416,6 +487,13 @@ impl Database {
 
         let mut where_sql = String::new();
         let mut params_vec: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
+
+        if let Some(ref sid) = filter.session_id {
+            if !sid.is_empty() {
+                where_sql.push_str(" AND session_id = ?");
+                params_vec.push(Box::new(sid.clone()));
+            }
+        }
 
         if let Some(ref search) = filter.search {
             if !search.is_empty() {
@@ -474,7 +552,7 @@ impl Database {
         let offset_i64 = offset as i64;
 
         let data_sql = format!(
-            "SELECT id, timestamp, method, url, response_status, response_status_text,
+            "SELECT id, session_id, timestamp, method, url, response_status, response_status_text,
                     COALESCE(LENGTH(request_body), 0),
                     COALESCE(LENGTH(response_body), 0),
                     COALESCE(server_addr, ''),
@@ -519,10 +597,15 @@ impl Database {
         })
     }
 
-    pub fn count(&self) -> Result<usize, String> {
+    pub fn count(&self, session_id: Option<&str>) -> Result<usize, String> {
         let conn = self.conn.lock().unwrap();
+        let (sql, params_vec): (String, Vec<Box<dyn rusqlite::ToSql>>) = match session_id {
+            Some(sid) if !sid.is_empty() => ("SELECT COUNT(*) FROM http_logs WHERE session_id = ?".to_string(), vec![Box::new(sid.to_string())]),
+            _ => ("SELECT COUNT(*) FROM http_logs".to_string(), Vec::new()),
+        };
+        let params_ref: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
         let total: i64 = conn
-            .query_row("SELECT COUNT(*) FROM http_logs", [], |row| row.get(0))
+            .query_row(&sql, params_ref.as_slice(), |row| row.get(0))
             .map_err(|e| e.to_string())?;
         Ok(total as usize)
     }
@@ -532,6 +615,13 @@ impl Database {
 
         let mut sql = String::from("SELECT url, method FROM http_logs WHERE 1=1");
         let mut params_vec: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
+
+        if let Some(ref sid) = filter.session_id {
+            if !sid.is_empty() {
+                sql.push_str(" AND session_id = ?");
+                params_vec.push(Box::new(sid.clone()));
+            }
+        }
 
         if let Some(ref search) = filter.search {
             if !search.is_empty() {
@@ -748,8 +838,9 @@ fn row_to_proxy_record(row: &rusqlite::Row) -> SqlResult<ProxyRecord> {
 }
 
 fn row_to_proxy_summary(row: &rusqlite::Row) -> SqlResult<ProxySummaryRow> {
-    let req_headers_raw: Option<String> = row.get(9).ok();
-    let res_headers_str: Option<String> = row.get(10).ok();
+    let session_id: String = row.get(1).unwrap_or_default();
+    let req_headers_raw: Option<String> = row.get(10).ok();
+    let res_headers_str: Option<String> = row.get(11).ok();
 
     let mut user_agent = None;
     let mut referrer = None;
@@ -793,14 +884,15 @@ fn row_to_proxy_summary(row: &rusqlite::Row) -> SqlResult<ProxySummaryRow> {
 
     Ok(ProxySummaryRow {
         id: row.get(0)?,
-        timestamp: row.get(1)?,
-        method: row.get(2)?,
-        url: row.get(3)?,
-        response_status: row.get::<_, Option<i64>>(4)?.map(|v| v as u16),
-        response_status_text: row.get(5)?,
-        request_body_size: row.get::<_, i64>(6)? as usize,
-        response_body_size: row.get::<_, i64>(7)? as usize,
-        server_addr: row.get(8)?,
+        session_id,
+        timestamp: row.get(2)?,
+        method: row.get(3)?,
+        url: row.get(4)?,
+        response_status: row.get::<_, Option<i64>>(5)?.map(|v| v as u16),
+        response_status_text: row.get(6)?,
+        request_body_size: row.get::<_, i64>(7)? as usize,
+        response_body_size: row.get::<_, i64>(8)? as usize,
+        server_addr: row.get(9)?,
         user_agent,
         host,
         response_content_type,

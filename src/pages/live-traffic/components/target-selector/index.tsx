@@ -1,7 +1,15 @@
-
-
-import { Badge, Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@celestia-project/ui';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@celestia-project/ui';
 import { PlusIcon, TargetIcon, ArrowLeftIcon } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 import { TargetSearchList } from './target-search-list';
 import { TargetDialogForm } from './target-dialog-form';
 import { useTargetSelectorDialog } from './hooks';
@@ -35,33 +43,53 @@ export function TargetSelectorDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {!isExternallyControlled && (
-        <DialogTrigger>
-          <Button variant="outline" size="sm" className="gap-1.5 active:scale-[0.97] transition-all">
-            <TargetIcon className="h-3.5 w-3.5 text-primary" />
-            Manage Target
-          </Button>
-        </DialogTrigger>
+        <DialogTrigger
+          render={
+            <Button variant="outline" size="sm">
+              <TargetIcon className="text-primary" />
+              <span>Manage Target</span>
+            </Button>
+          }
+        />
       )}
-      <DialogContent className="p-5 gap-4">
+      <DialogContent
+        showCloseButton={false}
+        className={cn(
+          // Sizing & Spacing
+          "sm:max-w-xl gap-4 p-5"
+        )}
+      >
         {showCreateNew ? (
           <>
-            <DialogHeader className="space-y-1">
-              <div className="flex items-center gap-2">
+            <DialogHeader>
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center",
+
+                  // Sizing & Spacing
+                  "gap-2"
+                )}
+              >
                 <Button
                   type="button"
-                  size="icon-sm"
+                  size="icon-xs"
                   variant="ghost"
                   onClick={handleCancelCreate}
-                  className="h-6 w-6 rounded-full shrink-0 -ml-1 text-muted-foreground hover:text-foreground active:scale-95 transition-all"
                   aria-label="Back to target list"
                 >
-                  <ArrowLeftIcon className="h-3.5 w-3.5" />
+                  <ArrowLeftIcon />
                 </Button>
-                <DialogTitle className="text-sm font-semibold flex items-center gap-2">
+                <DialogTitle>
                   {editingTarget ? 'Edit Target' : 'Create New Target'}
                 </DialogTitle>
               </div>
-              <DialogDescription className="text-xs text-muted-foreground pl-7">
+              <DialogDescription
+                className={cn(
+                  // Sizing & Spacing
+                  "pl-7"
+                )}
+              >
                 {editingTarget
                   ? 'Update target parameters and active domain scope rules.'
                   : 'Define a target name and domain scope patterns to start monitoring.'}
@@ -76,19 +104,20 @@ export function TargetSelectorDialog({
           </>
         ) : (
           <>
-            <DialogHeader className="space-y-1">
-              <div className="flex items-center justify-between">
-                <DialogTitle className="text-sm font-semibold flex items-center gap-2">
-                  <div className="p-1 rounded-md bg-primary/10 text-primary">
-                    <TargetIcon className="h-4 w-4" />
-                  </div>
-                  Target Scope Selector
-                </DialogTitle>
-                <Badge variant="outline" className="text-[10px] font-normal border-border/60">
-                  {targetCount} {targetCount === 1 ? 'Target' : 'Targets'}
-                </Badge>
-              </div>
-              <DialogDescription className="text-xs text-muted-foreground">
+            <DialogHeader>
+              <DialogTitle
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center",
+
+                  // Sizing & Spacing
+                  "gap-2"
+                )}
+              >
+                <TargetIcon className="text-primary" />
+                <span>Target Scope Selector</span>
+              </DialogTitle>
+              <DialogDescription>
                 Select an existing target to activate monitoring scope, or define a new target.
               </DialogDescription>
             </DialogHeader>
@@ -102,18 +131,34 @@ export function TargetSelectorDialog({
               onEditTarget={handleEditTarget}
             />
 
-            <DialogFooter className="pt-2 border-t border-border/40 flex items-center justify-between sm:justify-between">
-              <span className="text-[11px] text-muted-foreground">
-                Showing <span className="font-semibold text-foreground">{filteredCount}</span> of {targetCount}
+            <DialogFooter
+              className={cn(
+                // Layout & Positioning
+                "flex items-center justify-between sm:justify-between",
+
+                // Sizing & Spacing
+                "pt-2",
+
+                // Backgrounds & Borders
+                "border-t border-border/40"
+              )}
+            >
+              <span
+                className={cn(
+                  // Typography
+                  "text-xs text-muted-foreground"
+                )}
+              >
+                Showing <span className="font-semibold text-foreground">{filteredCount}</span> of{' '}
+                {targetCount}
               </span>
               <Button
                 variant="default"
                 size="sm"
                 onClick={handleCreateNew}
-                className="gap-1.5 active:scale-[0.98] transition-all"
               >
-                <PlusIcon className="h-3.5 w-3.5" />
-                Create New Target
+                <PlusIcon />
+                <span>Create New Target</span>
               </Button>
             </DialogFooter>
           </>
@@ -122,4 +167,3 @@ export function TargetSelectorDialog({
     </Dialog>
   );
 }
-

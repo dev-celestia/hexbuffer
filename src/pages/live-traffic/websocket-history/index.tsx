@@ -1,16 +1,36 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Button, Card, Input } from '@celestia-project/ui';
+import * as React from "react";
+import {
+  Button,
+  Card,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@celestia-project/ui';
 import { TabbedPageLayout } from "@/layout/tabs-layout/tabbed-page-layout";
 
 import { TargetSelectorDialog } from "@/pages/live-traffic/components/target-selector";
 import { useWebSocketHistoryPage } from "./hooks/use-websocket-history-page";
 import { useWebSocketHistoryQueryStore } from "@/stores/history";
-import { invoke } from "@tauri-apps/api/core";
+import { clearWebSocketAll } from "./api";
 import { toast } from "sonner";
-import { TrashIcon, PlayIcon, PauseIcon, TargetIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
+import {
+  TrashIcon,
+  PlayIcon,
+  PauseIcon,
+  TargetIcon,
+  MagnifyingGlassIcon,
+  XIcon,
+} from '@phosphor-icons/react';
 
+import { SessionSelector } from "@/pages/live-traffic/http-history/components/session-selector";
 import { openTargetSelector } from "@/triggers";
-
 import { cn } from "@/lib/utils";
 
 export function WebSocketHistoryPage() {
@@ -19,11 +39,13 @@ export function WebSocketHistoryPage() {
   const search = useWebSocketHistoryQueryStore((s) => s.filter.search);
   const setSearch = useWebSocketHistoryQueryStore((s) => s.setSearch);
 
-  const [localSearch, setLocalSearch] = useState(search);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [localSearch, setLocalSearch] = React.useState(search || '');
+  const [clearDialogOpen, setClearDialogOpen] = React.useState(false);
+  const [isClearing, setIsClearing] = React.useState(false);
+  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    setLocalSearch(search);
+  React.useEffect(() => {
+    setLocalSearch(search || '');
   }, [search]);
 
   const handleSearchChange = (val: string) => {
@@ -40,7 +62,7 @@ export function WebSocketHistoryPage() {
     setSearch('');
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
@@ -53,16 +75,18 @@ export function WebSocketHistoryPage() {
     if (wasPaused) store.triggerRefresh();
   };
 
-  const handleClearAll = async () => {
-    if (confirm("Are you sure you want to clear all WebSocket connection history?")) {
-      try {
-        await invoke("clear_websocket_all");
-        useWebSocketHistoryQueryStore.getState().triggerRefresh();
-        useWebSocketHistoryQueryStore.getState().setSelectedConnectionId(null);
-        toast.success("WebSocket history cleared");
-      } catch (err) {
-        toast.error("Failed to clear WebSocket history");
-      }
+  const handleConfirmClearAll = async () => {
+    setIsClearing(true);
+    try {
+      await clearWebSocketAll();
+      useWebSocketHistoryQueryStore.getState().triggerRefresh();
+      useWebSocketHistoryQueryStore.getState().setSelectedConnectionId(null);
+      toast.success("WebSocket history cleared");
+      setClearDialogOpen(false);
+    } catch (err) {
+      toast.error("Failed to clear WebSocket history");
+    } finally {
+      setIsClearing(false);
     }
   };
 
@@ -90,7 +114,7 @@ export function WebSocketHistoryPage() {
             "p-1 px-2",
 
             // Backgrounds & Borders
-            "bg-muted border-b"
+            "bg-muted/40 border-b"
           )}
         >
           <div
@@ -102,69 +126,55 @@ export function WebSocketHistoryPage() {
               "gap-2"
             )}
           >
-            <span
+            {/* Active Session Switcher Capsule */}
+            <SessionSelector />
+
+            {/* Modern Search InputGroup */}
+            <InputGroup
               className={cn(
-                // Typography
-                "text-[10px] font-medium text-muted-foreground uppercase tracking-wider pl-1"
+                // Sizing & Spacing
+                "w-48",
+
+                // Interactive & States
+                "transition-all duration-150 focus-within:w-64"
               )}
             >
-              WebSocket
-            </span>
+              <InputGroupAddon align="inline-start">
+                <MagnifyingGlassIcon
+                  className={cn(
+                    // Sizing & Spacing
+                    "size-3.5",
 
-            <div
-              className={cn(
-                // Layout & Positioning
-                "relative flex items-center"
-              )}
-            >
-              <MagnifyingGlassIcon
-                className={cn(
-                  // Layout & Positioning
-                  "absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none",
-
-                  // Sizing & Spacing
-                  "size-3.5",
-
-                  // Typography
-                  "text-muted-foreground"
-                )}
-              />
-              <Input
+                    // Typography
+                    "text-muted-foreground"
+                  )}
+                />
+              </InputGroupAddon>
+              <InputGroupInput
                 type="text"
                 value={localSearch}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder="Search URL, host, path…"
                 className={cn(
                   // Sizing & Spacing
-                  "h-7 w-44 pl-7 pr-7 text-xs bg-background",
-
-                  // Backgrounds & Borders
-                  "border-input",
-
-                  // Interactive & States
-                  "focus:w-56 transition-all duration-150"
+                  "h-7 text-xs"
                 )}
               />
               {localSearch && (
-                <button
-                  type="button"
-                  onClick={handleClearSearch}
-                  className={cn(
-                    // Layout & Positioning
-                    "absolute right-2 top-1/2 -translate-y-1/2",
-
-                    // Typography
-                    "text-muted-foreground",
-
-                    // Interactive & States
-                    "hover:text-foreground"
-                  )}
-                >
-                  <XIcon className="size-3" />
-                </button>
+                <InputGroupAddon align="inline-end">
+                  <InputGroupButton
+                    size="icon-xs"
+                    variant="ghost"
+                    onClick={handleClearSearch}
+                    aria-label="Clear search"
+                  >
+                    <XIcon className="size-3" />
+                  </InputGroupButton>
+                </InputGroupAddon>
               )}
-            </div>
+            </InputGroup>
           </div>
+
           <div
             className={cn(
               // Layout & Positioning
@@ -182,14 +192,19 @@ export function WebSocketHistoryPage() {
                 "shrink-0",
 
                 // Sizing & Spacing
-                "h-6",
-
-                // Typography
-                "text-xs"
+                "h-7 text-xs gap-1.5"
               )}
               onClick={togglePause}
             >
-              {isWsPaused ? <><PlayIcon className="size-3" /> Resume</> : <><PauseIcon className="size-3" /> Pause</>}
+              {isWsPaused ? (
+                <>
+                  <PlayIcon className="size-3.5 text-amber-500" /> Resume
+                </>
+              ) : (
+                <>
+                  <PauseIcon className="size-3.5 text-muted-foreground" /> Pause
+                </>
+              )}
             </Button>
             <Button
               variant="ghost"
@@ -199,39 +214,34 @@ export function WebSocketHistoryPage() {
                 "shrink-0",
 
                 // Sizing & Spacing
-                "h-6",
-
-                // Typography
-                "text-xs"
+                "h-7 text-xs gap-1.5"
               )}
               onClick={openTargetSelector}
             >
-              <TargetIcon className="size-3" />
+              <TargetIcon className="size-3.5 text-muted-foreground" />
               Target
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleClearAll}
+              onClick={() => setClearDialogOpen(true)}
               className={cn(
                 // Layout & Positioning
                 "shrink-0",
 
                 // Sizing & Spacing
-                "h-6",
+                "h-7 text-xs gap-1.5",
 
                 // Typography
-                "text-xs",
-
-                // Visuals & Colors
-                "!text-red-500"
+                "text-destructive hover:text-destructive hover:bg-destructive/10"
               )}
             >
-              <TrashIcon className="size-3 mr-1" />
+              <TrashIcon className="size-3.5" />
               Clear All
             </Button>
           </div>
         </div>
+
         <Card
           className={cn(
             // Layout & Positioning
@@ -241,16 +251,66 @@ export function WebSocketHistoryPage() {
             "!py-0",
 
             // Backgrounds & Borders
-            "rounded-none"
+            "rounded-none border-0 shadow-none"
           )}
         >
           {page.websocketView}
         </Card>
       </TabbedPageLayout>
+
       <TargetSelectorDialog
         externalOpen={page.isTargetSelectorOpen}
-        onExternalOpenChange={(open) => { if (!open) page.closeTargetSelector(); }}
+        onExternalOpenChange={(open) => {
+          if (!open) page.closeTargetSelector();
+        }}
       />
+
+      {/* Modern Confirmation Dialog */}
+      <Dialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Clear WebSocket History</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to permanently delete all captured WebSocket connections and messages?
+            </DialogDescription>
+          </DialogHeader>
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-col",
+
+              // Sizing & Spacing
+              "gap-1.5 p-3 my-1",
+
+              // Typography
+              "text-xs leading-relaxed",
+
+              // Backgrounds & Borders
+              "rounded-md border border-destructive/20 bg-destructive/5 text-muted-foreground"
+            )}
+          >
+            All connection handshakes and recorded frame payloads will be purged.
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setClearDialogOpen(false)}
+              disabled={isClearing}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleConfirmClearAll}
+              disabled={isClearing}
+            >
+              {isClearing ? 'Clearing…' : 'Clear All'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

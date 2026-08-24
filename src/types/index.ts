@@ -94,6 +94,7 @@ export interface ProxyRecord {
 
 export interface ProxyLogSummary {
   id: string;
+  session_id: string;
   timestamp: string;
   method: string;
   url: string;
@@ -105,6 +106,26 @@ export interface ProxyLogSummary {
   server_addr: string;
   user_agent: string | null;
   host: string | null;
+}
+
+export interface HttpSessionSummary {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+  is_active: boolean;
+  description: string | null;
+  request_count: number;
+  total_size_bytes: number;
+}
+
+export interface HttpSessionRecord {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+  is_active: boolean;
+  description: string | null;
 }
 
 export interface PaginatedResponse<T> {

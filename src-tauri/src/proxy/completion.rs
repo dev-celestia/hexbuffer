@@ -31,10 +31,16 @@ pub fn build_record(ctx: &Ctx) -> ProxyRecord {
 
 pub fn save_and_emit(ctx: &Ctx, app_handle: &tauri::AppHandle) {
     let txn = build_record(ctx);
+    let mut session_id = String::new();
 
     if let Some(history) = app_handle.try_state::<crate::HistoryBridge>() {
-        if let Err(e) = history.insert_record(&txn) {
+        let active_sess = history.get_active_http_session().ok().flatten();
+        let sid = active_sess.as_ref().map(|s| s.id.as_str());
+        if let Err(e) = history.insert_record(&txn, sid) {
             eprintln!("[completion] failed to insert to DB: {}", e);
+        }
+        if let Some(s) = active_sess {
+            session_id = s.id;
         }
     }
 
@@ -42,6 +48,7 @@ pub fn save_and_emit(ctx: &Ctx, app_handle: &tauri::AppHandle) {
 
     let summary = crate::ProxyLogSummary {
         id: txn.id.to_string(),
+        session_id,
         timestamp: txn.timestamp.to_rfc3339(),
         method: txn.request.method.clone(),
         url: txn.request.uri.clone(),

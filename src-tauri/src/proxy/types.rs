@@ -66,6 +66,8 @@ pub enum WebSocketMessageType {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WebSocketConnectionRecord {
     pub id: Uuid,
+    #[serde(default)]
+    pub session_id: String,
     pub timestamp: DateTime<Utc>,
     pub url: String,
     pub host: String,
@@ -96,6 +98,7 @@ pub struct WebSocketFilter {
     pub search: Option<String>,
     pub scope: Option<Vec<String>>,
     pub states: Option<Vec<String>>,
+    pub session_id: Option<String>,
 }
 
 impl WebSocketFilter {
@@ -151,6 +154,7 @@ pub struct ProxyFilter {
     pub methods: Option<Vec<String>>,
     pub status_codes: Option<Vec<u16>>,
     pub scope: Option<Vec<String>>,
+    pub session_id: Option<String>,
 }
 
 impl ProxyFilter {
