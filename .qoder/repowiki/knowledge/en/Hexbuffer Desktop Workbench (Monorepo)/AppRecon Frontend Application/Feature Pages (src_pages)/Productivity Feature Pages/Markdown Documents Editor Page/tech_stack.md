@@ -1,1 +1,0 @@
-React + TypeScript with Zustand (`zustand/react/shallow`) for global document state, Tauri (`@tauri-apps/api/core`, `@tauri-apps/plugin-dialog`, `@tauri-apps/plugin-fs`) for native persistence and file saving, `jspdf` for client-side PDF generation, and `hexbuffer-ui` for shared primitives (`AlertDialog`, `ResizablePanelGroup`).

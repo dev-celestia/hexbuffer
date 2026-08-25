@@ -1,1 +1,0 @@
-API keys are stored per-provider under the `hexbuffer.ai` service in the platform keychain; on macOS stale entries must be removed via Keychain Access if the secure store fails. Settings are read/written to `<app_data_dir>/ai-settings.json` and automatically migrate legacy `has_api_key` fields into the new `provider_key_status` map.

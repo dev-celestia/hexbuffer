@@ -1,1 +1,0 @@
-React with TypeScript; UI primitives sourced from the internal `hexbuffer-ui` package (Radix-based); styling via Tailwind CSS class names composed with `cn()` from `@/lib/utils`; tab persistence uses a Zustand store at `@/stores/tabs-layout`; icons from `@phosphor-icons/react`; markdown rendering via `streamdown`.

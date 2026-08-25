@@ -1,1 +1,0 @@
-No build or test scripts are scoped to this module; components are consumed as ES modules by the application. The `ui/index.ts` barrel re-exports everything from `hexbuffer-ui`, so adding new primitives requires only exporting them from that package.

@@ -1,1 +1,0 @@
-React with TypeScript, `@dnd-kit/core` for drag-and-drop (MouseSensor, TouchSensor, closestCorners collision detection, MeasuringStrategy.WhileDragging), `@phosphor-icons/react` for icons, `hexbuffer-ui` for Button/Tabs primitives, and Tailwind CSS via `cn()` utility from `@/lib/utils`.

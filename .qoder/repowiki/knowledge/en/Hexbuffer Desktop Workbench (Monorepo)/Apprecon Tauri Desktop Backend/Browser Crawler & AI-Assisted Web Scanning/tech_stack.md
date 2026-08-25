@@ -1,1 +1,0 @@
-Rust with Tauri (`tauri::{AppHandle, Emitter, Manager}`), the external `browser_crawler` crate for headless crawling (with `RenderMode::Dynamic`/`Static`), `uuid` for IDs, `chrono` for RFC3339 timestamps, `serde`/`serde_json` for serialization, and `rig` for the AI tool definition interface.

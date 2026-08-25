@@ -1,1 +1,0 @@
-React Flow (`@xyflow/react`) for the graph editor, Zustand via `@/stores/automation` for workflow state, `hexbuffer-ui` for ResizablePanel/TabbedPageLayout primitives, and Phosphor Icons for node icons. Node rendering uses memoized React components registered through a type-string-to-component map.

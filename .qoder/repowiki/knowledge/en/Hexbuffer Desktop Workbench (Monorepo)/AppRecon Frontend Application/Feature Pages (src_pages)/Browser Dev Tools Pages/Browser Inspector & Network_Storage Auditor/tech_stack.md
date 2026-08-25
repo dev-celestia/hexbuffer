@@ -1,1 +1,0 @@
-React with TypeScript, Tauri (`@tauri-apps/api/core` invoke + `listen` for cross-process events), Chrome DevTools Protocol over raw WebSocket, hexbuffer-ui for primitives, @phosphor-icons/react for icons, @tanstack/react-virtual for virtualized network request lists, and Zustand (`useShallow`) for the debugger store used by `use-debugger-page`.

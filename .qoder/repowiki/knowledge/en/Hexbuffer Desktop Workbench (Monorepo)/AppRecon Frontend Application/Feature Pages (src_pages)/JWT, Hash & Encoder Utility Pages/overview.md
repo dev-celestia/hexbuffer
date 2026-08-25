@@ -1,1 +1,0 @@
-Three self-contained React feature pages (JWT decode/generate, cryptographic hash computation, and URL/Base64/Hex encoding/decoding) each following a consistent hook-driven component architecture.

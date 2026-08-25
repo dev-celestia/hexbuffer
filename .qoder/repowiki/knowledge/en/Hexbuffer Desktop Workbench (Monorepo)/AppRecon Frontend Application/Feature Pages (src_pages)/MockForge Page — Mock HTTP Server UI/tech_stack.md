@@ -1,1 +1,0 @@
-React + TypeScript with Zustand (`zustand/react/shallow`) for global state, Tauri (`@tauri-apps/api/core` invoke + `listen`) for Rust backend IPC and real-time log events, `hexbuffer-ui` for primitives, `@phosphor-icons/react` for icons, and `sonner` for toast notifications.

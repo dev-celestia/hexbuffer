@@ -1,1 +1,0 @@
-React + TypeScript pages built on `hexbuffer-ui` for shared primitives, `@xyflow/react` for canvas-based pages (workflow, regression), `@dnd-kit/core` for drag-and-drop (kanban), and a shared `TabbedPageLayout` component for multi-tab navigation across all four pages.

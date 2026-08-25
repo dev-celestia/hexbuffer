@@ -1,8 +1,0 @@
-schema_version: 1
-module_path: frontend_app/feature_pages/security_tools/payload_invoker
-title: Security Payload Invoker Page
-scope:
-    - src/pages/invoker/
-source_files: []
-depends_on: []
-related_to: []

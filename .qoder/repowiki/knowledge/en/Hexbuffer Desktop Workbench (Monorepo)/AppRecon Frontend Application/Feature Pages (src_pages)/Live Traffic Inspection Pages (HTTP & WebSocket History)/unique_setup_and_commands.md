@@ -1,1 +1,0 @@
-Tauri backend must be running — calling any API without it throws an error instructing to start the desktop app with `pnpm tauri` rather than `pnpm dev`. WebSocket history supports pausing/resuming streams via a store flag and triggers refreshes through `triggerRefresh()`.

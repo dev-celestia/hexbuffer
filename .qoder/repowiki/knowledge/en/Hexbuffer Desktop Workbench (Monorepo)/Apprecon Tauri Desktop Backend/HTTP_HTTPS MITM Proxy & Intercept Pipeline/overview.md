@@ -1,1 +1,0 @@
-In-process HTTP/HTTPS MITM proxy built on hexbuffer-proxy that records traffic, supports interactive request/response interception with pause/resume, WebSocket frame capture, and early mock responses via MockForge.

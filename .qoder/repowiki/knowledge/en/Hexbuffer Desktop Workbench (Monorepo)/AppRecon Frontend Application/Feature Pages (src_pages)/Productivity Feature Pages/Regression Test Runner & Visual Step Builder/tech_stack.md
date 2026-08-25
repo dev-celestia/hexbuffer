@@ -1,1 +1,0 @@
-React with TypeScript, `@xyflow/react` (React Flow) for the visual step-flow canvas, Zustand (`useShallow`) for state management via `@/stores/regression`, `hexbuffer-ui` for primitives, Phosphor icons, and a sidecar Node.js process running Playwright for actual test execution. Types are validated against Zod schemas in `sidecars/lib/regression/types.mjs`.

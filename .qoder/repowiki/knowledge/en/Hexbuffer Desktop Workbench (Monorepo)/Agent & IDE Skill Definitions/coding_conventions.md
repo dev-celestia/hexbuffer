@@ -1,6 +1,0 @@
-- Each skill is declared as a single SKILL.md file with YAML front-matter containing at least `name` and `description`; optional flags like `disable-model-invocation` control agent behavior.
-- Executable logic inside skills lives in Node .mjs modules under a `scripts/` directory, organized into logical subdirectories (detector/, lib/, live/) rather than flat files.
-- Sub-agent configurations use TOML files with explicit fields `name`, `description`, `model_reasoning_effort`, and a `developer_instructions` triple-quoted string defining the agent's input/output contracts.
-- OpenAI agent integration is expressed through an openai.yaml with `interface.display_name`, `short_description`, and `default_prompt` keys.
-- Review-oriented skills produce structured output tables (Before | After | Why) rather than free-form prose, ensuring machine-parseable findings.
-- Commands follow a routing pattern: no argument → context-aware menu based on signals; first word matches a command → load its reference doc; otherwise fall back to general design invocation.

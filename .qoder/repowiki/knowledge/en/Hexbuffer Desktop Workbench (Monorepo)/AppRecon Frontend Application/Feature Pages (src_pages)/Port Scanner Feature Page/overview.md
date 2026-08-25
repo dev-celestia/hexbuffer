@@ -1,1 +1,0 @@
-React page that lets users configure and run TCP port scans against a target host, displaying real-time progress, open-port results with service banners, and exporting findings as JSON or CSV.

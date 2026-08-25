@@ -1,4 +1,0 @@
-- Each page follows the same file layout: `index.tsx` (route entry), `types.ts`, `api.ts`, a `use-*-page.ts` hook for page state, and a `components/` folder with subfolders for presentational components and their hooks.
-- Stateful logic is extracted into custom hooks (e.g. `use-*-panel.ts`, `use-filters.ts`) rather than kept inline in components.
-- Tabbed interfaces are implemented by a page-level hook managing active tab state, with child components consuming it via props or context.
-- API calls are centralized in a per-page `api.ts` module that wraps fetch calls and returns typed results from the corresponding `types.ts`.

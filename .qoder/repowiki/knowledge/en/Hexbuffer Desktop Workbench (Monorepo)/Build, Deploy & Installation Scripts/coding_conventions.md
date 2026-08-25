@@ -1,6 +1,0 @@
-- Every script starts with `#!/usr/bin/env bash` followed by `set -euo pipefail` and resolves `ROOT` relative to the script's own directory.
-- CLI arguments are parsed with a `while [ $# -gt 0 ]; do case "$1" in ... esac; done` loop, with a `usage()` heredoc printed on `--help` or unknown flags.
-- Optional external commands are checked at runtime via a `require_command` helper or `command -v` guards, failing fast with a descriptive message instead of assuming availability.
-- Colorized output uses ANSI escape codes (`RED`, `GREEN`, `YELLOW`, `NC`) consistently across scripts for human-readable status lines.
-- Filesystem operations use temporary files created via `mktemp` and cleaned up through a `trap cleanup EXIT` pattern.
-- Cross-platform differences are handled with `uname -s` / `uname -m` dispatch tables rather than conditional includes, keeping all logic in a single file.

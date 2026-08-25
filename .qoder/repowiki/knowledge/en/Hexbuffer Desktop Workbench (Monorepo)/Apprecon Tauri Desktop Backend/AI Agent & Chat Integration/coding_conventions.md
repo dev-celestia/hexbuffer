@@ -1,5 +1,0 @@
-- Each Tauri command in `mod.rs` is a thin `#[tauri::command]` wrapper that delegates to a corresponding `*_impl` function defined in `commands.rs` or the relevant feature submodule.
-- All serializable structs use `#[serde(rename_all = "camelCase")]` so JSON payloads match the frontend contract.
-- Provider selection goes through `providers::normalize_ai_provider` and `api_key_env_name` rather than ad-hoc string matching, returning descriptive `String` errors for unsupported values.
-- Secrets are never persisted to disk: `read_ai_settings` clears `api_key` on load, `write_ai_settings` strips it before writing, and actual keys live only in the OS keyring plus an in-process `BTreeMap` cache.
-- Streaming AI responses emit Tauri events (`ai-chat:started`, `ai-chat:delta`, `ai-chat:finished`, `ai:execute-tool`) via `app.emit` instead of returning incremental results.

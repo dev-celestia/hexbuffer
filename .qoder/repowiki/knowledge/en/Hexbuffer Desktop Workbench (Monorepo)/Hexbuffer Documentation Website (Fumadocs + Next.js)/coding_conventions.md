@@ -1,5 +1,0 @@
-- MDX documentation pages are organized under `content/docs/<section>/index.mdx` with a sibling `meta.json` defining title and navigation order, following Fumadocs' collection schema.
-- Route handlers and pages import shared state from `@/lib/source` rather than re-creating the Fumadocs source loader, keeping content resolution centralized.
-- Custom MDX component overrides are composed through `getMDXComponents` in `components/mdx.tsx`, which spreads default Fumadocs MDX components before applying site-specific ones.
-- URL construction for generated assets (images, markdown content) goes through helper functions in `lib/source.ts` (`getPageImageUrl`, `getPageMarkdownUrl`) instead of hardcoding paths.
-- Server-side route handlers declare `dynamic = 'force-static'` when they depend only on the Fumadocs source, ensuring they are baked into the static export.

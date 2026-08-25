@@ -1,7 +1,0 @@
-The module is organized as a classic React feature page with clear separation of concerns:
-- `index.tsx` is the page entry point, composing two presentational components (`ScannerSidebar`, `ScanResults`) in a fixed grid layout.
-- `hooks/use-port-scanner-page.ts` is the single source of truth for scan orchestration: it reads/writes shared state via `usePortScannerStore` (external store), invokes Tauri commands (`scan_ports`, `stop_port_scan`) through `@tauri-apps/api/core`, subscribes to per-scan events (`port-scan-result-*`, `port-scan-progress-*`) via `@tauri-apps/api/event`, and exposes derived values (`openResults`, `canScan`, `selectedPortLabel`) plus handlers.
-- `components/` holds pure presentational UI — `scanner-sidebar.tsx` renders inputs (target, preset select, custom ports, timeout, concurrency, banner-grab checkbox) and `scan-results.tsx` renders the welcome screen, active progress dashboard, result table, and export/copy actions.
-- `lib/port-helpers.ts` and `lib/export-helpers.ts` are pure utility modules (port parsing/range expansion, sorting, JSON/CSV download).
-- `constants.ts` defines port presets and their display options; `types.ts` declares `PortScanState` and `PortScanResult` shared across the module.
-Dependency direction is one-way: index → hook + components → lib helpers; the hook depends on the external store and Tauri IPC but nothing else inside the module imports the hook back.

@@ -1,9 +1,0 @@
-schema_version: 1
-module_path: scripts_and_build
-title: Build, Deploy & Installation Scripts
-scope:
-    - scripts/
-    - install.sh
-source_files: []
-depends_on: []
-related_to: []

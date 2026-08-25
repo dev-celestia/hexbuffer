@@ -1,1 +1,0 @@
-Tauri v2 with plugins (opener, dialog, fs, process, clipboard-manager, shell, os, pty, notification, updater); rusqlite (bundled) for SQLite persistence; tokio/async-trait for async runtime; hyper/reqwest for HTTP; hexbuffer-proxy, browser-crawler, hexbuffer-ai, and rig-core pulled from git repositories; keyring for OS-native API key storage.

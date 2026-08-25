@@ -1,1 +1,0 @@
-Two feature pages — a SQL injection scanner with live progress, vulnerability listing, and database extraction tabs, and an XSS payload builder with category-based library and chained encoding pipeline.

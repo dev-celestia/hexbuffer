@@ -1,1 +1,0 @@
-Commands are exposed to the frontend only after each submodule is listed in `mod.rs` and registered with Tauri's command registry at app initialization; there is no per-command registration script. Some commands depend on external binaries (e.g. `agent-browser` resolved via PATH or known paths) and require the CA PEM file at `hexbuffer-ca.pem` under the app data directory.

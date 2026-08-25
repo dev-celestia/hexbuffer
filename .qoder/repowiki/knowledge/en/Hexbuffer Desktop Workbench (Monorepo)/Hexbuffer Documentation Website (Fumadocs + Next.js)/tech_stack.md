@@ -1,1 +1,0 @@
-Next.js 16 App Router with static export, React 19, TypeScript, Fumadocs Core/UI 16.x (MDX-based docs framework), Tailwind CSS 4 via PostCSS, Biome for lint/format, Lucide icons, and Orama-powered server-side search.

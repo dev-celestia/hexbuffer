@@ -1,6 +1,0 @@
-- Each repository file implements methods directly on the shared `Database` struct via `impl Database { ... }`, keeping the connection handling centralized.
-- All database queries acquire the connection lock explicitly with `self.conn.lock().unwrap()` at the start of each method, ensuring single-connection semantics.
-- Complex or variable-length payloads are persisted as JSON strings using `serde_json::to_string` on write and `serde_json::from_str(...).unwrap_or_default()` on read.
-- Schema changes follow a two-step pattern: add new tables via new `CREATE TABLE IF NOT EXISTS` constants in `schema.rs`, and add missing columns incrementally through `ensure_column` calls in `Database::init`.
-- Record structs use `#[derive(Debug, Clone, Serialize, Deserialize)]` with `#[serde(rename_all = "camelCase")]` so Rust snake_case fields map to camelCase JSON payloads.
-- Upsert operations use SQLite's `INSERT ... ON CONFLICT(id) DO UPDATE SET` pattern rather than separate select-then-update logic.

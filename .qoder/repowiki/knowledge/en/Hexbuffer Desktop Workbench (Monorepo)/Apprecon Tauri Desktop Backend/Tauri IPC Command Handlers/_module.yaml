@@ -1,8 +1,0 @@
-schema_version: 1
-module_path: tauri_backend/commands
-title: Tauri IPC Command Handlers
-scope:
-    - src-tauri/src/commands/
-source_files: []
-depends_on: []
-related_to: []

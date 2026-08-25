@@ -1,1 +1,0 @@
-React/Tauri desktop application that composes a shared UI primitive library, feature pages, global Zustand stores, and trigger-based automation into a tabbed desktop-shell workspace.

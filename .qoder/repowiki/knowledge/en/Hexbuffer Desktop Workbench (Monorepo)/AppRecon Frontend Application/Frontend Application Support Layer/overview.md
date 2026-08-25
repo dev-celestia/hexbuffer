@@ -1,1 +1,0 @@
-Shared React hooks, Tauri IPC utilities, trigger orchestration modules, global styles, and type definitions that support the AppRecon frontend application.

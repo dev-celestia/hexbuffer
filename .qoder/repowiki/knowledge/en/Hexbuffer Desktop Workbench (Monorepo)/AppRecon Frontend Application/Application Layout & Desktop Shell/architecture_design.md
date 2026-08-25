@@ -1,9 +1,0 @@
-The module is organized as a shell composed of several sub-packages, each exporting a React component mounted by the root `AppLayout` in `index.tsx`:
-- `desktop-workspace/` renders the background desktop page and overlays floating `DesktopWindow` instances driven by the `useNavStore` (window state). Page components are lazily loaded through `page-lazy-imports.ts`, which maps route paths to `React.lazy` imports.
-- `taskbar/` (`AppSidebar`) implements the bottom dock with pinned/unpinned apps, drag-to-reorder via `@dnd-kit`, and system tools. It coordinates window open/focus/close through `useNavStore`.
-- `assistant/` is a self-contained AI chat pane built on `@ai-sdk/react` (`UIMessage`), with its own hooks (`use-ai-chat-pane`, `use-chat-sessions`, `use-page-mentions`), components, and transport layer (`dashboard-chat-transport.ts`).
-- `global-search/` selects a search implementation per route via a pathname switcher, exposing a `/` keyboard shortcut through `search-input.tsx`.
-- `footer/` shows proxy status and app version, polling via `setInterval`.
-- Shared hooks at `hooks/` (`use-top-nav`, `use-browser-session-events`, etc.) and leaf UI pieces (`open-browser.tsx`, `proxy-button.tsx`, `titlebar-buttons.tsx`, `triangle-logo.tsx`) are consumed across sub-packages.
-- Navigation metadata lives in `constants.ts` as `ALL_NAV_ITEMS` / `MAIN_NAV_ITEMS` (alpha/beta/release flags) consumed by the dock and app launcher.
-Dependency direction is inward: sub-packages depend on shared `@/stores/*`, `@/components/ai-elements/*`, and `hexbuffer-ui`; nothing outside this module is imported except stores and shared UI primitives.

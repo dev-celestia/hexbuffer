@@ -1,1 +1,0 @@
-Tauri command module that performs concurrent TCP port scans against targets (including CIDR ranges), optionally grabs service banners, detects services by banner heuristics, and streams progress/results back to the frontend.

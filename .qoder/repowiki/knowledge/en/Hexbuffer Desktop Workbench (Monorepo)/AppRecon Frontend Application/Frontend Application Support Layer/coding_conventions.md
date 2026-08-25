@@ -1,6 +1,0 @@
-- Each `triggers/<feature>/` directory follows a consistent split: `index.ts` barrel re-exports, plus separate files for `lifecycle.ts` (start/stop), `forwarding.ts` (request/response handling), `ui.ts` (UI actions), and `ai-tool.ts` (AI tool definitions and executors).
-- Tauri IPC calls go through `invoke('command_name', params)` from `@tauri-apps/api/core` and return a uniform `IpcResult<T>` discriminated union `{ success: true; data } | { success: false; error; code }`.
-- Event subscriptions use a factory pattern returning an object with an `unlisten()` method (see `createBrowserEventSubscription`), enabling safe cleanup without dangling listeners.
-- Hooks follow a standard shape: read from `useAppStore` selectors, manage local loading/error state with `useState`, wrap async operations in try/catch/finally, and surface results plus a handler function.
-- Shared types are centralized in `src/types/index.ts` and imported by consumers rather than redefined locally, ensuring consistent shapes for proxy records, API calls, and targets across the app.
-- CSS uses Tailwind v4 `@theme inline` token mapping to CSS custom properties, with dark mode variants applied via a `.dark` class selector and oklch color values.

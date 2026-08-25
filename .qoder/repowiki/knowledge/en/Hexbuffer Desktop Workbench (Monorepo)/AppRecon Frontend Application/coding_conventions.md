@@ -1,6 +1,0 @@
-- Each feature page under `src/pages/<name>` follows a fixed structure: `index.tsx` exports the page component, plus `components/`, `hooks/`, `lib/`, `types.ts`, and `constants.ts` submodules.
-- Feature pages are lazy-loaded through React.lazy with dynamic `import()` in `App.tsx` rather than top-level imports.
-- Global state is managed via separate Zustand store files in `src/stores/`, one per domain (e.g., `app.ts`, `browser-session-store.ts`, `repeater.ts`).
-- Cross-cutting background tasks are implemented as trigger modules under `src/triggers/<feature>/index.ts` that export paired `start*Watcher` / `stop*Watcher` functions invoked from the root `AutomationEventWatchers` component.
-- UI primitives are imported from the shared `@/components/ui` barrel (`index.ts`) and AI-specific components from `@/components/ai-elements` rather than being defined inline.
-- Tauri IPC and window operations go through `@/lib/tauri-types.ts` and the `@tauri-apps/api` packages, never raw window globals.

@@ -1,1 +1,0 @@
-React + TypeScript with hexbuffer-ui primitives, Phosphor icons, sonner for toast notifications, and Tauri (`@tauri-apps/api/core`) for IPC to the Rust backend via commands like `get_proxy_paginated`, `get_websocket_paginated`, `clear_websocket_all`, etc. State is managed via Zustand stores under `@/stores/history` and `@/stores/target`.

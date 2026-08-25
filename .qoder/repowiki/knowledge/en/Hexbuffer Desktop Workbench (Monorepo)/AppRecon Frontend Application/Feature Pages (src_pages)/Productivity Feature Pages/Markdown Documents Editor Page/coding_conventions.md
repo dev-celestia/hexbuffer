@@ -1,6 +1,0 @@
-- State mutations go through the Zustand store via `useDocumentsStore.getState().*` or the `updateDocument(activeDocumentId, updater)` callback pattern rather than direct state writes.
-- Each component receives a flat set of `on*` callback props from `useDocumentsPage` instead of accessing the store directly, keeping components purely presentational.
-- Per-section undo/redo history is tracked in a `Record<sectionKey, { past: string[], future: string[] }>` structure capped at `MAX_CUSTOM_SECTION_HISTORY = 100` entries.
-- File identity uses a branded template literal type `EditorFileId = \`custom:${string}\`` with helper predicates (`isCustomSectionFile`) and label/name generators centralized in `lib/editor-files.ts`.
-- Tauri availability is checked at call sites via an `isTauriAvailable()` guard before invoking `invoke()`, allowing the page to render safely in non-Tauri contexts.
-- Templates and built-in section definitions are declared as `as const` arrays in `constants.ts` and consumed through typed selectors (`getDocumentTemplate`, `DOCUMENT_SECTION_DEFINITIONS`) rather than ad-hoc objects.

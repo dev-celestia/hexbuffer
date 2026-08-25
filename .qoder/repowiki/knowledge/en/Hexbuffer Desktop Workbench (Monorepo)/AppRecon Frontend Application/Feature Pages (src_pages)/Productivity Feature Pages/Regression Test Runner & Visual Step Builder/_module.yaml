@@ -1,9 +1,0 @@
-schema_version: 1
-module_path: frontend_app/feature_pages/productivity_apps/regression_test_runner
-title: Regression Test Runner & Visual Step Builder
-scope:
-    - src/pages/regression/
-source_files: []
-depends_on: []
-related_to:
-    - path: tauri_backend/app_wiring

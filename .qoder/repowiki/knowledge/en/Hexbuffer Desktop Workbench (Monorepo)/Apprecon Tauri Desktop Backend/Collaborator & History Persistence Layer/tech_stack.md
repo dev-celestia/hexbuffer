@@ -1,1 +1,0 @@
-Rust with Tokio async runtime (`tokio::sync::Mutex`, `tokio::task::JoinHandle`) for concurrent task tracking; serde for serialization of all DTOs; SQLite-backed persistence via a `Database` repository abstraction consumed through `HistoryBridge`.

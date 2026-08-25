@@ -1,6 +1,0 @@
-- Component state is read exclusively from the Zustand store via `useInterceptStore((state) => state.field)` selectors; local component state is only used for transient UI (e.g., filter input, removing animation IDs).
-- Async mutations in the store wrap operations in `try/catch` blocks that call `toast.error(...)` on failure and set `isBusy` flags in `finally` blocks for consistent loading feedback.
-- Host/capture patterns are normalized through `normalizeHost` (trim + lowercase) before storage or comparison, and matching supports both exact and `*.domain` wildcard syntax.
-- Each panel exposes its behavior through a dedicated `use*-panel.ts` hook that subscribes to store slices and returns memoized handlers via `React.useCallback`, keeping components thin presentational wrappers.
-- All backend communication goes through `api.ts` using `invoke<T>(command_name, payload)` typed calls, while orchestration actions (forward/drop/toggle) go through `@/triggers/intercept` — never direct IPC from components.
-- Raw HTTP message construction uses `buildRawPausedRequest` / `buildRawPausedResponse` from `lib.ts` which delegate to `@/lib/http-message`, ensuring bidirectional consistency between display and editing.

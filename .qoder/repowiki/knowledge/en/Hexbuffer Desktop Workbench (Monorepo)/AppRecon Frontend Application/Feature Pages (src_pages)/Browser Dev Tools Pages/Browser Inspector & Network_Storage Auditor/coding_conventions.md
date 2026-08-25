@@ -1,5 +1,0 @@
-- All CDP commands go through a single `sendCommand(method, params)` helper that wraps a Promise around a unique numeric id stored in a `pendingCommands` Map, enabling request/response correlation over the WebSocket.
-- State mutations use functional `setState(prev => ...)` updates with immutability (e.g., spreading arrays/objects) rather than direct mutation of network requests, cookies, or storage items.
-- Each feature area (network, storage, console) is encapsulated in its own React component under `components/` that receives all data and callbacks as props, keeping the hook as the sole source of truth.
-- Error handling follows a try/catch around each CDP call with `console.error` logging and user-facing error state set via the `error` field exposed by the hook.
-- Tauri interop is isolated in `api.ts` using `invoke('command_name', { port })` calls, and the hook reuses these functions rather than calling `invoke` inline throughout the component tree.

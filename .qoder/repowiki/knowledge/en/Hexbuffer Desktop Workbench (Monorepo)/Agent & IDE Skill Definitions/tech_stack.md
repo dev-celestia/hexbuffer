@@ -1,1 +1,0 @@
-Node.js ES modules (.mjs) for all executable scripts; YAML for OpenAI agent interface config; TOML for custom agent definitions (model_reasoning_effort, developer_instructions); Markdown front-matter for skill metadata; Svelte/SvelteKit adapter used in the live iteration subsystem of impeccable.

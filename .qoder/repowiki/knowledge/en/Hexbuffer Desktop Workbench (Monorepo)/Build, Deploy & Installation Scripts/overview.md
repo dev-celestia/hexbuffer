@@ -1,1 +1,0 @@
-Bash utility scripts that build, version-bump, cross-compile, sign, upload Tauri artifacts to Cloudflare R2, and provide a platform-aware installer for macOS and Linux.

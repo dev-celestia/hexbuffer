@@ -1,1 +1,0 @@
-Two feature pages — a markdown scratchpad editor with sidebar management and a multi-tab xterm-based terminal with session lifecycle, theming, and command history.

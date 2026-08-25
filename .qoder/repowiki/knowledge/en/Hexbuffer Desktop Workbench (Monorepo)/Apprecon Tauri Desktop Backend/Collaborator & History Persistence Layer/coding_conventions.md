@@ -1,5 +1,0 @@
-- All public methods on `HistoryBridge` return `Result<T, String>` and propagate underlying `Database` errors using `.map_err(|e| e.to_string())`.
-- DTO structs derive `Debug, Clone, Serialize, Deserialize` and use `Option<T>` for nullable fields rather than separate presence flags.
-- Filter normalization helpers (`normalize_optional_string`, `normalize_string_vec`, `normalize_u16_vec`, `normalize_websocket_filter`) strip whitespace, drop empty values, and collapse empty collections back to `None` before delegating to the database.
-- Summary/view types like `ProxyLogSummary` and `WebSocketConnectionSummary` are produced via `From<Record>` implementations that extract and format fields from the canonical `*Record` types.
-- The `collaborator` module uses a flat `mod.rs` that only re-exports submodules (`pub mod state; pub mod types; pub use state::*; pub use types::*;`) without adding logic.

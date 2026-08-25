@@ -1,1 +1,0 @@
-No build or test commands are specific to this module; tools must be registered with `set_tool_call_handler` before any `dispatch_tool_call` can execute, otherwise calls are silently no-ops.

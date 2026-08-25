@@ -1,9 +1,0 @@
-The module is organized into five cohesive sub-packages with clear dependency direction:
-- `hooks/` contains React custom hooks (e.g. `use-proxy-start`, `use-monaco-lsp`, `use-updater`) that encapsulate side effects and state logic, typically reading from a central `@/stores/app` store and surfacing UI-friendly results.
-- `lib/` holds pure utility functions and Tauri IPC wrappers — notably `browser-panel-api.ts` which exposes typed `invoke()` calls and event subscriptions (`onBrowserTab*`) for browser tab management, plus helpers like `utils.ts` (`cn`, `matchesScope`, `cleanUrl`).
-- `providers/` provides React context providers; `window-provider.tsx` exposes windowing context (`isInWindow`, `windowElement`, `id`) for Tauri window detection.
-- `triggers/` is the core action orchestration layer: each subdirectory (`browser`, `intercept`, `invoker`, `repeater`, `live-traffic`, `documents`, `terminal`, `navigation`, `ai-tool`) groups related trigger handlers, each split into `index.ts` barrel re-exports plus feature files (`lifecycle.ts`, `forwarding.ts`, `ui.ts`, `ai-tool.ts`, etc.). The root `triggers/index.ts` is the single public API surface re-exporting all trigger functions and types.
-- `styles/` defines global Tailwind v4 theme variables, dark mode overrides, animations, and ReactFlow customization classes.
-- `types/index.ts` centralizes shared interfaces (`Target`, `ProxyStatus`, `ApiCall`, `ProxyRequest/Response/Record`, `PaginatedResponse<T>`).
-
-Dependency direction is one-way: hooks/lib/providers depend on `types` and external stores; triggers depend on lib utilities but never on hooks; styles are consumed globally.

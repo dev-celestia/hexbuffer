@@ -1,8 +1,0 @@
-The module is organized as a React page under `src/pages/markdown/` with a clear separation of concerns:
-- `index.tsx` is the page entry point (`DocumentsPage`) composed inside a `TabbedPageLayout`, wiring together toolbar, workspace, and dialog components.
-- `hooks/use-documents-page.ts` is the central state orchestrator: it reads/writes the global Zustand store (`@/stores/documents`) via `useShallow`, manages local UI state (open files, dialogs, delete confirmation), implements per-section undo/redo history, and exposes a flat callback surface to child components.
-- `components/` holds presentational pieces: `documents-workspace.tsx` splits the view into a resizable `DocumentsExplorer` (left panel) and `DocumentsEditorPane` (right panel); `documents-toolbar.tsx`, `editor-tab-strip.tsx`, and dialog components (`custom-section-dialog.tsx`, `document-template-dialog.tsx`) are pure UI consumers of the hook's props.
-- `lib/editor-files.ts` defines the `EditorFileId` branded type (`custom:${string}`) and helpers for file labeling/naming; `lib/export-document.ts` handles PDF generation via `jspdf` and Tauri file save.
-- `api.ts` abstracts Tauri IPC (`invoke('get_documents'|'save_document'|'delete_document')`) with a runtime `isTauriAvailable()` guard so the page renders gracefully outside Tauri.
-- `types.ts` and `constants.ts` define the `ReconDocument` shape, `CustomSection`, built-in section definitions, and pre-baked templates (`developer`, `qa`, `securityResearcher`, `blank`).
-Dependency direction is one-way: components → hooks → Zustand store / lib utilities / Tauri API; constants and types are leaf data.

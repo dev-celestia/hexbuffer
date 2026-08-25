@@ -1,1 +1,0 @@
-Tauri backend module that wires AI provider configuration, OS-keyring API key storage, persistent settings, and streaming chat/autocomplete calls to the hexbuffer_ai engine.

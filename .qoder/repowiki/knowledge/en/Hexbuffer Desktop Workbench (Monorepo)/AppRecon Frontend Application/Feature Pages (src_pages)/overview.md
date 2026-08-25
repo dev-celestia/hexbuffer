@@ -1,1 +1,0 @@
-Top-level feature pages that each expose a self-contained workspace — browser tools, security utilities, productivity apps, and developer workflows — mounted as tabs within the shared TabbedPageLayout shell.

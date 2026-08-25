@@ -1,1 +1,0 @@
-Rust Tauri command handlers that expose the application's browser automation, proxy, AI chat, storage, certificate management, repeater, mock server, and other features to the frontend via the Tauri IPC layer.

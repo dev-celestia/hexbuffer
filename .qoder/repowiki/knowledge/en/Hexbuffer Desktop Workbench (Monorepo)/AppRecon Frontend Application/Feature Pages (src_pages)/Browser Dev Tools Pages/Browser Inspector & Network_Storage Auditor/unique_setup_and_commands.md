@@ -1,1 +1,0 @@
-Connects to a browser launched with `--remote-debugging-port=<port>` (default 9223); the UI guides users to launch Chrome with this flag when no debuggable tabs are found. The `open_cdp_browser` Tauri command launches the browser automatically, then polls `get_cdp_targets` every 500ms up to 8 times before auto-connecting to the first available page.

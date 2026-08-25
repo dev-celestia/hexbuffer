@@ -1,1 +1,0 @@
-React page that manages OOB collaborator servers and payloads, polls for DNS/HTTP/HTTPS interactions, and presents them in a tabbed Hosts + Interactions dashboard with a resizable detail pane.

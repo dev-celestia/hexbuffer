@@ -1,1 +1,0 @@
-No build or setup scripts are specific to these pages — they are consumed as part of the larger React application. The JWT page depends on the external Zustand store `@/stores/jwt-store` being initialized elsewhere in the app.

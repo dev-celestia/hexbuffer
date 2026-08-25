@@ -1,1 +1,0 @@
-A tabbed security testing page that lets users define HTTP request templates with $-marked payload positions, configure payload sources (lists, files, number ranges), and execute concurrent attacks while inspecting results and responses.

@@ -1,1 +1,0 @@
-Entry point is `src/main.tsx` which renders the Root component inside ReactDOM.createRoot; splash-screen dismissal and main-window show are coordinated via a Tauri `show_main_window` invoke after a 250ms timeout.

@@ -1,1 +1,0 @@
-Tauri backend module that probes web endpoints for SQL injection vulnerabilities across boolean-blind, time-based, UNION, and error-based techniques, reporting findings and extracting database metadata via Tauri commands.

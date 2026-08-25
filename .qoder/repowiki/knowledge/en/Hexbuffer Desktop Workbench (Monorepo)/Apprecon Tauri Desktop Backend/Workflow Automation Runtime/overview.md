@@ -1,1 +1,0 @@
-Tauri-backed workflow engine that executes graph-based automation pipelines driven by live traffic, scheduled triggers, port scans, intercepts, and WebSocket messages.

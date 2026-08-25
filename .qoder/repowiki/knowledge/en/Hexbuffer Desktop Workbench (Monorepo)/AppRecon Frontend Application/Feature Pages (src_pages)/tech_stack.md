@@ -1,1 +1,0 @@
-React + TypeScript with Tauri IPC for backend calls; consistent use of custom hooks (use-*-page.ts) per feature, component/hook/lib file organization, and shared TabbedPageLayout for presentation.

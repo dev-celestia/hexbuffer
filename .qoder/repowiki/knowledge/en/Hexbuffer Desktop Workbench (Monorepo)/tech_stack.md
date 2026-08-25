@@ -1,1 +1,0 @@
-pnpm@9 as the workspace manager; React 18 + TypeScript + Vite for the frontend; Rust + Tauri v2 + rustls + SQLite for the backend; Next.js App Router + Fumadocs for the documentation site; GitHub Actions for CI/CD across macOS/Linux/Windows.

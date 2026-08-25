@@ -1,6 +1,0 @@
-- Each page exposes a single `use-*-page` custom hook that centralizes all derived state, event handlers, and side effects, and is destructured by the page component and child components.
-- Child components receive the entire hook object as a single `hook` prop typed via a `*PageHookType` export from the hook file, rather than individual props.
-- UI styling uses Tailwind classes composed through the `cn` utility from `@/lib/utils`, with consistent layout tokens like `flex`, `min-h-0`, `overflow-hidden`, and `bg-background`.
-- User-facing feedback is delivered via `sonner` toast calls (`toast.success`, `toast.error`) triggered from hook handlers instead of inline alerts.
-- Persistent UI preferences (e.g., sidebar visibility) are stored in `localStorage` with a key prefixed by the feature name (`scratchpad-sidebar-open`).
-- Conditional rendering of optional panels (sidebars, empty states) is gated by boolean flags exposed from the hook (`isSidebarOpen`, `sessions.length === 0`) rather than imperative DOM manipulation.

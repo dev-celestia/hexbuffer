@@ -1,1 +1,0 @@
-React with TypeScript, Zustand via `useListenerStore` for global state, `react-hook-form` + Zod for form validation, Tauri `@tauri-apps/api/core` invoke for Rust backend calls, `hexbuffer-ui` for primitives, `sonner` for toast notifications, and Phosphor icons.

@@ -1,6 +1,0 @@
-- Each page folder mirrors the same structure: index.tsx (UI composition), hooks/use-*-page.ts (state plus side effects), components/ (presentational panels), lib/ (pure utilities), constants.ts, and types.ts.
-- Page state is encapsulated in a single custom hook that returns a flat object of state getters/setters plus derived values and action handlers, which the component spreads as props to child panels.
-- UI styling uses inline Tailwind class strings composed through the cn utility from @/lib/utils, with comments grouping classes by purpose such as Layout, Sizing, Backgrounds, Typography.
-- Enumerations (techniques, categories, risk levels, severities) are defined as TypeScript union types in types.ts and paired with Record label maps in constants.ts.
-- Mutable sets are toggled immutably by creating a new Set instance inside setXxx(prev => { const next = new Set(prev); ... return next; }) rather than mutating in place.
-- Long-running async operations use a unique crypto.randomUUID() scan id to scope Tauri event listeners, and all listeners are collected into an UnlistenFn array and torn down in a finally block.

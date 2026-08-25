@@ -1,6 +1,0 @@
-- Stores are created with `create<State>()(persist(...))` and expose a typed `partialize` function that selects only the fields meant to survive persistence.
-- Persisted stores implement a `merge` hook that validates incoming persisted values against known enums/lists (e.g., algorithm whitelist, active workflow id validation) before merging with current state.
-- Slice functions follow the `(set, get) => Slice` signature and return an object of state fields plus setters, allowing composition of multiple slices into a single store.
-- Tauri backend calls go through `invoke('command_name', payload)` inside async store actions, with errors caught and surfaced via `toast.error` and execution logs.
-- Filter-like stores reset pagination (`page: 1`) and clear selections whenever filter inputs change, ensuring consistent query state after mutations.
-- Each store file declares its state shape as a TypeScript interface and exports the resulting `useXxxStore` hook as the default consumer.

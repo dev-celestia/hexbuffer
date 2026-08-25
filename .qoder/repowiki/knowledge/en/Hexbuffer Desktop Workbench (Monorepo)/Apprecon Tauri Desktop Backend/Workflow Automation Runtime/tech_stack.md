@@ -1,1 +1,0 @@
-Rust with Tauri (commands + `AppHandle::emit`), `tokio` async runtime, `serde`/`serde_json` for serialization, `uuid` for IDs, `chrono` timestamps, `regex` pattern matching, `reqwest` HTTP, `sha2`/`md5`/`sha1` hashing, `base64` encoding, and `tauri_plugin_notification` for desktop notifications.

@@ -1,1 +1,0 @@
-Reusable React component library providing base UI primitives (via hexbuffer-ui re-export), AI chat elements, tabbed page layouts, tree views, and cross-cutting utilities like theming and clipboard watching.

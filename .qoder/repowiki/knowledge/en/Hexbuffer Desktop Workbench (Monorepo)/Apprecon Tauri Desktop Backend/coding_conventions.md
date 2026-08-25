@@ -1,5 +1,0 @@
-- Each feature lives in its own `src/<feature>/mod.rs` module and is re-exported from `src/lib.rs` so commands can import it directly.
-- Public functionality is exposed to the frontend exclusively through Tauri command handlers in `src/commands/*.rs` that delegate to domain logic in sibling modules.
-- Persistent data goes through the `db_layer` repository pattern with per-domain files under `src/db/repository/` and a shared `Database` handle accessed via `HistoryBridge`.
-- Async operations use `tokio` with `async-trait` for trait definitions, and long-running work (proxy, scans, crawls) streams progress back to the frontend via WebSocket or Tauri events.
-- Configuration and secrets are split between JSON settings files, the `keyring` crate for API keys, and `tauri.conf.json` for app-level metadata.

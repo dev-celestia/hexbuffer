@@ -1,1 +1,0 @@
-React + TypeScript with `hexbuffer-ui` for shared components, `@phosphor-icons/react` for icons, Tauri triggers for backend commands (browser crawl), and Chrome DevTools Protocol (CDP) over WebSocket for the inspector.

@@ -1,6 +1,0 @@
-- Each sub-package follows a consistent structure with an `index.tsx` entry point, a `components/` folder for presentational pieces, a `hooks/` folder for custom hooks, and optional `lib/` for utilities.
-- Navigation items are declared as data objects in `constants.ts` using the `NavItem` interface (label, icon component, href, colors, flag) rather than being scattered across components.
-- Page components are registered in `desktop-workspace/page-lazy-imports.ts` as `React.lazy` imports keyed by route path, keeping route-to-component mapping centralized.
-- Styling uses Tailwind classes grouped with comments categorizing them into Layout & Positioning, Sizing & Spacing, Typography, Backgrounds & Borders, and Interactive & States, often combined via the `cn` utility from `@/lib/utils`.
-- State is accessed exclusively through Zustand stores (`useNavStore`, `useAppSettingsStore`, `useAppStore`, `useBrowserAutomationStore`) rather than local component state for cross-cutting concerns like windows, settings, and proxy status.
-- Keyboard shortcuts are implemented with `useEffect` registering `keydown` listeners on `window` or `document`, with guards to skip when focus is inside INPUT/TEXTAREA/SELECT elements.

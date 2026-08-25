@@ -1,1 +1,0 @@
-Tauri module that orchestrates a headless browser crawler to discover and analyze web pages, emitting real-time events and persisting sessions, pages, insights, and activity logs through the application's history bridge.

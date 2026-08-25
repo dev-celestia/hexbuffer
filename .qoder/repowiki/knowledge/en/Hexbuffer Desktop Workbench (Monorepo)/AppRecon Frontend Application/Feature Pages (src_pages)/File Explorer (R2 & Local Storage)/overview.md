@@ -1,1 +1,0 @@
-React page that lets users browse, upload, download, and manage files in Cloudflare R2 buckets and a local filesystem workspace, with caching, presigned URLs, and multipart uploads.

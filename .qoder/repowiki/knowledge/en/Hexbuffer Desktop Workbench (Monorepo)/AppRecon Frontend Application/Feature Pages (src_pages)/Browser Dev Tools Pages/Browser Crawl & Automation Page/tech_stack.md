@@ -1,1 +1,0 @@
-React with TypeScript, Zustand for state management (`useShallow` selector pattern), Tauri IPC via `@tauri-apps/api/event` for real-time crawl events, hexbuffer-ui for primitives (Alert, Button, Dialog, ResizablePanelGroup), Phosphor icons, and a custom `TreeView` component from `@/components/tree-view`.

@@ -1,8 +1,0 @@
-The module is split into four Rust files under `src-tauri/src/browser/` plus a loose tool adapter:
-- `crawl_types.rs` defines all serializable domain structs (`CrawlConfig`, `CrawlSession`, `CrawlPage`, `AIInsight`, `ActivityLog`) with `#[serde(rename_all = "camelCase")]` for JSON interoperability, and the shared `AiBrowserState` holding in-memory HashMaps of sessions/pages/insights/logs plus child processes and cancellation flags behind `Arc<Mutex<...>>`.
-- `crawl_helpers.rs` provides pure utility functions: timestamping, strategy normalization, log/session/page/insight persistence via `HistoryBridge`, session status updates, cross-platform child-process signaling (Unix `kill -KILL` vs fallback), and in-memory page upsert.
-- `crawl_runner.rs` implements `run_browser_crawler_crawl`, which builds a `browser_crawler::Browser` instance using its builder API, sets render mode based on `headless`, configures timeouts, and registers an `on_page` callback that constructs `CrawlPage` records, emits Tauri events (`ai-browser:page-discovered`, `ai-browser:page-updated`, `ai-browser:insight-created`), persists data, and forwards pages to `crate::automation::ingest_crawled_page`.
-- `mod.rs` re-exports only the public types from `crawl_types` and marks helpers/runner as `pub(crate)`.
-- The loose `tools/browser.rs` wires the crawler into the rig tool system via a `TriggerScanTool` implementing `rig::tool::Tool`, which dispatches through `dispatch_tool_call` rather than invoking the crawler directly.
-
-Dependency direction is one-way: runner → helpers → types; the tool adapter depends on both the crawler runner (indirectly via dispatch) and the rig framework. External sidecars are managed through `std::process::Child` handles stored in state.

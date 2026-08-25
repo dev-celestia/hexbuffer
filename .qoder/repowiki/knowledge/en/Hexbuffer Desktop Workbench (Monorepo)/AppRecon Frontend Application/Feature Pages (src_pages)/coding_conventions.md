@@ -1,5 +1,0 @@
-- Each feature page follows the same directory shape: index.tsx entry, use-*-page.ts hook, components/, optional lib/types/constants files.
-- Page-level state and side effects are encapsulated in a single use-*-page.ts hook exported from the feature root.
-- UI components live under components/ and are organized by concern (panels, dialogs, toolbars) rather than by file type.
-- Tauri backend calls go through dedicated api.ts or lib modules, keeping IPC concerns separate from React components.
-- Feature-specific types are declared in a local types.ts and constants in constants.ts at the feature root.

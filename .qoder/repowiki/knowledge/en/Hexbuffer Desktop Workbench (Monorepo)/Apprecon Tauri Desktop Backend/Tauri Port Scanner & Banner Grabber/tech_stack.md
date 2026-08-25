@@ -1,1 +1,0 @@
-Rust with Tokio async runtime, Tauri commands and state management, `reqwest` for HTTPS banner grabbing (with `danger_accept_invalid_certs(true)`), `url` crate for URL parsing, and `serde` for JSON serialization/deserialization of requests and results.

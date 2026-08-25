@@ -1,1 +1,0 @@
-Rust with `hexbuffer_proxy` (MITM proxy framework), `hyper` for HTTP types, `tokio` async runtime, `tauri` for AppHandle/event emission, `uuid` for record IDs, `chrono` for timestamps, and `bytes` for payload handling. Port management relies on the `lsof` and `kill` system commands.

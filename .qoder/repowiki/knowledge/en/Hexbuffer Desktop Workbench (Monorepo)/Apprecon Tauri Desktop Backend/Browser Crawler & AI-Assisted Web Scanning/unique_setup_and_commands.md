@@ -1,1 +1,0 @@
-On Unix platforms, process termination uses `kill -KILL` against the process group (`-{pid}`); non-Unix builds return an error indicating pause/resume is unsupported. Child processes are tracked in `AiBrowserState.children` and signaled via `signal_child_process_group`.

@@ -1,1 +1,0 @@
-No build or setup commands are specific to this module; it is consumed as part of the larger React/Tauri application. The `page-lazy-imports.ts` map must be kept in sync whenever new tool pages are added under `@/pages/*`.

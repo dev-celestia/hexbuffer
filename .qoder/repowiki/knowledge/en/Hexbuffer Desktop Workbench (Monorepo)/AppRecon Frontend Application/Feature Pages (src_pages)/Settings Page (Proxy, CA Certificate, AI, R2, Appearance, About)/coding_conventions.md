@@ -1,6 +1,0 @@
-- Each settings tab is a pure functional component receiving a single `settings: SettingsPageState` prop and never holding its own domain state — all mutations go through handler functions exposed by `useSettingsPage`.
-- Backend communication uses `invoke<T>(commandName, payload?)` from `@tauri-apps/api/core` with explicit TypeScript return types, and every async operation wraps success/error paths with `toast.success` / `toast.error` feedback.
-- Tab categories are declared once as a string union (`SettingsCategory`) in `settings-sidebar.tsx` and mirrored in `CATEGORY_LABELS` and `VALID_TABS` in `settings-layout.tsx` so navigation and rendering stay in sync.
-- UI rows are consistently composed using the `SettingsGroup` + `SettingsRow` pair from `./settings-group.tsx`, with labels, descriptions, and action buttons arranged in a uniform vertical stack.
-- Destructuring is used at the top of each tab component to pull only the needed fields from the `settings` prop, avoiding unnecessary re-renders when unrelated state changes.
-- Long-running or destructive actions (database reset, full app reset, CA regeneration) are wrapped in `AlertDialog` dialogs from `hexbuffer-ui` with descriptive confirmations before execution.

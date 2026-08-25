@@ -1,1 +1,0 @@
-Interactive workflow builder built on @xyflow/react that lets users compose trigger/condition/action nodes into executable automation pipelines with live execution logging and a tabbed multi-workspace UI.

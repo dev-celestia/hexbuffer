@@ -1,1 +1,0 @@
-The Monaco LSP hook (`use-monaco-lsp`) requires a running Tauri command `get_lsp_port` to obtain the WebSocket port for the Rust language server, then connects via `ws://127.0.0.1:<port>` using `vscode-ws-jsonrpc` transports.

@@ -1,1 +1,0 @@
-No build or setup scripts are specific to this module; it relies on the project's standard Tauri dev/build pipeline. The page requires the Tauri proxy to be running (displayed via an `Alert` prompting `handleStartProxy` from `@/hooks/use-proxy-start`) before interception works.

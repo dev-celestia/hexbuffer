@@ -1,1 +1,0 @@
-SQLite-backed persistence layer for AppRecon, providing schema definitions, a thread-safe Database handle with migration support, and per-domain repository modules that implement CRUD operations via rusqlite.

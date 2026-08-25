@@ -1,4 +1,0 @@
-- Workflow steps use pinned action versions (e.g. `actions/checkout@v4`, `pnpm/action-setup@v4`, `actions/setup-node@v4`) rather than floating tags.
-- Secrets are passed exclusively through `${{ secrets.* }}` expressions — never hardcoded — and environment variables are scoped per-step via `env:` blocks.
-- Matrix-based builds declare each platform as an explicit `include` entry with matching `os`, `platform`, `artifact_name`, and `artifact_path` fields.
-- Developer hooks are configured declaratively via JSON config files (`config.local.json`, `hooks.json`) that reference external scripts rather than embedding logic inline.

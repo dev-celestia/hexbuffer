@@ -1,1 +1,0 @@
-No build or test scripts are specific to this module; it is consumed as part of the larger app. The page expects the global `@/stores/automation` Zustand store to be initialized before mounting, and requires `@xyflow/react/dist/style.css` to be imported (done inside `workflow-canvas.tsx`).

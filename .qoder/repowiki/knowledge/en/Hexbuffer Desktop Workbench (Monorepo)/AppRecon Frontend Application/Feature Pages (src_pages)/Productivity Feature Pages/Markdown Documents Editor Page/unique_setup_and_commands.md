@@ -1,1 +1,0 @@
-No build or test scripts are specific to this module; it runs as part of the app's Tauri desktop build. The page requires a Tauri backend exposing `get_documents`, `save_document`, and `delete_document` commands — without them `api.ts` returns null/no-op, so the page loads but cannot persist data.

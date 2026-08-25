@@ -1,8 +1,0 @@
-schema_version: 1
-module_path: docs_website
-title: Hexbuffer Documentation Website (Fumadocs + Next.js)
-scope:
-    - docs/website/
-source_files: []
-depends_on: []
-related_to: []

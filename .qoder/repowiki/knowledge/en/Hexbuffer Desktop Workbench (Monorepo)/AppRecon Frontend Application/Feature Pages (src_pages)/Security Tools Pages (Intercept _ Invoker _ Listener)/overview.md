@@ -1,1 +1,0 @@
-Three sibling React feature pages — request interceptor, payload invoker, and OOB listener dashboard — that expose security testing capabilities through consistent tabbed UIs backed by shared hook/state conventions.

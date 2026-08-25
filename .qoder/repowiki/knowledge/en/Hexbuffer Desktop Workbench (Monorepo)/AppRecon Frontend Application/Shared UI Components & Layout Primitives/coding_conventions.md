@@ -1,6 +1,0 @@
-- Each component file exports a memoized React function component whose props type is derived from `ComponentProps<'element'>` or a dedicated interface, and sets an explicit `.displayName` for debugging.
-- Styling is done exclusively with Tailwind class names composed through the `cn()` utility from `@/lib/utils`, never inline styles or CSS modules.
-- Sub-packages separate concerns into distinct files: presentation components, hooks/state logic, and TypeScript interfaces/types live in their own files and are re-exported at the package root for consumers.
-- External UI primitives are always imported from `hexbuffer-ui` rather than implemented locally, keeping visual consistency across the app.
-- Async/loading/error/empty states are handled declaratively via props (e.g. `isLoading`, `loadError`, `nodes.length === 0`) and rendered with corresponding `hexbuffer-ui` components like `Alert`, `Empty`, and `Spinner`.
-- Context-based providers (e.g. `ThemeProvider`) expose a custom hook (`useTheme`) that throws when used outside the provider, enforcing correct usage at runtime.

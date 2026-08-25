@@ -1,1 +1,0 @@
-GitHub Actions (v4 actions), pnpm + Node.js 22, Rust stable toolchain, Tauri CLI for cross-platform desktop packaging (AppImage, deb, dmg, NSIS), GitHub Pages deployment, and a custom Impeccable/Codex hook system driven by a Node script.

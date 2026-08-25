@@ -1,1 +1,0 @@
-React with TypeScript, Tailwind CSS via `cn()` from `@/lib/utils`, `hexbuffer-ui` component library, `@phosphor-icons/react` for icons, and Tauri v2 (`@tauri-apps/api/core` + `event`) for IPC into the Rust backend. State is managed externally via `usePortScannerStore` from `@/stores/port-scanner`.

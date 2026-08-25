@@ -1,1 +1,0 @@
-Requires Tauri backend to implement the `r2_http_request` command (invoked by `tauri-s3-transport.ts`) and `get_r2_settings` command (called on hook mount to fetch credentials). R2 credentials must be configured through the app's Settings route before the R2 tab becomes usable; otherwise an onboarding screen redirects to `/settings?tab=r2`.

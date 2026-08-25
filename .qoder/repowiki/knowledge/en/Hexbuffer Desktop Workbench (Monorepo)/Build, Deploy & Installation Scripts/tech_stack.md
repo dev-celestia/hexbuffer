@@ -1,1 +1,0 @@
-Pure bash scripts driving `pnpm`, `tauri-cli`, `rustup`/`cargo`, `cargo-xwin` for Windows cross-compilation, `aws s3` CLI against Cloudflare R2, and inline Node.js snippets for JSON manipulation. Artifacts are signed (`.sig` files) and checksummed (`.sha256`) before upload.

@@ -1,1 +1,0 @@
-React page that lets users provision mock domains, define route rules with matchers and response bodies, and inspect live request logs for a Tauri-backed mock HTTP server.
