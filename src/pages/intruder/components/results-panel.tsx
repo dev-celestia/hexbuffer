@@ -75,7 +75,7 @@ export function IntruderResultsPanel() {
       <div
         className={cn(
           // Layout & Positioning
-          "flex items-center justify-between shrink-0 select-none",
+          "flex items-center justify-between shrink-0 select-none overflow-x-auto overflow-y-hidden",
 
           // Sizing & Spacing
           "px-3 py-1.5 gap-2",
@@ -88,7 +88,7 @@ export function IntruderResultsPanel() {
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center",
+            "flex items-center shrink-0",
 
             // Sizing & Spacing
             "gap-2"
@@ -170,7 +170,7 @@ export function IntruderResultsPanel() {
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center",
+            "flex items-center shrink-0",
 
             // Sizing & Spacing
             "gap-1.5"
