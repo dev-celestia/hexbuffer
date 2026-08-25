@@ -1,4 +1,15 @@
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@celestia-project/ui';
 import * as React from 'react';
+
+import { cn } from '@/lib/utils';
 
 interface UpdateDialogProps {
   open: boolean;
@@ -19,37 +30,40 @@ export function UpdateDialog({
   updateConfirmReady,
   onInstall,
 }: UpdateDialogProps) {
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-sm rounded-lg border bg-background p-6 shadow-lg">
-        <h3 className="text-sm font-semibold">
-          Update to v{updateVersion}
-        </h3>
-        <p className="mt-2 text-xs text-muted-foreground">
-          {updateDownloading
-            ? progressLabel
-            : "A new version is ready to install."}
-        </p>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            className="rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted"
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className={cn(
+          // Sizing & Spacing
+          "sm:max-w-sm"
+        )}
+      >
+        <DialogHeader>
+          <DialogTitle>Update to v{updateVersion}</DialogTitle>
+          <DialogDescription>
+            {updateDownloading
+              ? progressLabel
+              : "A new version is ready to install."}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => onOpenChange(false)}
+            disabled={updateDownloading}
           >
             Cancel
-          </button>
-          <button
-            type="button"
-            className="rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground disabled:opacity-50"
+          </Button>
+          <Button
+            size="sm"
             disabled={!updateConfirmReady || updateDownloading}
             onClick={onInstall}
           >
             {updateDownloading ? "Installing..." : "Install & Restart"}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

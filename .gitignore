@@ -9,7 +9,7 @@ lerna-debug.log*
 
 node_modules
 dist
-dist-app
+dist-app*
 dist-ssr
 *.local
 
@@ -26,6 +26,7 @@ dist-ssr
 .next/*
 out
 dummy
+.qoder/
 
 chrome
 .env

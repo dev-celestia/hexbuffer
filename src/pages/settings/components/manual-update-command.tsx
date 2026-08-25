@@ -30,7 +30,15 @@ export function ManualUpdateCommand({ className, message }: ManualUpdateCommandP
   }, []);
 
   return (
-    <div className={cn('space-y-2 rounded-md border bg-muted/30 p-3', className)}>
+    <div
+      className={cn(
+        // Sizing & Spacing
+        'space-y-2 p-3',
+        // Backgrounds & Borders
+        'rounded-md border bg-muted/30',
+        className
+      )}
+    >
       <div className="flex items-center gap-2 text-sm font-medium">
         <TerminalIcon className="size-4 text-muted-foreground" />
         Manual update command
@@ -39,7 +47,18 @@ export function ManualUpdateCommand({ className, message }: ManualUpdateCommandP
         <p className="text-xs text-muted-foreground">{message}</p>
       )}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <code className="min-w-0 flex-1 break-all rounded-md bg-background px-3 py-2 font-mono text-xs text-muted-foreground">
+        <code
+          className={cn(
+            // Layout & Positioning
+            'min-w-0 flex-1 break-all',
+            // Sizing & Spacing
+            'px-3 py-2',
+            // Typography
+            'font-mono text-xs text-muted-foreground',
+            // Backgrounds & Borders
+            'rounded-md bg-background'
+          )}
+        >
           {MANUAL_UPDATE_COMMAND}
         </code>
         <Button size="sm" variant="outline" onClick={handleCopy}>

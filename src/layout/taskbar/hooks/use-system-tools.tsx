@@ -90,9 +90,14 @@ export function useSystemTools(): UseSystemToolsReturn {
         id: toastId,
         description: 'Restarting app to finish applying the update.',
       });
-      window.setTimeout(() => {
-        void relaunch();
-      }, 1500);
+      window.setTimeout(async () => {
+        try {
+          await relaunch();
+        } catch (err) {
+          console.error('Failed to restart app automatically:', err);
+          toast.error('Could not restart automatically. Please restart the app manually.');
+        }
+      }, 1000);
     } else {
       const err = result.error || downloadError || 'Update failed.';
       toast.error('Update failed', {

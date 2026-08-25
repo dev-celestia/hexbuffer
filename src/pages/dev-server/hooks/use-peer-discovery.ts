@@ -4,7 +4,13 @@ import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { toast } from 'sonner';
 import type { PeerDevice, MyPeerInfo, SharedDataPayload, SharePayloadType } from '../types';
 
-export function usePeerDiscovery() {
+export interface UsePeerDiscoveryOptions {
+  activePort?: number;
+  isProcessRunning?: boolean;
+  hostUrl?: string;
+}
+
+export function usePeerDiscovery(_options?: UsePeerDiscoveryOptions) {
   const [peers, setPeers] = useState<PeerDevice[]>([]);
   const [myInfo, setMyInfo] = useState<MyPeerInfo | null>(null);
   const [isLoadingPeers, setIsLoadingPeers] = useState<boolean>(false);

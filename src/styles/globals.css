@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "@celestia-project/ui/globals.css";
 
 @custom-variant dark (&:is(.dark *));
 

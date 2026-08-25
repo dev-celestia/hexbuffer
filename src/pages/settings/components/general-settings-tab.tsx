@@ -267,6 +267,8 @@ export function GeneralSettingsTab({ settings }: GeneralSettingsTabProps) {
     currentVersion,
     handleCheckForUpdates,
     handleInstallUpdate,
+    handleRestartApp,
+    updateInstalled,
     updateAvailable,
     updateChecking,
     updateDownloading,
@@ -350,7 +352,15 @@ export function GeneralSettingsTab({ settings }: GeneralSettingsTabProps) {
               <ArrowClockwiseIcon className={`mr-1.5 size-3.5 ${updateChecking ? 'animate-spin' : ''}`} />
               {updateChecking ? 'Checking…' : 'Check'}
             </Button>
-            {updateAvailable && (
+            {updateInstalled ? (
+              <Button
+                size="sm"
+                onClick={handleRestartApp}
+              >
+                <ArrowCounterClockwiseIcon className="mr-1.5 size-3.5" />
+                Restart Now
+              </Button>
+            ) : updateAvailable ? (
               <Button
                 size="sm"
                 onClick={handleInstallUpdate}
@@ -359,7 +369,7 @@ export function GeneralSettingsTab({ settings }: GeneralSettingsTabProps) {
                 <AsteriskIcon className={`mr-1.5 size-3.5 ${updateDownloading ? 'animate-spin' : ''}`} />
                 {updateDownloading ? 'Installing…' : `Install v${updateVersion}`}
               </Button>
-            )}
+            ) : null}
           </div>
         </SettingsRow>
         {updateMessage && (

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { getVersion } from '@tauri-apps/api/app';
+import { relaunch } from '@tauri-apps/plugin-process';
 import { check } from '@tauri-apps/plugin-updater';
 import type { DownloadEvent, Update } from '@tauri-apps/plugin-updater';
 
@@ -177,6 +178,19 @@ export function useUpdater() {
       });
   }, []);
 
+  const relaunchApp = React.useCallback(async () => {
+    try {
+      await relaunch();
+      return { ok: true };
+    } catch (error) {
+      console.error('Failed to relaunch app:', error);
+      const message = toUpdaterErrorMessage(error);
+      setDownloadMessage(`Restart failed: ${message}. Please restart manually.`);
+      setDownloadError(message);
+      return { ok: false, error: message };
+    }
+  }, []);
+
   return {
     currentVersion,
     checking,
@@ -189,5 +203,6 @@ export function useUpdater() {
     updateVersion: pendingUpdate?.version ?? null,
     checkForUpdates: () => checkForUpdates(false),
     installUpdate,
+    relaunchApp,
   };
 }

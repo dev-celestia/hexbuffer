@@ -33,18 +33,6 @@ export default defineConfig({
         replacement: "monaco-editor/$1",
       },
       {
-        find: /^@celestia-project\/ui\/globals\.css$/,
-        replacement: path.resolve(__dirname, "../celestia-starter/packages/ui/src/styles/globals.css"),
-      },
-      {
-        find: /^@celestia-project\/ui$/,
-        replacement: path.resolve(__dirname, "../celestia-starter/packages/ui/src/index.ts"),
-      },
-      {
-        find: /^@celestia-project\/ui\/(.*)$/,
-        replacement: path.resolve(__dirname, "../celestia-starter/packages/ui/src/$1"),
-      },
-      {
         find: "@/components",
         replacement: path.resolve(__dirname, "./src/components"),
       },

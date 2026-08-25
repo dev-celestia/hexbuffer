@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { open, save } from '@tauri-apps/plugin-dialog';
+import { relaunch } from '@tauri-apps/plugin-process';
 import { toast } from 'sonner';
 import { getCaCert, regenerateCaCert, saveCaCert, trustInterceptCa } from '@/pages/live-traffic/http-history/api';
 import { useUpdater } from '@/hooks/use-updater';
@@ -72,11 +73,47 @@ export function useSettingsPage() {
     downloading: updateDownloading,
     downloadError: updateError,
     downloadMessage: updateMessage,
+    updateInstalled,
     updateAvailable,
     updateVersion,
     checkForUpdates,
     installUpdate,
   } = useUpdater();
+
+  const handleRestartApp = React.useCallback(async () => {
+    try {
+      await relaunch();
+    } catch (err) {
+      console.error('Failed to restart app:', err);
+      toast.error('Failed to restart automatically. Please restart the app manually.');
+    }
+  }, []);
+
+  const handleInstallUpdate = React.useCallback(async () => {
+    const targetVersion = updateVersion;
+    const toastId = toast.loading(`Installing v${targetVersion ?? ''}...`);
+    const result = await installUpdate();
+    if (result.ok) {
+      toast.success(`Updated to v${targetVersion ?? ''}`, {
+        id: toastId,
+        description: 'Restarting app to finish applying the update...',
+      });
+      window.setTimeout(async () => {
+        try {
+          await relaunch();
+        } catch (err) {
+          console.error('Failed to restart app automatically:', err);
+          toast.error('Could not restart automatically. Please restart the app manually.');
+        }
+      }, 1000);
+    } else {
+      const err = result.error || updateError || 'Update failed.';
+      toast.error('Update failed', {
+        id: toastId,
+        description: err.toLowerCase().includes('signature') ? 'Release signature mismatch.' : err,
+      });
+    }
+  }, [installUpdate, updateVersion, updateError]);
 
   const refreshAiKeyStatus = React.useCallback(async () => {
     const status = await invoke<AiKeyStatus>('get_ai_key_status');
@@ -463,10 +500,11 @@ export function useSettingsPage() {
     updateChecking,
     updateDownloading,
     updateError,
-    updateMessage,
+    updateInstalled,
     updateVersion,
     handleCheckForUpdates: checkForUpdates,
-    handleInstallUpdate: installUpdate,
+    handleInstallUpdate,
+    handleRestartApp,
     r2AccountId,
     setR2AccountId,
     r2AccessKeyId,
