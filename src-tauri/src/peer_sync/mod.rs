@@ -89,6 +89,7 @@ struct PeerSyncState {
     os: String,
     sync_port: u16,
     is_broadcasting: AtomicBool,
+    is_initialized: bool,
     peers: Arc<RwLock<HashMap<String, PeerInfo>>>,
     app_handle: Option<AppHandle>,
     server_shutdown_tx: Option<oneshot::Sender<()>>,
@@ -122,7 +123,8 @@ static PEER_SYNC_STATE: std::sync::LazyLock<Arc<RwLock<PeerSyncState>>> =
             my_name,
             os,
             sync_port: DEFAULT_SYNC_HTTP_PORT,
-            is_broadcasting: AtomicBool::new(true),
+            is_broadcasting: AtomicBool::new(false),
+            is_initialized: false,
             peers: Arc::new(RwLock::new(HashMap::new())),
             app_handle: None,
             server_shutdown_tx: None,
@@ -160,10 +162,16 @@ pub fn get_primary_lan_ip() -> String {
     "127.0.0.1".to_string()
 }
 
-/// Initialize the peer discovery and sync server
+/// Initialize the peer discovery and sync server on-demand
+#[tauri::command]
 pub async fn init_peer_sync(app: AppHandle) -> Result<(), String> {
     {
         let mut state = PEER_SYNC_STATE.write().await;
+        if state.is_initialized {
+            return Ok(());
+        }
+        state.is_initialized = true;
+        state.is_broadcasting.store(true, Ordering::Relaxed);
         state.app_handle = Some(app.clone());
     }
 

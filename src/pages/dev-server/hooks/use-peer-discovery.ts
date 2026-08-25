@@ -27,6 +27,7 @@ export function usePeerDiscovery() {
   // ── Fetch Initial Data ──
   const fetchMyInfo = useCallback(async () => {
     try {
+      await invoke('init_peer_sync');
       const info = await invoke<MyPeerInfo>('get_my_peer_info');
       setMyInfo(info);
       setCustomDeviceName(info.name);
@@ -88,6 +89,9 @@ export function usePeerDiscovery() {
   // ── Toggle Broadcast Visibility ──
   const handleToggleBroadcast = useCallback(async (enabled: boolean) => {
     try {
+      if (enabled) {
+        await invoke('init_peer_sync');
+      }
       await invoke('set_peer_broadcast', { enabled });
       setMyInfo((prev) => (prev ? { ...prev, is_broadcasting: enabled } : null));
       toast.success(enabled ? 'Discovery broadcasting enabled' : 'Stealth mode: discovery disabled');

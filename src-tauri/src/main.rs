@@ -204,6 +204,7 @@ fn main() {
             hexbuffer::dev_server::kill_port,
             hexbuffer::dev_server::generate_qr_svg,
             hexbuffer::dev_server::patch_target_next_config,
+            hexbuffer::peer_sync::init_peer_sync,
             hexbuffer::peer_sync::get_discovered_peers,
             hexbuffer::peer_sync::get_my_peer_info,
             hexbuffer::peer_sync::set_peer_broadcast,

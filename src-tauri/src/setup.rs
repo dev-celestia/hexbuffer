@@ -69,15 +69,6 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         });
     }
 
-    // Initialize LAN Peer Discovery & Sync
-    {
-        let handle = app.handle().clone();
-        tauri::async_runtime::spawn(async move {
-            if let Err(e) = hexbuffer::peer_sync::init_peer_sync(handle).await {
-                crate::log(&format!("[peer-sync] init failed: {e}"));
-            }
-        });
-    }
 
     // Fallback: if React fails to mount and call show_main_window,
     // auto-dismiss the splash after 10 seconds to prevent the app from

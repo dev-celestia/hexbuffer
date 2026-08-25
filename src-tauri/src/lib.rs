@@ -61,8 +61,8 @@ pub use dev_server::{
 };
 pub mod peer_sync;
 pub use peer_sync::{
-    get_discovered_peers, get_my_peer_info, ping_peer, set_device_name, set_peer_broadcast,
-    share_data_to_peer, MyPeerInfo, PeerInfo, SharedDataPayload,
+    get_discovered_peers, get_my_peer_info, init_peer_sync, ping_peer, set_device_name,
+    set_peer_broadcast, share_data_to_peer, MyPeerInfo, PeerInfo, SharedDataPayload,
 };
 pub use commands::hash::HashEngineState;
 
