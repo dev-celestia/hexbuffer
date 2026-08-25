@@ -81,9 +81,24 @@ impl HistoryBridge {
         &self,
         name: &str,
         description: Option<&str>,
+        capture_mode: Option<&str>,
+        capture_filter: Option<&str>,
+        exclude_filter: Option<&str>,
     ) -> Result<HttpSessionRecord, String> {
         self.db
-            .create_http_session(name, description)
+            .create_http_session(name, description, capture_mode, capture_filter, exclude_filter)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn update_http_session_filter(
+        &self,
+        session_id: &str,
+        capture_mode: &str,
+        capture_filter: &str,
+        exclude_filter: &str,
+    ) -> Result<(), String> {
+        self.db
+            .update_http_session_filter(session_id, capture_mode, capture_filter, exclude_filter)
             .map_err(|e| e.to_string())
     }
 

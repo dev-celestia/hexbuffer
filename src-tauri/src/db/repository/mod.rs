@@ -67,6 +67,9 @@ impl Database {
         conn.execute_batch(crate::db::schema::CREATE_CHRONICLE_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_MOCK_FORGE_TABLES)?;
 
+        Self::ensure_column(&conn, "http_sessions", "capture_mode", "TEXT NOT NULL DEFAULT 'all'")?;
+        Self::ensure_column(&conn, "http_sessions", "capture_filter", "TEXT NOT NULL DEFAULT '[]'")?;
+        Self::ensure_column(&conn, "http_sessions", "exclude_filter", "TEXT NOT NULL DEFAULT '[]'")?;
         Self::ensure_column(&conn, "http_logs", "session_id", "TEXT NOT NULL DEFAULT ''")?;
         Self::ensure_column(&conn, "websocket_connections", "session_id", "TEXT NOT NULL DEFAULT ''")?;
         let _ = Self::ensure_default_http_session(&conn)?;

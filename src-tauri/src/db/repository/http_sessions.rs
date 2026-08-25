@@ -11,6 +11,12 @@ pub struct HttpSessionRecord {
     pub updated_at: String,
     pub is_active: bool,
     pub description: Option<String>,
+    #[serde(default = "default_capture_mode")]
+    pub capture_mode: String,
+    #[serde(default = "default_filter_json")]
+    pub capture_filter: String,
+    #[serde(default = "default_filter_json")]
+    pub exclude_filter: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -21,8 +27,22 @@ pub struct HttpSessionSummary {
     pub updated_at: String,
     pub is_active: bool,
     pub description: Option<String>,
+    #[serde(default = "default_capture_mode")]
+    pub capture_mode: String,
+    #[serde(default = "default_filter_json")]
+    pub capture_filter: String,
+    #[serde(default = "default_filter_json")]
+    pub exclude_filter: String,
     pub request_count: usize,
     pub total_size_bytes: usize,
+}
+
+fn default_capture_mode() -> String {
+    "all".to_string()
+}
+
+fn default_filter_json() -> String {
+    "[]".to_string()
 }
 
 impl Database {
@@ -30,17 +50,32 @@ impl Database {
         &self,
         name: &str,
         description: Option<&str>,
+        capture_mode: Option<&str>,
+        capture_filter: Option<&str>,
+        exclude_filter: Option<&str>,
     ) -> SqlResult<HttpSessionRecord> {
         let conn = self.conn.lock().unwrap();
         let id = uuid::Uuid::new_v4().to_string();
         let now = chrono::Utc::now().to_rfc3339();
+        let mode = capture_mode.unwrap_or("all").trim();
+        let cap_filter = capture_filter.unwrap_or("[]").trim();
+        let exc_filter = exclude_filter.unwrap_or("[]").trim();
 
         // Mark existing sessions as inactive
         conn.execute("UPDATE http_sessions SET is_active = 0", [])?;
 
         conn.execute(
-            "INSERT INTO http_sessions (id, name, created_at, updated_at, is_active, description) VALUES (?1, ?2, ?3, ?4, 1, ?5)",
-            params![id, name.trim(), now, now, description.map(|d| d.trim())],
+            "INSERT INTO http_sessions (id, name, created_at, updated_at, is_active, description, capture_mode, capture_filter, exclude_filter) VALUES (?1, ?2, ?3, ?4, 1, ?5, ?6, ?7, ?8)",
+            params![
+                id,
+                name.trim(),
+                now,
+                now,
+                description.map(|d| d.trim()),
+                mode,
+                cap_filter,
+                exc_filter
+            ],
         )?;
 
         Ok(HttpSessionRecord {
@@ -50,7 +85,26 @@ impl Database {
             updated_at: now,
             is_active: true,
             description: description.map(|d| d.trim().to_string()),
+            capture_mode: mode.to_string(),
+            capture_filter: cap_filter.to_string(),
+            exclude_filter: exc_filter.to_string(),
         })
+    }
+
+    pub fn update_http_session_filter(
+        &self,
+        session_id: &str,
+        capture_mode: &str,
+        capture_filter: &str,
+        exclude_filter: &str,
+    ) -> SqlResult<()> {
+        let conn = self.conn.lock().unwrap();
+        let now = chrono::Utc::now().to_rfc3339();
+        conn.execute(
+            "UPDATE http_sessions SET capture_mode = ?1, capture_filter = ?2, exclude_filter = ?3, updated_at = ?4 WHERE id = ?5",
+            params![capture_mode.trim(), capture_filter.trim(), exclude_filter.trim(), now, session_id],
+        )?;
+        Ok(())
     }
 
     pub fn list_http_sessions(&self) -> SqlResult<Vec<HttpSessionSummary>> {
@@ -58,6 +112,9 @@ impl Database {
         let mut stmt = conn.prepare(
             r#"SELECT 
                 s.id, s.name, s.created_at, s.updated_at, s.is_active, s.description,
+                COALESCE(s.capture_mode, 'all') as capture_mode,
+                COALESCE(s.capture_filter, '[]') as capture_filter,
+                COALESCE(s.exclude_filter, '[]') as exclude_filter,
                 COALESCE(COUNT(l.id), 0) as request_count,
                 COALESCE(SUM(LENGTH(COALESCE(l.request_body, X'')) + LENGTH(COALESCE(l.response_body, X''))), 0) as total_size_bytes
                FROM http_sessions s
@@ -68,8 +125,8 @@ impl Database {
 
         let rows = stmt.query_map([], |row| {
             let is_active_int: i64 = row.get(4)?;
-            let req_count: i64 = row.get(6)?;
-            let total_size: i64 = row.get(7)?;
+            let req_count: i64 = row.get(9)?;
+            let total_size: i64 = row.get(10)?;
 
             Ok(HttpSessionSummary {
                 id: row.get(0)?,
@@ -78,6 +135,9 @@ impl Database {
                 updated_at: row.get(3)?,
                 is_active: is_active_int == 1,
                 description: row.get(5)?,
+                capture_mode: row.get(6)?,
+                capture_filter: row.get(7)?,
+                exclude_filter: row.get(8)?,
                 request_count: req_count as usize,
                 total_size_bytes: total_size as usize,
             })
@@ -93,7 +153,7 @@ impl Database {
     pub fn get_active_http_session(&self) -> SqlResult<Option<HttpSessionRecord>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
-            "SELECT id, name, created_at, updated_at, is_active, description FROM http_sessions WHERE is_active = 1 LIMIT 1",
+            "SELECT id, name, created_at, updated_at, is_active, description, COALESCE(capture_mode, 'all'), COALESCE(capture_filter, '[]'), COALESCE(exclude_filter, '[]') FROM http_sessions WHERE is_active = 1 LIMIT 1",
         )?;
         let mut rows = stmt.query([])?;
 
@@ -106,6 +166,9 @@ impl Database {
                 updated_at: row.get(3)?,
                 is_active: is_active_int == 1,
                 description: row.get(5)?,
+                capture_mode: row.get(6)?,
+                capture_filter: row.get(7)?,
+                exclude_filter: row.get(8)?,
             }))
         } else {
             Ok(None)

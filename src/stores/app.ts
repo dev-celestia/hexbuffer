@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
+import { useNotificationStore } from './notifications';
 
 export type ProxyStatus = 'connected' | 'disconnected' | 'starting' | 'stopping';
 
@@ -123,6 +124,13 @@ export const useAppStore = create<AppState>()(
             toast.warning(`Port ${port} is already in use. Proxy started on ${status.port}.`);
           }
 
+          useNotificationStore.getState().addAlert({
+            title: 'Proxy Started',
+            message: `Proxy server is listening on port ${status.port}.`,
+            type: 'success',
+            source: 'Proxy',
+          });
+
           set({
             proxyStatus: 'connected',
             proxyPort: status.port,
@@ -130,8 +138,15 @@ export const useAppStore = create<AppState>()(
           });
         } catch (error) {
           console.error('[store] Failed to start proxy:', error);
+          const errMsg = error instanceof Error ? error.message : String(error);
+          useNotificationStore.getState().addAlert({
+            title: 'Proxy Failed to Start',
+            message: errMsg,
+            type: 'error',
+            source: 'Proxy',
+          });
           set({ proxyStatus: 'disconnected', proxyPort: null });
-          throw new Error(error instanceof Error ? error.message : String(error));
+          throw new Error(errMsg);
         }
       },
 
@@ -142,6 +157,12 @@ export const useAppStore = create<AppState>()(
           await invoke('stop_proxy');
           await new Promise((resolve) => window.setTimeout(resolve, 300));
           const status = await invoke<ProxyRuntimeStatus>('get_proxy_status');
+          useNotificationStore.getState().addAlert({
+            title: 'Proxy Stopped',
+            message: 'Proxy server has been disconnected.',
+            type: 'info',
+            source: 'Proxy',
+          });
           set({
             proxyStatus: status.running ? 'connected' : 'disconnected',
             proxyPort: status.port,
@@ -152,6 +173,12 @@ export const useAppStore = create<AppState>()(
         } catch (error) {
           console.error('[store] Failed to stop proxy:', error);
           const status = await invoke<ProxyRuntimeStatus>('get_proxy_status');
+          useNotificationStore.getState().addAlert({
+            title: 'Proxy Stop Error',
+            message: error instanceof Error ? error.message : String(error),
+            type: 'error',
+            source: 'Proxy',
+          });
           set({
             proxyStatus: status.running ? 'connected' : 'disconnected',
             proxyPort: status.port,

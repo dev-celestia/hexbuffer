@@ -1,4 +1,4 @@
-import { Toaster } from 'sonner';
+import { Toaster } from "@/components/toaster";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";

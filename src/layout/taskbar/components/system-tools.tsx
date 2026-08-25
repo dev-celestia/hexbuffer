@@ -11,6 +11,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useSystemTools } from '../hooks/use-system-tools';
 import { UpdateDialog } from './update-dialog';
+import { NotificationAlert } from './notification-alert';
 
 export function SystemTools() {
   const {
@@ -104,6 +105,10 @@ export function SystemTools() {
             {dateString}
           </TooltipContent>
         </Tooltip>
+
+        {/* Notifications / Alerts */}
+        <div className="h-4 w-px bg-border/60 mx-0.5 shrink-0" />
+        <NotificationAlert />
       </div>
 
       <UpdateDialog

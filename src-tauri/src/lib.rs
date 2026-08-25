@@ -43,9 +43,10 @@ pub use history::{
 pub use port_scanner::{scan_ports, stop_port_scan, PortScanState};
 pub use proxy::ca::export_ca_cert_pem;
 pub use proxy::state::{
-    InterceptMode, InterceptStatus, PausedRequest, ProxyFilter, ProxyRecord, ProxyRequest,
-    ProxyResponse, WebSocketConnectionRecord, WebSocketConnectionState, WebSocketFilter,
-    WebSocketMessageDirection, WebSocketMessageRecord, WebSocketMessageType,
+    InterceptMode, InterceptStatus, PausedRequest, ProxyDbFilterConfig, ProxyFilter, ProxyRecord,
+    ProxyRecordMode, ProxyRequest, ProxyResponse, WebSocketConnectionRecord,
+    WebSocketConnectionState, WebSocketFilter, WebSocketMessageDirection, WebSocketMessageRecord,
+    WebSocketMessageType,
 };
 pub use proxy::utils::ensure_port_free;
 pub use proxy::{active_proxy_port, default_proxy_port, run, stop, ProxyConfig, ProxyState};

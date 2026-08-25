@@ -120,7 +120,10 @@ export function AppLauncher() {
                         // Sizing & Spacing
                         "py-2.5 px-3 rounded-lg my-0.5",
                         // Interactive & States
-                        "cursor-pointer"
+                        "cursor-pointer",
+
+                        // Background
+                        "!bg-transparent"
                       )}
                     >
                       <div
@@ -258,7 +261,7 @@ export function AppLauncher() {
               // Sizing & Spacing
               "px-4 py-2.5 border-t border-border/60",
               // Backgrounds & Borders
-              "bg-muted/30 text-muted-foreground",
+              "text-muted-foreground",
               // Typography
               "text-xs"
             )}

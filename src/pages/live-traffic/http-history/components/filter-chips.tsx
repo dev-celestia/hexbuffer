@@ -1,6 +1,8 @@
-import { XIcon } from '@phosphor-icons/react';
+import { Badge } from '@celestia-project/ui';
+import { FunnelIcon, TargetIcon, XIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import type { BlacklistRule } from '@/stores/history';
+import { useHttpSessionStore } from '@/stores/history';
 
 interface FilterChipsProps {
   blacklistRules: BlacklistRule[];
@@ -15,16 +17,67 @@ export function FilterChips({
   highlightedHosts,
   onRemoveHighlight,
 }: FilterChipsProps) {
+  const activeSession = useHttpSessionStore((state) => state.activeSession);
+  const captureMode = activeSession?.capture_mode ?? 'all';
+  let customHostsCount = 0;
+  if (captureMode === 'custom' && activeSession?.capture_filter) {
+    try {
+      const parsed = JSON.parse(activeSession.capture_filter);
+      if (Array.isArray(parsed)) customHostsCount = parsed.length;
+    } catch {}
+  }
+
   const hasBlacklist = blacklistRules.length > 0;
   const highlightEntries = Object.entries(highlightedHosts);
   const hasHighlights = highlightEntries.length > 0;
+  const hasDbFilter = captureMode !== 'all';
 
-  if (!hasBlacklist && !hasHighlights) {
+  if (!hasBlacklist && !hasHighlights && !hasDbFilter) {
     return null;
   }
 
   return (
     <>
+      {hasDbFilter && (
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-wrap items-center",
+
+            // Sizing & Spacing
+            "mt-1 gap-1.5"
+          )}
+        >
+          <span
+            className={cn(
+              // Layout & Positioning
+              "shrink-0",
+
+              // Typography
+              "text-[10px] font-medium text-muted-foreground"
+            )}
+          >
+            DB Recording:
+          </span>
+          <Badge
+            variant="secondary"
+            title="Only matching traffic is inserted into the database"
+          >
+            {captureMode === 'target_scope' ? (
+              <>
+                <TargetIcon className="size-3 mr-1" />
+                <span>In-Scope Target Only</span>
+              </>
+            ) : (
+              <>
+                <FunnelIcon className="size-3 mr-1" />
+                <span>Custom Whitelist ({customHostsCount} host{customHostsCount === 1 ? '' : 's'})</span>
+              </>
+            )}
+          </Badge>
+        </div>
+      )}
+
       {hasBlacklist && (
         <div
           className={cn(

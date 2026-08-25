@@ -75,3 +75,20 @@ pub async fn get_proxy_status() -> Result<ProxyRuntimeStatus, String> {
         connections: 0,
     })
 }
+
+#[tauri::command]
+pub async fn get_proxy_db_filter(
+    proxy_state: tauri::State<'_, crate::ProxyState>,
+) -> Result<crate::proxy::types::ProxyDbFilterConfig, String> {
+    Ok(proxy_state.get_db_filter_config())
+}
+
+#[tauri::command]
+pub async fn set_proxy_db_filter(
+    proxy_state: tauri::State<'_, crate::ProxyState>,
+    config: crate::proxy::types::ProxyDbFilterConfig,
+) -> Result<(), String> {
+    proxy_state.set_db_filter_config(config);
+    Ok(())
+}
+

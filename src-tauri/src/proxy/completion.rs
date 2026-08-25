@@ -31,6 +31,14 @@ pub fn build_record(ctx: &Ctx) -> ProxyRecord {
 
 pub fn save_and_emit(ctx: &Ctx, app_handle: &tauri::AppHandle) {
     let txn = build_record(ctx);
+
+    // ponytail: check if DB recording filter permits this record
+    if let Some(proxy_state) = app_handle.try_state::<crate::proxy::ProxyState>() {
+        if !proxy_state.should_record_to_db(&txn) {
+            return;
+        }
+    }
+
     let mut session_id = String::new();
 
     if let Some(history) = app_handle.try_state::<crate::HistoryBridge>() {

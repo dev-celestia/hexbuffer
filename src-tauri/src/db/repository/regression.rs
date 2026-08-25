@@ -223,11 +223,11 @@ impl Database {
         }
 
         // Seed Projects
-        let p1_id = "p-apprecon-1111";
+        let p1_id = "p-hexbuffer-1111";
         let p2_id = "p-oobserver-2222";
         conn.execute(
             "INSERT INTO r_projects (id, name, repository_url, created_at) VALUES (?1, ?2, ?3, ?4)",
-            params![p1_id, "apprecon-frontend", "https://github.com/arhamymr/apsara-cyber-tools", "2026-07-01T12:00:00Z"],
+            params![p1_id, "hexbuffer-frontend", "https://github.com/arhamymr/apsara-cyber-tools", "2026-07-01T12:00:00Z"],
         )?;
         conn.execute(
             "INSERT INTO r_projects (id, name, repository_url, created_at) VALUES (?1, ?2, ?3, ?4)",
@@ -242,7 +242,7 @@ impl Database {
         conn.execute("INSERT INTO r_execution_environments (id, name, description) VALUES (?1, ?2, ?3)", params![env_stg, "Staging", "Pre-release testing environment"])?;
         conn.execute("INSERT INTO r_execution_environments (id, name, description) VALUES (?1, ?2, ?3)", params![env_prd, "Production", "Critical live system checks"])?;
 
-        // Seed Test Suites for apprecon-frontend
+        // Seed Test Suites for hexbuffer-frontend
         let s1_id = "suite-auth";
         let s2_id = "suite-kanban";
         conn.execute("INSERT INTO r_test_suites (id, project_id, file_path, title) VALUES (?1, ?2, ?3, ?4)", params![s1_id, p1_id, "tests/auth/login.spec.ts", "Authentication Tests"])?;

@@ -26,7 +26,7 @@ import {
 import { cn } from '@/lib/utils';
 import { METHOD_FILTERS, STATUS_FILTERS } from './log-table/utils';
 import { FilterChips } from './filter-chips';
-import { SessionSelector } from './session-selector';
+import { SessionSelector } from './session';
 import { useLogFilters, type UseLogFiltersProps } from '../hooks/use-log-filters';
 
 export type LogFiltersProps = UseLogFiltersProps;

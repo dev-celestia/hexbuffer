@@ -75,7 +75,7 @@ This repository now prefers â€œpage entry + page hook + presentational sectionsâ
 
 ## AI Agent Tools & Triggers Integration
 
-When adding new app capabilities that AI agents can execute (or modifying existing tools), follow this standard two-step pattern across `hexbuffer-ai` and `apprecon`:
+When adding new app capabilities that AI agents can execute (or modifying existing tools), follow this standard two-step pattern across `hexbuffer-ai` and `hexbuffer`:
 
 ### 1. Rust LLM Tool Definition (`hexbuffer-ai`)
 - Create a dedicated file under `/Users/arham/Desktop/project/hexbuffer-ai/src/tools/<feature>.rs` implementing Rig's `Tool` trait.
@@ -83,7 +83,7 @@ When adding new app capabilities that AI agents can execute (or modifying existi
 - Attach the tool struct to the `AgentBuilder` in `src/chat.rs`.
 - If high-risk, configure security policy in `src/policy.rs` (`SecurityApprovalPolicy`).
 
-### 2. Frontend App Trigger Integration (`apprecon`)
+### 2. Frontend App Trigger Integration (`hexbuffer`)
 - Define the frontend tool definition (`*_AI_TOOL_DEFINITION`) and execution handler (`execute*AiTool`) under `src/layout/assistant/lib/ai-tools/<feature>.ts`.
 - Register the tool schema in `src/layout/assistant/lib/ai-tools/definitions.ts`.
 - Register the tool execution case in `src/layout/assistant/lib/ai-tools/executor.ts`.

@@ -44,7 +44,7 @@ async function dispatchToolExecution(toolName: string, args: Record<string, any>
 }
 
 /**
- * Executes a tool capability directly using Apprecon frontend triggers and tracks progress
+ * Executes a tool capability directly using Hexbuffer frontend triggers and tracks progress
  */
 export async function executeAiToolCall(toolName: string, args: Record<string, any>): Promise<any> {
   const actionId = addTrackedAction(toolName);

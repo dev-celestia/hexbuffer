@@ -25,8 +25,11 @@ export const terminalInstances = new Map<string, TerminalSessionInstances>();
 const restartCooldowns = new Map<string, number>();
 
 const STORAGE_KEYS = {
-  FONT_SIZE: 'apprecon:terminal:font-size',
-  SHELL_PATH: 'apprecon:terminal:shell-path',
+  FONT_SIZE: 'hexbuffer:terminal:font-size',
+  SHELL_PATH: 'hexbuffer:terminal:shell-path',
+  SAVED_SESSIONS: 'hexbuffer:terminal:saved-sessions',
+  RECENT_COMMANDS: 'hexbuffer:terminal:recent-commands',
+  SIDEBAR_OPEN: 'hexbuffer:terminal:sidebar-open',
 };
 
 const LIGHT_THEME = {
@@ -106,7 +109,7 @@ interface TerminalState {
 export const useTerminalStore = create<TerminalState>((set, get) => ({
   sessions: (() => {
     try {
-      const saved = localStorage.getItem('apprecon:terminal:saved-sessions');
+      const saved = localStorage.getItem('hexbuffer:terminal:saved-sessions');
       console.log('[Terminal Store] Initial sessions load from storage:', saved);
       if (saved) {
         const parsed = JSON.parse(saved) as TerminalSessionState[];
@@ -121,7 +124,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
   })(),
   activeId: (() => {
     try {
-      const saved = localStorage.getItem('apprecon:terminal:saved-sessions');
+      const saved = localStorage.getItem('hexbuffer:terminal:saved-sessions');
       if (saved) {
         const parsed = JSON.parse(saved) as TerminalSessionState[];
         if (parsed.length > 0) {
@@ -143,7 +146,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
     return saved || '/bin/zsh';
   })(),
   recentCommands: (() => {
-    const saved = localStorage.getItem('apprecon:terminal:recent-commands');
+    const saved = localStorage.getItem('hexbuffer:terminal:recent-commands');
     return saved ? JSON.parse(saved) : [];
   })(),
 
@@ -206,7 +209,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
       sessions: initialSessions,
       activeId: id,
     });
-    localStorage.setItem('apprecon:terminal:saved-sessions', JSON.stringify(initialSessions));
+    localStorage.setItem('hexbuffer:terminal:saved-sessions', JSON.stringify(initialSessions));
 
     try {
       const isDark = document.documentElement.classList.contains('dark');
@@ -267,7 +270,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
         term.write(`\r\n[Process completed with exit code ${exitCode}]\r\n`);
         const current = get().sessions.map((s) => s.id === id ? { ...s, status: 'exited' as const } : s);
         set({ sessions: current });
-        localStorage.setItem('apprecon:terminal:saved-sessions', JSON.stringify(current));
+        localStorage.setItem('hexbuffer:terminal:saved-sessions', JSON.stringify(current));
       });
 
       terminalInstances.set(id, { pty, term, fitAddon });
@@ -278,7 +281,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
         s.id === id ? { ...s, pid: pid || 0, status: 'ready' as const } : s
       );
       set({ sessions: readySessions });
-      localStorage.setItem('apprecon:terminal:saved-sessions', JSON.stringify(readySessions));
+      localStorage.setItem('hexbuffer:terminal:saved-sessions', JSON.stringify(readySessions));
       console.log('[Terminal Store] Saved session list updated in localStorage. length:', readySessions.length);
 
     } catch (error) {
@@ -317,7 +320,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
       sessions: filtered,
       activeId: nextActiveId,
     });
-    localStorage.setItem('apprecon:terminal:saved-sessions', JSON.stringify(filtered));
+    localStorage.setItem('hexbuffer:terminal:saved-sessions', JSON.stringify(filtered));
   },
 
   renameSession: (id, newName) => {
@@ -326,7 +329,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
     set({
       sessions: updated,
     });
-    localStorage.setItem('apprecon:terminal:saved-sessions', JSON.stringify(updated));
+    localStorage.setItem('hexbuffer:terminal:saved-sessions', JSON.stringify(updated));
   },
 
   closeTabsToLeft: (id) => {
@@ -359,7 +362,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
       sessions: remaining,
       activeId: nextActiveId,
     });
-    localStorage.setItem('apprecon:terminal:saved-sessions', JSON.stringify(remaining));
+    localStorage.setItem('hexbuffer:terminal:saved-sessions', JSON.stringify(remaining));
   },
 
   closeTabsToRight: (id) => {
@@ -392,7 +395,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
       sessions: remaining,
       activeId: nextActiveId,
     });
-    localStorage.setItem('apprecon:terminal:saved-sessions', JSON.stringify(remaining));
+    localStorage.setItem('hexbuffer:terminal:saved-sessions', JSON.stringify(remaining));
   },
 
   clearActiveSessionBuffer: () => {
@@ -411,12 +414,12 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
     const filtered = recentCommands.filter((c) => c !== trimmed);
     const updated = [trimmed, ...filtered].slice(0, 15);
     set({ recentCommands: updated });
-    localStorage.setItem('apprecon:terminal:recent-commands', JSON.stringify(updated));
+    localStorage.setItem('hexbuffer:terminal:recent-commands', JSON.stringify(updated));
   },
 
   clearRecentCommands: () => {
     set({ recentCommands: [] });
-    localStorage.removeItem('apprecon:terminal:recent-commands');
+    localStorage.removeItem('hexbuffer:terminal:recent-commands');
   },
 
   runCommand: (cmd) => {
@@ -433,14 +436,14 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
   },
 
   isSidebarOpen: (() => {
-    const saved = localStorage.getItem('apprecon:terminal:sidebar-open');
+    const saved = localStorage.getItem('hexbuffer:terminal:sidebar-open');
     return saved === null ? true : saved === 'true';
   })(),
 
   toggleSidebar: () => {
     const next = !get().isSidebarOpen;
     set({ isSidebarOpen: next });
-    localStorage.setItem('apprecon:terminal:sidebar-open', next.toString());
+    localStorage.setItem('hexbuffer:terminal:sidebar-open', next.toString());
   },
 
   initSavedSessions: async () => {
@@ -517,7 +520,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
           term.write(`\r\n[Process completed with exit code ${exitCode}]\r\n`);
           const current = get().sessions.map((item) => item.id === s.id ? { ...item, status: 'exited' as const } : item);
           set({ sessions: current });
-          localStorage.setItem('apprecon:terminal:saved-sessions', JSON.stringify(current));
+          localStorage.setItem('hexbuffer:terminal:saved-sessions', JSON.stringify(current));
         });
 
         s.pid = pty.pid || 0;
@@ -630,7 +633,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
         term.write(`\r\n[Process completed with exit code ${exitCode}]\r\n`);
         const current = get().sessions.map((item) => item.id === id ? { ...item, status: 'exited' as const } : item);
         set({ sessions: current });
-        localStorage.setItem('apprecon:terminal:saved-sessions', JSON.stringify(current));
+        localStorage.setItem('hexbuffer:terminal:saved-sessions', JSON.stringify(current));
       });
 
       terminalInstances.set(id, { pty, term, fitAddon });
@@ -640,7 +643,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
         item.id === id ? { ...item, pid: pty.pid || 0, status: 'ready' as const } : item
       );
       set({ sessions: readySessions });
-      localStorage.setItem('apprecon:terminal:saved-sessions', JSON.stringify(readySessions));
+      localStorage.setItem('hexbuffer:terminal:saved-sessions', JSON.stringify(readySessions));
       log(`[Restart] Successfully restarted session: ${id}. PID: ${pty.pid}`);
     } catch (error: any) {
       const errMsg = error?.message || String(error);

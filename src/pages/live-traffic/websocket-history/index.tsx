@@ -29,7 +29,7 @@ import {
   XIcon,
 } from '@phosphor-icons/react';
 
-import { SessionSelector } from "@/pages/live-traffic/http-history/components/session-selector";
+import { SessionSelector } from "@/pages/live-traffic/http-history/components/session";
 import { openTargetSelector } from "@/triggers";
 import { cn } from "@/lib/utils";
 

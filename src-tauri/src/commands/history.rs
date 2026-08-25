@@ -17,18 +17,71 @@ pub async fn get_http_sessions(
 #[tauri::command]
 pub async fn create_http_session(
     history: State<'_, HistoryBridge>,
+    proxy_state: State<'_, ProxyState>,
     name: String,
     description: Option<String>,
+    capture_mode: Option<String>,
+    capture_filter: Option<String>,
+    exclude_filter: Option<String>,
 ) -> Result<HttpSessionRecord, String> {
-    history.create_http_session(&name, description.as_deref())
+    let rec = history.create_http_session(
+        &name,
+        description.as_deref(),
+        capture_mode.as_deref(),
+        capture_filter.as_deref(),
+        exclude_filter.as_deref(),
+    )?;
+
+    sync_session_filter_to_proxy_state(&rec, &proxy_state);
+    Ok(rec)
 }
 
 #[tauri::command]
 pub async fn set_active_http_session(
     history: State<'_, HistoryBridge>,
+    proxy_state: State<'_, ProxyState>,
     session_id: String,
 ) -> Result<(), String> {
-    history.set_active_http_session(&session_id)
+    history.set_active_http_session(&session_id)?;
+    if let Ok(Some(sess)) = history.get_active_http_session() {
+        sync_session_filter_to_proxy_state(&sess, &proxy_state);
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn update_http_session_filter(
+    history: State<'_, HistoryBridge>,
+    proxy_state: State<'_, ProxyState>,
+    session_id: String,
+    capture_mode: String,
+    capture_filter: String,
+    exclude_filter: String,
+) -> Result<(), String> {
+    history.update_http_session_filter(&session_id, &capture_mode, &capture_filter, &exclude_filter)?;
+    if let Ok(Some(active)) = history.get_active_http_session() {
+        if active.id == session_id {
+            sync_session_filter_to_proxy_state(&active, &proxy_state);
+        }
+    }
+    Ok(())
+}
+
+fn sync_session_filter_to_proxy_state(session: &HttpSessionRecord, proxy_state: &ProxyState) {
+    let mode = match session.capture_mode.as_str() {
+        "target_scope" => crate::proxy::types::ProxyRecordMode::TargetScope,
+        "custom" => crate::proxy::types::ProxyRecordMode::Custom,
+        _ => crate::proxy::types::ProxyRecordMode::All,
+    };
+
+    let custom_hosts: Vec<String> = serde_json::from_str(&session.capture_filter).unwrap_or_default();
+    let exclude_hosts: Vec<String> = serde_json::from_str(&session.exclude_filter).unwrap_or_default();
+
+    let mut current_config = proxy_state.get_db_filter_config();
+    current_config.mode = mode;
+    current_config.custom_hosts = custom_hosts;
+    current_config.exclude_hosts = exclude_hosts;
+    proxy_state.set_db_filter_config(current_config);
 }
 
 #[tauri::command]

@@ -465,43 +465,51 @@ impl hexbuffer_proxy::WebSocketHandler for AppHandler {
         let (host, path, url) = websocket::parse_websocket_target(&req_uri, &req_headers);
         let key = format!("{}|{}|{}", client_addr, host, path);
 
-        self.ws_connections
-            .lock()
-            .unwrap()
-            .insert(key, connection_id);
-
-        let mut session_id = String::new();
-        if let Some(history) = self.app_handle.try_state::<crate::HistoryBridge>() {
-            if let Ok(Some(active)) = history.get_active_http_session() {
-                session_id = active.id;
-            }
-        }
-
-        let now = chrono::Utc::now();
-        let record = crate::proxy::state::WebSocketConnectionRecord {
-            id: connection_id,
-            session_id,
-            timestamp: now,
-            url,
-            host,
-            path,
-            handshake_request_headers: req_headers,
-            handshake_response_status: Some(101),
-            handshake_response_headers: HashMap::new(),
-            client_addr: client_addr.clone(),
-            server_addr: req_uri,
-            state: crate::proxy::state::WebSocketConnectionState::Open,
-            message_count: 0,
-            last_activity_at: now,
+        let should_record = if let Some(proxy_state) = self.app_handle.try_state::<crate::proxy::ProxyState>() {
+            proxy_state.should_record_ws_to_db(&host, &req_uri, &req_headers)
+        } else {
+            true
         };
 
-        if let Some(history) = self.app_handle.try_state::<crate::HistoryBridge>() {
-            if let Err(e) = history.insert_websocket_connection(&record) {
-                eprintln!("[websocket] failed to insert WS connection: {}", e);
+        if should_record {
+            self.ws_connections
+                .lock()
+                .unwrap()
+                .insert(key, connection_id);
+
+            let mut session_id = String::new();
+            if let Some(history) = self.app_handle.try_state::<crate::HistoryBridge>() {
+                if let Ok(Some(active)) = history.get_active_http_session() {
+                    session_id = active.id;
+                }
             }
-        }
-        if let Err(e) = self.app_handle.emit("websocket-connection", &record) {
-            eprintln!("[websocket] failed to emit WS connection event: {}", e);
+
+            let now = chrono::Utc::now();
+            let record = crate::proxy::state::WebSocketConnectionRecord {
+                id: connection_id,
+                session_id,
+                timestamp: now,
+                url,
+                host,
+                path,
+                handshake_request_headers: req_headers,
+                handshake_response_status: Some(101),
+                handshake_response_headers: HashMap::new(),
+                client_addr: client_addr.clone(),
+                server_addr: req_uri,
+                state: crate::proxy::state::WebSocketConnectionState::Open,
+                message_count: 0,
+                last_activity_at: now,
+            };
+
+            if let Some(history) = self.app_handle.try_state::<crate::HistoryBridge>() {
+                if let Err(e) = history.insert_websocket_connection(&record) {
+                    eprintln!("[websocket] failed to insert WS connection: {}", e);
+                }
+            }
+            if let Err(e) = self.app_handle.emit("websocket-connection", &record) {
+                eprintln!("[websocket] failed to emit WS connection event: {}", e);
+            }
         }
 
         request

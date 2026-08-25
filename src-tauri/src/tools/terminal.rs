@@ -21,7 +21,7 @@ impl Tool for RunTerminalCommandTool {
     async fn definition(&self, _prompt: String) -> ToolDefinition {
         ToolDefinition {
             name: Self::NAME.to_string(),
-            description: "Execute a shell command inside the Apprecon integrated terminal.".to_string(),
+            description: "Execute a shell command inside the Hexbuffer integrated terminal.".to_string(),
             parameters: json!({
                 "type": "object",
                 "properties": {

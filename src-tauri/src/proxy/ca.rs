@@ -73,7 +73,7 @@ mod tests {
 
     #[test]
     fn test_create_proxy_authority_uses_ca_dir() {
-        let temp_dir = std::env::temp_dir().join("apprecon_ca_test");
+        let temp_dir = std::env::temp_dir().join("hexbuffer_ca_test");
         let _ = fs::remove_dir_all(&temp_dir);
 
         init_ca_dir(temp_dir.clone());

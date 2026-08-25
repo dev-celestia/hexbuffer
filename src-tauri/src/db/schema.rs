@@ -5,7 +5,10 @@ CREATE TABLE IF NOT EXISTS http_sessions (
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     is_active INTEGER NOT NULL DEFAULT 1,
-    description TEXT
+    description TEXT,
+    capture_mode TEXT NOT NULL DEFAULT 'all',
+    capture_filter TEXT NOT NULL DEFAULT '[]',
+    exclude_filter TEXT NOT NULL DEFAULT '[]'
 );
 
 CREATE INDEX IF NOT EXISTS idx_http_sessions_active ON http_sessions(is_active);

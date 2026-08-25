@@ -13,6 +13,7 @@ pub struct ProxyStateInner {
     pub active_intercept_tab_id: Option<String>,
     pub intercept_capture_patterns: Vec<String>,
     pub intercept_bypass_patterns: Vec<String>,
+    pub db_filter_config: ProxyDbFilterConfig,
 }
 
 #[derive(Debug, Clone)]
@@ -355,6 +356,246 @@ impl ProxyState {
         }
         false
     }
+
+    pub fn get_db_filter_config(&self) -> ProxyDbFilterConfig {
+        self.0.lock().unwrap().db_filter_config.clone()
+    }
+
+    pub fn set_db_filter_config(&self, config: ProxyDbFilterConfig) {
+        self.0.lock().unwrap().db_filter_config = config;
+    }
+
+    // ponytail: evaluate if a proxy request should be inserted into sqlite DB
+    pub fn should_record_to_db(&self, record: &ProxyRecord) -> bool {
+        let inner = self.0.lock().unwrap();
+        let config = &inner.db_filter_config;
+
+        if !config.enabled {
+            return false;
+        }
+
+        let candidate_hosts = extract_candidate_hosts(
+            &record.request.uri,
+            &record.server_addr,
+            &record.request.headers,
+        );
+
+        // 1. Exclude blacklist check
+        if !config.exclude_hosts.is_empty() {
+            for pattern in &config.exclude_hosts {
+                for host in &candidate_hosts {
+                    if matches_host_pattern(host, pattern) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // 2. Mode check
+        match config.mode {
+            ProxyRecordMode::All => true,
+            ProxyRecordMode::TargetScope => {
+                if config.target_hosts.is_empty() {
+                    return false;
+                }
+                for pattern in &config.target_hosts {
+                    for host in &candidate_hosts {
+                        if matches_host_pattern(host, pattern) {
+                            return true;
+                        }
+                    }
+                }
+                false
+            }
+            ProxyRecordMode::Custom => {
+                if config.custom_hosts.is_empty() {
+                    return false;
+                }
+                for pattern in &config.custom_hosts {
+                    for host in &candidate_hosts {
+                        if matches_host_pattern(host, pattern) {
+                            return true;
+                        }
+                    }
+                }
+                false
+            }
+        }
+    }
+
+    // ponytail: evaluate if a websocket connection/message should be inserted into sqlite DB
+    pub fn should_record_ws_to_db(
+        &self,
+        host: &str,
+        uri: &str,
+        headers: &std::collections::HashMap<String, String>,
+    ) -> bool {
+        let inner = self.0.lock().unwrap();
+        let config = &inner.db_filter_config;
+
+        if !config.enabled {
+            return false;
+        }
+
+        let mut candidate_hosts = extract_candidate_hosts(uri, host, headers);
+        if !host.is_empty() && !candidate_hosts.contains(&host.to_lowercase()) {
+            candidate_hosts.push(host.to_lowercase());
+        }
+
+        // 1. Exclude check
+        if !config.exclude_hosts.is_empty() {
+            for pattern in &config.exclude_hosts {
+                for candidate in &candidate_hosts {
+                    if matches_host_pattern(candidate, pattern) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // 2. Mode check
+        match config.mode {
+            ProxyRecordMode::All => true,
+            ProxyRecordMode::TargetScope => {
+                if config.target_hosts.is_empty() {
+                    return false;
+                }
+                for pattern in &config.target_hosts {
+                    for candidate in &candidate_hosts {
+                        if matches_host_pattern(candidate, pattern) {
+                            return true;
+                        }
+                    }
+                }
+                false
+            }
+            ProxyRecordMode::Custom => {
+                if config.custom_hosts.is_empty() {
+                    return false;
+                }
+                for pattern in &config.custom_hosts {
+                    for candidate in &candidate_hosts {
+                        if matches_host_pattern(candidate, pattern) {
+                            return true;
+                        }
+                    }
+                }
+                false
+            }
+        }
+    }
+}
+
+fn extract_candidate_hosts(
+    uri: &str,
+    server_addr: &str,
+    headers: &std::collections::HashMap<String, String>,
+) -> Vec<String> {
+    let mut candidates = Vec::new();
+
+    // 1. Host or :authority header
+    if let Some(hdr) = headers.get("host").or_else(|| headers.get("Host")).or_else(|| headers.get(":authority")) {
+        let clean = hdr.split(':').next().unwrap_or("").trim().to_lowercase();
+        if !clean.is_empty() && !candidates.contains(&clean) {
+            candidates.push(clean);
+        }
+    }
+
+    // 2. Origin header
+    if let Some(origin) = headers.get("origin").or_else(|| headers.get("Origin")) {
+        let clean = origin
+            .trim_start_matches("http://")
+            .trim_start_matches("https://")
+            .split('/')
+            .next()
+            .unwrap_or("")
+            .split(':')
+            .next()
+            .unwrap_or("")
+            .trim()
+            .to_lowercase();
+        if !clean.is_empty() && clean != "null" && clean != "opaque" && !candidates.contains(&clean) {
+            candidates.push(clean);
+        }
+    }
+
+    // 3. Request URI host
+    if uri.contains("://") {
+        if let Some(after_scheme) = uri.split("://").nth(1) {
+            let clean = after_scheme
+                .split('/')
+                .next()
+                .unwrap_or("")
+                .split(':')
+                .next()
+                .unwrap_or("")
+                .trim()
+                .to_lowercase();
+            if !clean.is_empty() && !candidates.contains(&clean) {
+                candidates.push(clean);
+            }
+        }
+    } else if !uri.starts_with('/') {
+        let clean = uri
+            .split('/')
+            .next()
+            .unwrap_or("")
+            .split(':')
+            .next()
+            .unwrap_or("")
+            .trim()
+            .to_lowercase();
+        if !clean.is_empty() && !candidates.contains(&clean) {
+            candidates.push(clean);
+        }
+    }
+
+    // 4. Server Addr
+    if !server_addr.is_empty() && !server_addr.starts_with('/') {
+        let clean = server_addr
+            .split(':')
+            .next()
+            .unwrap_or("")
+            .trim()
+            .to_lowercase();
+        if !clean.is_empty() && !candidates.contains(&clean) {
+            candidates.push(clean);
+        }
+    }
+
+    candidates
+}
+
+fn matches_host_pattern(candidate: &str, pattern: &str) -> bool {
+    let cand_clean = candidate.trim().to_lowercase();
+    let pat_clean = pattern
+        .trim()
+        .trim_start_matches("http://")
+        .trim_start_matches("https://")
+        .trim_end_matches('/')
+        .to_lowercase();
+
+    if cand_clean.is_empty() || pat_clean.is_empty() {
+        return false;
+    }
+
+    let pat_no_port = pat_clean.split(':').next().unwrap_or(&pat_clean);
+    let cand_no_port = cand_clean.split(':').next().unwrap_or(&cand_clean);
+
+    if pat_clean.starts_with("*.") {
+        let base_domain = &pat_clean[2..];
+        let base_no_port = base_domain.split(':').next().unwrap_or(base_domain);
+        return cand_clean == base_domain
+            || cand_clean.ends_with(&format!(".{}", base_domain))
+            || cand_no_port == base_no_port
+            || cand_no_port.ends_with(&format!(".{}", base_no_port));
+    }
+
+    cand_clean == pat_clean
+        || cand_no_port == pat_no_port
+        || cand_clean.ends_with(&format!(".{}", pat_clean))
+        || cand_no_port.ends_with(&format!(".{}", pat_no_port))
+        || cand_clean.contains(&pat_clean)
 }
 
 impl Default for ProxyState {
@@ -362,3 +603,108 @@ impl Default for ProxyState {
         Self::new()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn create_test_record(uri: &str, host_header: Option<&str>, server_addr: &str) -> ProxyRecord {
+        let mut headers = HashMap::new();
+        if let Some(h) = host_header {
+            headers.insert("Host".to_string(), h.to_string());
+        }
+
+        ProxyRecord {
+            id: Uuid::new_v4(),
+            timestamp: chrono::Utc::now(),
+            client_addr: "127.0.0.1:55555".to_string(),
+            server_addr: server_addr.to_string(),
+            request: ProxyRequest {
+                method: "GET".to_string(),
+                uri: uri.to_string(),
+                http_version: "HTTP/1.1".to_string(),
+                headers,
+                body: Vec::new(),
+                content_decoded: false,
+            },
+            response: None,
+        }
+    }
+
+    #[test]
+    fn test_db_filter_all_mode() {
+        let state = ProxyState::new();
+        state.set_db_filter_config(ProxyDbFilterConfig {
+            enabled: true,
+            mode: ProxyRecordMode::All,
+            custom_hosts: vec![],
+            target_hosts: vec![],
+            exclude_hosts: vec![],
+        });
+
+        let rec = create_test_record("https://google.com/search", Some("google.com"), "google.com:443");
+        assert!(state.should_record_to_db(&rec));
+    }
+
+    #[test]
+    fn test_db_filter_target_scope_mode() {
+        let state = ProxyState::new();
+        state.set_db_filter_config(ProxyDbFilterConfig {
+            enabled: true,
+            mode: ProxyRecordMode::TargetScope,
+            custom_hosts: vec![],
+            target_hosts: vec!["*.target.com".to_string(), "api.example.com".to_string()],
+            exclude_hosts: vec!["analytics.target.com".to_string()],
+        });
+
+        // In scope matching wildcard
+        let rec1 = create_test_record("https://sub.target.com/users", Some("sub.target.com"), "sub.target.com:443");
+        assert!(state.should_record_to_db(&rec1));
+
+        // In scope matching exact host
+        let rec2 = create_test_record("https://api.example.com/v1", Some("api.example.com"), "api.example.com:443");
+        assert!(state.should_record_to_db(&rec2));
+
+        // Out of scope
+        let rec3 = create_test_record("https://google.com/gen_204", Some("google.com"), "google.com:443");
+        assert!(!state.should_record_to_db(&rec3));
+
+        // Excluded host even if matching wildcard
+        let rec4 = create_test_record("https://analytics.target.com/track", Some("analytics.target.com"), "analytics.target.com:443");
+        assert!(!state.should_record_to_db(&rec4));
+    }
+
+    #[test]
+    fn test_db_filter_custom_mode() {
+        let state = ProxyState::new();
+        state.set_db_filter_config(ProxyDbFilterConfig {
+            enabled: true,
+            mode: ProxyRecordMode::Custom,
+            custom_hosts: vec!["api.internal.corp".to_string()],
+            target_hosts: vec![],
+            exclude_hosts: vec![],
+        });
+
+        let rec1 = create_test_record("https://api.internal.corp:8443/data", Some("api.internal.corp:8443"), "api.internal.corp:8443");
+        assert!(state.should_record_to_db(&rec1));
+
+        let rec2 = create_test_record("https://other.corp/data", Some("other.corp"), "other.corp:443");
+        assert!(!state.should_record_to_db(&rec2));
+    }
+
+    #[test]
+    fn test_db_filter_disabled() {
+        let state = ProxyState::new();
+        state.set_db_filter_config(ProxyDbFilterConfig {
+            enabled: false,
+            mode: ProxyRecordMode::All,
+            custom_hosts: vec![],
+            target_hosts: vec![],
+            exclude_hosts: vec![],
+        });
+
+        let rec = create_test_record("https://api.example.com", Some("api.example.com"), "api.example.com:443");
+        assert!(!state.should_record_to_db(&rec));
+    }
+}
+

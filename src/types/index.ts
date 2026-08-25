@@ -108,6 +108,8 @@ export interface ProxyLogSummary {
   host: string | null;
 }
 
+export type SessionCaptureMode = 'all' | 'target_scope' | 'custom';
+
 export interface HttpSessionSummary {
   id: string;
   name: string;
@@ -115,6 +117,9 @@ export interface HttpSessionSummary {
   updated_at: string;
   is_active: boolean;
   description: string | null;
+  capture_mode?: SessionCaptureMode;
+  capture_filter?: string; // JSON array of string patterns
+  exclude_filter?: string; // JSON array of string patterns
   request_count: number;
   total_size_bytes: number;
 }
@@ -126,6 +131,17 @@ export interface HttpSessionRecord {
   updated_at: string;
   is_active: boolean;
   description: string | null;
+  capture_mode?: SessionCaptureMode;
+  capture_filter?: string;
+  exclude_filter?: string;
+}
+
+export interface ProxyDbFilterConfig {
+  enabled: boolean;
+  mode: SessionCaptureMode;
+  custom_hosts: string[];
+  target_hosts: string[];
+  exclude_hosts: string[];
 }
 
 export interface PaginatedResponse<T> {

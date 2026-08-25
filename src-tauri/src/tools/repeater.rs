@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 #[derive(Debug, thiserror::Error)]
-#[error("Apprecon tool execution error: {0}")]
+#[error("Hexbuffer tool execution error: {0}")]
 pub struct AppToolError(pub String);
 
 // 1. SendToRepeaterTool

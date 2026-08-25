@@ -240,3 +240,43 @@ impl ProxyFilter {
         false
     }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum ProxyRecordMode {
+    #[default]
+    All,
+    TargetScope,
+    Custom,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProxyDbFilterConfig {
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    #[serde(default)]
+    pub mode: ProxyRecordMode,
+    #[serde(default)]
+    pub custom_hosts: Vec<String>,
+    #[serde(default)]
+    pub target_hosts: Vec<String>,
+    #[serde(default)]
+    pub exclude_hosts: Vec<String>,
+}
+
+fn default_true() -> bool {
+    true
+}
+
+impl Default for ProxyDbFilterConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            mode: ProxyRecordMode::All,
+            custom_hosts: Vec::new(),
+            target_hosts: Vec::new(),
+            exclude_hosts: Vec::new(),
+        }
+    }
+}
+

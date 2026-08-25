@@ -5,6 +5,7 @@ import type {
   PaginatedResponse,
   HttpSessionSummary,
   HttpSessionRecord,
+  ProxyDbFilterConfig,
 } from '@/types';
 
 declare global {
@@ -63,8 +64,42 @@ export async function getHttpSessions(): Promise<HttpSessionSummary[]> {
   return invokeTauri('get_http_sessions');
 }
 
-export async function createHttpSession(name: string, description?: string): Promise<HttpSessionRecord> {
-  return invokeTauri('create_http_session', { name, description });
+export async function createHttpSession(
+  name: string,
+  description?: string,
+  captureMode?: string,
+  captureFilter?: string,
+  excludeFilter?: string
+): Promise<HttpSessionRecord> {
+  return invokeTauri('create_http_session', {
+    name,
+    description: description || null,
+    captureMode: captureMode || null,
+    captureFilter: captureFilter || null,
+    excludeFilter: excludeFilter || null,
+  });
+}
+
+export async function updateHttpSessionFilter(
+  sessionId: string,
+  captureMode: string,
+  captureFilter: string,
+  excludeFilter: string
+): Promise<void> {
+  return invokeTauri('update_http_session_filter', {
+    sessionId,
+    captureMode,
+    captureFilter,
+    excludeFilter,
+  });
+}
+
+export async function getProxyDbFilter(): Promise<ProxyDbFilterConfig> {
+  return invokeTauri('get_proxy_db_filter');
+}
+
+export async function setProxyDbFilter(config: ProxyDbFilterConfig): Promise<void> {
+  return invokeTauri('set_proxy_db_filter', { config });
 }
 
 export async function setActiveHttpSession(sessionId: string): Promise<void> {
