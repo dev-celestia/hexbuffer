@@ -17,6 +17,7 @@ export function useSessionSelector() {
     switchSession,
     renameSession,
     deleteSession,
+    clearSessionLogs,
   } = useHttpSessionStore(
     useShallow((state) => ({
       sessions: state.sessions,
@@ -31,12 +32,14 @@ export function useSessionSelector() {
       switchSession: state.switchSession,
       renameSession: state.renameSession,
       deleteSession: state.deleteSession,
+      clearSessionLogs: state.clearSessionLogs,
     }))
   );
 
   const [createOpen, setCreateOpen] = React.useState(false);
   const [editSessionTarget, setEditSessionTarget] = React.useState<HttpSessionSummary | null>(null);
   const [deleteSessionTarget, setDeleteSessionTarget] = React.useState<HttpSessionSummary | null>(null);
+  const [clearDataSessionTarget, setClearDataSessionTarget] = React.useState<HttpSessionSummary | null>(null);
 
   React.useEffect(() => {
     fetchSessions();
@@ -79,6 +82,13 @@ export function useSessionSelector() {
     [deleteSession]
   );
 
+  const handleClearData = React.useCallback(
+    async (sessionId: string) => {
+      await clearSessionLogs(sessionId);
+    },
+    [clearSessionLogs]
+  );
+
   const currentLabel = activeSession?.name || (isLoading ? 'Loading…' : 'Select Session');
   const isUnconfigured = !isLoading && Boolean(activeSession) && activeSession?.capture_mode === 'all';
 
@@ -95,10 +105,13 @@ export function useSessionSelector() {
     setEditSessionTarget,
     deleteSessionTarget,
     setDeleteSessionTarget,
+    clearDataSessionTarget,
+    setClearDataSessionTarget,
     switchSession,
     handleCreate,
     handleUpdateSession,
     handleDelete,
+    handleClearData,
     currentLabel,
     isUnconfigured,
   };

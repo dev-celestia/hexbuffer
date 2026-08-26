@@ -33,14 +33,6 @@ impl ProxyState {
         Self(Mutex::new(ProxyStateInner::default()))
     }
 
-    pub fn get_records(&self) -> Vec<ProxyRecord> {
-        self.0.lock().unwrap().records.clone()
-    }
-
-    pub fn add_record(&self, record: ProxyRecord) {
-        self.0.lock().unwrap().records.push(record);
-    }
-
     pub fn get_mode(&self) -> InterceptMode {
         self.0.lock().unwrap().intercept_mode.clone()
     }
@@ -65,14 +57,6 @@ impl ProxyState {
         inner.intercept_mode = mode;
     }
 
-    pub fn enable_intercept(&self) {
-        self.set_mode(InterceptMode::Enabled);
-    }
-
-    pub fn disable_intercept(&self) {
-        self.set_mode(InterceptMode::Disabled);
-    }
-
     pub fn get_status(&self) -> InterceptStatus {
         let inner = self.0.lock().unwrap();
         InterceptStatus {
@@ -93,15 +77,6 @@ impl ProxyState {
             .iter()
             .find(|r| r.id == *id)
             .cloned()
-    }
-
-    pub fn remove_paused_request(&self, id: &Uuid) -> Option<PausedRequest> {
-        let mut inner = self.0.lock().unwrap();
-        inner
-            .paused_requests
-            .iter()
-            .position(|r| r.id == *id)
-            .map(|pos| inner.paused_requests.remove(pos))
     }
 
     pub fn get_all_paused(&self) -> Vec<PausedRequest> {
@@ -228,66 +203,6 @@ impl ProxyState {
             .retain(|request| request.tab_id.as_deref() != Some(tab_id));
 
         matching_requests.len()
-    }
-
-    pub fn get_records_filtered(&self, filter: &ProxyFilter) -> Vec<ProxyRecord> {
-        let inner = self.0.lock().unwrap();
-        inner
-            .records
-            .iter()
-            .filter(|record| {
-                if !filter.record_matches_scope(record) {
-                    return false;
-                }
-                if let Some(ref methods) = filter.methods {
-                    if !methods.is_empty() && !methods.contains(&record.request.method) {
-                        return false;
-                    }
-                }
-                if let Some(ref status_codes) = filter.status_codes {
-                    if !status_codes.is_empty() {
-                        let status = record.response.as_ref().map(|r| r.status_code).unwrap_or(0);
-                        if !status_codes.contains(&status) {
-                            return false;
-                        }
-                    }
-                }
-                if let Some(ref search) = filter.search {
-                    if !search.is_empty() {
-                        let search_lower = search.to_lowercase();
-                        let uri_lower = record.request.uri.to_lowercase();
-                        let server_addr_lower = record.server_addr.to_lowercase();
-                        let req_headers = serde_json::to_string(&record.request.headers).unwrap_or_default().to_lowercase();
-
-                        if !uri_lower.contains(&search_lower)
-                            && !server_addr_lower.contains(&search_lower)
-                            && !req_headers.contains(&search_lower)
-                        {
-                            return false;
-                        }
-                    }
-                }
-                if let Some(ref path) = filter.path {
-                    if !path.is_empty() {
-                        let record_path = record
-                            .request
-                            .uri
-                            .split("://")
-                            .nth(1)
-                            .unwrap_or(record.request.uri.as_str())
-                            .split_once('/')
-                            .map(|(_, p)| format!("/{}", p))
-                            .unwrap_or_else(|| "/".to_string());
-
-                        if !record_path.contains(path) {
-                            return false;
-                        }
-                    }
-                }
-                true
-            })
-            .cloned()
-            .collect()
     }
 
     pub fn clear_records(&self) {
@@ -582,8 +497,7 @@ fn matches_host_pattern(candidate: &str, pattern: &str) -> bool {
     let pat_no_port = pat_clean.split(':').next().unwrap_or(&pat_clean);
     let cand_no_port = cand_clean.split(':').next().unwrap_or(&cand_clean);
 
-    if pat_clean.starts_with("*.") {
-        let base_domain = &pat_clean[2..];
+    if let Some(base_domain) = pat_clean.strip_prefix("*.") {
         let base_no_port = base_domain.split(':').next().unwrap_or(base_domain);
         return cand_clean == base_domain
             || cand_clean.ends_with(&format!(".{}", base_domain))

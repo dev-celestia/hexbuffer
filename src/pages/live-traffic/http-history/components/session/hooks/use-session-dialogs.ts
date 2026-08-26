@@ -263,13 +263,53 @@ export function useDeleteSessionDialog({
   session,
   onConfirm,
 }: UseDeleteSessionDialogProps) {
+  const [isDeleting, setIsDeleting] = React.useState(false);
+
   const handleDelete = React.useCallback(async () => {
     if (!session) return;
-    await onConfirm(session.id);
-    onOpenChange(false);
+    setIsDeleting(true);
+    try {
+      await onConfirm(session.id);
+      onOpenChange(false);
+    } finally {
+      setIsDeleting(false);
+    }
   }, [session, onConfirm, onOpenChange]);
 
   return {
     handleDelete,
+    isDeleting,
   };
 }
+
+export interface UseClearSessionDataDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  session: HttpSessionSummary | null;
+  onConfirm: (sessionId: string) => Promise<void>;
+}
+
+export function useClearSessionDataDialog({
+  onOpenChange,
+  session,
+  onConfirm,
+}: UseClearSessionDataDialogProps) {
+  const [isClearing, setIsClearing] = React.useState(false);
+
+  const handleClear = React.useCallback(async () => {
+    if (!session) return;
+    setIsClearing(true);
+    try {
+      await onConfirm(session.id);
+      onOpenChange(false);
+    } finally {
+      setIsClearing(false);
+    }
+  }, [session, onConfirm, onOpenChange]);
+
+  return {
+    handleClear,
+    isClearing,
+  };
+}
+

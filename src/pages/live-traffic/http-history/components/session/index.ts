@@ -6,15 +6,18 @@ export {
   CreateSessionDialog,
   EditSessionDialog,
   DeleteSessionDialog,
+  ClearSessionDataDialog,
 } from './session-dialogs';
 export type {
   CreateSessionDialogProps,
   EditSessionDialogProps,
   DeleteSessionDialogProps,
+  ClearSessionDataDialogProps,
 } from './session-dialogs';
 export {
   useCreateSessionDialog,
   useEditSessionDialog,
   useDeleteSessionDialog,
+  useClearSessionDataDialog,
 } from './hooks/use-session-dialogs';
 export { useSessionSelector } from './hooks/use-session-selector';

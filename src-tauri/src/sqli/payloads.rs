@@ -1,4 +1,4 @@
-use super::types::{SqliRiskLevel, SqliTechnique};
+use super::types::SqliTechnique;
 
 pub struct PayloadSet {
     pub mysql: Vec<&'static str>,
@@ -228,20 +228,6 @@ impl SqliPayloads {
             "oracle" => set.oracle.clone(),
             "sqlite" => set.sqlite.clone(),
             _ => set.mysql.clone(),
-        }
-    }
-
-    pub fn get_payloads_for_risk(
-        &self,
-        technique: SqliTechnique,
-        dbms: &str,
-        risk: SqliRiskLevel,
-    ) -> Vec<&'static str> {
-        let all = self.get_payloads(technique, dbms);
-        match risk {
-            SqliRiskLevel::Low => all.into_iter().take(3).collect(),
-            SqliRiskLevel::Medium => all.into_iter().take(6).collect(),
-            SqliRiskLevel::High => all,
         }
     }
 

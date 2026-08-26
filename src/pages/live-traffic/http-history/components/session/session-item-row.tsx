@@ -24,7 +24,7 @@ export interface SessionItemRowProps {
   isActive: boolean;
   onSelect: () => void;
   onConfigure: () => void;
-  onDelete: () => void;
+  onClearData: () => void;
 }
 
 export function SessionItemRow({
@@ -32,7 +32,7 @@ export function SessionItemRow({
   isActive,
   onSelect,
   onConfigure,
-  onDelete,
+  onClearData,
 }: SessionItemRowProps) {
   const mode = session.capture_mode ?? 'all';
   let customHostsList: string[] = [];
@@ -135,9 +135,9 @@ export function SessionItemRow({
               size="icon-sm"
               onClick={(e) => {
                 e.stopPropagation();
-                onDelete();
+                onClearData();
               }}
-              title="Delete Session"
+              title="Clear Session Data (Keep Session)"
             >
               <TrashIcon className="size-4" />
             </Button>

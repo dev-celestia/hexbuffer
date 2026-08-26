@@ -1050,20 +1050,6 @@ pub async fn ai_browser_stop_crawl(
     Ok(())
 }
 
-/// Check whether any crawl session is currently running or paused.
-pub fn has_any_active_crawl(state: &AiBrowserState) -> bool {
-    state
-        .sessions
-        .lock()
-        .ok()
-        .map(|sessions| {
-            sessions
-                .values()
-                .any(|s| s.status == "running" || s.status == "paused")
-        })
-        .unwrap_or(false)
-}
-
 /// Stop every crawl session that is currently running or paused.
 /// Called when the app is about to close while crawls are still active.
 pub fn stop_all_active_crawls(app: &AppHandle, state: &AiBrowserState) {
@@ -1280,6 +1266,3 @@ pub async fn list_recent_ai_browser_sessions(
     history.list_recent_ai_browser_sessions(limit.unwrap_or(20))
 }
 
-pub fn init_browser_state(_app: &AppHandle) -> BrowserProcessState {
-    BrowserProcessState::default()
-}

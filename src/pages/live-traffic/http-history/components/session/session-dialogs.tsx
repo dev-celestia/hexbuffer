@@ -8,7 +8,7 @@ import {
   DialogTitle,
   Input,
 } from '@celestia-project/ui';
-import { SlidersHorizontalIcon } from '@phosphor-icons/react';
+import { SlidersHorizontalIcon, TrashIcon } from '@phosphor-icons/react';
 import type { HttpSessionSummary, SessionCaptureMode } from '@/types';
 import { formatBytes } from '../log-table/utils';
 import { SessionFilterFields } from './session-filter-fields';
@@ -17,6 +17,7 @@ import {
   useCreateSessionDialog,
   useEditSessionDialog,
   useDeleteSessionDialog,
+  useClearSessionDataDialog,
 } from './hooks/use-session-dialogs';
 
 export interface CreateSessionDialogProps {
@@ -191,6 +192,7 @@ export interface EditSessionDialogProps {
     captureFilter: string[],
     excludeFilter: string[]
   ) => Promise<void>;
+  onDelete?: (session: HttpSessionSummary) => void;
 }
 
 export function EditSessionDialog({
@@ -198,6 +200,7 @@ export function EditSessionDialog({
   onOpenChange,
   session,
   onSubmit,
+  onDelete,
 }: EditSessionDialogProps) {
   const {
     name,
@@ -304,6 +307,60 @@ export function EditSessionDialog({
             onToggleAdvancedExclude={() => setShowAdvancedExclude(!showAdvancedExclude)}
             isCollapsibleExclude
           />
+
+          {onDelete && (
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center justify-between",
+
+                // Sizing & Spacing
+                "pt-3 mt-1",
+
+                // Backgrounds & Borders
+                "border-t border-border/40"
+              )}
+            >
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex flex-col",
+
+                  // Sizing & Spacing
+                  "gap-0.5"
+                )}
+              >
+                <span
+                  className={cn(
+                    // Typography
+                    "text-xs font-semibold text-destructive"
+                  )}
+                >
+                  Delete Session & Data
+                </span>
+                <span
+                  className={cn(
+                    // Typography
+                    "text-[11px] text-muted-foreground"
+                  )}
+                >
+                  Permanently remove this session and all {session.request_count.toLocaleString()} requests.
+                </span>
+              </div>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={() => {
+                  onOpenChange(false);
+                  onDelete(session);
+                }}
+              >
+                <TrashIcon className="size-3.5 mr-1.5" />
+                Delete Session
+              </Button>
+            </div>
+          )}
         </div>
 
         <DialogFooter>
@@ -328,22 +385,22 @@ export function EditSessionDialog({
   );
 }
 
-export interface DeleteSessionDialogProps {
+export interface ClearSessionDataDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   session: HttpSessionSummary | null;
   onConfirm: (sessionId: string) => Promise<void>;
-  isDeleting?: boolean;
+  isClearing?: boolean;
 }
 
-export function DeleteSessionDialog({
+export function ClearSessionDataDialog({
   open,
   onOpenChange,
   session,
   onConfirm,
-  isDeleting = false,
-}: DeleteSessionDialogProps) {
-  const { handleDelete } = useDeleteSessionDialog({
+  isClearing = false,
+}: ClearSessionDataDialogProps) {
+  const { handleClear, isClearing: localClearing } = useClearSessionDataDialog({
     open,
     onOpenChange,
     session,
@@ -362,7 +419,98 @@ export function DeleteSessionDialog({
         )}
       >
         <DialogHeader>
-          <DialogTitle className="text-destructive">Delete Session</DialogTitle>
+          <DialogTitle className="text-destructive">Clear Session Traffic Data</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to clear all recorded traffic for{' '}
+            <strong className="text-foreground">{session.name}</strong>?
+          </DialogDescription>
+        </DialogHeader>
+
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col",
+
+            // Sizing & Spacing
+            "gap-2 p-3 my-1",
+
+            // Typography
+            "text-xs leading-relaxed",
+
+            // Backgrounds & Borders
+            "rounded-md border border-destructive/20 bg-destructive/5 text-muted-foreground"
+          )}
+        >
+          <p>
+            This action will delete all{' '}
+            <span className="font-semibold text-foreground">
+              {session.request_count.toLocaleString()} requests
+            </span>{' '}
+            ({formatBytes(session.total_size_bytes)}) recorded in this session.
+          </p>
+          <p className="text-foreground font-medium">
+            The session name, notes, and traffic filtering rules will remain intact.
+          </p>
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onOpenChange(false)}
+            disabled={isClearing || localClearing}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleClear}
+            disabled={isClearing || localClearing}
+          >
+            {isClearing || localClearing ? 'Clearing…' : 'Clear Data'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export interface DeleteSessionDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  session: HttpSessionSummary | null;
+  onConfirm: (sessionId: string) => Promise<void>;
+  isDeleting?: boolean;
+}
+
+export function DeleteSessionDialog({
+  open,
+  onOpenChange,
+  session,
+  onConfirm,
+  isDeleting = false,
+}: DeleteSessionDialogProps) {
+  const { handleDelete, isDeleting: localDeleting } = useDeleteSessionDialog({
+    open,
+    onOpenChange,
+    session,
+    onConfirm,
+  });
+
+  if (!session) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        showCloseButton={false}
+        className={cn(
+          // Sizing & Spacing
+          "sm:max-w-[420px]"
+        )}
+      >
+        <DialogHeader>
+          <DialogTitle className="text-destructive">Delete Session & Data</DialogTitle>
           <DialogDescription>
             Are you sure you want to permanently delete{' '}
             <strong className="text-foreground">{session.name}</strong>?
@@ -401,7 +549,7 @@ export function DeleteSessionDialog({
             variant="outline"
             size="sm"
             onClick={() => onOpenChange(false)}
-            disabled={isDeleting}
+            disabled={isDeleting || localDeleting}
           >
             Cancel
           </Button>
@@ -409,9 +557,9 @@ export function DeleteSessionDialog({
             variant="destructive"
             size="sm"
             onClick={handleDelete}
-            disabled={isDeleting}
+            disabled={isDeleting || localDeleting}
           >
-            {isDeleting ? 'Reclaiming space…' : 'Delete & Reclaim Space'}
+            {isDeleting || localDeleting ? 'Deleting…' : 'Delete & Reclaim Space'}
           </Button>
         </DialogFooter>
       </DialogContent>

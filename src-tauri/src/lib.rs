@@ -28,7 +28,7 @@ pub use commands::browser::{
     ai_browser_submit_human_input, browser_batch, browser_click, browser_close, browser_execute,
     browser_fill, browser_navigate, browser_open, browser_press, browser_screenshot,
     browser_snapshot, browser_type, delete_ai_browser_session, get_ai_browser_session,
-    get_browser_status, has_any_active_crawl, list_ai_browser_insights, list_ai_browser_logs,
+    get_browser_status, list_ai_browser_insights, list_ai_browser_logs,
     list_ai_browser_pages, list_recent_ai_browser_sessions, stop_all_active_crawls,
     stop_browser_process, BrowserProcessState,
 };

@@ -66,6 +66,7 @@ fn main() {
             hexbuffer::commands::intercept::add_intercept_bypass_pattern,
             hexbuffer::commands::intercept::remove_intercept_bypass_pattern,
             hexbuffer::commands::intercept::open_intercept_browser,
+            hexbuffer::commands::intercept::trust_intercept_ca,
             hexbuffer::commands::history::get_http_sessions,
             hexbuffer::commands::history::create_http_session,
             hexbuffer::commands::history::set_active_http_session,

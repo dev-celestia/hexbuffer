@@ -47,7 +47,3 @@ pub fn stop_sqli_scan(
     Ok(())
 }
 
-#[tauri::command]
-pub fn get_sqli_scan_state(state: State<'_, types::SqliScanState>, scan_id: String) -> bool {
-    state.is_cancelled(&scan_id)
-}

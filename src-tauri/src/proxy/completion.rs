@@ -1,4 +1,3 @@
-use bytes::Bytes;
 use tauri::{Emitter, Manager};
 
 use super::lifecycle::Ctx;
@@ -74,16 +73,5 @@ pub fn save_and_emit(ctx: &Ctx, app_handle: &tauri::AppHandle) {
 
     if let Err(e) = app_handle.emit("proxy-record", &summary) {
         eprintln!("[completion] failed to emit event: {}", e);
-    }
-}
-
-pub fn handle_response_body(
-    body: &mut Option<Bytes>,
-    _end_of_stream: bool,
-    ctx: &mut Ctx,
-    _app_handle: &tauri::AppHandle,
-) {
-    if let Some(b) = body {
-        ctx.res_body.extend_from_slice(b);
     }
 }

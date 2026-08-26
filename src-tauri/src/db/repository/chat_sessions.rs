@@ -71,36 +71,6 @@ impl Database {
         rows.collect()
     }
 
-    pub fn add_chat_message(
-        &self,
-        session_id: &str,
-        role: &str,
-        content: &str,
-    ) -> SqlResult<ChatMessageRecord> {
-        let conn = self.conn.lock().unwrap();
-        let id = uuid::Uuid::new_v4().to_string();
-        let now = chrono::Utc::now().to_rfc3339();
-
-        conn.execute(
-            "INSERT INTO ai_chat_messages (id, session_id, role, content, created_at) VALUES (?1, ?2, ?3, ?4, ?5)",
-            params![id, session_id, role, content, now],
-        )?;
-
-        // Bump session updated_at
-        conn.execute(
-            "UPDATE ai_chat_sessions SET updated_at = ?1 WHERE id = ?2",
-            params![now, session_id],
-        )?;
-
-        Ok(ChatMessageRecord {
-            id,
-            session_id: session_id.to_string(),
-            role: role.to_string(),
-            content: content.to_string(),
-            created_at: now,
-        })
-    }
-
     pub fn replace_chat_messages(
         &self,
         session_id: &str,

@@ -13,6 +13,7 @@ import {
   CreateSessionDialog,
   DeleteSessionDialog,
   EditSessionDialog,
+  ClearSessionDataDialog,
 } from './session-dialogs';
 import { SessionSelectorTrigger } from './session-selector-trigger';
 import { SessionItemRow } from './session-item-row';
@@ -31,10 +32,13 @@ export function SessionSelector() {
     setEditSessionTarget,
     deleteSessionTarget,
     setDeleteSessionTarget,
+    clearDataSessionTarget,
+    setClearDataSessionTarget,
     switchSession,
     handleCreate,
     handleUpdateSession,
     handleDelete,
+    handleClearData,
     currentLabel,
     isUnconfigured,
   } = useSessionSelector();
@@ -95,7 +99,7 @@ export function SessionSelector() {
                   isActive={session.id === activeSessionId}
                   onSelect={() => switchSession(session.id)}
                   onConfigure={() => setEditSessionTarget(session)}
-                  onDelete={() => setDeleteSessionTarget(session)}
+                  onClearData={() => setClearDataSessionTarget(session)}
                 />
               ))}
             </div>
@@ -139,6 +143,19 @@ export function SessionSelector() {
         }}
         session={editSessionTarget}
         onSubmit={handleUpdateSession}
+        onDelete={(session) => {
+          setEditSessionTarget(null);
+          setDeleteSessionTarget(session);
+        }}
+      />
+
+      <ClearSessionDataDialog
+        open={Boolean(clearDataSessionTarget)}
+        onOpenChange={(open) => {
+          if (!open) setClearDataSessionTarget(null);
+        }}
+        session={clearDataSessionTarget}
+        onConfirm={handleClearData}
       />
 
       <DeleteSessionDialog

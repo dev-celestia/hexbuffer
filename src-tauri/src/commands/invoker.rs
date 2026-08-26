@@ -834,15 +834,6 @@ pub fn replace_marked_values_tracked(
     output
 }
 
-pub fn replace_marked_values(
-    text: &str,
-    payload_values: &HashMap<String, String>,
-    defaults: &[String],
-) -> String {
-    let mut position_index = 0;
-    replace_marked_values_tracked(text, payload_values, defaults, &mut position_index)
-}
-
 pub fn response_matches(body: &str, config: &InvokerGrepMatchConfig) -> bool {
     if !config.enabled || config.keyword.is_empty() {
         return false;

@@ -153,16 +153,3 @@ pub(crate) fn upsert_page_memory(state: &AiBrowserState, page: CrawlPage) {
         }
     }
 }
-
-#[allow(dead_code)]
-pub(crate) fn existing_page(
-    state: &AiBrowserState,
-    session_id: &str,
-    page_id: &str,
-) -> Option<CrawlPage> {
-    state.pages.lock().ok().and_then(|pages| {
-        pages
-            .get(session_id)
-            .and_then(|items| items.iter().find(|page| page.id == page_id).cloned())
-    })
-}
