@@ -53,7 +53,7 @@ sha2 = "0.10"
 md-5 = "0.10"
 rand = "0.8"
 tempfile = "3"
-hexbuffer-proxy = { git = "https://github.com/arhamymr/hexbuffer-proxy.git" }
+hexbuffer-proxy = "1"
 browser-crawler = { git = "https://github.com/arhamymr/browser-crawler.git" }
 hexbuffer-ai = { git = "https://github.com/arhamymr/hexbuffer-agent.git" }
 rig-core = "0.7"

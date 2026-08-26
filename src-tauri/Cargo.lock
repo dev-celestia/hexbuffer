@@ -2435,8 +2435,9 @@ dependencies = [
 
 [[package]]
 name = "hexbuffer-proxy"
-version = "0.0.2"
-source = "git+https://github.com/arhamymr/hexbuffer-proxy.git#ef2ca677a24c65f6de74f6799e9f9aaaa50523eb"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc5a582c175b034de2fb8dcff2bf9849f47deb92bcdb917df1f93c756d6bdb94"
 dependencies = [
  "anyhow",
  "async-trait",
