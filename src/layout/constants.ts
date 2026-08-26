@@ -217,7 +217,7 @@ export const ALPHA_NAV_ITEMS: NavItem[] = import.meta.env.PROD
         href: '/port-scanner',
         description: 'Scan host ports for open services and network vulnerabilities.',
         colors: { bg: 'bg-pink-500 dark:bg-pink-500', hoverBg: 'group-hover:bg-pink-500 dark:group-hover:bg-pink-500', border: 'border-pink-500 dark:border-pink-500' },
-        flag: 'alpha',
+        flag: 'beta',
         isNew: true,
       },
       {
@@ -226,7 +226,7 @@ export const ALPHA_NAV_ITEMS: NavItem[] = import.meta.env.PROD
         href: '/jwt',
         description: 'Decode, edit, and sign JSON Web Tokens.',
         colors: { bg: 'bg-lime-700 dark:bg-lime-700', hoverBg: 'group-hover:bg-lime-700 dark:group-hover:bg-lime-700', border: 'border-lime-700 dark:border-lime-700' },
-        flag: 'alpha',
+        flag: 'beta',
       },
       {
         label: 'XSS',
