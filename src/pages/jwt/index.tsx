@@ -1,7 +1,7 @@
 
 
-import { Button, ButtonGroup } from '@celestia-project/ui';
-import { CopyIcon, TrashIcon } from '@phosphor-icons/react';
+import { Button, Tabs, TabsList, TabsTrigger } from '@celestia-project/ui';
+import { TrashIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { useJwtPage } from './hooks/use-jwt-page';
 import { JwtDecodeView } from './components/jwt-decode-view';
@@ -44,7 +44,7 @@ export function JwtPage() {
             "flex items-center justify-between shrink-0",
 
             // Sizing & Spacing
-            "h-10 px-3 gap-2",
+            "h-10 px-1 gap-2",
 
             // Backgrounds & Borders
             "border-b bg-muted/40"
@@ -59,42 +59,15 @@ export function JwtPage() {
               "gap-2"
             )}
           >
-            <ButtonGroup>
-              <Button size="sm"
-                variant="outline"
-                className={cn(
-                  // Sizing & Spacing
-                  "h-6 px-2.5",
-
-                  // Typography
-                  "text-xs",
-
-                  // Interactive & States
-                  page.mode === 'decode' && 'text-green-500'
-                )}
-                data-state={page.mode === 'decode' ? 'on' : 'off'}
-                onClick={() => page.setMode('decode')}
-              >
-                Decode
-              </Button>
-              <Button size="sm"
-                variant="outline"
-                className={cn(
-                  // Sizing & Spacing
-                  "h-6 px-2.5",
-
-                  // Typography
-                  "text-xs",
-
-                  // Interactive & States
-                  page.mode === 'generate' && 'text-green-500'
-                )}
-                data-state={page.mode === 'generate' ? 'on' : 'off'}
-                onClick={() => page.setMode('generate')}
-              >
-                Generate
-              </Button>
-            </ButtonGroup>
+            <Tabs
+              value={page.mode}
+              onValueChange={(val) => page.setMode(val as 'decode' | 'generate')}
+            >
+              <TabsList>
+                <TabsTrigger value="decode">Decode</TabsTrigger>
+                <TabsTrigger value="generate">Generate</TabsTrigger>
+              </TabsList>
+            </Tabs>
 
             {page.mode === 'decode' && page.decoded && (
               <span
@@ -141,74 +114,38 @@ export function JwtPage() {
             )}
           >
             {page.mode === 'decode' && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => page.handleCopy(page.tokenInput)}
-                  disabled={!page.tokenInput}
-                  className={cn(
-                    // Sizing & Spacing
-                    "h-7 px-2 gap-1",
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={page.handleClear}
+                disabled={!page.tokenInput}
+                className={cn(
+                  // Sizing & Spacing
+                  "h-7 w-7",
 
-                    // Typography
-                    "text-xs"
-                  )}
-                >
-                  <CopyIcon className="h-3 w-3" />
-                  Copy Token
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={page.handleClear}
-                  disabled={!page.tokenInput}
-                  className={cn(
-                    // Sizing & Spacing
-                    "h-7 w-7",
-
-                    // Visuals & Colors / Interactive & States
-                    "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <TrashIcon className="h-3.5 w-3.5" />
-                </Button>
-              </>
+                  // Visuals & Colors / Interactive & States
+                  "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <TrashIcon className="h-3.5 w-3.5" />
+              </Button>
             )}
             {page.mode === 'generate' && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => page.handleCopy(page.generatedToken)}
-                  disabled={!page.generatedToken}
-                  className={cn(
-                    // Sizing & Spacing
-                    "h-7 px-2 gap-1",
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={page.handleClearGenerate}
+                disabled={isEmpty}
+                className={cn(
+                  // Sizing & Spacing
+                  "h-7 w-7",
 
-                    // Typography
-                    "text-xs"
-                  )}
-                >
-                  <CopyIcon className="h-3 w-3" />
-                  Copy Token
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={page.handleClearGenerate}
-                  disabled={isEmpty}
-                  className={cn(
-                    // Sizing & Spacing
-                    "h-7 w-7",
-
-                    // Visuals & Colors / Interactive & States
-                    "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <TrashIcon className="h-3.5 w-3.5" />
-                </Button>
-              </>
+                  // Visuals & Colors / Interactive & States
+                  "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <TrashIcon className="h-3.5 w-3.5" />
+              </Button>
             )}
           </div>
         </div>
@@ -242,7 +179,9 @@ export function JwtPage() {
               generatedToken={page.generatedToken}
               genError={page.genError}
               generating={page.generating}
+              generatingKey={page.generatingKey}
               onGenerate={page.handleGenerate}
+              onGenerateKey={page.handleGenerateKey}
               onCopy={page.handleCopy}
             />
           )}

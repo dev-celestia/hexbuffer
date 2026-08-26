@@ -112,6 +112,14 @@ export function DockItem({
       </TooltipTrigger>
       <TooltipContent side="top" sideOffset={12} className="flex items-center gap-1.5 font-sans">
         <span>{item.label}</span>
+        {item.isNew && (
+          <span className={cn(
+            "text-[9px] font-extrabold uppercase tracking-wider px-1 rounded-sm leading-none py-0.5",
+            "bg-purple-500/20 text-purple-600 dark:text-purple-400"
+          )}>
+            NEW
+          </span>
+        )}
         {item.flag && item.flag !== 'release' && (
           <span className={cn(
             "text-[9px] font-extrabold uppercase tracking-wider px-1 rounded-sm leading-none py-0.5",

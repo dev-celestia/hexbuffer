@@ -1,6 +1,7 @@
 use crate::port_scanner::banner::grab_banner;
 use crate::port_scanner::services::{detect_service, service_name};
 use crate::port_scanner::types::PortScanResult;
+use rand::Rng;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -13,8 +14,24 @@ pub async fn scan_single_port(
     port: u16,
     timeout_ms: u64,
     banner_grab: bool,
+    delay_ms: u64,
+    jitter_ms: u64,
     cancel_flag: Arc<AtomicBool>,
 ) -> PortScanResult {
+    if cancel_flag.load(Ordering::Relaxed) {
+        return port_result(host, port, "cancelled", None, None, None, None);
+    }
+
+    // Stealth: inter-probe delay with random jitter
+    if delay_ms > 0 || jitter_ms > 0 {
+        let jitter = if jitter_ms > 0 {
+            rand::thread_rng().gen_range(0..=jitter_ms)
+        } else {
+            0
+        };
+        tokio::time::sleep(Duration::from_millis(delay_ms + jitter)).await;
+    }
+
     if cancel_flag.load(Ordering::Relaxed) {
         return port_result(host, port, "cancelled", None, None, None, None);
     }

@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { PortScanResult } from '@/pages/port-scanner/types';
 import type { PortPreset } from '@/pages/port-scanner/constants';
 import { PORT_PRESETS } from '@/pages/port-scanner/constants';
+import { useNotificationStore } from '@/stores/notifications';
 
 interface PortScannerState {
   // Persisted state
@@ -12,6 +13,10 @@ interface PortScannerState {
   timeoutMs: string;
   concurrency: string;
   bannerGrab: boolean;
+  stealthMode: boolean;
+  delayMs: string;
+  jitterMs: string;
+  randomizePorts: boolean;
   results: PortScanResult[];
   hasRun: boolean;
   error: string;
@@ -27,6 +32,10 @@ interface PortScannerState {
   setTimeoutMs: (timeoutMs: string) => void;
   setConcurrency: (concurrency: string) => void;
   setBannerGrab: (bannerGrab: boolean) => void;
+  setStealthMode: (stealthMode: boolean) => void;
+  setDelayMs: (delayMs: string) => void;
+  setJitterMs: (jitterMs: string) => void;
+  setRandomizePorts: (randomizePorts: boolean) => void;
   setResults: (results: PortScanResult[] | ((current: PortScanResult[]) => PortScanResult[])) => void;
   setProgress: (progress: { current: number; total: number } | ((current: { current: number; total: number }) => { current: number; total: number })) => void;
   setIsRunning: (isRunning: boolean) => void;
@@ -45,6 +54,10 @@ export const usePortScannerStore = create<PortScannerState>()(
       timeoutMs: '800',
       concurrency: '100',
       bannerGrab: true,
+      stealthMode: true,
+      delayMs: '300',
+      jitterMs: '200',
+      randomizePorts: true,
       results: [],
       hasRun: false,
       error: '',
@@ -59,6 +72,21 @@ export const usePortScannerStore = create<PortScannerState>()(
       setTimeoutMs: (timeoutMs) => set({ timeoutMs }),
       setConcurrency: (concurrency) => set({ concurrency }),
       setBannerGrab: (bannerGrab) => set({ bannerGrab }),
+      setStealthMode: (stealthMode) => {
+        set({ stealthMode });
+        if (!stealthMode) {
+          useNotificationStore.getState().addAlert({
+            id: `noisy-scan-mode-${Date.now()}`,
+            title: 'Noisy Port Scan Mode Enabled',
+            message: 'Stealth mode is disabled. High-speed port scanning without probe delay or port randomization will likely trigger SIEM / IDS detection rules.',
+            type: 'warning',
+            source: 'Port Scanner',
+          });
+        }
+      },
+      setDelayMs: (delayMs) => set({ delayMs }),
+      setJitterMs: (jitterMs) => set({ jitterMs }),
+      setRandomizePorts: (randomizePorts) => set({ randomizePorts }),
       setResults: (updater) =>
         set((state) => ({
           results: typeof updater === 'function' ? updater(state.results) : updater,
@@ -87,6 +115,10 @@ export const usePortScannerStore = create<PortScannerState>()(
         timeoutMs: state.timeoutMs,
         concurrency: state.concurrency,
         bannerGrab: state.bannerGrab,
+        stealthMode: state.stealthMode,
+        delayMs: state.delayMs,
+        jitterMs: state.jitterMs,
+        randomizePorts: state.randomizePorts,
         results: state.results,
         hasRun: state.hasRun,
         error: state.error,
@@ -102,6 +134,10 @@ export const usePortScannerStore = create<PortScannerState>()(
           timeoutMs: state?.timeoutMs ?? base.timeoutMs,
           concurrency: state?.concurrency ?? base.concurrency,
           bannerGrab: state?.bannerGrab ?? base.bannerGrab,
+          stealthMode: state?.stealthMode ?? true,
+          delayMs: state?.delayMs ?? base.delayMs,
+          jitterMs: state?.jitterMs ?? base.jitterMs,
+          randomizePorts: state?.randomizePorts ?? base.randomizePorts,
           results: state?.results ?? base.results,
           hasRun: state?.hasRun ?? base.hasRun,
           error: state?.error ?? base.error,
@@ -110,3 +146,4 @@ export const usePortScannerStore = create<PortScannerState>()(
     }
   )
 );
+

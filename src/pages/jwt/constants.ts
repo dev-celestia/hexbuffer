@@ -19,12 +19,37 @@ export const SEVERITY_CONFIG: Record<
   info: { color: 'text-muted-foreground border-border bg-muted/50', icon: Info },
 };
 
-// ── Algorithm options ─────────────────────────────────────
+export interface AlgorithmOption {
+  value: JwtAlgorithm;
+  label: string;
+  category: 'HMAC' | 'RSA' | 'ECDSA' | 'RSA-PSS' | 'None';
+  type: 'symmetric' | 'asymmetric' | 'none';
+  description: string;
+}
 
-export const ALGORITHM_OPTIONS: { value: JwtAlgorithm; label: string }[] = [
-  { value: 'HS256', label: 'HS256' },
-  { value: 'HS384', label: 'HS384' },
-  { value: 'HS512', label: 'HS512' },
+export const ALGORITHM_OPTIONS: AlgorithmOption[] = [
+  // Symmetric (HMAC)
+  { value: 'HS256', label: 'HS256', category: 'HMAC', type: 'symmetric', description: 'HMAC using SHA-256' },
+  { value: 'HS384', label: 'HS384', category: 'HMAC', type: 'symmetric', description: 'HMAC using SHA-384' },
+  { value: 'HS512', label: 'HS512', category: 'HMAC', type: 'symmetric', description: 'HMAC using SHA-512' },
+
+  // Asymmetric (RSA PKCS#1 v1.5)
+  { value: 'RS256', label: 'RS256', category: 'RSA', type: 'asymmetric', description: 'RSASSA-PKCS1-v1_5 using SHA-256' },
+  { value: 'RS384', label: 'RS384', category: 'RSA', type: 'asymmetric', description: 'RSASSA-PKCS1-v1_5 using SHA-384' },
+  { value: 'RS512', label: 'RS512', category: 'RSA', type: 'asymmetric', description: 'RSASSA-PKCS1-v1_5 using SHA-512' },
+
+  // Asymmetric (ECDSA)
+  { value: 'ES256', label: 'ES256', category: 'ECDSA', type: 'asymmetric', description: 'ECDSA using P-256 and SHA-256' },
+  { value: 'ES384', label: 'ES384', category: 'ECDSA', type: 'asymmetric', description: 'ECDSA using P-384 and SHA-384' },
+  { value: 'ES512', label: 'ES512', category: 'ECDSA', type: 'asymmetric', description: 'ECDSA using P-521 and SHA-512' },
+
+  // Asymmetric (RSA-PSS)
+  { value: 'PS256', label: 'PS256', category: 'RSA-PSS', type: 'asymmetric', description: 'RSASSA-PSS using SHA-256' },
+  { value: 'PS384', label: 'PS384', category: 'RSA-PSS', type: 'asymmetric', description: 'RSASSA-PSS using SHA-384' },
+  { value: 'PS512', label: 'PS512', category: 'RSA-PSS', type: 'asymmetric', description: 'RSASSA-PSS using SHA-512' },
+
+  // Unsecured / None
+  { value: 'none', label: 'none', category: 'None', type: 'none', description: 'Unsecured (No signature)' },
 ];
 
 // ── Defaults ──────────────────────────────────────────────

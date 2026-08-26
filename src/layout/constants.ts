@@ -33,6 +33,8 @@ import intruderIcon from '@/assets/app/intruder.png';
 import notesIcon from '@/assets/app/notes.png';
 import repeaterIcon from '@/assets/app/repeater.png';
 import settingsIcon from '@/assets/app/settings.png';
+import jwtIcon from '@/assets/app/jwt.png';
+import portScannerIcon from '@/assets/app/port-scanner.png';
 
 export type ImageSource = string | { src: string };
 
@@ -44,6 +46,10 @@ export const APP_ICON_IMAGES: Record<string, ImageSource> = {
   '/notes': notesIcon,
   '/repeater': repeaterIcon,
   '/settings': settingsIcon,
+  '/jwt': jwtIcon,
+  'jwt': jwtIcon,
+  '/port-scanner': portScannerIcon,
+  'port scanner': portScannerIcon,
 };
 
 export function getAppIconImage(href: string, label?: string): string | undefined {
@@ -60,6 +66,7 @@ export interface NavItem {
   description?: string;
   colors?: { bg: string; hoverBg: string; border: string };
   flag?: 'alpha' | 'beta' | 'release';
+  isNew?: boolean;
 }
 
 export const RELEASE_NAV_ITEMS: NavItem[] = [
@@ -211,6 +218,7 @@ export const ALPHA_NAV_ITEMS: NavItem[] = import.meta.env.PROD
         description: 'Scan host ports for open services and network vulnerabilities.',
         colors: { bg: 'bg-pink-500 dark:bg-pink-500', hoverBg: 'group-hover:bg-pink-500 dark:group-hover:bg-pink-500', border: 'border-pink-500 dark:border-pink-500' },
         flag: 'alpha',
+        isNew: true,
       },
       {
         label: 'JWT',

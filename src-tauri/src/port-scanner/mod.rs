@@ -10,13 +10,18 @@ use std::sync::{
     atomic::{AtomicBool, AtomicUsize, Ordering},
     Arc, Mutex,
 };
-use targets::{expand_targets, normalize_scan_ports};
+use targets::{expand_targets, normalize_scan_ports, shuffle_ports};
 use tauri::{AppHandle, Emitter, State};
 use tokio::sync::Semaphore;
 use types::{PortScanProgress, PortScanRequest};
 
 pub use state::PortScanState;
 pub use types::PortScanResult;
+
+/// Stealth mode defaults
+const STEALTH_MAX_CONCURRENCY: usize = 10;
+const STEALTH_DEFAULT_DELAY_MS: u64 = 300;
+const STEALTH_DEFAULT_JITTER_MS: u64 = 200;
 
 #[tauri::command]
 pub async fn scan_ports(
@@ -32,15 +37,35 @@ pub async fn scan_ports(
     }
 
     let hosts = expand_targets(&request.target)?;
-    let ports = normalize_scan_ports(request.ports)?;
+    let mut ports = normalize_scan_ports(request.ports)?;
+    let stealth = request.stealth_mode.unwrap_or(false);
     let total = hosts.len() * ports.len();
     if total > 65_535 {
         return Err("Scans are limited to 65,535 host/port checks at a time".to_string());
     }
 
+    // Stealth: randomize port order to break sequential sweep signatures
+    let should_randomize = request.randomize_ports.unwrap_or(stealth);
+    if should_randomize {
+        ports = shuffle_ports(ports);
+    }
+
     let timeout_ms = request.timeout_ms.unwrap_or(800).clamp(100, 10_000);
-    let concurrency = request.concurrency.unwrap_or(100).clamp(1, 500);
+    let concurrency = if stealth {
+        request
+            .concurrency
+            .unwrap_or(STEALTH_MAX_CONCURRENCY)
+            .clamp(1, STEALTH_MAX_CONCURRENCY)
+    } else {
+        request.concurrency.unwrap_or(100).clamp(1, 500)
+    };
     let banner_grab = request.banner_grab.unwrap_or(true);
+    let delay_ms = request
+        .delay_ms
+        .unwrap_or(if stealth { STEALTH_DEFAULT_DELAY_MS } else { 0 });
+    let jitter_ms = request
+        .jitter_ms
+        .unwrap_or(if stealth { STEALTH_DEFAULT_JITTER_MS } else { 0 });
     let cancel_flag = Arc::new(AtomicBool::new(false));
 
     {
@@ -80,9 +105,16 @@ pub async fn scan_ports(
                     return;
                 }
 
-                let result =
-                    scan_single_port(&host, port, timeout_ms, banner_grab, cancel_flag.clone())
-                        .await;
+                let result = scan_single_port(
+                    &host,
+                    port,
+                    timeout_ms,
+                    banner_grab,
+                    delay_ms,
+                    jitter_ms,
+                    cancel_flag.clone(),
+                )
+                .await;
                 if result.state == "cancelled" {
                     return;
                 }

@@ -1,6 +1,10 @@
+use rand::Rng;
 use std::time::Duration;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
+
+const REALISTIC_USER_AGENT: &str =
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36";
 
 pub async fn grab_banner(
     host: &str,
@@ -16,12 +20,15 @@ pub async fn grab_banner(
     let probe = match port {
         80 | 8000 | 8080 | 8081 | 8888 | 9000 => {
             probe_data = format!(
-                "HEAD / HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n\r\n",
-                host
+                "HEAD / HTTP/1.1\r\nHost: {}\r\nUser-Agent: {}\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.5\r\nAccept-Encoding: gzip, deflate\r\nConnection: close\r\n\r\n",
+                host, REALISTIC_USER_AGENT
             );
             Some(probe_data.as_bytes())
         }
-        25 | 587 => Some(b"EHLO hexbuffer.local\r\n".as_slice()),
+        25 | 587 => {
+            probe_data = format!("EHLO {}\r\n", random_ehlo_hostname());
+            Some(probe_data.as_bytes())
+        }
         110 => Some(b"CAPA\r\n".as_slice()),
         143 => Some(b"a001 CAPABILITY\r\n".as_slice()),
         _ => None,
@@ -53,10 +60,11 @@ async fn grab_https_banner(host: &str, port: u16, timeout_ms: u64) -> Option<Str
         .timeout(Duration::from_millis(timeout_ms.min(2_500)))
         .danger_accept_invalid_certs(true)
         .redirect(reqwest::redirect::Policy::none())
+        .user_agent(REALISTIC_USER_AGENT)
         .build()
         .ok()?;
 
-    let response = client.head(url).send().await.ok()?;
+    let response = client.head(&url).send().await.ok()?;
     let mut parts = vec![format!(
         "HTTP/{} {} {}",
         http_version(response.version()),
@@ -164,4 +172,16 @@ fn http_version(version: reqwest::Version) -> &'static str {
         reqwest::Version::HTTP_3 => "3",
         _ => "?",
     }
+}
+
+fn random_ehlo_hostname() -> String {
+    const PREFIXES: &[&str] = &["mail", "mx", "smtp", "relay", "out", "gw"];
+    const DOMAINS: &[&str] = &[
+        "local", "internal", "corp.local", "office.local", "lan", "home",
+    ];
+    let mut rng = rand::thread_rng();
+    let prefix = PREFIXES[rng.gen_range(0..PREFIXES.len())];
+    let domain = DOMAINS[rng.gen_range(0..DOMAINS.len())];
+    let suffix: u16 = rng.gen_range(1..=99);
+    format!("{}{}.{}", prefix, suffix, domain)
 }

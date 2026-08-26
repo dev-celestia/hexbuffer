@@ -152,33 +152,309 @@ export function checkVulnerabilities(decoded: JwtDecoded): JwtVulnerability[] {
 
 // ── Sign ──────────────────────────────────────────────────
 
+function base64ToUint8Array(b64: string): Uint8Array {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+function wrapPkcs1InPkcs8(pkcs1Der: Uint8Array): Uint8Array {
+  const rsaOid = new Uint8Array([0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05, 0x00]);
+  const version = new Uint8Array([0x02, 0x01, 0x00]);
+
+  const encodeLength = (len: number): number[] => {
+    if (len < 128) return [len];
+    if (len < 256) return [0x81, len];
+    if (len < 65536) return [0x82, (len >> 8) & 0xff, len & 0xff];
+    return [0x83, (len >> 16) & 0xff, (len >> 8) & 0xff, len & 0xff];
+  };
+
+  const octetHeader = [0x04, ...encodeLength(pkcs1Der.length)];
+  const innerLen = version.length + rsaOid.length + octetHeader.length + pkcs1Der.length;
+  const seqHeader = [0x30, ...encodeLength(innerLen)];
+
+  const result = new Uint8Array(seqHeader.length + innerLen);
+  let offset = 0;
+  result.set(seqHeader, offset);
+  offset += seqHeader.length;
+  result.set(version, offset);
+  offset += version.length;
+  result.set(rsaOid, offset);
+  offset += rsaOid.length;
+  result.set(octetHeader, offset);
+  offset += octetHeader.length;
+  result.set(pkcs1Der, offset);
+  return result;
+}
+
+export function derToPem(
+  der: ArrayBuffer,
+  type: 'PRIVATE KEY' | 'PUBLIC KEY' | 'RSA PRIVATE KEY',
+): string {
+  const binary = Array.from(new Uint8Array(der), (b) => String.fromCharCode(b)).join('');
+  const b64 = btoa(binary);
+  const formattedB64 = b64.match(/.{1,64}/g)?.join('\n') ?? b64;
+  return `-----BEGIN ${type}-----\n${formattedB64}\n-----END ${type}-----`;
+}
+
+export async function generateKeyPairPem(
+  algorithm: JwtAlgorithm,
+): Promise<{ privateKeyPem: string; publicKeyPem?: string }> {
+  if (algorithm === 'none') {
+    return { privateKeyPem: '' };
+  }
+
+  if (algorithm.startsWith('HS')) {
+    const length = algorithm === 'HS256' ? 32 : algorithm === 'HS384' ? 48 : 64;
+    const randomBytes = new Uint8Array(length);
+    crypto.getRandomValues(randomBytes);
+    const secret = Array.from(randomBytes, (b) => b.toString(16).padStart(2, '0')).join('');
+    return { privateKeyPem: secret };
+  }
+
+  if (algorithm.startsWith('RS')) {
+    const hashMap: Record<'RS256' | 'RS384' | 'RS512', string> = {
+      RS256: 'SHA-256',
+      RS384: 'SHA-384',
+      RS512: 'SHA-512',
+    };
+    const keyPair = await crypto.subtle.generateKey(
+      {
+        name: 'RSASSA-PKCS1-v1_5',
+        modulusLength: 2048,
+        publicExponent: new Uint8Array([1, 0, 1]),
+        hash: hashMap[algorithm as 'RS256' | 'RS384' | 'RS512'],
+      },
+      true,
+      ['sign', 'verify'],
+    );
+    const privateDer = await crypto.subtle.exportKey('pkcs8', keyPair.privateKey);
+    const publicDer = await crypto.subtle.exportKey('spki', keyPair.publicKey);
+    return {
+      privateKeyPem: derToPem(privateDer, 'PRIVATE KEY'),
+      publicKeyPem: derToPem(publicDer, 'PUBLIC KEY'),
+    };
+  }
+
+  if (algorithm.startsWith('ES')) {
+    const curveMap: Record<'ES256' | 'ES384' | 'ES512', string> = {
+      ES256: 'P-256',
+      ES384: 'P-384',
+      ES512: 'P-521',
+    };
+    const namedCurve = curveMap[algorithm as 'ES256' | 'ES384' | 'ES512'];
+    const keyPair = await crypto.subtle.generateKey(
+      {
+        name: 'ECDSA',
+        namedCurve,
+      },
+      true,
+      ['sign', 'verify'],
+    );
+    const privateDer = await crypto.subtle.exportKey('pkcs8', keyPair.privateKey);
+    const publicDer = await crypto.subtle.exportKey('spki', keyPair.publicKey);
+    return {
+      privateKeyPem: derToPem(privateDer, 'PRIVATE KEY'),
+      publicKeyPem: derToPem(publicDer, 'PUBLIC KEY'),
+    };
+  }
+
+  if (algorithm.startsWith('PS')) {
+    const hashMap: Record<'PS256' | 'PS384' | 'PS512', string> = {
+      PS256: 'SHA-256',
+      PS384: 'SHA-384',
+      PS512: 'SHA-512',
+    };
+    const keyPair = await crypto.subtle.generateKey(
+      {
+        name: 'RSA-PSS',
+        modulusLength: 2048,
+        publicExponent: new Uint8Array([1, 0, 1]),
+        hash: hashMap[algorithm as 'PS256' | 'PS384' | 'PS512'],
+      },
+      true,
+      ['sign', 'verify'],
+    );
+    const privateDer = await crypto.subtle.exportKey('pkcs8', keyPair.privateKey);
+    const publicDer = await crypto.subtle.exportKey('spki', keyPair.publicKey);
+    return {
+      privateKeyPem: derToPem(privateDer, 'PRIVATE KEY'),
+      publicKeyPem: derToPem(publicDer, 'PUBLIC KEY'),
+    };
+  }
+
+  throw new Error(`Unsupported algorithm: ${algorithm}`);
+}
+
+export function pemToDer(pem: string): ArrayBuffer {
+  const trimmed = pem.trim();
+  if (trimmed.includes('BEGIN RSA PRIVATE KEY')) {
+    const b64 = trimmed
+      .replace(/-----BEGIN RSA PRIVATE KEY-----/g, '')
+      .replace(/-----END RSA PRIVATE KEY-----/g, '')
+      .replace(/\s+/g, '');
+    const pkcs1Der = base64ToUint8Array(b64);
+    return wrapPkcs1InPkcs8(pkcs1Der).buffer;
+  }
+
+  const b64 = trimmed
+    .replace(/-----BEGIN [A-Z0-9 _-]+-----/gi, '')
+    .replace(/-----END [A-Z0-9 _-]+-----/gi, '')
+    .replace(/\s+/g, '');
+
+  return base64ToUint8Array(b64).buffer;
+}
+
 export async function signJwt(
   header: object,
   payload: object,
-  secret: string,
+  secretOrKey: string,
   algorithm: JwtAlgorithm,
 ): Promise<string> {
-  const hashMap: Record<JwtAlgorithm, string> = {
-    HS256: 'SHA-256',
-    HS384: 'SHA-384',
-    HS512: 'SHA-512',
-  };
-
   const headerB64 = base64UrlEncode(JSON.stringify(header));
   const payloadB64 = base64UrlEncode(JSON.stringify(payload));
   const data = `${headerB64}.${payloadB64}`;
 
+  if (algorithm === 'none') {
+    return `${data}.`;
+  }
+
   const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(secret),
-    { name: 'HMAC', hash: hashMap[algorithm] },
-    false,
-    ['sign'],
-  );
+  const dataBytes = encoder.encode(data);
 
-  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(data));
-  const sigB64 = base64UrlEncodeBytes(new Uint8Array(signature));
+  if (algorithm.startsWith('HS')) {
+    const hashMap: Record<'HS256' | 'HS384' | 'HS512', string> = {
+      HS256: 'SHA-256',
+      HS384: 'SHA-384',
+      HS512: 'SHA-512',
+    };
+    const hash = hashMap[algorithm as 'HS256' | 'HS384' | 'HS512'];
+    try {
+      const key = await crypto.subtle.importKey(
+        'raw',
+        encoder.encode(secretOrKey),
+        { name: 'HMAC', hash },
+        false,
+        ['sign'],
+      );
+      const signature = await crypto.subtle.sign('HMAC', key, dataBytes);
+      return `${data}.${base64UrlEncodeBytes(new Uint8Array(signature))}`;
+    } catch (err) {
+      throw new Error(
+        `Failed to sign with HMAC (${algorithm}): ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
 
-  return `${data}.${sigB64}`;
+  if (algorithm.startsWith('RS')) {
+    const hashMap: Record<'RS256' | 'RS384' | 'RS512', string> = {
+      RS256: 'SHA-256',
+      RS384: 'SHA-384',
+      RS512: 'SHA-512',
+    };
+    const hash = hashMap[algorithm as 'RS256' | 'RS384' | 'RS512'];
+    let der: ArrayBuffer;
+    try {
+      der = pemToDer(secretOrKey);
+    } catch {
+      throw new Error(
+        `Invalid PEM format for ${algorithm}. Expected a valid base64-encoded PEM string (e.g. '-----BEGIN PRIVATE KEY----- ... -----END PRIVATE KEY-----').`,
+      );
+    }
+
+    try {
+      const key = await crypto.subtle.importKey(
+        'pkcs8',
+        der,
+        { name: 'RSASSA-PKCS1-v1_5', hash },
+        false,
+        ['sign'],
+      );
+      const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, dataBytes);
+      return `${data}.${base64UrlEncodeBytes(new Uint8Array(signature))}`;
+    } catch {
+      throw new Error(
+        `Invalid RSA Private Key for ${algorithm}. Ensure you provide a valid PKCS#8 or PKCS#1 RSA private key in PEM format. Plain text strings (like "${secretOrKey.slice(0, 10)}...") are only valid for HMAC algorithms (HS256, HS384, HS512).`,
+      );
+    }
+  }
+
+  if (algorithm.startsWith('ES')) {
+    const curveMap: Record<'ES256' | 'ES384' | 'ES512', { namedCurve: string; hash: string }> = {
+      ES256: { namedCurve: 'P-256', hash: 'SHA-256' },
+      ES384: { namedCurve: 'P-384', hash: 'SHA-384' },
+      ES512: { namedCurve: 'P-521', hash: 'SHA-512' },
+    };
+    const config = curveMap[algorithm as 'ES256' | 'ES384' | 'ES512'];
+    let der: ArrayBuffer;
+    try {
+      der = pemToDer(secretOrKey);
+    } catch {
+      throw new Error(
+        `Invalid PEM format for ${algorithm}. Expected a valid base64-encoded PEM string.`,
+      );
+    }
+
+    try {
+      const key = await crypto.subtle.importKey(
+        'pkcs8',
+        der,
+        { name: 'ECDSA', namedCurve: config.namedCurve },
+        false,
+        ['sign'],
+      );
+      const signature = await crypto.subtle.sign(
+        { name: 'ECDSA', hash: { name: config.hash } },
+        key,
+        dataBytes,
+      );
+      return `${data}.${base64UrlEncodeBytes(new Uint8Array(signature))}`;
+    } catch {
+      throw new Error(
+        `Invalid ECDSA Private Key for ${algorithm}. Ensure you provide a valid PKCS#8 EC private key matching curve ${config.namedCurve} in PEM format.`,
+      );
+    }
+  }
+
+  if (algorithm.startsWith('PS')) {
+    const pssMap: Record<'PS256' | 'PS384' | 'PS512', { hash: string; saltLength: number }> = {
+      PS256: { hash: 'SHA-256', saltLength: 32 },
+      PS384: { hash: 'SHA-384', saltLength: 48 },
+      PS512: { hash: 'SHA-512', saltLength: 64 },
+    };
+    const config = pssMap[algorithm as 'PS256' | 'PS384' | 'PS512'];
+    let der: ArrayBuffer;
+    try {
+      der = pemToDer(secretOrKey);
+    } catch {
+      throw new Error(
+        `Invalid PEM format for ${algorithm}. Expected a valid base64-encoded PEM string.`,
+      );
+    }
+
+    try {
+      const key = await crypto.subtle.importKey(
+        'pkcs8',
+        der,
+        { name: 'RSA-PSS', hash: config.hash },
+        false,
+        ['sign'],
+      );
+      const signature = await crypto.subtle.sign(
+        { name: 'RSA-PSS', saltLength: config.saltLength },
+        key,
+        dataBytes,
+      );
+      return `${data}.${base64UrlEncodeBytes(new Uint8Array(signature))}`;
+    } catch {
+      throw new Error(
+        `Invalid RSA-PSS Private Key for ${algorithm}. Ensure you provide a valid PKCS#8 or PKCS#1 RSA private key in PEM format.`,
+      );
+    }
+  }
+
+  throw new Error(`Unsupported algorithm: ${algorithm}`);
 }

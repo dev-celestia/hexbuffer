@@ -114,6 +114,21 @@ export function RecentsWidget() {
                 {item.label}
               </span>
 
+              {item.isNew && (
+                <span
+                  className={cn(
+                    // Sizing & Spacing
+                    "px-1 py-0.2 rounded-[2.5px] shrink-0 leading-none",
+                    // Typography
+                    "text-[7.5px] font-bold uppercase tracking-wider select-none",
+                    // Backgrounds & Borders
+                    "bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20"
+                  )}
+                >
+                  NEW
+                </span>
+              )}
+
               {item.flag && item.flag !== 'release' && (
                 <span
                   className={cn(

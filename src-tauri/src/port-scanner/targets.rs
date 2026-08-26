@@ -1,4 +1,11 @@
+use rand::seq::SliceRandom;
 use std::collections::BTreeSet;
+
+pub fn shuffle_ports(mut ports: Vec<u16>) -> Vec<u16> {
+    let mut rng = rand::thread_rng();
+    ports.shuffle(&mut rng);
+    ports
+}
 
 pub fn expand_targets(input: &str) -> Result<Vec<String>, String> {
     let trimmed = input.trim();

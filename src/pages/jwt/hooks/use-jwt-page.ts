@@ -5,6 +5,7 @@ import {
   decodeJwt,
   checkVulnerabilities,
   signJwt,
+  generateKeyPairPem,
 } from '../lib/jwt-helpers';
 import { useJwtStore } from '@/stores/jwt-store';
 
@@ -77,8 +78,12 @@ export function useJwtPage() {
         setGenerating(false);
         return;
       }
-      if (!genSecret) {
-        setGenError('Secret key is required');
+      if (genAlgorithm !== 'none' && !genSecret.trim()) {
+        setGenError(
+          genAlgorithm.startsWith('HS')
+            ? 'Secret key is required'
+            : 'Private key (PEM) is required',
+        );
         setGenerating(false);
         return;
       }
@@ -91,6 +96,30 @@ export function useJwtPage() {
       setGenerating(false);
     }
   }, [genHeader, genPayload, genSecret, genAlgorithm]);
+
+  const [generatingKey, setGeneratingKey] = useState(false);
+
+  // ── Generate Key Pair / Secret ──────────────────────
+  const handleGenerateKey = useCallback(async () => {
+    if (genAlgorithm === 'none') {
+      toast.info("No key required for 'none' algorithm");
+      return;
+    }
+    setGeneratingKey(true);
+    try {
+      const { privateKeyPem } = await generateKeyPairPem(genAlgorithm);
+      setGenSecret(privateKeyPem);
+      toast.success(
+        genAlgorithm.startsWith('HS')
+          ? `Generated random secret for ${genAlgorithm}`
+          : `Generated new ${genAlgorithm} private key (PEM)`,
+      );
+    } catch (err) {
+      toast.error(`Key generation failed: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setGeneratingKey(false);
+    }
+  }, [genAlgorithm, setGenSecret]);
 
   // ── Actions ─────────────────────────────────────────
   const handleCopy = useCallback(async (text: string) => {
@@ -134,8 +163,10 @@ export function useJwtPage() {
     setGeneratedToken,
     genError,
     generating,
+    generatingKey,
     // Actions
     handleGenerate,
+    handleGenerateKey,
     handleCopy,
     handleClear,
     handleClearGenerate,

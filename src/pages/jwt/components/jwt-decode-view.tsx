@@ -1,9 +1,17 @@
 
 
-import { Button, Label, ScrollArea } from '@celestia-project/ui';
+import {
+  Button,
+  Label,
+  type MonacoInstance,
+  ScrollArea,
+  TextEditor,
+  type TextEditorInstance,
+} from '@celestia-project/ui';
+import * as React from 'react';
 import { CopyIcon } from '@phosphor-icons/react';
+import { useTheme } from '@/components/theme-provider';
 import type { JwtDecoded, JwtVulnerability } from '../types';
-import { ColorizedJwtInput } from './colorized-jwt-input';
 import { DecodedSection } from './decoded-section';
 import { VulnerabilityCard } from './vulnerability-card';
 
@@ -24,6 +32,84 @@ export function JwtDecodeView({
   decodeError,
   onCopy,
 }: JwtDecodeViewProps) {
+  const { theme } = useTheme();
+  const monacoRef = React.useRef<MonacoInstance | null>(null);
+
+  const handleMount = React.useCallback(
+    (_editor: TextEditorInstance, monaco: MonacoInstance) => {
+      monacoRef.current = monaco;
+
+      const languages = monaco.languages.getLanguages();
+      if (!languages.some((l: { id: string }) => l.id === 'jwt')) {
+        monaco.languages.register({ id: 'jwt' });
+
+        monaco.languages.setMonarchTokensProvider('jwt', {
+          defaultToken: '',
+          tokenPostfix: '.jwt',
+          tokenizer: {
+            root: [
+              [/^[A-Za-z0-9_-]+/, 'jwt-header', '@afterHeader'],
+              [/\./, 'jwt-delimiter', '@payload'],
+              [/[^.]+/, 'jwt-header'],
+            ],
+            afterHeader: [
+              [/\./, 'jwt-delimiter', '@payload'],
+              [/[A-Za-z0-9_-]+/, 'jwt-header'],
+              [/[^.]+/, 'jwt-header'],
+            ],
+            payload: [
+              [/[A-Za-z0-9_-]+/, 'jwt-payload', '@afterPayload'],
+              [/\./, 'jwt-delimiter', '@signature'],
+              [/[^.]+/, 'jwt-payload'],
+            ],
+            afterPayload: [
+              [/\./, 'jwt-delimiter', '@signature'],
+              [/[A-Za-z0-9_-]+/, 'jwt-payload'],
+              [/[^.]+/, 'jwt-payload'],
+            ],
+            signature: [
+              [/[A-Za-z0-9_-]+/, 'jwt-signature'],
+              [/[^.]+/, 'jwt-signature'],
+            ],
+          },
+        });
+
+        monaco.editor.defineTheme('jwt-dark', {
+          base: 'vs-dark',
+          inherit: true,
+          rules: [
+            { token: 'jwt-header', foreground: 'ef4444' },
+            { token: 'jwt-payload', foreground: 'c084fc' },
+            { token: 'jwt-signature', foreground: '22d3ee' },
+            { token: 'jwt-delimiter', foreground: '71717a', fontStyle: 'bold' },
+          ],
+          colors: {},
+        });
+
+        monaco.editor.defineTheme('jwt-light', {
+          base: 'vs',
+          inherit: true,
+          rules: [
+            { token: 'jwt-header', foreground: 'dc2626' },
+            { token: 'jwt-payload', foreground: '9333ea' },
+            { token: 'jwt-signature', foreground: '0891b2' },
+            { token: 'jwt-delimiter', foreground: '71717a', fontStyle: 'bold' },
+          ],
+          colors: {},
+        });
+      }
+
+      monaco.editor.setTheme(theme === 'light' ? 'jwt-light' : 'jwt-dark');
+    },
+    [theme],
+  );
+
+  React.useEffect(() => {
+    if (monacoRef.current) {
+      monacoRef.current.editor.setTheme(theme === 'light' ? 'jwt-light' : 'jwt-dark');
+    }
+  }, [theme]);
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <section className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
@@ -39,11 +125,25 @@ export function JwtDecodeView({
               </span>
             </div>
           </div>
-          <ColorizedJwtInput
-            placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-            value={tokenInput}
-            onChange={setTokenInput}
-          />
+          <div className="flex-1 min-h-0">
+            <TextEditor
+              value={tokenInput}
+              onChange={(v) => setTokenInput(v ?? '')}
+              language="jwt"
+              theme={theme === 'light' ? 'jwt-light' : 'jwt-dark'}
+              height="100%"
+              onMount={handleMount}
+              options={{
+                wordWrap: 'on',
+                lineNumbers: 'off',
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                fontSize: 12,
+                folding: false,
+                renderLineHighlight: 'none',
+              }}
+            />
+          </div>
         </div>
 
         {/* Right: Decoded Output */}

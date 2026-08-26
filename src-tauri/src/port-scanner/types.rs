@@ -13,6 +13,14 @@ pub struct PortScanRequest {
     pub banner_grab: Option<bool>,
     #[serde(alias = "scanType")]
     pub scan_type: Option<String>,
+    #[serde(alias = "stealthMode")]
+    pub stealth_mode: Option<bool>,
+    #[serde(alias = "delayMs")]
+    pub delay_ms: Option<u64>,
+    #[serde(alias = "jitterMs")]
+    pub jitter_ms: Option<u64>,
+    #[serde(alias = "randomizePorts")]
+    pub randomize_ports: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize)]

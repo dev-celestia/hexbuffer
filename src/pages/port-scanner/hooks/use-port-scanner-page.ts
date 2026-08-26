@@ -7,6 +7,7 @@ import type { PortPreset } from '../constants';
 import { parsePorts, sortScanResults, describePortPreset } from '../lib/port-helpers';
 import { exportAsJson, exportAsCsv } from '../lib/export-helpers';
 import { usePortScannerStore } from '@/stores/port-scanner';
+import { useNotificationStore } from '@/stores/notifications';
 
 type ProgressEvent =
   | { type: 'Update'; current: number; total: number }
@@ -27,6 +28,14 @@ export function usePortScannerPage() {
     setConcurrency,
     bannerGrab,
     setBannerGrab,
+    stealthMode,
+    setStealthMode,
+    delayMs,
+    setDelayMs,
+    jitterMs,
+    setJitterMs,
+    randomizePorts,
+    setRandomizePorts,
     results,
     setResults,
     progress,
@@ -66,6 +75,16 @@ export function usePortScannerPage() {
 
     if (!scanTarget || scanPorts.length === 0) return;
 
+    if (!stealthMode) {
+      useNotificationStore.getState().addAlert({
+        id: `scan-noisy-alert-${Date.now()}`,
+        title: 'High Noise Scan Started',
+        message: `Port scan on target ${scanTarget} initiated in noisy mode. High probe rate without delay may trigger SIEM/IDS alerts.`,
+        type: 'warning',
+        source: 'Port Scanner',
+      });
+    }
+
     const scanId = crypto.randomUUID();
     scanIdRef.current = scanId;
     setResults([]);
@@ -102,6 +121,10 @@ export function usePortScannerPage() {
           concurrency: Number(concurrency) || 100,
           banner_grab: bannerGrab,
           scan_type: 'connect',
+          stealth_mode: stealthMode,
+          delay_ms: stealthMode ? (Number(delayMs) || 300) : undefined,
+          jitter_ms: stealthMode ? (Number(jitterMs) || 200) : undefined,
+          randomize_ports: stealthMode ? randomizePorts : undefined,
         },
       });
       setResults(finalResults.filter((r) => r.state === 'open').sort(sortScanResults));
@@ -119,6 +142,10 @@ export function usePortScannerPage() {
     timeoutMs,
     concurrency,
     bannerGrab,
+    stealthMode,
+    delayMs,
+    jitterMs,
+    randomizePorts,
     setResults,
     setProgress,
     setError,
@@ -159,6 +186,14 @@ export function usePortScannerPage() {
     setConcurrency,
     bannerGrab,
     setBannerGrab,
+    stealthMode,
+    setStealthMode,
+    delayMs,
+    setDelayMs,
+    jitterMs,
+    setJitterMs,
+    randomizePorts,
+    setRandomizePorts,
     // Scan
     results,
     progress,

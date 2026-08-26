@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { useCallback } from 'react';
 import { usePortScannerPage } from './hooks/use-port-scanner-page';
-import { ScannerSidebar } from './components/scanner-sidebar';
+import { ScannerToolbar } from './components/scanner-toolbar';
 import { ScanResults } from './components/scan-results';
 import type { PortPreset } from './constants';
 
@@ -21,22 +21,25 @@ export function PortScannerPage() {
     <div
       className={cn(
         // Sizing & Spacing
-        "h-full p-2"
+        "h-full p-2",
+
+        // Backgrounds & Borders
+        "bg-background"
       )}
     >
       <div
         className={cn(
           // Layout & Positioning
-          "grid grid-cols-[300px_1fr] min-h-0 overflow-hidden",
+          "flex flex-col min-h-0 overflow-hidden",
 
           // Sizing & Spacing
           "h-full",
 
           // Backgrounds & Borders
-          "rounded-md border bg-card"
+          "border rounded-md"
         )}
       >
-        <ScannerSidebar
+        <ScannerToolbar
           target={page.target}
           onTargetChange={page.setTarget}
           preset={page.preset}
@@ -49,28 +52,44 @@ export function PortScannerPage() {
           onConcurrencyChange={page.setConcurrency}
           bannerGrab={page.bannerGrab}
           onBannerGrabChange={page.setBannerGrab}
+          stealthMode={page.stealthMode}
+          onStealthModeChange={page.setStealthMode}
+          delayMs={page.delayMs}
+          onDelayMsChange={page.setDelayMs}
+          jitterMs={page.jitterMs}
+          onJitterMsChange={page.setJitterMs}
+          randomizePorts={page.randomizePorts}
+          onRandomizePortsChange={page.setRandomizePorts}
           selectedPortLabel={page.selectedPortLabel}
           isRunning={page.isRunning}
           canScan={page.canScan}
+          progress={page.progress}
           onStart={page.startScan}
           onStop={page.stopScan}
         />
 
-        <ScanResults
-          openResults={page.openResults}
-          hasResults={page.hasResults}
-          isRunning={page.isRunning}
-          hasRun={page.hasRun}
-          progress={page.progress}
-          error={page.error}
-          target={page.target}
-          concurrency={page.concurrency}
-          onClear={page.clearResults}
-          onQuickStart={handleQuickStart}
-          onCopy={page.copyOpenPorts}
-          onExportJson={page.handleExportJson}
-          onExportCsv={page.handleExportCsv}
-        />
+        <main
+          className={cn(
+            // Layout & Positioning
+            "flex-1 min-h-0"
+          )}
+        >
+          <ScanResults
+            openResults={page.openResults}
+            hasResults={page.hasResults}
+            isRunning={page.isRunning}
+            hasRun={page.hasRun}
+            progress={page.progress}
+            error={page.error}
+            target={page.target}
+            concurrency={page.concurrency}
+            onClear={page.clearResults}
+            onQuickStart={handleQuickStart}
+            onCopy={page.copyOpenPorts}
+            onExportJson={page.handleExportJson}
+            onExportCsv={page.handleExportCsv}
+          />
+        </main>
       </div>
     </div>
   );

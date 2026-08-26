@@ -106,6 +106,25 @@ export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Readon
             />
           )}
         </div>
+        {item?.isNew && (
+          <span
+            className={cn(
+              // Layout & Positioning
+              "absolute -top-1.5 -left-1.5 pointer-events-none select-none",
+
+              // Sizing & Spacing
+              "px-1 scale-90",
+
+              // Typography
+              "text-[8px] font-extrabold uppercase tracking-wider",
+
+              // Backgrounds & Borders
+              "rounded-sm bg-purple-600 text-white dark:bg-purple-700"
+            )}
+          >
+            NEW
+          </span>
+        )}
         {item?.flag && item.flag !== 'release' && (
           <span
             className={cn(
