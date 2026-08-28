@@ -35,7 +35,7 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
     handleOpenInInvoker,
     handleSendToCollection,
     handleSendToIntercept,
-    // handleSendToMockForge,
+    handleSendToMockForge,
     // handleOpenInBrowserAutomation,
     handleSendToNotes,
     handleDelete,
@@ -134,12 +134,9 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
         <ContextMenuItem onClick={handleSendToIntercept} className='text-xs py-1 px-1.5'>
           <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Intercept
         </ContextMenuItem>
-        {/* <ContextMenuItem onClick={handleSendToMockForge} className='text-xs py-1 px-1.5'>
+        <ContextMenuItem onClick={handleSendToMockForge} className='text-xs py-1 px-1.5'>
           <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Mock Forge
         </ContextMenuItem>
-        <ContextMenuItem onClick={handleOpenInBrowserAutomation} className='text-xs py-1 px-1.5'>
-          <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Automate Browser
-        </ContextMenuItem> */}
         <ContextMenuItem onClick={handleSendToNotes} className='text-xs py-1 px-1.5'>
           <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Notes
         </ContextMenuItem>

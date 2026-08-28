@@ -95,6 +95,14 @@ export const RELEASE_NAV_ITEMS: NavItem[] = [
     flag: 'release',
   },
   {
+    label: 'MockForge',
+    icon: BlueprintIcon,
+    href: '/mock-forge',
+    description: 'Mock HTTP endpoints, responses, and simulate server behaviors.',
+    colors: { bg: 'bg-teal-600 dark:bg-teal-600', hoverBg: 'group-hover:bg-teal-600 dark:group-hover:bg-teal-600', border: 'border-teal-600 dark:border-teal-600' },
+    flag: 'beta',
+  },
+  {
     label: 'Notes',
     icon: PencilIcon,
     href: '/scratchpad',
@@ -117,6 +125,24 @@ export const RELEASE_NAV_ITEMS: NavItem[] = [
     description: 'Modify HTTP requests, reissue them, and analyze responses side-by-side.',
     colors: { bg: 'bg-cyan-500 dark:bg-cyan-500', hoverBg: 'group-hover:bg-cyan-500 dark:group-hover:bg-cyan-500', border: 'border-cyan-500 dark:border-cyan-500' },
     flag: 'release',
+  },
+  {
+    label: 'Port Scanner',
+    icon: TargetIcon,
+    href: '/port-scanner',
+    description: 'Scan host ports for open services and network vulnerabilities.',
+    colors: { bg: 'bg-pink-500 dark:bg-pink-500', hoverBg: 'group-hover:bg-pink-500 dark:group-hover:bg-pink-500', border: 'border-pink-500 dark:border-pink-500' },
+    flag: 'release',
+    isNew: true,
+  },
+  {
+    label: 'JWT',
+    icon: CloverIcon,
+    href: '/jwt',
+    description: 'Decode, edit, and sign JSON Web Tokens.',
+    colors: { bg: 'bg-lime-700 dark:bg-lime-700', hoverBg: 'group-hover:bg-lime-700 dark:group-hover:bg-lime-700', border: 'border-lime-700 dark:border-lime-700' },
+    flag: 'release',
+    isNew: true,
   },
   {
     label: 'Settings',
@@ -171,14 +197,7 @@ export const ALPHA_NAV_ITEMS: NavItem[] = import.meta.env.PROD
         colors: { bg: 'bg-rose-500 dark:bg-rose-500', hoverBg: 'group-hover:bg-rose-500 dark:group-hover:bg-rose-500', border: 'border-rose-500 dark:border-rose-500' },
         flag: 'alpha',
       },
-      {
-        label: 'MockForge',
-        icon: BlueprintIcon,
-        href: '/mock-forge',
-        description: 'Mock HTTP endpoints, responses, and simulate server behaviors.',
-        colors: { bg: 'bg-teal-600 dark:bg-teal-600', hoverBg: 'group-hover:bg-teal-600 dark:group-hover:bg-teal-600', border: 'border-teal-600 dark:border-teal-600' },
-        flag: 'alpha',
-      },
+     
       {
         label: 'Listener',
         icon: BroadcastIcon,
@@ -211,23 +230,7 @@ export const ALPHA_NAV_ITEMS: NavItem[] = import.meta.env.PROD
         colors: { bg: 'bg-fuchsia-500 dark:bg-fuchsia-500', hoverBg: 'group-hover:bg-fuchsia-500 dark:group-hover:bg-fuchsia-500', border: 'border-fuchsia-500 dark:border-fuchsia-500' },
         flag: 'alpha',
       },
-      {
-        label: 'Port Scanner',
-        icon: TargetIcon,
-        href: '/port-scanner',
-        description: 'Scan host ports for open services and network vulnerabilities.',
-        colors: { bg: 'bg-pink-500 dark:bg-pink-500', hoverBg: 'group-hover:bg-pink-500 dark:group-hover:bg-pink-500', border: 'border-pink-500 dark:border-pink-500' },
-        flag: 'beta',
-        isNew: true,
-      },
-      {
-        label: 'JWT',
-        icon: CloverIcon,
-        href: '/jwt',
-        description: 'Decode, edit, and sign JSON Web Tokens.',
-        colors: { bg: 'bg-lime-700 dark:bg-lime-700', hoverBg: 'group-hover:bg-lime-700 dark:group-hover:bg-lime-700', border: 'border-lime-700 dark:border-lime-700' },
-        flag: 'beta',
-      },
+      
       {
         label: 'XSS',
         icon: LightningIcon,
