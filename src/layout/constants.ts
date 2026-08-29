@@ -24,7 +24,6 @@ import {
   BroadcastIcon,
   FolderOpenIcon,
   TerminalWindowIcon,
-  SparkleIcon,
 } from '@phosphor-icons/react';
 
 import httpHistoryIcon from '@/assets/app/http-history.png';
@@ -93,6 +92,24 @@ export const RELEASE_NAV_ITEMS: NavItem[] = [
     description: 'Pause incoming or outgoing requests to modify headers, parameters, and bodies.',
     colors: { bg: 'bg-green-500 dark:bg-green-500', hoverBg: 'group-hover:bg-green-500 dark:group-hover:bg-green-500', border: 'border-green-500 dark:border-green-500' },
     flag: 'release',
+  },
+  {
+    label: 'Mock Server',
+    icon: LightningIcon,
+    href: '/mock-api',
+    description: 'Standalone HTTP mock server running on localhost with CORS and custom endpoints.',
+    colors: { bg: 'bg-emerald-600 dark:bg-emerald-600', hoverBg: 'group-hover:bg-emerald-600 dark:group-hover:bg-emerald-600', border: 'border-emerald-600 dark:border-emerald-600' },
+    flag: 'release',
+    isNew: true,
+  },
+  {
+    label: 'Response Override',
+    icon: BlueprintIcon,
+    href: '/response-override',
+    description: 'Map Local rules that intercept and replace responses for proxy traffic.',
+    colors: { bg: 'bg-teal-600 dark:bg-teal-600', hoverBg: 'group-hover:bg-teal-600 dark:group-hover:bg-teal-600', border: 'border-teal-600 dark:border-teal-600' },
+    flag: 'release',
+    isNew: true,
   },
   {
     label: 'Notes',
@@ -277,14 +294,6 @@ export const ALPHA_NAV_ITEMS: NavItem[] = import.meta.env.PROD
         href: '/terminal',
         description: 'Interactive command-line shell with multi-tab support.',
         colors: { bg: 'bg-slate-700 dark:bg-slate-700', hoverBg: 'group-hover:bg-slate-700 dark:group-hover:bg-slate-700', border: 'border-slate-700 dark:border-slate-700' },
-        flag: 'alpha',
-      },
-      {
-        label: 'Dev Server',
-        icon: BroadcastIcon,
-        href: '/dev-server',
-        description: 'Host and serve development servers or static builds over tethered networks & hotspots.',
-        colors: { bg: 'bg-emerald-600 dark:bg-emerald-600', hoverBg: 'group-hover:bg-emerald-600 dark:group-hover:bg-emerald-600', border: 'border-emerald-600 dark:border-emerald-600' },
         flag: 'alpha',
       },
     ];

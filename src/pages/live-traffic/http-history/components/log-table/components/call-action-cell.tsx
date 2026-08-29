@@ -40,7 +40,8 @@ export const CallActionCell = memo(function CallActionCell({
     handleOpenInInvoker,
     handleSendToCollection,
     handleSendToIntercept,
-    handleSendToMockForge,
+    handleSendToResponseOverride,
+    handleSendToMockApi,
     handleOpenInBrowserAutomation,
     handleSendToNotes,
     handleDelete,
@@ -159,8 +160,11 @@ export const CallActionCell = memo(function CallActionCell({
         <DropdownMenuItem onClick={handleSendToIntercept} className="text-xs">
           <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Intercept
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleSendToMockForge} className="text-xs">
-          <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Mock Forge
+        <DropdownMenuItem onClick={handleSendToResponseOverride} className="text-xs">
+          <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Response Override
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleSendToMockApi} className="text-xs">
+          <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Mock API
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleOpenInBrowserAutomation} className="text-xs">
           <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Automate Browser

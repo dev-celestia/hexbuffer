@@ -2,6 +2,7 @@ pub mod ca;
 pub mod completion;
 pub mod lifecycle;
 pub mod mock_forge;
+pub mod mock_server;
 pub mod state;
 pub mod types;
 pub mod utils;

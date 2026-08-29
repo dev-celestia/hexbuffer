@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
 import type { ApiCall } from '@/types';
 import { getHttpLogDetail } from '../../../api';
@@ -20,9 +21,9 @@ import { copyText } from '@/lib/clipboard';
 import { useTargetStore } from '@/stores/target';
 import { useNavStore } from '@/stores/nav';
 import { useInterceptStore } from '@/pages/intercept/state/intercept-store';
-import { invoke } from '@tauri-apps/api/core';
-import { useMockForgeStore } from '@/stores/mock-forge';
-import type { MockDomain, MockRoute } from '@/pages/mock-forge/types';
+import { useMockApiStore } from '@/stores/mock-api';
+import { useResponseOverrideStore } from '@/stores/response-override';
+import type { MockDomain, MockRoute } from '@/pages/api-override/types';
 import { sendToCollection, sendRawToRepeater } from '@/triggers/repeater';
 import { cleanUrl } from '@/lib/utils';
 
@@ -290,7 +291,7 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
     }
   }, [call]);
 
-  const handleSendToMockForge = useCallback(async () => {
+  const handleSendToResponseOverride = useCallback(async () => {
     try {
       const detail = await getHttpLogDetail(call.id);
       const request = adaptProxyRecordToApiCall(detail);
@@ -357,21 +358,26 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
 
       const newRoute = await invoke<MockRoute>('mock_forge_add_route', { route });
 
-      const store = useMockForgeStore.getState();
+      const store = useResponseOverrideStore.getState();
       const updatedDomains = store.domains.some((d) => d.id === domain.id) ? store.domains : [...store.domains, domain];
       store.setDomains(updatedDomains);
       store.setRoutes([...store.routes, newRoute]);
+      store.setActiveSubTab('rules');
+      store.setSelectedDomainId(domain.id);
+      store.setSelectedRouteId(newRoute.id);
 
-      useNavStore.getState().openWindow('/mock-forge', 'Mock Forge');
-      useNavStore.getState().focusWindow('/mock-forge');
-      useNavStore.getState().triggerNavBlink('/mock-forge');
+      useNavStore.getState().openWindow('/response-override', 'Response Override');
+      useNavStore.getState().focusWindow('/response-override');
+      useNavStore.getState().triggerNavBlink('/response-override');
 
-      toast.success(`Mock created for ${request.method} ${hostname}${request.path}`);
+      toast.success(`Override created for ${request.method} ${hostname}${request.path || '/'}`);
     } catch (error) {
-      console.error('Failed to send to Mock Forge:', error);
-      toast.error('Failed to create mock in Mock Forge');
+      console.error('Failed to send to Response Override:', error);
+      toast.error('Failed to create override in Response Override');
     }
   }, [call.id]);
+
+  const handleSendToMockApi = handleSendToResponseOverride;
 
 
   const handleSendToNotes = useCallback(async () => {
@@ -462,7 +468,9 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
 
     handleSendToCollection,
     handleSendToIntercept,
-    handleSendToMockForge,
+    handleSendToResponseOverride,
+    handleSendToMockApi,
+    handleSendToMockForge: handleSendToResponseOverride,
     handleOpenInBrowserAutomation,
     handleSendToNotes,
     handleDelete,
