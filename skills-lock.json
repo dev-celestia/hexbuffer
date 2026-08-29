@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "better-layout": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-layout/SKILL.md",
+      "computedHash": "75df358bc65382fbd9da570e98abd7aee9fbe582743ca4384882d9f9e9feac27"
+    },
     "emil-design-eng": {
       "source": "emilkowalski/skills",
       "sourceType": "github",

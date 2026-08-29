@@ -37,5 +37,5 @@ target
 target-tauri
 binaries
 
-
 /reference
+.agents/
