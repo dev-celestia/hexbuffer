@@ -43,7 +43,7 @@ export function useTrafficTable({
     goToPreviousPage,
     handleRefresh,
     removeCallLocally,
-  } = useHistoryTable({ isStreamPaused: isContextMenuOpen, activeTabId });
+  } = useHistoryTable({ isStreamPaused: isContextMenuOpen });
 
   const pinnedIds = usePinnedRequestsStore((s) => s.pinnedIds);
   const unpinId = usePinnedRequestsStore((s) => s.unpinId);

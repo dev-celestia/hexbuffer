@@ -9,21 +9,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { buildHistoryQuery, hasActiveHistoryFilters } from '../../../state/build-history-query';
 
 import { parseApiCall } from '../utils';
-
-export function buildUrlParts(
-  uri: string,
-  headers?: Record<string, string>,
-  serverAddr?: string,
-  fallbackHost?: string | null
-) {
-  const parsed = parseApiCall({ url: uri, headers, server_addr: serverAddr, host: fallbackHost });
-  return {
-    fullUrl: parsed.url,
-    host: parsed.host,
-    path: parsed.path,
-  };
-}
-
+ 
 export function adaptProxySummaryToApiCall(record: ProxyLogSummary): ApiCall {
   return parseApiCall(record);
 }
@@ -34,10 +20,9 @@ export function adaptProxyRecordToApiCall(record: ProxyRecord): ApiCall {
 
 interface UseHistoryTableOptions {
   isStreamPaused?: boolean;
-  activeTabId?: string;
 }
 
-export function useHistoryTable({ isStreamPaused = false, activeTabId }: UseHistoryTableOptions = {}) {
+export function useHistoryTable({ isStreamPaused = false }: UseHistoryTableOptions = {}) {
   const activeSessionId = useHttpSessionStore((state) => state.activeSessionId);
   const incrementSessionStats = useHttpSessionStore((state) => state.incrementSessionStats);
 

@@ -110,6 +110,7 @@ pub async fn try_intercept(
         } else {
             Some(String::from_utf8_lossy(&ctx.req_body).into_owned())
         },
+        source: Some("response_override".to_string()),
     };
 
     {

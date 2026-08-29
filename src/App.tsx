@@ -70,8 +70,11 @@ const AssistantPage = React.lazy(() =>
 const ScratchpadPage = React.lazy(() =>
   import("@/pages/notes").then((m) => ({ default: m.ScratchpadPage }))
 );
-const MockForgePage = React.lazy(() =>
-  import("@/pages/mock-forge").then((m) => ({ default: m.MockForgePage }))
+const MockApiPage = React.lazy(() =>
+  import("@/pages/mock-api").then((m) => ({ default: m.MockApiPage }))
+);
+const ResponseOverridePage = React.lazy(() =>
+  import("@/pages/api-override").then((m) => ({ default: m.ResponseOverridePage }))
 );
 const KanbanPage = React.lazy(() =>
   import("@/pages/kanban").then((m) => ({ default: m.KanbanPage }))
@@ -81,9 +84,6 @@ const FileExplorerPage = React.lazy(() =>
 );
 const TerminalPage = React.lazy(() =>
   import("@/pages/terminal").then((m) => ({ default: m.TerminalPage }))
-);
-const DevServerPage = React.lazy(() =>
-  import("@/pages/dev-server").then((m) => ({ default: m.DevServerPage }))
 );
 
 
@@ -132,11 +132,12 @@ function AppRoutes() {
           <Route path="/regression" element={<RegressionPage />} />
           <Route path="/assistant" element={<AssistantPage />} />
           <Route path="/scratchpad" element={<ScratchpadPage />} />
-          <Route path="/mock-forge" element={<MockForgePage />} />
+          <Route path="/mock-api" element={<MockApiPage />} />
+          <Route path="/mock-forge" element={<MockApiPage />} />
+          <Route path="/response-override" element={<ResponseOverridePage />} />
           <Route path="/kanban" element={<KanbanPage />} />
           <Route path="/file-explorer" element={<FileExplorerPage />} />
           <Route path="/terminal" element={<TerminalPage />} />
-          <Route path="/dev-server" element={<DevServerPage />} />
         </Routes>
       </React.Suspense>
     </>

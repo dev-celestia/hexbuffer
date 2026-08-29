@@ -82,6 +82,17 @@ fn default_matcher_enabled() -> bool {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MockServerStatus {
+    pub running: bool,
+    pub port: u16,
+    #[serde(rename = "domainId")]
+    pub domain_id: Option<String>,
+    #[serde(rename = "corsEnabled")]
+    pub cors_enabled: bool,
+    pub url: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RequestLog {
     pub id: String,
     #[serde(rename = "domainId")]
@@ -99,6 +110,8 @@ pub struct RequestLog {
     pub request_headers: HashMap<String, String>,
     #[serde(rename = "requestBody")]
     pub request_body: Option<String>,
+    #[serde(rename = "source", skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
 }
 
 pub struct MockForgeState {
@@ -209,10 +222,55 @@ pub fn find_matching_route(
 ) -> Option<(MockDomain, MockRoute)> {
     let req_host_norm = normalize_hostname(req_host);
 
+    // 1. If this is the Local Mock Server (localhost / 127.0.0.1)
+    if is_local_server {
+        // First, check dedicated local mock server routes
+        let local_routes = routes.iter().filter(|r| {
+            (r.domain_id == "local_mock_server" || r.domain_id.is_empty() || r.domain_id == "localhost")
+                && r.enabled
+                && r.method.eq_ignore_ascii_case(req_method)
+                && path_matches(&r.path, req_path)
+        });
+
+        for r in local_routes {
+            if !r.matcher_enabled || matchers_satisfied(&r.matchers, req_headers, req_query, req_body) {
+                if let Some(ref expected_body) = r.request_body {
+                    if !expected_body.trim().is_empty() {
+                        let actual_body = String::from_utf8_lossy(req_body);
+                        if trim_json(&actual_body) != trim_json(expected_body) {
+                            continue;
+                        }
+                    }
+                }
+                if let Some(ref params) = r.request_query_params {
+                    let active_params: Vec<&QueryParam> = params.iter().filter(|p| p.enabled).collect();
+                    if !active_params.is_empty() {
+                        let all_match = active_params.iter().all(|p| {
+                            req_query.get(&p.key).map(|v| v == &p.value).unwrap_or(false)
+                        });
+                        if !all_match {
+                            continue;
+                        }
+                    }
+                }
+
+                let local_domain = MockDomain {
+                    id: "local_mock_server".to_string(),
+                    hostname: "localhost".to_string(),
+                    ssl: false,
+                    status: "active".to_string(),
+                    created_at: String::new(),
+                };
+                return Some((local_domain, r.clone()));
+            }
+        }
+    }
+
+    // 2. Proxy Override matching (for external mapped domains)
     let matching_domains: Vec<&MockDomain> = domains
         .iter()
         .filter(|d| {
-            if d.status != "active" {
+            if d.status != "active" || d.id == "local_mock_server" {
                 return false;
             }
             let dom_host_norm = normalize_hostname(&d.hostname);
@@ -403,6 +461,32 @@ pub fn mock_forge_clear_logs(state: State<'_, MockForgeState>) {
     state.logs.lock().unwrap().clear();
 }
 
+#[tauri::command]
+pub async fn mock_server_start(
+    app_handle: tauri::AppHandle,
+    port: u16,
+    domain_id: Option<String>,
+    cors: Option<bool>,
+) -> Result<MockServerStatus, String> {
+    crate::proxy::mock_server::start_mock_server(
+        app_handle,
+        port,
+        domain_id,
+        cors.unwrap_or(true),
+    )
+    .await
+}
+
+#[tauri::command]
+pub fn mock_server_stop() -> Result<(), String> {
+    crate::proxy::mock_server::stop_mock_server()
+}
+
+#[tauri::command]
+pub fn mock_server_get_status() -> MockServerStatus {
+    crate::proxy::mock_server::get_mock_server_status()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -572,5 +656,55 @@ mod tests {
             false,
         );
         assert!(matched.is_some());
+    }
+
+    #[test]
+    fn test_find_matching_route_local_server() {
+        let domains = vec![MockDomain {
+            id: "d1".to_string(),
+            hostname: "api.payment-gateway.local".to_string(),
+            ssl: false,
+            status: "active".to_string(),
+            created_at: "".to_string(),
+        }];
+        let routes = vec![MockRoute {
+            id: "r1".to_string(),
+            domain_id: "d1".to_string(),
+            method: "GET".to_string(),
+            path: "/v1/charges/:id".to_string(),
+            status_code: 200,
+            response_body: "{\"status\":\"paid\"}".to_string(),
+            response_headers: HashMap::new(),
+            matchers: vec![],
+            chaos: ChaosConfig {
+                latency_mode: "none".to_string(),
+                latency_fixed: None,
+                latency_min: None,
+                latency_max: None,
+                error_rate: None,
+                error_status: None,
+            },
+            enabled: true,
+            matcher_enabled: true,
+            request_query_params: None,
+            request_body: None,
+        }];
+
+        let req_headers = HashMap::new();
+        let matched = find_matching_route(
+            &domains,
+            &routes,
+            "localhost:4000",
+            "GET",
+            "/v1/charges/ch_999",
+            &req_headers,
+            &HashMap::new(),
+            &[],
+            true, // is_local_server
+        );
+        assert!(matched.is_some());
+        let (d, r) = matched.unwrap();
+        assert_eq!(d.id, "d1");
+        assert_eq!(r.id, "r1");
     }
 }
