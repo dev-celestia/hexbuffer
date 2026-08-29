@@ -1,4 +1,6 @@
+import { useMemo } from 'react';
 import {
+  Badge,
   Button,
   Input,
   Select,
@@ -6,6 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Switch,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -15,13 +18,15 @@ import {
   SquareIcon,
   EyeSlashIcon,
   WarningCircleIcon,
+  ListBulletsIcon,
 } from '@phosphor-icons/react';
 import type { PortPreset } from '../constants';
 import { PRESET_OPTIONS } from '../constants';
 import { cn } from '@/lib/utils';
+import { parsePorts } from '../lib/port-helpers';
 import { useScannerToolbar } from './hooks/use-scanner-toolbar';
-import { ScannerStatusIndicator } from './scanner-status-indicator';
 import { ScannerConfigPopover } from './scanner-config-popover';
+import { CustomPortsDialog } from './custom-ports-dialog';
 
 interface ScannerToolbarProps {
   target: string;
@@ -82,13 +87,15 @@ export function ScannerToolbar({
   const {
     showAdvanced,
     toggleAdvanced,
-    toggleStealth,
+    isCustomPortsOpen,
+    setIsCustomPortsOpen,
+    openCustomPortsDialog,
     percentage,
   } = useScannerToolbar({
     progress,
-    stealthMode,
-    onStealthModeChange,
   });
+
+  const parsedCustomCount = useMemo(() => parsePorts(ports).length, [ports]);
 
   return (
     <div
@@ -209,33 +216,84 @@ export function ScannerToolbar({
 
         {/* Custom ports inline (only if custom preset) */}
         {preset === 'Custom' && (
-          <Input
-            id="ports-input"
+          <div
             className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
               // Sizing & Spacing
-              "h-7 w-32 px-2",
-
-              // Typography
-              "text-xs font-mono",
-
-              // Backgrounds & Borders
-              "bg-background/50 border-muted-foreground/20",
+              "gap-1",
 
               // Interactive & States
-              "focus-visible:ring-primary/45 focus-visible:ring-1 focus-visible:ring-offset-0",
               "animate-in fade-in duration-150"
             )}
-            value={ports}
-            onChange={(e) => onPortsChange(e.target.value)}
-            placeholder="80,443,1-1024"
-          />
-        )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "relative flex items-center"
+              )}
+            >
+              <Input
+                id="ports-input"
+                className={cn(
+                  // Sizing & Spacing
+                  "h-7 w-44 sm:w-56 pl-2 pr-12",
 
-        {/* Status Indicator */}
-        <ScannerStatusIndicator
-          isRunning={isRunning}
-          stealthMode={stealthMode}
-        />
+                  // Typography
+                  "text-xs font-mono",
+
+                  // Backgrounds & Borders
+                  "bg-background/50 border-muted-foreground/20",
+
+                  // Interactive & States
+                  "focus-visible:ring-primary/45 focus-visible:ring-1 focus-visible:ring-offset-0"
+                )}
+                value={ports}
+                onChange={(e) => onPortsChange(e.target.value)}
+                placeholder="80, 443, 1-4, 8000..8010"
+              />
+              <span
+                className={cn(
+                  // Layout & Positioning
+                  "absolute right-1.5 pointer-events-none select-none",
+
+                  // Typography
+                  "text-[10px] font-mono text-muted-foreground font-medium"
+                )}
+              >
+                {parsedCustomCount > 0 ? `${parsedCustomCount}p` : '0p'}
+              </span>
+            </div>
+
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={openCustomPortsDialog}
+                    className={cn(
+                      // Sizing & Spacing
+                      "h-7 px-2",
+
+                      // Typography
+                      "text-xs",
+
+                      // Backgrounds & Borders
+                      "bg-background/50 border-muted-foreground/20 hover:bg-muted/60"
+                    )}
+                  />
+                }
+              >
+                <ListBulletsIcon className="size-3.5 text-primary" />
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Open Custom Ports Editor (Multi-line, Ranges & Patterns)
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        )}
 
         {/* Progress Display */}
         {isRunning && progress.total > 0 && (
@@ -269,39 +327,56 @@ export function ScannerToolbar({
           "gap-2"
         )}
       >
-        {/* Stealth Toggle */}
+        {/* Stealth / Noisy Mode Switch */}
         <Tooltip>
           <TooltipTrigger
             render={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={toggleStealth}
+              <label
+                htmlFor="stealth-mode-switch"
                 className={cn(
+                  // Layout & Positioning
+                  "flex items-center select-none cursor-pointer",
+
                   // Sizing & Spacing
-                  "h-7 px-2",
+                  "h-7 px-2 gap-2",
 
                   // Typography
-                  "text-xs",
+                  "text-xs font-medium",
+
+                  // Backgrounds & Borders
+                  stealthMode
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-red-600 dark:text-red-400",
 
                   // Interactive & States
-                  stealthMode
-                    ? "text-amber-500 border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10"
-                    : "text-red-500 border-red-500/30 bg-red-500/5 hover:bg-red-500/10"
+                  "transition-colors"
                 )}
               />
             }
           >
             {stealthMode ? (
-              <EyeSlashIcon weight="fill" className="size-3.5" />
+              <EyeSlashIcon weight="fill" className="size-3.5 shrink-0 text-amber-500" />
             ) : (
-              <WarningCircleIcon weight="fill" className="size-3.5 text-red-500" />
+              <WarningCircleIcon weight="fill" className="size-3.5 shrink-0 text-red-500" />
             )}
+            <span>{stealthMode ? 'Stealth' : 'Noisy - High Performance'}</span>
+            <Switch
+              id="stealth-mode-switch"
+              checked={stealthMode}
+              onCheckedChange={onStealthModeChange}
+              className={cn(
+                // Sizing & Spacing
+                "h-4 w-7 [&>span]:h-3 [&>span]:w-3",
+
+                // Interactive & States
+                "data-[state=checked]:bg-amber-500 data-[state=checked]:[&>span]:translate-x-3 data-[state=unchecked]:bg-red-500/60"
+              )}
+            />
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="max-w-[260px] text-xs">
+          <TooltipContent side="bottom" className="max-w-[280px] text-xs">
             {stealthMode
               ? 'Stealth mode ON — slower scan with delay, jitter & port randomization'
-              : '⚠️ Noisy Mode Active — High-speed scan without probe delay! Click to enable Stealth mode.'}
+              : '⚠️ Noisy - High Performance mode active: Maximum scan speed without probe delay or port randomization.'}
           </TooltipContent>
         </Tooltip>
 
@@ -343,6 +418,13 @@ export function ScannerToolbar({
           style={{ width: `${percentage}%` }}
         />
       )}
+      {/* Custom Ports Editor Dialog */}
+      <CustomPortsDialog
+        open={isCustomPortsOpen}
+        onOpenChange={setIsCustomPortsOpen}
+        ports={ports}
+        onSavePorts={onPortsChange}
+      />
     </div>
   );
 }

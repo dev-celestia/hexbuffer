@@ -2,24 +2,21 @@ import { useState, useCallback, useMemo } from 'react';
 
 interface UseScannerToolbarProps {
   progress: { current: number; total: number };
-  stealthMode: boolean;
-  onStealthModeChange: (v: boolean) => void;
 }
 
 export function useScannerToolbar({
   progress,
-  stealthMode,
-  onStealthModeChange,
 }: UseScannerToolbarProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isCustomPortsOpen, setIsCustomPortsOpen] = useState(false);
 
   const toggleAdvanced = useCallback(() => {
     setShowAdvanced((prev) => !prev);
   }, []);
 
-  const toggleStealth = useCallback(() => {
-    onStealthModeChange(!stealthMode);
-  }, [stealthMode, onStealthModeChange]);
+  const openCustomPortsDialog = useCallback(() => {
+    setIsCustomPortsOpen(true);
+  }, []);
 
   const percentage = useMemo(() => {
     return progress.total > 0
@@ -31,7 +28,9 @@ export function useScannerToolbar({
     showAdvanced,
     setShowAdvanced,
     toggleAdvanced,
-    toggleStealth,
+    isCustomPortsOpen,
+    setIsCustomPortsOpen,
+    openCustomPortsDialog,
     percentage,
   };
 }

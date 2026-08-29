@@ -77,7 +77,7 @@ export const usePortScannerStore = create<PortScannerState>()(
         if (!stealthMode) {
           useNotificationStore.getState().addAlert({
             id: `noisy-scan-mode-${Date.now()}`,
-            title: 'Noisy Port Scan Mode Enabled',
+            title: 'Noisy - High Performance Mode Enabled',
             message: 'Stealth mode is disabled. High-speed port scanning without probe delay or port randomization will likely trigger SIEM / IDS detection rules.',
             type: 'warning',
             source: 'Port Scanner',

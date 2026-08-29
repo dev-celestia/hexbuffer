@@ -78,8 +78,8 @@ export function usePortScannerPage() {
     if (!stealthMode) {
       useNotificationStore.getState().addAlert({
         id: `scan-noisy-alert-${Date.now()}`,
-        title: 'High Noise Scan Started',
-        message: `Port scan on target ${scanTarget} initiated in noisy mode. High probe rate without delay may trigger SIEM/IDS alerts.`,
+        title: 'Noisy - High Performance Scan Started',
+        message: `Port scan on target ${scanTarget} initiated in Noisy - High Performance mode. High probe rate without delay may trigger SIEM/IDS alerts.`,
         type: 'warning',
         source: 'Port Scanner',
       });
