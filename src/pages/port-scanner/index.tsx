@@ -86,8 +86,6 @@ export function PortScannerPage() {
             onClear={page.clearResults}
             onQuickStart={handleQuickStart}
             onCopy={page.copyOpenPorts}
-            onExportJson={page.handleExportJson}
-            onExportCsv={page.handleExportCsv}
           />
         </main>
       </div>

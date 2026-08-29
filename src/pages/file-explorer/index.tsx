@@ -2,6 +2,9 @@ import {
   Button,
   ContextMenuItem,
   ContextMenuSeparator,
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
 } from '@celestia-project/ui';
 import * as React from 'react';
 import {
@@ -152,151 +155,154 @@ export function FileExplorerPage() {
                 "flex-1 min-h-0 min-w-0"
               )}
             >
-              <div
-                className={cn(
-                  // Layout & Positioning
-                  "flex min-h-0",
-
-                  // Sizing & Spacing
-                  "h-full gap-3"
-                )}
-              >
+              <ResizablePanelGroup orientation="horizontal" className="h-full min-h-0">
                 {/* Left Buckets Sidebar */}
-                <div
-                  className={cn(
-                    // Layout & Positioning
-                    "shrink-0",
-
-                    // Sizing & Spacing
-                    "w-56 h-full"
-                  )}
-                >
-                  <ExplorerSidebar
-                    buckets={explorer.buckets}
-                    currentBucket={explorer.currentBucket}
-                    onSelectBucket={(b) => {
-                      explorer.setCurrentBucket(b);
-                      explorer.setSelectedItem(null);
-                    }}
-                    onAddCustomBucket={explorer.handleAddCustomBucket}
-                    onRemoveBucket={explorer.handleRemoveBucket}
-                    loading={explorer.loading}
-                  />
-                </div>
-
-                {/* Center File Grid Area */}
-                <div
-                  className={cn(
-                    // Layout & Positioning
-                    "flex-1 min-w-0 min-h-0",
-
-                    // Sizing & Spacing
-                    "h-full"
-                  )}
-                >
-                  <FileGrid
-                    items={explorer.items.map((item) => ({ ...item, id: item.key }))}
-                    selectedItem={
-                      explorer.selectedItem
-                        ? { ...explorer.selectedItem, id: explorer.selectedItem.key }
-                        : null
-                    }
-                    loading={explorer.loading}
-                    deletingId={explorer.deletingKey}
-                    onSelectItem={(item) =>
-                      explorer.setSelectedItem(explorer.items.find((i) => i.key === item.id) ?? null)
-                    }
-                    onDoubleClickItem={(item) => {
-                      const orig = explorer.items.find((i) => i.key === item.id);
-                      if (orig) {
-                        if (orig.type === 'folder') {
-                          explorer.navigateToFolder(orig.key);
-                        } else {
-                          void explorer.handleOpenFile(orig);
-                        }
-                      }
-                    }}
-                    onDeleteItem={(item) => {
-                      const orig = explorer.items.find((i) => i.key === item.id);
-                      if (orig) void explorer.handleDeleteItem(orig);
-                    }}
-                    viewMode={page.viewMode}
-                    emptyMessage="This folder contains no files or sub-directories."
-                    renderGridStatusOverlay={(item) => {
-                      const cached = explorer.cacheStatus[item.id]?.isCached;
-                      if (item.type === 'folder') return null;
-                      return (
-                        <span className="absolute right-0 bottom-1">
-                          <span
-                            className={cn(
-                              "block size-1.5 rounded-full",
-                              cached ? "bg-emerald-500" : "bg-muted-foreground/40"
-                            )}
-                            title={cached ? 'Local Cached' : 'R2 Remote'}
-                          />
-                        </span>
-                      );
-                    }}
-                    renderSyncStatus={(item) => {
-                      const cached = explorer.cacheStatus[item.id]?.isCached;
-                      if (item.type === 'folder') return '—';
-                      return cached ? (
-                        <span className="inline-flex items-center text-[10px] text-emerald-600 dark:text-emerald-400 font-sans gap-1 px-1.5 py-0.5 rounded border border-emerald-500/20 bg-emerald-500/10 font-semibold">
-                          <CheckCircleIcon className="size-3" /> Local
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center text-[10px] text-muted-foreground font-sans gap-1 px-1.5 py-0.5 rounded border border-muted-foreground/10 bg-muted font-semibold">
-                          <CloudArrowDownIcon className="size-3" /> R2
-                        </span>
-                      );
-                    }}
-                    renderExtraContextMenuItems={(item) => {
-                      const orig = explorer.items.find((i) => i.key === item.id);
-                      if (item.type !== 'file' || !orig) return null;
-                      return (
-                        <>
-                          <ContextMenuSeparator />
-                          {explorer.handleCopyPublicUrl && (
-                            <ContextMenuItem onClick={() => explorer.handleCopyPublicUrl(orig)}>
-                              <CopyIcon className="mr-2 size-3.5" />
-                              <span>Copy Public URL</span>
-                            </ContextMenuItem>
-                          )}
-                          {explorer.handleCopyPresignedUrl && (
-                            <ContextMenuItem
-                              onClick={() => explorer.handleCopyPresignedUrl(orig, 3600)}
-                            >
-                              <LinkSimpleIcon className="mr-2 size-3.5" />
-                              <span>Copy Presigned URL</span>
-                            </ContextMenuItem>
-                          )}
-                        </>
-                      );
-                    }}
-                  />
-                </div>
-
-                {/* Right Details Pane */}
-                {explorer.selectedItem && (
+                <ResizablePanel defaultSize={22} minSize={15} maxSize={35}>
                   <div
                     className={cn(
                       // Layout & Positioning
-                      "shrink-0",
+                      "flex flex-col min-h-0",
 
                       // Sizing & Spacing
-                      "w-72 h-full"
+                      "h-full"
                     )}
                   >
-                    <ExplorerDetailsPane
-                      item={explorer.selectedItem}
-                      cacheStatus={explorer.cacheStatus}
-                      onOpenFile={explorer.handleOpenFile}
-                      onCopyPublicUrl={explorer.handleCopyPublicUrl}
-                      onCopyPresignedUrl={explorer.handleCopyPresignedUrl}
+                    <ExplorerSidebar
+                      buckets={explorer.buckets}
+                      currentBucket={explorer.currentBucket}
+                      onSelectBucket={(b) => {
+                        explorer.setCurrentBucket(b);
+                        explorer.setSelectedItem(null);
+                      }}
+                      onAddCustomBucket={explorer.handleAddCustomBucket}
+                      onRemoveBucket={explorer.handleRemoveBucket}
+                      loading={explorer.loading}
                     />
                   </div>
+                </ResizablePanel>
+
+                <ResizableHandle withHandle />
+
+                {/* Center File Grid Area */}
+                <ResizablePanel defaultSize={explorer.selectedItem ? 52 : 78} minSize={30}>
+                  <div
+                    className={cn(
+                      // Layout & Positioning
+                      "flex flex-col min-w-0 min-h-0",
+
+                      // Sizing & Spacing
+                      "h-full p-2"
+                    )}
+                  >
+                    <FileGrid
+                      items={explorer.items.map((item) => ({ ...item, id: item.key }))}
+                      selectedItem={
+                        explorer.selectedItem
+                          ? { ...explorer.selectedItem, id: explorer.selectedItem.key }
+                          : null
+                      }
+                      loading={explorer.loading}
+                      deletingId={explorer.deletingKey}
+                      onSelectItem={(item) =>
+                        explorer.setSelectedItem(explorer.items.find((i) => i.key === item.id) ?? null)
+                      }
+                      onDoubleClickItem={(item) => {
+                        const orig = explorer.items.find((i) => i.key === item.id);
+                        if (orig) {
+                          if (orig.type === 'folder') {
+                            explorer.navigateToFolder(orig.key);
+                          } else {
+                            void explorer.handleOpenFile(orig);
+                          }
+                        }
+                      }}
+                      onDeleteItem={(item) => {
+                        const orig = explorer.items.find((i) => i.key === item.id);
+                        if (orig) void explorer.handleDeleteItem(orig);
+                      }}
+                      viewMode={page.viewMode}
+                      emptyMessage="This folder contains no files or sub-directories."
+                      renderGridStatusOverlay={(item) => {
+                        const cached = explorer.cacheStatus[item.id]?.isCached;
+                        if (item.type === 'folder') return null;
+                        return (
+                          <span className="absolute right-0 bottom-1">
+                            <span
+                              className={cn(
+                                "block size-1.5 rounded-full",
+                                cached ? "bg-emerald-500" : "bg-muted-foreground/40"
+                              )}
+                              title={cached ? 'Local Cached' : 'R2 Remote'}
+                            />
+                          </span>
+                        );
+                      }}
+                      renderSyncStatus={(item) => {
+                        const cached = explorer.cacheStatus[item.id]?.isCached;
+                        if (item.type === 'folder') return '—';
+                        return cached ? (
+                          <span className="inline-flex items-center text-[10px] text-emerald-600 dark:text-emerald-400 font-sans gap-1 px-1.5 py-0.5 rounded border border-emerald-500/20 bg-emerald-500/10 font-semibold">
+                            <CheckCircleIcon className="size-3" /> Local
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center text-[10px] text-muted-foreground font-sans gap-1 px-1.5 py-0.5 rounded border border-muted-foreground/10 bg-muted font-semibold">
+                            <CloudArrowDownIcon className="size-3" /> R2
+                          </span>
+                        );
+                      }}
+                      renderExtraContextMenuItems={(item) => {
+                        const orig = explorer.items.find((i) => i.key === item.id);
+                        if (item.type !== 'file' || !orig) return null;
+                        return (
+                          <>
+                            <ContextMenuSeparator />
+                            {explorer.handleCopyPublicUrl && (
+                              <ContextMenuItem onClick={() => explorer.handleCopyPublicUrl(orig)}>
+                                <CopyIcon className="mr-2 size-3.5" />
+                                <span>Copy Public URL</span>
+                              </ContextMenuItem>
+                            )}
+                            {explorer.handleCopyPresignedUrl && (
+                              <ContextMenuItem
+                                onClick={() => explorer.handleCopyPresignedUrl(orig, 3600)}
+                              >
+                                <LinkSimpleIcon className="mr-2 size-3.5" />
+                                <span>Copy Presigned URL</span>
+                              </ContextMenuItem>
+                            )}
+                          </>
+                        );
+                      }}
+                    />
+                  </div>
+                </ResizablePanel>
+
+                {/* Right Details Pane */}
+                {explorer.selectedItem && (
+                  <>
+                    <ResizableHandle withHandle />
+                    <ResizablePanel defaultSize={26} minSize={18} maxSize={40}>
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "flex flex-col min-h-0",
+
+                          // Sizing & Spacing
+                          "h-full"
+                        )}
+                      >
+                        <ExplorerDetailsPane
+                          item={explorer.selectedItem}
+                          cacheStatus={explorer.cacheStatus}
+                          onOpenFile={explorer.handleOpenFile}
+                          onCopyPublicUrl={explorer.handleCopyPublicUrl}
+                          onCopyPresignedUrl={explorer.handleCopyPresignedUrl}
+                        />
+                      </div>
+                    </ResizablePanel>
+                  </>
                 )}
-              </div>
+              </ResizablePanelGroup>
             </div>
           </div>
         );

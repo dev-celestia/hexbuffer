@@ -81,7 +81,7 @@ export function TerminalToolbar({
 
         {/* Settings Popover */}
         <Popover>
-          <PopoverTrigger asChild>
+          <PopoverTrigger>
             <Button
               size="sm"
               variant="ghost"

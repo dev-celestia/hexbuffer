@@ -48,11 +48,35 @@ export function DevServerPage() {
         onKillPort={page.handleKillPort}
       />
 
-      <div className="p-4 lg:p-6 flex-1 min-h-0">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex-1 min-h-0",
+
+          // Sizing & Spacing
+          "p-4 lg:p-6"
+        )}
+      >
         {/* ── Tab 1: Live Dev Process (Primary view with QR Code) ── */}
         {page.activeTabId === 'process' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-            <div className="lg:col-span-7 flex flex-col gap-5">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "grid grid-cols-1 lg:grid-cols-12 items-start",
+
+              // Sizing & Spacing
+              "gap-5"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "lg:col-span-7 flex flex-col",
+
+                // Sizing & Spacing
+                "gap-5"
+              )}
+            >
               <DevServerProcessPane
                 projectCwd={page.projectCwd}
                 onChangeProjectCwd={page.setProjectCwd}
@@ -74,7 +98,15 @@ export function DevServerPage() {
               />
             </div>
 
-            <div className="lg:col-span-5 flex flex-col gap-5">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "lg:col-span-5 flex flex-col",
+
+                // Sizing & Spacing
+                "gap-5"
+              )}
+            >
               <DevServerQrCard
                 hostUrl={page.hostUrl}
                 qrSvg={page.qrSvg}
@@ -93,8 +125,24 @@ export function DevServerPage() {
 
         {/* ── Tab 2: Network Diagnostics (No duplicate QR Code) ── */}
         {page.activeTabId === 'network' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-            <div className="lg:col-span-6 flex flex-col gap-5">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "grid grid-cols-1 lg:grid-cols-12 items-start",
+
+              // Sizing & Spacing
+              "gap-5"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "lg:col-span-6 flex flex-col",
+
+                // Sizing & Spacing
+                "gap-5"
+              )}
+            >
               {/* Detailed Network Adapters List */}
               <DevServerInterfaceSelector
                 interfaces={page.interfaces}
@@ -107,32 +155,99 @@ export function DevServerPage() {
               />
             </div>
 
-            <div className="lg:col-span-6 flex flex-col gap-5">
+            <div
+              className={cn(
+                // Layout & Positioning
+                "lg:col-span-6 flex flex-col",
+
+                // Sizing & Spacing
+                "gap-5"
+              )}
+            >
               {/* Mobile Setup Guidance */}
-              <div className="flex flex-col gap-3 p-5 rounded-xl bg-card border border-border/70 shadow-xs">
-                <div className="flex items-center gap-2">
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex flex-col",
+
+                  // Sizing & Spacing
+                  "p-5 gap-3",
+
+                  // Backgrounds & Borders
+                  "rounded-xl bg-card border border-border/70 shadow-xs"
+                )}
+              >
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-center",
+
+                    // Sizing & Spacing
+                    "gap-2"
+                  )}
+                >
                   <DeviceMobile size={18} className="text-emerald-500" />
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <h3
+                    className={cn(
+                      // Typography
+                      "text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                    )}
+                  >
                     Tethering & Connection Modes
                   </h3>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3">
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "grid grid-cols-1",
+
+                    // Sizing & Spacing
+                    "gap-3"
+                  )}
+                >
                   {HOTSPOT_TIPS.map((tip) => (
                     <div
                       key={tip.title}
-                      className="p-3 rounded-lg border border-border/60 bg-muted/20 flex flex-col justify-between"
+                      className={cn(
+                        // Layout & Positioning
+                        "flex flex-col justify-between",
+
+                        // Sizing & Spacing
+                        "p-3",
+
+                        // Backgrounds & Borders
+                        "rounded-lg border border-border/60 bg-muted/20"
+                      )}
                     >
                       <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-semibold text-foreground">
+                        <div
+                          className={cn(
+                            // Layout & Positioning
+                            "flex items-center justify-between",
+
+                            // Sizing & Spacing
+                            "mb-1"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              // Typography
+                              "text-xs font-semibold text-foreground"
+                            )}
+                          >
                             {tip.title}
                           </span>
                           <Badge variant="secondary" className="text-[9px] px-1 py-0 font-medium">
                             {tip.badge}
                           </Badge>
                         </div>
-                        <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        <p
+                          className={cn(
+                            // Typography
+                            "text-[11px] text-muted-foreground leading-relaxed"
+                          )}
+                        >
                           {tip.desc}
                         </p>
                       </div>
@@ -140,7 +255,21 @@ export function DevServerPage() {
                   ))}
                 </div>
 
-                <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 text-xs flex items-start gap-2.5 mt-2">
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-start",
+
+                    // Sizing & Spacing
+                    "p-3 gap-2.5 mt-2",
+
+                    // Typography
+                    "text-xs text-emerald-600 dark:text-emerald-400",
+
+                    // Backgrounds & Borders
+                    "rounded-lg border border-emerald-500/30 bg-emerald-500/5"
+                  )}
+                >
                   <ShieldCheck size={18} className="shrink-0 mt-0.5" />
                   <div>
                     <span className="font-semibold text-foreground">Next.js Origin Security Handled:</span>

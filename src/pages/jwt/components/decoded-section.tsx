@@ -1,6 +1,6 @@
 import { Label } from '@celestia-project/ui';
 import * as React from 'react';
-
+import { cn } from '@/lib/utils';
 import { formatTimestamp } from '../lib/jwt-helpers';
 
 const TIMESTAMP_KEYS = new Set(['iat', 'exp', 'nbf']);
@@ -27,22 +27,53 @@ function ColorizedValue({ value }: { value: unknown }) {
 
   if (type === 'object') {
     return (
-      <span className="font-mono break-all text-[11px] opacity-85">
+      <span
+        className={cn(
+          // Typography
+          "font-mono break-all text-[11px] opacity-85"
+        )}
+      >
         {JSON.stringify(value)}
       </span>
     );
   }
 
   if (type === 'null') {
-    return <span className={TYPE_COLORS.null}>null</span>;
+    return (
+      <span
+        className={cn(
+          // Typography
+          "font-mono",
+          TYPE_COLORS.null
+        )}
+      >
+        null
+      </span>
+    );
   }
 
   if (type === 'boolean') {
-    return <span className={TYPE_COLORS.boolean}>{String(value)}</span>;
+    return (
+      <span
+        className={cn(
+          // Typography
+          "font-mono",
+          TYPE_COLORS.boolean
+        )}
+      >
+        {String(value)}
+      </span>
+    );
   }
 
   return (
-    <span className={`font-mono break-all ${TYPE_COLORS[type] ?? ''}`}>
+    <span
+      className={cn(
+        // Typography
+        "font-mono break-all",
+        TYPE_COLORS[type] ?? ''
+      )}
+    >
       {String(value)}
     </span>
   );
@@ -56,23 +87,68 @@ interface DecodedSectionProps {
 export function DecodedSection({ title, data }: DecodedSectionProps) {
   return (
     <div>
-      <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
+      <Label
+        className={cn(
+          // Typography
+          "text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
+        )}
+      >
         {title}
       </Label>
-      <div className="mt-1 space-y-0.5">
+      <div
+        className={cn(
+          // Sizing & Spacing
+          "mt-1 space-y-0.5"
+        )}
+      >
         {Object.entries(data).map(([key, value]) => {
           const isTimestamp =
             TIMESTAMP_KEYS.has(key) && typeof value === 'number';
           const timestampStr = isTimestamp ? formatTimestamp(value) : null;
 
           return (
-            <div key={key} className="flex items-baseline gap-2 text-xs">
-              <span className="font-mono text-blue-400 dark:text-blue-300 shrink-0">
+            <div
+              key={key}
+              className={cn(
+                // Layout & Positioning
+                "flex items-baseline",
+
+                // Sizing & Spacing
+                "gap-2",
+
+                // Typography
+                "text-xs"
+              )}
+            >
+              <span
+                className={cn(
+                  // Layout & Positioning
+                  "shrink-0",
+
+                  // Typography
+                  "font-mono text-blue-400 dark:text-blue-300"
+                )}
+              >
                 {key}
               </span>
-              <span className="font-mono text-muted-foreground shrink-0">:</span>
+              <span
+                className={cn(
+                  // Layout & Positioning
+                  "shrink-0",
+
+                  // Typography
+                  "font-mono text-muted-foreground"
+                )}
+              >
+                :
+              </span>
               {isTimestamp && timestampStr ? (
-                <span className="text-xs text-muted-foreground italic">
+                <span
+                  className={cn(
+                    // Typography
+                    "text-xs text-muted-foreground italic"
+                  )}
+                >
                   {timestampStr}
                 </span>
               ) : (

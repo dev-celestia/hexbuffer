@@ -1,4 +1,11 @@
-import { Alert, AlertDescription, Button } from '@celestia-project/ui';
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@celestia-project/ui';
 import * as React from 'react';
 
 import { InfoIcon, PlayIcon, SquareIcon } from '@phosphor-icons/react';
@@ -90,8 +97,11 @@ export function IntruderPage() {
           // Layout & Positioning
           "flex-1 min-h-0 overflow-hidden",
 
+          // Sizing & Spacing
+          "m-2",
+
           // Backgrounds & Borders
-          "border rounded-lg"
+          "border rounded-lg bg-background"
         )}
       >
         <div
@@ -107,10 +117,10 @@ export function IntruderPage() {
           <div
             className={cn(
               // Layout & Positioning
-              "relative flex items-center justify-between shrink-0 select-none",
+              "relative flex items-center justify-between shrink-0 select-none overflow-x-auto min-w-0",
 
               // Sizing & Spacing
-              "px-3 py-2",
+              "px-3 py-2 gap-4",
 
               // Backgrounds & Borders
               "border-b bg-muted/20"
@@ -119,7 +129,7 @@ export function IntruderPage() {
             <div
               className={cn(
                 // Layout & Positioning
-                "flex items-center",
+                "flex items-center min-w-0 shrink-0",
 
                 // Sizing & Spacing
                 "gap-3"
@@ -130,8 +140,16 @@ export function IntruderPage() {
                   size="sm" 
                   variant="destructive" 
                   onClick={stopIntruderUiAttack}
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-7 px-2.5 gap-1.5",
+
+                    // Typography
+                    "text-xs font-medium"
+                  )}
                 >
-                  <SquareIcon className="size-3" /> Stop Attack
+                  <SquareIcon className="size-3" weight="fill" />
+                  <span>Stop Attack</span>
                 </Button>
               ) : (
                 <Button 
@@ -139,8 +157,16 @@ export function IntruderPage() {
                   variant="default"
                   onClick={page.handleStartAttack} 
                   disabled={!!page.startBlockedReason}
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-7 px-2.5 gap-1.5",
+
+                    // Typography
+                    "text-xs font-medium"
+                  )}
                 >
-                  <PlayIcon className="size-3" /> Start Attack
+                  <PlayIcon className="size-3" weight="fill" />
+                  <span>Start Attack</span>
                 </Button>
               )}
 
@@ -157,7 +183,16 @@ export function IntruderPage() {
                   "border-border"
                 )}
               >
-                <span className={`h-2 w-2 rounded-full ${page.isRunning ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/45'}`} />
+                <span
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-2 w-2",
+
+                    // Backgrounds & Borders
+                    "rounded-full",
+                    page.isRunning ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground/45"
+                  )}
+                />
                 <span
                   className={cn(
                     // Typography
@@ -178,7 +213,7 @@ export function IntruderPage() {
                     // Typography
                     "text-[10px] font-medium",
 
-                    // Visuals & Colors
+                    // Backgrounds & Borders
                     "text-amber-600 dark:text-amber-400 bg-amber-500/10 rounded border border-amber-500/20"
                   )}
                 >
@@ -192,7 +227,7 @@ export function IntruderPage() {
               <div
                 className={cn(
                   // Layout & Positioning
-                  "flex items-center",
+                  "flex items-center shrink-0",
 
                   // Sizing & Spacing
                   "gap-2",
@@ -202,13 +237,18 @@ export function IntruderPage() {
                 )}
               >
                 <span>Progress:</span>
-                <span className="font-mono text-foreground">
+                <span
+                  className={cn(
+                    // Typography
+                    "font-mono text-foreground"
+                  )}
+                >
                   {page.progress.current} / {page.progress.total} ({percentage}%)
                 </span>
               </div>
             )}
 
-            {/* Slick bottom border progress line */}
+            {/* Bottom border progress line */}
             {page.isRunning && page.progress && (
               <div
                 className={cn(
@@ -244,7 +284,7 @@ export function IntruderPage() {
                   "flex flex-col min-h-0",
 
                   // Sizing & Spacing
-                  "h-full p-3"
+                  "h-full"
                 )}
               >
                 {page.selectedResult ? (
@@ -258,7 +298,7 @@ export function IntruderPage() {
                         "h-full",
 
                         // Backgrounds & Borders
-                        "rounded-md border border-border"
+                        "border-t border-border"
                       )}
                     >
                       {page.activeTab.config && (
@@ -270,47 +310,41 @@ export function IntruderPage() {
                       )}
                     </div>
                   ) : (
-                    <div
-                      className={cn(
-                        // Layout & Positioning
-                        "grid grid-rows-2 divide-y min-h-0",
+                    <ResizablePanelGroup orientation="vertical" className="h-full">
+                      <ResizablePanel defaultSize={50} minSize={25}>
+                        <div
+                          className={cn(
+                            // Layout & Positioning
+                            "flex flex-col min-h-0",
 
-                        // Sizing & Spacing
-                        "h-full",
+                            // Sizing & Spacing
+                            "h-full"
+                          )}
+                        >
+                          <IntruderResultsPanel />
+                        </div>
+                      </ResizablePanel>
+                      <ResizableHandle withHandle />
+                      <ResizablePanel defaultSize={50} minSize={25}>
+                        <div
+                          className={cn(
+                            // Layout & Positioning
+                            "flex flex-col min-h-0",
 
-                        // Backgrounds & Borders
-                        "divide-border"
-                      )}
-                    >
-                      {/* Top Row: Results list table */}
-                      <div
-                        className={cn(
-                          // Layout & Positioning
-                          "flex flex-col min-h-0",
-
-                          // Sizing & Spacing
-                          "pb-1.5"
-                        )}
-                      >
-                        <IntruderResultsPanel />
-                      </div>
-
-                      {/* Bottom Row: Inline Request / Response inspector */}
-                      <div
-                        className={cn(
-                          // Layout & Positioning
-                          "flex flex-col min-h-0 pt-1.5"
-                        )}
-                      >
-                        {page.activeTab.config && (
-                          <IntruderResultInspector
-                            selectedResult={page.selectedResult}
-                            config={page.activeTab.config}
-                            onClose={() => page.setSelectedResult(null)}
-                          />
-                        )}
-                      </div>
-                    </div>
+                            // Sizing & Spacing
+                            "h-full"
+                          )}
+                        >
+                          {page.activeTab.config && (
+                            <IntruderResultInspector
+                              selectedResult={page.selectedResult}
+                              config={page.activeTab.config}
+                              onClose={() => page.setSelectedResult(null)}
+                            />
+                          )}
+                        </div>
+                      </ResizablePanel>
+                    </ResizablePanelGroup>
                   )
                 ) : (
                   <div
@@ -327,93 +361,49 @@ export function IntruderPage() {
                 )}
               </div>
             ) : (
-              /* Standard 50/50 Split Layout */
-              <div
-                className={cn(
-                  // Layout & Positioning
-                  "grid grid-cols-2 divide-x min-h-0",
-
-                  // Sizing & Spacing
-                  "h-full",
-
-                  // Backgrounds & Borders
-                  "divide-border"
-                )}
-              >
+              /* Standard Split Layout with Resizable Panels */
+              <ResizablePanelGroup orientation="horizontal" className="h-full">
                 {/* Left Column: Attack configurations and Request templates */}
-                <div
-                  className={cn(
-                    // Layout & Positioning
-                    "flex flex-col min-h-0 overflow-auto",
+                <ResizablePanel defaultSize={45} minSize={30}>
+                  <div
+                    className={cn(
+                      // Layout & Positioning
+                      "flex flex-col min-h-0 overflow-auto",
 
-                    // Sizing & Spacing
-                    "p-3"
-                  )}
-                >
-                  <IntruderConfigDialog
-                    isRunning={page.isRunning}
-                    progress={page.progress}
-                    startBlockedReason={page.startBlockedReason}
-                  />
-                </div>
+                      // Sizing & Spacing
+                      "h-full p-3"
+                    )}
+                  >
+                    <IntruderConfigDialog
+                      isRunning={page.isRunning}
+                      progress={page.progress}
+                      startBlockedReason={page.startBlockedReason}
+                    />
+                  </div>
+                </ResizablePanel>
+
+                <ResizableHandle withHandle />
 
                 {/* Right Column: Results & inspector view */}
-                <div
-                  className={cn(
-                    // Layout & Positioning
-                    "flex flex-col min-h-0 overflow-hidden"
-                  )}
-                >
-                  {page.selectedResult ? (
-                    page.isInspectorMaximized ? (
-                      <div
-                        className={cn(
-                          // Layout & Positioning
-                          "flex flex-col min-h-0",
+                <ResizablePanel defaultSize={55} minSize={30}>
+                  <div
+                    className={cn(
+                      // Layout & Positioning
+                      "flex flex-col min-h-0 overflow-hidden",
 
-                          // Sizing & Spacing
-                          "h-full p-3"
-                        )}
-                      >
-                        {page.activeTab.config && (
-                          <IntruderResultInspector
-                            selectedResult={page.selectedResult}
-                            config={page.activeTab.config}
-                            onClose={() => page.setSelectedResult(null)}
-                          />
-                        )}
-                      </div>
-                    ) : (
-                      <div
-                        className={cn(
-                          // Layout & Positioning
-                          "grid grid-rows-2 divide-y min-h-0",
-
-                          // Sizing & Spacing
-                          "h-full",
-
-                          // Backgrounds & Borders
-                          "divide-border"
-                        )}
-                      >
-                        {/* Top Row: Results list table */}
+                      // Sizing & Spacing
+                      "h-full"
+                    )}
+                  >
+                    {page.selectedResult ? (
+                      page.isInspectorMaximized ? (
                         <div
                           className={cn(
                             // Layout & Positioning
                             "flex flex-col min-h-0",
 
                             // Sizing & Spacing
-                            "p-3 pb-1.5"
-                          )}
-                        >
-                          <IntruderResultsPanel />
-                        </div>
-
-                        {/* Bottom Row: Inline Request / Response inspector */}
-                        <div
-                          className={cn(
-                            // Layout & Positioning
-                            "flex flex-col min-h-0"
+                            "h-full"
                           )}
                         >
                           {page.activeTab.config && (
@@ -424,23 +414,59 @@ export function IntruderPage() {
                             />
                           )}
                         </div>
-                      </div>
-                    )
-                  ) : (
-                    <div
-                      className={cn(
-                        // Layout & Positioning
-                        "w-full min-h-0",
+                      ) : (
+                        <ResizablePanelGroup orientation="vertical" className="h-full">
+                          <ResizablePanel defaultSize={50} minSize={25}>
+                            <div
+                              className={cn(
+                                // Layout & Positioning
+                                "flex flex-col min-h-0",
 
-                        // Sizing & Spacing
-                        "h-full p-3"
-                      )}
-                    >
-                      <IntruderResultsPanel />
-                    </div>
-                  )}
-                </div>
-              </div>
+                                // Sizing & Spacing
+                                "h-full"
+                              )}
+                            >
+                              <IntruderResultsPanel />
+                            </div>
+                          </ResizablePanel>
+                          <ResizableHandle withHandle />
+                          <ResizablePanel defaultSize={50} minSize={25}>
+                            <div
+                              className={cn(
+                                // Layout & Positioning
+                                "flex flex-col min-h-0",
+
+                                // Sizing & Spacing
+                                "h-full"
+                              )}
+                            >
+                              {page.activeTab.config && (
+                                <IntruderResultInspector
+                                  selectedResult={page.selectedResult}
+                                  config={page.activeTab.config}
+                                  onClose={() => page.setSelectedResult(null)}
+                                />
+                              )}
+                            </div>
+                          </ResizablePanel>
+                        </ResizablePanelGroup>
+                      )
+                    ) : (
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          "w-full min-h-0",
+
+                          // Sizing & Spacing
+                          "h-full"
+                        )}
+                      >
+                        <IntruderResultsPanel />
+                      </div>
+                    )}
+                  </div>
+                </ResizablePanel>
+              </ResizablePanelGroup>
             )}
           </div>
         </div>

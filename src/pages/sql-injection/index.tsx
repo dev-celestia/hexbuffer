@@ -1,4 +1,13 @@
-import { Badge, Tabs, TabsContent, TabsList, TabsTrigger } from '@celestia-project/ui';
+import {
+  Badge,
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 
 import { useSqliPage } from './hooks/use-sqli-page';
@@ -111,191 +120,192 @@ export function SqlInjectionPage() {
           </div>
         )}
 
-        <div
-          className={cn(
-            // Layout & Positioning
-            "flex flex-1 min-h-0 overflow-hidden"
-          )}
-        >
+        <ResizablePanelGroup orientation="horizontal" className="flex-1 min-h-0">
           {/* Left: parameters config */}
-          <div
-            className={cn(
-              // Layout & Positioning
-              "flex flex-col shrink-0 overflow-hidden",
-
-              // Sizing & Spacing
-              "w-64",
-
-              // Backgrounds & Borders
-              "border-r"
-            )}
-          >
-            <ParametersPanel
-              parameters={page.parameters}
-              newParamName={page.newParamName}
-              newParamValue={page.newParamValue}
-              injectCount={page.injectCount}
-              onNewParamNameChange={page.setNewParamName}
-              onNewParamValueChange={page.setNewParamValue}
-              onAddParameter={page.addParameter}
-              onRemoveParameter={page.removeParameter}
-              onToggleParamInject={page.toggleParamInject}
-              onParamValueChange={(name, value) =>
-                page.setParameters(prev =>
-                  prev.map(p => (p.name === name ? { ...p, value } : p)),
-                )
-              }
-            />
-          </div>
-
-          {/* Right: results tabs */}
-          <div
-            className={cn(
-              // Layout & Positioning
-              "flex flex-col flex-1 min-h-0 overflow-hidden"
-            )}
-          >
-            <Tabs
-              defaultValue="vulnerabilities"
+          <ResizablePanel defaultSize={25} minSize={18} maxSize={45}>
+            <div
               className={cn(
                 // Layout & Positioning
-                "flex flex-col min-h-0",
+                "flex flex-col min-h-0 overflow-hidden",
 
                 // Sizing & Spacing
-                "h-full",
-
-                // Backgrounds & Borders
-                "bg-background"
+                "h-full"
               )}
             >
-              <div
+              <ParametersPanel
+                parameters={page.parameters}
+                newParamName={page.newParamName}
+                newParamValue={page.newParamValue}
+                injectCount={page.injectCount}
+                onNewParamNameChange={page.setNewParamName}
+                onNewParamValueChange={page.setNewParamValue}
+                onAddParameter={page.addParameter}
+                onRemoveParameter={page.removeParameter}
+                onToggleParamInject={page.toggleParamInject}
+                onParamValueChange={(name, value) =>
+                  page.setParameters(prev =>
+                    prev.map(p => (p.name === name ? { ...p, value } : p)),
+                  )
+                }
+              />
+            </div>
+          </ResizablePanel>
+
+          <ResizableHandle withHandle />
+
+          {/* Right: results tabs */}
+          <ResizablePanel defaultSize={75} minSize={40}>
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col flex-1 min-h-0 overflow-hidden",
+
+                // Sizing & Spacing
+                "h-full"
+              )}
+            >
+              <Tabs
+                defaultValue="vulnerabilities"
                 className={cn(
                   // Layout & Positioning
-                  "flex items-center justify-between shrink-0",
+                  "flex flex-col min-h-0",
 
                   // Sizing & Spacing
-                  "h-9 px-3",
+                  "h-full",
 
                   // Backgrounds & Borders
-                  "border-b bg-muted/15"
+                  "bg-background"
                 )}
               >
-                <TabsList
+                <div
                   className={cn(
+                    // Layout & Positioning
+                    "flex items-center justify-between shrink-0",
+
                     // Sizing & Spacing
-                    "h-7 p-0.5",
+                    "h-9 px-3",
 
                     // Backgrounds & Borders
-                    "bg-background/50 border rounded-md shadow-sm"
+                    "border-b bg-muted/15"
                   )}
                 >
-                  <TabsTrigger
-                    value="vulnerabilities"
+                  <TabsList
                     className={cn(
                       // Sizing & Spacing
-                      "h-6 px-3",
+                      "h-7 p-0.5",
 
-                      // Typography
-                      "text-[11px] font-medium",
-
-                      // Interactive & States
-                      "transition-all"
+                      // Backgrounds & Borders
+                      "bg-background/50 border rounded-md shadow-sm"
                     )}
                   >
-                    Vulnerabilities
-                    {page.vulnerabilities.length > 0 && (
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          // Sizing & Spacing
-                          "ml-1.5 px-1 py-0 h-4",
+                    <TabsTrigger
+                      value="vulnerabilities"
+                      className={cn(
+                        // Sizing & Spacing
+                        "h-6 px-3",
 
-                          // Typography
-                          "text-[9px] font-bold",
+                        // Typography
+                        "text-[11px] font-medium",
 
-                          // Visuals & Colors
-                          "border-amber-500/20 text-amber-600 bg-amber-500/5"
-                        )}
-                      >
-                        {page.vulnerabilities.length}
-                      </Badge>
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="extraction"
-                    className={cn(
-                      // Sizing & Spacing
-                      "h-6 px-3",
+                        // Interactive & States
+                        "transition-all"
+                      )}
+                    >
+                      <span>Vulnerabilities</span>
+                      {page.vulnerabilities.length > 0 && (
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            // Sizing & Spacing
+                            "ml-1.5 px-1 py-0 h-4",
 
-                      // Typography
-                      "text-[11px] font-medium",
+                            // Typography
+                            "text-[9px] font-bold",
 
-                      // Interactive & States
-                      "transition-all"
-                    )}
-                  >
-                    Data Extraction
-                    {page.databases.length > 0 && (
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          // Sizing & Spacing
-                          "ml-1.5 px-1 py-0 h-4",
+                            // Visuals & Colors
+                            "border-amber-500/20 text-amber-600 bg-amber-500/5"
+                          )}
+                        >
+                          {page.vulnerabilities.length}
+                        </Badge>
+                      )}
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="extraction"
+                      className={cn(
+                        // Sizing & Spacing
+                        "h-6 px-3",
 
-                          // Typography
-                          "text-[9px] font-bold"
-                        )}
-                      >
-                        {page.databases.length}
-                      </Badge>
-                    )}
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+                        // Typography
+                        "text-[11px] font-medium",
 
-              <TabsContent
-                value="vulnerabilities"
-                className={cn(
-                  // Layout & Positioning
-                  "flex flex-col flex-1 min-h-0 overflow-hidden",
+                        // Interactive & States
+                        "transition-all"
+                      )}
+                    >
+                      <span>Data Extraction</span>
+                      {page.databases.length > 0 && (
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            // Sizing & Spacing
+                            "ml-1.5 px-1 py-0 h-4",
 
-                  // Sizing & Spacing
-                  "m-0"
-                )}
-              >
-                <VulnerabilitiesTab
-                  vulnerabilities={page.vulnerabilities}
-                  isRunning={page.isRunning}
-                  selectedVuln={page.selectedVuln}
-                  selectedVulnData={page.selectedVulnData}
-                  onSelectVuln={page.setSelectedVuln}
-                />
-              </TabsContent>
+                            // Typography
+                            "text-[9px] font-bold"
+                          )}
+                        >
+                          {page.databases.length}
+                        </Badge>
+                      )}
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
 
-              <TabsContent
-                value="extraction"
-                className={cn(
-                  // Layout & Positioning
-                  "flex flex-col flex-1 min-h-0 overflow-hidden",
+                <TabsContent
+                  value="vulnerabilities"
+                  className={cn(
+                    // Layout & Positioning
+                    "flex flex-col flex-1 min-h-0 overflow-hidden",
 
-                  // Sizing & Spacing
-                  "m-0"
-                )}
-              >
-                <ExtractionTab
-                  databases={page.databases}
-                  isRunning={page.isRunning}
-                  selectedDb={page.selectedDb}
-                  selectedTable={page.selectedTable}
-                  selectedDbData={page.selectedDbData}
-                  tableData={page.tableData}
-                  onSelectDb={page.setSelectedDb}
-                  onSelectTable={page.setSelectedTable}
-                />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
+                    // Sizing & Spacing
+                    "m-0"
+                  )}
+                >
+                  <VulnerabilitiesTab
+                    vulnerabilities={page.vulnerabilities}
+                    isRunning={page.isRunning}
+                    selectedVuln={page.selectedVuln}
+                    selectedVulnData={page.selectedVulnData}
+                    onSelectVuln={page.setSelectedVuln}
+                  />
+                </TabsContent>
+
+                <TabsContent
+                  value="extraction"
+                  className={cn(
+                    // Layout & Positioning
+                    "flex flex-col flex-1 min-h-0 overflow-hidden",
+
+                    // Sizing & Spacing
+                    "m-0"
+                  )}
+                >
+                  <ExtractionTab
+                    databases={page.databases}
+                    isRunning={page.isRunning}
+                    selectedDb={page.selectedDb}
+                    selectedTable={page.selectedTable}
+                    selectedDbData={page.selectedDbData}
+                    tableData={page.tableData}
+                    onSelectDb={page.setSelectedDb}
+                    onSelectTable={page.setSelectedTable}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </main>
     </div>
   );

@@ -76,9 +76,19 @@ export function HttpHistoryPage() {
         onTabRename={page.renameTab}
         onTabAdd={page.addGroup}
         renderTabContextMenuItems={renderTabContextMenuItems}
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col min-h-0",
+
+          // Sizing & Spacing
+          "h-full"
+        )}
         contentClassName={cn(
           // Layout & Positioning
           "flex flex-col flex-1 min-h-0 overflow-hidden",
+
+          // Sizing & Spacing
+          "m-2",
 
           // Backgrounds & Borders
           "border rounded-lg bg-background"
@@ -94,7 +104,7 @@ export function HttpHistoryPage() {
             "!py-0",
 
             // Backgrounds & Borders
-            "rounded-none"
+            "rounded-none border-0 shadow-none"
           )}
         >
           <HttpHistoryView

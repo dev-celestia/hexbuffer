@@ -39,7 +39,6 @@ export function ComparerPage() {
     }
   };
 
-  // ponytail: thin page coordinator wiring presentation sub-components together.
   return (
     <div
       className={cn(
@@ -53,78 +52,88 @@ export function ComparerPage() {
         "bg-background"
       )}
     >
-      <ComparerToolbar
-        hasContent={page.hasContent}
-        hasDiff={page.hasDiff}
-        diffMode={page.diffMode}
-        setDiffMode={page.setDiffMode}
-        showInputs={showInputs}
-        setShowInputs={setShowInputs}
-        handleSwap={page.handleSwap}
-        handleClear={page.handleClear}
-        handleCopy={page.handleCopy}
-        valueA={page.valueA}
-        valueB={page.valueB}
-        copyPanel={copyPanel}
-      />
-
       <div
         className={cn(
           // Layout & Positioning
-          "relative flex-1 min-h-0 overflow-hidden",
+          "flex flex-col min-h-0 overflow-hidden",
+
+          // Sizing & Spacing
+          "h-full",
 
           // Backgrounds & Borders
-          "border rounded-b-md"
+          "border rounded-md bg-card"
         )}
       >
-        {showInputs ? (
-          <ResizablePanelGroup orientation="vertical" className="h-full">
-            <ResizablePanel defaultSize={35} minSize={15}>
-              <ComparerInputs
-                valueA={page.valueA}
-                setValueA={page.setValueA}
-                valueB={page.valueB}
-                setValueB={page.setValueB}
-                handlePasteA={handlePasteA}
-                handlePasteB={handlePasteB}
-              />
-            </ResizablePanel>
+        <ComparerToolbar
+          hasContent={page.hasContent}
+          hasDiff={page.hasDiff}
+          diffMode={page.diffMode}
+          setDiffMode={page.setDiffMode}
+          showInputs={showInputs}
+          setShowInputs={setShowInputs}
+          handleSwap={page.handleSwap}
+          handleClear={page.handleClear}
+          handleCopy={page.handleCopy}
+          valueA={page.valueA}
+          valueB={page.valueB}
+          copyPanel={copyPanel}
+        />
 
-            <ResizableHandle withHandle />
-
-            <ResizablePanel defaultSize={65} minSize={30}>
-              <div
-                className={cn(
-                  // Layout & Positioning
-                  "relative",
-
-                  // Sizing & Spacing
-                  "h-full w-full"
-                )}
-              >
-                <ComparerDiffView
-                  diffResult={page.diffResult}
-                  diffMode={page.diffMode}
+        <div
+          className={cn(
+            // Layout & Positioning
+            "relative flex-1 min-h-0 overflow-hidden"
+          )}
+        >
+          {showInputs ? (
+            <ResizablePanelGroup orientation="vertical" className="h-full min-h-0">
+              <ResizablePanel defaultSize={35} minSize={15}>
+                <ComparerInputs
+                  valueA={page.valueA}
+                  setValueA={page.setValueA}
+                  valueB={page.valueB}
+                  setValueB={page.setValueB}
+                  handlePasteA={handlePasteA}
+                  handlePasteB={handlePasteB}
                 />
-              </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        ) : (
-          <div
-            className={cn(
-              // Layout & Positioning
-              "relative",
+              </ResizablePanel>
 
-              // Sizing & Spacing
-              "h-full w-full"
-            )}
-          >
-            <ComparerDiffView
-              diffResult={page.diffResult}
-              diffMode={page.diffMode}
-            />
-          </div>
-        )}
+              <ResizableHandle withHandle />
+
+              <ResizablePanel defaultSize={65} minSize={30}>
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "relative",
+
+                    // Sizing & Spacing
+                    "h-full w-full"
+                  )}
+                >
+                  <ComparerDiffView
+                    diffResult={page.diffResult}
+                    diffMode={page.diffMode}
+                  />
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          ) : (
+            <div
+              className={cn(
+                // Layout & Positioning
+                "relative",
+
+                // Sizing & Spacing
+                "h-full w-full"
+              )}
+            >
+              <ComparerDiffView
+                diffResult={page.diffResult}
+                diffMode={page.diffMode}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

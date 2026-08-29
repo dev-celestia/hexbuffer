@@ -64,7 +64,15 @@ export function ForgePanel() {
   }, [req.isLoading, req.response, req.error]);
 
   return (
-    <div className="flex flex-col h-full min-h-0 space-y-2 p-2">
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col min-h-0",
+
+        // Sizing & Spacing
+        "h-full space-y-2 p-2"
+      )}
+    >
       <ForgeRequestBar
         method={req.method}
         url={req.url}
@@ -76,11 +84,22 @@ export function ForgePanel() {
       {/* Switch View Tabs */}
       {/* ponytail: show switcher if a response, error, or loading state exists */}
       {(req.response || req.error || req.isLoading) && (
-        <div className="flex items-center justify-between pb-1 shrink-0">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center justify-between shrink-0",
+
+            // Sizing & Spacing
+            "pb-1"
+          )}
+        >
           <Tabs
             value={activeView}
             onValueChange={(val) => setActiveView(val as 'request' | 'response')}
-            className="w-fit"
+            className={cn(
+              // Sizing & Spacing
+              "w-fit"
+            )}
           >
             <TabsList>
               <TabsTrigger
@@ -94,17 +113,44 @@ export function ForgePanel() {
               >
                 <span>Response</span>
                 {req.response && (
-                  <span className={cn(
-                    "px-1 py-0.2 rounded text-[10px] font-bold transition-colors",
-                    req.response.status >= 200 && req.response.status < 300
-                      ? "bg-emerald-500/10 text-emerald-500 font-bold"
-                      : "bg-destructive/10 text-destructive font-bold"
-                  )}>
+                  <span
+                    className={cn(
+                      // Sizing & Spacing
+                      "px-1 py-0.2",
+
+                      // Typography
+                      "text-[10px] font-bold",
+
+                      // Backgrounds & Borders
+                      "rounded",
+
+                      // Interactive & States
+                      "transition-colors",
+
+                      req.response.status >= 200 && req.response.status < 300
+                        ? "bg-emerald-500/10 text-emerald-500 font-bold"
+                        : "bg-destructive/10 text-destructive font-bold"
+                    )}
+                  >
                     {req.response.status}
                   </span>
                 )}
                 {req.error && (
-                  <span className="px-1 py-0.2 rounded text-[10px] font-bold bg-destructive/10 text-destructive font-bold transition-colors">
+                  <span
+                    className={cn(
+                      // Sizing & Spacing
+                      "px-1 py-0.2",
+
+                      // Typography
+                      "text-[10px] font-bold",
+
+                      // Backgrounds & Borders
+                      "bg-destructive/10 text-destructive rounded",
+
+                      // Interactive & States
+                      "transition-colors"
+                    )}
+                  >
                     Err
                   </span>
                 )}
@@ -112,11 +158,15 @@ export function ForgePanel() {
             </TabsList>
           </Tabs>
         </div>
-      )
-      }
+      )}
 
       {/* Main Content Area */}
-      <div className="flex-1 min-h-0 flex flex-col">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col flex-1 min-h-0"
+        )}
+      >
         {req.isLoading ? (
           <ForgeLoadingView />
         ) : activeView === 'request' ? (
@@ -156,6 +206,6 @@ export function ForgePanel() {
           />
         )}
       </div>
-    </div >
+    </div>
   );
 }

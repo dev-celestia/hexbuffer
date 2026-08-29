@@ -1,37 +1,44 @@
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { cn } from '@/lib/utils';
-import { useScratchpadPage } from './hooks/use-scratchpad-page';
-import { ScratchpadSidebar } from './components/scratchpad-sidebar';
-import { ScratchpadEditorPane } from './components/scratchpad-editor-pane';
+import { useNotesPage } from './hooks/use-notes-page';
+import { NotesEditorPane } from './components/notes-editor-pane';
 
-export function ScratchpadPage() {
-  const hook = useScratchpadPage();
+export function NotesPage() {
+  const hook = useNotesPage();
 
-  // ponytail: sidebar + editor page layout using consistent container aesthetics
   return (
-    <div
+    <TabbedPageLayout
+      tabs={hook.tabs}
+      activeTabId={hook.activeId}
+      onTabChange={hook.onTabChange}
+      onTabRename={hook.onTabRename}
+      onTabClose={hook.onTabClose}
+      onTabAdd={hook.onTabAdd}
+      onCloseTabsToLeft={hook.onCloseTabsToLeft}
+      onCloseTabsToRight={hook.onCloseTabsToRight}
       className={cn(
         // Layout & Positioning
-        "flex overflow-hidden",
+        "flex flex-col min-h-0",
 
         // Sizing & Spacing
-        "h-full w-full p-2",
+        "h-full"
+      )}
+      contentClassName={cn(
+        // Layout & Positioning
+        "flex-1 min-h-0 overflow-hidden",
+
+        // Sizing & Spacing
+        "m-2",
 
         // Backgrounds & Borders
-        "bg-background"
+        "border rounded-md bg-card"
       )}
     >
-      <div
-        className={cn(
-          // Layout & Positioning
-          "flex flex-1 min-h-0 overflow-hidden",
-
-          // Backgrounds & Borders
-          "border rounded-md"
-        )}
-      >
-        {hook.isSidebarOpen && <ScratchpadSidebar hook={hook} />}
-        <ScratchpadEditorPane hook={hook} />
-      </div>
-    </div>
+      <NotesEditorPane hook={hook} />
+    </TabbedPageLayout>
   );
 }
+
+// Backward compatibility alias
+export { NotesPage as ScratchpadPage };
+

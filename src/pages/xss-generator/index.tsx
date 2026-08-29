@@ -1,5 +1,13 @@
 
-import { Button, Tabs, TabsList, TabsTrigger } from '@celestia-project/ui';
+import {
+  Button,
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 
 import { CopyIcon, TrashIcon } from '@phosphor-icons/react';
@@ -21,105 +29,148 @@ export function XssGeneratorPage() {
         "flex flex-col min-h-0",
 
         // Sizing & Spacing
-        "h-full",
+        "h-full p-2",
 
         // Backgrounds & Borders
         "bg-background"
       )}
     >
-      {/* Toolbar */}
       <div
         className={cn(
           // Layout & Positioning
-          "flex items-center justify-between shrink-0",
+          "flex flex-col min-h-0 overflow-hidden",
 
           // Sizing & Spacing
-          "px-2 py-1 gap-3",
+          "h-full",
 
           // Backgrounds & Borders
-          "border-b"
+          "border rounded-md bg-card"
         )}
       >
-        <Tabs
-          value={page.activeCategory}
-          onValueChange={(v) => page.setActiveCategory(v as XssPayloadCategory)}
-        >
-          <TabsList>
-            {(Object.keys(CATEGORY_LABELS) as XssPayloadCategory[]).map((cat) => (
-              <TabsTrigger key={cat} value={cat}>
-                {CATEGORY_LABELS[cat]}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-
+        {/* Toolbar */}
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center shrink-0",
+            "flex items-center justify-between shrink-0 select-none overflow-x-auto min-w-0",
 
             // Sizing & Spacing
-            "gap-1"
+            "px-3 py-2 gap-3",
+
+            // Backgrounds & Borders
+            "border-b bg-muted/20"
           )}
         >
-          <Button size="sm"
-            variant="outline"
-            onClick={() => page.handleCopy(page.encodedOutput)}
-            disabled={!page.encodedOutput}
+          <Tabs
+            value={page.activeCategory}
+            onValueChange={(v) => page.setActiveCategory(v as XssPayloadCategory)}
           >
-            <CopyIcon />
-            Copy Output
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={page.handleClear}
-            disabled={isEmpty}
+            <TabsList>
+              {(Object.keys(CATEGORY_LABELS) as XssPayloadCategory[]).map((cat) => (
+                <TabsTrigger key={cat} value={cat}>
+                  {CATEGORY_LABELS[cat]}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center shrink-0",
+
+              // Sizing & Spacing
+              "gap-1.5"
+            )}
           >
-            <TrashIcon />
-          </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => page.handleCopy(page.encodedOutput)}
+              disabled={!page.encodedOutput}
+              className={cn(
+                // Sizing & Spacing
+                "h-7 px-2.5 gap-1.5",
+
+                // Typography
+                "text-xs font-medium"
+              )}
+            >
+              <CopyIcon className="size-3.5" />
+              <span>Copy Output</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={page.handleClear}
+              disabled={isEmpty}
+              className={cn(
+                // Sizing & Spacing
+                "h-7 w-7",
+
+                // Typography
+                "text-muted-foreground",
+
+                // Interactive & States
+                "hover:text-foreground"
+              )}
+              title="Clear payloads"
+            >
+              <TrashIcon className="size-3.5" />
+            </Button>
+          </div>
         </div>
+
+        <main
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col flex-1 min-h-0"
+          )}
+        >
+          <ResizablePanelGroup orientation="horizontal" className="h-full min-h-0">
+            <ResizablePanel defaultSize={28} minSize={20} maxSize={45}>
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex flex-col min-h-0",
+
+                  // Sizing & Spacing
+                  "h-full"
+                )}
+              >
+                <PayloadLibraryPanel
+                  filteredPayloads={page.filteredPayloads}
+                  onSelectPayload={page.handleSelectPayload}
+                />
+              </div>
+            </ResizablePanel>
+
+            <ResizableHandle withHandle />
+
+            <ResizablePanel defaultSize={72} minSize={40}>
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex flex-col min-h-0",
+
+                  // Sizing & Spacing
+                  "h-full"
+                )}
+              >
+                <PayloadBuilderPanel
+                  basePayload={page.basePayload}
+                  onBasePayloadChange={page.setBasePayload}
+                  encodings={page.encodings}
+                  onToggleEncoding={page.toggleEncoding}
+                  injectionContext={page.injectionContext}
+                  onInjectionContextChange={page.setInjectionContext}
+                  encodedOutput={page.encodedOutput}
+                  onCopy={page.handleCopy}
+                />
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </main>
       </div>
-
-      <main
-        className={cn(
-          // Layout & Positioning
-          "flex flex-1 min-h-0"
-        )}
-      >
-        <div
-          className={cn(
-            // Layout & Positioning
-            "shrink-0",
-
-            // Sizing & Spacing
-            "w-72"
-          )}
-        >
-          <PayloadLibraryPanel
-            filteredPayloads={page.filteredPayloads}
-            onSelectPayload={page.handleSelectPayload}
-          />
-        </div>
-
-        <div
-          className={cn(
-            // Layout & Positioning
-            "flex-1 min-w-0"
-          )}
-        >
-          <PayloadBuilderPanel
-            basePayload={page.basePayload}
-            onBasePayloadChange={page.setBasePayload}
-            encodings={page.encodings}
-            onToggleEncoding={page.toggleEncoding}
-            injectionContext={page.injectionContext}
-            onInjectionContextChange={page.setInjectionContext}
-            encodedOutput={page.encodedOutput}
-            onCopy={page.handleCopy}
-          />
-        </div>
-      </main>
     </div>
   );
 }

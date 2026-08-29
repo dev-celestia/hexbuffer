@@ -81,8 +81,11 @@ export function HashPage() {
         // Layout & Positioning
         "flex-1 min-h-0 overflow-hidden",
 
+        // Sizing & Spacing
+        "m-2",
+
         // Backgrounds & Borders
-        "rounded-lg border bg-card"
+        "rounded-lg border bg-background"
       )}
     >
       <div

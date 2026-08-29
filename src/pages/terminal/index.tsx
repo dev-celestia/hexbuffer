@@ -1,4 +1,9 @@
 import * as React from 'react';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@celestia-project/ui';
 import { useTerminalPage } from './hooks/use-terminal-page';
 import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { TerminalToolbar } from './components/terminal-toolbar';
@@ -30,7 +35,6 @@ export function TerminalPage() {
     runCommand,
     isSidebarOpen,
     toggleSidebar,
-    isSessionReady,
     restartSession,
     logHistory,
   } = useTerminalPage();
@@ -61,7 +65,7 @@ export function TerminalPage() {
       onCloseTabsToRight={closeTabsToRight}
       className={cn(
         // Layout & Positioning
-        "flex flex-col flex-1 min-h-0",
+        "flex flex-col min-h-0",
 
         // Sizing & Spacing
         "h-full"
@@ -69,6 +73,9 @@ export function TerminalPage() {
       contentClassName={cn(
         // Layout & Positioning
         "flex-1 min-h-0 overflow-hidden",
+
+        // Sizing & Spacing
+        "m-2",
 
         // Backgrounds & Borders
         "rounded-lg border bg-background"
@@ -101,49 +108,71 @@ export function TerminalPage() {
               "flex flex-1 min-h-0 relative"
             )}
           >
-            {/* Left Workspace: Terminals Container */}
-            <div
-              ref={workspaceRef}
-              className={cn(
-                // Layout & Positioning
-                "flex-1 min-h-0 relative",
+            {isSidebarOpen ? (
+              <ResizablePanelGroup orientation="horizontal" className="h-full min-h-0">
+                <ResizablePanel defaultSize={75} minSize={40}>
+                  <div
+                    ref={workspaceRef}
+                    className={cn(
+                      // Layout & Positioning
+                      "h-full min-h-0 relative",
 
-                // Sizing & Spacing
-                "p-2",
+                      // Sizing & Spacing
+                      "p-2",
 
-                // Backgrounds & Borders
-                "bg-background"
-              )}
-            >
-              {sessions.map((session) => (
-                <TerminalContainer
-                  key={session.id}
-                  id={session.id}
-                  registerContainer={registerContainer}
-                  isActive={activeId === session.id}
-                  status={session.status}
-                  onRestart={() => restartSession(session.id)}
-                  logHistory={logHistory}
-                />
-              ))}
-            </div>
+                      // Backgrounds & Borders
+                      "bg-background"
+                    )}
+                  >
+                    {sessions.map((session) => (
+                      <TerminalContainer
+                        key={session.id}
+                        id={session.id}
+                        registerContainer={registerContainer}
+                        isActive={activeId === session.id}
+                        status={session.status}
+                        onRestart={() => restartSession(session.id)}
+                        logHistory={logHistory}
+                      />
+                    ))}
+                  </div>
+                </ResizablePanel>
 
-            {/* Right Panel: Recent Commands Sidebar */}
-            {isSidebarOpen && (
+                <ResizableHandle withHandle />
+
+                <ResizablePanel defaultSize={25} minSize={18} maxSize={40}>
+                  <TerminalSidebar
+                    recentCommands={recentCommands}
+                    clearRecentCommands={clearRecentCommands}
+                    runCommand={runCommand}
+                  />
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            ) : (
               <div
+                ref={workspaceRef}
                 className={cn(
                   // Layout & Positioning
-                  "shrink-0",
+                  "flex-1 min-h-0 relative",
 
                   // Sizing & Spacing
-                  "w-64 h-full"
+                  "p-2",
+
+                  // Backgrounds & Borders
+                  "bg-background"
                 )}
               >
-                <TerminalSidebar
-                  recentCommands={recentCommands}
-                  clearRecentCommands={clearRecentCommands}
-                  runCommand={runCommand}
-                />
+                {sessions.map((session) => (
+                  <TerminalContainer
+                    key={session.id}
+                    id={session.id}
+                    registerContainer={registerContainer}
+                    isActive={activeId === session.id}
+                    status={session.status}
+                    onRestart={() => restartSession(session.id)}
+                    logHistory={logHistory}
+                  />
+                ))}
               </div>
             )}
           </div>

@@ -15,6 +15,8 @@ interface ScratchpadState {
   deleteScratchpad: (id: string) => void;
   setActiveId: (id: string) => void;
   renameScratchpad: (id: string, name: string) => void;
+  closeScratchpadsToLeft: (id: string) => void;
+  closeScratchpadsToRight: (id: string) => void;
 }
 
 // ponytail: keep initial state loading simple and self-contained
@@ -124,6 +126,42 @@ export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
     
     const activePad = updated.find((s) => s.id === activeId);
     set({ scratchpads: updated, note: activePad ? activePad.note : get().note });
+  },
+
+  closeScratchpadsToLeft: (id) => {
+    const { scratchpads, activeId } = get();
+    const index = scratchpads.findIndex((s) => s.id === id);
+    if (index <= 0) return;
+
+    const updated = scratchpads.slice(index);
+    let nextActiveId = activeId;
+    if (!updated.some((s) => s.id === activeId)) {
+      nextActiveId = id;
+    }
+    const activePad = updated.find((s) => s.id === nextActiveId) || updated[0];
+
+    localStorage.setItem('desktop-scratchpads', JSON.stringify(updated));
+    localStorage.setItem('desktop-scratchpad-active-id', nextActiveId);
+    localStorage.setItem('desktop-scratchpad', activePad.note);
+    set({ scratchpads: updated, activeId: nextActiveId, note: activePad.note });
+  },
+
+  closeScratchpadsToRight: (id) => {
+    const { scratchpads, activeId } = get();
+    const index = scratchpads.findIndex((s) => s.id === id);
+    if (index === -1 || index >= scratchpads.length - 1) return;
+
+    const updated = scratchpads.slice(0, index + 1);
+    let nextActiveId = activeId;
+    if (!updated.some((s) => s.id === activeId)) {
+      nextActiveId = id;
+    }
+    const activePad = updated.find((s) => s.id === nextActiveId) || updated[0];
+
+    localStorage.setItem('desktop-scratchpads', JSON.stringify(updated));
+    localStorage.setItem('desktop-scratchpad-active-id', nextActiveId);
+    localStorage.setItem('desktop-scratchpad', activePad.note);
+    set({ scratchpads: updated, activeId: nextActiveId, note: activePad.note });
   },
 }));
 

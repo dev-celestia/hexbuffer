@@ -1,5 +1,5 @@
 import { Badge, Button } from '@celestia-project/ui';
-import { CheckIcon, CopyIcon, TrashIcon } from '@phosphor-icons/react';
+import { CheckIcon, CopyIcon, DownloadSimpleIcon, FileCsvIcon, TrashIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
 interface ScanResultsHeaderProps {
@@ -8,9 +8,9 @@ interface ScanResultsHeaderProps {
   hasResults: boolean;
   copied: boolean;
   onCopy: () => void;
-  onExportJson: () => void;
-  onExportCsv: () => void;
   onClear: () => void;
+  onExportJson?: () => void;
+  onExportCsv?: () => void;
 }
 
 export function ScanResultsHeader({
@@ -19,9 +19,9 @@ export function ScanResultsHeader({
   hasResults,
   copied,
   onCopy,
+  onClear,
   onExportJson,
   onExportCsv,
-  onClear,
 }: ScanResultsHeaderProps) {
   return (
     <div
@@ -52,9 +52,18 @@ export function ScanResultsHeader({
             "text-[11px] font-semibold text-muted-foreground"
           )}
         >
-          Scanned <code className="font-mono text-[11px] text-foreground">{target}</code>
+          Scanned <code className="font-mono text-[11px] text-foreground font-normal">{target}</code>
         </span>
-        <Badge variant="outline" className="h-5 px-1.5 text-[10px]">
+        <Badge
+          variant="outline"
+          className={cn(
+            // Sizing & Spacing
+            "h-5 px-1.5",
+
+            // Typography
+            "text-[10px] font-medium"
+          )}
+        >
           {openCount} open
         </Badge>
       </div>
@@ -70,49 +79,98 @@ export function ScanResultsHeader({
         )}
       >
         {hasResults && (
-          <>
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "gap-1"
+            )}
+          >
             <Button
               variant="outline"
               size="sm"
               onClick={onCopy}
-              className="h-6 px-2 text-[11px]"
+              className={cn(
+                // Sizing & Spacing
+                "h-6 px-2 gap-1",
+
+                // Typography
+                "text-[11px]"
+              )}
             >
               {copied ? (
                 <>
                   <CheckIcon className="size-3 text-emerald-500" />
-                  Copied
+                  <span>Copied</span>
                 </>
               ) : (
                 <>
                   <CopyIcon className="size-3" />
-                  Copy
+                  <span>Copy</span>
                 </>
               )}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onExportJson}
-              className="h-6 px-2 text-[11px]"
-            >
-              JSON
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onExportCsv}
-              className="h-6 px-2 text-[11px]"
-            >
-              CSV
-            </Button>
-            <div className="w-[1px] h-4 bg-muted mx-0.5" />
-          </>
+            {onExportJson && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onExportJson}
+                className={cn(
+                  // Sizing & Spacing
+                  "h-6 px-2 gap-1",
+
+                  // Typography
+                  "text-[11px]"
+                )}
+              >
+                <DownloadSimpleIcon className="size-3" />
+                <span>JSON</span>
+              </Button>
+            )}
+            {onExportCsv && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onExportCsv}
+                className={cn(
+                  // Sizing & Spacing
+                  "h-6 px-2 gap-1",
+
+                  // Typography
+                  "text-[11px]"
+                )}
+              >
+                <FileCsvIcon className="size-3" />
+                <span>CSV</span>
+              </Button>
+            )}
+            <div
+              className={cn(
+                // Sizing & Spacing
+                "w-px h-4 mx-0.5",
+
+                // Backgrounds & Borders
+                "bg-border/60"
+              )}
+            />
+          </div>
         )}
         <Button
           variant="ghost"
           size="icon"
           onClick={onClear}
-          className="h-6 w-6 text-muted-foreground hover:text-foreground"
+          className={cn(
+            // Sizing & Spacing
+            "h-6 w-6",
+
+            // Typography
+            "text-muted-foreground",
+
+            // Interactive & States
+            "hover:text-foreground"
+          )}
           title="Clear results"
         >
           <TrashIcon className="size-3" />

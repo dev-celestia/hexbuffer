@@ -106,7 +106,7 @@ export function WebSocketContextMenu({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+      <ContextMenuTrigger>{children}</ContextMenuTrigger>
       <ContextMenuContent className="w-52">
         <ContextMenuItem onClick={handleCopyUrl} className="text-xs">
           <CopyIcon className="mr-2 size-3.5 text-muted-foreground" />

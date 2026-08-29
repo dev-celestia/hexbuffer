@@ -4,13 +4,17 @@ import {
   Button,
   Label,
   type MonacoInstance,
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
   ScrollArea,
   TextEditor,
   type TextEditorInstance,
 } from '@celestia-project/ui';
 import * as React from 'react';
-import { CopyIcon } from '@phosphor-icons/react';
+import { CopyIcon, TrashIcon } from '@phosphor-icons/react';
 import { useTheme } from '@/components/theme-provider';
+import { cn } from '@/lib/utils';
 import type { JwtDecoded, JwtVulnerability } from '../types';
 import { DecodedSection } from './decoded-section';
 import { VulnerabilityCard } from './vulnerability-card';
@@ -22,6 +26,7 @@ interface JwtDecodeViewProps {
   vulnerabilities: JwtVulnerability[];
   decodeError: string | null;
   onCopy: (text: string) => void;
+  onClear?: () => void;
 }
 
 export function JwtDecodeView({
@@ -31,6 +36,7 @@ export function JwtDecodeView({
   vulnerabilities,
   decodeError,
   onCopy,
+  onClear,
 }: JwtDecodeViewProps) {
   const { theme } = useTheme();
   const monacoRef = React.useRef<MonacoInstance | null>(null);
@@ -111,124 +117,417 @@ export function JwtDecodeView({
   }, [theme]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <section className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
-        {/* Left: Token Input */}
-        <div className="flex min-h-0 flex-col bg-background lg:border-b-0 lg:border-r">
-          <div className="flex h-8 shrink-0 items-center justify-between border-b bg-muted/10 px-3">
-            <div className="flex items-baseline gap-2">
-              <span className="text-[11px] font-semibold uppercase text-muted-foreground tracking-wider">
-                JWT Token
-              </span>
-              <span className="text-[10px] text-muted-foreground hidden sm:inline">
-                Paste token to decode
-              </span>
-            </div>
-          </div>
-          <div className="flex-1 min-h-0">
-            <TextEditor
-              value={tokenInput}
-              onChange={(v) => setTokenInput(v ?? '')}
-              language="jwt"
-              theme={theme === 'light' ? 'jwt-light' : 'jwt-dark'}
-              height="100%"
-              onMount={handleMount}
-              options={{
-                wordWrap: 'on',
-                lineNumbers: 'off',
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                fontSize: 12,
-                folding: false,
-                renderLineHighlight: 'none',
-              }}
-            />
-          </div>
-        </div>
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col min-h-0",
 
-        {/* Right: Decoded Output */}
-        <div className="flex min-h-0 flex-col bg-background">
-          <div className="flex h-8 shrink-0 items-center justify-between border-b bg-muted/10 px-3">
-            <div className="flex items-baseline gap-2">
-              <span className="text-[11px] font-semibold uppercase text-muted-foreground tracking-wider">
-                Decoded Breakdown
-              </span>
-              <span className="text-[10px] text-muted-foreground hidden sm:inline">
-                Header, payload & signature
-              </span>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() =>
-                onCopy(
-                  decoded
-                    ? `Header:\n${JSON.stringify(decoded.header, null, 2)}\n\nPayload:\n${JSON.stringify(decoded.payload, null, 2)}`
-                    : '',
-                )
-              }
-              disabled={!decoded}
-              className="h-6 w-6 text-muted-foreground hover:text-foreground"
+        // Sizing & Spacing
+        "h-full"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex-1 min-h-0"
+        )}
+      >
+        <ResizablePanelGroup orientation="horizontal" className="h-full">
+          {/* Left: Token Input */}
+          <ResizablePanel defaultSize={50} minSize={30}>
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col min-h-0",
+
+                // Sizing & Spacing
+                "h-full",
+
+                // Backgrounds & Borders
+                "bg-background"
+              )}
             >
-              <CopyIcon className="h-3 w-3" />
-            </Button>
-          </div>
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center justify-between shrink-0",
 
-          {decodeError ? (
-            <div className="min-h-0 flex-1 bg-destructive/5 p-4 text-xs font-mono text-destructive whitespace-pre-wrap overflow-auto">
-              {decodeError}
+                  // Sizing & Spacing
+                  "h-8 px-3",
+
+                  // Backgrounds & Borders
+                  "border-b bg-muted/10"
+                )}
+              >
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-baseline",
+
+                    // Sizing & Spacing
+                    "gap-2"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      // Typography
+                      "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                    )}
+                  >
+                    JWT Token
+                  </span>
+                  <span
+                    className={cn(
+                      // Layout & Positioning
+                      "hidden sm:inline",
+
+                      // Typography
+                      "text-[10px] text-muted-foreground"
+                    )}
+                  >
+                    Paste token to decode
+                  </span>
+                </div>
+                {onClear && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onClear}
+                    disabled={!tokenInput}
+                    className={cn(
+                      // Sizing & Spacing
+                      "h-6 w-6",
+
+                      // Typography
+                      "text-muted-foreground",
+
+                      // Interactive & States
+                      "hover:text-foreground"
+                    )}
+                    title="Clear token"
+                  >
+                    <TrashIcon className="size-3" />
+                  </Button>
+                )}
+              </div>
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex-1 min-h-0"
+                )}
+              >
+                <TextEditor
+                  value={tokenInput}
+                  onChange={(v) => setTokenInput(v ?? '')}
+                  language="jwt"
+                  theme={theme === 'light' ? 'jwt-light' : 'jwt-dark'}
+                  height="100%"
+                  onMount={handleMount}
+                  options={{
+                    wordWrap: 'on',
+                    lineNumbers: 'off',
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    fontSize: 12,
+                    folding: false,
+                    renderLineHighlight: 'none',
+                  }}
+                />
+              </div>
             </div>
-          ) : decoded ? (
-            <ScrollArea className="min-h-0 flex-1">
-              <div className="space-y-4 p-4">
-                <DecodedSection title="Header" data={decoded.header} />
-                <DecodedSection title="Payload" data={decoded.payload} />
-                <div>
-                  <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
-                    Signature
-                  </Label>
-                  <div className="mt-1 space-y-0.5">
-                    <div className="flex items-baseline gap-2 text-xs">
-                      <span className="font-mono text-muted-foreground shrink-0">
-                        Algorithm:
-                      </span>
-                      <span className="font-mono">{decoded.algorithm}</span>
-                    </div>
-                    <div className="flex items-baseline gap-2 text-xs">
-                      <span className="font-mono text-muted-foreground shrink-0">
-                        Value:
-                      </span>
-                      <span className="font-mono break-all text-[11px] opacity-85">
-                        {decoded.signature}
-                      </span>
+          </ResizablePanel>
+
+          <ResizableHandle withHandle />
+
+          {/* Right: Decoded Output */}
+          <ResizablePanel defaultSize={50} minSize={30}>
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col min-h-0",
+
+                // Sizing & Spacing
+                "h-full",
+
+                // Backgrounds & Borders
+                "bg-background"
+              )}
+            >
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center justify-between shrink-0",
+
+                  // Sizing & Spacing
+                  "h-8 px-3",
+
+                  // Backgrounds & Borders
+                  "border-b bg-muted/10"
+                )}
+              >
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-center",
+
+                    // Sizing & Spacing
+                    "gap-2"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      // Typography
+                      "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                    )}
+                  >
+                    Decoded Breakdown
+                  </span>
+                  {decoded && (
+                    <span
+                      className={cn(
+                        // Sizing & Spacing
+                        "px-1.5 py-0.2",
+
+                        // Typography
+                        "text-[10px] font-mono text-white",
+
+                        // Backgrounds & Borders
+                        "bg-primary rounded"
+                      )}
+                    >
+                      {decoded.algorithm}
+                    </span>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() =>
+                    onCopy(
+                      decoded
+                        ? `Header:\n${JSON.stringify(decoded.header, null, 2)}\n\nPayload:\n${JSON.stringify(decoded.payload, null, 2)}`
+                        : '',
+                    )
+                  }
+                  disabled={!decoded}
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-6 w-6",
+
+                    // Typography
+                    "text-muted-foreground",
+
+                    // Interactive & States
+                    "hover:text-foreground"
+                  )}
+                  title="Copy JSON"
+                >
+                  <CopyIcon className="size-3" />
+                </Button>
+              </div>
+
+              {decodeError ? (
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex-1 min-h-0 overflow-auto",
+
+                    // Sizing & Spacing
+                    "p-4",
+
+                    // Typography
+                    "text-xs font-mono text-destructive whitespace-pre-wrap",
+
+                    // Backgrounds & Borders
+                    "bg-destructive/5"
+                  )}
+                >
+                  {decodeError}
+                </div>
+              ) : decoded ? (
+                <ScrollArea
+                  className={cn(
+                    // Layout & Positioning
+                    "flex-1 min-h-0"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      // Sizing & Spacing
+                      "space-y-4 p-4"
+                    )}
+                  >
+                    <DecodedSection title="Header" data={decoded.header} />
+                    <DecodedSection title="Payload" data={decoded.payload} />
+                    <div>
+                      <Label
+                        className={cn(
+                          // Typography
+                          "text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
+                        )}
+                      >
+                        Signature
+                      </Label>
+                      <div
+                        className={cn(
+                          // Sizing & Spacing
+                          "mt-1 space-y-0.5"
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            // Layout & Positioning
+                            "flex items-baseline",
+
+                            // Sizing & Spacing
+                            "gap-2",
+
+                            // Typography
+                            "text-xs"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              // Layout & Positioning
+                              "shrink-0",
+
+                              // Typography
+                              "font-mono text-muted-foreground"
+                            )}
+                          >
+                            Algorithm:
+                          </span>
+                          <span
+                            className={cn(
+                              // Typography
+                              "font-mono"
+                            )}
+                          >
+                            {decoded.algorithm}
+                          </span>
+                        </div>
+                        <div
+                          className={cn(
+                            // Layout & Positioning
+                            "flex items-baseline",
+
+                            // Sizing & Spacing
+                            "gap-2",
+
+                            // Typography
+                            "text-xs"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              // Layout & Positioning
+                              "shrink-0",
+
+                              // Typography
+                              "font-mono text-muted-foreground"
+                            )}
+                          >
+                            Value:
+                          </span>
+                          <span
+                            className={cn(
+                              // Typography
+                              "font-mono break-all text-[11px] opacity-85"
+                            )}
+                          >
+                            {decoded.signature}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                </ScrollArea>
+              ) : (
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex flex-1 min-h-0 items-center justify-center",
+
+                    // Typography
+                    "text-xs text-muted-foreground"
+                  )}
+                >
+                  Paste a JWT token to decode.
                 </div>
-              </div>
-            </ScrollArea>
-          ) : (
-            <div className="flex min-h-0 flex-1 items-center justify-center text-xs text-muted-foreground">
-              Paste a JWT token to decode.
+              )}
             </div>
-          )}
-        </div>
-      </section>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
 
       {/* Vulnerability Findings */}
       {vulnerabilities.length > 0 && (
-        <section className="border-t bg-background flex flex-col shrink-0">
-          <div className="flex h-8 shrink-0 items-center justify-between border-b bg-muted/15 px-3">
-            <div className="flex items-baseline gap-2">
-              <span className="text-[11px] font-semibold uppercase text-muted-foreground tracking-wider">
+        <section
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col shrink-0",
+
+            // Backgrounds & Borders
+            "border-t bg-background"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center justify-between shrink-0",
+
+              // Sizing & Spacing
+              "h-8 px-3",
+
+              // Backgrounds & Borders
+              "border-b bg-muted/15"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-baseline",
+
+                // Sizing & Spacing
+                "gap-2"
+              )}
+            >
+              <span
+                className={cn(
+                  // Typography
+                  "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                )}
+              >
                 Vulnerability Findings
               </span>
-              <span className="text-[10px] text-muted-foreground hidden sm:inline">
+              <span
+                className={cn(
+                  // Layout & Positioning
+                  "hidden sm:inline",
+
+                  // Typography
+                  "text-[10px] text-muted-foreground"
+                )}
+              >
                 {vulnerabilities.length} issue{vulnerabilities.length !== 1 ? 's' : ''} detected
               </span>
             </div>
           </div>
-          <ScrollArea className="max-h-[140px] overflow-auto">
-            <div className="space-y-1.5 p-3">
+          <ScrollArea
+            className={cn(
+              // Layout & Positioning
+              "overflow-auto",
+
+              // Sizing & Spacing
+              "max-h-[140px]"
+            )}
+          >
+            <div
+              className={cn(
+                // Sizing & Spacing
+                "space-y-1.5 p-3"
+              )}
+            >
               {vulnerabilities.map((v) => (
                 <VulnerabilityCard key={v.id} vuln={v} />
               ))}

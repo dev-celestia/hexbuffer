@@ -97,9 +97,19 @@ export function WebSocketHistoryPage() {
         activeTabId={page.activeTabId}
         onTabChange={page.setActiveTabId}
         onTabClose={page.removeTab}
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col min-h-0",
+
+          // Sizing & Spacing
+          "h-full"
+        )}
         contentClassName={cn(
           // Layout & Positioning
           "flex flex-col flex-1 min-h-0 overflow-hidden",
+
+          // Sizing & Spacing
+          "m-2",
 
           // Backgrounds & Borders
           "border rounded-lg bg-background"
@@ -108,12 +118,13 @@ export function WebSocketHistoryPage() {
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center justify-between",
+            "flex items-center justify-between shrink-0 select-none overflow-x-auto min-w-0",
 
             // Sizing & Spacing
-            "p-1 px-2",
-            
-            "border-b"
+            "p-1 px-2 gap-2",
+
+            // Backgrounds & Borders
+            "border-b bg-muted/20"
           )}
         >
           <div

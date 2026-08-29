@@ -16,7 +16,12 @@ export function ScanWelcomeState({ onQuickStart }: ScanWelcomeStateProps) {
         "h-full p-6 space-y-6 max-w-2xl mx-auto"
       )}
     >
-      <div className="space-y-2">
+      <div
+        className={cn(
+          // Sizing & Spacing
+          "space-y-2"
+        )}
+      >
         <h1
           className={cn(
             // Typography
@@ -27,8 +32,11 @@ export function ScanWelcomeState({ onQuickStart }: ScanWelcomeStateProps) {
         </h1>
         <p
           className={cn(
+            // Sizing & Spacing
+            "max-w-md mx-auto",
+
             // Typography
-            "text-xs text-muted-foreground leading-relaxed max-w-md mx-auto"
+            "text-xs text-muted-foreground leading-relaxed"
           )}
         >
           Scan hostnames or IP addresses to discover open ports, identify running services,
@@ -50,7 +58,7 @@ export function ScanWelcomeState({ onQuickStart }: ScanWelcomeStateProps) {
           onClick={() => onQuickStart('Quick')}
           className={cn(
             // Layout & Positioning
-            "flex flex-col items-start text-left",
+            "flex flex-col items-start text-left group",
 
             // Sizing & Spacing
             "p-3.5",
@@ -59,13 +67,29 @@ export function ScanWelcomeState({ onQuickStart }: ScanWelcomeStateProps) {
             "rounded-sm border bg-card/45",
 
             // Interactive & States
-            "hover:bg-muted/10 hover:border-primary/30 transition-all active:scale-[0.97] outline-none cursor-pointer group"
+            "hover:bg-muted/10 hover:border-primary/30 transition-all active:scale-[0.97] outline-none cursor-pointer"
           )}
         >
-          <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">
+          <span
+            className={cn(
+              // Typography
+              "text-xs font-semibold text-foreground group-hover:text-primary",
+
+              // Interactive & States
+              "transition-colors"
+            )}
+          >
             Quick Scan
           </span>
-          <span className="text-[10px] text-muted-foreground mt-1 leading-snug">
+          <span
+            className={cn(
+              // Sizing & Spacing
+              "mt-1",
+
+              // Typography
+              "text-[10px] text-muted-foreground leading-snug"
+            )}
+          >
             Scan top 18 common ports (web, ssh, db)
           </span>
         </button>
@@ -75,7 +99,7 @@ export function ScanWelcomeState({ onQuickStart }: ScanWelcomeStateProps) {
           onClick={() => onQuickStart('Web')}
           className={cn(
             // Layout & Positioning
-            "flex flex-col items-start text-left",
+            "flex flex-col items-start text-left group",
 
             // Sizing & Spacing
             "p-3.5",
@@ -84,13 +108,29 @@ export function ScanWelcomeState({ onQuickStart }: ScanWelcomeStateProps) {
             "rounded-sm border bg-card/45",
 
             // Interactive & States
-            "hover:bg-muted/10 hover:border-primary/30 transition-all active:scale-[0.97] outline-none cursor-pointer group"
+            "hover:bg-muted/10 hover:border-primary/30 transition-all active:scale-[0.97] outline-none cursor-pointer"
           )}
         >
-          <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">
+          <span
+            className={cn(
+              // Typography
+              "text-xs font-semibold text-foreground group-hover:text-primary",
+
+              // Interactive & States
+              "transition-colors"
+            )}
+          >
             Web Ports
           </span>
-          <span className="text-[10px] text-muted-foreground mt-1 leading-snug">
+          <span
+            className={cn(
+              // Sizing & Spacing
+              "mt-1",
+
+              // Typography
+              "text-[10px] text-muted-foreground leading-snug"
+            )}
+          >
             Scan common HTTP/HTTPS, proxies, and web services
           </span>
         </button>
@@ -100,7 +140,7 @@ export function ScanWelcomeState({ onQuickStart }: ScanWelcomeStateProps) {
           onClick={() => onQuickStart('Top100')}
           className={cn(
             // Layout & Positioning
-            "flex flex-col items-start text-left",
+            "flex flex-col items-start text-left group",
 
             // Sizing & Spacing
             "p-3.5",
@@ -109,13 +149,29 @@ export function ScanWelcomeState({ onQuickStart }: ScanWelcomeStateProps) {
             "rounded-sm border bg-card/45",
 
             // Interactive & States
-            "hover:bg-muted/10 hover:border-primary/30 transition-all active:scale-[0.97] outline-none cursor-pointer group"
+            "hover:bg-muted/10 hover:border-primary/30 transition-all active:scale-[0.97] outline-none cursor-pointer"
           )}
         >
-          <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">
+          <span
+            className={cn(
+              // Typography
+              "text-xs font-semibold text-foreground group-hover:text-primary",
+
+              // Interactive & States
+              "transition-colors"
+            )}
+          >
             Top 100 Ports
           </span>
-          <span className="text-[10px] text-muted-foreground mt-1 leading-snug">
+          <span
+            className={cn(
+              // Sizing & Spacing
+              "mt-1",
+
+              // Typography
+              "text-[10px] text-muted-foreground leading-snug"
+            )}
+          >
             Scan top 100 common network services
           </span>
         </button>

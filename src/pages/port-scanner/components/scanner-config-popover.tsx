@@ -139,25 +139,71 @@ export function ScannerConfigPopover({
           </div>
 
           {/* Stealth Section */}
-          <div className="border-t border-muted/50 pt-3 space-y-3">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "space-y-3",
+
+              // Sizing & Spacing
+              "pt-3",
+
+              // Backgrounds & Borders
+              "border-t border-muted/50"
+            )}
+          >
             <button
               type="button"
               onClick={onToggleAdvanced}
-              className="flex items-center gap-1 text-[11px] font-semibold uppercase text-muted-foreground hover:text-foreground tracking-wider transition-colors w-full text-left cursor-pointer"
+              className={cn(
+                // Layout & Positioning
+                "flex items-center w-full text-left",
+
+                // Sizing & Spacing
+                "gap-1",
+
+                // Typography
+                "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground",
+
+                // Interactive & States
+                "hover:text-foreground transition-colors cursor-pointer"
+              )}
             >
               {showAdvanced ? (
                 <CaretDownIcon className="h-3.5 w-3.5 text-primary" />
               ) : (
                 <CaretRightIcon className="h-3.5 w-3.5" />
               )}
-              Stealth Options
+              <span>Stealth Options</span>
             </button>
 
             {showAdvanced && (
-              <div className="space-y-3 animate-in fade-in slide-in-from-top-1 duration-150">
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "space-y-3",
+
+                  // Interactive & States
+                  "animate-in fade-in slide-in-from-top-1 duration-150"
+                )}
+              >
                 {/* Delay */}
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-xs text-muted-foreground">Delay (ms)</span>
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-center justify-between",
+
+                    // Sizing & Spacing
+                    "gap-4"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      // Typography
+                      "text-xs text-muted-foreground"
+                    )}
+                  >
+                    Delay (ms)
+                  </span>
                   <Input
                     id="delay-input"
                     className={cn(
@@ -179,8 +225,23 @@ export function ScannerConfigPopover({
                 </div>
 
                 {/* Jitter */}
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-xs text-muted-foreground">Jitter (ms)</span>
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-center justify-between",
+
+                    // Sizing & Spacing
+                    "gap-4"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      // Typography
+                      "text-xs text-muted-foreground"
+                    )}
+                  >
+                    Jitter (ms)
+                  </span>
                   <Input
                     id="jitter-input"
                     className={cn(
@@ -202,8 +263,20 @@ export function ScannerConfigPopover({
                 </div>
 
                 {/* Randomize Ports */}
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Randomize Port Order</span>
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-center justify-between"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      // Typography
+                      "text-xs text-muted-foreground"
+                    )}
+                  >
+                    Randomize Port Order
+                  </span>
                   <Checkbox
                     id="randomize-checkbox"
                     checked={randomizePorts}

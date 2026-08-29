@@ -16,6 +16,7 @@ import {
   CheckIcon,
   SparkleIcon,
 } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 import { parsePorts, formatPortsSummary } from '../lib/port-helpers';
 import { PORT_PRESETS } from '../constants';
 
@@ -80,8 +81,24 @@ export function CustomPortsDialog({
         </DialogHeader>
 
         {/* Quick presets / Shortcuts */}
-        <div className="flex flex-wrap items-center gap-1.5 py-1">
-          <span className="text-xs font-semibold text-muted-foreground mr-1">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-wrap items-center",
+
+            // Sizing & Spacing
+            "gap-1.5 py-1"
+          )}
+        >
+          <span
+            className={cn(
+              // Sizing & Spacing
+              "mr-1",
+
+              // Typography
+              "text-xs font-semibold text-muted-foreground"
+            )}
+          >
             Quick Add:
           </span>
           <Button
@@ -122,7 +139,13 @@ export function CustomPortsDialog({
               variant="ghost"
               size="xs"
               onClick={handleClear}
-              className="text-muted-foreground hover:text-destructive"
+              className={cn(
+                // Typography
+                "text-muted-foreground",
+
+                // Interactive & States
+                "hover:text-destructive"
+              )}
             >
               <TrashIcon className="size-3 mr-1" />
               Clear
@@ -137,17 +160,56 @@ export function CustomPortsDialog({
             onChange={(e) => setDraft(e.target.value)}
             placeholder={`Examples:\n80, 443, 8080\n1 - 4\n3000..3010\n80/tcp\nweb, db`}
             rows={7}
-            className="font-mono text-xs"
+            className={cn(
+              // Typography
+              "font-mono text-xs"
+            )}
           />
         </div>
 
         {/* Supported Patterns Guide */}
-        <div className="p-3 rounded-lg bg-muted/40 text-xs text-muted-foreground space-y-1.5">
-          <div className="flex items-center gap-1.5 font-medium text-foreground text-xs">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "space-y-1.5",
+
+            // Sizing & Spacing
+            "p-3",
+
+            // Typography
+            "text-xs text-muted-foreground",
+
+            // Backgrounds & Borders
+            "rounded-lg bg-muted/40"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "gap-1.5",
+
+              // Typography
+              "font-medium text-foreground text-xs"
+            )}
+          >
             <SparkleIcon className="size-3.5 text-primary" />
-            Supported Pattern Syntax
+            <span>Supported Pattern Syntax</span>
           </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-1 font-mono text-[11px]">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "grid grid-cols-2",
+
+              // Sizing & Spacing
+              "gap-x-4 gap-y-1 pt-1",
+
+              // Typography
+              "font-mono text-[11px]"
+            )}
+          >
             <div><span className="text-foreground font-semibold">1,2,3,4</span> <span className="text-muted-foreground font-sans">➔ comma separated</span></div>
             <div><span className="text-foreground font-semibold">1 - 4</span> <span className="text-muted-foreground font-sans">➔ range with spaces</span></div>
             <div><span className="text-foreground font-semibold">3000..3010</span> <span className="text-muted-foreground font-sans">➔ double-dot range</span></div>

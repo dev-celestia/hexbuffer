@@ -1,3 +1,8 @@
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 import { useEncoderPage } from './hooks/use-encoder-page';
 import { EncoderToolbar } from './components/encoder-toolbar';
@@ -48,34 +53,32 @@ export function EncoderPage() {
             "flex flex-col flex-1 min-h-0",
 
             // Backgrounds & Borders
-            "bg-card "
+            "bg-card"
           )}
         >
-          <section
-            className={cn(
-              // Layout & Positioning
-              "grid grid-cols-1 lg:grid-cols-2 min-h-0",
+          <ResizablePanelGroup orientation="horizontal" className="h-full min-h-0">
+            <ResizablePanel defaultSize={50} minSize={25}>
+              <EncoderInputPanel
+                headerLabel={page.currentMode.source}
+                input={page.input}
+                mode={page.mode}
+                isEmpty={page.isEmpty}
+                onInputChange={page.setInput}
+                onClear={page.handleClear}
+              />
+            </ResizablePanel>
 
-              // Sizing & Spacing
-              "h-full"
-            )}
-          >
-            <EncoderInputPanel
-              headerLabel={page.currentMode.source}
-              input={page.input}
-              mode={page.mode}
-              isEmpty={page.isEmpty}
-              onInputChange={page.setInput}
-              onClear={page.handleClear}
-            />
+            <ResizableHandle withHandle />
 
-            <EncoderOutputPanel
-              headerLabel={page.currentMode.target}
-              output={page.output}
-              error={page.error}
-              onCopy={page.handleCopy}
-            />
-          </section>
+            <ResizablePanel defaultSize={50} minSize={25}>
+              <EncoderOutputPanel
+                headerLabel={page.currentMode.target}
+                output={page.output}
+                error={page.error}
+                onCopy={page.handleCopy}
+              />
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </main>
       </div>
     </div>

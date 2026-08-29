@@ -106,7 +106,7 @@ export function TreeNodeRow({
       )}
 
       <ContextMenu>
-        <ContextMenuTrigger asChild>
+        <ContextMenuTrigger>
           <div
             className={cn(
               'flex cursor-pointer items-center gap-1 rounded-sm py-0.5 transition-colors hover:bg-muted group/tree-row',

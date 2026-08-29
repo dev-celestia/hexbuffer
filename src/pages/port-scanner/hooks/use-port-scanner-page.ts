@@ -5,7 +5,6 @@ import type { PortScanResult } from '../types';
 import { PORT_PRESETS } from '../constants';
 import type { PortPreset } from '../constants';
 import { parsePorts, sortScanResults, describePortPreset } from '../lib/port-helpers';
-import { exportAsJson, exportAsCsv } from '../lib/export-helpers';
 import { usePortScannerStore } from '@/stores/port-scanner';
 import { useNotificationStore } from '@/stores/notifications';
 
@@ -165,14 +164,6 @@ export function usePortScannerPage() {
     );
   }, [openResults]);
 
-  const handleExportJson = useCallback(() => {
-    exportAsJson(openResults);
-  }, [openResults]);
-
-  const handleExportCsv = useCallback(() => {
-    exportAsCsv(openResults);
-  }, [openResults]);
-
   return {
     // Config
     target,
@@ -213,7 +204,5 @@ export function usePortScannerPage() {
     stopScan,
     clearResults,
     copyOpenPorts,
-    handleExportJson,
-    handleExportCsv,
   };
 }

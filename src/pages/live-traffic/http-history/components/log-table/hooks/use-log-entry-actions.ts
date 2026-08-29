@@ -26,73 +26,56 @@ import type { MockDomain, MockRoute } from '@/pages/mock-forge/types';
 import { sendToCollection, sendRawToRepeater } from '@/triggers/repeater';
 import { cleanUrl } from '@/lib/utils';
 
+function stripDefaultPort(host: string): string {
+  if (host.endsWith(':80')) return host.slice(0, -3);
+  if (host.endsWith(':443')) return host.slice(0, -4);
+  return host;
+}
+
+function cleanHostCandidate(raw: string | undefined | null): string {
+  if (!raw || raw === '-' || raw === 'null' || raw === 'opaque') return '';
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed.startsWith('/')) return '';
+
+  try {
+    const withScheme = trimmed.includes('://') ? trimmed : `http://${trimmed}`;
+    const parsedHost = new URL(withScheme).host;
+    if (parsedHost) {
+      return stripDefaultPort(parsedHost.toLowerCase());
+    }
+  } catch {
+    // Fallback string parsing if URL constructor throws
+  }
+
+  const fallback = trimmed.replace(/^https?:\/\//i, '').split('/')[0]?.trim().toLowerCase();
+  if (!fallback || fallback.startsWith('/')) return '';
+  return stripDefaultPort(fallback);
+}
+
+function getHeaderValue(headers: Record<string, string> | undefined, ...keys: string[]): string | undefined {
+  if (!headers) return undefined;
+  for (const key of keys) {
+    const value = headers[key];
+    if (value) return value;
+  }
+  return undefined;
+}
+
 export function extractHostFromCall(call: Partial<ApiCall> | null | undefined): string {
   if (!call) return '';
 
-  // 1. Prioritize Host / :authority header
-  const headerHost = call.headers?.['host'] || call.headers?.['Host'] || call.headers?.[':authority'];
-  if (headerHost && typeof headerHost === 'string' && headerHost.trim()) {
-    const cleaned = headerHost.trim().toLowerCase().replace(/^https?:\/\//i, '').split('/')[0].trim();
-    if (cleaned && !cleaned.startsWith('/')) {
-      return cleaned.endsWith(':80') ? cleaned.slice(0, -3) : cleaned.endsWith(':443') ? cleaned.slice(0, -4) : cleaned;
-    }
-  }
+  const candidates = [
+    getHeaderValue(call.headers, 'host', 'Host', ':authority'),
+    call.host,
+    call.url,
+    call.server_ip,
+    getHeaderValue(call.headers, 'origin', 'Origin'),
+    getHeaderValue(call.headers, 'referer', 'Referer'),
+  ];
 
-  // 2. Fallback to call.host
-  const rawHost = call.host && call.host !== '-' ? call.host.trim() : '';
-  if (rawHost && !rawHost.includes('/') && !rawHost.startsWith('/')) {
-    const cleaned = rawHost.toLowerCase().replace(/^https?:\/\//i, '').split('/')[0].trim();
-    if (cleaned) {
-      return cleaned.endsWith(':80') ? cleaned.slice(0, -3) : cleaned.endsWith(':443') ? cleaned.slice(0, -4) : cleaned;
-    }
-  }
-
-  // 3. Fallback to call.url
-  if (call.url && call.url.trim()) {
-    try {
-      const withScheme = call.url.includes('://') ? call.url : `http://${call.url}`;
-      const urlObj = new URL(withScheme);
-      if (urlObj.host) {
-        const cleaned = urlObj.host.toLowerCase();
-        return cleaned.endsWith(':80') ? cleaned.slice(0, -3) : cleaned.endsWith(':443') ? cleaned.slice(0, -4) : cleaned;
-      }
-    } catch {
-      const parsed = call.url.replace(/^https?:\/\//i, '').split('/')[0].trim().toLowerCase();
-      if (parsed && !parsed.startsWith('/')) {
-        return parsed.endsWith(':80') ? parsed.slice(0, -3) : parsed.endsWith(':443') ? parsed.slice(0, -4) : parsed;
-      }
-    }
-  }
-
-  // 4. Fallback to server_ip
-  if (call.server_ip && call.server_ip.trim() && !call.server_ip.startsWith('/') && call.server_ip !== '-') {
-    return call.server_ip.trim().toLowerCase();
-  }
-
-  // 5. Fallback to Origin header if present
-  const origin = call.headers?.['origin'] || call.headers?.['Origin'];
-  if (origin && origin.trim() && origin.trim() !== 'null' && origin.trim() !== 'opaque') {
-    try {
-      const withScheme = origin.includes('://') ? origin : `http://${origin}`;
-      const urlObj = new URL(withScheme);
-      if (urlObj.host) return urlObj.host.toLowerCase();
-    } catch {
-      const parsed = origin.replace(/^https?:\/\//i, '').split('/')[0].trim().toLowerCase();
-      if (parsed) return parsed;
-    }
-  }
-
-  // 6. Fallback to Referer header if present
-  const referer = call.headers?.['referer'] || call.headers?.['Referer'];
-  if (referer && referer.trim()) {
-    try {
-      const withScheme = referer.includes('://') ? referer : `http://${referer}`;
-      const urlObj = new URL(withScheme);
-      if (urlObj.host) return urlObj.host.toLowerCase();
-    } catch {
-      const parsed = referer.replace(/^https?:\/\//i, '').split('/')[0].trim().toLowerCase();
-      if (parsed) return parsed;
-    }
+  for (const candidate of candidates) {
+    const host = cleanHostCandidate(candidate);
+    if (host) return host;
   }
 
   return '';
@@ -446,7 +429,7 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
 
   const handleHighlightHost = useCallback(async (color: string) => {
     const host = extractCallHost(call);
-    const pathname = call.path ? call.path.split('?')[0] : null;
+    const pathname = call.path ? call.path.split('?')[0] : '';
     if (host) {
       useHighlightStore.getState().highlightHost(host, pathname, color);
     }
@@ -454,10 +437,10 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
 
   const handleRemoveHighlight = useCallback(async () => {
     const host = extractCallHost(call);
-    const pathname = call.path ? call.path.split('?')[0] : null;
+    const pathname = call.path ? call.path.split('?')[0] : '';
     if (host) {
       useHighlightStore.getState().removeHighlight(host, pathname);
-    } else {
+    } else if (call.host) {
       useHighlightStore.getState().removeHighlight(call.host, pathname);
     }
   }, [call]);

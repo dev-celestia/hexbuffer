@@ -66,9 +66,6 @@ export function IntruderResultsPanel() {
 
         // Sizing & Spacing
         "h-full",
-
-        // Backgrounds & Borders
-        "rounded-md border border-border bg-background"
       )}
     >
       {/* Header toolbar */}

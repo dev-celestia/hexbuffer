@@ -89,7 +89,7 @@ export function InterceptPage() {
         onCloseTabsToRight={(tabId) => void page.closeTabsToRight(tabId)}
         className={cn(
           // Layout & Positioning
-          "flex flex-col flex-1 min-h-0",
+          "flex flex-col min-h-0",
 
           // Sizing & Spacing
           "h-full"
@@ -98,8 +98,11 @@ export function InterceptPage() {
           // Layout & Positioning
           "flex-1 min-h-0 overflow-hidden",
 
+          // Sizing & Spacing
+          "m-2",
+
           // Backgrounds & Borders
-          "rounded-lg border"
+          "rounded-lg border bg-background"
         )}
       >
         <div
@@ -115,10 +118,10 @@ export function InterceptPage() {
           <div
             className={cn(
               // Layout & Positioning
-              "flex items-center justify-between shrink-0",
+              "relative flex items-center justify-between shrink-0 select-none overflow-x-auto min-w-0",
 
               // Sizing & Spacing
-              "h-10 px-3 gap-4",
+              "px-3 py-2 gap-4",
 
               // Backgrounds & Borders
               "border-b bg-muted/20"
@@ -128,7 +131,7 @@ export function InterceptPage() {
             <div
               className={cn(
                 // Layout & Positioning
-                "flex items-center",
+                "flex items-center min-w-0 shrink-0",
 
                 // Sizing & Spacing
                 "gap-3"
@@ -138,6 +141,13 @@ export function InterceptPage() {
                 variant={isEnabled ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => void toggleIntercept(!isEnabled)}
+                className={cn(
+                  // Sizing & Spacing
+                  "h-7 px-2.5 gap-1.5",
+
+                  // Typography
+                  "text-xs font-medium"
+                )}
               >
                 {isEnabled ? (
                   <>
@@ -173,7 +183,7 @@ export function InterceptPage() {
             <div
               className={cn(
                 // Layout & Positioning
-                "flex items-center min-w-0 max-w-[60%]",
+                "flex items-center min-w-0 shrink-0",
 
                 // Sizing & Spacing
                 "gap-2"
@@ -196,7 +206,7 @@ export function InterceptPage() {
                   "flex items-center overflow-x-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]",
 
                   // Sizing & Spacing
-                  "gap-1 py-0.5 max-w-[300px]"
+                  "gap-1 py-0.5 max-w-[280px]"
                 )}
               >
                 {patterns.length > 0 ? (
@@ -233,7 +243,7 @@ export function InterceptPage() {
                           "ml-0.5 h-3.5 w-3.5",
 
                           // Interactive & States
-                          "hover:bg-muted-foreground/20"
+                          "hover:bg-muted-foreground/20 cursor-pointer"
                         )}
                         aria-label={`Remove ${pattern}`}
                       >
@@ -276,10 +286,10 @@ export function InterceptPage() {
                   placeholder="Add host..."
                   className={cn(
                     // Sizing & Spacing
-                    "h-6 w-36 px-2 py-1",
+                    "h-6 w-32 px-2 py-1",
 
                     // Typography
-                    "text-[11px]",
+                    "text-[11px] font-mono",
 
                     // Backgrounds & Borders
                     "rounded-sm"
@@ -290,7 +300,7 @@ export function InterceptPage() {
                   size="sm"
                   className={cn(
                     // Sizing & Spacing
-                    "h-6"
+                    "h-6 px-2"
                   )}
                   onClick={() => {
                     const trimmed = filterValue.trim();

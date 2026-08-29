@@ -23,20 +23,93 @@ export function InspectorPage() {
       tabs={tabs}
       activeTabId={cdp.activeTab}
       onTabChange={cdp.setActiveTab}
-      className="flex h-full min-h-0 flex-col bg-background"
-      contentClassName="flex-1 border rounded-lg overflow-hidden bg-background min-h-0"
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col min-h-0",
+
+        // Sizing & Spacing
+        "h-full",
+
+        // Backgrounds & Borders
+        "bg-background"
+      )}
+      contentClassName={cn(
+        // Layout & Positioning
+        "flex-1 min-h-0 overflow-hidden",
+
+        // Sizing & Spacing
+        "m-2",
+
+        // Backgrounds & Borders
+        "border rounded-lg bg-background"
+      )}
     >
-      <div className="flex h-full min-h-0 flex-col">
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex flex-col min-h-0",
+
+          // Sizing & Spacing
+          "h-full"
+        )}
+      >
         {/* Top Header info */}
-        <header className="flex items-center justify-between gap-3 px-3 py-2 border-b bg-muted/20 shrink-0 select-none flex-wrap">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="flex size-7 shrink-0 items-center justify-center rounded-sm border bg-background text-primary">
+        <header
+          className={cn(
+            // Layout & Positioning
+            "flex flex-wrap items-center justify-between shrink-0 select-none",
+
+            // Sizing & Spacing
+            "px-3 py-2 gap-3",
+
+            // Backgrounds & Borders
+            "border-b bg-muted/20"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center min-w-0",
+
+              // Sizing & Spacing
+              "gap-2"
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex size-7 shrink-0 items-center justify-center",
+
+                // Backgrounds & Borders
+                "rounded-sm border bg-background text-primary"
+              )}
+            >
               <Bug className="size-4" />
             </div>
 
-            <div className="space-y-0.5 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold tracking-tight">InspectExternal</span>
+            <div
+              className={cn(
+                // Layout & Positioning
+                "space-y-0.5 min-w-0"
+              )}
+            >
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center",
+
+                  // Sizing & Spacing
+                  "gap-2"
+                )}
+              >
+                <span
+                  className={cn(
+                    // Typography
+                    "text-xs font-semibold tracking-tight"
+                  )}
+                >
+                  InspectExternal
+                </span>
                 {cdp.connectionStatus === 'connected' && cdp.selectedTarget ? (
                   <>
                     <Badge variant="default" className="gap-1 bg-emerald-600 hover:bg-emerald-600 text-white dark:bg-emerald-500">
@@ -86,41 +159,94 @@ export function InspectorPage() {
           </div>
 
           {cdp.connectionStatus === 'connected' && cdp.selectedTarget ? (
-            <Button size="sm"
+            <Button
+              size="sm"
               variant="outline"
               onClick={cdp.disconnect}
+              className={cn(
+                // Sizing & Spacing
+                "h-7 px-2.5",
+
+                // Typography
+                "text-xs font-medium"
+              )}
             >
               Disconnect
             </Button>
           ) : (
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Port:</span>
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-wrap items-center",
+
+                // Sizing & Spacing
+                "gap-2"
+              )}
+            >
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center",
+
+                  // Sizing & Spacing
+                  "gap-1.5"
+                )}
+              >
+                <span
+                  className={cn(
+                    // Typography
+                    "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+                  )}
+                >
+                  Port:
+                </span>
                 <Input
                   type="number"
-                  className="w-16 font-mono"
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-7 w-16 px-2",
+
+                    // Typography
+                    "font-mono text-xs"
+                  )}
                   value={cdp.port}
                   onChange={(e) => cdp.setPort(e.target.value === '' ? '' : Number(e.target.value))}
                   placeholder="9223"
                 />
               </div>
 
-              <Button size="sm"
+              <Button
+                size="sm"
                 variant="outline"
                 onClick={cdp.openBrowser}
                 disabled={cdp.connectionStatus === 'connecting'}
+                className={cn(
+                  // Sizing & Spacing
+                  "h-7 px-2.5 gap-1.5",
+
+                  // Typography
+                  "text-xs font-medium"
+                )}
               >
                 <Browser />
-                Open Browser
+                <span>Open Browser</span>
               </Button>
 
-              <Button size="sm"
+              <Button
+                size="sm"
                 variant="outline"
                 onClick={cdp.fetchTargets}
                 disabled={cdp.connectionStatus === 'connecting'}
+                className={cn(
+                  // Sizing & Spacing
+                  "h-7 px-2.5 gap-1.5",
+
+                  // Typography
+                  "text-xs font-medium"
+                )}
               >
                 <ArrowClockwise />
-                Scan
+                <span>Scan</span>
               </Button>
 
               <Select
@@ -130,7 +256,7 @@ export function InspectorPage() {
                 }}
                 disabled={cdp.connectionStatus === 'connecting' || cdp.targets.length === 0}
               >
-                <SelectTrigger className="w-[200px]">
+                <SelectTrigger className="w-[200px] h-7 text-xs">
                   <SelectValue placeholder={cdp.targets.length === 0 ? "No active tabs" : "Select target..."} />
                 </SelectTrigger>
                 <SelectContent>
@@ -147,7 +273,18 @@ export function InspectorPage() {
 
         {/* Tab Content Panels */}
         {cdp.connectionStatus !== 'connected' || !cdp.selectedTarget ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-6 h-full bg-background min-h-0">
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex-1 flex flex-col items-center justify-center min-h-0",
+
+              // Sizing & Spacing
+              "h-full p-6",
+
+              // Backgrounds & Borders
+              "bg-background"
+            )}
+          >
             <Empty className="max-w-md border-none">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
@@ -221,15 +358,40 @@ export function InspectorPage() {
 
             {/* Console logs panel */}
             <TabsContent value="console" className="flex-1 min-h-0 m-0 outline-none flex flex-col bg-background">
-              <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/40 shrink-0">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center justify-between shrink-0",
+
+                  // Sizing & Spacing
+                  "px-3 py-2",
+
+                  // Backgrounds & Borders
+                  "border-b bg-muted/40"
+                )}
+              >
+                <span
+                  className={cn(
+                    // Typography
+                    "text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                  )}
+                >
                   Console logs
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={cdp.clearConsole}
-                  className="h-8 gap-1 active:scale-[0.97] transition-transform duration-100 ease-out"
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-7 px-2.5 gap-1",
+
+                    // Typography
+                    "text-xs",
+
+                    // Interactive & States
+                    "active:scale-[0.97] transition-transform duration-100 ease-out"
+                  )}
                 >
                   Clear Console
                 </Button>

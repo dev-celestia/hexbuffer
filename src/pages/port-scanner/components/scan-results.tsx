@@ -19,8 +19,8 @@ interface ScanResultsProps {
   onClear: () => void;
   onQuickStart: (preset: PortPreset) => void;
   onCopy: () => void | Promise<void>;
-  onExportJson: () => void;
-  onExportCsv: () => void;
+  onExportJson?: () => void;
+  onExportCsv?: () => void;
 }
 
 export function ScanResults({
@@ -61,9 +61,9 @@ export function ScanResults({
           hasResults={hasResults}
           copied={copied}
           onCopy={handleCopy}
+          onClear={onClear}
           onExportJson={onExportJson}
           onExportCsv={onExportCsv}
-          onClear={onClear}
         />
       )}
 

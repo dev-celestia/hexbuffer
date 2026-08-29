@@ -75,6 +75,16 @@ export function ListenerPage() {
         tabs={tabs}
         activeTabId={page.activeSubTab}
         onTabChange={(tabId) => page.setActiveSubTab(tabId as ListenerSubTab)}
+        contentClassName={cn(
+          // Layout & Positioning
+          "flex-1 min-h-0 overflow-hidden",
+
+          // Sizing & Spacing
+          "m-2",
+
+          // Backgrounds & Borders
+          "border rounded-lg bg-background"
+        )}
       >
         <TabsContent
           value="hosts"
