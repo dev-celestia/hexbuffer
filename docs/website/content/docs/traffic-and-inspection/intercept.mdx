@@ -5,50 +5,59 @@ description: Pause, modify, and drop live HTTP requests and responses in transit
 
 # Active Traffic Interception
 
-**Active Interception** empowers you to step between your web application and its server. Instead of just observing network traffic, interception allows you to pause HTTP/HTTPS requests or responses in-flight, inspect their contents, alter parameters, and evaluate how the client or server reacts.
+**Active Interception** gives you full control as a live gatekeeper between your client application (web browser, mobile app, CLI tool) and the destination server. Instead of passively recording traffic, interception pauses requests and responses in-flight, allowing you to inspect headers and parameters, modify payloads on the fly, and test how both client and server handle altered data.
 
 ---
 
 ## How Active Interception Works
 
-When Interception is enabled, hexbuffer acts as a live gatekeeper:
+```
+Client  ──► [ Paused in Hexbuffer Intercept ] ──► (Modified Request) ──► Target Server
+Client  ◄── (Modified Response) ◄── [ Paused in Hexbuffer Intercept ] ◄── Target Server
+```
 
-1. **Client Sends Request**: Your web browser or mobile app submits a form or API call.
-2. **hexbuffer Pauses Traffic**: The request is held in the Interception tab before hitting the remote server.
-3. **User Inspects & Edits**: You can modify headers, cookies, JSON bodies, or query strings.
-4. **Action Executed**: Choose to **Forward** the modified request, **Drop** it entirely, or **Pass Through** remaining traffic.
-
----
-
-## Step-by-Step Usage Guide
-
-### 1. Enable Interception
-Navigate to the **Intercept** tab in the main sidebar and toggle **Intercept is ON**.
-
-### 2. Configure Interception Rules
-You don't need to pause every single request. Set up specific match rules to target only what you want to test:
-- Intercept requests matching domain `api.example.com`.
-- Intercept requests with specific HTTP methods (e.g., `POST` or `PUT`).
-- Intercept responses containing error status codes (`500 Internal Server Error`).
-
-### 3. Modify Parameters In-Flight
-When a paused request appears in the editor:
-- Edit request parameters (e.g., change user roles, user IDs, or pricing fields).
-- Add or remove HTTP headers (e.g., test missing `Authorization` tokens).
-- Click **Forward** to transmit the modified request to the server.
-
-### 4. Intercepting Server Responses
-You can also intercept and alter server responses before they reach your browser!
-- Change a `403 Forbidden` response to a `200 OK` to test client UI handling.
-- Modify JSON payload response properties to test front-end validation limits.
+1. **Client Dispatches Request**: Your browser or API client sends an HTTP/HTTPS request.
+2. **Hexbuffer Pauses Traffic**: When Intercept is active, the request is held before transmission.
+3. **Inspect & Alter**: Modify headers, authentication tokens, JSON bodies, or form parameters in the rich editor.
+4. **Action Executed**: Choose to **Forward** (transmit modified data), **Drop** (terminate the connection), or **Pass Through** remaining requests.
 
 ---
 
-## Value & Use Cases
+## Interception Modes & Controls
 
-- **Backend Validation Testing**: Verify if your server properly validates input data even when client-side JavaScript restrictions are bypassed.
-- **Error Simulation**: Drop requests to simulate network timeouts or server failures and verify offline/error recovery in your application.
-- **Role Permission Audits**: Test privilege levels by changing session cookies or auth tokens in transit.
+- **Intercept Requests**: Pause outgoing requests sent by the client.
+- **Intercept Responses**: Pause incoming responses returned by the server before the client receives them.
+- **Forward (`Cmd+Enter` / `Ctrl+Enter`)**: Dispatch the active request or response with your edits applied.
+- **Drop**: Discard the in-flight packet, simulating a network timeout or dropped connection.
+- **Pass Through**: Temporarily bypass interception for remaining queued traffic.
+
+---
+
+## Match Rules & Breakpoint Filters
+
+Avoid getting overwhelmed by high-traffic web applications by setting targeted match rules:
+
+- **Host & Domain Filter**: Only pause traffic directed to specific target domains (e.g., `api.example.com`).
+- **Method Matching**: Target specific HTTP verbs (e.g., only intercept `POST` or `PUT` requests).
+- **URL Path Patterns**: Match specific routes such as `/api/v1/checkout` or `/login`.
+- **Response Status Matching**: Only pause responses matching specific status codes (e.g., `500 Server Error` or `403 Forbidden`).
+
+---
+
+## Common Use Cases & Testing Scenarios
+
+### 1. Client-Side Restriction Bypasses
+Test whether backend APIs properly validate inputs by removing read-only flags, bypassing disabled form inputs, or modifying hidden form fields that the frontend UI attempts to restrict.
+
+### 2. Privilege Escalation & Role Tampering
+Alter session cookies, user IDs, or role claims in transit to verify whether unauthorized users can perform administrative operations.
+
+### 3. Server Error & Resilience Simulation
+Drop critical requests or modify server error responses to evaluate whether your frontend displays graceful fallback UI or crashes unexpectedly.
+
+---
+
+## Best Practices
 
 > [!WARNING]
-> **Remember to Disable Interception**: Leaving interception turned on with pending paused requests will cause your browser requests to wait indefinitely until forwarded!
+> **Remember to Disable Interception**: Leaving interception active with pending paused requests will cause browser tabs or API clients to hang until forwarded or dropped!

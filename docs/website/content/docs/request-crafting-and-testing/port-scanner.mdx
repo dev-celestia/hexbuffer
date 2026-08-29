@@ -1,37 +1,40 @@
 ---
-title: Network & Port Scanner
-description: High-performance TCP port discovery, service banner grabbing, and network health audits.
+title: Network & Port Scanner (Beta)
+description: High-performance multi-threaded TCP port discovery, service banner grabbing, and network auditing.
 ---
 
-# Network & Port Scanner
+# Network & Port Scanner (Beta)
 
-Before auditing web applications, understanding the underlying server infrastructure and open service ports is vital. hexbuffer includes a fast, multi-threaded **Port Scanner** built directly into the desktop application.
+Before auditing web applications, mapping out open network ports, accessible services, and exposed infrastructure is essential. **Hexbuffer** includes a fast, multi-threaded **Port Scanner** built directly into the desktop application.
 
 ---
 
 ## Features & Capabilities
 
-- **High-Performance Rust Core**: Multi-threaded TCP port scanning capable of checking thousands of ports per second.
-- **Service Banner Grabbing**: Automatically probes open ports to identify running services (e.g., HTTP/80, HTTPS/443, SSH/22, MySQL/3306, Redis/6379).
-- **Preset Port Profiles**:
-  - **Quick Scan**: Scans top 100 common application service ports.
-  - **Web Services**: Focuses on HTTP, HTTPS, alternative web proxy ports (8000, 8080, 8443, 8888).
-  - **Custom Range**: Allows custom port selection (e.g., `1-65535` or `21,22,80,443,3000-3005`).
+### High-Performance Rust Core Engine
+- **`JoinSet` Asynchronous Concurrency**: Powered by Tokio's `JoinSet` architecture in Rust, allowing Hexbuffer to scan thousands of ports per second with minimal CPU and memory overhead.
+- **Service Banner Grabbing**: Probes open ports to identify running network daemons and services (e.g., HTTP/80, HTTPS/443, SSH/22, MySQL/3306, PostgreSQL/5432, Redis/6379, MongoDB/27017).
+- **Latency & Round-Trip Timing**: Measures connection establishment latency for each responsive port.
+
+### Scan Profiles & Custom Ports Dialog
+- **Top 100 Common Ports**: Rapid audit of standard application, database, and system services.
+- **Web Services Profile**: Targeted scan focusing on web proxy and HTTP/HTTPS alternative ports (80, 443, 3000, 5000, 8000, 8080, 8443, 8888, 9000).
+- **Custom Ports Dialog**: Manage custom port lists and ranges (e.g., `21-25, 80, 443, 8000-8100, 65535`) with preset saving and validation.
 
 ---
 
 ## How to Run a Port Scan
 
 1. Select **Port Scanner** from the left navigation menu.
-2. Enter the target hostname or IP address (e.g., `192.168.1.50` or `staging.myapp.com`).
-3. Select your desired scan profile or enter custom port ranges.
-4. Set concurrency limits (number of parallel worker sockets).
+2. Enter the target hostname or IP address (e.g., `192.168.1.50` or `staging.myapp.dev`).
+3. Select your scan profile or open **Custom Ports Dialog** to specify port lists.
+4. Set concurrency limits (parallel worker task count) and socket timeout thresholds.
 5. Click **Start Scan**.
-6. Review open ports in real time along with service signatures and response round-trip latency.
+6. Review open ports in the real-time results table, sort by port number or service signature, and copy discovered services.
 
 ---
 
-## Best Practices & Security Advice
+## Best Practices
 
 > [!NOTE]
-> **Infrastructure Auditing**: Regularly scan internal development environments to ensure sensitive database ports (like Redis or PostgreSQL) are not unintentionally exposed to public networks!
+> **Internal Network Hygiene**: Regularly audit staging and local development networks to ensure sensitive internal services (such as unauthenticated Redis caches or debug endpoints) are not inadvertently bound to public IP interfaces!

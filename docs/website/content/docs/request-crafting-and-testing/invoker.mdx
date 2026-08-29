@@ -1,53 +1,72 @@
 ---
 title: Invoker & High-Speed Fuzzer
-description: Parameter stress testing, payload fuzzing, and automated vulnerability scanning.
+description: Parameter stress testing, multi-mode payload fuzzing, and automated vulnerability discovery.
 ---
 
 # Invoker & High-Speed Fuzzer
 
-**Invoker** is hexbuffer's high-speed parameter fuzzing engine. It allows developers and security auditors to test how web applications handle unexpected inputs, boundary cases, high volumes of requests, and automated payload lists.
+**Invoker** is Hexbuffer's high-speed parameter fuzzing and automated request injection engine. It allows developers, QA engineers, and security auditors to test how web applications handle unexpected inputs, boundary cases, high volumes of requests, dictionary attacks, and automated vulnerability payloads.
 
 ---
 
 ## What is Parameter Fuzzing?
 
-Fuzzing involves injecting a series of test inputs (payloads) into specific parameter locations within an HTTP request (such as URL parameters, form fields, headers, or JSON values) and analyzing the server's responses for anomalies, errors, or security flaws.
+Fuzzing involves marking specific parameter locations within an HTTP request template (such as URL query parameters, form fields, headers, cookies, or JSON values) and injecting a series of test inputs (payloads) to analyze how the target server reacts in terms of status codes, response lengths, error patterns, and latency variations.
 
 ---
 
-## Attack Modes & Concurrency Controls
+## Attack Modes
 
-Invoker offers flexible execution strategies tailored to your testing goals:
+Invoker provides four distinct execution strategies tailored to different testing objectives:
 
-### 1. Sniper Mode
-Targets one specific parameter position at a time, testing each payload in sequence before moving to the next parameter.
-
-### 2. Battering Ram Mode
-Injects the exact same payload into multiple designated parameter locations simultaneously.
-
-### 3. Pitchfork Mode
-Uses multiple payload lists in parallel, iterating through list items synchronously across designated parameter markers.
-
-### 4. Concurrency & Rate Throttling
-Configure thread concurrency and request delay throttling (e.g., 50 requests/second with a 10ms delay) to prevent overwhelming target servers or triggering unintentional rate limiting during testing.
+| Attack Mode | Description | Ideal Use Case |
+| :--- | :--- | :--- |
+| **Sniper** | Uses a single payload set. Injects payloads into one marked position at a time, testing each position sequentially. | Parameter-by-parameter vulnerability scanning (e.g., SQLi, XSS, Path Traversal). |
+| **Battering Ram** | Uses a single payload set. Injects the identical payload into all marked parameter positions simultaneously. | Testing multi-field consistency (e.g., username & password matching). |
+| **Pitchfork** | Uses multiple payload sets (one per marked position). Steps through lists in parallel synchronously. | Testing paired credentials (e.g., list of users alongside corresponding passwords). |
+| **Cluster Bomb** | Uses multiple payload sets. Tests every possible permutation (Cartesian product) across all marked positions. | Exhaustive credential brute-forcing and multi-parameter combinatorial testing. |
 
 ---
 
-## Step-by-Step Fuzzing Workflow
+## Payload Sets & Sources
 
-1. **Import Request**: Send a base HTTP request from **Live Traffic** or **Repeater** into **Invoker**.
-2. **Define Payload Positions**: Highlight parameter values in the request template (e.g., `id=§100§`) to mark where test payloads should be injected.
-3. **Select Payload Source**:
-   - Built-in wordlists (numbers, special characters, common filenames, path traversal strings).
-   - Custom uploaded text files or dictionary wordlists.
-   - Dynamic generators (numeric ranges, random string generators).
-4. **Configure Response Extractors**: Set up regex pattern extractors or status code filters to flag noteworthy responses.
-5. **Start Attack**: Click **Start Invoker Attack** and monitor real-time execution results, status code distributions, response length changes, and error flags.
+Hexbuffer supports flexible payload configuration:
+
+- **Built-in Wordlists**: Common injection strings, special characters, directory discovery lists, numeric ranges, and error triggers.
+- **Custom Wordlists**: Import custom `.txt` or `.csv` dictionary files.
+- **Dynamic Generators**:
+  - Sequential or random numeric ranges (e.g., IDs from `1000` to `5000` with step `1`).
+  - Character brute-force sets (custom character ranges and length limits).
+  - Dates, timestamps, and UUID generators.
+- **Payload Processing Rules**: Apply URL encoding, Base64 encoding, prefix/suffix additions, or hashing transformations to payloads before transmission.
 
 ---
 
-## Key Benefits
+## High-Throughput Engine & Concurrency Controls
 
-- **Boundary Validation**: Easily verify whether your backend gracefully handles oversized inputs, invalid data types, or unexpected symbols.
-- **Automated Parameter Exploration**: Quickly identify hidden API parameters or undiscovered endpoint paths.
-- **Fast Multithreaded Execution**: Powered by a high-performance Rust core engine for maximum request throughput.
+Powered by a multi-threaded Rust execution core, Invoker delivers high-speed request throughput while giving you precise control:
+
+- **Thread Concurrency**: Configure the number of parallel worker threads.
+- **Rate Throttling & Delays**: Set millisecond delay intervals between requests to avoid triggering web application firewalls (WAF) or overwhelming staging servers.
+- **Auto-Pause & Retry**: Automatically pause on connection drops or rate-limit responses (HTTP `429 Too Many Requests`).
+
+---
+
+## Result Analysis & Multi-Layout Inspector
+
+As the attack runs, Invoker populates a real-time results table:
+
+- **Sorting & Metrics**: Sort results by Status Code, Response Length, Latency, or Extracted Regex Matches.
+- **Pattern Extractors**: Configure regex or JSONPath extractors to pull out specific tokens, error strings, or reflected text in response bodies.
+- **Dynamic Full-Width & Maximized Inspector**: Expand the results inspector to full-width or maximized mode to analyze differences between baseline and anomaly responses without leaving the view.
+- **Send to Repeater / Comparer**: Right-click any attack result to inspect it in Repeater or compare it with a baseline response in Monaco Comparer.
+
+---
+
+## Step-by-Step Workflow
+
+1. **Load Base Request**: In **Live Traffic** or **Repeater**, right-click a request and select **Send to Invoker** (`Cmd+I` / `Ctrl+I`).
+2. **Set Positions**: Highlight the values you want to test and click **Add Marker `§`** (e.g., `id=§100§`).
+3. **Select Attack Mode**: Choose between Sniper, Battering Ram, Pitchfork, or Cluster Bomb.
+4. **Define Payloads**: Assign wordlists or generators to each payload position.
+5. **Start Attack**: Click **Start Attack** and monitor execution progress, status code distributions, and flagged anomalies.

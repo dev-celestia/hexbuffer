@@ -1,11 +1,11 @@
 ---
-title: Developer Workspace Utilities & Mock Forge
-description: Spin up mock API hosts, execute shell terminal commands, and organize files.
+title: Developer Workspace & Server Utilities
+description: Spin up mock API hosts with Mock Forge, run local dev servers, execute shell terminal commands, and organize files.
 ---
 
-# Developer Workspace Utilities & Mock Forge
+# Developer Workspace & Server Utilities
 
-To provide a complete developer environment, hexbuffer integrates essential productivity tools directly into the desktop application—eliminating the need to switch between terminal windows, mock servers, and file managers.
+To provide a complete developer environment, **Hexbuffer** integrates essential productivity tools directly into the desktop application—eliminating the need to switch between external terminal windows, mock servers, and file managers.
 
 ---
 
@@ -15,22 +15,32 @@ Building or testing front-end applications before backend APIs are ready? **Mock
 
 ### Key Capabilities
 - **Custom Route Rules**: Define custom endpoints (e.g., `GET /api/v1/users`, `POST /api/v1/checkout`).
-- **Dynamic Response Templates**: Return custom HTTP status codes (`200`, `201`, `400`, `500`), headers, and JSON mock payloads.
-- **Latency Simulation**: Add artificial response delays (e.g., 300ms) to test front-end loading states and spinner animations under poor network conditions.
+- **Dynamic Response Templates**: Return custom HTTP status codes (`200 OK`, `201 Created`, `400 Bad Request`, `500 Server Error`), headers, and JSON mock payloads.
+- **Latency Simulation**: Add artificial response delays (e.g., 300ms) to test front-end loading states, spinners, and timeout recovery under degraded network conditions.
+- **Mock Header Injection**: Simulate custom CORS headers, rate-limiting headers (`X-RateLimit-Remaining`), or authentication tokens.
+
+---
+
+## Dev Server Manager
+
+Manage and monitor local web development servers directly within Hexbuffer:
+- Start, stop, and restart local frontend frameworks (Next.js, Vite, Astro, React).
+- Stream live dev server build logs and output directly in the app.
+- Automatically route dev server traffic through Hexbuffer's MITM proxy for instant traffic analysis.
 
 ---
 
 ## Integrated PTY Shell Terminal
 
-Never switch to an external terminal window again! hexbuffer includes a full-featured pseudo-terminal (PTY) powered by `xterm.js`.
+Never leave your diagnostic workspace to run CLI commands! Hexbuffer includes a full-featured pseudo-terminal (PTY) powered by `xterm.js`.
 
 - **Multi-Tab Terminal Sessions**: Open multiple terminal tabs connected directly to your operating system shell (`zsh`, `bash`, or `PowerShell`).
-- **Direct Workspace Path**: Opens automatically in your active project workspace directory.
-- **AI Terminal Assistance**: Interact with the AI copilot to generate complex terminal shell commands, run diagnostic scripts, or inspect system processes.
+- **Direct Workspace Path**: Automatically opens in your active project workspace directory.
+- **AI Terminal Assistance**: Prompt the AI copilot to generate complex terminal shell commands, run diagnostic scripts, or inspect system processes with one click.
 
 ---
 
 ## File Explorer & Scratchpad
 
-- **Built-in File Explorer**: Browse, view, and edit local files, scripts, logs, and project assets directly within hexbuffer.
+- **Built-in File Explorer**: Browse, view, and edit local project files, scripts, logs, and workspace assets directly within Hexbuffer.
 - **Quick Scratchpad**: A lightweight text scratchpad for pasting temporary API keys, curl snippets, notes, or transient test data.

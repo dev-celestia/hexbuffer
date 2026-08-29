@@ -5,14 +5,14 @@ description: Build visual end-to-end regression suites, test steps, assertions, 
 
 # Visual Regression & E2E Testing Suite
 
-Ensuring web applications maintain visual consistency, functional stability, and bug-free releases is seamless with hexbuffer's **Regression Runner**. It combines functional API verification with visual end-to-end assertion steps.
+Ensuring web applications maintain visual consistency, functional stability, and bug-free releases is seamless with Hexbuffer's **Regression Runner**. It combines functional API verification with visual end-to-end assertion steps to prevent regressions across backend releases and frontend UI updates.
 
 ---
 
 ## Core Capabilities
 
 - **Step-by-Step Test Suites**: Group API requests, UI interactions, and assertions into structured regression test suites.
-- **Visual Assertion & Screenshots**: Capture full-page or element screenshots during test execution and compare them against approved baseline images.
+- **Visual Assertion & Screenshots**: Capture full-page or component-level screenshots during test execution and compare them against approved baseline images.
 - **Automated Assertion Engine**: Verify response status codes, header signatures, JSON schemas, and maximum latency bounds.
 - **Comprehensive Reports**: Generate detailed test reports with pass/fail ratios, execution duration trends, and visual diff highlights.
 
@@ -23,15 +23,15 @@ Ensuring web applications maintain visual consistency, functional stability, and
 1. Navigate to **Regression** in the left sidebar.
 2. Click **Create New Test Suite** (e.g., `User Authentication & Checkout Flow`).
 3. Add Test Steps:
-   - Step 1: Submit POST `/api/login` (Assert Status: `200`).
-   - Step 2: GET `/api/user/profile` (Assert JSON property `user.id` exists).
-   - Step 3: Render web route `/dashboard` and capture visual screenshot.
+   - **Step 1**: Submit POST `/api/login` (Assert Status: `200`).
+   - **Step 2**: GET `/api/user/profile` (Assert JSON property `user.id` exists).
+   - **Step 3**: Render web route `/dashboard` and capture visual screenshot.
 4. Click **Execute Test Suite**.
 5. View step-by-step progress and review test result summaries.
 
 ---
 
-## Customer Benefits
+## Key Benefits
 
 - **Prevent Breaking Releases**: Catch visual regressions and API contract breaks before pushing code to production.
 - **One-Click Execution**: Re-run your entire suite of end-to-end regression tests anytime you update backend microservices.

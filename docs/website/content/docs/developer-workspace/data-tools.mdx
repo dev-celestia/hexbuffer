@@ -1,41 +1,46 @@
 ---
 title: Encoders, Hashers & JWT Security Inspector
-description: Transform data formats, compute cryptographic hashes, and inspect JSON Web Tokens.
+description: Transform data formats, compute cryptographic hashes, and inspect JSON Web Tokens with the tabbed JWT tool.
 ---
 
 # Encoders, Hashers & JWT Security Inspector
 
-Data transformation and cryptographic analysis are everyday tasks during API development and security audits. hexbuffer packages a comprehensive suite of utility converters directly into the app.
+Data transformation, cryptographic verification, and token analysis are everyday requirements during API development and security audits. **Hexbuffer** packages a comprehensive suite of utility converters directly into the app.
 
 ---
 
 ## Universal Encoder & Decoder
 
 Transform strings and payloads instantly across multiple formats:
+
 - **Base64 & Base64URL**: Encode and decode standard Base64 data or URL-safe Base64 strings.
 - **URL / Query Escaping**: Convert special characters to `%XX` hex encoding for safe query parameter transmission.
 - **Hexadecimal**: Convert binary buffers to hex strings and back.
-- **HTML Entity Encoder**: Escape HTML special characters (`<`, `>`, `&`, `"`, `'`) to test input sanitization.
+- **HTML Entity Encoder**: Escape and unescape HTML special characters (`<`, `>`, `&`, `"`, `'`) to test input sanitization.
+- **Binary & ASCII**: Convert raw byte strings to binary representations.
 
 ---
 
-## Cryptographic Hasher
+## Cryptographic Hasher & HMAC Generator
 
 Compute and verify cryptographic hash digests instantly:
-- **Supported Algorithms**: MD5, SHA-1, SHA-256, SHA-512, RIPEMD-160.
+
+- **Supported Hash Algorithms**: MD5, SHA-1, SHA-256, SHA-384, SHA-512, and RIPEMD-160.
 - **HMAC Signatures**: Calculate Hash-based Message Authentication Codes (HMAC) using custom secret keys.
-- **Hash Matcher**: Compare target hashes against inputs to verify checksum integrity.
+- **Hash Matcher**: Compare target hashes against inputs to verify checksum integrity and detect tampering.
 
 ---
 
-## JWT Security Inspector
+## JWT Security Inspector (Beta)
 
-JSON Web Tokens (JWT) are widely used for API authentication. The **JWT Tool** decodes, audits, and signs JWT tokens:
+JSON Web Tokens (JWT) are widely used for API authentication and microservice authorization. The **JWT Tool** (migrated to a modern tabbed layout) decodes, audits, and manipulates JWT tokens:
 
 ### Key Features
-- **Token Deconstruction**: Split JWT strings into Header, Payload, and Signature components visually.
-- **Weakness Auditor**: Automatically flags security risks, such as:
-  - Tokens using the weak `"alg": "none"` signature algorithm.
-  - Expired tokens (`exp` claim validation).
-  - Missing security claims (`nbf`, `iat`, `iss`, `aud`).
-- **Token Re-Signer**: Modify claims in the payload (e.g., change `"role": "user"` to `"role": "admin"`) and re-sign the token using a custom secret or private key to test authorization enforcement.
+- **Token Deconstruction**: Split JWT strings into Header, Payload, and Signature components with live formatting.
+- **Weakness & Misconfiguration Scanner**: Automatically flags security risks, such as:
+  - Tokens using the insecure `"alg": "none"` signature algorithm.
+  - Expired tokens (`exp` timestamp validation).
+  - Premature tokens (`nbf` not before claim validation).
+  - Missing security claims (`iss`, `aud`, `iat`).
+- **Claims Editor & Token Re-Signer**: Modify claims in the payload (e.g., changing `"role": "user"` to `"role": "admin"` or updating `user_id`) and re-sign the token using a custom HMAC secret key or RSA/ECDSA private key to test backend authorization enforcement.
+- **Secret Key Verification & Brute-Forcer**: Test weak or default secret keys against token signatures.

@@ -1,11 +1,11 @@
 ---
-title: Master User Guide & Customer Experience Best Practices
-description: Essential tips, keyboard shortcuts, performance optimizations, and troubleshooting FAQs.
+title: Master User Guide & FAQs
+description: Essential tips, keyboard shortcuts, performance optimizations, and troubleshooting FAQs for Hexbuffer.
 ---
 
-# Master User Guide & Customer Experience Best Practices
+# Master User Guide & FAQs
 
-Welcome to the comprehensive **hexbuffer User Guide**. This reference manual is designed to help you maximize efficiency, streamline your application testing workflows, and get the absolute best customer experience from the hexbuffer platform.
+Welcome to the comprehensive **Hexbuffer User Guide**. This reference manual is designed to help you maximize efficiency, streamline your application testing workflows, and get the best experience from the Hexbuffer platform.
 
 ---
 
@@ -18,47 +18,52 @@ Speed up your daily workflow with built-in desktop shortcuts:
 | :--- | :--- |
 | `Cmd + R` / `Ctrl + R` | Send selected request to **Repeater** |
 | `Cmd + I` / `Ctrl + I` | Send selected request to **Invoker (Fuzzer)** |
-| `Cmd + K` / `Ctrl + K` | Open AI Assistant command palette |
+| `Cmd + K` / `Ctrl + K` | Open AI Assistant / Command Palette |
 | `Cmd + F` / `Ctrl + F` | Focus real-time traffic search bar |
 | `Cmd + \` / `Ctrl + \` | Toggle Left Navigation Sidebar |
 | `Cmd + Shift + C` | Send selected request/response to **Monaco Comparer** |
+| `Cmd + Enter` / `Ctrl + Enter` | Forward intercepted request or dispatch active Repeater request |
 
 ---
 
 ### 2. Streamlining Workspace Layouts
-hexbuffer supports split views and tabbed navigation:
-- **Pin Frequently Used Tools**: Keep Repeater, Live Traffic, and AI Assistant open simultaneously using split view windows.
-- **Save Custom Presets**: Save custom tool panel layouts tailored to API debugging vs. security vulnerability scanning.
+Hexbuffer supports flexible multi-panel layouts:
+- **Split Views**: Keep Repeater, Live Traffic, and AI Assistant open simultaneously.
+- **Maximized Inspector Mode**: Expand the results inspector to full-width or maximized mode when analyzing large payloads.
+- **Modular Desktop Dashboard**: Arrange target, proxy, VPN, and clipboard widgets according to your daily priorities.
 
 ---
 
-## Customer Experience Best Practices
+## Performance & Hygiene Best Practices
 
 ### Optimizing Traffic Diagnostics
-- **Target Scope Hygiene**: Always define your domain target scope (e.g., `*.myapp.dev`) before launching testing sessions. This prevents third-party analytics or browser background traffic from cluttering your logs.
-- **Database Compression**: Enable automatic SQLite session database compression in **Settings -> Database** to store large capture sessions efficiently without consuming disk space.
+- **Target Scope Hygiene**: Always define your domain target scope (e.g., `*.myapp.dev`) before starting extensive capture sessions. This filters out background operating system updates and third-party browser noise.
+- **Database Compression**: Hexbuffer automatically manages capture logs in a local SQLite database with compression, allowing you to store extensive sessions without excessive disk usage.
 
 ### AI Copilot Efficiency
-- **Provide Context**: When asking the AI copilot to diagnose an issue, include relevant HTTP status codes or error messages for faster, more accurate solutions.
-- **Use Local Models for Offline Work**: If working offline or in isolated network environments, switch AI Provider settings to Ollama or LM Studio.
+- **Provide Context**: When asking the AI copilot to diagnose an issue, select the relevant request in Live Traffic so the AI can automatically read request headers and response bodies.
+- **Local Models for Offline Work**: If auditing confidential internal targets or working offline, configure local models via Ollama or LM Studio in **Settings -> AI Configuration**.
 
 ---
 
 ## Frequently Asked Questions (FAQ)
 
 ### Q1: Why is HTTPS traffic showing certificate warning errors in my browser?
-**Answer**: Make sure you have installed hexbuffer's Root CA Certificate into your operating system or browser's trusted certificate store. Refer to the [Getting Started Guide](/docs/getting-started) for step-by-step instructions.
+**Answer**: You need to install Hexbuffer's Root CA Certificate into your operating system or browser's trusted certificate authority store. Go to **Settings -> CA Certificate Manager**, click **Install to System Trust Store** (or export the certificate), and restart your browser.
 
-### Q2: How do I export my capture data to share with colleagues?
-**Answer**: Select the desired requests in the **Live Traffic** grid, right-click, and select **Export to HAR** or **Export to CSV**. You can also copy any individual request as a `curl` command.
+### Q2: How do I export my capture data to share with teammates?
+**Answer**: Select requests in the **Live Traffic** grid, right-click, and choose **Export to HAR**, **Export to CSV**, or **Copy as cURL**.
 
-### Q3: Can I run hexbuffer without an active internet connection?
-**Answer**: Yes! hexbuffer is a native desktop application. All core proxy diagnostics, repeater replaying, fuzzing, port scanning, and local AI capabilities run entirely offline on your device.
+### Q3: Can I run Hexbuffer completely offline without an internet connection?
+**Answer**: Yes! Hexbuffer is a native desktop application. All core proxy diagnostics, repeater replaying, fuzzing, port scanning, and local AI capabilities (via Ollama or LM Studio) run 100% locally on your machine.
+
+### Q4: How does Peer Discovery and Sync work?
+**Answer**: Hexbuffer includes on-demand local network peer discovery, allowing team members on the same local subnet to share session captures and scope configurations without routing data through external cloud servers.
 
 ---
 
 ## Need Further Assistance?
 
-Our goal is to ensure you have a flawless experience with hexbuffer. If you encounter unexpected behavior or have feature requests:
-- Submit an issue on our official repository.
+If you encounter unexpected behavior or have feature requests:
+- Submit an issue on the official [GitHub repository](https://github.com/arhamymr/apsara-cyber-tools).
 - Consult the built-in AI assistant by typing `/help` in the chat window.

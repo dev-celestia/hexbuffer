@@ -5,43 +5,45 @@ description: Construct node-based automation flows linking network triggers to a
 
 # Visual Workflows & Pipeline Automation
 
-The **Workflows** module is a visual, node-based automation canvas powered by `@xyflow/react`. It enables you to design automated event pipelines, linking incoming network proxy triggers to custom processing steps, assertions, notifications, or external scripts.
+The **Workflows** module is a visual, node-based automation canvas powered by `@xyflow/react`. It enables you to design automated event pipelines, linking incoming network proxy triggers or schedules to custom processing steps, assertions, notifications, or external scripts without writing complex glue code.
 
 ---
 
 ## Node Types & Building Blocks
 
-Workflows are created by connecting nodes together on an interactive canvas:
+Workflows are built by dragging, dropping, and connecting nodes on the interactive canvas:
 
 ### 1. Trigger Nodes
-- **HTTP Traffic Trigger**: Fires when an incoming request matches a specific URL path, method, or status code.
-- **Timer / Schedule Trigger**: Executes pipeline flows periodically (e.g., every 15 minutes).
-- **Manual Trigger**: Executed on-demand via a button click or AI agent event.
+- **HTTP Traffic Trigger**: Fires when an incoming request matches a specific URL path, method, domain, or status code.
+- **WebSocket Trigger**: Fires on specific incoming or outgoing WebSocket message frames.
+- **Timer / Cron Trigger**: Executes pipeline flows periodically (e.g., every 5 minutes).
+- **Manual / AI Trigger**: Executed on-demand via a button click or AI agent command.
 
 ### 2. Action Nodes
-- **Request Replayer Node**: Sends an HTTP request with dynamic parameter inputs.
-- **Script Node**: Executes custom JavaScript functions to transform payload data.
-- **Extract Node**: Uses regex or JSONPath to capture token values from response bodies.
-- **Notification Node**: Triggers desktop alerts, webhook calls, or logs custom events.
+- **Request Replayer Node**: Dispatches an HTTP request using dynamic inputs extracted from previous nodes.
+- **Script Node**: Executes custom JavaScript functions to transform payload data or compute dynamic cryptographic signatures.
+- **Extract Node**: Uses regex, JSONPath, or CSS selectors to capture token values or IDs from response bodies.
+- **Notification Node**: Triggers desktop OS notifications, logs custom events, or sends external webhook alerts.
 
 ### 3. Logic & Assertion Nodes
-- **Conditional Branch (If/Else)**: Evaluates response metrics or header values to route execution down different canvas paths.
-- **Assertion Node**: Verifies whether target criteria (e.g., status == 200, response time < 500ms) are satisfied.
+- **Conditional Branch (If/Else)**: Evaluates response metrics, status codes, or header values to route execution down different branches.
+- **Assertion Node**: Verifies target criteria (e.g., status == 200, response time < 500ms, JSON schema matches) and flags failures.
 
 ---
 
 ## Creating Your First Workflow
 
 1. Open **Workflows** from the main sidebar.
-2. Drag an **HTTP Trigger Node** onto the canvas.
-3. Connect its output port to a **JSON Extractor Node** to pull out an authentication token.
-4. Connect the Extractor output to a **Repeater Action Node** that re-uses the token.
-5. Click **Run Workflow** or set it to **Active Listener** mode.
+2. Drag an **HTTP Trigger Node** onto the canvas and set the URL match pattern to `/api/v1/auth/login`.
+3. Connect its output port to a **JSON Extractor Node** configured to extract `response.body.access_token`.
+4. Connect the extracted token output to a **Request Replayer Node** that invokes protected endpoints using the fresh token.
+5. Add an **Assertion Node** to verify the subsequent request returns HTTP `200 OK`.
+6. Click **Run Workflow** to test interactively, or enable **Active Listener** mode for background monitoring.
 
 ---
 
-## Use Cases
+## Common Use Cases
 
-- **Automated Authentication Refresh**: Automatically catch token expiration errors and fire login requests to refresh session tokens in the background.
-- **Real-Time Alerting**: Receive instant desktop notifications whenever an API endpoint returns a 500-level backend error.
-- **Multi-Step API Orchestration**: Execute complex multi-step integration test flows visually.
+- **Automated Authentication Refresh**: Catch token expiration errors and automatically fire login requests to refresh session tokens in the background.
+- **Real-Time Error Alerting**: Receive instant desktop notifications whenever an API endpoint returns unexpected `5xx` errors.
+- **Multi-Step Integration Testing**: Execute end-to-end multi-step API journeys visually with full status feedback at each node.

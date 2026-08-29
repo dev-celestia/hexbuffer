@@ -1,0 +1,54 @@
+---
+title: WebSocket Traffic & Live Frames
+description: Monitor persistent WebSocket connections, inspect live frames, and analyze bidirectional message streams.
+---
+
+# WebSocket Traffic & Live Frames
+
+Modern real-time applications—such as collaborative tools, live dashboards, financial tickers, and chat applications—rely heavily on the **WebSocket (WS/WSS)** protocol for bidirectional, low-latency communication.
+
+**Hexbuffer** provides dedicated, real-time WebSocket inspection capabilities that capture handshakes, monitor persistent socket connections, and log individual incoming and outgoing data frames.
+
+---
+
+## Key Features & Capabilities
+
+### 1. Persistent Connection Tracking
+- **Handshake Analysis**: View initial HTTP `101 Switching Protocols` upgrade requests, handshake headers (`Sec-WebSocket-Key`, `Sec-WebSocket-Accept`, `Sec-WebSocket-Version`), and origin verification.
+- **Connection Lifecycle**: Track socket connection state (Open, Closing, Closed), start timestamps, duration, and termination status codes (e.g., `1000 Normal Closure`, `1006 Abnormal Closure`).
+- **Connection Metrics**: Monitor the total count of transmitted vs. received frames, message frequency, and total transferred byte sizes.
+
+### 2. Live Message Stream & Frame Inspection
+Selecting any active or past WebSocket connection displays the live message feed:
+- **Direction Indicators**: Clear visual distinctions for **Client -> Server** (outgoing) and **Server -> Client** (incoming) messages.
+- **Opcode & Data Types**: Distinguishes between Text (`0x1`), Binary (`0x2`), Ping (`0x9`), Pong (`0xA`), and Close (`0x8`) frames.
+- **Precise Timestamps**: Sub-millisecond timing for every individual message frame to diagnose latency or sequence issues.
+- **Payload Viewer**: Syntax-highlighted viewer supporting JSON, XML, Protobuf structures, and raw hex/ASCII view for binary payloads.
+
+---
+
+## Filtering & Search in WebSocket History
+
+High-frequency WebSocket connections can generate thousands of messages per minute. Hexbuffer provides powerful filtering controls:
+
+- **Filter by Direction**: Isolate incoming server broadcasts or client-sent messages.
+- **Filter by Frame Type**: Show only Text, Binary, or Control frames (Ping/Pong/Close).
+- **Full-Text Payload Search**: Search through message contents in real time using literal strings or regex patterns.
+- **Length & Timing Filters**: Filter messages exceeding specific byte lengths or response latencies.
+
+---
+
+## Replaying & Testing WebSocket Messages
+
+You can seamlessly bridge WebSocket traffic into testing workflows:
+
+1. **Send to Repeater**: Right-click any WebSocket connection or individual frame and select **Send to Repeater**.
+2. **Interactive WebSocket Replaying**: Establish live custom socket connections in Repeater, craft custom text or binary frames, and observe live responses.
+3. **Automate with Workflows**: Connect WebSocket triggers to visual workflows to alert on specific error messages or payload events.
+
+---
+
+## Best Practices
+
+> [!TIP]
+> **Masking & Protocol Validation**: Ensure your backend WebSocket servers properly enforce client frame masking (RFC 6455) and origin header validation (`Origin`) to prevent Cross-Site WebSocket Hijacking (CSWSH).

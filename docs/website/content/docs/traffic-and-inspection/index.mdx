@@ -1,54 +1,69 @@
 ---
-title: Live Traffic Inspection & Diagnostics
-description: Real-time network request monitoring, domain scope filtering, search, and session management.
+title: Live Traffic & HTTP History
+description: Real-time HTTP/HTTPS request monitoring, domain scope filtering, advanced search, and session management.
 ---
 
-# Live Traffic Inspection & Diagnostics
+# Live Traffic & HTTP History
 
-The **Live Traffic** module is the central nervous system of hexbuffer. It provides real-time visibility into all HTTP, HTTPS, and WebSocket communication passing between your client applications and remote backend servers.
+The **Live Traffic** module is the central diagnostic center of Hexbuffer. It provides real-time visibility into all HTTP and HTTPS communication passing between your client applications, browsers, or automated scripts and remote backend servers.
 
 ---
 
 ## Key Features & Capabilities
 
 ### Real-Time Request Grid
-The main traffic grid displays incoming and outgoing network events as they happen. Each entry includes critical request metrics:
-- **Status & Method**: HTTP status code (200, 302, 401, 500) and request method (`GET`, `POST`, `PUT`, `DELETE`).
-- **Host & URL Path**: Full endpoint URL with domain resolution.
-- **Latency & Timing**: Total response round-trip time in milliseconds.
-- **Content Size**: Exact byte sizes for request and response headers/bodies.
-- **MIME & Content-Type**: Automatic identification of JSON, HTML, XML, binary, and media formats.
+The main traffic grid displays incoming and outgoing network events as they occur with sub-millisecond precision:
+
+- **Status & Method**: Color-coded HTTP status badges (`200 OK`, `302 Found`, `401 Unauthorized`, `403 Forbidden`, `500 Server Error`) and request methods (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `OPTIONS`, `HEAD`).
+- **Host & URL Path**: Full endpoint URL path resolution with host indicators and SSL/TLS status.
+- **Latency & Performance**: Precise round-trip timing in milliseconds to identify backend bottlenecks.
+- **Content Size**: Exact byte counts for request headers, request bodies, response headers, and response payloads.
+- **MIME & Content-Type**: Instant detection of JSON, XML, HTML, GraphQL, JavaScript, CSS, images, and raw binary streams.
+- **Color Tags & Notes**: Assign custom color tags and inline notes to flag noteworthy requests during security audits or API debugging.
 
 ---
 
 ## Powerful Search & Scope Filtering
 
-When debugging complex web applications or microservices, filtering noise is essential. hexbuffer provides multi-layered filtering controls:
+When auditing complex microservices or modern single-page applications, eliminating background noise is essential:
 
-### 1. Scope Filtering
-Define Target Scopes to focus exclusively on relevant hostnames. Traffic outside your target scope can be hidden with a single toggle.
+### 1. Target Scope Filtering
+Define in-scope and out-of-scope domain patterns (e.g., `*.api.example.com`). Toggle **Filter by Scope** to hide all operating system, browser telemetry, or non-target domain traffic.
 
 ### 2. Full-Text Search & Regex Filtering
-Search through URLs, request headers, POST parameters, or response body text in real time. Supports regex pattern matching for advanced pattern detection (e.g., finding specific API tokens or error codes).
+Search through request and response URLs, headers, POST parameters, cookies, or body content in real time. Full regex support enables precise pattern extraction (e.g., detecting exposed API keys, JWT signatures, or stack traces).
 
-### 3. Tagging & Status Ranges
-Assign custom color tags (e.g., `Authentication`, `Error`, `Checkout`) to traffic items. Filter by HTTP status ranges (e.g., `4xx`, `5xx`) to quickly identify server errors or authorization failures.
-
----
-
-## Session Management & Exporting
-
-Never lose your testing history. hexbuffer stores session data in an optimized database with compression.
-
-- **Save Sessions**: Save active captures to disk for later review or collaboration.
-- **Export Formats**: Export selected requests or full capture logs to standard formats:
-  - **HAR (HTTP Archive)**: Compatible with web performance tools and browser DevTools.
-  - **CSV / JSON**: Ideal for spreadsheets, analytics, or automated reporting.
-  - **cURL Command**: Right-click any request to copy it as a ready-to-run `curl` shell command.
+### 3. Status Range & Content-Type Filters
+Filter requests by HTTP status categories (`2xx`, `3xx`, `4xx`, `5xx`), MIME types (JSON, HTML, Media), or minimum/maximum response sizes.
 
 ---
 
-## Customer Experience Best Practices
+## Context Menu & Quick Actions
+
+Right-click any request in the Live Traffic grid to access workflow triggers:
+
+- **Send to Repeater (`Cmd+R` / `Ctrl+R`)**: Clone the request into an interactive crafting tab.
+- **Send to Invoker (`Cmd+I` / `Ctrl+I`)**: Load the request into the high-speed parameter fuzzer.
+- **Send to Comparer (`Cmd+Shift+C`)**: Compare request or response payloads side-by-side.
+- **Copy as cURL / fetch**: Generate ready-to-run shell commands or JavaScript `fetch()` snippets.
+- **Add to Target Scope**: Instantly whitelist the request host in your scope settings.
+
+---
+
+## Session Management & Storage
+
+Hexbuffer stores session capture logs in a high-performance local SQLite database engine:
+
+- **Automatic Session Persistence**: Never lose your capture history across app restarts.
+- **Database Compression**: Built-in data compression ensures capturing tens of thousands of requests uses minimal disk space.
+- **Export Formats**:
+  - **HAR (HTTP Archive)**: Standard format for web performance auditing and cross-tool sharing.
+  - **CSV / JSON**: Structured export for automated analysis, compliance reports, or spreadsheets.
+  - **Raw Session DB**: Save and load complete Hexbuffer capture sessions.
+
+---
+
+## Best Practices
 
 > [!TIP]
-> **Keep Sessions Clean**: Use the **Clear Noise** button to remove 304 Not Modified cache hits or static image assets when auditing API behavior. This ensures your view focuses strictly on dynamic application data!
+> **Use Color Tags for Audit Triage**: Highlight authentication endpoints in Green, payment flows in Blue, and internal error responses in Red to keep complex audit sessions organized and easy to navigate!

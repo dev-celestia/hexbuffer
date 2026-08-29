@@ -1,20 +1,22 @@
 ---
 title: Intelligent AI Assistant & App Triggers
-description: Context-aware AI copilot for traffic inspection, request crafting, and app triggers.
+description: Context-aware AI copilot for traffic inspection, request crafting, terminal execution, and direct app triggers.
 ---
 
 # Intelligent AI Assistant & App Triggers
 
-**hexbuffer** embeds an autonomous AI assistant powered by the `hexbuffer-ai` / Rig LLM framework directly into your workspace sidebar. The assistant understands your current workspace context, inspects network traffic, executes application tools, and assists with complex debugging tasks in plain natural language.
+**Hexbuffer** embeds an autonomous AI assistant powered by the `hexbuffer-ai` / Rig LLM framework directly into your workspace. The AI copilot understands your active workspace context, inspects network traffic, executes application tools, and assists with complex debugging tasks in plain natural language.
 
 ---
 
-## What Makes hexbuffer AI Unique?
+## What Makes Hexbuffer AI Unique?
 
-Unlike standard chatbot interfaces where you have to manually copy and paste code or JSON payloads, hexbuffer's AI agent has **direct tool integration with the application UI**:
+Unlike standard chatbot interfaces where you have to manually copy and paste code or JSON payloads, Hexbuffer's AI agent has **direct tool integration with the application UI**:
+
 - **Live Traffic Context**: The AI can read active proxy logs, analyze HTTP headers, and identify anomalous response codes.
 - **Direct App Triggers**: Ask the AI to create a new Repeater tab, launch a port scan, decode a JWT token, or write a workflow node, and it will execute the action in the app for you.
-- **Terminal & File Access**: The AI can run diagnostic shell commands, check local test files, and organize documentation automatically.
+- **Terminal & Command Execution**: The AI can run diagnostic shell commands in the integrated PTY terminal, inspect files, and execute scripts safely with security approval policies.
+- **Global Command Palette (`Cmd+K` / `Ctrl+K`)**: Prompt the AI copilot from anywhere within the application.
 
 ---
 
@@ -23,19 +25,25 @@ Unlike standard chatbot interfaces where you have to manually copy and paste cod
 Try asking the AI copilot commands such as:
 
 - *"Inspect the last 5 failed HTTP requests in Live Traffic and tell me why they returned 500 errors."*
-- *"Send the POST /api/v1/auth request from Live Traffic to Repeater and create a pre-request script for timestamp generation."*
-- *"Generate a context-aware XSS payload list for the input field 'username' and open it in the Invoker fuzzer."*
-- *"Explain the claims inside this JWT token and check if the signature algorithm is weak."*
+- *"Send the POST /api/v1/auth request from Live Traffic to Repeater and create a pre-request script for HMAC signature generation."*
+- *"Generate a context-aware XSS payload list for the input field 'search_query' and open it in the Invoker fuzzer."*
+- *"Explain the claims inside this JWT token and check if the signature algorithm is vulnerable to 'none' attacks."*
+- *"Create a mock API endpoint in Mock Forge for GET /api/v1/products returning 5 sample items with a 200ms latency."*
 
 ---
 
 ## Configuring AI Providers
 
-You can connect hexbuffer AI to your preferred LLM provider or local models:
+You can connect Hexbuffer AI to your preferred cloud LLM provider or completely local offline models:
+
 1. Open **Settings** -> **AI Configuration**.
-2. Select your provider (OpenAI, Anthropic Claude, Google Gemini, Ollama, or local LM Studio).
-3. Enter your API key or local model endpoint URL.
-4. Customize model temperature, context window size, and system prompts.
+2. Select your provider:
+   - **OpenAI** (GPT-4o, GPT-4o-mini, o1, o3)
+   - **Anthropic** (Claude 3.5 Sonnet, Claude 3.7 Sonnet)
+   - **Google Gemini** (Gemini 2.0 Flash, Gemini 1.5 Pro)
+   - **Ollama / LM Studio** (Local open-source models such as Llama 3, DeepSeek-R1, Qwen 2.5)
+3. Enter your API key or local model endpoint URL (e.g., `http://localhost:11434/v1`).
+4. Configure model parameters (temperature, max tokens, custom system prompts).
 
 > [!TIP]
-> **Privacy First**: When using local LLMs (via Ollama or LM Studio), all traffic analysis and AI reasoning remain entirely on your local machine without sending data to external cloud services!
+> **Privacy-First Local AI**: When using local LLMs (via Ollama or LM Studio), all traffic analysis and AI reasoning remain entirely on your machine without sending data to external cloud services!

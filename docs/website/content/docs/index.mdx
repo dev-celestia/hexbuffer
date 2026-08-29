@@ -1,26 +1,26 @@
 ---
-title: Welcome to hexbuffer
+title: Welcome to Hexbuffer
 description: The Unified Application Security, API Diagnostics, and AI Automation Workspace
 ---
 
 # Redefining Web Application Reconnaissance & Security Testing
 
-**hexbuffer** is a next-generation desktop platform designed to unify web application security diagnostics, API request crafting, network traffic analysis, visual workflow automation, and autonomous AI guidance into a single, seamless environment.
+**Hexbuffer** (v1.1.0) is a high-performance desktop platform designed to unify web application security diagnostics, API request crafting, network traffic analysis, visual workflow automation, and autonomous AI guidance into a single, seamless environment.
 
-Built for modern developers, security researchers, QA engineers, and system architects, hexbuffer eliminates tool fragmentation by bringing network proxying, automated parameter fuzzing, visual end-to-end regression, and AI-driven intelligence under one roof.
+Built with a high-speed Rust backend core, a reactive modern UI, and direct LLM agent tool triggers, Hexbuffer eliminates tool sprawl by bringing network proxying, automated parameter fuzzing, visual end-to-end regression, and AI-driven intelligence under one roof.
 
 ---
 
-## Why Choose hexbuffer?
+## Why Choose Hexbuffer?
 
-Traditional web application testing often requires switching between disjointed browser extensions, standalone API clients, CLI tools, external AI chats, and isolated notes applications. **hexbuffer** replaces this fragmented experience with an intuitive, integrated desktop suite.
+Traditional web application testing often requires switching between disjointed browser extensions, standalone API clients, CLI tools, external AI chats, and isolated notes applications. **Hexbuffer** replaces this fragmented experience with an intuitive, integrated desktop suite.
 
 <Cards>
   <Card title="No Web Tool Sprawl" href="/docs/getting-started">
-    Access your proxy, API client, fuzzers, shell terminal, and documentation in a unified workspace without context switching.
+    Access your proxy, API client, fuzzers, shell terminal, mock servers, and documentation in a unified workspace without context switching.
   </Card>
   <Card title="Autonomous AI Copilot" href="/docs/ai-and-automation">
-    Leverage built-in AI agents that inspect live network traffic, generate test payloads, manage terminal commands, and draft documentation in real time.
+    Leverage built-in AI agents that inspect live network traffic, generate test payloads, trigger desktop tools, and draft documentation in real time.
   </Card>
   <Card title="High-Speed Traffic Diagnostics" href="/docs/traffic-and-inspection">
     Intercept, inspect, and modify HTTP/HTTPS and WebSocket traffic on the fly with millisecond responsiveness and deep packet analysis.
@@ -34,17 +34,20 @@ Traditional web application testing often requires switching between disjointed 
 
 ## Core Capabilities at a Glance
 
-### 1. Real-Time Traffic & Interception
-Capture complete web interactions, monitor live requests and responses, filter by domain scope, and pause in-flight traffic to edit payloads before they hit your servers.
+### 1. Modular Desktop Dashboard
+Customize your workspace with draggable widgets—monitor target scopes, proxy status, VPN connections, system clipboard history, request collections, recent files, scratchpads, and keyboard shortcuts from a central hub.
 
-### 2. Request Crafting & Fuzzing
-Replay and modify requests effortlessly in the **Repeater**, execute high-speed parameter fuzzing in the **Invoker**, and perform context-aware vulnerability checks for SQL Injection and XSS.
+### 2. Real-Time Traffic & Interception
+Capture complete web interactions, monitor live HTTP and WebSocket requests, filter by domain scope, and pause in-flight traffic with active interception to edit payloads before they reach the server.
 
-### 3. Out-of-Band Collaborator
-Detect asynchronous callbacks, webhooks, and out-of-band interactions across DNS, HTTP, and SMTP protocols to verify asynchronous application behavior.
+### 3. Request Crafting & Fuzzing
+Replay and modify requests effortlessly in the multi-tab **Repeater**, execute high-speed parameter fuzzing with **Invoker** (Sniper, Battering Ram, Pitchfork, Cluster Bomb), and perform context-aware vulnerability checks for SQL Injection and XSS.
 
-### 4. AI-Powered Workspace & Developer Tools
-Collaborate with an integrated AI assistant, execute visual E2E regression tests, spin up API mock servers with **Mock Forge**, manage project tasks with **Kanban**, and encode/hash payloads instantly.
+### 4. Security Utilities & Out-of-Band Collaborator
+Inspect and sign JSON Web Tokens with the tabbed **JWT Tool**, perform fast TCP port scanning with **Port Scanner** (Beta), and capture asynchronous DNS, HTTP, and SMTP callbacks using the **OOB Listener**.
+
+### 5. AI-Powered Workspace & Developer Tools
+Collaborate with an integrated AI copilot (`Cmd+K`), execute visual E2E regression tests, spin up API mock servers with **Mock Forge**, manage project tasks with **Kanban**, execute shell commands in the integrated **PTY Terminal**, and encode/hash payloads instantly.
 
 ---
 
@@ -52,9 +55,9 @@ Collaborate with an integrated AI assistant, execute visual E2E regression tests
 
 Get up and running quickly or dive deep into specific feature modules:
 
-- **[Getting Started](/docs/getting-started)**: Install hexbuffer, set up your root CA certificate, and capture your first request.
-- **[Traffic & Inspection](/docs/traffic-and-inspection)**: Master live proxy diagnostics, active interception, and side-by-side payload comparison.
-- **[Request Crafting & Testing](/docs/request-crafting-and-testing)**: Learn how to replay requests, run fuzzers, and check security boundaries.
-- **[AI & Automation](/docs/ai-and-automation)**: Discover how AI agents and visual workflows accelerate your testing cycle.
-- **[Developer Workspace](/docs/developer-workspace)**: Utilize mock servers, encoders, JWT analysis, and integrated note-taking.
-- **[User Guide & Best Practices](/docs/user-guide-and-faqs)**: Tips for maximizing productivity and getting the best customer experience.
+- **[Getting Started](/docs/getting-started)**: Install Hexbuffer, configure the local MITM proxy, set up your root CA certificate, and capture your first request.
+- **[Traffic & Diagnostics](/docs/traffic-and-inspection)**: Master live HTTP history, WebSocket frame streaming, active interception, and side-by-side payload comparison.
+- **[Request Crafting & Testing](/docs/request-crafting-and-testing)**: Learn how to replay requests in Repeater, run fuzzers in Invoker, scan ports, and test security boundaries.
+- **[AI & Automation](/docs/ai-and-automation)**: Discover how AI copilot agents, visual workflows, and automated web crawlers accelerate your testing cycle.
+- **[Developer Workspace](/docs/developer-workspace)**: Utilize Mock Forge API servers, PTY shell terminal, Encoders, Hashers, JWT analysis, Markdown notes, and Kanban boards.
+- **[User Guide & Best Practices](/docs/user-guide-and-faqs)**: Tips for maximizing productivity, keyboard shortcuts, performance tuning, and FAQs.

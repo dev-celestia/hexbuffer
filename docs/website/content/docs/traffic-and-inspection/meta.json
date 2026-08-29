@@ -2,7 +2,9 @@
   "title": "Traffic & Diagnostics",
   "pages": [
     "index",
+    "websocket-history",
     "intercept",
     "inspector"
   ]
 }
+

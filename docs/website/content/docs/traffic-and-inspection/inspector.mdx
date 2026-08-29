@@ -1,43 +1,64 @@
 ---
 title: Deep Message Inspector & Monaco Comparer
-description: Analyze HTTP structures, headers, cookies, and run side-by-side visual diffs.
+description: Analyze HTTP structures, headers, cookies, timing metrics, and run side-by-side visual diffs.
 ---
 
 # Deep Message Inspector & Monaco Comparer
 
-Understanding intricate request structures, header details, and payload variations requires specialized tools. The **Inspector** and **Comparer** modules in hexbuffer provide deep structural analysis and visual diff comparison for all web traffic.
+Understanding intricate request structures, header details, token signatures, and payload variations requires specialized diagnostic tools. The **Inspector** and **Comparer** modules in Hexbuffer provide deep structural analysis and visual diff comparison for all web traffic.
 
 ---
 
 ## Deep Message Inspector
 
-Selecting any request in hexbuffer opens the **Inspector Pane**, which breaks down raw network packets into easy-to-read, structured components:
+Selecting any request in Hexbuffer opens the **Inspector Pane**, which deconstructs raw network packets into clean, structured views:
 
 ### Key Inspection Views
-- **Headers View**: Organized key-value representation of HTTP request and response headers with quick-copy capabilities.
-- **Body & Payload View**: Formatted syntax-highlighted editor for JSON, XML, HTML, GraphQL, or raw text payloads with auto-indentation.
-- **Cookies & Tokens**: Dedicated tab isolating session cookies, Bearer tokens, and security flags (`HttpOnly`, `Secure`, `SameSite`).
-- **Timing Breakdown**: Visual waterfall breakdown showing DNS lookup, TLS handshake, request transfer, server processing time, and response download.
+
+- **Headers View**:
+  - Organized table of key-value HTTP request and response headers.
+  - Quick-copy buttons for individual header values.
+  - Raw header mode for viewing exact protocol byte sequences.
+- **Body & Payload View**:
+  - Formatted, syntax-highlighted editor supporting JSON, XML, HTML, GraphQL, Form-Data, and Multipart bodies.
+  - Automatic indentation, tree folding, and search within payloads.
+  - Raw text and hex view modes for inspecting binary content or corrupted character encodings.
+- **Cookies & Security Tokens**:
+  - Isolated tab listing session cookies, Bearer tokens, and security flags (`HttpOnly`, `Secure`, `SameSite`, `Max-Age`).
+  - Highlights potentially vulnerable cookies lacking critical security flags.
+- **Timing & Waterfall Breakdown**:
+  - Sub-millisecond timing visualization covering DNS resolution, TLS handshake, request transfer, server processing latency, and response content download.
+
+### Layout Customization
+Adapt the inspector to your screen size and workflow:
+- **Split-View**: View the request grid and inspector side-by-side.
+- **Full-Width Inspector**: Expand the inspector horizontally to review wide JSON payloads.
+- **Maximized Inspector**: Dedicate the entire screen to deep packet inspection.
 
 ---
 
 ## Monaco-Powered Payload Comparer
 
-When comparing two API responses (e.g., staging vs. production, or authorized vs. unauthorized requests), finding subtle differences manually can be time-consuming. The **Comparer** tool automates this process using the industry-standard Monaco editor engine.
+When comparing two API responses (such as Staging vs. Production, Authorized vs. Unauthorized, or baseline vs. fuzzed responses), finding subtle variations manually is error-prone. The **Comparer** tool automates this with the Monaco diff engine.
 
-### How to Compare Requests or Responses
+### Comparing Requests & Responses
 
-1. Select two items from your **Live Traffic** grid or **Repeater** tabs.
-2. Right-click and choose **Send to Comparer** (or open the **Comparer** tab directly).
-3. The split-screen diff viewer highlights:
+1. Select two items in the **Live Traffic** grid or **Repeater** tabs.
+2. Right-click and choose **Send to Comparer** (or press `Cmd+Shift+C`).
+3. The split-screen diff viewer highlights differences:
    - **Green**: Added lines or parameters.
    - **Red**: Deleted lines or missing fields.
-   - **Yellow/Blue**: Modified header values or altered JSON properties.
+   - **Blue / Yellow**: Modified header values, altered JSON properties, or timing differences.
+
+### Comparison Modes
+- **Text Diff**: Line-by-line structural text comparison with whitespace tolerance controls.
+- **Byte / Hex Diff**: Byte-level binary diff for comparing compressed or non-text assets.
+- **Word / Token Diff**: Inline character-by-character highlight of specific parameter changes.
 
 ---
 
-## Customer Benefits
+## Key Benefits
 
-- **Rapid Debugging**: Instantly spot missing header fields or mismatched API payload schemas.
-- **Regression Detection**: Compare successful API responses against failed responses to pinpoint breaking backend changes.
-- **Clean Visual Presentation**: Auto-formats messy, minified JSON or HTML into clean, readable code structures.
+- **Rapid Debugging**: Instantly pinpoint schema discrepancies between API versions.
+- **Regression Detection**: Compare successful API responses against broken responses to discover the root cause of backend exceptions.
+- **Clean Formatting**: Minified, unreadable JSON or HTML is automatically beautified and organized.

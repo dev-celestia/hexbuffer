@@ -1,42 +1,56 @@
 ---
 title: Security & Vulnerability Testing Suite
-description: Context-aware SQL Injection testing, XSS payload generation, and input validation checks.
+description: Context-aware SQL Injection testing, XSS payload generation, tamper evasion, and input validation checks.
 ---
 
 # Security & Vulnerability Testing Suite
 
-To ensure your web applications are resilient against common security threats, hexbuffer includes specialized, context-aware testing modules for **SQL Injection (SQLi)** and **Cross-Site Scripting (XSS)** payload generation.
+To ensure web applications are resilient against modern application security threats, **Hexbuffer** includes specialized, context-aware testing modules for **SQL Injection (SQLi)** and **Cross-Site Scripting (XSS)** payload generation and validation.
 
 ---
 
-## SQL Injection & Boundary Tester
+## SQL Injection Generator & Tester
 
-The **SQL Injection Tester** helps verify whether user input fields properly sanitize database query parameters before executing SQL queries.
+The **SQL Injection** tool helps developers and security engineers identify database injection vulnerabilities and test whether backend database layers properly sanitize input parameters.
 
-### Key Capabilities
-- **Vector Categories**: Includes error-based, boolean-based blind, time-based blind, and UNION query payload vectors.
-- **Automated Validation**: Analyzes server responses for database error patterns (MySQL, PostgreSQL, SQLite, MSSQL, Oracle).
-- **Safe Boundary Checking**: Designed to identify input validation weaknesses without causing database corruption or data loss.
+### Supported Injection Vectors
+- **Error-Based SQLi**: Generates payloads designed to trigger syntax or type conversion errors across specific database engines, revealing schema structure in error messages.
+- **Boolean-Based Blind SQLi**: Injects true/false boolean assertions (e.g., `' OR 1=1 --` vs `' OR 1=2 --`) to infer database state based on subtle differences in response content or HTTP status codes.
+- **Time-Based Blind SQLi**: Injects database sleep/delay functions (e.g., `pg_sleep()`, `WAITFOR DELAY`, `SLEEP()`) to confirm injection vulnerabilities when applications return identical responses for all inputs.
+- **UNION-Based SQLi**: Injects `UNION SELECT` statements to determine column counts, data types, and extract database records.
+
+### Database Dialect Targeting & Tamper Scripts
+- **Dialect Optimization**: Tailor payloads specifically for **MySQL**, **PostgreSQL**, **SQLite**, **Microsoft SQL Server (MSSQL)**, and **Oracle**.
+- **Tamper Scripts**: Apply automated evasion transformations to test Web Application Firewall (WAF) rule robustness:
+  - Space-to-comment conversion (`/**/`)
+  - Hexadecimal and Unicode encoding
+  - Random case alterations (`uNiOn sElEcT`)
+  - Double URL encoding (`%2527`)
 
 ---
 
 ## XSS Payload Generator & Encoder
 
-The **XSS Generator** crafts context-aware payload vectors to test whether web applications adequately escape user-supplied input rendered in HTML, attribute contexts, JavaScript blocks, or URI query strings.
+The **XSS Generator** constructs context-aware payload vectors to test whether web applications properly sanitize and escape untrusted data rendered in browser contexts.
 
-### Key Capabilities
-- **Context Awareness**: Generates tailored payloads based on where input is reflected (e.g., inside `<div>` tags, `<input value="...">` attributes, or `<script>` blocks).
-- **Nested Encoders**: Integrates Base64, URL encoding, HTML entity encoding, and Hex escaping to test bypass mechanisms against over-filtering.
-- **DOM-Based XSS Inspection**: Scans client-side JavaScript execution sinks to flag unescaped DOM assignments (`innerHTML`, `document.write`, `eval`).
+### Context-Aware Payload Categories
+- **HTML Context**: Payloads for insertion directly between HTML tags (e.g., `<div>{{payload}}</div>`).
+- **Attribute Context**: Payloads designed to break out of HTML attributes (e.g., `<input value="{{payload}}">` or `<a href="{{payload}}">`).
+- **JavaScript Context**: Payloads tailored for execution inside existing inline `<script>` blocks or JSON variables.
+- **DOM XSS Polyglots**: Compact multi-context strings designed to execute successfully across various browser parsing states.
+
+### Filter Bypass & Encoding Matrix
+- Nested encoding options: URL encoding, Base64, HTML Entity Decimal/Hex, Unicode Escapes, and String.fromCharCode transformations.
+- Modern event-handler variants (`onerror`, `onload`, `onfocus`, `ontoggle`, `onanimationstart`) that bypass legacy regex filters targeting `<script>` tags.
 
 ---
 
-## Remediation & Best Practices
+## Remediation & Defensive Best Practices
 
-Testing with hexbuffer provides clear actionable feedback for engineering teams:
+Testing with Hexbuffer provides actionable guidance for engineering teams:
 
 > [!IMPORTANT]
-> **Use Parameterized Queries**: To prevent SQL Injection, always use prepared statements or parameterized ORM queries in your backend codebase.
+> **Defend Against SQL Injection**: Always use prepared statements, parameterized queries, or modern Object-Relational Mappers (ORMs). Never concatenate user input directly into SQL strings.
 
 > [!TIP]
-> **Contextual HTML Escaping**: To prevent XSS, use framework-level auto-escaping (such as React or modern templating engines) and implement a robust **Content Security Policy (CSP)**.
+> **Defend Against XSS**: Implement strict **Content Security Policy (CSP)** headers, enforce contextual HTML output escaping, and utilize framework-level protections (such as React's JSX auto-escaping or trusted types).
