@@ -15,7 +15,6 @@ import {
   extractCallHost,
 } from '@/stores/history';
 import { adaptProxyRecordToApiCall } from './use-history-table';
-import { useRepeaterStore } from '@/stores/repeater';
 import { buildHttpCurlCommand, buildRawHttpRequest } from '@/lib/http-message';
 import { copyText } from '@/lib/clipboard';
 import { useTargetStore } from '@/stores/target';
@@ -26,9 +25,6 @@ import { useMockForgeStore } from '@/stores/mock-forge';
 import type { MockDomain, MockRoute } from '@/pages/mock-forge/types';
 import { sendToCollection, sendRawToRepeater } from '@/triggers/repeater';
 import { cleanUrl } from '@/lib/utils';
-import { exportHarJson } from '@/lib/har';
-import { downloadFile } from '@/lib/download';
-import { generatePythonRequestsCode, generateNodeFetchCode } from '@/lib/code-gen';
 
 export function extractHostFromCall(call: Partial<ApiCall> | null | undefined): string {
   if (!call) return '';
@@ -238,7 +234,6 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
   }, [call.id]);
 
   const handleOpenInInvoker = handleOpenInIntruder;
-
 
   const handleOpenInRepeater = useCallback(async () => {
     try {

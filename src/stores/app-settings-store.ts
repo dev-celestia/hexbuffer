@@ -18,6 +18,7 @@ interface AppSettingsState {
   primaryColor: PrimaryColor
   hiddenWidgets: string[]
   widgetOrder: string[]
+  seenNewApps: string[]
   setBg: (type: BgType, value: string) => void
   clearBg: () => void
   setTheme: (t: AppTheme) => void
@@ -29,13 +30,14 @@ interface AppSettingsState {
   addRecentApp: (href: string) => void
   removeRecentApp: (href: string) => void
   clearRecentApps: () => void
+  markNewAppSeen: (href: string) => void
   toggleWidget: (widgetId: string) => void
   reorderWidgets: (fromIndex: number, toIndex: number) => void
   setWidgetOrder: (order: string[]) => void
   resetHiddenWidgets: () => void
 }
 
-type PersistedSettings = Pick<AppSettingsState, 'hiddenNavItems' | 'pinnedNavItems' | 'recentApps' | 'bgType' | 'bgValue' | 'theme' | 'primaryColor' | 'hiddenWidgets' | 'widgetOrder'>
+type PersistedSettings = Pick<AppSettingsState, 'hiddenNavItems' | 'pinnedNavItems' | 'recentApps' | 'bgType' | 'bgValue' | 'theme' | 'primaryColor' | 'hiddenWidgets' | 'widgetOrder' | 'seenNewApps'>
 
 export const useAppSettingsStore = create<AppSettingsState>()(
   persist<AppSettingsState, [], [], PersistedSettings>(
@@ -49,6 +51,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
         '/browser',
       ],
       recentApps: [],
+      seenNewApps: [],
       bgType: 'none',
       bgValue: '',
       theme: 'dark',
@@ -90,6 +93,12 @@ export const useAppSettingsStore = create<AppSettingsState>()(
           recentApps: (state.recentApps || []).filter((h) => h !== href),
         })),
       clearRecentApps: () => set({ recentApps: [] }),
+      markNewAppSeen: (href) =>
+        set((state) => ({
+          seenNewApps: (state.seenNewApps || []).includes(href)
+            ? (state.seenNewApps || [])
+            : [...(state.seenNewApps || []), href],
+        })),
       toggleWidget: (widgetId) =>
         set((state) => ({
           hiddenWidgets: (state.hiddenWidgets || []).includes(widgetId)
@@ -125,6 +134,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
         hiddenNavItems: state.hiddenNavItems,
         pinnedNavItems: state.pinnedNavItems,
         recentApps: state.recentApps,
+        seenNewApps: state.seenNewApps,
         bgType: state.bgType,
         bgValue: state.bgValue,
         theme: state.theme,
@@ -141,6 +151,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
           hiddenNavItems: state?.hiddenNavItems ?? base.hiddenNavItems,
           pinnedNavItems: state?.pinnedNavItems ?? base.pinnedNavItems,
           recentApps: state?.recentApps ?? base.recentApps,
+          seenNewApps: state?.seenNewApps ?? base.seenNewApps,
           bgType: state?.bgType ?? base.bgType,
           bgValue: state?.bgValue ?? base.bgValue,
           theme: state?.theme ?? base.theme,

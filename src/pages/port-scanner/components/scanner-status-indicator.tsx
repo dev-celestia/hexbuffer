@@ -58,14 +58,9 @@ export function ScannerStatusIndicator({
       {/* Stealth / Noisy Mode indicator badge */}
       {stealthMode ? (
         <Badge
-          variant="outline"
           className={cn(
             // Sizing & Spacing
             "h-5 px-1.5",
-
-            // Typography
-            "text-[10px] font-medium",
-
             // Backgrounds & Borders
             "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20"
           )}

@@ -54,7 +54,7 @@ export function usePortScannerPage() {
   // ── Derived ──────────────────────────────────
   const parsedPorts = useMemo(() => parsePorts(ports), [ports]);
   const openResults = useMemo(() => results.filter((r) => r.state === 'open'), [results]);
-  const selectedPortLabel = preset === 'custom' ? ports || 'Custom ports' : describePortPreset(preset);
+  const selectedPortLabel = preset === 'Custom' ? ports || 'Custom ports' : describePortPreset(preset);
   const hasResults = openResults.length > 0;
   const canScan = !!target.trim() && parsedPorts.length > 0;
 
@@ -62,7 +62,7 @@ export function usePortScannerPage() {
   const handlePresetChange = useCallback((value: string) => {
     const nextPreset = value as PortPreset;
     setPreset(nextPreset);
-    if (nextPreset !== 'custom') {
+    if (nextPreset !== 'Custom') {
       setPorts(PORT_PRESETS[nextPreset]);
     }
   }, [setPreset, setPorts]);
@@ -70,7 +70,7 @@ export function usePortScannerPage() {
   // ── Scan ─────────────────────────────────────
   const startScan = useCallback(async (targetOverride?: string | unknown, presetOverride?: PortPreset | unknown) => {
     const scanTarget = (typeof targetOverride === 'string' ? targetOverride : target).trim();
-    const scanPortsStr = typeof presetOverride === 'string' && presetOverride !== 'custom' ? PORT_PRESETS[presetOverride] : ports;
+    const scanPortsStr = typeof presetOverride === 'string' && presetOverride !== 'Custom' ? PORT_PRESETS[presetOverride] : ports;
     const scanPorts = parsePorts(scanPortsStr);
 
     if (!scanTarget || scanPorts.length === 0) return;

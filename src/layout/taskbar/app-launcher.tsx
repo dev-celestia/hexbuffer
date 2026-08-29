@@ -33,6 +33,7 @@ export function AppLauncher() {
   const navigate = useNavigate();
 
   const pinnedNavItems = useAppSettingsStore((s) => s.pinnedNavItems);
+  const seenNewApps = useAppSettingsStore((s) => s.seenNewApps);
   const togglePinNavItem = useAppSettingsStore((s) => s.togglePinNavItem);
 
   const launcherItems = MAIN_NAV_ITEMS.filter((item) => item.href !== '/');
@@ -218,7 +219,7 @@ export function AppLauncher() {
                             >
                               {item.label}
                             </span>
-                            {item.isNew && (
+                            {item.isNew && !seenNewApps?.includes(item.href) && (
                               <span
                                 className={cn(
                                   // Sizing & Spacing

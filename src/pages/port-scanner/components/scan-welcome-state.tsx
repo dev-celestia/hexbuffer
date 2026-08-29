@@ -47,7 +47,7 @@ export function ScanWelcomeState({ onQuickStart }: ScanWelcomeStateProps) {
       >
         <button
           type="button"
-          onClick={() => onQuickStart('quick')}
+          onClick={() => onQuickStart('Quick')}
           className={cn(
             // Layout & Positioning
             "flex flex-col items-start text-left",
@@ -72,7 +72,7 @@ export function ScanWelcomeState({ onQuickStart }: ScanWelcomeStateProps) {
 
         <button
           type="button"
-          onClick={() => onQuickStart('web')}
+          onClick={() => onQuickStart('Web')}
           className={cn(
             // Layout & Positioning
             "flex flex-col items-start text-left",
@@ -97,7 +97,7 @@ export function ScanWelcomeState({ onQuickStart }: ScanWelcomeStateProps) {
 
         <button
           type="button"
-          onClick={() => onQuickStart('top100')}
+          onClick={() => onQuickStart('Top100')}
           className={cn(
             // Layout & Positioning
             "flex flex-col items-start text-left",

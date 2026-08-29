@@ -103,66 +103,7 @@ export function ScannerToolbar({
         "border-b bg-muted/20"
       )}
     >
-      {/* Left: Action Buttons + Status + Progress */}
-      <div
-        className={cn(
-          // Layout & Positioning
-          "flex items-center",
-
-          // Sizing & Spacing
-          "gap-3"
-        )}
-      >
-        {/* Start / Stop */}
-        {isRunning ? (
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={onStop}
-          >
-            <SquareIcon className="size-3" />
-            Stop Scan
-          </Button>
-        ) : (
-          <Button
-            size="sm"
-            disabled={!canScan}
-            onClick={onStart}
-          >
-            <PlayIcon className="size-3" />
-            Start Scan
-          </Button>
-        )}
-
-        {/* Status Indicator */}
-        <ScannerStatusIndicator
-          isRunning={isRunning}
-          stealthMode={stealthMode}
-        />
-
-        {/* Progress Display */}
-        {isRunning && progress.total > 0 && (
-          <div
-            className={cn(
-              // Layout & Positioning
-              "flex items-center",
-
-              // Sizing & Spacing
-              "gap-2",
-
-              // Typography
-              "text-xs font-semibold text-muted-foreground"
-            )}
-          >
-            <span>Progress:</span>
-            <span className="font-mono text-foreground">
-              {progress.current} / {progress.total} ({percentage}%)
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Right: Target Input, Preset, Stealth Toggle, Config Popover */}
+      {/* Left: Target Input, Action Button, Preset Select, Status & Progress */}
       <div
         className={cn(
           // Layout & Positioning
@@ -191,7 +132,47 @@ export function ScannerToolbar({
           placeholder="target host or IP"
           value={target}
           onChange={(e) => onTargetChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && canScan && !isRunning) {
+              onStart();
+            }
+          }}
         />
+
+        {/* Start / Stop */}
+        {isRunning ? (
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={onStop}
+            className={cn(
+              // Sizing & Spacing
+              "h-7 px-2.5",
+
+              // Typography
+              "text-xs"
+            )}
+          >
+            <SquareIcon className="size-3" />
+            Stop Scan
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            disabled={!canScan}
+            onClick={onStart}
+            className={cn(
+              // Sizing & Spacing
+              "h-7 px-2.5",
+
+              // Typography
+              "text-xs"
+            )}
+          >
+            <PlayIcon className="size-3" />
+            Start Scan
+          </Button>
+        )}
 
         {/* Preset Select */}
         <Select value={preset} onValueChange={onPresetChange}>
@@ -227,7 +208,7 @@ export function ScannerToolbar({
         </Select>
 
         {/* Custom ports inline (only if custom preset) */}
-        {preset === 'custom' && (
+        {preset === 'Custom' && (
           <Input
             id="ports-input"
             className={cn(
@@ -250,6 +231,44 @@ export function ScannerToolbar({
           />
         )}
 
+        {/* Status Indicator */}
+        <ScannerStatusIndicator
+          isRunning={isRunning}
+          stealthMode={stealthMode}
+        />
+
+        {/* Progress Display */}
+        {isRunning && progress.total > 0 && (
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center",
+
+              // Sizing & Spacing
+              "gap-2",
+
+              // Typography
+              "text-xs font-semibold text-muted-foreground"
+            )}
+          >
+            <span>Progress:</span>
+            <span className="font-mono text-foreground">
+              {progress.current} / {progress.total} ({percentage}%)
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Right: Stealth Toggle & Config Popover */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center",
+
+          // Sizing & Spacing
+          "gap-2"
+        )}
+      >
         {/* Stealth Toggle */}
         <Tooltip>
           <TooltipTrigger

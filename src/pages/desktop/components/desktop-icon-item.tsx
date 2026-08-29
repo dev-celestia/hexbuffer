@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { ALL_NAV_ITEMS, getAppIconImage } from '@/layout/constants';
+import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { DEFAULT_ICON_COLORS } from '../constants';
 import { cn } from '@/lib/utils';
 
@@ -16,10 +17,12 @@ interface DesktopIconItemProps {
 }
 
 export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Readonly<DesktopIconItemProps>) {
+  const seenNewApps = useAppSettingsStore((s) => s.seenNewApps);
   const item = React.useMemo(() => {
     return ALL_NAV_ITEMS.find((i) => i.href === href);
   }, [href]);
 
+  const isNew = Boolean(item?.isNew && !seenNewApps?.includes(href));
   const CustomIcon = item?.icon || IconComp;
   const colors = item?.colors || DEFAULT_ICON_COLORS;
   const description = item?.description || '';
@@ -106,7 +109,7 @@ export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Readon
             />
           )}
         </div>
-        {item?.isNew && (
+        {isNew && (
           <span
             className={cn(
               // Layout & Positioning

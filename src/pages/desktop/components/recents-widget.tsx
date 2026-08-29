@@ -10,6 +10,7 @@ export function RecentsWidget() {
   const navigate = useNavigate();
   const recentApps = useAppSettingsStore((s) => s.recentApps || []);
   const hiddenNavItems = useAppSettingsStore((s) => s.hiddenNavItems);
+  const seenNewApps = useAppSettingsStore((s) => s.seenNewApps);
 
   const recentItems = React.useMemo(() => {
     return recentApps
@@ -114,7 +115,7 @@ export function RecentsWidget() {
                 {item.label}
               </span>
 
-              {item.isNew && (
+              {item.isNew && !seenNewApps?.includes(item.href) && (
                 <span
                   className={cn(
                     // Sizing & Spacing

@@ -28,8 +28,8 @@ export function sortScanResults(a: PortScanResult, b: PortScanResult): number {
 }
 
 export function describePortPreset(preset: PortPreset): string {
-  if (preset === 'quick') return `Quick ports: ${PORT_PRESETS.quick}`;
-  if (preset === 'web') return `Web ports: ${PORT_PRESETS.web}`;
-  if (preset === 'top100') return `Top 100 common ports: ${PORT_PRESETS.top100}`;
+  if (preset === 'Quick') return `Quick ports: ${PORT_PRESETS.Quick}`;
+  if (preset === 'Web') return `Web ports: ${PORT_PRESETS.Web}`;
+  if (preset === 'Top100') return `Top 100 common ports: ${PORT_PRESETS.Top100}`;
   return 'Full scan: 1-65535';
 }

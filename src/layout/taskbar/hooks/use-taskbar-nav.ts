@@ -40,6 +40,7 @@ export function useSidebarNav() {
   const togglePinNavItem = useAppSettingsStore((s) => s.togglePinNavItem);
 
   const addRecentApp = useAppSettingsStore((s) => s.addRecentApp);
+  const markNewAppSeen = useAppSettingsStore((s) => s.markNewAppSeen);
 
   const windows = useNavStore((state) => state.windows);
 
@@ -71,7 +72,7 @@ export function useSidebarNav() {
     }
   }, [pathname, visibleNavItems, openWindow]);
 
-  // Track pathname changes to update recent apps list
+  // Track pathname changes to update recent apps list and mark as seen
   React.useEffect(() => {
     const matchedItem = visibleNavItems.find((item) => item.href === pathname);
     if (
@@ -80,8 +81,9 @@ export function useSidebarNav() {
       pathname !== '/assistant'
     ) {
       addRecentApp(pathname);
+      markNewAppSeen(pathname);
     }
-  }, [pathname, visibleNavItems, addRecentApp]);
+  }, [pathname, visibleNavItems, addRecentApp, markNewAppSeen]);
 
   const pinnedDockItems = React.useMemo(() => {
     return pinnedNavItems

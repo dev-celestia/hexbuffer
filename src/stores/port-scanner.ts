@@ -49,8 +49,8 @@ export const usePortScannerStore = create<PortScannerState>()(
     (set) => ({
       // Initial values
       target: '',
-      preset: 'quick',
-      ports: PORT_PRESETS.quick,
+      preset: 'Quick',
+      ports: PORT_PRESETS.Quick,
       timeoutMs: '800',
       concurrency: '100',
       bannerGrab: true,
@@ -126,10 +126,19 @@ export const usePortScannerStore = create<PortScannerState>()(
       merge: (persisted, current): PortScannerState => {
         const base = current as PortScannerState;
         const state = persisted as Partial<PortScannerState> | undefined;
+        const persistedPreset = state?.preset as string | undefined;
+        let normalizedPreset: PortPreset = base.preset;
+        if (persistedPreset) {
+          if (persistedPreset.toLowerCase() === 'quick') normalizedPreset = 'Quick';
+          else if (persistedPreset.toLowerCase() === 'web') normalizedPreset = 'Web';
+          else if (persistedPreset.toLowerCase() === 'top100') normalizedPreset = 'Top100';
+          else if (persistedPreset.toLowerCase() === 'full') normalizedPreset = 'Full';
+          else if (persistedPreset.toLowerCase() === 'custom') normalizedPreset = 'Custom';
+        }
         return {
           ...base,
           target: state?.target ?? base.target,
-          preset: state?.preset ?? base.preset,
+          preset: normalizedPreset,
           ports: state?.ports ?? base.ports,
           timeoutMs: state?.timeoutMs ?? base.timeoutMs,
           concurrency: state?.concurrency ?? base.concurrency,

@@ -95,14 +95,6 @@ export const RELEASE_NAV_ITEMS: NavItem[] = [
     flag: 'release',
   },
   {
-    label: 'MockForge',
-    icon: BlueprintIcon,
-    href: '/mock-forge',
-    description: 'Mock HTTP endpoints, responses, and simulate server behaviors.',
-    colors: { bg: 'bg-teal-600 dark:bg-teal-600', hoverBg: 'group-hover:bg-teal-600 dark:group-hover:bg-teal-600', border: 'border-teal-600 dark:border-teal-600' },
-    flag: 'beta',
-  },
-  {
     label: 'Notes',
     icon: PencilIcon,
     href: '/scratchpad',
@@ -164,6 +156,14 @@ export const ALPHA_NAV_ITEMS: NavItem[] = import.meta.env.PROD
         description: 'Capture and inspect real-time WebSocket network traffic.',
         colors: { bg: 'bg-blue-500 dark:bg-blue-500', hoverBg: 'group-hover:bg-blue-500 dark:group-hover:bg-blue-500', border: 'border-blue-500 dark:border-blue-500' },
         flag: 'alpha',
+      },
+      {
+        label: 'MockForge',
+        icon: BlueprintIcon,
+        href: '/mock-forge',
+        description: 'Mock HTTP endpoints, responses, and simulate server behaviors.',
+        colors: { bg: 'bg-teal-600 dark:bg-teal-600', hoverBg: 'group-hover:bg-teal-600 dark:group-hover:bg-teal-600', border: 'border-teal-600 dark:border-teal-600' },
+        flag: 'beta',
       },
       {
         label: 'Workflow',

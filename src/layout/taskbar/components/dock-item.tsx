@@ -6,6 +6,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 import { cn } from '@/lib/utils';
+import { useAppSettingsStore } from '@/stores/app-settings-store';
 
 import { getAppIconImage, type NavItem } from '../../constants';
 
@@ -26,6 +27,8 @@ export function DockItem({
   onClick,
   children,
 }: DockItemProps) {
+  const seenNewApps = useAppSettingsStore((s) => s.seenNewApps);
+  const isNew = Boolean(item.isNew && !seenNewApps?.includes(item.href));
   const imageSrc = getAppIconImage(item.href, item.label);
 
   return (
@@ -112,7 +115,7 @@ export function DockItem({
       </TooltipTrigger>
       <TooltipContent side="top" sideOffset={12} className="flex items-center gap-1.5 font-sans">
         <span>{item.label}</span>
-        {item.isNew && (
+        {isNew && (
           <span className={cn(
             "text-[9px] font-extrabold uppercase tracking-wider px-1 rounded-sm leading-none py-0.5",
             "bg-purple-500/20 text-purple-600 dark:text-purple-400"
