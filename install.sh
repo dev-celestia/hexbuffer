@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="hexbuffer"
+APP_NAME="Hexbuffer"
 BASE_URL="${OXBUFFER_RELEASES_URL:-https://dist.0xbuffer.com}"
 BASE_URL="${BASE_URL%/}"
 INSTALL_DIR="${OXBUFFER_INSTALL_DIR:-/Applications}"
