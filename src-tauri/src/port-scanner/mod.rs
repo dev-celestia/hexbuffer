@@ -78,8 +78,8 @@ pub async fn scan_ports(
 
     let semaphore = Arc::new(Semaphore::new(concurrency));
     let completed = Arc::new(AtomicUsize::new(0));
-    let results = Arc::new(Mutex::new(Vec::with_capacity(total)));
-    let mut handles = Vec::with_capacity(total);
+    let results = Arc::new(Mutex::new(Vec::new()));
+    let mut join_set = tokio::task::JoinSet::new();
 
     for host in hosts {
         for port in &ports {
@@ -91,6 +91,13 @@ pub async fn scan_ports(
                 Ok(permit) => permit,
                 Err(_) => break,
             };
+
+            while join_set.len() >= concurrency * 2 {
+                if join_set.join_next().await.is_none() {
+                    break;
+                }
+            }
+
             let app = app.clone();
             let host = host.clone();
             let port = *port;
@@ -99,7 +106,7 @@ pub async fn scan_ports(
             let completed = completed.clone();
             let results = results.clone();
 
-            handles.push(tokio::spawn(async move {
+            join_set.spawn(async move {
                 let _permit = permit;
                 if cancel_flag.load(Ordering::Relaxed) {
                     return;
@@ -115,28 +122,33 @@ pub async fn scan_ports(
                     cancel_flag.clone(),
                 )
                 .await;
+
                 if result.state == "cancelled" {
                     return;
                 }
-                crate::automation::ingest_port_scan_result(&app, &scan_id, &result);
 
-                let current = completed.fetch_add(1, Ordering::Relaxed) + 1;
-                if let Ok(mut results) = results.lock() {
-                    results.push(result.clone());
+                let is_open = result.state == "open";
+                if is_open {
+                    crate::automation::ingest_port_scan_result(&app, &scan_id, &result);
+                    if let Ok(mut results) = results.lock() {
+                        results.push(result.clone());
+                    }
+                    let _ = app.emit(&format!("port-scan-result-{}", scan_id), result);
                 }
 
-                let _ = app.emit(&format!("port-scan-result-{}", scan_id), result);
-                let _ = app.emit(
-                    &format!("port-scan-progress-{}", scan_id),
-                    PortScanProgress::Update { current, total },
-                );
-            }));
+                let current = completed.fetch_add(1, Ordering::Relaxed) + 1;
+                let emit_interval = (total / 100).clamp(5, 250);
+                if current % emit_interval == 0 || current == total {
+                    let _ = app.emit(
+                        &format!("port-scan-progress-{}", scan_id),
+                        PortScanProgress::Update { current, total },
+                    );
+                }
+            });
         }
     }
 
-    for handle in handles {
-        let _ = handle.await;
-    }
+    while let Some(_) = join_set.join_next().await {}
 
     let was_cancelled = cancel_flag.load(Ordering::Relaxed);
     if let Ok(mut cancellations) = scan_state.cancellations.lock() {
