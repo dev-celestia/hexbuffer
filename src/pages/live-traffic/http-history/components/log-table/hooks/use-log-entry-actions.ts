@@ -21,7 +21,6 @@ import { copyText } from '@/lib/clipboard';
 import { useTargetStore } from '@/stores/target';
 import { useNavStore } from '@/stores/nav';
 import { useInterceptStore } from '@/pages/intercept/state/intercept-store';
-import { useMockApiStore } from '@/stores/mock-api';
 import { useResponseOverrideStore } from '@/stores/response-override';
 import type { MockDomain, MockRoute } from '@/pages/api-override/types';
 import { sendToCollection, sendRawToRepeater } from '@/triggers/repeater';
@@ -377,9 +376,6 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
     }
   }, [call.id]);
 
-  const handleSendToMockApi = handleSendToResponseOverride;
-
-
   const handleSendToNotes = useCallback(async () => {
     try {
       const detail = await getHttpLogDetail(call.id);
@@ -469,7 +465,6 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
     handleSendToCollection,
     handleSendToIntercept,
     handleSendToResponseOverride,
-    handleSendToMockApi,
     handleSendToMockForge: handleSendToResponseOverride,
     handleOpenInBrowserAutomation,
     handleSendToNotes,

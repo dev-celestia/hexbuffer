@@ -41,7 +41,6 @@ export const CallActionCell = memo(function CallActionCell({
     handleSendToCollection,
     handleSendToIntercept,
     handleSendToResponseOverride,
-    handleSendToMockApi,
     handleOpenInBrowserAutomation,
     handleSendToNotes,
     handleDelete,
@@ -162,9 +161,6 @@ export const CallActionCell = memo(function CallActionCell({
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleSendToResponseOverride} className="text-xs">
           <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to API Override
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleSendToMockApi} className="text-xs">
-          <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Mock API
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleOpenInBrowserAutomation} className="text-xs">
           <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Automate Browser

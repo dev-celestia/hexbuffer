@@ -35,7 +35,6 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
     handleOpenInInvoker,
     handleSendToCollection,
     handleSendToIntercept,
-    handleSendToMockApi,
     handleSendToResponseOverride,
     // handleOpenInBrowserAutomation,
     handleSendToNotes,
@@ -137,9 +136,6 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
         </ContextMenuItem>
         <ContextMenuItem onClick={handleSendToResponseOverride} className='text-xs py-1 px-1.5'>
           <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to API Override
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleSendToMockApi} className='text-xs py-1 px-1.5'>
-          <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Mock API
         </ContextMenuItem>
         <ContextMenuItem onClick={handleSendToNotes} className='text-xs py-1 px-1.5'>
           <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Notes

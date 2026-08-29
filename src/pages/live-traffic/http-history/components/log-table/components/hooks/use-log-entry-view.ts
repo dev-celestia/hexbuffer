@@ -135,8 +135,14 @@ export function useLogEntryView() {
     [call?.response_headers],
   );
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const toggleViewMode = useCallback(() => {
     setViewMode((prev) => (prev === "table" ? "text" : "table"));
+  }, []);
+
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded((prev) => !prev);
   }, []);
 
   const closeDetailView = useCallback(() => {
@@ -151,12 +157,14 @@ export function useLogEntryView() {
     viewMode,
     setViewMode,
     toggleViewMode,
+    isExpanded,
+    setIsExpanded,
+    toggleExpanded,
     closeDetailView,
     handleSendToCollection,
     handleSendToIntruder,
     handleSendToInvoker,
     rawRequest,
-
     rawResponse,
     requestHeaders,
     requestCookies,
