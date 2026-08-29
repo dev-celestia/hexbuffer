@@ -39,15 +39,7 @@ function formatTime(ts: string) {
 
 export function LogsPanel({ logs, domains, routes, selectedLogId, onSelect }: LogsProps) {
   const { searchQuery, setSearchQuery, filteredLogs } = useLogsPanel(logs, domains);
-  const [sourceFilter, setSourceFilter] = useState<'all' | 'mock_server' | 'response_override'>('all');
   const selectedLog = logs.find((l) => l.id === selectedLogId) ?? null;
-
-  const displayLogs = filteredLogs.filter((log) => {
-    if (sourceFilter === 'all') return true;
-    if (sourceFilter === 'mock_server') return log.source === 'mock_server' || (!log.source && log.domainId === 'local_mock_server');
-    if (sourceFilter === 'response_override') return log.source === 'response_override' || (!log.source && log.domainId !== 'local_mock_server');
-    return true;
-  });
 
   return (
     <div className="flex h-full min-h-0 flex-1">
@@ -57,47 +49,17 @@ export function LogsPanel({ logs, domains, routes, selectedLogId, onSelect }: Lo
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <ListIcon className="h-4 w-4 text-muted-foreground" />
-              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Gateway Logs</h3>
+              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Mock API Logs</h3>
             </div>
             <Badge variant="secondary" className="text-[10px] font-mono rounded px-1.5 py-0.5 leading-none bg-muted text-muted-foreground">
-              {displayLogs.length} logs
+              {filteredLogs.length} logs
             </Badge>
-          </div>
-
-          {/* Source Filter Buttons */}
-          <div className="flex items-center gap-1 bg-muted/30 p-0.5 rounded border border-border/40">
-            <Button
-              size="sm"
-              variant={sourceFilter === 'all' ? 'secondary' : 'ghost'}
-              className="h-5.5 text-[10px] px-2 flex-1 cursor-pointer"
-              onClick={() => setSourceFilter('all')}
-            >
-              All
-            </Button>
-            <Button
-              size="sm"
-              variant={sourceFilter === 'mock_server' ? 'secondary' : 'ghost'}
-              className="h-5.5 text-[10px] px-2 flex-1 cursor-pointer gap-1"
-              onClick={() => setSourceFilter('mock_server')}
-            >
-              <LightningIcon className="h-2.5 w-2.5 text-emerald-400" />
-              Mock Server
-            </Button>
-            <Button
-              size="sm"
-              variant={sourceFilter === 'response_override' ? 'secondary' : 'ghost'}
-              className="h-5.5 text-[10px] px-2 flex-1 cursor-pointer gap-1"
-              onClick={() => setSourceFilter('response_override')}
-            >
-              <ArrowsLeftRightIcon className="h-2.5 w-2.5 text-blue-400" />
-              Override
-            </Button>
           </div>
 
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-2.5 top-2.5 h-3 w-3 text-muted-foreground" />
             <Input
-              placeholder="Search logs by path, host, method, status..."
+              placeholder="Search logs by path, method, status..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-7.5 h-7.5 text-xs bg-muted/30 focus-visible:ring-primary focus-visible:ring-1 border-border"
@@ -106,17 +68,15 @@ export function LogsPanel({ logs, domains, routes, selectedLogId, onSelect }: Lo
         </div>
 
         <ScrollArea className="flex-1">
-          {displayLogs.length === 0 ? (
+          {filteredLogs.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-16 text-muted-foreground">
               <ListIcon className="h-8 w-8 opacity-40" />
               <p className="text-sm font-medium">No requests logged yet</p>
             </div>
           ) : (
             <div className="divide-y divide-border/20 border-b">
-              {displayLogs.map((log) => {
-                const domain = domains.find((d) => d.id === log.domainId);
+              {filteredLogs.map((log) => {
                 const isSelected = selectedLogId === log.id;
-                const isMockServer = log.source === 'mock_server' || log.domainId === 'local_mock_server';
                 return (
                   <div
                     key={log.id}
@@ -131,21 +91,7 @@ export function LogsPanel({ logs, domains, routes, selectedLogId, onSelect }: Lo
                       {log.method}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <p className="truncate font-mono text-xs font-medium text-foreground">{log.path}</p>
-                        {isMockServer ? (
-                          <Badge variant="outline" className="text-[8px] font-mono px-1 py-0 h-3.5 text-emerald-400 border-emerald-500/30">
-                            Local
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-[8px] font-mono px-1 py-0 h-3.5 text-blue-400 border-blue-500/30">
-                            Proxy
-                          </Badge>
-                        )}
-                      </div>
-                      {domain && (
-                        <p className="truncate text-[10px] text-muted-foreground font-mono mt-0.5">{domain.hostname}</p>
-                      )}
+                      <p className="truncate font-mono text-xs font-medium text-foreground">{log.path}</p>
                     </div>
                     <span className={`shrink-0 font-mono text-xs font-bold ${statusColor(log.statusCode)}`}>
                       {log.statusCode}
@@ -177,9 +123,7 @@ export function LogsPanel({ logs, domains, routes, selectedLogId, onSelect }: Lo
 
 function LogDetailView({ log, domains, routes }: { log: RequestLog; domains: MockDomain[]; routes: MockRoute[] }) {
   const { theme } = useTheme();
-  const domain = domains.find((d) => d.id === log.domainId);
   const route = routes.find((r) => r.id === log.routeId);
-  const isMockServer = log.source === 'mock_server' || log.domainId === 'local_mock_server';
   const { reqBodyStr, respBodyStr, handleSendToRepeater } = useLogDetail(log, domains, routes);
 
   return (
@@ -190,15 +134,9 @@ function LogDetailView({ log, domains, routes }: { log: RequestLog; domains: Moc
           {log.method}
         </span>
         <span className="font-mono text-xs font-medium text-foreground">{log.path}</span>
-        {isMockServer ? (
-          <Badge variant="outline" className="text-[10px] font-mono text-emerald-400 border-emerald-500/30">
-            ⚡ Mock Server
-          </Badge>
-        ) : (
-          <Badge variant="outline" className="text-[10px] font-mono text-blue-400 border-blue-500/30">
-            🔀 Proxy Override
-          </Badge>
-        )}
+        <Badge variant="outline" className="text-[10px] font-mono text-emerald-400 border-emerald-500/30">
+          ⚡ Mock API
+        </Badge>
         <span className={`font-mono text-xs font-bold ${statusColor(log.statusCode)}`}>
           HTTP {log.statusCode}
         </span>
@@ -219,15 +157,15 @@ function LogDetailView({ log, domains, routes }: { log: RequestLog; domains: Moc
       {/* Meta grid */}
       <div className="grid grid-cols-3 gap-2 border-b p-3 bg-muted/5 text-xs">
         <div>
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Target Host</span>
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Matched Endpoint</span>
           <span className="font-mono text-xs text-foreground mt-0.5 block truncate">
-            {domain ? domain.hostname : isMockServer ? 'localhost (Mock Server)' : 'Unknown'}
+            {route ? `${route.method} ${route.path}` : 'Default Mock Response'}
           </span>
         </div>
         <div>
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Matched Route ID</span>
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Latency</span>
           <span className="font-mono text-xs text-foreground mt-0.5 block truncate">
-            {route ? `${route.method} ${route.path}` : 'No route (404)'}
+            {log.latencyMs} ms
           </span>
         </div>
         <div>

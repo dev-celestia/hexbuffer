@@ -92,7 +92,7 @@ export function RouteEditor({
     const normalizedPath = trimmedPath.startsWith('/') ? trimmedPath : `/${trimmedPath}`;
     onUpdate(route.id, { method: editMethod, path: normalizedPath });
     setEditPath(normalizedPath);
-    toast.success('Route updated.');
+    toast.success('Override rule updated.');
     setEditingHeader(false);
   };
 
@@ -401,10 +401,10 @@ export function RouteEditor({
                 <ArrowSquareOutIcon className="mr-1 h-3.5 w-3.5" />
                 Repeater
               </Button>
-              <Button variant="outline" size="sm" className="h-7 px-2 text-xs cursor-pointer border-border" onClick={handleClone} title="Clone route">
+              <Button variant="outline" size="sm" className="h-7 px-2 text-xs cursor-pointer border-border" onClick={handleClone} title="Clone override rule">
                 Clone
               </Button>
-              <Button variant="destructive" size="icon" className="h-7 w-7 cursor-pointer rounded" onClick={() => onDelete(route.id)} title="Delete route">
+              <Button variant="destructive" size="icon" className="h-7 w-7 cursor-pointer rounded" onClick={() => onDelete(route.id)} title="Delete override rule">
                 <TrashIcon className="h-3.5 w-3.5" />
               </Button>
             </div>
@@ -431,3 +431,6 @@ export function RouteEditor({
     </div>
   );
 }
+
+export const OverrideRuleEditor = RouteEditor;
+

@@ -140,7 +140,7 @@ export function RulesPanel({
               )}
             />
             <Input
-              placeholder="Filter routes..."
+              placeholder="Filter override rules..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={cn(
@@ -205,7 +205,7 @@ export function RulesPanel({
                     "text-sm font-medium"
                   )}
                 >
-                  No matching routes
+                  No matching override rules
                 </EmptyTitle>
               </EmptyHeader>
             </Empty>
@@ -457,7 +457,7 @@ export function RulesPanel({
                   "text-sm font-medium"
                 )}
               >
-                Select a mock route ruleset to configure
+                Select an override rule to configure
               </EmptyTitle>
             </EmptyHeader>
           </Empty>
@@ -468,3 +468,4 @@ export function RulesPanel({
 }
 
 export const RoutesPanel = RulesPanel;
+export const ApiRulesPanel = RulesPanel;

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 APP_NAME="hexbuffer"
-DISPLAY_NAME="hexbuffer"
+DISPLAY_NAME="Hexbuffer"
 LATEST_JSON_NAME="latest.json"
 
 usage() {
@@ -130,13 +130,15 @@ install_macos() {
   hdiutil attach "$DMG_PATH" -mountpoint "$MOUNT_DIR" -nobrowse -quiet
 
   local APP_PATH
-  APP_PATH="$(find "$MOUNT_DIR" -maxdepth 2 -name "$APP_NAME.app" -type d | head -n 1)"
+  APP_PATH="$(find "$MOUNT_DIR" -maxdepth 2 -iname "*.app" -type d | head -n 1)"
   if [ -z "$APP_PATH" ]; then
-    echo "Could not find $APP_NAME.app in $DMG_NAME"
+    echo "Could not find any .app bundle in $DMG_NAME"
     exit 1
   fi
 
-  local TARGET_APP="$INSTALL_DIR/$APP_NAME.app"
+  local APP_BUNDLE_NAME
+  APP_BUNDLE_NAME="$(basename "$APP_PATH")"
+  local TARGET_APP="$INSTALL_DIR/$APP_BUNDLE_NAME"
 
   echo "Installing $DISPLAY_NAME to $INSTALL_DIR..."
   if [ -w "$INSTALL_DIR" ]; then

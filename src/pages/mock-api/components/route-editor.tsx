@@ -92,7 +92,7 @@ export function RouteEditor({
     const normalizedPath = trimmedPath.startsWith('/') ? trimmedPath : `/${trimmedPath}`;
     onUpdate(route.id, { method: editMethod, path: normalizedPath });
     setEditPath(normalizedPath);
-    toast.success('Route updated.');
+    toast.success('Endpoint updated.');
     setEditingHeader(false);
   };
 
@@ -113,10 +113,10 @@ export function RouteEditor({
       case 'config':
         return (
           <div className="space-y-3">
-            {/* General Route Config */}
+            {/* General Endpoint Config */}
             <div className="space-y-3 rounded-md border border-border p-3 bg-muted/20">
               <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
-                {isMockServer ? 'Endpoint Settings' : 'Override Rule Config'}
+                Endpoint Settings
               </h4>
               <div className="flex gap-4">
                 <div className="space-y-1.5 w-24">
@@ -134,29 +134,6 @@ export function RouteEditor({
                     className="h-8 text-xs font-mono bg-muted/40 text-center"
                   />
                 </div>
-
-                {!isMockServer && (
-                  <div className="flex-1 space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">Target Hostname</Label>
-                    <Select
-                      value={route.domainId}
-                      onValueChange={(v) => {
-                        if (v) onUpdate(route.id, { domainId: v });
-                      }}
-                    >
-                      <SelectTrigger className="text-xs h-8 bg-muted/40">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {domains.map((d) => (
-                          <SelectItem key={d.id} value={d.id} className="text-xs font-mono">
-                            {d.hostname}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -401,10 +378,10 @@ export function RouteEditor({
                 <ArrowSquareOutIcon className="mr-1 h-3.5 w-3.5" />
                 Repeater
               </Button>
-              <Button variant="outline" size="sm" className="h-7 px-2 text-xs cursor-pointer border-border" onClick={handleClone} title="Clone route">
+              <Button variant="outline" size="sm" className="h-7 px-2 text-xs cursor-pointer border-border" onClick={handleClone} title="Clone endpoint">
                 Clone
               </Button>
-              <Button variant="destructive" size="icon" className="h-7 w-7 cursor-pointer rounded" onClick={() => onDelete(route.id)} title="Delete route">
+              <Button variant="destructive" size="icon" className="h-7 w-7 cursor-pointer rounded" onClick={() => onDelete(route.id)} title="Delete endpoint">
                 <TrashIcon className="h-3.5 w-3.5" />
               </Button>
             </div>
@@ -431,3 +408,6 @@ export function RouteEditor({
     </div>
   );
 }
+
+export const EndpointEditor = RouteEditor;
+

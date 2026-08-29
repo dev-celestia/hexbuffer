@@ -52,13 +52,13 @@ export function NewRouteDialog({
       <DialogTrigger>
         <Button size="sm" className="h-7 text-xs px-2.5 cursor-pointer">
           <PlusIcon className="mr-1 h-3 w-3 stroke-[2]" />
-          {buttonLabel ?? (isLocalMock ? 'New Endpoint' : 'New Route')}
+          {buttonLabel ?? (isLocalMock ? 'New Endpoint' : 'New Rule')}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg border-border bg-background">
         <DialogHeader>
           <DialogTitle className="text-sm font-bold text-foreground">
-            {dialogTitle ?? (isLocalMock ? 'New Local Mock Endpoint' : 'New Override Route')}
+            {dialogTitle ?? (isLocalMock ? 'New Local Mock Endpoint' : 'New Override Rule')}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
@@ -122,10 +122,13 @@ export function NewRouteDialog({
             />
           </div>
           <Button size="sm" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-9 rounded-md mt-2 cursor-pointer" onClick={handleAdd}>
-            Create Endpoint
+            {isLocalMock ? 'Create Endpoint' : 'Create Override Rule'}
           </Button>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+
+export const NewRuleDialog = NewRouteDialog;
+

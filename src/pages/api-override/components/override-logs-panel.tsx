@@ -57,7 +57,7 @@ export function OverrideLogsPanel({ logs, domains, routes, selectedLogId, onSele
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <ListIcon className="h-4 w-4 text-muted-foreground" />
-              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Gateway Logs</h3>
+              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Override Logs</h3>
             </div>
             <Badge variant="secondary" className="text-[10px] font-mono rounded px-1.5 py-0.5 leading-none bg-muted text-muted-foreground">
               {displayLogs.length} logs
@@ -90,7 +90,7 @@ export function OverrideLogsPanel({ logs, domains, routes, selectedLogId, onSele
               onClick={() => setSourceFilter('response_override')}
             >
               <ArrowsLeftRightIcon className="h-2.5 w-2.5 text-blue-400" />
-              Override
+              API Override
             </Button>
           </div>
 
@@ -196,7 +196,7 @@ function LogDetailView({ log, domains, routes }: { log: RequestLog; domains: Moc
           </Badge>
         ) : (
           <Badge variant="outline" className="text-[10px] font-mono text-blue-400 border-blue-500/30">
-            🔀 Proxy Override
+            🔀 API Override
           </Badge>
         )}
         <span className={`font-mono text-xs font-bold ${statusColor(log.statusCode)}`}>
@@ -225,9 +225,9 @@ function LogDetailView({ log, domains, routes }: { log: RequestLog; domains: Moc
           </span>
         </div>
         <div>
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Matched Route ID</span>
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Matched Rule</span>
           <span className="font-mono text-xs text-foreground mt-0.5 block truncate">
-            {route ? `${route.method} ${route.path}` : 'No route (404)'}
+            {route ? `${route.method} ${route.path}` : 'No rule matched'}
           </span>
         </div>
         <div>
@@ -288,7 +288,7 @@ function LogDetailView({ log, domains, routes }: { log: RequestLog; domains: Moc
         <div className="flex flex-1 min-w-0 flex-col">
           <div className="flex items-center justify-between border-b px-3 py-1.5 bg-muted/20">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              Mock Response Served
+              Override Response Served
             </span>
           </div>
           <ScrollArea className="flex-1">

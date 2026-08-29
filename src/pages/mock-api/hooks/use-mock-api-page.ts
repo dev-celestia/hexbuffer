@@ -86,11 +86,11 @@ export function useMockApiPage() {
         cors: cfg.corsEnabled,
       });
       setServerStatus(status);
-      toast.success(`Mock Server started on http://127.0.0.1:${status.port}`);
+      toast.success(`Mock API server started on http://127.0.0.1:${status.port}`);
       return status;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      toast.error(`Failed to start Mock Server: ${msg}`);
+      toast.error(`Failed to start Mock API server: ${msg}`);
       throw err;
     } finally {
       setIsStartingServer(false);
@@ -102,10 +102,10 @@ export function useMockApiPage() {
       await invoke('mock_server_stop');
       const current = useMockApiStore.getState().serverStatus;
       setServerStatus({ ...current, running: false, url: null });
-      toast.info('Mock Server stopped');
+      toast.info('Mock API server stopped');
     } catch (err) {
       console.error(err);
-      toast.error('Failed to stop Mock Server');
+      toast.error('Failed to stop Mock API server');
     }
   }, [setServerStatus]);
 

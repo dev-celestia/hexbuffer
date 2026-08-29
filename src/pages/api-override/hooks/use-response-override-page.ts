@@ -45,7 +45,7 @@ export function useResponseOverridePage() {
         setRoutes(proxyRoutes);
         setLogs(proxyLogs);
       } catch (err) {
-        console.error('Failed to load Response Override state from backend:', err);
+        console.error('Failed to load API Override state from backend:', err);
       }
     };
     loadState();
@@ -178,3 +178,5 @@ export function useResponseOverridePage() {
     addRoute, updateRoute, deleteRoute,
   };
 }
+
+export const useApiOverridePage = useResponseOverridePage;

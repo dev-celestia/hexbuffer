@@ -1,12 +1,12 @@
 import { useResponseOverridePage } from './hooks/use-response-override-page';
 import { ResponseOverrideContent } from './components/response-override-content';
 import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
-import { RESPONSE_OVERRIDE_SUB_TABS } from './constants';
+import { API_OVERRIDE_SUB_TABS } from './constants';
 
-export function ResponseOverridePage() {
+export function ApiOverridePage() {
   const page = useResponseOverridePage();
 
-  const tabs = RESPONSE_OVERRIDE_SUB_TABS.map((t) => ({
+  const tabs = API_OVERRIDE_SUB_TABS.map((t) => ({
     id: t.id,
     name: t.label,
     closable: false,
@@ -24,4 +24,5 @@ export function ResponseOverridePage() {
   );
 }
 
-export default ResponseOverridePage;
+export const ResponseOverridePage = ApiOverridePage;
+export default ApiOverridePage;

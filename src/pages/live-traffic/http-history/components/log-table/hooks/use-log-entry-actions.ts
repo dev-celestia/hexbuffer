@@ -366,14 +366,14 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
       store.setSelectedDomainId(domain.id);
       store.setSelectedRouteId(newRoute.id);
 
-      useNavStore.getState().openWindow('/response-override', 'Response Override');
+      useNavStore.getState().openWindow('/response-override', 'API Override');
       useNavStore.getState().focusWindow('/response-override');
       useNavStore.getState().triggerNavBlink('/response-override');
 
       toast.success(`Override created for ${request.method} ${hostname}${request.path || '/'}`);
     } catch (error) {
-      console.error('Failed to send to Response Override:', error);
-      toast.error('Failed to create override in Response Override');
+      console.error('Failed to send to API Override:', error);
+      toast.error('Failed to create override in API Override');
     }
   }, [call.id]);
 

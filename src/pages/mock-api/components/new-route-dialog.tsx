@@ -15,20 +15,18 @@ interface NewRouteDialogProps {
 
 export function NewRouteDialog({
   domains,
-  fixedDomainId,
-  dialogTitle,
-  buttonLabel,
+  fixedDomainId = 'local_mock_server',
+  dialogTitle = 'New Mock Endpoint',
+  buttonLabel = 'New Endpoint',
   onAdd,
 }: NewRouteDialogProps) {
   const [open, setOpen] = useState(false);
-  const [domainId, setDomainId] = useState(fixedDomainId ?? domains[0]?.id ?? 'local_mock_server');
   const [method, setMethod] = useState<MockRoute['method']>('GET');
   const [path, setPath] = useState('/api/resource/:id');
   const [statusCode, setStatusCode] = useState('200');
   const [body, setBody] = useState(DEFAULT_RESPONSE_BODY);
 
-  const isLocalMock = fixedDomainId === 'local_mock_server';
-  const effectiveDomainId = fixedDomainId ?? domainId;
+  const effectiveDomainId = fixedDomainId || 'local_mock_server';
 
   const handleAdd = () => {
     if (!path.trim() || !effectiveDomainId) return;
@@ -52,34 +50,16 @@ export function NewRouteDialog({
       <DialogTrigger>
         <Button size="sm" className="h-7 text-xs px-2.5 cursor-pointer">
           <PlusIcon className="mr-1 h-3 w-3 stroke-[2]" />
-          {buttonLabel ?? (isLocalMock ? 'New Endpoint' : 'New Route')}
+          {buttonLabel}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg border-border bg-background">
         <DialogHeader>
           <DialogTitle className="text-sm font-bold text-foreground">
-            {dialogTitle ?? (isLocalMock ? 'New Local Mock Endpoint' : 'New Override Route')}
+            {dialogTitle}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
-          {!fixedDomainId && domains.length > 0 && (
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Target Host</Label>
-              <Select value={domainId} onValueChange={(v) => setDomainId(v ?? '')}>
-                <SelectTrigger className="h-9 bg-muted/40">
-                  <SelectValue placeholder="Select host" />
-                </SelectTrigger>
-                <SelectContent>
-                  {domains.map((d) => (
-                    <SelectItem key={d.id} value={d.id}>
-                      {d.hostname}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
           <div className="flex gap-3">
             <div className="w-28 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Method</Label>
@@ -129,3 +109,6 @@ export function NewRouteDialog({
     </Dialog>
   );
 }
+
+export const NewEndpointDialog = NewRouteDialog;
+

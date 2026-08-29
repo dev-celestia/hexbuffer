@@ -161,7 +161,7 @@ export const CallActionCell = memo(function CallActionCell({
           <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Intercept
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleSendToResponseOverride} className="text-xs">
-          <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Response Override
+          <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to API Override
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleSendToMockApi} className="text-xs">
           <PaperPlaneTiltIcon className="mr-2 size-3" /> Send to Mock API

@@ -36,17 +36,17 @@ export function HostsPanel({
       <div className="flex flex-col gap-3 border-b p-3 bg-muted/10">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div>
-            <h2 className="text-sm font-semibold text-foreground">Mock Domains</h2>
+            <h2 className="text-sm font-semibold text-foreground">Target Hosts</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Provision custom hostnames that route mock traffic to your mock rule definitions.
+              Provision target hostnames to intercept proxy traffic and apply API override rules.
             </p>
           </div>
           {/* ponytail: guide to pick domain from http history instead of manual creation */}
           <div className="flex items-start gap-2.5 rounded-lg border border-primary/20 bg-primary/5 p-2.5 text-xs text-muted-foreground max-w-md shrink-0">
             <Info className="h-4 w-4 shrink-0 text-primary mt-0.5" />
             <div>
-              <span className="font-semibold text-foreground">How to add domains: </span>
-              Go to <span className="font-medium text-foreground">HTTP History</span>, right-click any request, and select <span className="font-medium text-foreground">"Send to Mock API"</span>.
+              <span className="font-semibold text-foreground">How to add hosts: </span>
+              Go to <span className="font-medium text-foreground">HTTP History</span>, right-click any request, and select <span className="font-medium text-foreground">"Send to API Override"</span>.
             </div>
           </div>
         </div>
@@ -55,7 +55,7 @@ export function HostsPanel({
         <div className="relative">
           <MagnifyingGlassIcon className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <Input
-            placeholder="Search domains..."
+            placeholder="Search target hosts..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-8 h-8 text-xs bg-muted/30 focus-visible:ring-primary focus-visible:ring-1 border-border"
@@ -68,7 +68,7 @@ export function HostsPanel({
         <div className="flex items-center px-4 py-2 border-b text-[10px] font-bold text-muted-foreground uppercase tracking-wider bg-muted/10">
           <div className="w-8 shrink-0">SSL</div>
           <div className="flex-1">Hostname</div>
-          <div className="w-32 text-center">Routes Mapped</div>
+          <div className="w-32 text-center">Override Rules</div>
           <div className="w-20 text-center">Status</div>
           <div className="w-10 shrink-0"></div>
         </div>
@@ -80,7 +80,7 @@ export function HostsPanel({
           <div className="flex flex-col items-center justify-center gap-2 py-16 text-muted-foreground">
             <GlobeIcon className="h-8 w-8 opacity-40 text-muted-foreground" />
             <p className="text-sm font-medium">
-              {searchQuery ? 'No domains match search query' : 'No domains yet — add one above'}
+              {searchQuery ? 'No target hosts match search query' : 'No target hosts yet — send from HTTP History'}
             </p>
           </div>
         ) : (
@@ -119,7 +119,7 @@ export function HostsPanel({
                   {/* Routes mapped count */}
                   <div className="w-32 text-center flex justify-center">
                     <Badge className={`text-[10px] font-mono font-medium rounded-[4px] px-1.5 py-0.5 leading-none bg-muted text-muted-foreground border-none`}>
-                      {domainRoutesCount} {domainRoutesCount === 1 ? 'route' : 'routes'}
+                      {domainRoutesCount} {domainRoutesCount === 1 ? 'rule' : 'rules'}
                     </Badge>
                   </div>
 

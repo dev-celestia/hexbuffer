@@ -70,7 +70,7 @@ export function MockServerPanel({
   const [portInput, setPortInput] = useState(String(serverConfig.port || 4000));
   const [copiedUrl, setCopiedUrl] = useState(false);
 
-  // Local Mock Server routes only
+  // Local Mock API routes only
   const localRoutes = useMemo(() => {
     return routes.filter(
       (r) => r.domainId === 'local_mock_server' || !r.domainId || r.domainId === 'localhost'
@@ -134,7 +134,7 @@ export function MockServerPanel({
               )}
             />
             <span className="text-xs font-bold tracking-tight text-foreground">
-              {serverStatus.running ? "MOCK SERVER RUNNING" : "MOCK SERVER STOPPED"}
+              {serverStatus.running ? "MOCK API RUNNING" : "MOCK API STOPPED"}
             </span>
           </div>
 
@@ -246,7 +246,7 @@ export function MockServerPanel({
               <NewRouteDialog
                 domains={domains}
                 fixedDomainId="local_mock_server"
-                dialogTitle="New Local Mock Endpoint"
+                dialogTitle="New Mock Endpoint"
                 buttonLabel="New Endpoint"
                 onAdd={onAddRoute}
               />
@@ -344,7 +344,7 @@ export function MockServerPanel({
                 </EmptyMedia>
                 <EmptyHeader>
                   <EmptyTitle className="text-sm font-medium text-muted-foreground mt-2">
-                    Select an endpoint or create a new route to inspect and configure
+                    Select an endpoint or create a new endpoint to inspect and configure
                   </EmptyTitle>
                 </EmptyHeader>
               </Empty>
@@ -355,3 +355,6 @@ export function MockServerPanel({
     </div>
   );
 }
+
+export const MockApiPanel = MockServerPanel;
+

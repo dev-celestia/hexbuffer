@@ -1,5 +1,5 @@
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS';
-export type MockApiSubTab = 'endpoints' | 'logs' | 'mock-server' | 'routes';
+export type MockApiSubTab = 'endpoints' | 'logs';
 
 export interface MockServerConfig {
   port: number;
@@ -67,5 +67,5 @@ export interface RequestLog {
   timestamp: string;
   requestHeaders: Record<string, string>;
   requestBody: string | null;
-  source?: 'mock_server' | 'response_override';
+  source?: string;
 }

@@ -49,7 +49,7 @@ export function useRouteEditor(
 
   const saveBody = () => {
     onUpdate(route.id, { responseBody: body });
-    toast.success('Response body mock updated.');
+    toast.success('Override response body updated.');
   };
 
   const saveReqBody = () => {
@@ -83,7 +83,7 @@ export function useRouteEditor(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _id, ...rest } = route;
     onAdd({ ...rest });
-    toast.success(`Cloned route: ${route.method} ${route.path}`);
+    toast.success(`Cloned override rule: ${route.method} ${route.path}`);
   };
 
   const handleAddParam = () => {
@@ -169,10 +169,10 @@ export function useRouteEditor(
 
       await collectionsStore.saveActiveEndpoint();
       useNavStore.getState().triggerNavBlink('/repeater');
-      toast.success(`Sent mock route ${route.method} ${route.path} to Repeater!`);
+      toast.success(`Sent override rule ${route.method} ${route.path} to Repeater!`);
     } catch (error) {
       console.error(error);
-      toast.error('Failed to send mock route to Repeater');
+      toast.error('Failed to send override rule to Repeater');
     }
   };
 

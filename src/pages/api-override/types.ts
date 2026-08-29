@@ -1,6 +1,7 @@
 export type MockDomainStatus = 'active' | 'inactive';
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS';
-export type ResponseOverrideSubTab = 'hosts' | 'rules' | 'logs';
+export type ApiOverrideSubTab = 'hosts' | 'rules' | 'logs';
+export type ResponseOverrideSubTab = ApiOverrideSubTab;
 
 export interface MockDomain {
   id: string;
