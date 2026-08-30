@@ -22,13 +22,21 @@ export function CollectionPickerSubmenu({
   const workspaces = useRepeaterStore((s) => s.workspaces);
   const stashes = useCollectionsStore((s) => s.stashes);
   const isHydrated = useCollectionsStore((s) => s.isHydrated);
+  const fetchFromDb = useCollectionsStore((s) => s.fetchFromDb);
 
-  // Auto-create workspace if empty after hydration (ponytail: keep it simple and robust)
+  // Auto-fetch from DB if not hydrated yet
   React.useEffect(() => {
-    if (isHydrated && workspaces.length === 0) {
+    if (!isHydrated) {
+      void fetchFromDb();
+    }
+  }, [isHydrated, fetchFromDb]);
+
+  // Auto-create workspace if empty (ponytail: keep it simple and robust)
+  React.useEffect(() => {
+    if (workspaces.length === 0) {
       createWorkspace();
     }
-  }, [isHydrated, workspaces.length]);
+  }, [workspaces.length]);
 
   const Sub = variant === 'dropdown' ? DropdownMenuSub : ContextMenuSub;
   const SubTrigger = variant === 'dropdown' ? DropdownMenuSubTrigger : ContextMenuSubTrigger;

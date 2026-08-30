@@ -14,6 +14,9 @@ export interface SendRawToRepeaterOptions {
   raw?: string;
   url?: string;
   name?: string;
+  headers?: Record<string, string>;
+  method?: string;
+  body?: string;
 }
 
 /**
@@ -40,18 +43,18 @@ export async function sendRawToRepeater(options: SendRawToRepeaterOptions): Prom
   }
 
   // 3. Parse request
-  let method = 'GET';
+  let method = options.method || 'GET';
   let targetUrl = url || '';
-  let headers: Record<string, string> = {};
-  let body = '';
+  let headers: Record<string, string> = options.headers || {};
+  let body = options.body || '';
 
   if (raw) {
     const parsed = parseRawHttpRequest(raw, { defaultTarget: url || '/' });
     if (parsed) {
-      method = parsed.method || 'GET';
+      method = parsed.method || method;
       targetUrl = parsed.url || targetUrl;
-      headers = parsed.headers || {};
-      body = parsed.body || '';
+      headers = parsed.headers || headers;
+      body = parsed.body || body;
     }
   }
 

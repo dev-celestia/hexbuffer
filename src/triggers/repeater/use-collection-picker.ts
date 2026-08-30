@@ -18,6 +18,13 @@ function buildCollectionList(stashes: StashRecord[]): CollectionNode[] {
 export function useCollectionPicker() {
   const stashes = useCollectionsStore((s) => s.stashes);
   const isHydrated = useCollectionsStore((s) => s.isHydrated);
+  const fetchFromDb = useCollectionsStore((s) => s.fetchFromDb);
+
+  useMemo(() => {
+    if (!isHydrated) {
+      void fetchFromDb();
+    }
+  }, [isHydrated, fetchFromDb]);
 
   const collections = useMemo(
     () => (isHydrated ? buildCollectionList(stashes) : []),
