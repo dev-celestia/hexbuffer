@@ -76,7 +76,7 @@ export interface BuildLogMenuItemsParams {
   onAddToScope: () => void;
   onOpenInInvoker: () => void;
   onSendToIntercept: () => void;
-  onOpenInBrowserAutomation: () => void;
+  onOpenInBrowserAutomation?: () => void;
   onSendToNotes: () => void;
   onHighlightHost: (color: string) => void;
   onRemoveHighlight: () => void;
@@ -237,13 +237,6 @@ export function buildLogMenuItems(params: BuildLogMenuItemsParams): LogMenuItemD
       label: "Send to Intercept",
       icon: PaperPlaneTiltIcon,
       onClick: onSendToIntercept,
-    },
-    {
-      type: "item",
-      key: "send-to-browser-automation",
-      label: "Send to Browser Automation",
-      icon: PaperPlaneTiltIcon,
-      onClick: onOpenInBrowserAutomation,
     },
     {
       type: "item",
