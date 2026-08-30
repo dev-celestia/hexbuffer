@@ -109,6 +109,7 @@ export function HttpHistoryPage() {
         >
           <HttpHistoryView
             activeTabId={page.activeTabId}
+            activeScope={page.activeScope}
             isPinnedTabActive={page.isPinnedTabActive}
             isGroupTabActive={page.isGroupTabActive}
             activeGroupId={page.activeGroupId}

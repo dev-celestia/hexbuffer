@@ -27,7 +27,7 @@ fn build_scope_sql_clause(scope: &[String]) -> Option<String> {
             let domain_no_port = clean.split(':').next().unwrap_or(clean);
 
             Some(format!(
-                "(url LIKE '%{clean}%' OR url LIKE '%{domain_no_port}%' OR server_addr LIKE '%{clean}%' OR server_addr LIKE '%{domain_no_port}%' OR request_headers LIKE '%{clean}%' OR request_headers LIKE '%{domain_no_port}%')",
+                "(url LIKE '%{clean}%' OR url LIKE '%{domain_no_port}%' OR server_addr LIKE '%{clean}%' OR server_addr LIKE '%{domain_no_port}%')",
                 clean = clean,
                 domain_no_port = domain_no_port
             ))

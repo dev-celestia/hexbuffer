@@ -26,6 +26,7 @@ export interface ApiCall {
 
   method: string;
   url: string;
+  display_url?: string;
   host: string;
   path: string;
   query_params: Record<string, string>;

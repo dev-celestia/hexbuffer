@@ -127,20 +127,7 @@ export function useTrafficTableColumns({
         size: 300,
         cell: (call, searchQuery = "") => {
           const requestGroups = getGroupsForRequest(call.id);
-          const displayUrl = (() => {
-            try {
-              const u = new URL(call.url);
-              if (
-                (u.protocol === "https:" && u.port === "443") ||
-                (u.protocol === "http:" && u.port === "80")
-              ) {
-                u.port = "";
-              }
-              return u.toString();
-            } catch {
-              return call.url;
-            }
-          })();
+          const displayUrl = call.display_url || call.url;
           const isSecured =
             call.url.startsWith("https://") ||
             call.url.startsWith("wss://") ||

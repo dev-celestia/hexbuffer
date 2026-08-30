@@ -24,6 +24,7 @@ import {
   BroadcastIcon,
   FolderOpenIcon,
   TerminalWindowIcon,
+  ShieldCheckIcon,
 } from '@phosphor-icons/react';
 
 import httpHistoryIcon from '@/assets/app/http-history.png';
@@ -150,6 +151,15 @@ export const RELEASE_NAV_ITEMS: NavItem[] = [
     href: '/jwt',
     description: 'Decode, edit, and sign JSON Web Tokens.',
     colors: { bg: 'bg-lime-700 dark:bg-lime-700', hoverBg: 'group-hover:bg-lime-700 dark:group-hover:bg-lime-700', border: 'border-lime-700 dark:border-lime-700' },
+    flag: 'release',
+    isNew: true,
+  },
+  {
+    label: 'Nuclei',
+    icon: ShieldCheckIcon,
+    href: '/nuclei',
+    description: 'Automated vulnerability scanner with Nuclei YAML templates and real-time telemetry.',
+    colors: { bg: 'bg-emerald-600 dark:bg-emerald-600', hoverBg: 'group-hover:bg-emerald-600 dark:group-hover:bg-emerald-600', border: 'border-emerald-600 dark:border-emerald-600' },
     flag: 'release',
     isNew: true,
   },

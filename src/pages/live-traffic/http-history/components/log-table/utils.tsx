@@ -171,6 +171,22 @@ export function parseApiCall(raw: any): ApiCall {
     return uri.slice(pathStart) || '/';
   })();
 
+  const displayUrl = (() => {
+    if (!fullUrl) return '';
+    try {
+      const u = urlObj || new URL(fullUrl);
+      if (
+        (u.protocol === 'https:' && u.port === '443') ||
+        (u.protocol === 'http:' && u.port === '80')
+      ) {
+        u.port = '';
+      }
+      return u.toString();
+    } catch {
+      return fullUrl;
+    }
+  })();
+
   const requestBody = raw.request_body ?? (raw.request?.body ? new TextDecoder().decode(new Uint8Array(raw.request.body)) : null);
   const responseBody = raw.response_body ?? (raw.response?.body ? new TextDecoder().decode(new Uint8Array(raw.response.body)) : null);
 
@@ -182,6 +198,7 @@ export function parseApiCall(raw: any): ApiCall {
     request_type: raw.request_type || 'Other',
     method: raw.request?.method || raw.method || 'GET',
     url: fullUrl,
+    display_url: displayUrl,
     host: (extractedHost && !extractedHost.includes('/')) ? extractedHost : (urlObj?.host ?? '-'),
     path,
     query_params: raw.query_params || {},

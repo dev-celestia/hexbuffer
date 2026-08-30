@@ -107,13 +107,16 @@ export function useHttpHistoryPage() {
     setIsGroupDialogOpen(true);
   }, []);
 
-  React.useEffect(() => {
-    if (isPinnedTabActive || isGroupTabActive) {
-      setActiveScope(null);
-    } else {
-      setActiveScope(activeTab?.scope ?? null);
+  const activeScope = React.useMemo(() => {
+    if (isPinnedTabActive || isGroupTabActive || !activeTab) {
+      return null;
     }
-  }, [activeTab?.scope, setActiveScope, isPinnedTabActive, isGroupTabActive]);
+    return activeTab.scope && activeTab.scope.length > 0 ? activeTab.scope : null;
+  }, [isPinnedTabActive, isGroupTabActive, activeTab]);
+
+  React.useEffect(() => {
+    setActiveScope(activeScope);
+  }, [activeScope, setActiveScope]);
 
   const sendScopeToNotes = React.useCallback((targetId: string) => {
     const target = activeTargets.find((activeTarget) => activeTarget.id === targetId);
@@ -141,6 +144,7 @@ export function useHttpHistoryPage() {
   return {
     tabs,
     activeTabId,
+    activeScope,
     setActiveTabId,
     removeTab,
     renameTab: handleRenameTab,

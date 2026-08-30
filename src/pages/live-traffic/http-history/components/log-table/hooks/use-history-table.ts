@@ -20,15 +20,16 @@ export function adaptProxyRecordToApiCall(record: ProxyRecord): ApiCall {
 
 interface UseHistoryTableOptions {
   isStreamPaused?: boolean;
+  activeScope?: string[] | null;
 }
 
-export function useHistoryTable({ isStreamPaused = false }: UseHistoryTableOptions = {}) {
+export function useHistoryTable({ isStreamPaused = false, activeScope: activeScopeProp }: UseHistoryTableOptions = {}) {
   const activeSessionId = useHttpSessionStore((state) => state.activeSessionId);
   const incrementSessionStats = useHttpSessionStore((state) => state.incrementSessionStats);
 
   const {
     filter,
-    activeScope,
+    activeScope: storeActiveScope,
     sortOrder,
     page,
     perPage,
@@ -52,22 +53,24 @@ export function useHistoryTable({ isStreamPaused = false }: UseHistoryTableOptio
     }))
   );
 
+  const effectiveActiveScope = activeScopeProp !== undefined ? activeScopeProp : storeActiveScope;
+
   const query = useMemo(
     () =>
       buildHistoryQuery({
         filter,
-        activeScope,
+        activeScope: effectiveActiveScope,
         sessionId: activeSessionId,
         sortOrder,
         page,
         perPage,
       }),
-    [filter, activeScope, activeSessionId, sortOrder, page, perPage]
+    [filter, effectiveActiveScope, activeSessionId, sortOrder, page, perPage]
   );
 
   const hasActiveFilters = useMemo(
-    () => hasActiveHistoryFilters({ filter, activeScope }),
-    [filter, activeScope]
+    () => hasActiveHistoryFilters({ filter, activeScope: effectiveActiveScope }),
+    [filter, effectiveActiveScope]
   );
   const isHistoryStreamPaused = isStreamPaused || isStreamManuallyPaused;
 
@@ -82,7 +85,7 @@ export function useHistoryTable({ isStreamPaused = false }: UseHistoryTableOptio
   const lastBaseQueryRef = useRef<string>('');
   const currentPageRef = useRef(page);
   const activeSessionIdRef = useRef(activeSessionId);
-  const isFetchingRef = useRef(false);
+  const requestSeqRef = useRef(0);
 
   useEffect(() => {
     currentPageRef.current = page;
@@ -113,13 +116,16 @@ export function useHistoryTable({ isStreamPaused = false }: UseHistoryTableOptio
 
   const fetchPage = useCallback(
     async (pageToLoad: number) => {
-      if (isFetchingRef.current) return;
-      isFetchingRef.current = true;
+      const currentSeq = ++requestSeqRef.current;
       setIsLoading(true);
 
       try {
         setLoadError(null);
         const result = await getHttpLogs(pageToLoad, query.perPage, query.filter, query.sortOrder);
+
+        if (currentSeq !== requestSeqRef.current) {
+          return;
+        }
 
         setPagination({
           page: pageToLoad,
@@ -131,12 +137,16 @@ export function useHistoryTable({ isStreamPaused = false }: UseHistoryTableOptio
         const adapted = result.data.map(adaptProxySummaryToApiCall);
         setCalls(adapted);
       } catch (error) {
+        if (currentSeq !== requestSeqRef.current) {
+          return;
+        }
         console.error('Failed to fetch logs:', error);
         setLoadError(error instanceof Error ? error.message : 'Failed to load HTTP history.');
         setCalls([]);
       } finally {
-        setIsLoading(false);
-        isFetchingRef.current = false;
+        if (currentSeq === requestSeqRef.current) {
+          setIsLoading(false);
+        }
       }
     },
     [query]
@@ -168,19 +178,20 @@ export function useHistoryTable({ isStreamPaused = false }: UseHistoryTableOptio
 
       pendingEventsCountRef.current += 1;
 
-      if (!batchTimer) {
-        batchTimer = setTimeout(async () => {
-          batchTimer = null;
-          const count = pendingEventsCountRef.current;
-          pendingEventsCountRef.current = 0;
-
-          if (isStreamPausedRef.current || currentPageRef.current !== 1) {
-            setNewEventsCount((prev) => prev + count);
-          } else {
-            await fetchPage(1);
-          }
-        }, 120);
+      if (batchTimer) {
+        clearTimeout(batchTimer);
       }
+      batchTimer = setTimeout(async () => {
+        batchTimer = null;
+        const count = pendingEventsCountRef.current;
+        pendingEventsCountRef.current = 0;
+
+        if (isStreamPausedRef.current || currentPageRef.current !== 1) {
+          setNewEventsCount((prev) => prev + count);
+        } else {
+          await fetchPage(1);
+        }
+      }, 250);
     };
 
     const unlistenPromise = listen<ProxyLogSummary>('proxy-record', handleEvent);

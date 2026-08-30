@@ -12,6 +12,7 @@ import { useTrafficTableColumns } from "./use-traffic-table-columns";
 
 interface UseTrafficTableOptions {
   activeTabId?: string;
+  activeScope?: string[] | null;
   isPinnedTabActive?: boolean;
   isGroupTabActive?: boolean;
   activeGroupId?: string | null;
@@ -19,6 +20,7 @@ interface UseTrafficTableOptions {
 
 export function useTrafficTable({
   activeTabId,
+  activeScope,
   isPinnedTabActive = false,
   isGroupTabActive = false,
   activeGroupId = null,
@@ -43,7 +45,7 @@ export function useTrafficTable({
     goToPreviousPage,
     handleRefresh,
     removeCallLocally,
-  } = useHistoryTable({ isStreamPaused: isContextMenuOpen });
+  } = useHistoryTable({ isStreamPaused: isContextMenuOpen, activeScope });
 
   const pinnedIds = usePinnedRequestsStore((s) => s.pinnedIds);
   const unpinId = usePinnedRequestsStore((s) => s.unpinId);

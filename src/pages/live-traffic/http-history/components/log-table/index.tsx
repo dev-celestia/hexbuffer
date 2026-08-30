@@ -5,13 +5,13 @@ import { cn } from "@/lib/utils";
 import { HistoryLoadingState } from "@/pages/live-traffic/components/history-loading-state";
 import { TrafficTablePagination } from "@/pages/live-traffic/components/traffic-table-pagination";
 import { CreateGroupDialog } from "../group-dialog";
-import { LogEntryContextMenu } from "./components/log-context-menu";
+import { TrafficTableRow } from "./components/traffic-table-row";
 
 import { useTrafficTable } from "./hooks";
-import { getCallHost } from "./utils";
 
 interface TrafficTableProps {
   activeTabId?: string;
+  activeScope?: string[] | null;
   isPinnedTabActive?: boolean;
   isGroupTabActive?: boolean;
   activeGroupId?: string | null;
@@ -175,84 +175,19 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
             {/* Table Body Rows */}
             <div className="flex-1">
               {visibleCalls.map((call) => (
-                <LogEntryContextMenu
+                <TrafficTableRow
                   key={call.id}
                   call={call}
+                  isSelected={call.id === selectedCallId}
+                  isPinned={pinnedSet.has(call.id)}
+                  isGroupTabActive={isGroupTabActive}
+                  searchQuery={searchQuery}
+                  columns={columns}
+                  onRowClick={actions.handleRowClick}
                   onDelete={actions.removeCallLocallyWithUnpin}
-                  onOpenChange={actions.handleContextMenuOpenChange}
+                  onContextMenuOpenChange={actions.handleContextMenuOpenChange}
                   onNewGroup={actions.handleNewGroup}
-                >
-                  <button
-                    type="button"
-                    aria-pressed={call.id === selectedCallId}
-                    className={cn(
-                      // Layout & Positioning
-                      "flex items-center text-left border-b",
-
-                      // Sizing & Spacing
-                      "w-full h-8",
-
-                      // Typography
-                      "font-mono text-xs",
-
-                      // Backgrounds & Borders
-                      pinnedSet.has(call.id) && "bg-amber-500/10 dark:bg-amber-800/20",
-                      isGroupTabActive && "bg-sky-500/5 dark:bg-sky-950/20",
-                      call.id === selectedCallId
-                        ? "hover:!bg-muted bg-muted"
-                        : "hover:bg-muted/50",
-
-                      // Interactive & States
-                      "transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    )}
-                    onClick={() => actions.handleRowClick(call.id)}
-                  >
-                    {columns.map((col) => {
-                      const isRightAligned =
-                        col.id === "response_body_size" ||
-                        col.id === "request_body_size";
-                      const isCentered = col.id === "action";
-                      const isUrl = col.id === "url";
-
-                      let cellTitle: string | undefined;
-                      if (col.id === "url") {
-                        cellTitle = call.url;
-                      } else if (col.id === "host") {
-                        cellTitle = getCallHost(call);
-                      } else if (col.id === "response_content_type") {
-                        cellTitle = call.response_content_type ?? undefined;
-                      }
-
-                      return (
-                        <div
-                          key={col.id}
-                          className={cn(
-                            // Layout & Positioning
-                            "truncate min-w-0",
-
-                            // Sizing & Spacing
-                            "px-3 py-1",
-
-                            // Typography
-                            "text-xs text-muted-foreground",
-
-                            // Interactive & States
-                            isRightAligned && "text-right",
-                            isCentered && "text-center"
-                          )}
-                          title={cellTitle}
-                          style={{
-                            width: isUrl ? undefined : col.size,
-                            minWidth: isUrl ? 180 : col.size,
-                            flex: isUrl ? "1 1 auto" : "0 0 auto",
-                          }}
-                        >
-                          {col.cell(call, searchQuery)}
-                        </div>
-                      );
-                    })}
-                  </button>
-                </LogEntryContextMenu>
+                />
               ))}
             </div>
           </div>

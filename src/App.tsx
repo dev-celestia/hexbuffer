@@ -85,6 +85,9 @@ const FileExplorerPage = React.lazy(() =>
 const TerminalPage = React.lazy(() =>
   import("@/pages/terminal").then((m) => ({ default: m.TerminalPage }))
 );
+const NucleiPage = React.lazy(() =>
+  import("@/pages/nuclei").then((m) => ({ default: m.NucleiPage }))
+);
 
 
 
@@ -138,6 +141,8 @@ function AppRoutes() {
           <Route path="/kanban" element={<KanbanPage />} />
           <Route path="/file-explorer" element={<FileExplorerPage />} />
           <Route path="/terminal" element={<TerminalPage />} />
+          <Route path="/nuclei" element={<NucleiPage />} />
+          <Route path="/scanner" element={<NucleiPage />} />
         </Routes>
       </React.Suspense>
     </>

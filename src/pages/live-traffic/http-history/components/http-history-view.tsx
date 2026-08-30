@@ -8,6 +8,7 @@ import { useHttpHistoryQueryStore } from '@/stores/history';
 
 export interface HttpHistoryViewProps {
   activeTabId?: string;
+  activeScope?: string[] | null;
   isPinnedTabActive?: boolean;
   isGroupTabActive?: boolean;
   activeGroupId?: string | null;
@@ -15,6 +16,7 @@ export interface HttpHistoryViewProps {
 
 export function HttpHistoryView({
   activeTabId,
+  activeScope,
   isPinnedTabActive = false,
   isGroupTabActive = false,
   activeGroupId = null,
@@ -49,6 +51,7 @@ export function HttpHistoryView({
         <div className="h-full overflow-hidden min-w-0" style={{ width: '100%', ...coverStyle }}>
           <TrafficTable
             activeTabId={activeTabId}
+            activeScope={activeScope}
             isPinnedTabActive={isPinnedTabActive}
             isGroupTabActive={isGroupTabActive}
             activeGroupId={activeGroupId}
