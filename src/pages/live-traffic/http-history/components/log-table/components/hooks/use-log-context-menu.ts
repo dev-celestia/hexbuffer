@@ -1,24 +1,2 @@
-import type { ApiCall } from "@/types";
-import { useLogEntryActions } from "@/pages/live-traffic/http-history/components/log-table/hooks/use-log-entry-actions";
-import {
-  useHighlightStore,
-  HIGHLIGHT_COLORS,
-  HIGHLIGHT_COLOR_LABELS,
-} from "@/stores/history";
-
-export interface UseLogContextMenuOptions {
-  call: ApiCall;
-  onDelete?: (id: string) => void;
-}
-
-export function useLogContextMenu({ call, onDelete }: UseLogContextMenuOptions) {
-  const logActions = useLogEntryActions(call, onDelete);
-  const highlightColor = useHighlightStore((s) => s.getHighlightColor(call.host, call.path));
-
-  return {
-    ...logActions,
-    highlightColor,
-    highlightColors: HIGHLIGHT_COLORS,
-    highlightColorLabels: HIGHLIGHT_COLOR_LABELS,
-  };
-}
+export { useLogMenuItems as useLogContextMenu } from './use-log-menu-items';
+export type { UseLogMenuItemsOptions as UseLogContextMenuOptions } from './use-log-menu-items';
