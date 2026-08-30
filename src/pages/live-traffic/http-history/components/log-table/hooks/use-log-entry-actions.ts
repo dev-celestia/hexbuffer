@@ -185,6 +185,8 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
       toast.error('Host is unavailable');
       return;
     }
+    useNavStore.getState().openWindow('/', 'Scope');
+    useNavStore.getState().focusWindow('/');
     useNavStore.getState().triggerNavBlink('/');
     toast.success(`Added ${target.name} to targets`);
   }, [call]);
@@ -208,6 +210,8 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
         positions: findRequestPayloadPositions(baseRequest),
       };
       useIntruderStore.getState().addAttackTab(config);
+      useNavStore.getState().openWindow('/intruder', 'Intruder');
+      useNavStore.getState().focusWindow('/intruder');
       useNavStore.getState().triggerNavBlink('/intruder');
       toast.success(`Sent ${request.method} ${request.path || request.url} to Intruder`);
     } catch (error) {
@@ -233,6 +237,9 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
         url: cleanedUrl,
         name: `${request.method} ${request.path || cleanedUrl}`,
       });
+      useNavStore.getState().openWindow('/repeater', 'Repeater');
+      useNavStore.getState().focusWindow('/repeater');
+      useNavStore.getState().triggerNavBlink('/repeater');
       toast.success(`Sent ${request.method} ${request.path || request.url} to Repeater`);
     } catch (error) {
       console.error('Failed to open request in Repeater:', error);
@@ -268,6 +275,8 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
       return;
     }
     useInterceptStore.getState().addTabForHost(host);
+    useNavStore.getState().openWindow('/intercept', 'Intercept');
+    useNavStore.getState().focusWindow('/intercept');
     useNavStore.getState().triggerNavBlink('/intercept');
     toast.success(`Added ${host} to Intercept`);
   }, [call]);
@@ -395,6 +404,9 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
       const currentNote = store.note;
       const newNote = currentNote.trim() ? `${currentNote.trimEnd()}\n\n${entryText}` : entryText;
       store.setNote(newNote);
+      useNavStore.getState().openWindow('/notes', 'Notes');
+      useNavStore.getState().focusWindow('/notes');
+      useNavStore.getState().triggerNavBlink('/notes');
       toast.success('Sent to Notes');
     } catch (error) {
       console.error('Failed to send to notes:', error);
