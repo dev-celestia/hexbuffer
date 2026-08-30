@@ -118,6 +118,7 @@ export function useTrafficTable({
     getHighlightColor,
     highlightedHosts,
     handleNewGroup,
+    onDelete: removeCallLocallyWithUnpin,
   });
 
   const handleContextMenuOpenChange = useCallback((open: boolean) => {

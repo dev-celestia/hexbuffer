@@ -30,6 +30,7 @@ interface UseTrafficTableColumnsOptions {
   getHighlightColor: (host: string, path: string) => string | undefined;
   highlightedHosts: Record<string, string>;
   handleNewGroup: (call: ApiCall) => void;
+  onDelete?: (id: string) => void;
 }
 
 export function useTrafficTableColumns({
@@ -38,6 +39,7 @@ export function useTrafficTableColumns({
   getHighlightColor,
   highlightedHosts,
   handleNewGroup,
+  onDelete,
 }: UseTrafficTableColumnsOptions) {
   return useMemo<TrafficTableColumn[]>(
     () => [
@@ -224,7 +226,11 @@ export function useTrafficTableColumns({
         header: "",
         size: 36,
         cell: (call) => (
-          <CallActionCell call={call} onNewGroup={handleNewGroup} />
+          <CallActionCell
+            call={call}
+            onNewGroup={handleNewGroup}
+            onDelete={onDelete}
+          />
         ),
       },
     ],
@@ -234,6 +240,7 @@ export function useTrafficTableColumns({
       handleNewGroup,
       highlightedHosts,
       getHighlightColor,
+      onDelete,
     ]
   );
 }

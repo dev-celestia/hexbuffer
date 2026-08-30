@@ -142,7 +142,8 @@ export function useDesktopWindow({ win, isFocused }: UseDesktopWindowProps) {
     windowRef,
   });
 
-  const handleWindowClick = React.useCallback(() => {
+  const handleWindowClick = React.useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (isMinimized) {
       focusWindow(id, navigate);
     } else if (!isFocused) {

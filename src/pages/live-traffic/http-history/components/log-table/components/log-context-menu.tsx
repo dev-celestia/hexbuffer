@@ -1,12 +1,148 @@
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from '@celestia-project/ui';
+import {
+  Button,
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@celestia-project/ui';
 import { memo } from 'react';
+import { DotsThreeVerticalIcon } from '@phosphor-icons/react';
 
-import { CopyIcon, PlusIcon, TrashIcon, PaperPlaneTiltIcon, PushPinSimpleIcon, PushPinSimpleSlashIcon, ProhibitIcon, PaletteIcon } from '@phosphor-icons/react';
 import type { ApiCall } from '@/types';
-import { useLogContextMenu } from './hooks/use-log-context-menu';
+import { cn } from '@/lib/utils';
 import { CollectionPickerSubmenu } from '@/triggers/repeater/collection-picker-submenu';
+import {
+  type LogMenuVariant,
+  type LogSubmenuItemData,
+} from '../constants';
+import { useLogMenuItems } from './hooks/use-log-menu-items';
 
-interface LogEntryContextMenuProps {
+export type { LogMenuVariant } from '../constants';
+
+export interface LogMenuItemsProps {
+  call: ApiCall;
+  variant: LogMenuVariant;
+  onNewGroup?: (call: ApiCall) => void;
+  onDelete?: (id: string) => void;
+}
+
+function renderSubmenuItem(
+  item: LogSubmenuItemData,
+  Item: typeof DropdownMenuItem | typeof ContextMenuItem,
+  Separator: typeof DropdownMenuSeparator | typeof ContextMenuSeparator
+) {
+  if (item.type === 'separator') {
+    return <Separator key={item.key} />;
+  }
+
+  const Icon = item.icon;
+  const dotSize = item.colorDotSize || 'size-1.5';
+
+  return (
+    <Item
+      key={item.key}
+      className="text-xs"
+      onClick={item.onClick}
+      disabled={item.disabled}
+    >
+      {item.colorDot && (
+        <span
+          className={cn('mr-2 rounded-full', dotSize)}
+          style={{ backgroundColor: item.colorDot }}
+        />
+      )}
+      {Icon && <Icon className="mr-2 size-3" />}
+      {item.label}
+      {item.isChecked && <span className="ml-auto text-muted-foreground">✓</span>}
+    </Item>
+  );
+}
+
+export const LogMenuItems = memo(function LogMenuItems({
+  call,
+  variant,
+  onNewGroup,
+  onDelete,
+}: LogMenuItemsProps) {
+  const { menuItems, handleSendToCollection } = useLogMenuItems({
+    call,
+    onDelete,
+    onNewGroup,
+  });
+
+  const Sub = variant === 'dropdown' ? DropdownMenuSub : ContextMenuSub;
+  const SubTrigger = variant === 'dropdown' ? DropdownMenuSubTrigger : ContextMenuSubTrigger;
+  const SubContent = variant === 'dropdown' ? DropdownMenuSubContent : ContextMenuSubContent;
+  const Item = variant === 'dropdown' ? DropdownMenuItem : ContextMenuItem;
+  const Separator = variant === 'dropdown' ? DropdownMenuSeparator : ContextMenuSeparator;
+
+  return (
+    <>
+      {menuItems.map((entry) => {
+        if (entry.type === 'separator') {
+          return <Separator key={entry.key} />;
+        }
+
+        if (entry.type === 'repeater-collection') {
+          return (
+            <CollectionPickerSubmenu
+              key={entry.key}
+              variant={variant}
+              onSelect={(stashId) => {
+                void handleSendToCollection(stashId);
+              }}
+            />
+          );
+        }
+
+        if (entry.type === 'submenu') {
+          const Icon = entry.icon;
+          return (
+            <Sub key={entry.key}>
+              <SubTrigger className="text-xs">
+                {Icon && <Icon className="mr-2 size-3" />}
+                {entry.label}
+              </SubTrigger>
+              <SubContent>
+                {entry.items.map((subItem) =>
+                  renderSubmenuItem(subItem, Item, Separator)
+                )}
+              </SubContent>
+            </Sub>
+          );
+        }
+
+        const Icon = entry.icon;
+        return (
+          <Item
+            key={entry.key}
+            onClick={entry.onClick}
+            variant={entry.variant}
+            className="text-xs"
+            disabled={entry.disabled}
+          >
+            {Icon && <Icon className="mr-2 size-3" />}
+            {entry.label}
+          </Item>
+        );
+      })}
+    </>
+  );
+});
+
+export interface LogEntryContextMenuProps {
   call: ApiCall;
   children: React.ReactNode;
   onDelete?: (id: string) => void;
@@ -21,167 +157,58 @@ export const LogEntryContextMenu = memo(function LogEntryContextMenu({
   onOpenChange,
   onNewGroup,
 }: LogEntryContextMenuProps) {
-  const {
-    pinned,
-    groups,
-    requestGroupIds,
-    addRequestToGroup,
-    removeRequestFromGroup,
-    handleQuickAddToGroup,
-    handleTogglePin,
-    handleCopyCurlCommand,
-    handleCopyUrl,
-    handleAddToScope,
-    handleOpenInInvoker,
-    handleSendToCollection,
-    handleSendToIntercept,
-    handleSendToMockForge,
-    // handleOpenInBrowserAutomation,
-    handleSendToNotes,
-    handleDelete,
-    handleBlacklistHost,
-    handleBlacklistHostAndPath,
-    handleHighlightHost,
-    handleRemoveHighlight,
-    highlightColor,
-    highlightColors,
-    highlightColorLabels,
-  } = useLogContextMenu({ call, onDelete });
-
   return (
     <ContextMenu onOpenChange={onOpenChange}>
-      <ContextMenuTrigger>
-        {children}
-      </ContextMenuTrigger>
+      <ContextMenuTrigger>{children}</ContextMenuTrigger>
       <ContextMenuContent className="p-0.5">
-        <ContextMenuItem onClick={handleCopyCurlCommand} className='text-xs py-1 px-1.5'>
-          <CopyIcon className="mr-1.5 size-3" /> Copy as curl command (bash)
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleCopyUrl} className='text-xs py-1 px-1.5'>
-          <CopyIcon className="mr-1.5 size-3" /> Copy URL
-        </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem onClick={handleTogglePin} className='text-xs py-1 px-1.5'>
-          {pinned
-            ? <><PushPinSimpleSlashIcon className="mr-1.5 size-3" /> Unpin</>
-            : <><PushPinSimpleIcon className="mr-1.5 size-3" /> Pin </>
-          }
-        </ContextMenuItem>
-        <ContextMenuSeparator />
-        {groups.length === 0 ? (
-          <ContextMenuItem onClick={handleQuickAddToGroup} className='text-xs py-1 px-1.5'>
-            <PlusIcon className="mr-1.5 size-3" /> Add to Group
-          </ContextMenuItem>
-        ) : (
-          <ContextMenuSub>
-            <ContextMenuSubTrigger className='text-xs py-1 px-1.5'>
-              <PlusIcon className="mr-1.5 size-3" /> Add to Group
-            </ContextMenuSubTrigger>
-            <ContextMenuSubContent>
-              {groups.map((g) => (
-                <ContextMenuItem
-                  key={g.id}
-                  className='text-xs py-1 px-1.5'
-                  onClick={() => addRequestToGroup(g.id, call)}
-                >
-                  <span className="mr-1.5 size-1.5 rounded-full" style={{ backgroundColor: g.color }} />
-                  {g.name}
-                  {requestGroupIds.includes(g.id) && <span className="ml-auto text-muted-foreground">✓</span>}
-                </ContextMenuItem>
-              ))}
-              <ContextMenuSeparator />
-              <ContextMenuItem className='text-xs py-1 px-1.5' onClick={() => onNewGroup?.(call)}>
-                <PlusIcon className="mr-1.5 size-3" /> New Group…
-              </ContextMenuItem>
-            </ContextMenuSubContent>
-          </ContextMenuSub>
-        )}
-        {requestGroupIds.length > 0 && (
-          <ContextMenuSub>
-            <ContextMenuSubTrigger className='text-xs py-1 px-1.5'>
-              Remove from Group
-            </ContextMenuSubTrigger>
-            <ContextMenuSubContent>
-              {requestGroupIds.map((gid) => {
-                const g = groups.find((gr) => gr.id === gid);
-                if (!g) return null;
-                return (
-                  <ContextMenuItem
-                    key={g.id}
-                    className='text-xs py-1 px-1.5'
-                    onClick={() => removeRequestFromGroup(g.id, call.id)}
-                  >
-                    <span className="mr-1.5 size-1.5 rounded-full" style={{ backgroundColor: g.color }} />
-                    {g.name}
-                  </ContextMenuItem>
-                );
-              })}
-            </ContextMenuSubContent>
-          </ContextMenuSub>
-        )}
-        <ContextMenuSeparator />
-        <ContextMenuItem onClick={handleAddToScope} className='text-xs py-1 px-1.5'>
-          <PlusIcon className="mr-1.5 size-3" /> Add to Target
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleOpenInInvoker} className='text-xs py-1 px-1.5'>
-          <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Intruder
-        </ContextMenuItem>
-
-        <CollectionPickerSubmenu
+        <LogMenuItems
+          call={call}
           variant="context"
-          onSelect={(stashId) => { void handleSendToCollection(stashId); }}
+          onNewGroup={onNewGroup}
+          onDelete={onDelete}
         />
-        <ContextMenuItem onClick={handleSendToIntercept} className='text-xs py-1 px-1.5'>
-          <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Intercept
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleSendToMockForge} className='text-xs py-1 px-1.5'>
-          <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Mock Forge
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleSendToNotes} className='text-xs py-1 px-1.5'>
-          <PaperPlaneTiltIcon className="mr-1.5 size-3" /> Send to Notes
-        </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuSub>
-          <ContextMenuSubTrigger className='text-xs py-1 px-2'>
-            <PaletteIcon className="mr-3 size-3" /> Highlight
-          </ContextMenuSubTrigger>
-          <ContextMenuSubContent>
-            {highlightColors.map((color) => (
-              <ContextMenuItem
-                key={color}
-                className='text-xs py-1 px-1.5'
-                onClick={() => handleHighlightHost(color)}
-              >
-                <span className="mr-2 size-2 rounded-full" style={{ backgroundColor: color }} />
-                {highlightColorLabels[color] || color}
-                {highlightColor === color && <span className="ml-auto text-muted-foreground">✓</span>}
-              </ContextMenuItem>
-            ))}
-            {highlightColor && (
-              <>
-                <ContextMenuSeparator />
-                <ContextMenuItem
-                  className="text-xs py-1 px-1.5"
-                  onClick={handleRemoveHighlight}
-                >
-                  Remove Highlight
-                </ContextMenuItem>
-              </>
-            )}
-          </ContextMenuSubContent>
-        </ContextMenuSub>
-        <ContextMenuSeparator />
-        <ContextMenuItem onClick={handleBlacklistHost} className='text-xs py-1 px-1.5'>
-          <ProhibitIcon className="mr-1.5 size-3" /> Blacklist Host
-        </ContextMenuItem>
-        <ContextMenuItem onClick={handleBlacklistHostAndPath} className='text-xs py-1 px-1.5'>
-          <ProhibitIcon className="mr-1.5 size-3" /> Blacklist Host + Path
-        </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem onClick={handleDelete} variant="destructive" className='text-xs py-1 px-1.5'>
-          <TrashIcon className="mr-1.5 size-3" /> Delete
-        </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
+  );
+});
+
+export interface CallActionCellProps {
+  call: ApiCall;
+  onNewGroup?: (call: ApiCall) => void;
+  onDelete?: (id: string) => void;
+}
+
+export const CallActionCell = memo(function CallActionCell({
+  call,
+  onNewGroup,
+  onDelete,
+}: CallActionCellProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            // Layout & Positioning
+            'p-0',
+
+            // Sizing & Spacing
+            'h-6 w-6'
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <DotsThreeVerticalIcon className="size-3.5 text-muted-foreground" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <LogMenuItems
+          call={call}
+          variant="dropdown"
+          onNewGroup={onNewGroup}
+          onDelete={onDelete}
+        />
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 });

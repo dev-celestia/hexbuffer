@@ -1,10 +1,18 @@
 import { Button, Input, Kbd, KbdGroup, TextEditor } from '@celestia-project/ui';
 import * as React from 'react';
-import { PencilSimpleIcon, CheckIcon, XIcon, FileTextIcon } from '@phosphor-icons/react';
+import {
+  PencilSimpleIcon,
+  CheckIcon,
+  XIcon,
+  CopyIcon,
+  DownloadSimpleIcon,
+  SelectionAllIcon,
+} from '@phosphor-icons/react';
 import { useTheme } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
-
 import { NotesPageHookType } from '../hooks/use-notes-page';
+import { NotesEmptyState } from './notes-empty-state';
+import { getWordAndCharCount } from '../lib/helpers';
 
 interface NotesEditorPaneProps {
   hook: NotesPageHookType;
@@ -19,42 +27,31 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
     editingId,
     renameValue,
     setRenameValue,
+    setIsSavedNotesOpen,
+    handleEditorMount,
+    handleSelectAll,
+    handleExportActiveNote,
+    handleCopyActiveNote,
     handleStartRename,
     handleRenameSubmit,
     handleRenameCancel,
+    onTabAdd,
   } = hook;
 
   const isMac = typeof window !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 
   const isRenamingActive = activeNote && editingId === activeNote.id;
 
-  const wordCount = React.useMemo(() => {
-    if (!note) return 0;
-    return note.trim().split(/\s+/).filter(Boolean).length;
+  const stats = React.useMemo(() => {
+    return getWordAndCharCount(note);
   }, [note]);
-
-  const charCount = note?.length || 0;
 
   if (!activeNote) {
     return (
-      <div
-        className={cn(
-          // Layout & Positioning
-          "flex-1 flex flex-col items-center justify-center",
-
-          // Sizing & Spacing
-          "p-8",
-
-          // Typography
-          "text-muted-foreground",
-
-          // Backgrounds & Borders
-          "bg-background"
-        )}
-      >
-        <FileTextIcon className="size-12 mb-4 opacity-20" />
-        <p className="text-xs">No note selected</p>
-      </div>
+      <NotesEmptyState
+        onOpenSavedNotes={() => setIsSavedNotesOpen(true)}
+        onCreateNewNote={onTabAdd}
+      />
     );
   }
 
@@ -75,12 +72,13 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
           "flex items-center justify-between shrink-0 select-none",
 
           // Sizing & Spacing
-          "h-12 px-4",
+          "h-12 px-4 border-b",
 
           // Backgrounds & Borders
-          "border-b bg-muted/5"
+          "bg-muted/10"
         )}
       >
+        {/* Left Section: Note Title & Rename */}
         <div
           className={cn(
             // Layout & Positioning
@@ -130,7 +128,7 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
                 variant="outline"
                 size="sm"
                 title="Save name"
-                className="h-7 w-7 p-0 text-primary active:scale-95 transition-all"
+                className="h-7 w-7 p-0 text-primary active:scale-95 transition-all cursor-pointer"
               >
                 <CheckIcon className="size-3.5" />
               </Button>
@@ -140,7 +138,7 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
                 size="sm"
                 onClick={handleRenameCancel}
                 title="Cancel rename"
-                className="h-7 w-7 p-0 text-muted-foreground active:scale-95 transition-all"
+                className="h-7 w-7 p-0 text-muted-foreground active:scale-95 transition-all cursor-pointer"
               >
                 <XIcon className="size-3.5" />
               </Button>
@@ -163,7 +161,7 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
               <span
                 className={cn(
                   // Sizing & Spacing
-                  "max-w-[200px] sm:max-w-[300px] md:max-w-[450px]",
+                  "max-w-[180px] sm:max-w-[280px] md:max-w-[400px]",
 
                   // Typography
                   "font-semibold text-xs md:text-sm text-foreground truncate"
@@ -171,6 +169,7 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
               >
                 {activeNote.name}
               </span>
+
               <Button
                 variant="ghost"
                 size="sm"
@@ -183,7 +182,7 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
                   "text-muted-foreground",
 
                   // Interactive & States
-                  "opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity hover:text-foreground hover:bg-muted"
+                  "opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity hover:text-foreground hover:bg-muted cursor-pointer"
                 )}
                 title="Rename note"
               >
@@ -193,38 +192,111 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
           )}
         </div>
 
-        {/* Editor Metadata */}
+        {/* Right Section: Utility Actions & Stats */}
         <div
           className={cn(
             // Layout & Positioning
             "flex items-center shrink-0 select-none",
 
             // Sizing & Spacing
-            "gap-4",
-
-            // Typography
-            "text-[10px] text-muted-foreground"
+            "gap-3"
           )}
         >
-          <span className="font-mono">{wordCount} words</span>
-          <span className="font-mono">{charCount} chars</span>
+          {/* Quick Action Buttons Group */}
           <div
             className={cn(
               // Layout & Positioning
-              "hidden sm:flex items-center",
+              "flex items-center",
 
               // Sizing & Spacing
-              "gap-1.5 pl-4",
-
-              // Backgrounds & Borders
-              "border-l"
+              "gap-1"
             )}
           >
-            <span className="text-muted-foreground text-[10px]">Save</span>
-            <KbdGroup>
-              <Kbd>{isMac ? '⌘' : 'Ctrl'}</Kbd>
-              <Kbd>S</Kbd>
-            </KbdGroup>
+            {/* Select All */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSelectAll}
+              className={cn(
+                // Sizing & Spacing
+                "h-7 px-2",
+
+                // Typography
+                "text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+              )}
+              title="Select all text (Cmd+A / Ctrl+A)"
+            >
+              <SelectionAllIcon className="size-3.5 mr-1" />
+              <span className="hidden sm:inline">Select All</span>
+            </Button>
+
+            {/* Copy Note */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCopyActiveNote}
+              className={cn(
+                // Sizing & Spacing
+                "h-7 px-2",
+
+                // Typography
+                "text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+              )}
+              title="Copy note content to clipboard"
+            >
+              <CopyIcon className="size-3.5 mr-1" />
+              <span className="hidden sm:inline">Copy</span>
+            </Button>
+
+            {/* Export Note */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleExportActiveNote}
+              className={cn(
+                // Sizing & Spacing
+                "h-7 px-2",
+
+                // Typography
+                "text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+              )}
+              title="Export note as Markdown (.md)"
+            >
+              <DownloadSimpleIcon className="size-3.5 mr-1" />
+              <span className="hidden sm:inline">Export</span>
+            </Button>
+          </div>
+
+          {/* Stats & Shortcuts */}
+          <div
+            className={cn(
+              // Layout & Positioning
+              "hidden md:flex items-center",
+
+              // Sizing & Spacing
+              "gap-3 pl-2.5 border-l",
+
+              // Typography
+              "text-[10px] text-muted-foreground font-mono"
+            )}
+          >
+            <span>{stats.words} words</span>
+            <span>{stats.chars} chars</span>
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center",
+
+                // Sizing & Spacing
+                "gap-1 pl-2 border-l"
+              )}
+            >
+              <span className="text-[10px] text-muted-foreground">Save</span>
+              <KbdGroup>
+                <Kbd>{isMac ? '⌘' : 'Ctrl'}</Kbd>
+                <Kbd>S</Kbd>
+              </KbdGroup>
+            </div>
           </div>
         </div>
       </div>
@@ -234,6 +306,7 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
         <TextEditor
           value={note}
           onChange={(value) => setNote(value ?? '')}
+          onMount={handleEditorMount}
           language="markdown"
           height="100%"
           detectLinks={true}
