@@ -23,6 +23,17 @@ fn main() {
     // from starving the worker threads and freezing the entire app.
     std::env::set_var("TOKIO_WORKER_THREADS", "32");
 
+    // Fix WebKitGTK DMA-BUF renderer & GPU compositing bugs on Linux
+    #[cfg(target_os = "linux")]
+    {
+        if std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
+            std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+        }
+        if std::env::var("WEBKIT_DISABLE_COMPOSITING_MODE").is_err() {
+            std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+        }
+    }
+
     // Start a fresh log file on each launch
     let _ = std::fs::write("/tmp/hexbuffer.log", "");
     log("Application starting...");

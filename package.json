@@ -12,6 +12,7 @@
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
+    "tauri:build:deb": "tauri build --bundles deb",
     "dev:clean": "lsof -ti:1420 | xargs kill -9 2>/dev/null || true && vite",
     "docs": "pnpm --dir docs/website dev -p 5555",
     "docs:dev": "pnpm --dir docs/website dev -p 5555",

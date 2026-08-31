@@ -59,6 +59,12 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
     crate::log("Building Tauri app...");
 
+    #[cfg(target_os = "linux")]
+    if let Some(main_window) = app.get_webview_window("main") {
+        let _ = main_window.set_decorations(false);
+        crate::log("Linux window decorations disabled");
+    }
+
     #[cfg(desktop)]
     {
         let handle = app.handle().clone();

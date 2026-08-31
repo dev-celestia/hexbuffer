@@ -25,6 +25,9 @@ pub fn show_main_window(app: tauri::AppHandle) -> Result<(), String> {
             "main window was not found".to_string()
         })?;
 
+    #[cfg(target_os = "linux")]
+    let _ = main_window.set_decorations(false);
+
     main_window.show().map_err(|error| {
         crate::log(&format!("Failed to show main window: {error}"));
         error.to_string()

@@ -8,6 +8,8 @@ import { useTheme } from '@/components/theme-provider';
 import { MonitorIcon, SunIcon, MoonIcon, ImageIcon, GearSixIcon, DotsSixIcon } from '@phosphor-icons/react';
 import { AppSidebar } from './taskbar';
 import { DesktopWorkspace } from './desktop-workspace';
+import { WindowControls } from './window-controls';
+import { isMacOS } from './hooks/use-window-controls';
 import { cn } from '@/lib/utils';
 
 import whiteWallpaper from '@/assets/white-wallpaper.png';
@@ -66,6 +68,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const isMac = React.useMemo(() => isMacOS(), []);
 
   return (
     <ContextMenu>
@@ -82,7 +85,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             "bg-background border rounded-[11px]"
           )}
         >
-          {/* Top macOS Drag Bar & Apple-style Grab Visual Aid */}
+          {/* Top Window Drag Bar & Controls */}
           <div
             data-tauri-drag-region
             aria-hidden="true"
@@ -96,35 +99,26 @@ export function AppLayout({ children }: AppLayoutProps) {
             }}
             className={cn(
               // Layout & Positioning
-              "absolute top-0 left-0 right-0 z-30 flex items-center justify-center select-none",
+              "absolute top-0 left-0 right-0 z-40 flex items-center justify-between select-none",
 
               // Sizing & Spacing
-              "h-8 px-4",
+              "h-8 px-3",
 
               // Interactive & States
               "cursor-grab active:cursor-grabbing group"
             )}
           >
-            {/* Apple-style Translucent Grab Capsule */}
-            {/* <div
-              data-tauri-drag-region
-              className={cn(
-                // Layout & Positioning
-                "flex items-center justify-center gap-1 pointer-events-none",
-
-                // Sizing & Spacing
-                "px-3 py-1",
-
-                // Backgrounds & Borders
-                "bg-foreground/[0.04] dark:bg-foreground/[0.08] border border-border/40 rounded-xl backdrop-blur-md shadow-xs",
-
-                // Typography
-                "text-muted-foreground/50",
-
-                // Interactive & States
-                "transition-all duration-200 ease-out group-hover:text-foreground group-hover:bg-foreground/[0.08] group-hover:border-border/70 group-active:scale-95"
+            {/* Left side: Hexbuffer label on Linux/Windows; empty spacer on macOS to preserve native traffic lights */}
+            <div className="flex items-center gap-1.5 pointer-events-none w-20">
+              {!isMac && (
+                <span className="text-[11px] font-medium tracking-wider text-muted-foreground/60 select-none">
+                  Hexbuffer
+                </span>
               )}
-            > */}
+            </div>
+
+            {/* Center: Grab indicator */}
+            <div className="flex items-center justify-center pointer-events-none">
               <DotsSixIcon
                 weight="bold"
                 className={cn(
@@ -135,7 +129,12 @@ export function AppLayout({ children }: AppLayoutProps) {
                   "opacity-70 group-hover:opacity-100"
                 )}
               />
-            {/* </div> */}
+            </div>
+
+            {/* Right side: Window Controls (Minimize, Maximize, Close) */}
+            <div className="flex items-center justify-end w-20">
+              <WindowControls />
+            </div>
           </div>
           <BgLayer />
           <div
