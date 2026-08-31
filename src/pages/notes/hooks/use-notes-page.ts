@@ -27,6 +27,7 @@ export function useNotesPage() {
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [renameValue, setRenameValue] = React.useState('');
   const [isSavedNotesOpen, setIsSavedNotesOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState('');
 
   const editorRef = React.useRef<TextEditorInstance | null>(null);
 
@@ -34,26 +35,18 @@ export function useNotesPage() {
     return notes.find((s) => s.id === activeId) || null;
   }, [notes, activeId]);
 
-  // Handle Cmd+S on window
-  React.useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
-        e.preventDefault();
-        if (activeNote) {
-          toast.success('Note saved', { description: activeNote.name });
-        }
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [activeNote]);
-
-  // Derived tabs from openTabIds
+  // Derived tabs from openTabIds (filtered by searchQuery across note name and note content)
   const tabs: PageTabItem[] = React.useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
     const list: PageTabItem[] = [];
     for (const id of openTabIds) {
       const item = notes.find((s) => s.id === id);
-      if (item) {
+      if (!item) continue;
+      if (
+        !query ||
+        item.name.toLowerCase().includes(query) ||
+        item.note.toLowerCase().includes(query)
+      ) {
         list.push({
           id: item.id,
           name: item.name,
@@ -63,7 +56,16 @@ export function useNotesPage() {
       }
     }
     return list;
-  }, [openTabIds, notes]);
+  }, [openTabIds, notes, searchQuery]);
+
+  // Auto-switch active tab when current active tab is filtered out by search query
+  React.useEffect(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return;
+    if (tabs.length > 0 && !tabs.some((t) => t.id === activeId)) {
+      setActiveId(tabs[0].id);
+    }
+  }, [searchQuery, tabs, activeId, setActiveId]);
 
   const handleStartRename = (id: string, currentName: string) => {
     setEditingId(id);
@@ -158,6 +160,24 @@ export function useNotesPage() {
     }
   }, [activeNote]);
 
+  // Handle Cmd+S on window
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        if (activeNote) {
+          toast.success('Note saved', { description: activeNote.name });
+        }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [activeNote]);
+
+  const clearSearch = React.useCallback(() => {
+    setSearchQuery('');
+  }, []);
+
   return {
     tabs,
     notes,
@@ -166,6 +186,9 @@ export function useNotesPage() {
     activeNote,
     note,
     setNote,
+    searchQuery,
+    setSearchQuery,
+    clearSearch,
     editingId,
     renameValue,
     setRenameValue,

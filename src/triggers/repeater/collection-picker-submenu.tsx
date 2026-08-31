@@ -68,60 +68,68 @@ export function CollectionPickerSubmenu({
     onSelect(stashId);
   };
 
+  const renderContent = () => {
+    if (!isHydrated) {
+      return (
+        <Item className="text-xs py-1 px-1.5" disabled>
+          <SpinnerGapIcon className="mr-1.5 size-3 animate-spin" />
+          Loading workspaces...
+        </Item>
+      );
+    }
+
+    if (workspaces.length === 0) {
+      return (
+        <Item className="text-xs py-1 px-1.5" disabled>
+          No workspaces
+        </Item>
+      );
+    }
+
+    return workspaces.map((ws) => {
+      const collections = workspaceCollectionsMap[ws.id] || [];
+      const hasCollections = collections.length > 0;
+
+      return (
+        <Sub key={ws.id}>
+          <SubTrigger className="text-xs py-1 px-1.5">
+            <FolderOpenIcon className="mr-1.5 size-3" />
+            {ws.name}
+          </SubTrigger>
+          <SubContent>
+            {!hasCollections ? (
+              <Item
+                className="text-xs py-1 px-1.5 font-medium text-primary"
+                onClick={() => handleCreateAndSelect(ws.id)}
+              >
+                <FolderStarIcon className="mr-1.5 size-3" />
+                new collection
+              </Item>
+            ) : (
+              collections.map((node) => (
+                <Item
+                  key={node.id}
+                  className="text-xs py-1 px-1.5"
+                  onClick={() => onSelect(node.id)}
+                >
+                  <PaperPlaneTiltIcon className="mr-1.5 size-3" />
+                  {node.name}
+                </Item>
+              ))
+            )}
+          </SubContent>
+        </Sub>
+      );
+    });
+  };
+
   return (
     <Sub>
       <SubTrigger className="text-xs" disabled={disabled}>
         <PaperPlaneTiltIcon className="mr-2 size-3" />
         Send to Repeater
       </SubTrigger>
-      <SubContent>
-        {!isHydrated ? (
-          <Item className="text-xs py-1 px-1.5" disabled>
-            <SpinnerGapIcon className="mr-1.5 size-3 animate-spin" />
-            Loading workspaces...
-          </Item>
-        ) : workspaces.length === 0 ? (
-          <Item className="text-xs py-1 px-1.5" disabled>
-            No workspaces
-          </Item>
-        ) : (
-          workspaces.map((ws) => {
-            const collections = workspaceCollectionsMap[ws.id] || [];
-            const hasCollections = collections.length > 0;
-
-            return (
-              <Sub key={ws.id}>
-                <SubTrigger className="text-xs py-1 px-1.5">
-                  <FolderOpenIcon className="mr-1.5 size-3" />
-                  {ws.name}
-                </SubTrigger>
-                <SubContent>
-                  {!hasCollections ? (
-                    <Item
-                      className="text-xs py-1 px-1.5 font-medium text-primary"
-                      onClick={() => handleCreateAndSelect(ws.id)}
-                    >
-                      <FolderStarIcon className="mr-1.5 size-3" />
-                      new collection
-                    </Item>
-                  ) : (
-                    collections.map((node) => (
-                      <Item
-                        key={node.id}
-                        className="text-xs py-1 px-1.5"
-                        onClick={() => onSelect(node.id)}
-                      >
-                        <PaperPlaneTiltIcon className="mr-1.5 size-3" />
-                        {node.name}
-                      </Item>
-                    ))
-                  )}
-                </SubContent>
-              </Sub>
-            );
-          })
-        )}
-      </SubContent>
+      <SubContent>{renderContent()}</SubContent>
     </Sub>
   );
 }

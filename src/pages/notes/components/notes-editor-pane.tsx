@@ -7,6 +7,8 @@ import {
   CopyIcon,
   DownloadSimpleIcon,
   SelectionAllIcon,
+  MagnifyingGlassIcon,
+  FolderSimpleIcon,
 } from '@phosphor-icons/react';
 import { useTheme } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
@@ -21,6 +23,10 @@ interface NotesEditorPaneProps {
 export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
   const { theme } = useTheme();
   const {
+    tabs,
+    notes,
+    searchQuery,
+    clearSearch,
     activeNote,
     note,
     setNote,
@@ -46,7 +52,88 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
     return getWordAndCharCount(note);
   }, [note]);
 
-  if (!activeNote) {
+  // When searching, if no open tabs match the query
+  if (tabs.length === 0 && searchQuery.trim()) {
+    return (
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex-1 flex flex-col items-center justify-center min-h-0",
+
+          // Sizing & Spacing
+          "p-8",
+
+          // Backgrounds & Borders
+          "bg-background"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col items-center text-center max-w-md w-full",
+
+            // Sizing & Spacing
+            "gap-4"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center justify-center",
+
+              // Sizing & Spacing
+              "size-14 rounded-2xl",
+
+              // Backgrounds & Borders
+              "bg-muted/50 border",
+
+              // Typography
+              "text-muted-foreground"
+            )}
+          >
+            <MagnifyingGlassIcon className="size-7" />
+          </div>
+
+          <div>
+            <h3 className="text-base font-semibold text-foreground">No Matching Open Tabs</h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              No open tabs match &quot;{searchQuery}&quot;. Clear your search or browse the full saved notes library.
+            </p>
+          </div>
+
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center justify-center",
+
+              // Sizing & Spacing
+              "gap-3 mt-2"
+            )}
+          >
+            <Button
+              variant="outline"
+              onClick={clearSearch}
+              className="text-xs font-medium cursor-pointer"
+            >
+              <XIcon className="size-3.5 mr-1.5" />
+              Clear Search
+            </Button>
+
+            <Button
+              variant="default"
+              onClick={() => setIsSavedNotesOpen(true)}
+              className="text-xs font-medium cursor-pointer"
+            >
+              <FolderSimpleIcon className="size-3.5 mr-1.5" />
+              Saved Notes Library ({notes.length})
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!activeNote || tabs.length === 0) {
     return (
       <NotesEmptyState
         onOpenSavedNotes={() => setIsSavedNotesOpen(true)}

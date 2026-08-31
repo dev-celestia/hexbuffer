@@ -1,5 +1,10 @@
-import { Button } from '@celestia-project/ui';
-import { FolderSimpleIcon, PlusIcon, NotebookIcon } from '@phosphor-icons/react';
+import { Button, Input } from '@celestia-project/ui';
+import {
+  FolderSimpleIcon,
+  PlusIcon,
+  MagnifyingGlassIcon,
+  XIcon,
+} from '@phosphor-icons/react';
 import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { cn } from '@/lib/utils';
 import { useNotesPage } from './hooks/use-notes-page';
@@ -26,17 +31,69 @@ export function NotesPage() {
           "flex items-center justify-between shrink-0 select-none",
 
           // Sizing & Spacing
-          "h-10 px-3 border-b",
+          "h-10 px-3 border-b gap-3",
 
           // Backgrounds & Borders
           "bg-muted/15"
         )}
       >
+        {/* Left: Search Open Tabs & Note Content */}
+        <div
+          className={cn(
+            // Layout & Positioning
+            "relative flex items-center max-w-xs w-full"
+          )}
+        >
+          <MagnifyingGlassIcon
+            className={cn(
+              // Layout & Positioning
+              "absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none",
+
+              // Sizing & Spacing
+              "size-3.5",
+
+              // Typography
+              "text-muted-foreground"
+            )}
+          />
+          <Input
+            value={hook.searchQuery}
+            onChange={(e) => hook.setSearchQuery(e.target.value)}
+            placeholder="Search open tabs & contents..."
+            className={cn(
+              // Sizing & Spacing
+              "h-7 pl-8 pr-7 w-full",
+
+              // Typography
+              "text-xs",
+
+              // Backgrounds & Borders
+              "bg-background"
+            )}
+          />
+          {hook.searchQuery && (
+            <button
+              type="button"
+              onClick={hook.clearSearch}
+              className={cn(
+                // Layout & Positioning
+                "absolute right-2 top-1/2 -translate-y-1/2",
+
+                // Typography
+                "text-muted-foreground hover:text-foreground cursor-pointer"
+              )}
+              title="Clear search"
+            >
+              <XIcon className="size-3.5" />
+            </button>
+          )}
+        </div>
+
         {/* Right: Saved Notes Button (Above Tabs) & New Note */}
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center justify-end w-full",
+            "flex items-center justify-end shrink-0",
 
             // Sizing & Spacing
             "gap-2"
