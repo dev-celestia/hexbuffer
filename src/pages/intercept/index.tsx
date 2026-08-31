@@ -127,59 +127,7 @@ export function InterceptPage() {
               "border-b bg-muted/20"
             )}
           >
-            {/* Left: Intercept Status & Toggle */}
-            <div
-              className={cn(
-                // Layout & Positioning
-                "flex items-center min-w-0 shrink-0",
-
-                // Sizing & Spacing
-                "gap-3"
-              )}
-            >
-              <Button
-                variant={isEnabled ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => void toggleIntercept(!isEnabled)}
-                className={cn(
-                  // Sizing & Spacing
-                  "h-7 px-2.5 gap-1.5",
-
-                  // Typography
-                  "text-xs font-medium"
-                )}
-              >
-                {isEnabled ? (
-                  <>
-                    <PauseIcon className="size-3.5" />
-                    <span>Intercept On</span>
-                  </>
-                ) : (
-                  <>
-                    <PlayIcon className="size-3.5" />
-                    <span>Intercept Off</span>
-                  </>
-                )}
-              </Button>
-              {activeRequests.length > 0 && (
-                <span
-                  className={cn(
-                    // Sizing & Spacing
-                    "px-1.5 py-0.5",
-
-                    // Typography
-                    "text-[10px] font-mono",
-
-                    // Backgrounds & Borders
-                    "text-muted-foreground bg-muted rounded border border-border/60"
-                  )}
-                >
-                  {activeRequests.length} paused req{activeRequests.length === 1 ? '' : 's'}
-                </span>
-              )}
-            </div>
-
-            {/* Right: Capture Hosts Filters */}
+            {/* Left: Capture Hosts Filters */}
             <div
               className={cn(
                 // Layout & Positioning
@@ -314,6 +262,58 @@ export function InterceptPage() {
                   <PlusIcon className="h-3 w-3" />
                 </Button>
               </div>
+            </div>
+
+            {/* Right: Intercept Status & Toggle */}
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center min-w-0 shrink-0",
+
+                // Sizing & Spacing
+                "gap-3"
+              )}
+            >
+              <Button
+                variant={isEnabled ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => void toggleIntercept(!isEnabled)}
+                className={cn(
+                  // Sizing & Spacing
+                  "h-7 px-2.5 gap-1.5",
+
+                  // Typography
+                  "text-xs font-medium"
+                )}
+              >
+                {isEnabled ? (
+                  <>
+                    <PauseIcon className="size-3.5" />
+                    <span>Intercept On</span>
+                  </>
+                ) : (
+                  <>
+                    <PlayIcon className="size-3.5" />
+                    <span>Intercept Off</span>
+                  </>
+                )}
+              </Button>
+              {activeRequests.length > 0 && (
+                <span
+                  className={cn(
+                    // Sizing & Spacing
+                    "px-1.5 py-0.5",
+
+                    // Typography
+                    "text-[10px] font-mono",
+
+                    // Backgrounds & Borders
+                    "text-muted-foreground bg-muted rounded border border-border/60"
+                  )}
+                >
+                  {activeRequests.length} paused req{activeRequests.length === 1 ? '' : 's'}
+                </span>
+              )}
             </div>
           </div>
 

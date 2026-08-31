@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle, Button, Empty, EmptyDescription, EmptyTitle } from '@celestia-project/ui';
-import { memo } from "react";
+import { memo, useRef } from "react";
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from "@/lib/utils";
 
 import { HistoryLoadingState } from "@/pages/live-traffic/components/history-loading-state";
@@ -36,6 +37,15 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
     pagination,
     actions,
   } = useTrafficTable(props);
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: visibleCalls.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => 32,
+    overscan: 10,
+  });
 
   if (loadError) {
     return (
@@ -109,6 +119,7 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
 
         {/* Scrollable Table Area (Header + Rows) */}
         <div
+          ref={scrollContainerRef}
           className={cn(
             // Layout & Positioning
             "flex-1 overflow-auto min-w-0"
@@ -130,9 +141,7 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
                 "w-full",
 
                 // Typography
-                "text-xs font-semibold text-muted-foreground bg-background",
-
-    
+                "text-xs font-semibold text-muted-foreground bg-background"
               )}
             >
               <div className="flex items-center w-full min-w-0">
@@ -172,23 +181,44 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
               </div>
             </div>
 
-            {/* Table Body Rows */}
-            <div className="flex-1">
-              {visibleCalls.map((call) => (
-                <TrafficTableRow
-                  key={call.id}
-                  call={call}
-                  isSelected={call.id === selectedCallId}
-                  isPinned={pinnedSet.has(call.id)}
-                  isGroupTabActive={isGroupTabActive}
-                  searchQuery={searchQuery}
-                  columns={columns}
-                  onRowClick={actions.handleRowClick}
-                  onDelete={actions.removeCallLocallyWithUnpin}
-                  onContextMenuOpenChange={actions.handleContextMenuOpenChange}
-                  onNewGroup={actions.handleNewGroup}
-                />
-              ))}
+            {/* Table Body Rows (Virtual) */}
+            <div
+              className="flex-1 relative w-full"
+              style={{
+                height: `${rowVirtualizer.getTotalSize()}px`,
+              }}
+            >
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const call = visibleCalls[virtualRow.index];
+                if (!call) return null;
+                return (
+                  <div
+                    key={call.id}
+                    data-index={virtualRow.index}
+                    ref={rowVirtualizer.measureElement}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                  >
+                    <TrafficTableRow
+                      call={call}
+                      isSelected={call.id === selectedCallId}
+                      isPinned={pinnedSet.has(call.id)}
+                      isGroupTabActive={isGroupTabActive}
+                      searchQuery={searchQuery}
+                      columns={columns}
+                      onRowClick={actions.handleRowClick}
+                      onDelete={actions.removeCallLocallyWithUnpin}
+                      onContextMenuOpenChange={actions.handleContextMenuOpenChange}
+                      onNewGroup={actions.handleNewGroup}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

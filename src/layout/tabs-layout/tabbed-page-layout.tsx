@@ -32,7 +32,7 @@ export function TabbedPageLayout({
   renderTabContextMenuItems,
   children,
   className = 'flex flex-col h-full',
-  contentClassName = 'flex-1 border rounded-md overflow-hidden bg-background min-h-0',
+  contentClassName,
 }: Readonly<TabbedPageLayoutProps>) {
   return (
     <div className={className}>
@@ -49,8 +49,8 @@ export function TabbedPageLayout({
           renderTabContextMenuItems={renderTabContextMenuItems}
         />
       </div>
-      <div className={cn(contentClassName, 'm-2')}>
-        <Tabs value={activeTabId} onValueChange={onTabChange} className="gap-0 h-full flex flex-col min-w-0">
+      <div className={cn('flex-1 min-h-0 overflow-hidden', contentClassName ?? 'm-2 border rounded-md bg-background')}>
+        <Tabs value={activeTabId} onValueChange={onTabChange} className="gap-0 h-full w-full flex flex-col min-w-0">
           {children}
         </Tabs>
       </div>

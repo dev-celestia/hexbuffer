@@ -15,10 +15,11 @@ pub use types::*;
 
 use rusqlite::{Connection, Result as SqlResult};
 use std::path::PathBuf;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
+#[derive(Clone)]
 pub struct Database {
-    conn: Mutex<Connection>,
+    conn: Arc<Mutex<Connection>>,
     path: PathBuf,
 }
 
@@ -26,7 +27,7 @@ impl Database {
     pub fn new(path: PathBuf) -> SqlResult<Self> {
         let conn = Connection::open(&path)?;
         Ok(Self {
-            conn: Mutex::new(conn),
+            conn: Arc::new(Mutex::new(conn)),
             path,
         })
     }

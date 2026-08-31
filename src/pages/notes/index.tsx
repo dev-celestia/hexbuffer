@@ -8,8 +8,7 @@ import {
 import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { cn } from '@/lib/utils';
 import { useNotesPage } from './hooks/use-notes-page';
-import { NotesEditorPane } from './components/notes-editor-pane';
-import { SavedNotesDialog } from './components/saved-notes-dialog';
+import { NotesEditorPane, SavedNotesDialog } from './components';
 
 export function NotesPage() {
   const hook = useNotesPage();
@@ -18,7 +17,7 @@ export function NotesPage() {
     <div
       className={cn(
         // Layout & Positioning
-        "flex flex-col min-h-0",
+        "flex flex-col min-h-0 w-full",
 
         // Sizing & Spacing
         "h-full"
@@ -107,7 +106,7 @@ export function NotesPage() {
             className="flex items-center gap-2"
           >
             <FolderSimpleIcon className="size-3.5 text-primary" />
-            <span className='text-xs mt-0.5'>Manage Saved Notes</span>
+            <span className="text-xs mt-0.5">Manage Saved Notes</span>
             <span
               className={cn(
                 // Sizing & Spacing
@@ -154,17 +153,17 @@ export function NotesPage() {
         onCloseTabsToRight={hook.onCloseTabsToRight}
         className={cn(
           // Layout & Positioning
-          "flex flex-col flex-1 min-h-0 overflow-hidden"
+          "flex flex-col flex-1 min-h-0 w-full h-full overflow-hidden"
         )}
         contentClassName={cn(
           // Layout & Positioning
-          "flex-1 min-h-0 overflow-hidden",
+          "flex-1 min-h-0 w-full h-full overflow-hidden",
 
           // Sizing & Spacing
-          "m-2",
+          "p-0 m-0",
 
           // Backgrounds & Borders
-          "border rounded-md bg-card"
+          "bg-background"
         )}
       >
         <NotesEditorPane hook={hook} />

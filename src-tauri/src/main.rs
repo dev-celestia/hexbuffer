@@ -19,9 +19,14 @@ pub(crate) fn log(msg: &str) {
 }
 
 fn main() {
-    // Set a larger Tokio thread pool size to prevent tauri-plugin-pty's blocking loops
-    // from starving the worker threads and freezing the entire app.
-    std::env::set_var("TOKIO_WORKER_THREADS", "32");
+    // Set a balanced Tokio thread pool size to ensure tauri-plugin-pty's read loops have
+    // sufficient worker headroom without over-allocating threads and context-switching on low-core CPUs.
+    let default_threads = std::thread::available_parallelism()
+        .map(|n| (n.get() * 2).clamp(4, 16))
+        .unwrap_or(8);
+    if std::env::var("TOKIO_WORKER_THREADS").is_err() {
+        std::env::set_var("TOKIO_WORKER_THREADS", default_threads.to_string());
+    }
 
     // Fix WebKitGTK DMA-BUF renderer & GPU compositing bugs on Linux
     #[cfg(target_os = "linux")]

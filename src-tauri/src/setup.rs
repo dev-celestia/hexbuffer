@@ -21,20 +21,16 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
     let db_path = app_dir.join("hexbuffer.db");
     crate::log(&format!("Opening database at {:?}", db_path));
-    let database = hexbuffer::db::repository::Database::new(db_path.clone())
+    let database = hexbuffer::db::repository::Database::new(db_path)
         .expect("Failed to initialize database");
     if let Err(e) = database.init() {
         crate::log(&format!("FATAL: Failed to initialize database schema: {}", e));
         panic!("Failed to initialize database schema: {}", e);
     }
-    let history = match HistoryBridge::new(db_path) {
-        Ok(h) => h,
-        Err(e) => {
-            crate::log(&format!("FATAL: Failed to initialize history bridge: {}", e));
-            panic!("Failed to initialize history bridge: {}", e);
-        }
-    };
+    let history = HistoryBridge::from_database(database.clone());
     crate::log("History bridge initialized");
+
+    hexbuffer::proxy::completion::init_proxy_log_worker(app.handle().clone());
 
     app.manage(ProxyState::new());
     app.manage(InvokerState::default());

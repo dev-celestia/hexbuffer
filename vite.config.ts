@@ -56,7 +56,6 @@ export default defineConfig({
           if (id.includes("node_modules")) {
             // Heavy standalone packages isolated for route-level / on-demand loading
             if (id.includes("monaco-editor")) return "vendor-monaco";
-            if (id.includes("jspdf")) return "vendor-jspdf";
             if (id.includes("xterm") || id.includes("@xterm")) return "vendor-xterm";
             if (id.includes("@xyflow") || id.includes("reactflow")) return "vendor-reactflow";
             if (id.includes("motion")) return "vendor-motion";

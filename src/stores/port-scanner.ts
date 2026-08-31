@@ -119,9 +119,6 @@ export const usePortScannerStore = create<PortScannerState>()(
         delayMs: state.delayMs,
         jitterMs: state.jitterMs,
         randomizePorts: state.randomizePorts,
-        results: state.results,
-        hasRun: state.hasRun,
-        error: state.error,
       }),
       merge: (persisted, current): PortScannerState => {
         const base = current as PortScannerState;
@@ -147,9 +144,9 @@ export const usePortScannerStore = create<PortScannerState>()(
           delayMs: state?.delayMs ?? base.delayMs,
           jitterMs: state?.jitterMs ?? base.jitterMs,
           randomizePorts: state?.randomizePorts ?? base.randomizePorts,
-          results: state?.results ?? base.results,
-          hasRun: state?.hasRun ?? base.hasRun,
-          error: state?.error ?? base.error,
+          results: [],
+          hasRun: false,
+          error: '',
         };
       },
     }

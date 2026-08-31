@@ -3,7 +3,10 @@ import { toast } from 'sonner';
 import { useScratchpadStore } from '@/stores/scratchpad';
 import type { PageTabItem } from '@/layout/tabs-layout/types';
 import type { TextEditorInstance, MonacoInstance } from '@celestia-project/ui';
+import type { EditorViewMode } from '../types';
 import { downloadAsMarkdown, copyNoteToClipboard } from '../lib/helpers';
+import { saveBase64ToLocalExplorer, formatMarkdownImage } from '../lib/image-helpers';
+
 
 export function useNotesPage() {
   const {
@@ -27,9 +30,12 @@ export function useNotesPage() {
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [renameValue, setRenameValue] = React.useState('');
   const [isSavedNotesOpen, setIsSavedNotesOpen] = React.useState(false);
+  const [isDrawingOpen, setIsDrawingOpen] = React.useState(false);
+  const [viewMode, setViewMode] = React.useState<EditorViewMode>('editor');
   const [searchQuery, setSearchQuery] = React.useState('');
 
   const editorRef = React.useRef<TextEditorInstance | null>(null);
+
 
   const activeNote = React.useMemo(() => {
     return notes.find((s) => s.id === activeId) || null;
@@ -148,6 +154,43 @@ export function useNotesPage() {
     []
   );
 
+  const handleInsertDrawing = React.useCallback(
+    async (dataUrl: string, title?: string) => {
+      const fileName = `scratchpad-${Date.now()}.png`;
+      const saved = await saveBase64ToLocalExplorer(dataUrl, fileName, 'scratchpads');
+      const markdownImage = formatMarkdownImage(title || 'Scratchpad Drawing', saved.srcUrl);
+
+      if (editorRef.current) {
+        const selection = editorRef.current.getSelection();
+        if (selection) {
+          editorRef.current.executeEdits('insert-drawing', [
+            {
+              range: selection,
+              text: markdownImage,
+              forceMoveMarkers: true,
+            },
+          ]);
+          editorRef.current.focus();
+        } else {
+          setNote((note ? `${note}\n` : '') + markdownImage);
+        }
+      } else {
+        setNote((note ? `${note}\n` : '') + markdownImage);
+      }
+
+      if (saved.filePath) {
+        toast.success(`Saved to File Explorer: ${saved.relativePath}`);
+      }
+
+      // If in code mode, switch to editor view so user immediately sees rendered scratchpad image
+      if (viewMode === 'code') {
+        setViewMode('editor');
+      }
+    },
+    [note, setNote, viewMode]
+  );
+
+
   const handleExportActiveNote = React.useCallback(() => {
     if (activeNote) {
       downloadAsMarkdown(activeNote.name, activeNote.note);
@@ -194,11 +237,16 @@ export function useNotesPage() {
     setRenameValue,
     isSavedNotesOpen,
     setIsSavedNotesOpen,
+    isDrawingOpen,
+    setIsDrawingOpen,
+    viewMode,
+    setViewMode,
     editorRef,
     handleEditorMount,
     handleSelectAll,
     handleExportActiveNote,
     handleCopyActiveNote,
+    handleInsertDrawing,
     handleStartRename,
     handleRenameSubmit,
     handleRenameCancel,
@@ -216,3 +264,4 @@ export function useNotesPage() {
 }
 
 export type NotesPageHookType = ReturnType<typeof useNotesPage>;
+

@@ -3,7 +3,7 @@ import { FileTextIcon, PlusIcon, FolderSimpleIcon } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils';
 import { useScratchpadStore } from '@/stores/scratchpad';
 
-interface NotesEmptyStateProps {
+export interface NotesEmptyStateProps {
   onOpenSavedNotes: () => void;
   onCreateNewNote: () => void;
 }
@@ -52,8 +52,23 @@ export function NotesEmptyState({ onOpenSavedNotes, onCreateNewNote }: NotesEmpt
         </div>
 
         <div>
-          <h3 className="text-base font-semibold text-foreground">No Note Tabs Open</h3>
-          <p className="text-xs text-muted-foreground mt-1">
+          <h3
+            className={cn(
+              // Typography
+              "text-base font-semibold text-foreground"
+            )}
+          >
+            No Note Tabs Open
+          </h3>
+          <p
+            className={cn(
+              // Sizing & Spacing
+              "mt-1",
+
+              // Typography
+              "text-xs text-muted-foreground"
+            )}
+          >
             All your notes remain safely stored in the library. Reopen a saved note or create a new one.
           </p>
         </div>
@@ -69,7 +84,10 @@ export function NotesEmptyState({ onOpenSavedNotes, onCreateNewNote }: NotesEmpt
         >
           <Button
             onClick={onCreateNewNote}
-            className="text-xs font-medium cursor-pointer"
+            className={cn(
+              // Typography
+              "text-xs font-medium cursor-pointer"
+            )}
           >
             <PlusIcon className="size-3.5 mr-1.5" />
             New Note
@@ -78,7 +96,10 @@ export function NotesEmptyState({ onOpenSavedNotes, onCreateNewNote }: NotesEmpt
           <Button
             variant="outline"
             onClick={onOpenSavedNotes}
-            className="text-xs font-medium cursor-pointer"
+            className={cn(
+              // Typography
+              "text-xs font-medium cursor-pointer"
+            )}
           >
             <FolderSimpleIcon className="size-3.5 mr-1.5" />
             Saved Notes Library ({notes.length})

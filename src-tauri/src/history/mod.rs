@@ -66,6 +66,14 @@ impl HistoryBridge {
         Ok(Self { db })
     }
 
+    pub fn from_database(db: Database) -> Self {
+        Self { db }
+    }
+
+    pub fn database(&self) -> &Database {
+        &self.db
+    }
+
     // ponytail: delegates to reset internal database connection
     pub fn close_connection(&self) -> Result<(), String> {
         self.db.close_connection().map_err(|e| e.to_string())
@@ -138,6 +146,10 @@ impl HistoryBridge {
 
     pub fn insert_record(&self, record: &ProxyRecord, session_id: Option<&str>) -> Result<(), String> {
         self.db.insert_log(record, session_id).map_err(|e| e.to_string())
+    }
+
+    pub fn insert_records_batch(&self, records: &[(ProxyRecord, Option<String>)]) -> Result<(), String> {
+        self.db.insert_logs_batch(records).map_err(|e| e.to_string())
     }
 
     pub fn upsert_ai_browser_session(&self, session: &CrawlSession) -> Result<(), String> {

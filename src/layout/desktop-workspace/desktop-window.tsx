@@ -49,53 +49,53 @@ const DesktopWindow = React.memo(function DesktopWindow({
       className={windowClassName}
       style={windowStyle}
     >
-      {/* Minimized Overlay to capture click and prevent inner interactions */}
-      {isMinimized && (
-        <WindowMinimizedOverlay
-          id={id}
-          title={title}
-          navItem={navItem}
-        />
-      )}
+      <WindowProvider id={id} windowElement={windowRef.current}>
+        {/* Minimized Overlay to capture click and prevent inner interactions */}
+        {isMinimized && (
+          <WindowMinimizedOverlay
+            id={id}
+            title={title}
+            navItem={navItem}
+          />
+        )}
 
-      {/* Window Header */}
-      {!isMinimized && (
-        <WindowHeader
-          id={id}
-          title={title}
-          isFocused={isFocused}
-          isMaximized={isMaximized}
-          navItem={navItem}
-          onDragMouseDown={handleMouseDown}
-          tileLeft={tileLeft}
-          tileRight={tileRight}
-        />
-      )}
+        {/* Window Header */}
+        {!isMinimized && (
+          <WindowHeader
+            id={id}
+            title={title}
+            isFocused={isFocused}
+            isMaximized={isMaximized}
+            navItem={navItem}
+            onDragMouseDown={handleMouseDown}
+            tileLeft={tileLeft}
+            tileRight={tileRight}
+          />
+        )}
 
-      {/* Window Body Container */}
-      <div
-        className="flex-1 min-h-0 bg-background overflow-hidden relative"
-        aria-hidden={isMinimized}
-        style={{
-          display: isMinimized ? "none" : undefined,
-        }}
-      >
-        {/* Interaction overlay blocks iframes/canvases during drag/resize to prevent reflow jank */}
-        {isInteracting && <div className="absolute inset-0 z-40" />}
-        <WindowProvider id={id} windowElement={windowRef.current}>
+        {/* Window Body Container */}
+        <div
+          className="flex-1 min-h-0 bg-background overflow-hidden relative"
+          aria-hidden={isMinimized}
+          style={{
+            display: isMinimized ? "none" : undefined,
+          }}
+        >
+          {/* Interaction overlay blocks iframes/canvases during drag/resize to prevent reflow jank */}
+          {isInteracting && <div className="absolute inset-0 z-40" />}
           <WindowContent
             id={id}
             isCurrentRoute={isCurrentRoute}
             activeChild={activeChild}
             StaticComponent={StaticComponent}
           />
-        </WindowProvider>
-      </div>
+        </div>
 
-      {/* Resize Handle (only show when not maximized and not minimized) */}
-      {!isMaximized && !isMinimized && (
-        <WindowResizeHandle onMouseDown={handleResizeMouseDown} />
-      )}
+        {/* Resize Handle (only show when not maximized and not minimized) */}
+        {!isMaximized && !isMinimized && (
+          <WindowResizeHandle onMouseDown={handleResizeMouseDown} />
+        )}
+      </WindowProvider>
     </div>
   );
 });

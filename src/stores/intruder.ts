@@ -108,6 +108,8 @@ export type InvokerState = IntruderState;
 
 const unlistenProgressByTab = new Map<string, UnlistenFn>();
 const unlistenResultByTab = new Map<string, UnlistenFn>();
+const resultBuffersByTab = new Map<string, AttackResult[]>();
+const flushTimersByTab = new Map<string, ReturnType<typeof setTimeout>>();
 
 function createAttackTab(index: number, config = createDefaultAttackConfig()): IntruderTab {
   return {
@@ -144,7 +146,37 @@ function createAttackTab(index: number, config = createDefaultAttackConfig()): I
 
 const initialTab = createAttackTab(1);
 
+function flushTabResults(
+  tabId: string,
+  set: (partial: Partial<IntruderState> | ((state: IntruderState) => Partial<IntruderState>)) => void
+) {
+  const timer = flushTimersByTab.get(tabId);
+  if (timer) {
+    clearTimeout(timer);
+    flushTimersByTab.delete(tabId);
+  }
+
+  const buffer = resultBuffersByTab.get(tabId);
+  if (!buffer || buffer.length === 0) return;
+
+  const batch = buffer.splice(0, buffer.length);
+  set((state) => ({
+    tabs: state.tabs.map((currentTab) =>
+      currentTab.id === tabId
+        ? { ...currentTab, results: [...currentTab.results, ...batch] }
+        : currentTab
+    ),
+  }));
+}
+
 function cleanupTabListeners(tabId: string) {
+  const timer = flushTimersByTab.get(tabId);
+  if (timer) {
+    clearTimeout(timer);
+    flushTimersByTab.delete(tabId);
+  }
+  resultBuffersByTab.delete(tabId);
+
   const unlistenProgress = unlistenProgressByTab.get(tabId);
   const unlistenResult = unlistenResultByTab.get(tabId);
   unlistenProgressByTab.delete(tabId);
@@ -152,10 +184,7 @@ function cleanupTabListeners(tabId: string) {
 
   if (typeof unlistenProgress === 'function') {
     try {
-      const res = unlistenProgress();
-      if (res && typeof (res as any).catch === 'function') {
-        (res as any).catch(() => {});
-      }
+      unlistenProgress();
     } catch {
       // ignore
     }
@@ -163,10 +192,7 @@ function cleanupTabListeners(tabId: string) {
 
   if (typeof unlistenResult === 'function') {
     try {
-      const res = unlistenResult();
-      if (res && typeof (res as any).catch === 'function') {
-        (res as any).catch(() => {});
-      }
+      unlistenResult();
     } catch {
       // ignore
     }
@@ -446,6 +472,9 @@ export const useIntruderStore = create<IntruderState>((set, get) => ({
 
       const unlistenProgress = await listen<AttackProgress>(`invoker-progress-${id}`, (event) => {
         const p = event.payload;
+        if (p.type === 'Complete') {
+          flushTabResults(tab.id, set);
+        }
         set((state) => ({
           tabs: state.tabs.map((currentTab) => {
             if (currentTab.id !== tab.id) return currentTab;
@@ -464,13 +493,19 @@ export const useIntruderStore = create<IntruderState>((set, get) => ({
       });
 
       const unlistenResult = await listen<AttackResult>(`invoker-result-${id}`, (event) => {
-        set((state) => ({
-          tabs: state.tabs.map((currentTab) =>
-            currentTab.id === tab.id
-              ? { ...currentTab, results: [...currentTab.results, event.payload] }
-              : currentTab
-          ),
-        }));
+        let buffer = resultBuffersByTab.get(tab.id);
+        if (!buffer) {
+          buffer = [];
+          resultBuffersByTab.set(tab.id, buffer);
+        }
+        buffer.push(event.payload);
+
+        if (!flushTimersByTab.has(tab.id)) {
+          const timer = setTimeout(() => {
+            flushTabResults(tab.id, set);
+          }, 50);
+          flushTimersByTab.set(tab.id, timer);
+        }
       });
 
       unlistenProgressByTab.set(tab.id, unlistenProgress);

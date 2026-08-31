@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { readDir, mkdir, exists, remove, rename, stat } from '@tauri-apps/plugin-fs';
+import { readDir, mkdir, exists, remove, rename, stat, writeFile } from '@tauri-apps/plugin-fs';
 import { documentDir, join } from '@tauri-apps/api/path';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { openPath } from '@tauri-apps/plugin-opener';
 import { toast } from 'sonner';
+import { DEFAULT_FLOWCHART_BASE64 } from '../constants';
 
 export const LOCAL_STORAGE_DIR_NAME = 'Hexbuffer Files';
 
@@ -34,11 +35,36 @@ export function useLocalStorage() {
       if (!alreadyExists) {
         await mkdir(root, { recursive: true });
       }
+
+      // Ensure default diagrams folder and default flowchart sample exist
+      const diagramsDir = await join(root, 'diagrams');
+      const diagramsExist = await exists(diagramsDir);
+      if (!diagramsExist) {
+        await mkdir(diagramsDir, { recursive: true });
+      }
+
+      const defaultFlowchartPath = await join(diagramsDir, 'flowchart-diagram.png');
+      const flowchartExists = await exists(defaultFlowchartPath);
+      if (!flowchartExists) {
+        try {
+          const cleanBase64 = DEFAULT_FLOWCHART_BASE64.replace(/^data:image\/\w+;base64,/, '');
+          const binaryString = atob(cleanBase64);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          await writeFile(defaultFlowchartPath, bytes);
+        } catch (e) {
+          console.warn('Could not seed default flowchart image:', e);
+        }
+      }
+
       setRootDir(root);
       setCurrentPath(root);
     }
     init().catch(console.error);
   }, []);
+
 
   const listDir = React.useCallback(async (path: string) => {
     if (!path) return;

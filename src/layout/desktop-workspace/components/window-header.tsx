@@ -12,6 +12,7 @@ import {
 
 import { ALL_NAV_ITEMS, getAppIconImage, type NavItem } from "@/layout/constants";
 import { useNavStore } from "@/stores/nav";
+import { useWindowContext } from "@/providers/window-provider";
 import { cn } from "@/lib/utils";
 
 interface WindowHeaderProps {
@@ -39,6 +40,7 @@ export const WindowHeader = React.memo(function WindowHeader({
   const closeWindow = useNavStore((s) => s.closeWindow);
   const minimizeWindow = useNavStore((s) => s.minimizeWindow);
   const maximizeWindow = useNavStore((s) => s.maximizeWindow);
+  const { setHeaderSlotNode, hasHeaderSlotContent } = useWindowContext();
 
   const resolvedNavItem =
     navItem ||
@@ -158,7 +160,19 @@ export const WindowHeader = React.memo(function WindowHeader({
         )}
       </div>
 
-      <div className="flex gap-2 h-6 items-center">
+      <div className="flex gap-1.5 h-6 items-center">
+        {/* Custom Header Slot / Buttons (beside split screen buttons) */}
+        <div
+          ref={setHeaderSlotNode}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="flex items-center gap-1 cursor-default select-text"
+        />
+
+        {/* Separator between Custom Slot and Snap Layout Controls */}
+        {hasHeaderSlotContent && (
+          <Separator orientation="vertical" className="h-4" />
+        )}
+
         {/* Snap Layout Controls */}
         <div className="flex items-center gap-1 text-muted-foreground">
           <button
@@ -189,7 +203,7 @@ export const WindowHeader = React.memo(function WindowHeader({
           </button>
         </div>
 
-        <Separator orientation="vertical" className="h-6" />
+        <Separator orientation="vertical" className="h-4" />
 
         {/* Window Controls */}
         <div className="flex items-center gap-0.5">
@@ -238,3 +252,5 @@ export const WindowHeader = React.memo(function WindowHeader({
     </div>
   );
 });
+
+

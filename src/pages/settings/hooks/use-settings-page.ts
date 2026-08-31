@@ -467,7 +467,13 @@ export function useSettingsPage() {
     }
   }, [proxyStatus, saveProxyDefaultPort]);
 
+  const isMac = React.useMemo(() => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+    return /Macintosh|MacIntel|MacPPC|Mac68K|Mac/i.test(navigator.userAgent) || /Mac/i.test(navigator.platform);
+  }, []);
+
   return {
+    isMac,
     aiSettings,
     aiSettingsLoading,
     aiSettingsSaving,

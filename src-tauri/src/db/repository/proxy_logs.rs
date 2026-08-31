@@ -86,6 +86,57 @@ impl Database {
         Ok(())
     }
 
+    pub fn insert_logs_batch(&self, records: &[(ProxyRecord, Option<String>)]) -> SqlResult<()> {
+        if records.is_empty() {
+            return Ok(());
+        }
+        let mut conn = self.conn.lock().unwrap();
+        let default_session = Self::ensure_default_http_session(&conn)?;
+        let tx = conn.transaction()?;
+        {
+            let mut stmt = tx.prepare_cached(
+                r#"INSERT INTO http_logs (
+                    id, session_id, timestamp, method, url,
+                    request_headers, request_body,
+                    response_status, response_status_text,
+                    response_headers, response_body,
+                    client_addr, server_addr, duration_ms
+                ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)"#,
+            )?;
+            for (record, session_id) in records {
+                let target_session_id = match session_id.as_deref() {
+                    Some(s) if !s.trim().is_empty() => s.trim(),
+                    _ => &default_session,
+                };
+                let request_headers = serde_json::to_string(&record.request.headers).unwrap_or_default();
+                let response_headers = record
+                    .response
+                    .as_ref()
+                    .map(|r| serde_json::to_string(&r.headers).unwrap_or_default())
+                    .unwrap_or_default();
+
+                stmt.execute(params![
+                    record.id.to_string(),
+                    target_session_id,
+                    record.timestamp.to_rfc3339(),
+                    record.request.method,
+                    record.request.uri,
+                    request_headers,
+                    record.request.body,
+                    record.response.as_ref().map(|r| r.status_code as i64),
+                    record.response.as_ref().map(|r| r.status_text.clone()),
+                    response_headers,
+                    record.response.as_ref().map(|r| r.body.clone()),
+                    record.client_addr,
+                    record.server_addr,
+                    0i64,
+                ])?;
+            }
+        }
+        tx.commit()?;
+        Ok(())
+    }
+
     pub fn get_all(&self) -> SqlResult<Vec<ProxyRecord>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(&format!("SELECT {} FROM http_logs ORDER BY timestamp DESC", SELECT_PROXY_RECORD_COLS))?;

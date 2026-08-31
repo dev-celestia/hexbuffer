@@ -28,6 +28,7 @@ import { METHOD_FILTERS, STATUS_FILTERS } from './log-table/utils';
 import { FilterChips } from './filter-chips';
 import { SessionSelector } from './session';
 import { useLogFilters, type UseLogFiltersProps } from '../hooks/use-log-filters';
+import { WindowHeaderSlot } from '@/providers/window-provider';
 
 export type LogFiltersProps = UseLogFiltersProps;
 
@@ -60,6 +61,55 @@ export function LogFilters(props: LogFiltersProps) {
         "p-2 px-2"
       )}
     >
+      <WindowHeaderSlot>
+        {isStreamManuallyPaused && (
+          <Badge
+            variant="outline"
+            className={cn(
+              // Sizing & Spacing
+              "px-1 py-0.5",
+
+              // Typography
+              "font-mono text-[10px] font-semibold text-white",
+
+              // Backgrounds & Borders
+              "rounded border-none bg-amber-600 shadow-none"
+            )}
+          >
+            paused
+          </Badge>
+        )}
+
+        <ButtonGroup>
+          <Button
+            size="xs"
+            variant="secondary"
+            onClick={handleToggleStreamPause}
+          >
+            {isStreamManuallyPaused ? (
+              <>
+                <PlayIcon />
+                Resume
+              </>
+            ) : (
+              <>
+                <PauseIcon />
+                Pause
+              </>
+            )}
+          </Button>
+
+          <Button
+            size="xs"
+            variant="secondary"
+            onClick={openTargetSelector}
+          >
+            <TargetIcon />
+            Target
+          </Button>
+        </ButtonGroup>
+      </WindowHeaderSlot>
+
       <div
         className={cn(
           // Layout & Positioning
@@ -222,53 +272,6 @@ export function LogFilters(props: LogFiltersProps) {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-          </ButtonGroup>
-
-          {isStreamManuallyPaused && (
-            <Badge
-              variant="outline"
-              className={cn(
-                // Sizing & Spacing
-                "px-1 py-0.5",
-
-                // Typography
-                "font-mono text-[10px] font-semibold text-white",
-
-                // Backgrounds & Borders
-                "rounded border-none bg-amber-600 shadow-none"
-              )}
-            >
-              paused
-            </Badge>
-          )}
-
-          <ButtonGroup>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={handleToggleStreamPause}
-            >
-              {isStreamManuallyPaused ? (
-                <>
-                  <PlayIcon />
-                  Resume
-                </>
-              ) : (
-                <>
-                  <PauseIcon />
-                  Pause
-                </>
-              )}
-            </Button>
-
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={openTargetSelector}
-            >
-              <TargetIcon />
-              Target
-            </Button>
           </ButtonGroup>
         </div>
       </div>

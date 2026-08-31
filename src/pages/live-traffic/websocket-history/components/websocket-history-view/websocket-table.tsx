@@ -93,6 +93,15 @@ export function WebSocketTable({ selectedConnectionId, onSelectConnection }: Web
     removeConnectionLocally,
   } = useWebSocketTable();
 
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: connections.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => 32,
+    overscan: 10,
+  });
+
   if (loadError) {
     return (
       <div
@@ -159,103 +168,125 @@ export function WebSocketTable({ selectedConnectionId, onSelectConnection }: Web
       )}
 
       <div
+        ref={scrollContainerRef}
         className={cn(
           // Layout & Positioning
           "flex-1 overflow-auto min-w-0"
         )}
       >
-        <table className="w-full border-collapse">
-          <thead
+        <div className="flex flex-col min-h-full min-w-full w-full">
+          <div
             className={cn(
               // Layout & Positioning
-              "sticky top-0 z-10 select-none",
+              "sticky top-0 z-10 select-none flex items-center shrink-0 w-full",
 
               // Typography
               "text-[10px] font-semibold text-muted-foreground uppercase tracking-wider",
 
               // Backgrounds & Borders
-              "border-b bg-muted/50 backdrop-blur-sm"
+              "border-b bg-background"
             )}
           >
-            <tr>
-              <th className="text-left px-3 py-1.5 w-[80px]">Status</th>
-              <th className="text-left px-3 py-1.5 w-[90px]">Time</th>
-              <th className="text-left px-3 py-1.5 w-[200px]">Host</th>
-              <th className="text-left px-3 py-1.5 flex-1">Path</th>
-              <th className="text-right px-3 py-1.5 w-[80px]">Frames</th>
-              <th className="text-left px-3 py-1.5 w-[90px]">Last Active</th>
-            </tr>
-          </thead>
-          <tbody>
-            {connections.map((connection) => {
+            <div className="px-3 py-1.5 w-[80px]">Status</div>
+            <div className="px-3 py-1.5 w-[90px]">Time</div>
+            <div className="px-3 py-1.5 w-[200px]">Host</div>
+            <div className="px-3 py-1.5 flex-1">Path</div>
+            <div className="px-3 py-1.5 text-right w-[80px]">Frames</div>
+            <div className="px-3 py-1.5 w-[90px]">Last Active</div>
+          </div>
+
+          <div
+            className="flex-1 relative w-full"
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`,
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const connection = connections[virtualRow.index];
+              if (!connection) return null;
               const isSelected = selectedConnectionId === connection.id;
 
               return (
-                <WebSocketContextMenu
+                <div
                   key={connection.id}
-                  connectionId={connection.id}
-                  connectionUrl={connection.url}
-                  connectionHost={connection.host}
-                  connectionPath={connection.path}
-                  onDelete={removeConnectionLocally}
+                  data-index={virtualRow.index}
+                  ref={rowVirtualizer.measureElement}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
                 >
-                  <tr
-                    className={cn(
-                      // Typography
-                      "font-mono text-xs cursor-pointer select-none",
-
-                      // Backgrounds & Borders
-                      "border-b border-border/40 transition-colors",
-                      isSelected
-                        ? "bg-accent text-accent-foreground font-medium"
-                        : "hover:bg-muted/40"
-                    )}
-                    onClick={() => onSelectConnection(connection.id)}
+                  <WebSocketContextMenu
+                    connectionId={connection.id}
+                    connectionUrl={connection.url}
+                    connectionHost={connection.host}
+                    connectionPath={connection.path}
+                    onDelete={removeConnectionLocally}
                   >
-                    <td className="px-3 py-1.5">
-                      <StatusIndicator state={connection.state} />
-                    </td>
-                    <td className="text-muted-foreground px-3 py-1.5 text-[11px]">
-                      {formatTime(connection.timestamp)}
-                    </td>
-                    <td
-                      className="px-3 py-1.5 truncate max-w-[200px] font-medium text-foreground text-[11px]"
-                      title={connection.url}
-                    >
-                      <HighlightedText text={connection.host} query={searchQuery} />
-                    </td>
-                    <td
-                      className="px-3 py-1.5 text-muted-foreground truncate max-w-[220px] text-[11px]"
-                      title={connection.url}
-                    >
-                      <HighlightedText text={connection.path} query={searchQuery} />
-                    </td>
-                    <td className="px-3 py-1.5 text-right">
-                      <Badge
-                        variant="secondary"
-                        className={cn(
-                          // Sizing & Spacing
-                          "h-4 px-1.5",
+                    <div
+                      className={cn(
+                        // Layout & Positioning
+                        "flex items-center text-left w-full h-8",
 
-                          // Typography
-                          "font-mono text-[10px] font-normal",
+                        // Typography
+                        "font-mono text-xs cursor-pointer select-none",
 
-                          // Backgrounds & Borders
-                          "bg-muted/80 rounded"
-                        )}
+                        // Backgrounds & Borders
+                        "border-b border-border/40 transition-colors",
+                        isSelected
+                          ? "bg-accent text-accent-foreground font-medium"
+                          : "hover:bg-muted/40"
+                      )}
+                      onClick={() => onSelectConnection(connection.id)}
+                    >
+                      <div className="px-3 py-1.5 w-[80px]">
+                        <StatusIndicator state={connection.state} />
+                      </div>
+                      <div className="text-muted-foreground px-3 py-1.5 text-[11px] w-[90px]">
+                        {formatTime(connection.timestamp)}
+                      </div>
+                      <div
+                        className="px-3 py-1.5 truncate w-[200px] font-medium text-foreground text-[11px]"
+                        title={connection.url}
                       >
-                        {connection.messageCount}
-                      </Badge>
-                    </td>
-                    <td className="text-muted-foreground px-3 py-1.5 text-[11px]">
-                      {formatTime(connection.lastActivityAt)}
-                    </td>
-                  </tr>
-                </WebSocketContextMenu>
+                        <HighlightedText text={connection.host} query={searchQuery} />
+                      </div>
+                      <div
+                        className="px-3 py-1.5 text-muted-foreground truncate flex-1 text-[11px]"
+                        title={connection.url}
+                      >
+                        <HighlightedText text={connection.path} query={searchQuery} />
+                      </div>
+                      <div className="px-3 py-1.5 text-right w-[80px]">
+                        <Badge
+                          variant="secondary"
+                          className={cn(
+                            // Sizing & Spacing
+                            "h-4 px-1.5",
+
+                            // Typography
+                            "font-mono text-[10px] font-normal",
+
+                            // Backgrounds & Borders
+                            "bg-muted/80 rounded"
+                          )}
+                        >
+                          {connection.messageCount}
+                        </Badge>
+                      </div>
+                      <div className="text-muted-foreground px-3 py-1.5 text-[11px] w-[90px]">
+                        {formatTime(connection.lastActivityAt)}
+                      </div>
+                    </div>
+                  </WebSocketContextMenu>
+                </div>
               );
             })}
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
 
       <TrafficTablePagination

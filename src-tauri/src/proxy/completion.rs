@@ -1,7 +1,51 @@
-use tauri::{Emitter, Manager};
+use std::sync::OnceLock;
+use tauri::{AppHandle, Emitter, Manager};
+use tokio::sync::mpsc;
 
 use super::lifecycle::Ctx;
 use super::state::ProxyRecord;
+
+static LOG_SENDER: OnceLock<mpsc::UnboundedSender<(ProxyRecord, Option<String>)>> = OnceLock::new();
+
+pub fn init_proxy_log_worker(app_handle: AppHandle) {
+    let (tx, mut rx) = mpsc::unbounded_channel::<(ProxyRecord, Option<String>)>();
+    if LOG_SENDER.set(tx).is_err() {
+        return;
+    }
+
+    tauri::async_runtime::spawn(async move {
+        let mut buffer: Vec<(ProxyRecord, Option<String>)> = Vec::with_capacity(64);
+        let mut interval = tokio::time::interval(std::time::Duration::from_millis(150));
+
+        loop {
+            tokio::select! {
+                Some(item) = rx.recv() => {
+                    buffer.push(item);
+                    if buffer.len() >= 50 {
+                        flush_log_buffer(&app_handle, &mut buffer);
+                    }
+                }
+                _ = interval.tick() => {
+                    if !buffer.is_empty() {
+                        flush_log_buffer(&app_handle, &mut buffer);
+                    }
+                }
+            }
+        }
+    });
+}
+
+fn flush_log_buffer(app_handle: &AppHandle, buffer: &mut Vec<(ProxyRecord, Option<String>)>) {
+    if buffer.is_empty() {
+        return;
+    }
+    let records = std::mem::replace(buffer, Vec::with_capacity(64));
+    if let Some(history) = app_handle.try_state::<crate::HistoryBridge>() {
+        if let Err(e) = history.insert_records_batch(&records) {
+            eprintln!("[completion] failed to batch insert to DB: {}", e);
+        }
+    }
+}
 
 pub fn build_record(ctx: &Ctx) -> ProxyRecord {
     ProxyRecord {
@@ -39,15 +83,20 @@ pub fn save_and_emit(ctx: &Ctx, app_handle: &tauri::AppHandle) {
     }
 
     let mut session_id = String::new();
+    let mut session_id_opt: Option<String> = None;
 
     if let Some(history) = app_handle.try_state::<crate::HistoryBridge>() {
-        let active_sess = history.get_active_http_session().ok().flatten();
-        let sid = active_sess.as_ref().map(|s| s.id.as_str());
-        if let Err(e) = history.insert_record(&txn, sid) {
-            eprintln!("[completion] failed to insert to DB: {}", e);
+        if let Ok(Some(s)) = history.get_active_http_session() {
+            session_id = s.id.clone();
+            session_id_opt = Some(s.id);
         }
-        if let Some(s) = active_sess {
-            session_id = s.id;
+    }
+
+    if let Some(sender) = LOG_SENDER.get() {
+        let _ = sender.send((txn.clone(), session_id_opt));
+    } else if let Some(history) = app_handle.try_state::<crate::HistoryBridge>() {
+        if let Err(e) = history.insert_record(&txn, session_id_opt.as_deref()) {
+            eprintln!("[completion] failed to insert to DB: {}", e);
         }
     }
 
