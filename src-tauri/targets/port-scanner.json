@@ -1,0 +1,9 @@
+{
+  "productName": "Hexbuffer Port Scanner",
+  "identifier": "com.hexbuffer.port-scanner",
+  "bundle": {
+    "icon": [
+      "icons/port-scanner/icon.png"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "productName": "Hexbuffer JWT",
+  "identifier": "com.hexbuffer.jwt",
+  "bundle": {
+    "icon": [
+      "icons/jwt/icon.png"
+    ]
+  }
+}

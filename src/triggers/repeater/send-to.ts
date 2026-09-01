@@ -17,6 +17,28 @@ export interface SendRawToRepeaterOptions {
   headers?: Record<string, string>;
   method?: string;
   body?: string;
+  endpointId?: string;
+}
+
+import { openUrl } from '@tauri-apps/plugin-opener';
+import { getAppTarget } from '@/routes/page-resolver';
+
+export async function openStandaloneRepeater(options: SendRawToRepeaterOptions): Promise<void> {
+  const params = new URLSearchParams();
+  if (options.endpointId) params.set('endpointId', options.endpointId);
+  if (options.raw) params.set('raw', options.raw);
+  if (options.url) params.set('url', options.url);
+  if (options.name) params.set('name', options.name);
+  params.set('target', 'repeater');
+
+  const deepLinkUrl = `apprecon://repeater?${params.toString()}`;
+  try {
+    await openUrl(deepLinkUrl);
+  } catch {
+    // Fallback for dev mode or browser window
+    const webUrl = `${window.location.origin}/?${params.toString()}`;
+    window.open(webUrl, '_blank');
+  }
 }
 
 /**
@@ -84,10 +106,20 @@ export async function sendRawToRepeater(options: SendRawToRepeaterOptions): Prom
   // 5. Select endpoint
   selectEndpoint(endpointId);
 
-  // 6. Navigation
-  useNavStore.getState().triggerNavBlink('/repeater');
-  useNavStore.getState().openWindow('/repeater', 'Repeater');
-  useNavStore.getState().focusWindow('/repeater');
+  // 6. Navigation / Standalone Dispatch
+  const currentTarget = getAppTarget();
+  if (currentTarget && currentTarget !== 'repeater') {
+    await openStandaloneRepeater({
+      raw,
+      url: targetUrl,
+      name: endpointName,
+      endpointId,
+    });
+  } else {
+    useNavStore.getState().triggerNavBlink('/repeater');
+    useNavStore.getState().openWindow('/repeater', 'Repeater');
+    useNavStore.getState().focusWindow('/repeater');
+  }
 
   return endpointId;
 }

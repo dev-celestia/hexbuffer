@@ -10,6 +10,7 @@ import { AppLayout } from "@/layout";
 import { ResponseDetailWindow } from "@/pages/live-traffic/http-history/components/log-table/components/response-detail-window";
 import { suppressResizeObserverLoopErrors } from "@/lib/resize-observer-errors";
 import { useTauriFocusFix } from "@/hooks/use-tauri-focus-fix";
+import { getAppTarget, StandaloneAppView } from "@/routes/page-resolver";
 import AppRoutes from "./App";
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
@@ -51,6 +52,19 @@ function Root() {
       <BrowserRouter>
         <ThemeProvider>
           <ResponseDetailWindow callId={responseDetailCallId} />
+          <Toaster position="bottom-right" closeButton />
+        </ThemeProvider>
+      </BrowserRouter>
+    );
+  }
+
+  const appTarget = getAppTarget();
+  if (appTarget) {
+    return (
+      <BrowserRouter>
+        <ThemeProvider>
+          <StandaloneAppView target={appTarget} />
+          <MainWindowReadySignal />
           <Toaster position="bottom-right" closeButton />
         </ThemeProvider>
       </BrowserRouter>
