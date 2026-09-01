@@ -12,14 +12,11 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         .expect("Failed to initialize updater plugin");
 
     crate::log("Initializing database...");
-    let app_dir = app
-        .path()
-        .app_data_dir()
-        .expect("Failed to get app data dir");
+    let app_dir = hexbuffer::paths::get_shared_app_dir();
     std::fs::create_dir_all(&app_dir).expect("Failed to create app data dir");
     hexbuffer::proxy::ca::init_ca_dir(app_dir.clone());
 
-    let db_path = app_dir.join("hexbuffer.db");
+    let db_path = hexbuffer::paths::get_shared_db_path();
     crate::log(&format!("Opening database at {:?}", db_path));
     let database = hexbuffer::db::repository::Database::new(db_path)
         .expect("Failed to initialize database");

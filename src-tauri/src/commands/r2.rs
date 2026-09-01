@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
 use keyring::{Entry, Error as KeyringError};
 
 fn log(msg: &str) {
@@ -39,11 +39,8 @@ fn keyring_entry() -> Result<Entry, String> {
     Entry::new(R2_KEYRING_SERVICE, R2_KEYRING_USER).map_err(|e| e.to_string())
 }
 
-fn r2_settings_path(app: &AppHandle) -> Result<PathBuf, String> {
-    let app_dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|error| error.to_string())?;
+fn r2_settings_path(_app: &AppHandle) -> Result<PathBuf, String> {
+    let app_dir = crate::paths::get_shared_app_dir();
     Ok(app_dir.join("r2-settings.json"))
 }
 

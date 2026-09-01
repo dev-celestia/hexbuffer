@@ -4,7 +4,7 @@ use std::process::Command;
 
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, State};
 use uuid::Uuid;
 
 pub use crate::proxy::state::{
@@ -286,16 +286,12 @@ pub fn browser_candidates() -> Vec<PathBuf> {
     }
 }
 
-fn intercept_browser_profile_dir(app: &AppHandle) -> Result<PathBuf, String> {
-    Ok(app
-        .path()
-        .app_data_dir()
-        .map_err(|e| e.to_string())?
-        .join("intercept-browser-profile"))
+fn intercept_browser_profile_dir(_app: &AppHandle) -> Result<PathBuf, String> {
+    Ok(crate::paths::get_shared_app_dir().join("intercept-browser-profile"))
 }
 
-fn write_intercept_ca(app: &AppHandle) -> Result<PathBuf, String> {
-    let app_data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+fn write_intercept_ca(_app: &AppHandle) -> Result<PathBuf, String> {
+    let app_data_dir = crate::paths::get_shared_app_dir();
     std::fs::create_dir_all(&app_data_dir).map_err(|e| e.to_string())?;
 
     let ca_path = app_data_dir.join("hexbuffer-ca.pem");

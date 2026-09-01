@@ -12,6 +12,7 @@ import { R2SettingsTab } from './r2-settings-tab';
 
 interface SettingsLayoutProps {
   settings: SettingsPageState;
+  categories?: SettingsCategory[];
 }
 
 interface CategoryContentProps {
@@ -81,14 +82,25 @@ function CategoryContent({ settings, active }: CategoryContentProps) {
   );
 }
 
-const VALID_TABS: SettingsCategory[] = ['general', 'ca-cert', 'ai', 'appearance'];
+const DEFAULT_TABS: SettingsCategory[] = ['general', 'ca-cert', 'ai', 'appearance'];
 
-export function SettingsLayout({ settings }: SettingsLayoutProps) {
+export function SettingsLayout({ settings, categories }: SettingsLayoutProps) {
   const [searchParams] = useSearchParams();
+  const validTabs = categories || DEFAULT_TABS;
   const tabParam = searchParams.get('tab') as SettingsCategory | null;
-  const initialTab: SettingsCategory = tabParam && VALID_TABS.includes(tabParam) ? tabParam : 'general';
+  const initialTab: SettingsCategory =
+    tabParam && validTabs.includes(tabParam)
+      ? tabParam
+      : validTabs[0] || 'general';
+
   const [active, setActive] = React.useState<SettingsCategory>(initialTab);
   const [contentKey, setContentKey] = React.useState(0);
+
+  React.useEffect(() => {
+    if (categories && !categories.includes(active)) {
+      setActive(categories[0] || 'general');
+    }
+  }, [categories, active]);
 
   const handleSelect = React.useCallback((category: SettingsCategory) => {
     setActive(category);
@@ -105,7 +117,7 @@ export function SettingsLayout({ settings }: SettingsLayoutProps) {
         "h-full"
       )}
     >
-      <SettingsSidebar active={active} onSelect={handleSelect} />
+      <SettingsSidebar active={active} onSelect={handleSelect} categories={categories} />
 
       <div
         key={contentKey}

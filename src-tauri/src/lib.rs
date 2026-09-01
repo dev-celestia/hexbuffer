@@ -11,6 +11,9 @@ pub mod proxy;
 pub mod sqli;
 pub mod tools;
 pub mod hash_engine;
+pub mod paths;
+
+pub use paths::{get_shared_app_dir, get_shared_db_path};
 
 pub use ai::{
     clear_ai_api_key, get_ai_key_status, get_ai_settings, save_ai_settings,

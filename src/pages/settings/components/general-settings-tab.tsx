@@ -406,52 +406,6 @@ export function GeneralSettingsTab({ settings }: GeneralSettingsTabProps) {
 
         <SettingsRowSeparator />
 
-        {/* Browser Artifacts */}
-        <SettingsRow
-          label="Browser Artifacts"
-          description={storageInfo?.browserArtifactsPath ?? 'Loading…'}
-        >
-          <div className="flex items-center gap-2">
-            <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-mono tabular-nums text-muted-foreground">
-              {formatBytes(storageInfo?.browserArtifactsSizeBytes)}
-            </span>
-            <StorageRowDelete
-              artifact="browser_artifacts"
-              label="Browser Artifacts"
-              description="Deletes all AI browser automation screenshots, recordings, and captured page data. This cannot be undone."
-              deletingArtifact={deletingArtifact}
-              onDelete={handleDeleteArtifact}
-            />
-          </div>
-        </SettingsRow>
-
-        <SettingsRowSeparator />
-
-        {/* Regression Artifacts */}
-        <SettingsRow
-          label="Regression Artifacts"
-          description={
-            storageInfo
-              ? storageInfo.databasePath.replace('hexbuffer.db', 'regression-artifacts')
-              : 'Loading…'
-          }
-        >
-          <div className="flex items-center gap-2">
-            <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-mono tabular-nums text-muted-foreground">
-              {formatBytes(storageInfo?.regressionArtifactsSizeBytes)}
-            </span>
-            <StorageRowDelete
-              artifact="regression_artifacts"
-              label="Regression Artifacts"
-              description="Deletes all regression test run artifacts and screenshots. Test case definitions in the database are not affected."
-              deletingArtifact={deletingArtifact}
-              onDelete={handleDeleteArtifact}
-            />
-          </div>
-        </SettingsRow>
-
-        <SettingsRowSeparator />
-
         {/* Log File */}
         <SettingsRow
           label="Log File"

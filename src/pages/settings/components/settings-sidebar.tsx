@@ -25,9 +25,14 @@ const NAV_ITEMS: SettingsNavItem[] = [
 interface SettingsSidebarProps {
   active: SettingsCategory;
   onSelect: (category: SettingsCategory) => void;
+  categories?: SettingsCategory[];
 }
 
-export function SettingsSidebar({ active, onSelect }: SettingsSidebarProps) {
+export function SettingsSidebar({ active, onSelect, categories }: SettingsSidebarProps) {
+  const visibleNavItems = categories
+    ? NAV_ITEMS.filter((item) => categories.includes(item.id))
+    : NAV_ITEMS;
+
   return (
     <nav
       className={cn(
@@ -41,7 +46,7 @@ export function SettingsSidebar({ active, onSelect }: SettingsSidebarProps) {
         "border-r bg-muted/30"
       )}
     >
-      {NAV_ITEMS.map((item) => {
+      {visibleNavItems.map((item) => {
         const isActive = active === item.id;
         return (
           <button

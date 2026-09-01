@@ -55,6 +55,8 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         conn.execute_batch("PRAGMA foreign_keys = ON;")?;
         conn.execute_batch("PRAGMA journal_mode = WAL;")?;
+        conn.execute_batch("PRAGMA busy_timeout = 5000;")?;
+        conn.execute_batch("PRAGMA synchronous = NORMAL;")?;
         conn.execute_batch(crate::db::schema::CREATE_HTTP_SESSIONS_TABLE)?;
         conn.execute_batch(crate::db::schema::CREATE_HTTP_LOGS_TABLE)?;
         conn.execute_batch(crate::db::schema::CREATE_WEBSOCKET_TABLES)?;

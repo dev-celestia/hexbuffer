@@ -71,7 +71,7 @@ pub async fn get_cdp_targets(port: u16) -> Result<String, String> {
 }
 
 #[tauri::command]
-pub async fn open_cdp_browser(app: tauri::AppHandle, port: u16) -> Result<(), String> {
+pub async fn open_cdp_browser(_app: tauri::AppHandle, port: u16) -> Result<(), String> {
     // Check if the port is already occupied by a different application
     if std::net::TcpListener::bind(("127.0.0.1", port)).is_err() {
         let url = format!("http://127.0.0.1:{}/json", port);
@@ -123,10 +123,7 @@ pub async fn open_cdp_browser(app: tauri::AppHandle, port: u16) -> Result<(), St
         }
     }
 
-    let profile_dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|e| e.to_string())?
+    let profile_dir = hexbuffer::paths::get_shared_app_dir()
         .join(format!("cdp-browser-profile-{}", port));
     std::fs::create_dir_all(&profile_dir).map_err(|e| e.to_string())?;
 

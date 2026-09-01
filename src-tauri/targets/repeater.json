@@ -1,7 +1,9 @@
 {
-  "productName": "Hexbuffer Repeater",
+  "productName": "Repeater",
   "identifier": "com.hexbuffer.repeater",
   "bundle": {
+    "externalBin": [],
+    "resources": [],
     "icon": [
       "icons/repeater/icon.png"
     ]

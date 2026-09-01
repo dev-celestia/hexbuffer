@@ -1,7 +1,9 @@
 {
-  "productName": "Hexbuffer JWT",
+  "productName": "JWT",
   "identifier": "com.hexbuffer.jwt",
   "bundle": {
+    "externalBin": [],
+    "resources": [],
     "icon": [
       "icons/jwt/icon.png"
     ]

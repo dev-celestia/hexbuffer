@@ -1,7 +1,9 @@
 {
-  "productName": "Hexbuffer HTTP History",
+  "productName": "HTTP History",
   "identifier": "com.hexbuffer.http-history",
   "bundle": {
+    "externalBin": [],
+    "resources": [],
     "icon": [
       "icons/http/icon.png"
     ]

@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
 
 use super::providers::AI_PROVIDERS;
 use super::types::AiSettings;
@@ -44,11 +44,8 @@ pub(crate) fn write_ai_settings(app: &AppHandle, settings: &AiSettings) -> Resul
     std::fs::write(path, content).map_err(|error| error.to_string())
 }
 
-fn ai_settings_path(app: &AppHandle) -> Result<PathBuf, String> {
-    let app_dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|error| error.to_string())?;
+fn ai_settings_path(_app: &AppHandle) -> Result<PathBuf, String> {
+    let app_dir = crate::paths::get_shared_app_dir();
     Ok(app_dir.join("ai-settings.json"))
 }
 

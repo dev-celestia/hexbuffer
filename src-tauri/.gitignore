@@ -8,6 +8,4 @@
 /binaries
 /resources/*
 !/resources/annotation-overlay.js
-!/resources/ghidra/
-!/resources/ghidra/*
 /.pkg-cache

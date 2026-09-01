@@ -13,7 +13,7 @@ name = "hexbuffer"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["protocol-asset", "macos-private-api", "unstable", "devtools"] }
+tauri = { version = "2", features = ["protocol-asset", "macos-private-api", "unstable"] }
 tauri-plugin-opener = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
@@ -66,3 +66,20 @@ sha3 = "0.10"
 ripemd = "0.1"
 parking_lot = "0.12"
 sysinfo = "0.33"
+
+# Development profile (fast compile, debug symbols, no heavy LTO)
+[profile.dev]
+opt-level = 0
+debug = true
+lto = false
+codegen-units = 256
+panic = "unwind"
+strip = false
+
+# Standalone / Release distribution profile (slim standalone binary)
+[profile.release]
+opt-level = "s"       # Optimize for binary size
+lto = true            # Enable Link-Time Optimization across crates
+codegen-units = 1     # Maximize dead-code elimination
+panic = "abort"       # Remove stack unwinding machinery
+strip = true          # Strip all debug symbols

@@ -118,36 +118,36 @@ export function StandaloneAppView({ target }: { readonly target: string }) {
       case "http":
       case "http-history":
       case "live-traffic":
-        return <StandaloneLayout title="Hexbuffer HTTP History"><StandaloneHttpHistoryPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/http-history" title="HTTP History"><StandaloneHttpHistoryPage /></StandaloneLayout>;
       case "encoder":
-        return <StandaloneLayout title="Hexbuffer Encoder"><EncoderPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/encoder" title="Encoder"><EncoderPage /></StandaloneLayout>;
       case "jwt":
-        return <StandaloneLayout title="Hexbuffer JWT Tool"><JwtPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/jwt" title="JWT"><JwtPage /></StandaloneLayout>;
       case "hash":
-        return <StandaloneLayout title="Hexbuffer Hash Tool"><HashPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/hash" title="Hash"><HashPage /></StandaloneLayout>;
       case "comparer":
-        return <StandaloneLayout title="Hexbuffer Comparer"><ComparerPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/comparer" title="Comparer"><ComparerPage /></StandaloneLayout>;
       case "repeater":
-        return <StandaloneLayout title="Hexbuffer Repeater"><StandaloneRepeaterPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/repeater" title="Repeater"><StandaloneRepeaterPage /></StandaloneLayout>;
       case "port-scanner":
-        return <StandaloneLayout title="Hexbuffer Port Scanner"><PortScannerPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/port-scanner" title="Port Scanner"><PortScannerPage /></StandaloneLayout>;
       case "intruder":
-        return <StandaloneLayout title="Hexbuffer Intruder"><IntruderPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/intruder" title="Intruder"><IntruderPage /></StandaloneLayout>;
       case "intercept":
-        return <StandaloneLayout title="Hexbuffer Intercept"><InterceptPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/intercept" title="Intercept"><InterceptPage /></StandaloneLayout>;
       case "xss":
       case "xss-generator":
-        return <StandaloneLayout title="Hexbuffer XSS Generator"><XssGeneratorPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/xss-generator" title="XSS Generator"><XssGeneratorPage /></StandaloneLayout>;
       case "sqli":
       case "sql-injection":
-        return <StandaloneLayout title="Hexbuffer SQLi Helper"><SqlInjectionPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/sql-injection" title="SQLi Helper"><SqlInjectionPage /></StandaloneLayout>;
       case "notes":
       case "scratchpad":
-        return <StandaloneLayout title="Hexbuffer Scratchpad"><ScratchpadPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/scratchpad" title="Hexbuffer Scratchpad"><ScratchpadPage /></StandaloneLayout>;
       case "kanban":
-        return <StandaloneLayout title="Hexbuffer Kanban"><KanbanPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/kanban" title="Hexbuffer Kanban"><KanbanPage /></StandaloneLayout>;
       case "terminal":
-        return <StandaloneLayout title="Hexbuffer Terminal"><TerminalPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/terminal" title="Hexbuffer Terminal"><TerminalPage /></StandaloneLayout>;
       default:
         return null;
     }

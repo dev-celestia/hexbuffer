@@ -3,7 +3,12 @@ import { Button } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 import { useProxyButton } from './hooks/use-proxy-button';
 
-export function ProxyButton() {
+interface ProxyButtonProps {
+  readonly size?: 'xs' | 'sm' | 'default';
+  readonly className?: string;
+}
+
+export function ProxyButton({ size = 'sm', className }: ProxyButtonProps) {
   const { canToggle, isConnected, onToggleProxy, title } = useProxyButton();
 
   return (
@@ -13,13 +18,15 @@ export function ProxyButton() {
         "group flex items-center shrink-0",
 
         // Sizing & Spacing
-        "gap-1 sm:gap-2 pl-0.5 sm:pl-1"
+        "gap-1 sm:gap-2 pl-0.5 sm:pl-1",
+
+        className
       )}
       title={title}
     >
       <Button
         variant={isConnected ? "destructive" : "outline"}
-        size="sm"
+        size={size}
         onClick={() => onToggleProxy(!isConnected)}
         disabled={!canToggle}
       >
@@ -28,4 +35,3 @@ export function ProxyButton() {
     </div>
   );
 }
-

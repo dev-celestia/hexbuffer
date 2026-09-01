@@ -748,7 +748,7 @@ fn execute_hash_data(node: &AutomationNode, input_data: &Value) -> Result<Value,
 }
 
 fn execute_export_json(
-    app: &AppHandle,
+    _app: &AppHandle,
     node: &AutomationNode,
     input_data: &Value,
 ) -> Result<Value, String> {
@@ -769,10 +769,7 @@ fn execute_export_json(
         serde_json::to_string_pretty(&value).map_err(|error| error.to_string())?
     };
 
-    let dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|error| error.to_string())?
+    let dir = crate::paths::get_shared_app_dir()
         .join("automation-exports");
     fs::create_dir_all(&dir).map_err(|error| error.to_string())?;
     let path = dir.join(filename);

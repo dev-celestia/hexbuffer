@@ -55,10 +55,7 @@ pub async fn run_regression_test(
     let config_json = serde_json::to_string(&test_case_value)
         .map_err(|e| format!("Failed to serialize test case: {}", e))?;
 
-    let artifact_dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|e: tauri::Error| e.to_string())?
+    let artifact_dir = crate::paths::get_shared_app_dir()
         .join("regression-artifacts");
     std::fs::create_dir_all(&artifact_dir).map_err(|e| e.to_string())?;
 

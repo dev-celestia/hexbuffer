@@ -40,12 +40,9 @@ pub struct DeleteArtifactResult {
 }
 
 #[tauri::command]
-pub async fn get_storage_info(app: AppHandle) -> Result<StorageInfo, String> {
-    let app_data_dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|error| error.to_string())?;
-    let database_path = app_data_dir.join("hexbuffer.db");
+pub async fn get_storage_info(_app: AppHandle) -> Result<StorageInfo, String> {
+    let app_data_dir = crate::paths::get_shared_app_dir();
+    let database_path = crate::paths::get_shared_db_path();
     let browser_artifacts_path = app_data_dir.join("ai-browser-artifacts");
     let regression_artifacts_path = app_data_dir.join("regression-artifacts");
 
@@ -81,14 +78,11 @@ pub async fn get_storage_info(app: AppHandle) -> Result<StorageInfo, String> {
 #[tauri::command]
 pub async fn delete_storage_artifact(
     artifact: String,
-    app: AppHandle,
+    _app: AppHandle,
     database: State<'_, Database>,
     history: State<'_, HistoryBridge>,
 ) -> Result<DeleteArtifactResult, String> {
-    let app_data_dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|error| error.to_string())?;
+    let app_data_dir = crate::paths::get_shared_app_dir();
 
     match artifact.as_str() {
         "database" => {
@@ -96,7 +90,7 @@ pub async fn delete_storage_artifact(
             database.close_connection().map_err(|e| e.to_string())?;
             history.close_connection().map_err(|e| e.to_string())?;
 
-            let db_path = app_data_dir.join("hexbuffer.db");
+            let db_path = crate::paths::get_shared_db_path();
             let mut bytes_deleted: u64 = 0;
             for p in [
                 db_path.clone(),
@@ -197,13 +191,10 @@ pub async fn reset_all_app_data(
     database.close_connection().map_err(|e| e.to_string())?;
     history.close_connection().map_err(|e| e.to_string())?;
 
-    let app_data_dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|error| error.to_string())?;
+    let app_data_dir = crate::paths::get_shared_app_dir();
     
     // DB files
-    let db_path = app_data_dir.join("hexbuffer.db");
+    let db_path = crate::paths::get_shared_db_path();
     if db_path.exists() {
         fs::remove_file(&db_path).map_err(|error| error.to_string())?;
     }
