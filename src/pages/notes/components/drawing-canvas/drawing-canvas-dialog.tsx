@@ -63,81 +63,34 @@ export function DrawingCanvasDialog({
           "bg-card border shadow-2xl rounded-xl"
         )}
       >
-        {/* Modal Header */}
-        <DialogHeader
-          className={cn(
-            // Layout & Positioning
-            "flex flex-row items-center justify-between shrink-0",
-
-            // Sizing & Spacing
-            "px-5 py-3 border-b",
-
-            // Backgrounds & Borders
-            "bg-muted/10"
-          )}
-        >
-          <div
-            className={cn(
-              // Layout & Positioning
-              "flex items-center",
-
-              // Sizing & Spacing
-              "gap-2.5"
-            )}
-          >
-            <div
-              className={cn(
-                // Layout & Positioning
-                "flex items-center justify-center",
-
-                // Sizing & Spacing
-                "size-8 rounded-lg",
-
-                // Backgrounds & Borders
-                "bg-primary/10 text-primary border border-primary/20"
-              )}
-            >
-              <PaintBrushIcon className="size-4" />
-            </div>
-            <div>
-              <DialogTitle
-                className={cn(
-                  // Typography
-                  "text-sm sm:text-base font-semibold text-foreground"
-                )}
-              >
-                Scratchpad Canvas
-              </DialogTitle>
-              <DialogDescription
-                className={cn(
-                  // Typography
-                  "text-xs text-muted-foreground"
-                )}
-              >
-                Quick scratchpad for sketching, freehand notes, or rough drawings
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
-
-        {/* Studio Controls Toolbar */}
-        <DrawingCanvasToolbar hook={hook} />
-
         {/* Main Canvas Drawing Surface */}
         <div
+          tabIndex={0}
+          onKeyDown={hook.handleKeyDown}
+          onKeyUp={hook.handleKeyUp}
           className={cn(
             // Layout & Positioning
-            "relative flex-1 min-h-0 w-full overflow-hidden select-none",
+            "relative flex-1 min-h-0 w-full overflow-hidden select-none outline-none",
 
             // Backgrounds & Borders
             "bg-background"
           )}
         >
+          {/* Floating Studio Controls Toolbar */}
+          <DrawingCanvasToolbar hook={hook} />
+
           <canvas
             ref={hook.canvasRef}
+            onWheel={hook.handleWheel}
             onPointerDown={hook.handlePointerDown}
             onPointerMove={hook.handlePointerMove}
             onPointerUp={hook.handlePointerUp}
+            style={{
+              cursor:
+                hook.activeTool === 'select' || hook.activeTool === 'pan'
+                  ? hook.cursorStyle
+                  : undefined,
+            }}
             className={cn(
               // Layout & Positioning
               "w-full h-full block touch-none",
@@ -147,7 +100,9 @@ export function DrawingCanvasDialog({
                 ? "cursor-crosshair"
                 : hook.activeTool === 'text'
                   ? "cursor-text"
-                  : "cursor-crosshair"
+                  : hook.activeTool === 'select' || hook.activeTool === 'pan'
+                    ? ""
+                    : "cursor-crosshair"
             )}
           />
 
@@ -156,8 +111,8 @@ export function DrawingCanvasDialog({
             <div
               style={{
                 position: 'absolute',
-                left: Math.max(10, hook.editingTextElement.x),
-                top: Math.max(10, hook.editingTextElement.y),
+                left: Math.max(10, hook.editingTextElement.x * hook.zoom + hook.pan.x),
+                top: Math.max(10, hook.editingTextElement.y * hook.zoom + hook.pan.y),
                 zIndex: 40,
               }}
               className={cn(
@@ -236,7 +191,12 @@ export function DrawingCanvasDialog({
               "text-xs text-muted-foreground font-mono"
             )}
           >
-            {hook.elements.length} elements • Tool: <span className="font-semibold capitalize text-foreground">{hook.activeTool}</span>
+            {hook.elements.length} elements • Tool: <span className="font-semibold capitalize text-foreground">{hook.activeTool}</span> • Zoom: <span className="font-semibold text-foreground">{Math.round(hook.zoom * 100)}%</span>
+            {hook.selectedElement && (
+              <span className="ml-2 pl-2 border-l border-border text-primary font-medium">
+                Selected: {hook.selectedElement.type}
+              </span>
+            )}
           </div>
 
           {/* Right Action Buttons */}

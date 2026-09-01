@@ -12,7 +12,6 @@ import {
   CopyIcon,
   DownloadSimpleIcon,
   SelectionAllIcon,
-  PaintBrushIcon,
   CodeIcon,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
@@ -27,7 +26,7 @@ export interface NotesEditorToolbarProps {
   onRenameSubmit: () => void;
   onRenameCancel: () => void;
   onStartRename: (id: string, name: string) => void;
-  onOpenDrawingCanvas: () => void;
+  onOpenDrawingCanvas?: () => void;
   viewMode: EditorViewMode;
   onViewModeChange: (mode: EditorViewMode) => void;
   onSelectAll: () => void;
@@ -184,7 +183,7 @@ export function NotesEditorToolbar({
         )}
       </div>
 
-      {/* Middle & Right Section: Drawing Tools, View Mode & Utility Actions */}
+      {/* Middle & Right Section: View Mode & Utility Actions */}
       <div
         className={cn(
           // Layout & Positioning
@@ -194,26 +193,6 @@ export function NotesEditorToolbar({
           "gap-1.5"
         )}
       >
-        {/* Scratchpad Canvas Drawing Button (Icon Only with Tooltip) */}
-        <Button
-          variant="default"
-          size="sm"
-          onClick={onOpenDrawingCanvas}
-          className={cn(
-            // Layout & Positioning
-            "flex items-center justify-center shadow-xs",
-
-            // Sizing & Spacing
-            "size-7 p-0",
-
-            // Interactive & States
-            "cursor-pointer"
-          )}
-          title="Scratchpad Canvas (Draw)"
-        >
-          <PaintBrushIcon className="size-3.5" />
-        </Button>
-
         {/* View Mode Switcher: Editor (Visual) vs Code (Markdown) */}
         <div
           className={cn(

@@ -1,4 +1,388 @@
-import type { CanvasElement, Point, CanvasGridType } from '../types';
+import type { CanvasElement, Point, CanvasGridType, ResizeHandle, BoundingBox } from '../types';
+
+/**
+ * Calculates bounding box of an individual canvas element
+ */
+export function getElementBounds(elem: CanvasElement): BoundingBox {
+  if (elem.points && elem.points.length > 0) {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    elem.points.forEach((p) => {
+      minX = Math.min(minX, p.x);
+      minY = Math.min(minY, p.y);
+      maxX = Math.max(maxX, p.x);
+      maxY = Math.max(maxY, p.y);
+    });
+
+    return {
+      minX,
+      minY,
+      maxX,
+      maxY,
+      width: Math.max(1, maxX - minX),
+      height: Math.max(1, maxY - minY),
+    };
+  }
+
+  if (elem.type === 'text') {
+    const fontSize = elem.fontSize || 14;
+    const lines = (elem.text || ' ').split('\n');
+    const maxLineLen = Math.max(...lines.map((l) => l.length), 1);
+    const approxW = Math.max(20, maxLineLen * fontSize * 0.6);
+    const approxH = Math.max(20, lines.length * fontSize * 1.35);
+
+    return {
+      minX: elem.x,
+      minY: elem.y,
+      maxX: elem.x + approxW,
+      maxY: elem.y + approxH,
+      width: approxW,
+      height: approxH,
+    };
+  }
+
+  const left = Math.min(elem.x, elem.x + (elem.width || 0));
+  const right = Math.max(elem.x, elem.x + (elem.width || 0));
+  const top = Math.min(elem.y, elem.y + (elem.height || 0));
+  const bottom = Math.max(elem.y, elem.y + (elem.height || 0));
+
+  return {
+    minX: left,
+    minY: top,
+    maxX: right,
+    maxY: bottom,
+    width: Math.max(1, right - left),
+    height: Math.max(1, bottom - top),
+  };
+}
+
+/**
+ * Distance from point P to line segment VW
+ */
+function distToSegment(p: Point, v: Point, w: Point) {
+  const l2 = (v.x - w.x) ** 2 + (v.y - w.y) ** 2;
+  if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y);
+  let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(p.x - (v.x + t * (w.x - v.x)), p.y - (v.y + t * (w.y - v.y)));
+}
+
+/**
+ * Checks whether point (x, y) hits a canvas element
+ */
+export function hitTestElement(elem: CanvasElement, point: Point, tolerance = 8): boolean {
+  if (elem.type === 'pen' && elem.points && elem.points.length > 0) {
+    if (elem.points.length === 1) {
+      return Math.hypot(point.x - elem.points[0].x, point.y - elem.points[0].y) <= (elem.strokeWidth / 2 + tolerance);
+    }
+    for (let i = 0; i < elem.points.length - 1; i++) {
+      const d = distToSegment(point, elem.points[i], elem.points[i + 1]);
+      if (d <= (elem.strokeWidth / 2 + tolerance)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  if (elem.type === 'line' || elem.type === 'arrow') {
+    const start: Point = { x: elem.x, y: elem.y };
+    const end: Point = { x: elem.x + (elem.width || 0), y: elem.y + (elem.height || 0) };
+    const d = distToSegment(point, start, end);
+    return d <= (elem.strokeWidth / 2 + tolerance);
+  }
+
+  const bounds = getElementBounds(elem);
+
+  if (elem.type === 'ellipse') {
+    const midX = bounds.minX + bounds.width / 2;
+    const midY = bounds.minY + bounds.height / 2;
+    const rx = bounds.width / 2;
+    const ry = bounds.height / 2;
+    if (rx === 0 || ry === 0) return false;
+    const normalizedDist = ((point.x - midX) ** 2) / (rx ** 2) + ((point.y - midY) ** 2) / (ry ** 2);
+    // Hit inside or on border
+    return normalizedDist <= 1.15;
+  }
+
+  if (elem.type === 'diamond') {
+    const midX = bounds.minX + bounds.width / 2;
+    const midY = bounds.minY + bounds.height / 2;
+    const halfW = bounds.width / 2;
+    const halfH = bounds.height / 2;
+    if (halfW === 0 || halfH === 0) return false;
+    const norm = Math.abs(point.x - midX) / halfW + Math.abs(point.y - midY) / halfH;
+    return norm <= 1.15;
+  }
+
+  // Rectangle, text, and other elements
+  return (
+    point.x >= bounds.minX - tolerance &&
+    point.x <= bounds.maxX + tolerance &&
+    point.y >= bounds.minY - tolerance &&
+    point.y <= bounds.maxY + tolerance
+  );
+}
+
+/**
+ * Returns interactive handles for a selected element
+ */
+export function getResizeHandles(elem: CanvasElement): Array<{ type: ResizeHandle; x: number; y: number }> {
+  if (elem.type === 'line' || elem.type === 'arrow') {
+    return [
+      { type: 'start', x: elem.x, y: elem.y },
+      { type: 'end', x: elem.x + (elem.width || 0), y: elem.y + (elem.height || 0) },
+    ];
+  }
+
+  const b = getElementBounds(elem);
+  const midX = b.minX + b.width / 2;
+  const midY = b.minY + b.height / 2;
+
+  return [
+    { type: 'nw', x: b.minX, y: b.minY },
+    { type: 'n', x: midX, y: b.minY },
+    { type: 'ne', x: b.maxX, y: b.minY },
+    { type: 'e', x: b.maxX, y: midY },
+    { type: 'se', x: b.maxX, y: b.maxY },
+    { type: 's', x: midX, y: b.maxY },
+    { type: 'sw', x: b.minX, y: b.maxY },
+    { type: 'w', x: b.minX, y: midY },
+  ];
+}
+
+/**
+ * Hit test resize handles
+ */
+export function hitTestResizeHandle(elem: CanvasElement, point: Point, radius = 7): ResizeHandle | null {
+  const handles = getResizeHandles(elem);
+  for (const h of handles) {
+    if (Math.hypot(point.x - h.x, point.y - h.y) <= radius) {
+      return h.type;
+    }
+  }
+  return null;
+}
+
+/**
+ * Draws selection bounding box and resize handles around a selected element
+ */
+export function drawSelectionOutline(
+  ctx: CanvasRenderingContext2D,
+  elem: CanvasElement,
+  isDarkTheme: boolean
+) {
+  ctx.save();
+  const accentColor = '#3b82f6';
+  const handleBg = isDarkTheme ? '#1e293b' : '#ffffff';
+  const handleRadius = 4.5;
+
+  if (elem.type === 'line' || elem.type === 'arrow') {
+    const startX = elem.x;
+    const startY = elem.y;
+    const endX = elem.x + (elem.width || 0);
+    const endY = elem.y + (elem.height || 0);
+
+    // Subtle connecting line
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = accentColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+
+    // Start & End nodes
+    [
+      { x: startX, y: startY },
+      { x: endX, y: endY },
+    ].forEach((pt) => {
+      ctx.setLineDash([]);
+      ctx.fillStyle = handleBg;
+      ctx.strokeStyle = accentColor;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, handleRadius + 1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    });
+
+    ctx.restore();
+    return;
+  }
+
+  const b = getElementBounds(elem);
+  const pad = 4;
+  const minX = b.minX - pad;
+  const minY = b.minY - pad;
+  const width = b.width + pad * 2;
+  const height = b.height + pad * 2;
+
+  // Dashed selection rectangle
+  ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = accentColor;
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(minX, minY, width, height);
+
+  // Resize handle squares
+  const handles = getResizeHandles(elem);
+  ctx.setLineDash([]);
+
+  handles.forEach((h) => {
+    ctx.fillStyle = handleBg;
+    ctx.strokeStyle = accentColor;
+    ctx.lineWidth = 1.5;
+    ctx.fillRect(h.x - handleRadius, h.y - handleRadius, handleRadius * 2, handleRadius * 2);
+    ctx.strokeRect(h.x - handleRadius, h.y - handleRadius, handleRadius * 2, handleRadius * 2);
+  });
+
+  ctx.restore();
+}
+
+/**
+ * Translates an element by dx and dy
+ */
+export function translateElement(elem: CanvasElement, dx: number, dy: number): CanvasElement {
+  if (elem.points && elem.points.length > 0) {
+    return {
+      ...elem,
+      x: elem.x + dx,
+      y: elem.y + dy,
+      points: elem.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
+    };
+  }
+
+  return {
+    ...elem,
+    x: elem.x + dx,
+    y: elem.y + dy,
+  };
+}
+
+/**
+ * Scales an element based on active resize handle and pointer movement
+ */
+export function scaleElement(
+  initialElem: CanvasElement,
+  handle: ResizeHandle,
+  currentPoint: Point,
+  _startPoint: Point
+): CanvasElement {
+  // Handle Line and Arrow resizing
+  if (initialElem.type === 'line' || initialElem.type === 'arrow') {
+    if (handle === 'start') {
+      const origEndX = initialElem.x + (initialElem.width || 0);
+      const origEndY = initialElem.y + (initialElem.height || 0);
+      return {
+        ...initialElem,
+        x: currentPoint.x,
+        y: currentPoint.y,
+        width: origEndX - currentPoint.x,
+        height: origEndY - currentPoint.y,
+      };
+    } else if (handle === 'end') {
+      return {
+        ...initialElem,
+        width: currentPoint.x - initialElem.x,
+        height: currentPoint.y - initialElem.y,
+      };
+    }
+  }
+
+  const initialBounds = getElementBounds(initialElem);
+  let newMinX = initialBounds.minX;
+  let newMinY = initialBounds.minY;
+  let newMaxX = initialBounds.maxX;
+  let newMaxY = initialBounds.maxY;
+
+  switch (handle) {
+    case 'nw':
+      newMinX = currentPoint.x;
+      newMinY = currentPoint.y;
+      break;
+    case 'n':
+      newMinY = currentPoint.y;
+      break;
+    case 'ne':
+      newMaxX = currentPoint.x;
+      newMinY = currentPoint.y;
+      break;
+    case 'e':
+      newMaxX = currentPoint.x;
+      break;
+    case 'se':
+      newMaxX = currentPoint.x;
+      newMaxY = currentPoint.y;
+      break;
+    case 's':
+      newMaxY = currentPoint.y;
+      break;
+    case 'sw':
+      newMinX = currentPoint.x;
+      newMaxY = currentPoint.y;
+      break;
+    case 'w':
+      newMinX = currentPoint.x;
+      break;
+    default:
+      break;
+  }
+
+  // Normalize bounds if flipped
+  const normalizedLeft = Math.min(newMinX, newMaxX);
+  const normalizedRight = Math.max(newMinX, newMaxX);
+  const normalizedTop = Math.min(newMinY, newMaxY);
+  const normalizedBottom = Math.max(newMinY, newMaxY);
+
+  const newW = Math.max(10, normalizedRight - normalizedLeft);
+  const newH = Math.max(10, normalizedBottom - normalizedTop);
+
+  // Pen freehand stroke scaling
+  if (initialElem.type === 'pen' && initialElem.points && initialElem.points.length > 0) {
+    const origW = Math.max(1, initialBounds.width);
+    const origH = Math.max(1, initialBounds.height);
+    const scaleX = newW / origW;
+    const scaleY = newH / origH;
+
+    const scaledPoints = initialElem.points.map((p) => ({
+      x: normalizedLeft + (p.x - initialBounds.minX) * scaleX,
+      y: normalizedTop + (p.y - initialBounds.minY) * scaleY,
+    }));
+
+    return {
+      ...initialElem,
+      x: normalizedLeft,
+      y: normalizedTop,
+      points: scaledPoints,
+    };
+  }
+
+  // Text scaling: scale font size proportionally
+  if (initialElem.type === 'text') {
+    const origH = Math.max(1, initialBounds.height);
+    const scaleRatio = newH / origH;
+    const currentFontSize = initialElem.fontSize || 14;
+    const newFontSize = Math.max(9, Math.min(72, Math.round(currentFontSize * scaleRatio)));
+
+    return {
+      ...initialElem,
+      x: normalizedLeft,
+      y: normalizedTop,
+      fontSize: newFontSize,
+    };
+  }
+
+  // Standard geometric shapes (rectangle, ellipse, diamond)
+  return {
+    ...initialElem,
+    x: normalizedLeft,
+    y: normalizedTop,
+    width: newW,
+    height: newH,
+  };
+}
 
 /**
  * Draws an arrow from (fromX, fromY) to (toX, toY) with a sharp arrowhead
@@ -212,7 +596,9 @@ export function drawGrid(
   width: number,
   height: number,
   gridType: CanvasGridType,
-  isDarkTheme: boolean
+  isDarkTheme: boolean,
+  pan: Point = { x: 0, y: 0 },
+  zoom = 1
 ) {
   if (gridType === 'none') return;
 
@@ -220,26 +606,32 @@ export function drawGrid(
   const step = 24;
   const gridColor = isDarkTheme ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
 
+  // Calculate world coordinate bounds for the visible viewport
+  const startX = Math.floor((-pan.x / zoom) / step) * step - step;
+  const endX = Math.ceil(((width - pan.x) / zoom) / step) * step + step;
+  const startY = Math.floor((-pan.y / zoom) / step) * step - step;
+  const endY = Math.ceil(((height - pan.y) / zoom) / step) * step + step;
+
   if (gridType === 'dots') {
     ctx.fillStyle = gridColor;
-    for (let x = step; x < width; x += step) {
-      for (let y = step; y < height; y += step) {
+    for (let x = startX; x <= endX; x += step) {
+      for (let y = startY; y <= endY; y += step) {
         ctx.beginPath();
-        ctx.arc(x, y, 1.2, 0, Math.PI * 2);
+        ctx.arc(x, y, 1.2 / Math.min(1.5, Math.max(0.7, zoom)), 0, Math.PI * 2);
         ctx.fill();
       }
     }
   } else if (gridType === 'lines') {
     ctx.strokeStyle = gridColor;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1 / Math.max(0.5, zoom);
     ctx.beginPath();
-    for (let x = 0; x < width; x += step) {
-      ctx.moveTo(x + 0.5, 0);
-      ctx.lineTo(x + 0.5, height);
+    for (let x = startX; x <= endX; x += step) {
+      ctx.moveTo(x + 0.5, startY);
+      ctx.lineTo(x + 0.5, endY);
     }
-    for (let y = 0; y < height; y += step) {
-      ctx.moveTo(0, y + 0.5);
-      ctx.lineTo(width, y + 0.5);
+    for (let y = startY; y <= endY; y += step) {
+      ctx.moveTo(startX, y + 0.5);
+      ctx.lineTo(endX, y + 0.5);
     }
     ctx.stroke();
   }

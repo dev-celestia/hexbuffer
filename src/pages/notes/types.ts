@@ -26,6 +26,7 @@ export interface NoteCardProps {
 // Drawing Canvas Types
 export type DrawingTool =
   | 'select'
+  | 'pan'
   | 'pen'
   | 'line'
   | 'arrow'
@@ -65,4 +66,16 @@ export interface DrawingTemplate {
   description: string;
   elements: CanvasElement[];
 }
+
+export type ResizeHandle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'start' | 'end';
+
+export interface BoundingBox {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+  width: number;
+  height: number;
+}
+
 

@@ -30,7 +30,6 @@ import {
   ScrollArea,
 } from '@celestia-project/ui';
 import {
-  TreeStructureIcon,
   CheckIcon,
   XIcon,
   UploadSimpleIcon,
@@ -362,7 +361,7 @@ export function NotesPreviewPane({
         <div
           className={cn(
             // Layout & Positioning
-            "max-w-4xl mx-auto flex flex-col w-full",
+            "max-w-4xl mx-auto flex flex-col w-full h-full",
 
             // Sizing & Spacing
             "p-6 gap-1",
@@ -375,7 +374,7 @@ export function NotesPreviewPane({
             <div
               className={cn(
                 // Layout & Positioning
-                "flex flex-col items-center justify-center text-center",
+                "flex flex-col items-center justify-center text-center h-full",
 
                 // Sizing & Spacing
                 "py-16 gap-3",
@@ -384,15 +383,6 @@ export function NotesPreviewPane({
                 "text-muted-foreground"
               )}
             >
-              <TreeStructureIcon
-                className={cn(
-                  // Sizing & Spacing
-                  "size-10 mb-1",
-
-                  // Interactive & States
-                  "opacity-40"
-                )}
-              />
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-medium text-foreground">Empty Note Canvas</p>
                 <p className="text-xs max-w-sm">
