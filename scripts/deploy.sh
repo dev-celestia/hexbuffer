@@ -3,18 +3,19 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-
 export TAURI_SIGNING_PRIVATE_KEY="dW50cnVzdGVkIGNvbW1lbnQ6IHJzaWduIGVuY3J5cHRlZCBzZWNyZXQga2V5ClJXUlRZMEl5KytaNjI1em1zelZMWFNsb21QQ2svUnNVMUlTZ1Iza0o0dzNmK1Q1SlVUNEFBQkFBQUFBQUFBQUFBQUlBQUFBQVpYL2RPQzl3bVRybFdINnEvKzBHOUVLT21UWDVTdCttWGg0TVR3a1RUUDliSkJFKysyOFdENldQY1hoRi9jbEdkaEQxcmR5M0w5TWRVRFljYVVKTytmdDRmTzdHenA2NmRGT2paUy9xS2J1STVKUWI5bVlJd0UwZWtXVmJDcGNlcEFFTEpTeGJFaEE9Cg=="
-
 
 usage() {
   cat <<EOF
 Usage:
-  pnpm run deploy                         Auto-increment patch version, then build/upload
+  pnpm run deploy                         Auto-increment full suite patch version, then build/upload
   pnpm run deploy -- --help               Show this help
+  pnpm run deploy -- --target http        Build/upload standalone HTTP History
+  pnpm run deploy -- --target repeater    Build/upload standalone Repeater
+  pnpm run deploy -- --target jwt         Build/upload standalone JWT Analyzer
+  pnpm run deploy -- --target port-scanner Build/upload standalone Port Scanner
   pnpm run deploy -- --bump               Auto-increment patch version, then build/upload
-  pnpm run deploy -- --version 0.1.1   Bump to exact version, then build/upload
-  pnpm run deploy -- 0.1.1             Bump to exact version, then build/upload
+  pnpm run deploy -- --version 1.0.1      Bump to exact version, then build/upload
   pnpm run deploy -- --windows            Cross-compile Windows x86_64 from macOS/Linux
   pnpm run deploy -- --windows-all        Build/upload Windows x64, x86, and ARM64
   pnpm run deploy -- --all                Build native platform + all Windows targets
@@ -22,7 +23,7 @@ Usage:
 Notes:
   - Pass script args after -- when using pnpm.
   - Use "pnpm run deploy"; "pnpm deploy" is a pnpm built-in command.
-  - --windows and --windows-all can cross-compile from macOS/Linux with cargo-xwin.
+  - Standalone targets build with their dedicated configs in src-tauri/targets/<name>.json.
   - Upload uses R2_ENDPOINT, R2_BUCKET, and optional UPDATER_BASE_URL.
 EOF
 }

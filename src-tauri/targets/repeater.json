@@ -1,6 +1,14 @@
 {
   "productName": "Repeater",
+  "version": "1.0.0",
   "identifier": "com.hexbuffer.repeater",
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://dist.0xbuffer.com/targets/repeater/latest.json"
+      ]
+    }
+  },
   "bundle": {
     "externalBin": [],
     "resources": [],

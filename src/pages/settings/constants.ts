@@ -1,6 +1,17 @@
+import * as React from 'react';
 import { WarningCircleIcon } from '@phosphor-icons/react';
 
-export const INSTALLATION_GUIDES = [
+export interface InstallationGuide {
+  id: string;
+  title: string;
+  steps: string[];
+  note?: {
+    Icon: React.ComponentType<{ className?: string }>;
+    message: string;
+  };
+}
+
+export const INSTALLATION_GUIDES: InstallationGuide[] = [
   {
     id: 'chrome-windows',
     title: 'Chrome / Edge (Windows)',
@@ -93,8 +104,8 @@ export const TROUBLESHOOTING_GUIDES = [
     id: 'remove-ca',
     title: 'How to remove the CA certificate',
     bullets: [
-      'Windows: Internet Options → Content → Certificates → Authorities → Select "Hexbuffer security Tools Root CA" → Remove',
-      'macOS: Keychain Access → System → Certificates → Delete "Hexbuffer security Tools Root CA"',
+      'Windows: Internet Options → Content → Certificates → Authorities → Select "Hexbuffer Proxy CA" → Remove',
+      'macOS: Keychain Access → login or System → Certificates → Delete "Hexbuffer Proxy CA"',
       'Firefox: Options → Privacy → Certificates → View Certificates → Authorities → Delete',
     ],
   },

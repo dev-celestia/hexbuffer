@@ -7,19 +7,21 @@ cd "$ROOT"
 usage() {
   cat <<EOF
 Usage:
-  ./scripts/build.sh                 Build/upload hexbuffer
-  ./scripts/build.sh --help          Show this help
-  ./scripts/build.sh --upload        Upload existing artifacts (skip build)
-  ./scripts/build.sh --no-upload     Build app locally without uploading to S3
-  ./scripts/build.sh 0.1.1        Bump to exact version, then build/upload
-  ./scripts/build.sh --bump          Auto-increment patch version, then build/upload
+  ./scripts/build.sh                      Build/upload full suite (Hexbuffer)
+  ./scripts/build.sh --help               Show this help
+  ./scripts/build.sh --target <name>      Build/upload specific standalone target (e.g. http, repeater, jwt)
+  ./scripts/build.sh --upload             Upload existing artifacts (skip build)
+  ./scripts/build.sh --no-upload          Build app locally without uploading to S3
+  ./scripts/build.sh 0.1.1                Bump to exact version, then build/upload
+  ./scripts/build.sh --bump               Auto-increment patch version, then build/upload
   ./scripts/build.sh --version 0.1.1
-  ./scripts/build.sh --windows       Cross-compile Windows x86_64 from macOS/Linux
-  ./scripts/build.sh --windows-all   Build/upload Windows x64, x86, and ARM64
-  ./scripts/build.sh --all            Build native platform + all Windows targets
+  ./scripts/build.sh --windows            Cross-compile Windows x86_64 from macOS/Linux
+  ./scripts/build.sh --windows-all        Build/upload Windows x64, x86, and ARM64
+  ./scripts/build.sh --all                Build native platform + all Windows targets
 EOF
 }
 
+TARGET=""
 REQUESTED_VERSION=""
 AUTO_BUMP=false
 FORCE_BUILD=false
@@ -32,6 +34,15 @@ SKIP_UPLOAD=false
 
 while [ $# -gt 0 ]; do
   case "$1" in
+    --target|-t)
+      if [ -z "${2:-}" ]; then
+        echo "Missing value for $1"
+        usage
+        exit 1
+      fi
+      TARGET="$2"
+      shift 2
+      ;;
     --upload)
       UPLOAD_ONLY=true
       shift
@@ -92,7 +103,6 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-
 if [ -f "$ROOT/.env" ]; then
   set -a; source "$ROOT/.env"; set +a
 else
@@ -117,10 +127,10 @@ if $UPLOAD_ONLY; then
 fi
 
 ensure_rust_target() {
-  local target="$1"
-  if ! rustup target list --installed 2>/dev/null | grep -q "$target"; then
-    echo "Installing Rust target: $target"
-    rustup target add "$target"
+  local rust_target="$1"
+  if ! rustup target list --installed 2>/dev/null | grep -q "$rust_target"; then
+    echo "Installing Rust target: $rust_target"
+    rustup target add "$rust_target"
   fi
 }
 
@@ -139,13 +149,43 @@ if $WINDOWS_ALL || $ALL; then
   esac
 fi
 
-if [ -n "$REQUESTED_VERSION" ]; then
-  "$ROOT/scripts/bump-version.sh" "$REQUESTED_VERSION"
-elif $AUTO_BUMP; then
-  "$ROOT/scripts/bump-version.sh"
+# ── Target Configuration & Versioning ────────────────────────────────
+TARGET_CONFIG_FLAG=""
+TARGET_PREFIX=""
+
+if [ -n "$TARGET" ]; then
+  TARGET_JSON="$ROOT/src-tauri/targets/${TARGET}.json"
+  if [ ! -f "$TARGET_JSON" ]; then
+    echo "Error: Target config $TARGET_JSON not found."
+    exit 1
+  fi
+  TARGET_CONFIG_FLAG="--config src-tauri/targets/${TARGET}.json"
+  TARGET_PREFIX="targets/${TARGET}/"
+  export VITE_APP_TARGET="$TARGET"
+
+  if [ -n "$REQUESTED_VERSION" ]; then
+    "$ROOT/scripts/bump-version.sh" --target "$TARGET" "$REQUESTED_VERSION"
+  elif $AUTO_BUMP; then
+    "$ROOT/scripts/bump-version.sh" --target "$TARGET"
+  fi
+
+  VERSION=$(node -e "
+    const fs = require('fs');
+    const cfg = JSON.parse(fs.readFileSync('$TARGET_JSON', 'utf-8'));
+    console.log(cfg.version || '1.0.0');
+  ")
+  APP_DISPLAY_NAME="Target [${TARGET}]"
+else
+  if [ -n "$REQUESTED_VERSION" ]; then
+    "$ROOT/scripts/bump-version.sh" "$REQUESTED_VERSION"
+  elif $AUTO_BUMP; then
+    "$ROOT/scripts/bump-version.sh"
+  fi
+
+  VERSION="$(cat "$ROOT/VERSION")"
+  APP_DISPLAY_NAME="Hexbuffer Full Suite"
 fi
 
-VERSION="$(cat "$ROOT/VERSION")"
 PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 BASE_URL="${UPDATER_BASE_URL:-https://dist.0xbuffer.com}"
 
@@ -227,25 +267,6 @@ find_first_artifact() {
   find "$artifact_dir" -maxdepth 1 -name "$artifact_glob" ! -name "*.sig" 2>/dev/null | head -1 || true
 }
 
-has_newer_build_inputs() {
-  local artifact="$1"
-
-  if [ -z "$artifact" ] || [ ! -f "$artifact" ]; then
-    return 0
-  fi
-
-  [ -n "$(find \
-    "$ROOT/package.json" \
-    "$ROOT/pnpm-lock.yaml" \
-    "$ROOT/src" \
-    "$ROOT/src-tauri/Cargo.toml" \
-    "$ROOT/Cargo.lock" \
-    "$ROOT/src-tauri/tauri.conf.json" \
-    "$ROOT/src-tauri/src" \
-    "$ROOT/src-tauri/icons" \
-    -newer "$artifact" 2>/dev/null | head -1)" ]
-}
-
 windows_bundle_dir_for_target() {
   local rust_target="$1"
   echo "src-tauri/target/${rust_target}/release/bundle/nsis"
@@ -265,8 +286,9 @@ build_windows() {
   local runner_args
   runner_args=$(windows_runner_args)
 
-  echo "Cross-compiling Tauri Windows app (x86_64) for hexbuffer..."
-  pnpm run tauri build $runner_args --target x86_64-pc-windows-msvc --bundles nsis
+  echo "Cross-compiling Tauri Windows app (x86_64) for ${APP_DISPLAY_NAME}..."
+  # shellcheck disable=SC2086
+  pnpm run tauri build $runner_args $TARGET_CONFIG_FLAG --target x86_64-pc-windows-msvc --bundles nsis
 
   echo "Windows build complete."
 }
@@ -282,8 +304,9 @@ build_windows_all() {
     rust_target="${entry%%:*}"
     updater_platform="${entry#*:}"
 
-    echo "Building Tauri Windows app for ${updater_platform} (${rust_target}) for hexbuffer..."
-    pnpm run tauri build $runner_args --target "$rust_target" --bundles nsis
+    echo "Building Tauri Windows app for ${updater_platform} (${rust_target}) for ${APP_DISPLAY_NAME}..."
+    # shellcheck disable=SC2086
+    pnpm run tauri build $runner_args $TARGET_CONFIG_FLAG --target "$rust_target" --bundles nsis
   done
 
   echo "Windows builds complete."
@@ -294,8 +317,9 @@ build_all() {
   pnpm install
 
   # ── Native platform build ─────────────────────────────────────────
-  echo "Building native platform ($PLATFORM) for hexbuffer..."
-  pnpm run tauri build --bundles "$BUNDLE_TYPES"
+  echo "Building native platform ($PLATFORM) for ${APP_DISPLAY_NAME}..."
+  # shellcheck disable=SC2086
+  pnpm run tauri build $TARGET_CONFIG_FLAG --bundles "$BUNDLE_TYPES"
   echo "Native build complete."
 
   # ── Windows cross-compile ─────────────────────────────────────────
@@ -308,8 +332,9 @@ build_all() {
       rust_target="${entry%%:*}"
       updater_platform="${entry#*:}"
 
-      echo "Cross-compiling Windows app for ${updater_platform} (${rust_target}) for hexbuffer..."
-      pnpm run tauri build $runner_args --target "$rust_target" --bundles nsis
+      echo "Cross-compiling Windows app for ${updater_platform} (${rust_target}) for ${APP_DISPLAY_NAME}..."
+      # shellcheck disable=SC2086
+      pnpm run tauri build $runner_args $TARGET_CONFIG_FLAG --target "$rust_target" --bundles nsis
     done
     echo "Windows builds complete."
   else
@@ -325,42 +350,16 @@ elif $WINDOWS; then
 elif $ALL; then
   build_all
 else
-  # ── Check for existing artifacts ─────────────────────────────────────
+  echo "Installing dependencies..."
+  pnpm install
 
-  ARTIFACTS_EXIST=false
-  ARTIFACTS_STALE=false
+  ensure_rust_target x86_64-pc-windows-msvc
 
-  EXISTING_BUNDLE=$(find_first_artifact "$BUNDLE_DIR" "*${BUNDLE_EXT}")
-  EXISTING_INSTALLER=$(find_first_artifact "$INSTALLER_DIR" "$INSTALLER_GLOB")
+  echo "Building Tauri desktop app for ${APP_DISPLAY_NAME} (v${VERSION})..."
+  # shellcheck disable=SC2086
+  pnpm run tauri build $TARGET_CONFIG_FLAG --bundles "$BUNDLE_TYPES"
 
-  if [ -n "${EXISTING_BUNDLE:-}" ] && [ -f "${EXISTING_BUNDLE}.sig" ] && [ -n "${EXISTING_INSTALLER:-}" ]; then
-    ARTIFACTS_EXIST=true
-  fi
-
-  if $ARTIFACTS_EXIST && has_newer_build_inputs "$EXISTING_BUNDLE"; then
-    ARTIFACTS_STALE=true
-  fi
-
-  if $ARTIFACTS_EXIST && ! $ARTIFACTS_STALE && ! $FORCE_BUILD; then
-    echo -e "${GREEN}Artifacts for hexbuffer v${VERSION} already exist — skipping build.${NC}"
-  else
-    if $FORCE_BUILD; then
-      echo "Version bump requested; building fresh artifacts for hexbuffer v${VERSION}..."
-    elif $ARTIFACTS_STALE; then
-      echo "Build inputs changed since the existing updater artifact; rebuilding fresh artifacts for hexbuffer v${VERSION}..."
-    fi
-
-    echo "Installing dependencies..."
-    pnpm install
-
-    # Ensure Windows target is available (needed by some dependencies even on non-Windows)
-    ensure_rust_target x86_64-pc-windows-msvc
-
-    echo "Building Tauri desktop app for hexbuffer..."
-    pnpm run tauri build --bundles "$BUNDLE_TYPES"
-
-    echo "Build complete."
-  fi
+  echo "Build complete."
 fi  # end of build cascade
 fi  # end of !UPLOAD_ONLY
 
@@ -371,7 +370,6 @@ if [ -z "${R2_ENDPOINT:-}" ] || [ -z "${R2_BUCKET:-}" ]; then
   exit 0
 fi
 
-# aws s3 CP wrapper for R2
 r2_cp() { aws s3 --endpoint-url "$R2_ENDPOINT" cp "$@"; }
 r2_cat() { aws s3 --endpoint-url "$R2_ENDPOINT" cp "$1" - 2>/dev/null; }
 sha256_file() {
@@ -399,7 +397,7 @@ upload_installer_checksum() {
   installer_sha_file=$(mktemp "${TMPDIR:-/tmp}/${installer_name}.XXXXXX.sha256")
   sha256_file "$installer_file" | awk -v name="$installer_name" '{print $1 "  " name}' > "$installer_sha_file"
   echo "[upload] uploading installer checksum: ${GREEN}${installer_name}.sha256${NC}"
-  r2_cp "$installer_sha_file" "s3://${R2_BUCKET}/${installer_name}.sha256"
+  r2_cp "$installer_sha_file" "s3://${R2_BUCKET}/${TARGET_PREFIX}${installer_name}.sha256"
   rm -f "$installer_sha_file"
 }
 
@@ -413,7 +411,7 @@ update_latest_platform() {
   export UPDATER_PLATFORM="$platform"
   export UPDATER_VERSION="$VERSION"
   export UPDATER_PUB_DATE="$PUB_DATE"
-  export UPDATER_BASE_URL="${BASE_URL%/}"
+  export UPDATER_BASE_URL="${BASE_URL%/}/${TARGET_PREFIX%/}"
   export UPDATER_BUNDLE_NAME="$bundle_name"
   export UPDATER_LATEST_JSON="$latest_json"
 
@@ -462,12 +460,13 @@ upload_platform_artifacts() {
 
   echo -e "[upload] platform: ${GREEN}${platform}${NC}"
   echo -e "[upload] bundle: ${GREEN}${bundle_name}${NC}"
+  echo -e "[upload] prefix: ${GREEN}${TARGET_PREFIX}${NC}"
   echo -e "[upload] bucket: ${GREEN}${R2_BUCKET}${NC}"
 
   echo "[upload] uploading bundle..."
-  r2_cp "$bundle_file" "s3://${R2_BUCKET}/${bundle_name}"
+  r2_cp "$bundle_file" "s3://${R2_BUCKET}/${TARGET_PREFIX}${bundle_name}"
   echo "[upload] uploading signature..."
-  r2_cp "$sig_file" "s3://${R2_BUCKET}/${bundle_name}.sig"
+  r2_cp "$sig_file" "s3://${R2_BUCKET}/${TARGET_PREFIX}${bundle_name}.sig"
 
   installer_file=$(find_first_artifact "$installer_dir" "$installer_glob")
   if [ -n "${installer_file:-}" ] && [ -f "$installer_file" ]; then
@@ -477,7 +476,7 @@ upload_platform_artifacts() {
     fi
 
     echo "[upload] uploading installer: ${GREEN}${installer_name}${NC}"
-    r2_cp "$installer_file" "s3://${R2_BUCKET}/${installer_name}"
+    r2_cp "$installer_file" "s3://${R2_BUCKET}/${TARGET_PREFIX}${installer_name}"
     upload_installer_checksum "$installer_file" "$installer_name"
   else
     echo -e "${YELLOW}[upload] installer not found for ${platform}, skipping${NC}"
@@ -493,15 +492,17 @@ fi
 
 echo -e "[upload] detected platform: ${GREEN}${PLATFORM}${NC}"
 
-echo "[upload] uploading install script..."
-r2_cp "$ROOT/scripts/install.sh" "s3://${R2_BUCKET}/install.sh"
+if [ -z "$TARGET" ]; then
+  echo "[upload] uploading install script..."
+  r2_cp "$ROOT/scripts/install.sh" "s3://${R2_BUCKET}/install.sh"
+fi
 
 # ── Update latest.json ───────────────────────────────────────────────
 
 LATEST_JSON=$(mktemp "${TMPDIR:-/tmp}/hexbuffer_latest.XXXXXX.json")
-LATEST_JSON_NAME="latest.json"
+LATEST_JSON_NAME="${TARGET_PREFIX}latest.json"
 
-echo "[upload] downloading existing latest.json..."
+echo "[upload] downloading existing ${LATEST_JSON_NAME}..."
 r2_cat "s3://${R2_BUCKET}/${LATEST_JSON_NAME}" > "$LATEST_JSON" || echo '{}' > "$LATEST_JSON"
 
 if $WINDOWS_ALL; then
@@ -515,16 +516,14 @@ elif $WINDOWS; then
   target_bundle_dir=$(windows_bundle_dir_for_target "x86_64-pc-windows-msvc")
   upload_platform_artifacts "windows-x86_64" "$target_bundle_dir" ".exe" "$target_bundle_dir" "*.exe" "$LATEST_JSON"
 elif $ALL; then
-  # Upload native platform artifacts
   INSTALLER_NAME_OVERRIDE=""
   if [ "$(uname -s)" = "Darwin" ]; then
     INSTALLER_NAME_OVERRIDE="hexbuffer_${VERSION}_${PLATFORM#darwin-}.dmg"
   fi
   upload_platform_artifacts "$PLATFORM" "$BUNDLE_DIR" "$BUNDLE_EXT" "$INSTALLER_DIR" "$INSTALLER_GLOB" "$LATEST_JSON" "$INSTALLER_NAME_OVERRIDE"
 
-  # Upload Windows artifacts (only if cross-compiled)
   case "$(uname -s)" in
-    MINGW*|MSYS*|CYGWIN*) ;; # already uploaded as native platform
+    MINGW*|MSYS*|CYGWIN*) ;;
     *)
       for entry in "${WINDOWS_TARGETS[@]}"; do
         rust_target="${entry%%:*}"
@@ -543,12 +542,12 @@ else
   upload_platform_artifacts "$PLATFORM" "$BUNDLE_DIR" "$BUNDLE_EXT" "$INSTALLER_DIR" "$INSTALLER_GLOB" "$LATEST_JSON" "$INSTALLER_NAME_OVERRIDE"
 fi
 
-echo "[upload] latest.json updated:"
+echo "[upload] ${LATEST_JSON_NAME} updated:"
 cat "$LATEST_JSON"
 
-echo "[upload] uploading latest.json..."
+echo "[upload] uploading ${LATEST_JSON_NAME}..."
 r2_cp "$LATEST_JSON" "s3://${R2_BUCKET}/${LATEST_JSON_NAME}"
 
 rm -f "$LATEST_JSON"
 
-echo -e "${GREEN}[upload] done — artifacts uploaded to ${R2_BUCKET}${NC}"
+echo -e "${GREEN}[upload] done — artifacts uploaded to ${R2_BUCKET}/${TARGET_PREFIX}${NC}"

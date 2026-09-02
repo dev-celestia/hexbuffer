@@ -14,9 +14,7 @@ pub fn init_ca_dir(app_data_dir: PathBuf) {
 
 fn get_ca_dir() -> PathBuf {
     CA_ROOT.get().cloned().unwrap_or_else(|| {
-        std::env::current_dir()
-            .unwrap_or_else(|_| PathBuf::from("."))
-            .join(".hexbuffer")
+        crate::paths::get_shared_app_dir().join(".hexbuffer")
     })
 }
 
@@ -49,7 +47,9 @@ pub fn regenerate_ca() -> Result<(), Box<dyn std::error::Error>> {
     fs::remove_file(get_ca_cert_path()).ok();
     fs::remove_file(get_ca_key_path()).ok();
 
-    let _ca = CertificationAuthority::new_in(&ca_dir);
+    let ca = CertificationAuthority::new_in(&ca_dir);
+    let shared_ca_path = crate::paths::get_shared_app_dir().join("hexbuffer-ca.pem");
+    let _ = fs::write(&shared_ca_path, ca.ca_cert_pem());
     Ok(())
 }
 
@@ -57,8 +57,18 @@ pub fn ensure_ca_exists() {
     let cert_path = get_ca_cert_path();
     let key_path = get_ca_key_path();
 
-    if !cert_path.exists() || !key_path.exists() {
-        eprintln!("[ca] CA files missing, regenerating...");
+    let needs_regen = if !cert_path.exists() || !key_path.exists() {
+        true
+    } else if let Ok(cert_content) = fs::read_to_string(&cert_path) {
+        // If certificate is using a legacy subject that does not match the proxy CA,
+        // regenerate it so leaf certificates forged by hexbuffer-proxy match the root.
+        !cert_content.contains("Hexbuffer Proxy CA")
+    } else {
+        true
+    };
+
+    if needs_regen {
+        eprintln!("[ca] CA files missing or outdated, regenerating...");
         if let Err(e) = regenerate_ca() {
             eprintln!("[ca] Failed to regenerate CA: {}", e);
         } else {

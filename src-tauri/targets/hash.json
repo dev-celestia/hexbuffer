@@ -1,11 +1,11 @@
 {
-  "productName": "JWT Analyzer",
+  "productName": "Hash Engine",
   "version": "1.0.0",
-  "identifier": "com.hexbuffer.jwt",
+  "identifier": "com.hexbuffer.hash",
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://dist.0xbuffer.com/targets/jwt/latest.json"
+        "https://dist.0xbuffer.com/targets/hash/latest.json"
       ]
     }
   },
@@ -13,7 +13,7 @@
     "externalBin": [],
     "resources": [],
     "icon": [
-      "icons/jwt/icon.png"
+      "icons/hash/icon.png"
     ]
   }
 }

@@ -1,6 +1,12 @@
 import * as React from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { DotsSixIcon, GearSixIcon } from "@phosphor-icons/react";
+import { relaunch } from "@tauri-apps/plugin-process";
+import {
+  ArrowCircleDownIcon,
+  CircleNotchIcon,
+  DotsSixIcon,
+  GearSixIcon,
+} from "@phosphor-icons/react";
 import {
   Button,
   Dialog,
@@ -10,16 +16,20 @@ import {
   DialogTitle,
   Separator,
 } from "@celestia-project/ui";
+import { toast } from "sonner";
 
 import { ALL_NAV_ITEMS, getAppIconImage, type NavItem } from "@/layout/constants";
 import { WindowProvider, useWindowContext } from "@/providers/window-provider";
-import type { SettingsCategory } from "@/pages/settings";
+import type { SettingsCategory, SettingsProps } from "@/pages/settings";
+import { useUpdater } from "@/hooks/use-updater";
+import { UpdateDialog } from "@/layout/taskbar/components/update-dialog";
+import { formatBytes } from "@/lib/utils";
 import { ProxyButton } from "./proxy-button";
 import { WindowControls } from "./window-controls";
 import { isMacOS } from "./hooks/use-window-controls";
 import { cn } from "@/lib/utils";
 
-const SettingsModal = React.lazy(() =>
+const SettingsModal = React.lazy<React.ComponentType<SettingsProps>>(() =>
   import("@/pages/settings").then((m) => ({ default: m.Settings }))
 );
 
@@ -41,7 +51,61 @@ interface StandaloneHeaderProps {
 function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
   const isMac = React.useMemo(() => isMacOS(), []);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
+  const [updateDialogOpen, setUpdateDialogOpen] = React.useState(false);
+  const [updateConfirmReady, setUpdateConfirmReady] = React.useState(false);
+
   const { setHeaderSlotNode, hasHeaderSlotContent } = useWindowContext();
+
+  const {
+    currentVersion,
+    updateAvailable,
+    updateVersion,
+    downloading: updateDownloading,
+    downloadProgress,
+    downloadError,
+    updateInstalled,
+    installUpdate,
+  } = useUpdater();
+
+  React.useEffect(() => {
+    if (!updateDialogOpen || updateDownloading || updateInstalled) return;
+    const t = window.setTimeout(() => setUpdateConfirmReady(true), 250);
+    return () => window.clearTimeout(t);
+  }, [updateDialogOpen, updateDownloading, updateInstalled]);
+
+  const progressLabel =
+    downloadProgress.percent !== null
+      ? `${downloadProgress.percent}%`
+      : downloadProgress.downloadedBytes > 0
+        ? `Downloaded ${formatBytes(downloadProgress.downloadedBytes)}`
+        : "Preparing...";
+
+  const handleInstallUpdate = React.useCallback(async () => {
+    if (!updateConfirmReady) return;
+    const targetVersion = updateVersion;
+    const toastId = toast.loading(`Installing v${targetVersion}...`);
+    const result = await installUpdate();
+    if (result.ok) {
+      toast.success(`Updated to v${targetVersion}`, {
+        id: toastId,
+        description: "Restarting app to finish applying the update.",
+      });
+      window.setTimeout(async () => {
+        try {
+          await relaunch();
+        } catch (err) {
+          console.error("Failed to restart app automatically:", err);
+          toast.error("Could not restart automatically. Please restart the app manually.");
+        }
+      }, 1000);
+    } else {
+      const err = result.error || downloadError || "Update failed.";
+      toast.error("Update failed", {
+        id: toastId,
+        description: err,
+      });
+    }
+  }, [updateConfirmReady, updateVersion, installUpdate, downloadError]);
 
   const resolvedNavItem =
     navItem ||
@@ -89,7 +153,7 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
           "cursor-grab active:cursor-grabbing group"
         )}
       >
-        {/* Left side: Window Icon, Title & Flags */}
+        {/* Left side: Window Icon, Title, Flags & Version */}
         <div
           className={cn(
             // Layout & Positioning
@@ -100,7 +164,6 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
           )}
         >
           <Separator orientation="vertical" className="h-6 mr-2" />
-          
 
           {imageSrc ? (
             <div
@@ -147,11 +210,29 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
           <span
             className={cn(
               // Typography
-              "text-xs font-semibold tracking-wide truncate max-w-[240px]"
+              "text-xs font-semibold tracking-wide truncate max-w-[200px]"
             )}
           >
             {displayTitle}
           </span>
+
+          {currentVersion && (
+            <span
+              className={cn(
+                // Sizing & Spacing
+                "px-1 py-0.5 rounded-xs leading-none shrink-0",
+
+                // Typography
+                "font-mono text-[9px] text-muted-foreground/70 select-none",
+
+                // Backgrounds & Borders
+                "bg-muted/50 border border-border/40"
+              )}
+              title={`Version ${currentVersion}`}
+            >
+              v{currentVersion}
+            </span>
+          )}
 
           {resolvedNavItem?.flag && resolvedNavItem.flag !== "release" && (
             <span
@@ -176,7 +257,7 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
           )}
         </div>
 
-        {/* Right side: Slot + Separator + Proxy Button + Settings Button + Separator + Window Controls */}
+        {/* Right side: Slot + Separator + Updater + Proxy Button + Settings Button + Separator + Window Controls */}
         <div
           className={cn(
             // Layout & Positioning
@@ -203,6 +284,52 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
           {hasHeaderSlotContent && (
             <Separator orientation="vertical" className="h-6" />
           )}
+
+          {/* Update Available / Downloading Indicator */}
+          {updateDownloading ? (
+            <div
+              onMouseDown={(e) => e.stopPropagation()}
+              className={cn(
+                // Layout & Positioning
+                "flex items-center gap-1 px-1.5 py-0.5 rounded-xs",
+
+                // Typography
+                "font-mono text-[10px] text-primary",
+
+                // Backgrounds & Borders
+                "bg-primary/10 border border-primary/20",
+
+                // Interactive & States
+                "animate-pulse select-none"
+              )}
+              title={progressLabel}
+            >
+              <CircleNotchIcon className="size-3 animate-spin" />
+              <span>{downloadProgress.percent !== null ? `${downloadProgress.percent}%` : "Updating…"}</span>
+            </div>
+          ) : updateAvailable ? (
+            <div onMouseDown={(e) => e.stopPropagation()}>
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={() => setUpdateDialogOpen(true)}
+                className={cn(
+                  // Sizing & Spacing
+                  "h-5.5 px-1.5 gap-1",
+
+                  // Typography
+                  "text-[10px] font-medium text-emerald-600 dark:text-emerald-400",
+
+                  // Backgrounds & Borders
+                  "border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20"
+                )}
+                title={`Update v${updateVersion} is available`}
+              >
+                <ArrowCircleDownIcon className="size-3" weight="bold" />
+                <span>v{updateVersion}</span>
+              </Button>
+            </div>
+          ) : null}
 
           {/* Proxy Start / Stop Button */}
           <div
@@ -244,7 +371,6 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
             </Button>
           </div>
 
-         
           {/* Separator between Quick Tools and Window Controls */}
           {!isMac && (
             <Separator orientation="vertical" className="h-4" />
@@ -260,7 +386,7 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
             <WindowControls />
           </div>
 
-           {isMac && (
+          {isMac && (
             <DotsSixIcon
               size={16}
               className={cn(
@@ -275,7 +401,6 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
               )}
             />
           )}
-
         </div>
       </div>
 
@@ -310,6 +435,17 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
           </React.Suspense>
         </DialogContent>
       </Dialog>
+
+      {/* Auto Update Confirmation Dialog */}
+      <UpdateDialog
+        open={updateDialogOpen}
+        onOpenChange={setUpdateDialogOpen}
+        updateDownloading={updateDownloading}
+        progressLabel={progressLabel}
+        updateVersion={updateVersion}
+        updateConfirmReady={updateConfirmReady}
+        onInstall={handleInstallUpdate}
+      />
     </>
   );
 }

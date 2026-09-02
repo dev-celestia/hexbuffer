@@ -395,7 +395,12 @@ fn import_intercept_ca_to_chrome_profile(app: &AppHandle) -> Result<String, Stri
     }
 
     let db_dir = format!("sql:{}", profile_dir.display());
-    let nickname = "Hexbuffer security Tools Root CA".to_string();
+    let nicknames = [
+        "Hexbuffer Proxy CA",
+        "Hexbuffer security Tools Root CA",
+        "hexbuffer Security Tools Root CA",
+        "Apprecon Security Tools Root CA",
+    ];
 
     let init_args = vec![
         "-N".to_string(),
@@ -405,21 +410,23 @@ fn import_intercept_ca_to_chrome_profile(app: &AppHandle) -> Result<String, Stri
     ];
     let _ = run_certutil(&init_args);
 
-    let delete_args = vec![
-        "-D".to_string(),
-        "-d".to_string(),
-        db_dir.clone(),
-        "-n".to_string(),
-        nickname.clone(),
-    ];
-    let _ = run_certutil(&delete_args);
+    for nick in &nicknames {
+        let delete_args = vec![
+            "-D".to_string(),
+            "-d".to_string(),
+            db_dir.clone(),
+            "-n".to_string(),
+            nick.to_string(),
+        ];
+        let _ = run_certutil(&delete_args);
+    }
 
     let add_args = vec![
         "-A".to_string(),
         "-d".to_string(),
         db_dir,
         "-n".to_string(),
-        nickname,
+        "Hexbuffer Proxy CA".to_string(),
         "-t".to_string(),
         "C,,".to_string(),
         "-i".to_string(),
@@ -429,7 +436,7 @@ fn import_intercept_ca_to_chrome_profile(app: &AppHandle) -> Result<String, Stri
     match run_certutil(&add_args) {
         Ok(()) => {
             std::fs::write(import_marker_path, ca_fingerprint).map_err(|e| e.to_string())?;
-            Ok("hexbuffer CA imported into the managed Chrome profile. Close old Intercept browser windows and open it again.".to_string())
+            Ok("Hexbuffer CA imported into the managed Chrome profile. Close old Intercept browser windows and open it again.".to_string())
         }
         Err(error) => Err(format!(
             "Chrome-profile CA import failed: {error}. Install NSS tools with `brew install nss`, then try again."
@@ -467,15 +474,28 @@ fn run_security(args: &[String]) -> Result<(), String> {
 fn install_intercept_ca_to_macos_keychain(app: &AppHandle) -> Result<String, String> {
     let ca_path = write_intercept_ca(app)?;
     let keychain_path = user_login_keychain_path()?;
-    let cert_name = "Hexbuffer security Tools Root CA".to_string();
-
-    let delete_args = vec![
-        "delete-certificate".to_string(),
-        "-c".to_string(),
-        cert_name,
-        keychain_path.display().to_string(),
+    let cert_names = [
+        "Hexbuffer Proxy CA",
+        "hexbuffer Security Tools Root CA",
+        "Hexbuffer security Tools Root CA",
+        "Apprecon Security Tools Root CA",
+        "Apprecon Proxy CA",
     ];
-    let _ = run_security(&delete_args);
+
+    // Clean up any stale or duplicate certificates from the login keychain
+    for cert_name in &cert_names {
+        loop {
+            let delete_args = vec![
+                "delete-certificate".to_string(),
+                "-c".to_string(),
+                cert_name.to_string(),
+                keychain_path.display().to_string(),
+            ];
+            if run_security(&delete_args).is_err() {
+                break;
+            }
+        }
+    }
 
     let add_args = vec![
         "add-trusted-cert".to_string(),
@@ -489,7 +509,7 @@ fn install_intercept_ca_to_macos_keychain(app: &AppHandle) -> Result<String, Str
     ];
 
     run_security(&add_args).map(|_| {
-        "hexbuffer CA installed in your macOS login keychain and trusted for SSL. Restart browsers that were already open.".to_string()
+        "Hexbuffer CA installed in your macOS login keychain and trusted for SSL. Restart browsers that were already open.".to_string()
     })
 }
 

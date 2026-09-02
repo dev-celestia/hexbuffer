@@ -299,7 +299,7 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
     }
   }, [call]);
 
-  const handleSendToResponseOverride = useCallback(async () => {
+  const handleSendToApiOverride = useCallback(async () => {
     try {
       const detail = await getHttpLogDetail(call.id);
       const request = adaptProxyRecordToApiCall(detail);
@@ -334,8 +334,7 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
       const requestQueryParams: { key: string; value: string; enabled: boolean }[] = [];
       if (request.url.includes('?')) {
         const queryStr = request.url.substring(request.url.indexOf('?') + 1);
-        const pairs = queryStr.split('&');
-        for (const pair of pairs) {
+        for (const pair of queryStr.split('&')) {
           const eq = pair.indexOf('=');
           if (eq !== -1) {
             const key = decodeURIComponent(pair.substring(0, eq));
@@ -383,7 +382,7 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
       console.error('Failed to send to API Override:', error);
       toast.error('Failed to create override in API Override');
     }
-  }, [call.id]);
+  }, [call.id, call]);
 
   const handleSendToNotes = useCallback(async () => {
     try {
@@ -476,8 +475,9 @@ export function useLogEntryActions(call: ApiCall, onDelete?: (id: string) => voi
 
     handleSendToCollection,
     handleSendToIntercept,
-    handleSendToResponseOverride,
-    handleSendToMockForge: handleSendToResponseOverride,
+    handleSendToApiOverride,
+    handleSendToResponseOverride: handleSendToApiOverride,
+    handleSendToMockForge: handleSendToApiOverride,
     handleOpenInBrowserAutomation,
     handleSendToNotes,
     handleDelete,

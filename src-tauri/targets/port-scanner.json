@@ -1,6 +1,14 @@
 {
   "productName": "Port Scanner",
+  "version": "1.0.0",
   "identifier": "com.hexbuffer.port-scanner",
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://dist.0xbuffer.com/targets/port-scanner/latest.json"
+      ]
+    }
+  },
   "bundle": {
     "externalBin": [],
     "resources": [],

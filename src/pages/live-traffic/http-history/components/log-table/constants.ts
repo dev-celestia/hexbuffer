@@ -76,6 +76,7 @@ export interface BuildLogMenuItemsParams {
   onAddToScope: () => void;
   onOpenInInvoker: () => void;
   onSendToIntercept: () => void;
+  onSendToApiOverride?: () => void;
   onOpenInBrowserAutomation?: () => void;
   onSendToNotes: () => void;
   onHighlightHost: (color: string) => void;
@@ -104,6 +105,7 @@ export function buildLogMenuItems(params: BuildLogMenuItemsParams): LogMenuItemD
     onAddToScope,
     onOpenInInvoker,
     onSendToIntercept,
+    onSendToApiOverride,
     onOpenInBrowserAutomation,
     onSendToNotes,
     onHighlightHost,
@@ -237,6 +239,13 @@ export function buildLogMenuItems(params: BuildLogMenuItemsParams): LogMenuItemD
       label: "Send to Intercept",
       icon: PaperPlaneTiltIcon,
       onClick: onSendToIntercept,
+    },
+    {
+      type: "item",
+      key: "send-to-api-override",
+      label: "Send to API Override",
+      icon: PaperPlaneTiltIcon,
+      onClick: onSendToApiOverride,
     },
     {
       type: "item",

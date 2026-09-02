@@ -1,6 +1,14 @@
 {
   "productName": "HTTP History",
+  "version": "1.0.0",
   "identifier": "com.hexbuffer.http-history",
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://dist.0xbuffer.com/targets/http/latest.json"
+      ]
+    }
+  },
   "bundle": {
     "externalBin": [],
     "resources": [],
