@@ -1,3 +1,4 @@
+use crate::db::payload_store::PayloadStore;
 use crate::proxy::state::{ProxyFilter, ProxyRecord, ProxyRequest, ProxyResponse};
 use rusqlite::{params, Result as SqlResult};
 use uuid::Uuid;
@@ -41,14 +42,42 @@ fn build_scope_sql_clause(scope: &[String]) -> Option<String> {
     }
 }
 
-const SELECT_PROXY_RECORD_COLS: &str = "id, timestamp, method, url, request_headers, request_body, response_status, response_status_text, response_headers, response_body, client_addr, server_addr";
+const SELECT_PROXY_RECORD_COLS: &str = "id, timestamp, method, url, request_headers, request_body, response_status, response_status_text, response_headers, response_body, client_addr, server_addr, req_payload_ref, res_payload_ref";
 
 impl Database {
-    pub fn insert_log(&self, record: &ProxyRecord, session_id: Option<&str>) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
-        let target_session_id = match session_id {
-            Some(s) if !s.trim().is_empty() => s.trim().to_string(),
-            _ => Self::ensure_default_http_session(&conn)?,
+    pub fn insert_log(
+        &self,
+        record: &ProxyRecord,
+        session_id: Option<&str>,
+        payload_store: Option<&PayloadStore>,
+    ) -> SqlResult<()> {
+        let storage_mode = self.get_session_storage_mode(session_id);
+        let target_session_id = if let Some(sid) = session_id {
+            sid.to_string()
+        } else {
+            let conn = self.conn.lock().unwrap();
+            Self::ensure_default_http_session(&conn)?
+        };
+
+        // Store body in payload store if provided
+        let (req_ref, req_size, req_trunc) = if let Some(ps) = payload_store {
+            ps.store_body(&target_session_id, &record.request.body, &storage_mode)
+        } else {
+            (String::new(), record.request.body.len(), false)
+        };
+
+        let (res_ref, res_size, res_trunc) = if let Some(ps) = payload_store {
+            if let Some(ref resp) = record.response {
+                ps.store_body(&target_session_id, &resp.body, &storage_mode)
+            } else {
+                (String::new(), 0, false)
+            }
+        } else {
+            (
+                String::new(),
+                record.response.as_ref().map(|r| r.body.len()).unwrap_or(0),
+                false,
+            )
         };
 
         let request_headers = serde_json::to_string(&record.request.headers).unwrap_or_default();
@@ -58,14 +87,15 @@ impl Database {
             .map(|r| serde_json::to_string(&r.headers).unwrap_or_default())
             .unwrap_or_default();
 
+        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
         conn.execute(
             r#"INSERT INTO http_logs (
                 id, session_id, timestamp, method, url,
-                request_headers, request_body,
+                request_headers, request_body, req_payload_ref, req_body_size, req_truncated,
                 response_status, response_status_text,
-                response_headers, response_body,
+                response_headers, response_body, res_payload_ref, res_body_size, res_truncated,
                 client_addr, server_addr, duration_ms
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)"#,
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, NULL, ?7, ?8, ?9, ?10, ?11, ?12, NULL, ?13, ?14, ?15, ?16, ?17, ?18)"#,
             params![
                 record.id.to_string(),
                 target_session_id,
@@ -73,80 +103,309 @@ impl Database {
                 record.request.method,
                 record.request.uri,
                 request_headers,
-                record.request.body,
+                req_ref,
+                req_size as i64,
+                if req_trunc { 1 } else { 0 },
                 record.response.as_ref().map(|r| r.status_code as i64),
                 record.response.as_ref().map(|r| r.status_text.clone()),
                 response_headers,
-                record.response.as_ref().map(|r| r.body.clone()),
+                res_ref,
+                res_size as i64,
+                if res_trunc { 1 } else { 0 },
                 record.client_addr,
                 record.server_addr,
-                0i64, // duration_ms placeholder
+                0i64,
             ],
         )?;
+
+        if storage_mode == "ephemeral" {
+            let _ = Self::prune_ephemeral_http_logs(&conn, payload_store, &target_session_id);
+        }
         Ok(())
     }
 
-    pub fn insert_logs_batch(&self, records: &[(ProxyRecord, Option<String>)]) -> SqlResult<()> {
+    pub const EPHEMERAL_BASELINE_ROWS: usize = 100;
+    pub const EPHEMERAL_HIGH_WATERMARK_ROWS: usize = 150;
+
+    pub fn prune_ephemeral_http_logs(
+        conn: &rusqlite::Connection,
+        payload_store: Option<&PayloadStore>,
+        session_id: &str,
+    ) -> SqlResult<()> {
+        let count: i64 = conn.query_row(
+            "SELECT COUNT(*) FROM http_logs WHERE session_id = ?1",
+            params![session_id],
+            |r| r.get(0),
+        )?;
+
+        // Only prune when reaching or exceeding high watermark (150)
+        if count < Self::EPHEMERAL_HIGH_WATERMARK_ROWS as i64 {
+            return Ok(());
+        }
+
+        // Collect slab refs to remove for rows beyond the baseline 100
+        let mut stmt = conn.prepare_cached(
+            "SELECT req_payload_ref, res_payload_ref FROM http_logs \
+             WHERE session_id = ?1 \
+             ORDER BY timestamp DESC, id DESC \
+             LIMIT -1 OFFSET ?2",
+        )?;
+
+        let mut refs_to_remove = Vec::new();
+        let mut rows = stmt.query(params![session_id, Self::EPHEMERAL_BASELINE_ROWS as i64])?;
+        while let Some(row) = rows.next()? {
+            let req_ref: Option<String> = row.get(0)?;
+            let res_ref: Option<String> = row.get(1)?;
+            if let Some(r) = req_ref {
+                if !r.is_empty() {
+                    refs_to_remove.push(r);
+                }
+            }
+            if let Some(r) = res_ref {
+                if !r.is_empty() {
+                    refs_to_remove.push(r);
+                }
+            }
+        }
+        drop(rows);
+        drop(stmt);
+
+        // Bulk single-statement DELETE trimming back to baseline 100
+        conn.execute(
+            "DELETE FROM http_logs \
+             WHERE session_id = ?1 AND id IN ( \
+                 SELECT id FROM http_logs \
+                 WHERE session_id = ?1 \
+                 ORDER BY timestamp DESC, id DESC \
+                 LIMIT -1 OFFSET ?2 \
+             )",
+            params![session_id, Self::EPHEMERAL_BASELINE_ROWS as i64],
+        )?;
+
+        if let Some(store) = payload_store {
+            for r in refs_to_remove {
+                let _ = store.remove_body(&r);
+            }
+        }
+
+        Ok(())
+    }
+
+    pub fn insert_logs_batch(
+        &self,
+        records: &[(ProxyRecord, Option<String>)],
+        payload_store: Option<&PayloadStore>,
+    ) -> SqlResult<()> {
         if records.is_empty() {
             return Ok(());
         }
-        let mut conn = self.conn.lock().unwrap();
-        let default_session = Self::ensure_default_http_session(&conn)?;
-        let tx = conn.transaction()?;
-        {
-            let mut stmt = tx.prepare_cached(
-                r#"INSERT INTO http_logs (
-                    id, session_id, timestamp, method, url,
-                    request_headers, request_body,
-                    response_status, response_status_text,
-                    response_headers, response_body,
-                    client_addr, server_addr, duration_ms
-                ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)"#,
-            )?;
-            for (record, session_id) in records {
-                let target_session_id = match session_id.as_deref() {
-                    Some(s) if !s.trim().is_empty() => s.trim(),
-                    _ => &default_session,
-                };
-                let request_headers = serde_json::to_string(&record.request.headers).unwrap_or_default();
-                let response_headers = record
-                    .response
-                    .as_ref()
-                    .map(|r| serde_json::to_string(&r.headers).unwrap_or_default())
-                    .unwrap_or_default();
 
-                stmt.execute(params![
-                    record.id.to_string(),
-                    target_session_id,
-                    record.timestamp.to_rfc3339(),
-                    record.request.method,
-                    record.request.uri,
-                    request_headers,
-                    record.request.body,
-                    record.response.as_ref().map(|r| r.status_code as i64),
-                    record.response.as_ref().map(|r| r.status_text.clone()),
-                    response_headers,
-                    record.response.as_ref().map(|r| r.body.clone()),
-                    record.client_addr,
-                    record.server_addr,
-                    0i64,
-                ])?;
+        // Group records by (target_session_id, storage_mode)
+        let mut persistent_records = Vec::new();
+        let mut ephemeral_records = Vec::new();
+
+        {
+            let conn = self.conn.lock().unwrap();
+            let default_session = Self::ensure_default_http_session(&conn)?;
+            drop(conn);
+
+            for (record, session_id) in records {
+                let sid = match session_id.as_deref() {
+                    Some(s) if !s.trim().is_empty() => s.trim().to_string(),
+                    _ => default_session.clone(),
+                };
+                let mode = self.get_session_storage_mode(Some(&sid));
+                if mode == "ephemeral" {
+                    ephemeral_records.push((record, sid));
+                } else {
+                    persistent_records.push((record, sid));
+                }
             }
         }
-        tx.commit()?;
+
+        // Write persistent batch
+        if !persistent_records.is_empty() {
+            let mut conn = self.conn.lock().unwrap();
+            let tx = conn.transaction()?;
+            {
+                let mut stmt = tx.prepare_cached(
+                    r#"INSERT INTO http_logs (
+                        id, session_id, timestamp, method, url,
+                        request_headers, request_body, req_payload_ref, req_body_size, req_truncated,
+                        response_status, response_status_text,
+                        response_headers, response_body, res_payload_ref, res_body_size, res_truncated,
+                        client_addr, server_addr, duration_ms
+                    ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, NULL, ?7, ?8, ?9, ?10, ?11, ?12, NULL, ?13, ?14, ?15, ?16, ?17, ?18)"#,
+                )?;
+                for (record, sid) in &persistent_records {
+                    let (req_ref, req_size, req_trunc) = if let Some(ps) = payload_store {
+                        ps.store_body(sid, &record.request.body, "persistent")
+                    } else {
+                        (String::new(), record.request.body.len(), false)
+                    };
+
+                    let (res_ref, res_size, res_trunc) = if let Some(ps) = payload_store {
+                        if let Some(ref resp) = record.response {
+                            ps.store_body(sid, &resp.body, "persistent")
+                        } else {
+                            (String::new(), 0, false)
+                        }
+                    } else {
+                        (
+                            String::new(),
+                            record.response.as_ref().map(|r| r.body.len()).unwrap_or(0),
+                            false,
+                        )
+                    };
+
+                    let request_headers =
+                        serde_json::to_string(&record.request.headers).unwrap_or_default();
+                    let response_headers = record
+                        .response
+                        .as_ref()
+                        .map(|r| serde_json::to_string(&r.headers).unwrap_or_default())
+                        .unwrap_or_default();
+
+                    stmt.execute(params![
+                        record.id.to_string(),
+                        sid,
+                        record.timestamp.to_rfc3339(),
+                        record.request.method,
+                        record.request.uri,
+                        request_headers,
+                        req_ref,
+                        req_size as i64,
+                        if req_trunc { 1 } else { 0 },
+                        record.response.as_ref().map(|r| r.status_code as i64),
+                        record.response.as_ref().map(|r| r.status_text.clone()),
+                        response_headers,
+                        res_ref,
+                        res_size as i64,
+                        if res_trunc { 1 } else { 0 },
+                        record.client_addr,
+                        record.server_addr,
+                        0i64,
+                    ])?;
+                }
+            }
+            tx.commit()?;
+        }
+
+        // Write ephemeral batch
+        if !ephemeral_records.is_empty() {
+            let mut conn = self.ephemeral_conn.lock().unwrap();
+            let tx = conn.transaction()?;
+            {
+                let mut stmt = tx.prepare_cached(
+                    r#"INSERT INTO http_logs (
+                        id, session_id, timestamp, method, url,
+                        request_headers, request_body, req_payload_ref, req_body_size, req_truncated,
+                        response_status, response_status_text,
+                        response_headers, response_body, res_payload_ref, res_body_size, res_truncated,
+                        client_addr, server_addr, duration_ms
+                    ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, NULL, ?7, ?8, ?9, ?10, ?11, ?12, NULL, ?13, ?14, ?15, ?16, ?17, ?18)"#,
+                )?;
+                for (record, sid) in &ephemeral_records {
+                    let (req_ref, req_size, req_trunc) = if let Some(ps) = payload_store {
+                        ps.store_body(sid, &record.request.body, "ephemeral")
+                    } else {
+                        (String::new(), record.request.body.len(), false)
+                    };
+
+                    let (res_ref, res_size, res_trunc) = if let Some(ps) = payload_store {
+                        if let Some(ref resp) = record.response {
+                            ps.store_body(sid, &resp.body, "ephemeral")
+                        } else {
+                            (String::new(), 0, false)
+                        }
+                    } else {
+                        (
+                            String::new(),
+                            record.response.as_ref().map(|r| r.body.len()).unwrap_or(0),
+                            false,
+                        )
+                    };
+
+                    let request_headers =
+                        serde_json::to_string(&record.request.headers).unwrap_or_default();
+                    let response_headers = record
+                        .response
+                        .as_ref()
+                        .map(|r| serde_json::to_string(&r.headers).unwrap_or_default())
+                        .unwrap_or_default();
+
+                    stmt.execute(params![
+                        record.id.to_string(),
+                        sid,
+                        record.timestamp.to_rfc3339(),
+                        record.request.method,
+                        record.request.uri,
+                        request_headers,
+                        req_ref,
+                        req_size as i64,
+                        if req_trunc { 1 } else { 0 },
+                        record.response.as_ref().map(|r| r.status_code as i64),
+                        record.response.as_ref().map(|r| r.status_text.clone()),
+                        response_headers,
+                        res_ref,
+                        res_size as i64,
+                        if res_trunc { 1 } else { 0 },
+                        record.client_addr,
+                        record.server_addr,
+                        0i64,
+                    ])?;
+                }
+            }
+            tx.commit()?;
+
+            // Prune ephemeral sessions after batch write
+            let mut session_ids: Vec<String> =
+                ephemeral_records.iter().map(|(_, sid)| sid.clone()).collect();
+            session_ids.sort();
+            session_ids.dedup();
+            for sid in session_ids {
+                let _ = Self::prune_ephemeral_http_logs(
+                    &conn,
+                    payload_store,
+                    &sid,
+                );
+            }
+        }
+
         Ok(())
     }
 
-    pub fn get_all(&self) -> SqlResult<Vec<ProxyRecord>> {
-        let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare(&format!("SELECT {} FROM http_logs ORDER BY timestamp DESC", SELECT_PROXY_RECORD_COLS))?;
-        let rows = stmt.query_map([], row_to_proxy_record)?;
-
-        Ok(collect_records(rows))
+    pub fn get_all(&self, payload_store: Option<&PayloadStore>) -> SqlResult<Vec<ProxyRecord>> {
+        let mut results = Vec::new();
+        {
+            let conn = self.conn.lock().unwrap();
+            let mut stmt = conn.prepare(&format!(
+                "SELECT {} FROM http_logs ORDER BY timestamp DESC",
+                SELECT_PROXY_RECORD_COLS
+            ))?;
+            let rows = stmt.query_map([], |row| row_to_proxy_record(row, payload_store))?;
+            results.extend(collect_records(rows));
+        }
+        {
+            let eph = self.ephemeral_conn.lock().unwrap();
+            let mut stmt = eph.prepare(&format!(
+                "SELECT {} FROM http_logs ORDER BY timestamp DESC",
+                SELECT_PROXY_RECORD_COLS
+            ))?;
+            let rows = stmt.query_map([], |row| row_to_proxy_record(row, payload_store))?;
+            results.extend(collect_records(rows));
+        }
+        results.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+        Ok(results)
     }
 
-    pub fn get_filtered(&self, filter: &ProxyFilter) -> SqlResult<Vec<ProxyRecord>> {
-        let conn = self.conn.lock().unwrap();
+    pub fn get_filtered(
+        &self,
+        filter: &ProxyFilter,
+        payload_store: Option<&PayloadStore>,
+    ) -> SqlResult<Vec<ProxyRecord>> {
+        let storage_mode = self.get_session_storage_mode(filter.session_id.as_deref());
+        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
         let mut sql = format!("SELECT {} FROM http_logs WHERE 1=1", SELECT_PROXY_RECORD_COLS);
         let mut conditions = Vec::new();
 
@@ -193,53 +452,110 @@ impl Database {
         sql.push_str(" ORDER BY timestamp DESC");
 
         let mut stmt = conn.prepare(&sql)?;
-        let rows = stmt.query_map([], row_to_proxy_record)?;
+        let rows = stmt.query_map([], |row| row_to_proxy_record(row, payload_store))?;
 
         Ok(collect_records(rows))
     }
 
     pub fn delete_log(&self, id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
-        conn.execute("DELETE FROM http_logs WHERE id = ?1", params![id])?;
+        {
+            let conn = self.conn.lock().unwrap();
+            let _ = conn.execute("DELETE FROM http_logs WHERE id = ?1", params![id]);
+        }
+        {
+            let eph = self.ephemeral_conn.lock().unwrap();
+            let _ = eph.execute("DELETE FROM http_logs WHERE id = ?1", params![id]);
+        }
         Ok(())
     }
 
-    pub fn get_by_id(&self, id: &str) -> SqlResult<Option<ProxyRecord>> {
-        let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare(&format!("SELECT {} FROM http_logs WHERE id = ?1 LIMIT 1", SELECT_PROXY_RECORD_COLS))?;
-        let mut rows = stmt.query(params![id])?;
-
-        match rows.next()? {
-            Some(row) => row_to_proxy_record(row).map(Some),
-            None => Ok(None),
+    pub fn get_by_id(
+        &self,
+        id: &str,
+        payload_store: Option<&PayloadStore>,
+    ) -> SqlResult<Option<ProxyRecord>> {
+        // Try persistent DB first
+        {
+            let conn = self.conn.lock().unwrap();
+            let mut stmt = conn.prepare(&format!(
+                "SELECT {} FROM http_logs WHERE id = ?1 LIMIT 1",
+                SELECT_PROXY_RECORD_COLS
+            ))?;
+            let mut rows = stmt.query(params![id])?;
+            if let Some(row) = rows.next()? {
+                return row_to_proxy_record(row, payload_store).map(Some);
+            }
         }
+
+        // Try ephemeral DB
+        {
+            let eph = self.ephemeral_conn.lock().unwrap();
+            let mut stmt = eph.prepare(&format!(
+                "SELECT {} FROM http_logs WHERE id = ?1 LIMIT 1",
+                SELECT_PROXY_RECORD_COLS
+            ))?;
+            let mut rows = stmt.query(params![id])?;
+            if let Some(row) = rows.next()? {
+                return row_to_proxy_record(row, payload_store).map(Some);
+            }
+        }
+
+        Ok(None)
     }
 
     pub fn clear_logs(&self) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
-        conn.execute("DELETE FROM http_logs", [])?;
-        drop(conn);
-        let _ = self.vacuum();
+        {
+            let conn = self.conn.lock().unwrap();
+            conn.execute("DELETE FROM http_logs", [])?;
+            drop(conn);
+            let _ = self.vacuum();
+        }
+        {
+            let eph = self.ephemeral_conn.lock().unwrap();
+            let _ = eph.execute("DELETE FROM http_logs", []);
+        }
         Ok(())
     }
 
     pub fn clear_logs_before(&self, cutoff_rfc3339: &str) -> SqlResult<usize> {
-        let conn = self.conn.lock().unwrap();
-        let rows = conn.execute(
-            "DELETE FROM http_logs WHERE timestamp < ?1",
-            params![cutoff_rfc3339],
-        )?;
-        let _ = conn.execute(
-            "DELETE FROM websocket_messages WHERE timestamp < ?1",
-            params![cutoff_rfc3339],
-        );
-        let _ = conn.execute(
-            "DELETE FROM websocket_connections WHERE timestamp < ?1",
-            params![cutoff_rfc3339],
-        );
-        drop(conn);
-        let _ = self.vacuum();
-        Ok(rows)
+        let mut total = 0;
+        {
+            let conn = self.conn.lock().unwrap();
+            let rows = conn.execute(
+                "DELETE FROM http_logs WHERE timestamp < ?1",
+                params![cutoff_rfc3339],
+            )?;
+            let _ = conn.execute(
+                "DELETE FROM websocket_messages WHERE timestamp < ?1",
+                params![cutoff_rfc3339],
+            );
+            let _ = conn.execute(
+                "DELETE FROM websocket_connections WHERE timestamp < ?1",
+                params![cutoff_rfc3339],
+            );
+            drop(conn);
+            let _ = self.vacuum();
+            total += rows;
+        }
+        {
+            let eph = self.ephemeral_conn.lock().unwrap();
+            let rows = eph
+                .execute(
+                    "DELETE FROM http_logs WHERE timestamp < ?1",
+                    params![cutoff_rfc3339],
+                )
+                .unwrap_or(0);
+            let _ = eph.execute(
+                "DELETE FROM websocket_messages WHERE timestamp < ?1",
+                params![cutoff_rfc3339],
+            );
+            let _ = eph.execute(
+                "DELETE FROM websocket_connections WHERE timestamp < ?1",
+                params![cutoff_rfc3339],
+            );
+            total += rows;
+        }
+        Ok(total)
     }
 
     pub fn get_paginated(
@@ -248,12 +564,17 @@ impl Database {
         page: u32,
         per_page: u32,
         sort_order: &str,
+        payload_store: Option<&PayloadStore>,
     ) -> Result<PaginatedResponse<ProxyRecord>, String> {
-        let conn = self.conn.lock().unwrap();
+        let storage_mode = self.get_session_storage_mode(session_id);
+        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
         let offset = (page - 1) * per_page;
 
         let (where_clause, params_vec): (String, Vec<Box<dyn rusqlite::ToSql>>) = match session_id {
-            Some(sid) if !sid.is_empty() => (" WHERE session_id = ?".to_string(), vec![Box::new(sid.to_string())]),
+            Some(sid) if !sid.is_empty() => (
+                " WHERE session_id = ?".to_string(),
+                vec![Box::new(sid.to_string())],
+            ),
             _ => (String::new(), Vec::new()),
         };
 
@@ -266,18 +587,22 @@ impl Database {
 
         let per_page_i64 = per_page as i64;
         let offset_i64 = offset as i64;
-        let mut all_params: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
+        let mut all_params: Vec<&dyn rusqlite::ToSql> =
+            params_vec.iter().map(|b| b.as_ref()).collect();
         all_params.push(&per_page_i64 as &dyn rusqlite::ToSql);
         all_params.push(&offset_i64 as &dyn rusqlite::ToSql);
 
         let rows = stmt
-            .query_map(all_params.as_slice(), row_to_proxy_record)
+            .query_map(all_params.as_slice(), |row| {
+                row_to_proxy_record(row, payload_store)
+            })
             .map_err(|e| e.to_string())?;
 
         let records = collect_records(rows);
 
         let count_sql = format!("SELECT COUNT(*) FROM http_logs{}", where_clause);
-        let count_params: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
+        let count_params: Vec<&dyn rusqlite::ToSql> =
+            params_vec.iter().map(|b| b.as_ref()).collect();
         let total: i64 = conn
             .query_row(&count_sql, count_params.as_slice(), |row| row.get(0))
             .map_err(|e| e.to_string())?;
@@ -301,19 +626,23 @@ impl Database {
         per_page: u32,
         sort_order: &str,
     ) -> Result<PaginatedResponse<ProxySummaryRow>, String> {
-        let conn = self.conn.lock().unwrap();
+        let storage_mode = self.get_session_storage_mode(session_id);
+        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
         let offset = (page - 1) * per_page;
         let limit = per_page + 1;
 
         let (where_clause, params_vec): (String, Vec<Box<dyn rusqlite::ToSql>>) = match session_id {
-            Some(sid) if !sid.is_empty() => (" WHERE session_id = ?".to_string(), vec![Box::new(sid.to_string())]),
+            Some(sid) if !sid.is_empty() => (
+                " WHERE session_id = ?".to_string(),
+                vec![Box::new(sid.to_string())],
+            ),
             _ => (String::new(), Vec::new()),
         };
 
         let sql = format!(
             "SELECT id, session_id, timestamp, method, url, response_status, response_status_text,
-                    COALESCE(LENGTH(request_body), 0),
-                    COALESCE(LENGTH(response_body), 0),
+                    COALESCE(req_body_size, LENGTH(COALESCE(request_body, X''))),
+                    COALESCE(res_body_size, LENGTH(COALESCE(response_body, X''))),
                     COALESCE(server_addr, ''),
                     request_headers,
                     response_headers
@@ -325,7 +654,8 @@ impl Database {
         let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
         let limit_i64 = limit as i64;
         let offset_i64 = offset as i64;
-        let mut all_params: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
+        let mut all_params: Vec<&dyn rusqlite::ToSql> =
+            params_vec.iter().map(|b| b.as_ref()).collect();
         all_params.push(&limit_i64 as &dyn rusqlite::ToSql);
         all_params.push(&offset_i64 as &dyn rusqlite::ToSql);
 
@@ -365,7 +695,8 @@ impl Database {
         per_page: u32,
         sort_order: &str,
     ) -> Result<PaginatedResponse<ProxySummaryRow>, String> {
-        let conn = self.conn.lock().unwrap();
+        let storage_mode = self.get_session_storage_mode(filter.session_id.as_deref());
+        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
         let offset = (page - 1) * per_page;
 
         let mut where_sql = String::new();
@@ -381,7 +712,9 @@ impl Database {
         if let Some(ref search) = filter.search {
             if !search.is_empty() {
                 let search_pattern = format!("%{}%", search);
-                where_sql.push_str(" AND (url LIKE ? OR method LIKE ? OR server_addr LIKE ? OR request_headers LIKE ?)");
+                where_sql.push_str(
+                    " AND (url LIKE ? OR method LIKE ? OR server_addr LIKE ? OR request_headers LIKE ?)",
+                );
                 params_vec.push(Box::new(search_pattern.clone()));
                 params_vec.push(Box::new(search_pattern.clone()));
                 params_vec.push(Box::new(search_pattern.clone()));
@@ -436,8 +769,8 @@ impl Database {
 
         let data_sql = format!(
             "SELECT id, session_id, timestamp, method, url, response_status, response_status_text,
-                    COALESCE(LENGTH(request_body), 0),
-                    COALESCE(LENGTH(response_body), 0),
+                    COALESCE(req_body_size, LENGTH(COALESCE(request_body, X''))),
+                    COALESCE(res_body_size, LENGTH(COALESCE(response_body, X''))),
                     COALESCE(server_addr, ''),
                     request_headers,
                     response_headers
@@ -481,12 +814,17 @@ impl Database {
     }
 
     pub fn count(&self, session_id: Option<&str>) -> Result<usize, String> {
-        let conn = self.conn.lock().unwrap();
+        let storage_mode = self.get_session_storage_mode(session_id);
+        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
         let (sql, params_vec): (String, Vec<Box<dyn rusqlite::ToSql>>) = match session_id {
-            Some(sid) if !sid.is_empty() => ("SELECT COUNT(*) FROM http_logs WHERE session_id = ?".to_string(), vec![Box::new(sid.to_string())]),
+            Some(sid) if !sid.is_empty() => (
+                "SELECT COUNT(*) FROM http_logs WHERE session_id = ?".to_string(),
+                vec![Box::new(sid.to_string())],
+            ),
             _ => ("SELECT COUNT(*) FROM http_logs".to_string(), Vec::new()),
         };
-        let params_ref: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
+        let params_ref: Vec<&dyn rusqlite::ToSql> =
+            params_vec.iter().map(|b| b.as_ref()).collect();
         let total: i64 = conn
             .query_row(&sql, params_ref.as_slice(), |row| row.get(0))
             .map_err(|e| e.to_string())?;
@@ -494,7 +832,8 @@ impl Database {
     }
 
     pub fn get_tree(&self, filter: &ProxyFilter) -> Result<Vec<TreeNode>, String> {
-        let conn = self.conn.lock().unwrap();
+        let storage_mode = self.get_session_storage_mode(filter.session_id.as_deref());
+        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
 
         let mut sql = String::from("SELECT url, method FROM http_logs WHERE 1=1");
         let mut params_vec: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
@@ -509,7 +848,9 @@ impl Database {
         if let Some(ref search) = filter.search {
             if !search.is_empty() {
                 let search_pattern = format!("%{}%", search);
-                sql.push_str(" AND (url LIKE ? OR method LIKE ? OR server_addr LIKE ? OR request_headers LIKE ?)");
+                sql.push_str(
+                    " AND (url LIKE ? OR method LIKE ? OR server_addr LIKE ? OR request_headers LIKE ?)",
+                );
                 params_vec.push(Box::new(search_pattern.clone()));
                 params_vec.push(Box::new(search_pattern.clone()));
                 params_vec.push(Box::new(search_pattern.clone()));
@@ -534,7 +875,7 @@ impl Database {
                     sql.push('?');
                     params_vec.push(Box::new(m.clone()));
                 }
-                sql.push(')');
+                where_sql_push_close(&mut sql);
             }
         }
 
@@ -548,7 +889,7 @@ impl Database {
                     sql.push('?');
                     params_vec.push(Box::new(*s as i64));
                 }
-                sql.push(')');
+                where_sql_push_close(&mut sql);
             }
         }
 
@@ -558,7 +899,8 @@ impl Database {
             }
         }
 
-        let all_params: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
+        let all_params: Vec<&dyn rusqlite::ToSql> =
+            params_vec.iter().map(|b| b.as_ref()).collect();
 
         let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
         let rows = stmt
@@ -594,12 +936,10 @@ impl Database {
             let host = uri.split('/').next().unwrap_or("");
 
             let host_entry = host_paths.entry(host.to_string()).or_default();
-            let path_entry = host_entry
-                .entry(url.to_string())
-                .or_insert_with(|| PathInfo {
-                    url,
-                    ..Default::default()
-                });
+            let path_entry = host_entry.entry(url.to_string()).or_insert_with(|| PathInfo {
+                url,
+                ..Default::default()
+            });
             path_entry.count += 1;
             path_entry.methods.insert(method);
         }
@@ -644,19 +984,50 @@ impl Database {
     }
 }
 
-fn row_to_proxy_record(row: &rusqlite::Row) -> SqlResult<ProxyRecord> {
+fn where_sql_push_close(sql: &mut String) {
+    sql.push(')');
+}
+
+fn row_to_proxy_record(
+    row: &rusqlite::Row,
+    payload_store: Option<&PayloadStore>,
+) -> SqlResult<ProxyRecord> {
     let id: String = row.get(0)?;
     let timestamp: String = row.get(1)?;
     let method: String = row.get(2)?;
     let url: String = row.get(3)?;
     let request_headers: Option<String> = row.get(4)?;
-    let request_body: Option<Vec<u8>> = row.get(5)?;
+    let legacy_request_body: Option<Vec<u8>> = row.get(5)?;
     let response_status: Option<i64> = row.get(6)?;
     let response_status_text: Option<String> = row.get(7)?;
     let response_headers: Option<String> = row.get(8)?;
-    let response_body: Option<Vec<u8>> = row.get(9)?;
+    let legacy_response_body: Option<Vec<u8>> = row.get(9)?;
     let client_addr: Option<String> = row.get(10)?;
     let server_addr: Option<String> = row.get(11)?;
+    let req_payload_ref: String = row.get(12).unwrap_or_default();
+    let res_payload_ref: String = row.get(13).unwrap_or_default();
+
+    // Resolve request body: try payload_store first, fall back to legacy BLOB
+    let request_body_bytes = if !req_payload_ref.is_empty() {
+        if let Some(ps) = payload_store {
+            ps.load_body(&req_payload_ref).unwrap_or(None)
+        } else {
+            None
+        }
+    } else {
+        legacy_request_body
+    };
+
+    // Resolve response body: try payload_store first, fall back to legacy BLOB
+    let response_body_bytes = if !res_payload_ref.is_empty() {
+        if let Some(ps) = payload_store {
+            ps.load_body(&res_payload_ref).unwrap_or(None)
+        } else {
+            None
+        }
+    } else {
+        legacy_response_body
+    };
 
     let mut request = ProxyRequest {
         method,
@@ -668,7 +1039,7 @@ fn row_to_proxy_record(row: &rusqlite::Row) -> SqlResult<ProxyRecord> {
             .transpose()
             .unwrap_or_default()
             .unwrap_or_default(),
-        body: request_body.unwrap_or_default(),
+        body: request_body_bytes.unwrap_or_default(),
         content_decoded: false,
     };
 
@@ -692,7 +1063,7 @@ fn row_to_proxy_record(row: &rusqlite::Row) -> SqlResult<ProxyRecord> {
             .transpose()
             .unwrap_or_default()
             .unwrap_or_default(),
-        body: response_body.unwrap_or_default(),
+        body: response_body_bytes.unwrap_or_default(),
         content_decoded: false,
     });
 
@@ -733,7 +1104,9 @@ fn row_to_proxy_summary(row: &rusqlite::Row) -> SqlResult<ProxySummaryRow> {
         if let Ok(map) = serde_json::from_str::<std::collections::HashMap<String, String>>(h_str) {
             for (k, v) in map {
                 let lower = k.to_lowercase();
-                if host.is_none() && (lower == "host" || lower == ":authority" || lower == "x-forwarded-host") {
+                if host.is_none()
+                    && (lower == "host" || lower == ":authority" || lower == "x-forwarded-host")
+                {
                     let trimmed = v.trim();
                     if !trimmed.is_empty() {
                         host = Some(trimmed.to_string());

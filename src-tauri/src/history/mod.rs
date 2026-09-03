@@ -57,21 +57,33 @@ pub struct WebSocketConnectionDetail {
 
 pub struct HistoryBridge {
     db: Database,
+    payload_store: Option<crate::db::PayloadStore>,
 }
 
 impl HistoryBridge {
     pub fn new(path: PathBuf) -> Result<Self, String> {
         let db = Database::new(path).map_err(|e| e.to_string())?;
         db.init().map_err(|e| e.to_string())?;
-        Ok(Self { db })
+        Ok(Self { db, payload_store: None })
     }
 
     pub fn from_database(db: Database) -> Self {
-        Self { db }
+        Self { db, payload_store: None }
+    }
+
+    pub fn from_database_and_payload_store(db: Database, payload_store: crate::db::PayloadStore) -> Self {
+        Self {
+            db,
+            payload_store: Some(payload_store),
+        }
     }
 
     pub fn database(&self) -> &Database {
         &self.db
+    }
+
+    pub fn payload_store(&self) -> Option<&crate::db::PayloadStore> {
+        self.payload_store.as_ref()
     }
 
     // ponytail: delegates to reset internal database connection
@@ -92,9 +104,17 @@ impl HistoryBridge {
         capture_mode: Option<&str>,
         capture_filter: Option<&str>,
         exclude_filter: Option<&str>,
+        storage_mode: Option<&str>,
     ) -> Result<HttpSessionRecord, String> {
         self.db
-            .create_http_session(name, description, capture_mode, capture_filter, exclude_filter)
+            .create_http_session(
+                name,
+                description,
+                capture_mode,
+                capture_filter,
+                exclude_filter,
+                storage_mode,
+            )
             .map_err(|e| e.to_string())
     }
 
@@ -125,6 +145,9 @@ impl HistoryBridge {
     }
 
     pub fn delete_http_session(&self, session_id: &str) -> Result<(), String> {
+        if let Some(ps) = &self.payload_store {
+            let _ = ps.remove_session(session_id);
+        }
         self.db
             .delete_http_session(session_id)
             .map_err(|e| e.to_string())
@@ -137,6 +160,9 @@ impl HistoryBridge {
     }
 
     pub fn clear_http_session_logs(&self, session_id: &str) -> Result<usize, String> {
+        if let Some(ps) = &self.payload_store {
+            let _ = ps.remove_session(session_id);
+        }
         self.db
             .clear_http_session_logs(session_id)
             .map_err(|e| e.to_string())
@@ -145,11 +171,15 @@ impl HistoryBridge {
     // ── Logs ───────────────────────────────────────────────────────
 
     pub fn insert_record(&self, record: &ProxyRecord, session_id: Option<&str>) -> Result<(), String> {
-        self.db.insert_log(record, session_id).map_err(|e| e.to_string())
+        self.db
+            .insert_log(record, session_id, self.payload_store.as_ref())
+            .map_err(|e| e.to_string())
     }
 
     pub fn insert_records_batch(&self, records: &[(ProxyRecord, Option<String>)]) -> Result<(), String> {
-        self.db.insert_logs_batch(records).map_err(|e| e.to_string())
+        self.db
+            .insert_logs_batch(records, self.payload_store.as_ref())
+            .map_err(|e| e.to_string())
     }
 
     pub fn upsert_ai_browser_session(&self, session: &CrawlSession) -> Result<(), String> {
@@ -285,6 +315,10 @@ impl HistoryBridge {
     }
 
     pub fn clear_all(&self) -> Result<(), String> {
+        if let Some(ps) = &self.payload_store {
+            let _ = ps.clear_all_persistent();
+            ps.clear_ephemeral();
+        }
         self.db.clear_logs().map_err(|e| e.to_string())
     }
 
@@ -297,20 +331,20 @@ impl HistoryBridge {
     }
 
     pub fn get_all(&self) -> Result<Vec<ProxyRecord>, String> {
-        self.db.get_all().map_err(|e| e.to_string())
+        self.db.get_all(self.payload_store.as_ref()).map_err(|e| e.to_string())
     }
 
     pub fn get_by_id(&self, log_id: &str) -> Result<Option<ProxyRecord>, String> {
-        self.db.get_by_id(log_id).map_err(|e| e.to_string())
+        self.db.get_by_id(log_id, self.payload_store.as_ref()).map_err(|e| e.to_string())
     }
 
     pub fn get_filtered(&self, filter: ProxyFilter) -> Result<Vec<ProxyRecord>, String> {
         let filter = self.normalize_filter(filter);
 
         if self.has_active_filters(&filter) {
-            self.db.get_filtered(&filter).map_err(|e| e.to_string())
+            self.db.get_filtered(&filter, self.payload_store.as_ref()).map_err(|e| e.to_string())
         } else {
-            self.db.get_all().map_err(|e| e.to_string())
+            self.db.get_all(self.payload_store.as_ref()).map_err(|e| e.to_string())
         }
     }
 

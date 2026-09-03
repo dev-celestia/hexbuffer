@@ -12,18 +12,20 @@ pub const SELECT_WS_CONNECTION_COLS: &str = "id, session_id, timestamp, url, hos
 
 impl Database {
     pub fn insert_websocket_connection(&self, record: &WebSocketConnectionRecord) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
         let session_id = if !record.session_id.is_empty() {
             record.session_id.clone()
         } else {
+            let conn = self.conn.lock().unwrap();
             Database::get_active_session_id(&conn).unwrap_or_default()
         };
 
+        let storage_mode = self.get_session_storage_mode(Some(&session_id));
         let request_headers =
             serde_json::to_string(&record.handshake_request_headers).unwrap_or_default();
         let response_headers =
             serde_json::to_string(&record.handshake_response_headers).unwrap_or_default();
 
+        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
         conn.execute(
             r#"INSERT INTO websocket_connections (
                 id, session_id, timestamp, url, host, path,
@@ -51,14 +53,31 @@ impl Database {
     }
 
     pub fn insert_websocket_message(&self, record: &WebSocketMessageRecord) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        // Find if connection is in ephemeral or persistent DB
+        let conn_id = record.connection_id.to_string();
+        let is_in_eph = {
+            let eph = self.ephemeral_conn.lock().unwrap();
+            eph.query_row(
+                "SELECT 1 FROM websocket_connections WHERE id = ?1",
+                params![conn_id],
+                |_| Ok(true),
+            )
+            .unwrap_or(false)
+        };
+
+        let conn = if is_in_eph {
+            self.ephemeral_conn.lock().unwrap()
+        } else {
+            self.conn.lock().unwrap()
+        };
+
         conn.execute(
             r#"INSERT INTO websocket_messages (
                 id, connection_id, timestamp, direction, message_type, payload, payload_size
             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)"#,
             params![
                 record.id.to_string(),
-                record.connection_id.to_string(),
+                conn_id,
                 record.timestamp.to_rfc3339(),
                 websocket_message_direction_to_str(&record.direction),
                 websocket_message_type_to_str(&record.message_type),
@@ -72,26 +91,63 @@ impl Database {
                SET message_count = message_count + 1, last_activity_at = ?2
                WHERE id = ?1"#,
             params![
-                record.connection_id.to_string(),
+                conn_id,
                 record.timestamp.to_rfc3339()
             ],
         )?;
+
+        if is_in_eph {
+            let msg_count: i64 = conn.query_row(
+                "SELECT COUNT(*) FROM websocket_messages WHERE connection_id = ?1",
+                params![conn_id],
+                |r| r.get(0),
+            ).unwrap_or(0);
+
+            if msg_count >= 150 {
+                let _ = conn.execute(
+                    "DELETE FROM websocket_messages \
+                     WHERE connection_id = ?1 AND id IN ( \
+                         SELECT id FROM websocket_messages \
+                         WHERE connection_id = ?1 \
+                         ORDER BY timestamp DESC, id DESC \
+                         LIMIT -1 OFFSET 100 \
+                     )",
+                    params![conn_id],
+                );
+            }
+        }
         Ok(())
     }
 
     pub fn clear_websocket_logs(&self) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
-        conn.execute("DELETE FROM websocket_messages", [])?;
-        conn.execute("DELETE FROM websocket_connections", [])?;
+        {
+            let conn = self.conn.lock().unwrap();
+            conn.execute("DELETE FROM websocket_messages", [])?;
+            conn.execute("DELETE FROM websocket_connections", [])?;
+        }
+        {
+            let eph = self.ephemeral_conn.lock().unwrap();
+            let _ = eph.execute("DELETE FROM websocket_messages", []);
+            let _ = eph.execute("DELETE FROM websocket_connections", []);
+        }
         Ok(())
     }
 
     pub fn delete_websocket_connection(&self, id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
-        conn.execute(
-            "DELETE FROM websocket_connections WHERE id = ?1",
-            params![id],
-        )?;
+        {
+            let conn = self.conn.lock().unwrap();
+            conn.execute(
+                "DELETE FROM websocket_connections WHERE id = ?1",
+                params![id],
+            )?;
+        }
+        {
+            let eph = self.ephemeral_conn.lock().unwrap();
+            let _ = eph.execute(
+                "DELETE FROM websocket_connections WHERE id = ?1",
+                params![id],
+            );
+        }
         Ok(())
     }
 
@@ -101,7 +157,8 @@ impl Database {
         page: u32,
         per_page: u32,
     ) -> Result<PaginatedResponse<WebSocketConnectionRecord>, String> {
-        let conn = self.conn.lock().unwrap();
+        let storage_mode = self.get_session_storage_mode(filter.and_then(|f| f.session_id.as_deref()));
+        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
         let offset = (page - 1) * per_page;
 
         let mut sql = format!("SELECT {} FROM websocket_connections WHERE 1=1", SELECT_WS_CONNECTION_COLS);
@@ -155,36 +212,61 @@ impl Database {
         &self,
         id: &str,
     ) -> Result<Option<WebSocketConnectionRecord>, String> {
-        let conn = self.conn.lock().unwrap();
         let sql = format!("SELECT {} FROM websocket_connections WHERE id = ?1 LIMIT 1", SELECT_WS_CONNECTION_COLS);
-        let mut stmt = conn
-            .prepare(&sql)
-            .map_err(|e| e.to_string())?;
-        let mut rows = stmt.query(params![id]).map_err(|e| e.to_string())?;
-
-        match rows.next().map_err(|e| e.to_string())? {
-            Some(row) => row_to_websocket_connection_record(row)
-                .map(Some)
-                .map_err(|e| e.to_string()),
-            None => Ok(None),
+        // Try persistent DB first
+        {
+            let conn = self.conn.lock().unwrap();
+            let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
+            let mut rows = stmt.query(params![id]).map_err(|e| e.to_string())?;
+            if let Some(row) = rows.next().map_err(|e| e.to_string())? {
+                return row_to_websocket_connection_record(row)
+                    .map(Some)
+                    .map_err(|e| e.to_string());
+            }
         }
+
+        // Try ephemeral DB
+        {
+            let eph = self.ephemeral_conn.lock().unwrap();
+            let mut stmt = eph.prepare(&sql).map_err(|e| e.to_string())?;
+            let mut rows = stmt.query(params![id]).map_err(|e| e.to_string())?;
+            if let Some(row) = rows.next().map_err(|e| e.to_string())? {
+                return row_to_websocket_connection_record(row)
+                    .map(Some)
+                    .map_err(|e| e.to_string());
+            }
+        }
+
+        Ok(None)
     }
 
     pub fn get_websocket_messages_by_connection_id(
         &self,
         connection_id: &str,
     ) -> Result<Vec<WebSocketMessageRecord>, String> {
-        let conn = self.conn.lock().unwrap();
-        let mut stmt = conn
-            .prepare(
-                "SELECT id, connection_id, timestamp, direction, message_type, payload, payload_size FROM websocket_messages WHERE connection_id = ?1 ORDER BY timestamp ASC",
-            )
-            .map_err(|e| e.to_string())?;
-        let rows = stmt
-            .query_map(params![connection_id], row_to_websocket_message_record)
-            .map_err(|e| e.to_string())?;
+        let sql = "SELECT id, connection_id, timestamp, direction, message_type, payload, payload_size FROM websocket_messages WHERE connection_id = ?1 ORDER BY timestamp ASC";
+        // Try persistent DB first
+        {
+            let conn = self.conn.lock().unwrap();
+            let mut stmt = conn.prepare(sql).map_err(|e| e.to_string())?;
+            let rows = stmt
+                .query_map(params![connection_id], row_to_websocket_message_record)
+                .map_err(|e| e.to_string())?;
+            let res: Vec<WebSocketMessageRecord> = rows.filter_map(Result::ok).collect();
+            if !res.is_empty() {
+                return Ok(res);
+            }
+        }
 
-        Ok(rows.filter_map(Result::ok).collect())
+        // Try ephemeral DB
+        {
+            let eph = self.ephemeral_conn.lock().unwrap();
+            let mut stmt = eph.prepare(sql).map_err(|e| e.to_string())?;
+            let rows = stmt
+                .query_map(params![connection_id], row_to_websocket_message_record)
+                .map_err(|e| e.to_string())?;
+            Ok(rows.filter_map(Result::ok).collect())
+        }
     }
 }
 

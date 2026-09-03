@@ -69,7 +69,8 @@ export async function createHttpSession(
   description?: string,
   captureMode?: string,
   captureFilter?: string,
-  excludeFilter?: string
+  excludeFilter?: string,
+  storageMode?: string
 ): Promise<HttpSessionRecord> {
   return invokeTauri('create_http_session', {
     name,
@@ -77,7 +78,12 @@ export async function createHttpSession(
     captureMode: captureMode || null,
     captureFilter: captureFilter || null,
     excludeFilter: excludeFilter || null,
+    storageMode: storageMode || null,
   });
+}
+
+export async function promoteSession(sessionId: string): Promise<void> {
+  return invokeTauri('promote_session', { sessionId });
 }
 
 export async function updateHttpSessionFilter(

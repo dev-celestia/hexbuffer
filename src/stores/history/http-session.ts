@@ -1,8 +1,9 @@
 import { create } from 'zustand';
-import type { HttpSessionSummary, HttpSessionRecord, SessionCaptureMode } from '@/types';
+import type { HttpSessionSummary, HttpSessionRecord, SessionCaptureMode, SessionStorageMode } from '@/types';
 import {
   getHttpSessions,
   createHttpSession,
+  promoteSession as apiPromoteSession,
   updateHttpSessionFilter,
   setProxyDbFilter,
   setActiveHttpSession,
@@ -67,8 +68,10 @@ interface HttpSessionState {
     description?: string,
     captureMode?: SessionCaptureMode,
     captureFilter?: string[],
-    excludeFilter?: string[]
+    excludeFilter?: string[],
+    storageMode?: SessionStorageMode
   ) => Promise<HttpSessionRecord | null>;
+  promoteSession: (sessionId: string) => Promise<void>;
   updateSessionFilter: (
     sessionId: string,
     captureMode: SessionCaptureMode,
@@ -124,7 +127,8 @@ export const useHttpSessionStore = create<HttpSessionState>()((set, get) => ({
     description?: string,
     captureMode: SessionCaptureMode = 'all',
     captureFilter: string[] = [],
-    excludeFilter: string[] = []
+    excludeFilter: string[] = [],
+    storageMode: SessionStorageMode = 'ephemeral'
   ) => {
     set({ isCreating: true, error: null });
     try {
@@ -133,7 +137,8 @@ export const useHttpSessionStore = create<HttpSessionState>()((set, get) => ({
         description,
         captureMode,
         JSON.stringify(captureFilter),
-        JSON.stringify(excludeFilter)
+        JSON.stringify(excludeFilter),
+        storageMode
       );
       await get().fetchSessions();
       set({ isCreating: false });
@@ -155,6 +160,24 @@ export const useHttpSessionStore = create<HttpSessionState>()((set, get) => ({
         error: err instanceof Error ? err.message : 'Failed to create session',
       });
       return null;
+    }
+  },
+
+  promoteSession: async (sessionId: string) => {
+    try {
+      await apiPromoteSession(sessionId);
+      await get().fetchSessions();
+      useNotificationStore.getState().addAlert({
+        title: 'Session Persisted',
+        message: 'Ephemeral traffic session has been saved to disk.',
+        type: 'info',
+        source: 'Traffic Session',
+      });
+    } catch (err) {
+      console.error('[http-session] failed to promote session:', err);
+      set({
+        error: err instanceof Error ? err.message : 'Failed to persist session to disk',
+      });
     }
   },
 

@@ -20,16 +20,43 @@ use std::sync::{Arc, Mutex};
 #[derive(Clone)]
 pub struct Database {
     conn: Arc<Mutex<Connection>>,
+    ephemeral_conn: Arc<Mutex<Connection>>,
     path: PathBuf,
 }
 
 impl Database {
     pub fn new(path: PathBuf) -> SqlResult<Self> {
         let conn = Connection::open(&path)?;
+        let ephemeral_conn = Connection::open_in_memory()?;
         Ok(Self {
             conn: Arc::new(Mutex::new(conn)),
+            ephemeral_conn: Arc::new(Mutex::new(ephemeral_conn)),
             path,
         })
+    }
+
+    pub fn disk_conn(&self) -> &Arc<Mutex<Connection>> {
+        &self.conn
+    }
+
+    pub fn ephemeral_conn(&self) -> &Arc<Mutex<Connection>> {
+        &self.ephemeral_conn
+    }
+
+    pub fn traffic_conn(&self, storage_mode: &str) -> &Arc<Mutex<Connection>> {
+        if storage_mode == "ephemeral" {
+            &self.ephemeral_conn
+        } else {
+            &self.conn
+        }
+    }
+
+    pub fn reset_ephemeral(&self) -> SqlResult<()> {
+        let eph = self.ephemeral_conn.lock().unwrap();
+        eph.execute("DELETE FROM websocket_messages", [])?;
+        eph.execute("DELETE FROM websocket_connections", [])?;
+        eph.execute("DELETE FROM http_logs", [])?;
+        Ok(())
     }
 
     // ponytail: allow closing the sqlite connection and reopening it to reset the database file safely
@@ -50,13 +77,16 @@ impl Database {
         Ok(())
     }
 
-
     pub fn init(&self) -> SqlResult<()> {
         let conn = self.conn.lock().unwrap();
         conn.execute_batch("PRAGMA foreign_keys = ON;")?;
         conn.execute_batch("PRAGMA journal_mode = WAL;")?;
         conn.execute_batch("PRAGMA busy_timeout = 5000;")?;
         conn.execute_batch("PRAGMA synchronous = NORMAL;")?;
+        conn.execute_batch("PRAGMA mmap_size = 1073741824;")?;
+        conn.execute_batch("PRAGMA cache_size = -65536;")?;
+        conn.execute_batch("PRAGMA temp_store = MEMORY;")?;
+        conn.execute_batch("PRAGMA wal_autocheckpoint = 1000;")?;
         conn.execute_batch(crate::db::schema::CREATE_HTTP_SESSIONS_TABLE)?;
         conn.execute_batch(crate::db::schema::CREATE_HTTP_LOGS_TABLE)?;
         conn.execute_batch(crate::db::schema::CREATE_WEBSOCKET_TABLES)?;
@@ -73,11 +103,44 @@ impl Database {
         Self::ensure_column(&conn, "http_sessions", "capture_mode", "TEXT NOT NULL DEFAULT 'all'")?;
         Self::ensure_column(&conn, "http_sessions", "capture_filter", "TEXT NOT NULL DEFAULT '[]'")?;
         Self::ensure_column(&conn, "http_sessions", "exclude_filter", "TEXT NOT NULL DEFAULT '[]'")?;
+        Self::ensure_column(&conn, "http_sessions", "storage_mode", "TEXT NOT NULL DEFAULT 'persistent'")?;
         Self::ensure_column(&conn, "http_logs", "session_id", "TEXT NOT NULL DEFAULT ''")?;
+        Self::ensure_column(&conn, "http_logs", "req_payload_ref", "TEXT DEFAULT ''")?;
+        Self::ensure_column(&conn, "http_logs", "req_body_size", "INTEGER DEFAULT 0")?;
+        Self::ensure_column(&conn, "http_logs", "req_truncated", "INTEGER DEFAULT 0")?;
+        Self::ensure_column(&conn, "http_logs", "res_payload_ref", "TEXT DEFAULT ''")?;
+        Self::ensure_column(&conn, "http_logs", "res_body_size", "INTEGER DEFAULT 0")?;
+        Self::ensure_column(&conn, "http_logs", "res_truncated", "INTEGER DEFAULT 0")?;
         Self::ensure_column(&conn, "websocket_connections", "session_id", "TEXT NOT NULL DEFAULT ''")?;
         let _ = Self::ensure_default_http_session(&conn)?;
         let _ = conn.execute("CREATE INDEX IF NOT EXISTS idx_http_logs_session_ts ON http_logs(session_id, timestamp DESC)", []);
+        let _ = conn.execute("CREATE INDEX IF NOT EXISTS idx_http_logs_host_status_ts ON http_logs(server_addr, response_status, timestamp DESC)", []);
         let _ = conn.execute("CREATE INDEX IF NOT EXISTS idx_websocket_connections_session ON websocket_connections(session_id)", []);
+        drop(conn);
+
+        // Initialize in-memory ephemeral database
+        let eph = self.ephemeral_conn.lock().unwrap();
+        eph.execute_batch("PRAGMA foreign_keys = OFF;")?;
+        eph.execute_batch("PRAGMA journal_mode = OFF;")?;
+        eph.execute_batch("PRAGMA synchronous = OFF;")?;
+        eph.execute_batch("PRAGMA temp_store = MEMORY;")?;
+        eph.execute_batch(crate::db::schema::CREATE_HTTP_SESSIONS_TABLE)?;
+        eph.execute_batch(crate::db::schema::CREATE_HTTP_LOGS_TABLE)?;
+        eph.execute_batch(crate::db::schema::CREATE_WEBSOCKET_TABLES)?;
+        Self::ensure_column(&eph, "http_logs", "session_id", "TEXT NOT NULL DEFAULT ''")?;
+        Self::ensure_column(&eph, "http_logs", "req_payload_ref", "TEXT DEFAULT ''")?;
+        Self::ensure_column(&eph, "http_logs", "req_body_size", "INTEGER DEFAULT 0")?;
+        Self::ensure_column(&eph, "http_logs", "req_truncated", "INTEGER DEFAULT 0")?;
+        Self::ensure_column(&eph, "http_logs", "res_payload_ref", "TEXT DEFAULT ''")?;
+        Self::ensure_column(&eph, "http_logs", "res_body_size", "INTEGER DEFAULT 0")?;
+        Self::ensure_column(&eph, "http_logs", "res_truncated", "INTEGER DEFAULT 0")?;
+        Self::ensure_column(&eph, "websocket_connections", "session_id", "TEXT NOT NULL DEFAULT ''")?;
+        let _ = eph.execute("CREATE INDEX IF NOT EXISTS idx_http_logs_session_ts ON http_logs(session_id, timestamp DESC)", []);
+        let _ = eph.execute("CREATE INDEX IF NOT EXISTS idx_http_logs_host_status_ts ON http_logs(server_addr, response_status, timestamp DESC)", []);
+        let _ = eph.execute("CREATE INDEX IF NOT EXISTS idx_websocket_connections_session ON websocket_connections(session_id)", []);
+        drop(eph);
+
+        let conn = self.conn.lock().unwrap();
 
         Self::ensure_column(
             &conn,

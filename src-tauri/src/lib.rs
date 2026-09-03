@@ -38,6 +38,8 @@ pub use db::repository::{
     Database, DocumentRecord, PaginatedResponse, TreeNode, TreePath, StashRecord,
     StashEndpointRecord, ContextRecord, ChronicleLogRecord,
 };
+pub use db::payload_store::PayloadStore;
+pub use db::promotion::promote_session;
 pub use history::{
     HistoryBridge, ProxyLogSummary, WebSocketConnectionDetail,
     WebSocketConnectionSummary,

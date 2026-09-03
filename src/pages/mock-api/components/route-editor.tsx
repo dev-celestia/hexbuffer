@@ -335,8 +335,8 @@ export function RouteEditor({
               className="h-7 flex-1 font-mono text-xs bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
               autoFocus
             />
-            <Button size="sm" className="h-7 px-2.5 text-xs cursor-pointer" onClick={handleSaveHeader}>Save</Button>
-            <Button size="sm" variant="ghost" className="h-7 px-2.5 text-xs cursor-pointer" onClick={handleCancelHeader}>Cancel</Button>
+            <Button size="sm" onClick={handleSaveHeader}>Save</Button>
+            <Button size="sm" variant="ghost" onClick={handleCancelHeader}>Cancel</Button>
           </div>
         ) : (
           <div className="flex items-center gap-3 p-2.5">
@@ -357,32 +357,44 @@ export function RouteEditor({
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 px-2 text-xs cursor-pointer border-border"
                 onClick={copyUrl}
                 title="Copy full URL"
               >
-                {copiedUrl ? <CheckIcon className="mr-1 h-3 w-3 text-green-400" /> : <CopyIcon className="mr-1 h-3 w-3" />}
+                {copiedUrl ? <CheckIcon className="text-green-400" /> : <CopyIcon />}
                 URL
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 px-2 text-xs cursor-pointer border-border"
                 onClick={() => handleCopyCurl(baseUrl)}
                 title="Copy cURL command"
               >
-                <CodeIcon className="mr-1 h-3 w-3" />
+                <CodeIcon />
                 cURL
               </Button>
-              <Button variant="outline" size="sm" className="h-7 px-2 text-xs cursor-pointer border-border" onClick={handleSendToRepeater}>
-                <ArrowSquareOutIcon className="mr-1 h-3.5 w-3.5" />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSendToRepeater}
+              >
+                <ArrowSquareOutIcon />
                 Repeater
               </Button>
-              <Button variant="outline" size="sm" className="h-7 px-2 text-xs cursor-pointer border-border" onClick={handleClone} title="Clone endpoint">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClone}
+                title="Clone endpoint"
+              >
                 Clone
               </Button>
-              <Button variant="destructive" size="icon" className="h-7 w-7 cursor-pointer rounded" onClick={() => onDelete(route.id)} title="Delete endpoint">
-                <TrashIcon className="h-3.5 w-3.5" />
+              <Button
+                variant="destructive"
+                size="icon-sm"
+                onClick={() => onDelete(route.id)}
+                title="Delete endpoint"
+              >
+                <TrashIcon />
               </Button>
             </div>
           </div>

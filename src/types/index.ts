@@ -110,6 +110,7 @@ export interface ProxyLogSummary {
 }
 
 export type SessionCaptureMode = 'all' | 'target_scope' | 'custom';
+export type SessionStorageMode = 'ephemeral' | 'persistent';
 
 export interface HttpSessionSummary {
   id: string;
@@ -121,6 +122,7 @@ export interface HttpSessionSummary {
   capture_mode?: SessionCaptureMode;
   capture_filter?: string; // JSON array of string patterns
   exclude_filter?: string; // JSON array of string patterns
+  storage_mode?: SessionStorageMode;
   request_count: number;
   total_size_bytes: number;
 }
@@ -135,6 +137,7 @@ export interface HttpSessionRecord {
   capture_mode?: SessionCaptureMode;
   capture_filter?: string;
   exclude_filter?: string;
+  storage_mode?: SessionStorageMode;
 }
 
 export interface ProxyDbFilterConfig {

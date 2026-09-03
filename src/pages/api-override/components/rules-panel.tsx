@@ -12,11 +12,13 @@ import {
 import {
   CaretRightIcon,
   GlobeIcon,
+  InfoIcon,
+  LockSimpleIcon,
+  LockSimpleOpenIcon,
   MagnifyingGlassIcon,
   PencilSimpleIcon,
-  TreeStructureIcon,
+  TrashIcon,
 } from '@phosphor-icons/react';
-import { useState } from 'react';
 
 import { cn } from '@/lib/utils';
 import type { MockDomain, MockRoute } from '../types';
@@ -33,7 +35,7 @@ const METHOD_COLORS: Record<string, string> = {
   OPTIONS: 'text-purple-500 font-bold',
 };
 
-interface RoutesProps {
+interface RulesProps {
   readonly domains: MockDomain[];
   readonly routes: MockRoute[];
   readonly selectedRouteId: string | null;
@@ -41,6 +43,8 @@ interface RoutesProps {
   readonly onAdd: (route: Omit<MockRoute, 'id'>) => void;
   readonly onUpdate: (id: string, patch: Partial<MockRoute>) => void;
   readonly onDelete: (id: string) => void;
+  readonly onToggleDomain?: (id: string) => void;
+  readonly onDeleteDomain?: (id: string) => void;
   readonly onClone?: (route: Omit<MockRoute, 'id'>) => void;
 }
 
@@ -52,18 +56,19 @@ export function RulesPanel({
   onAdd,
   onUpdate,
   onDelete,
-}: RoutesProps) {
-  const { searchQuery, setSearchQuery, filteredRoutes, routesByDomain } = useRoutesPanel(routes, domains);
-  // ponytail: all folders open by default
-  const [expandedDomains, setExpandedDomains] = useState<Set<string>>(() => new Set(Object.keys(routesByDomain)));
-  const selectedRoute = routes.find((r) => r.id === selectedRouteId) ?? null;
+  onToggleDomain,
+  onDeleteDomain,
+}: RulesProps) {
+  const {
+    searchQuery,
+    setSearchQuery,
+    filteredDomains,
+    routesByDomain,
+    expandedDomains,
+    toggleDomain,
+  } = useRoutesPanel(routes, domains);
 
-  const toggle = (id: string) =>
-    setExpandedDomains((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+  const selectedRoute = routes.find((r) => r.id === selectedRouteId) ?? null;
 
   return (
     <div
@@ -82,7 +87,7 @@ export function RulesPanel({
           "flex shrink-0 flex-col",
 
           // Sizing & Spacing
-          "w-72",
+          "w-80",
 
           // Backgrounds & Borders
           "border-r bg-background"
@@ -94,7 +99,7 @@ export function RulesPanel({
             "flex flex-col",
 
             // Sizing & Spacing
-            "gap-2 p-2",
+            "gap-2.5 p-2.5",
 
             // Backgrounds & Borders
             "border-b bg-muted/10"
@@ -106,14 +111,36 @@ export function RulesPanel({
               "flex items-center justify-between"
             )}
           >
-            <h3
+            <div
               className={cn(
-                // Typography
-                "text-xs font-bold uppercase tracking-wider text-foreground"
+                // Layout & Positioning
+                "flex items-center",
+
+                // Sizing & Spacing
+                "gap-1.5"
               )}
             >
-              Override Rules ({filteredRoutes.length})
-            </h3>
+              <h3
+                className={cn(
+                  // Typography
+                  "text-xs font-bold uppercase tracking-wider text-foreground"
+                )}
+              >
+                Target Hosts & Rules
+              </h3>
+              <Badge
+                variant="secondary"
+                className={cn(
+                  // Sizing & Spacing
+                  "h-4 px-1.5",
+
+                  // Typography
+                  "font-mono text-[9px] text-muted-foreground"
+                )}
+              >
+                {domains.length}
+              </Badge>
+            </div>
             <NewRouteDialog
               domains={domains}
               onAdd={onAdd}
@@ -121,6 +148,71 @@ export function RulesPanel({
               buttonLabel="New Rule"
             />
           </div>
+
+          {/* Guide callout banner */}
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-start",
+
+              // Sizing & Spacing
+              "gap-2 p-2 rounded-md",
+
+              // Backgrounds & Borders
+              "border border-primary/20 bg-primary/5",
+
+              // Typography
+              "text-muted-foreground"
+            )}
+          >
+            <InfoIcon 
+              className={cn(
+                // Layout & Positioning
+                "shrink-0",
+
+                // Sizing & Spacing
+                "h-3.5 w-3.5 mt-0.5",
+
+                // Typography
+                "text-primary"
+              )}
+            />
+            <div
+              className={cn(
+                // Typography
+                "text-[11px] leading-relaxed"
+              )}
+            >
+              <span
+                className={cn(
+                  // Typography
+                  "font-semibold text-foreground"
+                )}
+              >
+                How to add hosts:{" "}
+              </span>
+              Go to{" "}
+              <span
+                className={cn(
+                  // Typography
+                  "font-medium text-foreground"
+                )}
+              >
+                HTTP History
+              </span>
+              , right-click any request, and select{" "}
+              <span
+                className={cn(
+                  // Typography
+                  "font-medium text-foreground"
+                )}
+              >
+                "Send to API Override"
+              </span>
+              .
+            </div>
+          </div>
+
           <div
             className={cn(
               // Layout & Positioning
@@ -140,7 +232,7 @@ export function RulesPanel({
               )}
             />
             <Input
-              placeholder="Filter override rules..."
+              placeholder="Filter hosts and rules..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={cn(
@@ -166,7 +258,61 @@ export function RulesPanel({
             "flex-1"
           )}
         >
-          {filteredRoutes.length === 0 ? (
+          {domains.length === 0 ? (
+            <Empty
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col items-center justify-center text-center",
+
+                // Sizing & Spacing
+                "py-16 px-4",
+
+                // Backgrounds & Borders
+                "border-none",
+
+                // Typography
+                "text-muted-foreground"
+              )}
+            >
+              <EmptyMedia
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center justify-center"
+                )}
+              >
+                <GlobeIcon
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-8 w-8",
+
+                    // Interactive & States
+                    "opacity-40"
+                  )}
+                />
+              </EmptyMedia>
+              <EmptyHeader>
+                <EmptyTitle
+                  className={cn(
+                    // Typography
+                    "text-xs font-semibold text-foreground"
+                  )}
+                >
+                  No target hosts yet
+                </EmptyTitle>
+                <p
+                  className={cn(
+                    // Sizing & Spacing
+                    "mt-1",
+
+                    // Typography
+                    "text-[11px] text-muted-foreground leading-relaxed"
+                  )}
+                >
+                  Go to <span className="font-medium text-foreground">HTTP History</span>, right-click any request, and select <span className="font-medium text-foreground">"Send to API Override"</span>.
+                </p>
+              </EmptyHeader>
+            </Empty>
+          ) : filteredDomains.length === 0 ? (
             <Empty
               className={cn(
                 // Layout & Positioning
@@ -182,30 +328,14 @@ export function RulesPanel({
                 "text-muted-foreground"
               )}
             >
-              <EmptyMedia
-                className={cn(
-                  // Layout & Positioning
-                  "flex items-center justify-center"
-                )}
-              >
-                <TreeStructureIcon
-                  className={cn(
-                    // Sizing & Spacing
-                    "h-8 w-8",
-
-                    // Interactive & States
-                    "opacity-40"
-                  )}
-                />
-              </EmptyMedia>
               <EmptyHeader>
                 <EmptyTitle
                   className={cn(
                     // Typography
-                    "text-sm font-medium"
+                    "text-xs font-medium"
                   )}
                 >
-                  No matching override rules
+                  No matching hosts or rules
                 </EmptyTitle>
               </EmptyHeader>
             </Empty>
@@ -219,89 +349,178 @@ export function RulesPanel({
                 "py-1"
               )}
             >
-              {Object.entries(routesByDomain).map(([domainId, domainRoutes]) => {
-                const domain = domains.find((d) => d.id === domainId);
-                const isOpen = expandedDomains.has(domainId);
+              {filteredDomains.map((domain) => {
+                const domainRoutes = routesByDomain[domain.id] ?? [];
+                const isOpen = expandedDomains.has(domain.id);
+
                 return (
                   <div
-                    key={domainId}
+                    key={domain.id}
                     className={cn(
                       // Layout & Positioning
                       "flex flex-col"
                     )}
                   >
-                    {/* Folder header */}
-                    <Button size="sm" variant="ghost"
-                      onClick={() => toggle(domainId)}
+                    {/* Host Header */}
+                    <div
                       className={cn(
                         // Layout & Positioning
-                        "flex w-full min-w-0 items-center justify-start text-left select-none rounded-none",
+                        "group flex items-center select-none",
 
                         // Sizing & Spacing
                         "h-auto gap-1.5 px-2 py-1.5",
 
                         // Backgrounds & Borders
-                        "border-b bg-muted hover:bg-muted/80",
+                        "border-b bg-muted/60 hover:bg-muted/90",
 
                         // Interactive & States
                         "transition-colors"
                       )}
                     >
-                      <CaretRightIcon
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => toggleDomain(domain.id)}
                         className={cn(
                           // Layout & Positioning
-                          "shrink-0",
+                          "flex flex-1 min-w-0 items-center justify-start text-left p-0",
 
                           // Sizing & Spacing
-                          "h-3 w-3",
+                          "h-auto gap-1.5",
 
-                          // Typography
-                          "text-muted-foreground",
-
-                          // Interactive & States
-                          "transition-transform",
-                          isOpen && "rotate-90"
-                        )}
-                      />
-                      <GlobeIcon
-                        className={cn(
-                          // Layout & Positioning
-                          "shrink-0",
-
-                          // Sizing & Spacing
-                          "h-3 w-3",
-
-                          // Typography
-                          "text-muted-foreground"
-                        )}
-                      />
-                      <span
-                        className={cn(
-                          // Layout & Positioning
-                          "flex-1 truncate",
-
-                          // Typography
-                          "font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
+                          // Backgrounds & Borders
+                          "hover:bg-transparent"
                         )}
                       >
-                        {domain ? domain.hostname : 'Fallback Host'}
-                      </span>
-                      <Badge
-                        variant="secondary"
-                        className={cn(
-                          // Layout & Positioning
-                          "shrink-0",
+                        <CaretRightIcon
+                          className={cn(
+                            // Layout & Positioning
+                            "shrink-0",
 
-                          // Sizing & Spacing
-                          "h-4 px-1",
+                            // Sizing & Spacing
+                            "h-3 w-3",
 
-                          // Typography
-                          "font-mono text-[9px] text-muted-foreground/70"
+                            // Typography
+                            "text-muted-foreground",
+
+                            // Interactive & States
+                            "transition-transform",
+                            isOpen && "rotate-90"
+                          )}
+                        />
+                        {domain.ssl ? (
+                          <span title="HTTPS (SSL Enabled)" className="flex shrink-0 items-center">
+                            <LockSimpleIcon
+                              className={cn(
+                                // Layout & Positioning
+                                "shrink-0",
+
+                                // Sizing & Spacing
+                                "h-3.5 w-3.5",
+
+                                // Typography
+                                "text-green-500"
+                              )}
+                            />
+                          </span>
+                        ) : (
+                          <span title="HTTP (No SSL)" className="flex shrink-0 items-center">
+                            <LockSimpleOpenIcon
+                              className={cn(
+                                // Layout & Positioning
+                                "shrink-0",
+
+                                // Sizing & Spacing
+                                "h-3.5 w-3.5",
+
+                                // Typography
+                                "text-amber-500"
+                              )}
+                            />
+                          </span>
                         )}
-                      >
-                        {domainRoutes.length}
-                      </Badge>
-                    </Button>
+                        <span
+                          className={cn(
+                            // Layout & Positioning
+                            "flex-1 truncate",
+
+                            // Typography
+                            "font-mono text-[11px] font-bold tracking-tight text-foreground"
+                          )}
+                        >
+                          {domain.hostname}
+                        </span>
+                        <Badge
+                          variant="secondary"
+                          className={cn(
+                            // Layout & Positioning
+                            "shrink-0",
+
+                            // Sizing & Spacing
+                            "h-4 px-1",
+
+                            // Typography
+                            "font-mono text-[9px] text-muted-foreground/70"
+                          )}
+                        >
+                          {domainRoutes.length}
+                        </Badge>
+                      </Button>
+
+                      {onToggleDomain && (
+                        <Switch
+                          checked={domain.status === 'active'}
+                          onCheckedChange={() => onToggleDomain(domain.id)}
+                          onClick={(e) => e.stopPropagation()}
+                          className={cn(
+                            // Layout & Positioning
+                            "shrink-0",
+
+                            // Sizing & Spacing
+                            "scale-75",
+
+                            // Interactive & States
+                            "cursor-pointer"
+                          )}
+                          title={domain.status === 'active' ? 'Disable host' : 'Enable host'}
+                        />
+                      )}
+
+                      {onDeleteDomain && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteDomain(domain.id);
+                          }}
+                          className={cn(
+                            // Layout & Positioning
+                            "shrink-0",
+
+                            // Sizing & Spacing
+                            "h-6 w-6",
+
+                            // Typography
+                            "text-muted-foreground hover:text-red-400",
+
+                            // Backgrounds & Borders
+                            "hover:bg-red-500/10",
+
+                            // Interactive & States
+                            "opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                          )}
+                          title="Delete host and rules"
+                        >
+                          <TrashIcon
+                            className={cn(
+                              // Sizing & Spacing
+                              "h-3 w-3"
+                            )}
+                          />
+                        </Button>
+                      )}
+                    </div>
 
                     {/* Routes inside folder */}
                     {isOpen && (
@@ -311,83 +530,103 @@ export function RulesPanel({
                           "flex flex-col"
                         )}
                       >
-                        {domainRoutes.map((route) => {
-                          const isSelected = selectedRouteId === route.id;
+                        {domainRoutes.length === 0 ? (
+                          <div
+                            className={cn(
+                              // Layout & Positioning
+                              "flex items-center",
 
-                          return (
-                            <div
-                              key={route.id}
-                              className={cn(
-                                // Layout & Positioning
-                                "group flex items-center cursor-pointer",
+                              // Sizing & Spacing
+                              "py-2 pl-7 pr-3",
 
-                                // Sizing & Spacing
-                                "gap-2 py-1 pl-6 pr-3",
+                              // Typography
+                              "text-[10px] text-muted-foreground italic",
 
-                                // Backgrounds & Borders
-                                "border-b",
-                                isSelected && "bg-muted/50",
+                              // Backgrounds & Borders
+                              "border-b"
+                            )}
+                          >
+                            No override rules yet for this host
+                          </div>
+                        ) : (
+                          domainRoutes.map((route) => {
+                            const isSelected = selectedRouteId === route.id;
 
-                                // Interactive & States
-                                "transition-colors hover:bg-muted/40",
-                                !route.enabled && "opacity-40"
-                              )}
-                              onClick={() => onSelect(route.id)}
-                            >
-                              <span
-                                className={cn(
-                                  // Layout & Positioning
-                                  "shrink-0",
-
-                                  // Sizing & Spacing
-                                  "mt-0.5",
-
-                                  // Typography
-                                  "text-[10px]",
-                                  METHOD_COLORS[route.method] ?? ""
-                                )}
-                              >
-                                {route.method}
-                              </span>
+                            return (
                               <div
+                                key={route.id}
                                 className={cn(
                                   // Layout & Positioning
-                                  "min-w-0 flex-1 overflow-hidden",
+                                  "group flex items-center cursor-pointer",
 
                                   // Sizing & Spacing
-                                  "pl-0.5"
-                                )}
-                              >
-                                <p
-                                  className={cn(
-                                    // Layout & Positioning
-                                    "truncate",
+                                  "gap-2 py-1 pl-6 pr-3",
 
-                                    // Typography
-                                    "text-[11px] font-medium text-foreground"
-                                  )}
-                                >
-                                  {route.path}
-                                </p>
-                              </div>
-                              <Switch
-                                checked={route.enabled}
-                                onCheckedChange={(v) => onUpdate(route.id, { enabled: v })}
-                                onClick={(e) => e.stopPropagation()}
-                                className={cn(
-                                  // Layout & Positioning
-                                  "shrink-0",
-
-                                  // Sizing & Spacing
-                                  "mt-0.5 scale-75",
+                                  // Backgrounds & Borders
+                                  "border-b",
+                                  isSelected && "bg-muted/50",
 
                                   // Interactive & States
-                                  "cursor-pointer"
+                                  "transition-colors hover:bg-muted/40",
+                                  !route.enabled && "opacity-40"
                                 )}
-                              />
-                            </div>
-                          );
-                        })}
+                                onClick={() => onSelect(route.id)}
+                              >
+                                <span
+                                  className={cn(
+                                    // Layout & Positioning
+                                    "shrink-0",
+
+                                    // Sizing & Spacing
+                                    "mt-0.5",
+
+                                    // Typography
+                                    "text-[10px]",
+                                    METHOD_COLORS[route.method] ?? ""
+                                  )}
+                                >
+                                  {route.method}
+                                </span>
+                                <div
+                                  className={cn(
+                                    // Layout & Positioning
+                                    "min-w-0 flex-1 overflow-hidden",
+
+                                    // Sizing & Spacing
+                                    "pl-0.5"
+                                  )}
+                                >
+                                  <p
+                                    className={cn(
+                                      // Layout & Positioning
+                                      "truncate",
+
+                                      // Typography
+                                      "text-[11px] font-medium text-foreground"
+                                    )}
+                                  >
+                                    {route.path}
+                                  </p>
+                                </div>
+                                <Switch
+                                  checked={route.enabled}
+                                  onCheckedChange={(v) => onUpdate(route.id, { enabled: v })}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className={cn(
+                                    // Layout & Positioning
+                                    "shrink-0",
+
+                                    // Sizing & Spacing
+                                    "mt-0.5 scale-75",
+
+                                    // Interactive & States
+                                    "cursor-pointer"
+                                  )}
+                                />
+                              </div>
+                            );
+                          })
+                        )}
                       </div>
                     )}
                   </div>
@@ -422,10 +661,13 @@ export function RulesPanel({
           <Empty
             className={cn(
               // Layout & Positioning
-              "flex h-full items-center justify-center",
+              "flex h-full items-center justify-center text-center",
 
               // Backgrounds & Borders
               "border-none bg-muted/5",
+
+              // Sizing & Spacing
+              "p-6",
 
               // Typography
               "text-muted-foreground"
@@ -440,7 +682,7 @@ export function RulesPanel({
               <PencilSimpleIcon
                 className={cn(
                   // Sizing & Spacing
-                  "h-8 w-8",
+                  "h-10 w-10",
 
                   // Typography
                   "text-muted-foreground",
@@ -454,11 +696,23 @@ export function RulesPanel({
               <EmptyTitle
                 className={cn(
                   // Typography
-                  "text-sm font-medium"
+                  "text-sm font-semibold text-foreground"
                 )}
               >
                 Select an override rule to configure
               </EmptyTitle>
+              <p
+                className={cn(
+                  // Sizing & Spacing
+                  "mt-1.5",
+
+                  // Typography
+                  "text-xs text-muted-foreground max-w-sm leading-relaxed"
+                )}
+              >
+                Pick a rule from the left panel to modify responses, headers, and status codes.
+                To target new hosts, go to <span className="font-medium text-foreground">HTTP History</span>, right-click any request, and select <span className="font-medium text-foreground">"Send to API Override"</span>.
+              </p>
             </EmptyHeader>
           </Empty>
         )}

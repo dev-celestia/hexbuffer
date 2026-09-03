@@ -17,6 +17,8 @@ pub struct HttpSessionRecord {
     pub capture_filter: String,
     #[serde(default = "default_filter_json")]
     pub exclude_filter: String,
+    #[serde(default = "default_storage_mode")]
+    pub storage_mode: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -33,6 +35,8 @@ pub struct HttpSessionSummary {
     pub capture_filter: String,
     #[serde(default = "default_filter_json")]
     pub exclude_filter: String,
+    #[serde(default = "default_storage_mode")]
+    pub storage_mode: String,
     pub request_count: usize,
     pub total_size_bytes: usize,
 }
@@ -45,6 +49,10 @@ fn default_filter_json() -> String {
     "[]".to_string()
 }
 
+fn default_storage_mode() -> String {
+    "ephemeral".to_string()
+}
+
 impl Database {
     pub fn create_http_session(
         &self,
@@ -53,6 +61,7 @@ impl Database {
         capture_mode: Option<&str>,
         capture_filter: Option<&str>,
         exclude_filter: Option<&str>,
+        storage_mode: Option<&str>,
     ) -> SqlResult<HttpSessionRecord> {
         let conn = self.conn.lock().unwrap();
         let id = uuid::Uuid::new_v4().to_string();
@@ -60,12 +69,13 @@ impl Database {
         let mode = capture_mode.unwrap_or("all").trim();
         let cap_filter = capture_filter.unwrap_or("[]").trim();
         let exc_filter = exclude_filter.unwrap_or("[]").trim();
+        let store_mode = storage_mode.unwrap_or("ephemeral").trim();
 
         // Mark existing sessions as inactive
         conn.execute("UPDATE http_sessions SET is_active = 0", [])?;
 
         conn.execute(
-            "INSERT INTO http_sessions (id, name, created_at, updated_at, is_active, description, capture_mode, capture_filter, exclude_filter) VALUES (?1, ?2, ?3, ?4, 1, ?5, ?6, ?7, ?8)",
+            "INSERT INTO http_sessions (id, name, created_at, updated_at, is_active, description, capture_mode, capture_filter, exclude_filter, storage_mode) VALUES (?1, ?2, ?3, ?4, 1, ?5, ?6, ?7, ?8, ?9)",
             params![
                 id,
                 name.trim(),
@@ -74,7 +84,8 @@ impl Database {
                 description.map(|d| d.trim()),
                 mode,
                 cap_filter,
-                exc_filter
+                exc_filter,
+                store_mode
             ],
         )?;
 
@@ -88,6 +99,7 @@ impl Database {
             capture_mode: mode.to_string(),
             capture_filter: cap_filter.to_string(),
             exclude_filter: exc_filter.to_string(),
+            storage_mode: store_mode.to_string(),
         })
     }
 
@@ -107,6 +119,29 @@ impl Database {
         Ok(())
     }
 
+    pub fn get_session_storage_mode(&self, session_id: Option<&str>) -> String {
+        let conn = self.conn.lock().unwrap();
+        if let Some(sid) = session_id {
+            if !sid.is_empty() {
+                if let Ok(mode) = conn.query_row(
+                    "SELECT COALESCE(storage_mode, 'persistent') FROM http_sessions WHERE id = ?1",
+                    params![sid],
+                    |r| r.get::<_, String>(0),
+                ) {
+                    return mode;
+                }
+            }
+        }
+
+        // Default to active session's storage mode
+        conn.query_row(
+            "SELECT COALESCE(storage_mode, 'persistent') FROM http_sessions WHERE is_active = 1 LIMIT 1",
+            [],
+            |r| r.get::<_, String>(0),
+        )
+        .unwrap_or_else(|_| "persistent".to_string())
+    }
+
     pub fn list_http_sessions(&self) -> SqlResult<Vec<HttpSessionSummary>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
@@ -115,8 +150,9 @@ impl Database {
                 COALESCE(s.capture_mode, 'all') as capture_mode,
                 COALESCE(s.capture_filter, '[]') as capture_filter,
                 COALESCE(s.exclude_filter, '[]') as exclude_filter,
+                COALESCE(s.storage_mode, 'persistent') as storage_mode,
                 COALESCE(COUNT(l.id), 0) as request_count,
-                COALESCE(SUM(LENGTH(COALESCE(l.request_body, X'')) + LENGTH(COALESCE(l.response_body, X''))), 0) as total_size_bytes
+                COALESCE(SUM(COALESCE(l.req_body_size, LENGTH(COALESCE(l.request_body, X''))) + COALESCE(l.res_body_size, LENGTH(COALESCE(l.response_body, X'')))), 0) as total_size_bytes
                FROM http_sessions s
                LEFT JOIN http_logs l ON s.id = l.session_id
                GROUP BY s.id
@@ -125,8 +161,8 @@ impl Database {
 
         let rows = stmt.query_map([], |row| {
             let is_active_int: i64 = row.get(4)?;
-            let req_count: i64 = row.get(9)?;
-            let total_size: i64 = row.get(10)?;
+            let req_count: i64 = row.get(10)?;
+            let total_size: i64 = row.get(11)?;
 
             Ok(HttpSessionSummary {
                 id: row.get(0)?,
@@ -138,6 +174,7 @@ impl Database {
                 capture_mode: row.get(6)?,
                 capture_filter: row.get(7)?,
                 exclude_filter: row.get(8)?,
+                storage_mode: row.get(9)?,
                 request_count: req_count as usize,
                 total_size_bytes: total_size as usize,
             })
@@ -145,7 +182,25 @@ impl Database {
 
         let mut results = Vec::new();
         for row in rows {
-            results.push(row?);
+            let mut summary = row?;
+            // If the session is ephemeral, check ephemeral_conn for live count & size
+            if summary.storage_mode == "ephemeral" {
+                if let Ok(eph) = self.ephemeral_conn.lock() {
+                    let counts: Result<(i64, i64), _> = eph.query_row(
+                        r#"SELECT COUNT(id),
+                                  COALESCE(SUM(COALESCE(req_body_size, 0) + COALESCE(res_body_size, 0)), 0)
+                           FROM http_logs
+                           WHERE session_id = ?1"#,
+                        params![summary.id],
+                        |r| Ok((r.get(0)?, r.get(1)?)),
+                    );
+                    if let Ok((c, sz)) = counts {
+                        summary.request_count = c as usize;
+                        summary.total_size_bytes = sz as usize;
+                    }
+                }
+            }
+            results.push(summary);
         }
         Ok(results)
     }
@@ -153,7 +208,7 @@ impl Database {
     pub fn get_active_http_session(&self) -> SqlResult<Option<HttpSessionRecord>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
-            "SELECT id, name, created_at, updated_at, is_active, description, COALESCE(capture_mode, 'all'), COALESCE(capture_filter, '[]'), COALESCE(exclude_filter, '[]') FROM http_sessions WHERE is_active = 1 LIMIT 1",
+            "SELECT id, name, created_at, updated_at, is_active, description, COALESCE(capture_mode, 'all'), COALESCE(capture_filter, '[]'), COALESCE(exclude_filter, '[]'), COALESCE(storage_mode, 'persistent') FROM http_sessions WHERE is_active = 1 LIMIT 1",
         )?;
         let mut rows = stmt.query([])?;
 
@@ -169,6 +224,7 @@ impl Database {
                 capture_mode: row.get(6)?,
                 capture_filter: row.get(7)?,
                 exclude_filter: row.get(8)?,
+                storage_mode: row.get(9)?,
             }))
         } else {
             Ok(None)
@@ -209,15 +265,23 @@ impl Database {
     }
 
     pub fn clear_http_session_logs(&self, session_id: &str) -> SqlResult<usize> {
+        // Clear from disk DB
         let conn = self.conn.lock().unwrap();
         let rows = conn.execute("DELETE FROM http_logs WHERE session_id = ?1", params![session_id])?;
         let _ = conn.execute("DELETE FROM websocket_messages WHERE connection_id IN (SELECT id FROM websocket_connections WHERE session_id = ?1)", params![session_id]);
         let _ = conn.execute("DELETE FROM websocket_connections WHERE session_id = ?1", params![session_id]);
         drop(conn);
 
-        // Run vacuum to reclaim deleted BLOBs space
+        // Clear from ephemeral DB as well
+        let eph = self.ephemeral_conn.lock().unwrap();
+        let eph_rows = eph.execute("DELETE FROM http_logs WHERE session_id = ?1", params![session_id]).unwrap_or(0);
+        let _ = eph.execute("DELETE FROM websocket_messages WHERE connection_id IN (SELECT id FROM websocket_connections WHERE session_id = ?1)", params![session_id]);
+        let _ = eph.execute("DELETE FROM websocket_connections WHERE session_id = ?1", params![session_id]);
+        drop(eph);
+
+        // Run vacuum to reclaim deleted space in disk DB
         let _ = self.vacuum();
-        Ok(rows)
+        Ok(rows + eph_rows)
     }
 
     pub fn delete_http_session(&self, session_id: &str) -> SqlResult<()> {
@@ -235,9 +299,10 @@ impl Database {
             )
             .unwrap_or(false);
 
-        // Delete the session; cascade will delete http_logs & websockets
-        conn.execute("DELETE FROM http_logs WHERE session_id = ?1", params![session_id])?;
-        conn.execute("DELETE FROM websocket_connections WHERE session_id = ?1", params![session_id])?;
+        // Delete child tables first to avoid foreign key issues
+        let _ = conn.execute("DELETE FROM websocket_messages WHERE connection_id IN (SELECT id FROM websocket_connections WHERE session_id = ?1)", params![session_id]);
+        let _ = conn.execute("DELETE FROM websocket_connections WHERE session_id = ?1", params![session_id]);
+        let _ = conn.execute("DELETE FROM http_logs WHERE session_id = ?1", params![session_id]);
         conn.execute("DELETE FROM http_sessions WHERE id = ?1", params![session_id])?;
 
         // If the active session was deleted, make the latest remaining session active or create a new one
@@ -260,13 +325,21 @@ impl Database {
                 let now = chrono::Utc::now().to_rfc3339();
                 let name = format!("Session - {}", chrono::Local::now().format("%d %b %H:%M"));
                 conn.execute(
-                    "INSERT INTO http_sessions (id, name, created_at, updated_at, is_active, description) VALUES (?1, ?2, ?3, ?4, 1, 'Default session')",
+                    "INSERT INTO http_sessions (id, name, created_at, updated_at, is_active, description, storage_mode) VALUES (?1, ?2, ?3, ?4, 1, 'Default session', 'ephemeral')",
                     params![id, name, now, now],
                 )?;
             }
         }
 
         drop(conn);
+
+        // Clean up from ephemeral DB
+        let eph = self.ephemeral_conn.lock().unwrap();
+        let _ = eph.execute("DELETE FROM http_logs WHERE session_id = ?1", params![session_id]);
+        let _ = eph.execute("DELETE FROM websocket_messages WHERE connection_id IN (SELECT id FROM websocket_connections WHERE session_id = ?1)", params![session_id]);
+        let _ = eph.execute("DELETE FROM websocket_connections WHERE session_id = ?1", params![session_id]);
+        let _ = eph.execute("DELETE FROM http_sessions WHERE id = ?1", params![session_id]);
+        drop(eph);
 
         // Reclaim disk space
         let _ = self.vacuum();
@@ -297,7 +370,7 @@ impl Database {
                 let now = chrono::Utc::now().to_rfc3339();
                 let name = format!("Session - {}", chrono::Local::now().format("%d %b %H:%M"));
                 conn.execute(
-                    "INSERT INTO http_sessions (id, name, created_at, updated_at, is_active, description) VALUES (?1, ?2, ?3, ?4, 1, 'Default session')",
+                    "INSERT INTO http_sessions (id, name, created_at, updated_at, is_active, description, storage_mode) VALUES (?1, ?2, ?3, ?4, 1, 'Default session', 'persistent')",
                     params![id, name, now, now],
                 )?;
                 id

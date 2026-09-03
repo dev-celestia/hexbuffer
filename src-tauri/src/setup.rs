@@ -24,8 +24,13 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         crate::log(&format!("FATAL: Failed to initialize database schema: {}", e));
         panic!("Failed to initialize database schema: {}", e);
     }
-    let history = HistoryBridge::from_database(database.clone());
-    crate::log("History bridge initialized");
+
+    let sessions_dir = app_dir.join("sessions");
+    std::fs::create_dir_all(&sessions_dir).expect("Failed to create sessions directory");
+    let payload_store = hexbuffer::db::PayloadStore::new(sessions_dir);
+
+    let history = HistoryBridge::from_database_and_payload_store(database.clone(), payload_store.clone());
+    crate::log("History bridge initialized with PayloadStore");
 
     hexbuffer::proxy::completion::init_proxy_log_worker(app.handle().clone());
 
@@ -37,6 +42,7 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     app.manage(SqliScanState::new());
     app.manage(CollaboratorPollingState::default());
     app.manage(hexbuffer::automation::AutomationRuntimeState::default());
+    app.manage(payload_store);
     app.manage(database);
     app.manage(history);
     app.manage(hexbuffer::commands::vpn::VpnState::default());

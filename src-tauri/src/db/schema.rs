@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS http_sessions (
     description TEXT,
     capture_mode TEXT NOT NULL DEFAULT 'all',
     capture_filter TEXT NOT NULL DEFAULT '[]',
-    exclude_filter TEXT NOT NULL DEFAULT '[]'
+    exclude_filter TEXT NOT NULL DEFAULT '[]',
+    storage_mode TEXT NOT NULL DEFAULT 'persistent'
 );
 
 CREATE INDEX IF NOT EXISTS idx_http_sessions_active ON http_sessions(is_active);
@@ -24,10 +25,16 @@ CREATE TABLE IF NOT EXISTS http_logs (
     url TEXT NOT NULL,
     request_headers TEXT,
     request_body BLOB,
+    req_payload_ref TEXT DEFAULT '',
+    req_body_size INTEGER DEFAULT 0,
+    req_truncated INTEGER DEFAULT 0,
     response_status INTEGER,
     response_status_text TEXT,
     response_headers TEXT,
     response_body BLOB,
+    res_payload_ref TEXT DEFAULT '',
+    res_body_size INTEGER DEFAULT 0,
+    res_truncated INTEGER DEFAULT 0,
     client_addr TEXT,
     server_addr TEXT,
     duration_ms INTEGER,
@@ -39,6 +46,7 @@ CREATE INDEX IF NOT EXISTS idx_http_logs_method ON http_logs(method);
 CREATE INDEX IF NOT EXISTS idx_http_logs_url ON http_logs(url);
 CREATE INDEX IF NOT EXISTS idx_http_logs_response_status ON http_logs(response_status);
 CREATE INDEX IF NOT EXISTS idx_http_logs_server_addr ON http_logs(server_addr);
+CREATE INDEX IF NOT EXISTS idx_http_logs_host_status_ts ON http_logs(server_addr, response_status, timestamp DESC);
 "#;
 
 pub const CREATE_WEBSOCKET_TABLES: &str = r#"

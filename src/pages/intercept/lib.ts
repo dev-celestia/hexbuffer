@@ -72,3 +72,46 @@ export function formatRequestTime(timestamp: string): string {
     second: '2-digit',
   }).format(new Date(timestamp));
 }
+
+export function formatRawMessage(raw: string): string {
+  if (!raw || !raw.trim()) {
+    return raw;
+  }
+
+  // 1. Check if the entire raw text is JSON
+  try {
+    const parsed = JSON.parse(raw.trim());
+    return JSON.stringify(parsed, null, 2);
+  } catch {
+    // Continue to HTTP message header/body parsing
+  }
+
+  // 2. Check if this is an HTTP request/response with headers and body
+  const crlfIndex = raw.indexOf('\r\n\r\n');
+  const lfIndex = raw.indexOf('\n\n');
+  const delimiter = crlfIndex !== -1 ? '\r\n\r\n' : (lfIndex !== -1 ? '\n\n' : null);
+
+  if (delimiter) {
+    const splitIndex = raw.indexOf(delimiter);
+    const headers = raw.slice(0, splitIndex);
+    const body = raw.slice(splitIndex + delimiter.length);
+
+    try {
+      const parsedBody = JSON.parse(body.trim());
+      const formattedBody = JSON.stringify(parsedBody, null, 2);
+
+      // Update Content-Length header if present
+      const newLength = new TextEncoder().encode(formattedBody).length;
+      const updatedHeaders = headers.replace(
+        /(content-length:\s*)\d+/i,
+        `$1${newLength}`
+      );
+
+      return `${updatedHeaders}${delimiter}${formattedBody}`;
+    } catch {
+      // Body is not JSON
+    }
+  }
+
+  return raw;
+}

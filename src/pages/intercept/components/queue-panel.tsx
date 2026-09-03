@@ -3,7 +3,6 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   FlagIcon,
-  PlusIcon,
   ShieldSlashIcon,
   PaperPlaneTiltIcon,
   TrashIcon,
@@ -28,7 +27,7 @@ export function InterceptQueuePanel() {
     handleInterceptResponse,
     handleDrop,
     handleDontCapture,
-    handleAddCaptureHost,
+    handleSendToRepeater,
   } = useQueuePanel();
 
   return (
@@ -300,11 +299,11 @@ export function InterceptQueuePanel() {
                     </ContextMenuTrigger>
                     <ContextMenuContent className="w-52">
                       <ContextMenuItem
-                        onClick={() => handleAddCaptureHost(host)}
+                        onClick={() => handleSendToRepeater(request)}
                         className="text-xs"
                       >
-                        <PlusIcon className="size-3.5" />
-                        Capture this host
+                        <PaperPlaneTiltIcon className="size-3.5" />
+                        Send to Repeater
                       </ContextMenuItem>
                       <ContextMenuSeparator />
                       {direction === "request" && (

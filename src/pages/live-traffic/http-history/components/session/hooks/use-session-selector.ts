@@ -13,6 +13,7 @@ export function useSessionSelector() {
     isDeleting,
     fetchSessions,
     createSession,
+    promoteSession,
     updateSessionFilter,
     switchSession,
     renameSession,
@@ -28,6 +29,7 @@ export function useSessionSelector() {
       isDeleting: state.isDeleting,
       fetchSessions: state.fetchSessions,
       createSession: state.createSession,
+      promoteSession: state.promoteSession,
       updateSessionFilter: state.updateSessionFilter,
       switchSession: state.switchSession,
       renameSession: state.renameSession,
@@ -51,9 +53,10 @@ export function useSessionSelector() {
       description?: string,
       captureMode?: SessionCaptureMode,
       captureFilter?: string[],
-      excludeFilter?: string[]
+      excludeFilter?: string[],
+      storageMode?: import('@/types').SessionStorageMode
     ) => {
-      await createSession(name, description, captureMode, captureFilter, excludeFilter);
+      await createSession(name, description, captureMode, captureFilter, excludeFilter, storageMode);
     },
     [createSession]
   );
@@ -112,6 +115,7 @@ export function useSessionSelector() {
     handleUpdateSession,
     handleDelete,
     handleClearData,
+    handlePromote: promoteSession,
     currentLabel,
     isUnconfigured,
   };

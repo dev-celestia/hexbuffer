@@ -2,28 +2,21 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useResponseOverrideStore } from '@/stores/response-override';
 import { invoke } from '@tauri-apps/api/core';
-import { listen } from '@tauri-apps/api/event';
 import { toast } from 'sonner';
-import type { MockDomain, MockRoute, RequestLog } from '../types';
+import type { MockDomain, MockRoute } from '../types';
 
 export function useResponseOverridePage() {
   const {
-    activeSubTab, setActiveSubTab,
     domains, setDomains,
     routes, setRoutes,
-    logs, setLogs,
     selectedDomainId, setSelectedDomainId,
     selectedRouteId, setSelectedRouteId,
-    selectedLogId, setSelectedLogId,
   } = useResponseOverrideStore(
     useShallow((s) => ({
-      activeSubTab: s.activeSubTab, setActiveSubTab: s.setActiveSubTab,
       domains: s.domains, setDomains: s.setDomains,
       routes: s.routes, setRoutes: s.setRoutes,
-      logs: s.logs, setLogs: s.setLogs,
       selectedDomainId: s.selectedDomainId, setSelectedDomainId: s.setSelectedDomainId,
       selectedRouteId: s.selectedRouteId, setSelectedRouteId: s.setSelectedRouteId,
-      selectedLogId: s.selectedLogId, setSelectedLogId: s.setSelectedLogId,
     }))
   );
 
@@ -32,36 +25,19 @@ export function useResponseOverridePage() {
       try {
         const backendDomains = await invoke<MockDomain[]>('mock_forge_get_domains');
         const backendRoutes = await invoke<MockRoute[]>('mock_forge_get_routes');
-        const backendLogs = await invoke<RequestLog[]>('mock_forge_get_logs');
 
         // Filter to proxy domains and override rules
         const proxyDomains = backendDomains.filter((d) => d.id !== 'local_mock_server');
         const proxyRoutes = backendRoutes.filter((r) => r.domainId !== 'local_mock_server');
-        const proxyLogs = backendLogs.filter(
-          (l) => l.source === 'response_override' || (!l.source && l.domainId !== 'local_mock_server')
-        );
 
         setDomains(proxyDomains);
         setRoutes(proxyRoutes);
-        setLogs(proxyLogs);
       } catch (err) {
         console.error('Failed to load API Override state from backend:', err);
       }
     };
     loadState();
-
-    const unlistenLogPromise = listen<RequestLog>('mock-forge-log', (event) => {
-      const log = event.payload;
-      if (log.source === 'response_override' || (!log.source && log.domainId !== 'local_mock_server')) {
-        const currentLogs = useResponseOverrideStore.getState().logs;
-        setLogs([log, ...currentLogs].slice(0, 200));
-      }
-    });
-
-    return () => {
-      unlistenLogPromise.then((unlisten) => unlisten());
-    };
-  }, [setDomains, setRoutes, setLogs]);
+  }, [setDomains, setRoutes]);
 
   const toggleDomain = useCallback(async (id: string) => {
     try {
@@ -156,26 +132,29 @@ export function useResponseOverridePage() {
     [routes, selectedRouteId]
   );
 
-  const selectedLog = useMemo<RequestLog | null>(
-    () => logs.find((l) => l.id === selectedLogId) ?? null,
-    [logs, selectedLogId]
-  );
-
   const domainRoutes = useMemo(
     () => (selectedDomainId ? routes.filter((r) => r.domainId === selectedDomainId) : routes),
     [routes, selectedDomainId]
   );
 
   return {
-    activeSubTab, setActiveSubTab,
-    domains, routes, logs,
-    selectedDomainId, setSelectedDomainId,
-    selectedRouteId, setSelectedRouteId,
-    selectedLogId, setSelectedLogId,
-    selectedDomain, selectedRoute, selectedLog,
+    activeSubTab: 'rules' as const,
+    setActiveSubTab: (_tab?: string) => {},
+    domains,
+    routes,
+    selectedDomainId,
+    setSelectedDomainId,
+    selectedRouteId,
+    setSelectedRouteId,
+    selectedDomain,
+    selectedRoute,
     domainRoutes,
-    toggleDomain, addDomain, deleteDomain,
-    addRoute, updateRoute, deleteRoute,
+    toggleDomain,
+    addDomain,
+    deleteDomain,
+    addRoute,
+    updateRoute,
+    deleteRoute,
   };
 }
 

@@ -1,6 +1,14 @@
 import * as React from 'react';
+import { toast } from 'sonner';
 import { useInterceptStore } from '../../state/intercept-store';
-import { getPausedDirection, getRequestHost, getRequestPath } from '../../lib';
+import {
+  buildRawPausedRequest,
+  getPausedDirection,
+  getRequestHost,
+  getRequestPath,
+} from '../../lib';
+import { cleanUrl } from '@/lib/utils';
+import { sendRawToRepeater } from '@/triggers/repeater';
 import type { PausedRequest } from '../../types';
 
 export function useQueuePanel() {
@@ -78,6 +86,26 @@ export function useQueuePanel() {
     [addCaptureHost]
   );
 
+  const handleSendToRepeater = React.useCallback(
+    async (request: PausedRequest) => {
+      try {
+        const raw = buildRawPausedRequest(request);
+        const cleanedUrl = cleanUrl(request.request.uri);
+        const path = getRequestPath(request);
+        await sendRawToRepeater({
+          raw,
+          url: cleanedUrl,
+          name: `${request.request.method} ${path || cleanedUrl}`,
+        });
+        toast.success(`Sent ${request.request.method} ${path || cleanedUrl} to Repeater`);
+      } catch (error) {
+        console.error('Failed to send request to Repeater:', error);
+        toast.error('Failed to send request to Repeater');
+      }
+    },
+    []
+  );
+
   const handleToggleIntercept = React.useCallback(
     (enabled: boolean) => {
       void toggleIntercept(enabled);
@@ -101,6 +129,7 @@ export function useQueuePanel() {
     handleDrop,
     handleDontCapture,
     handleAddCaptureHost,
+    handleSendToRepeater,
     handleToggleIntercept,
   };
 }

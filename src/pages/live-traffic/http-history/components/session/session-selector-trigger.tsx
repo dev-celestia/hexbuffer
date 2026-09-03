@@ -15,6 +15,7 @@ export interface SessionSelectorTriggerProps
   extends React.ComponentProps<typeof Button> {
   currentLabel: string;
   isUnconfigured: boolean;
+  isEphemeral?: boolean;
 }
 
 export const SessionSelectorTrigger = React.forwardRef<
@@ -24,6 +25,7 @@ export const SessionSelectorTrigger = React.forwardRef<
   {
     currentLabel,
     isUnconfigured,
+    isEphemeral = true,
     className,
     ...props
   },
@@ -53,11 +55,11 @@ export const SessionSelectorTrigger = React.forwardRef<
       )}
       {...props}
     >
-      {/* Apple-style emerald pulse for active session */}
+      {/* Indicator */}
       <span
         className={cn(
           // Layout & Positioning
-          "relative flex",
+          "relative flex shrink-0",
 
           // Sizing & Spacing
           "size-2"
@@ -72,7 +74,8 @@ export const SessionSelectorTrigger = React.forwardRef<
             "size-full",
 
             // Backgrounds & Borders
-            "rounded-full bg-emerald-400 opacity-75 animate-ping"
+            "rounded-full opacity-75 animate-ping",
+            isEphemeral ? "bg-amber-400" : "bg-emerald-400"
           )}
         />
         <span
@@ -84,7 +87,8 @@ export const SessionSelectorTrigger = React.forwardRef<
             "size-2",
 
             // Backgrounds & Borders
-            "rounded-full bg-emerald-500"
+            "rounded-full",
+            isEphemeral ? "bg-amber-500" : "bg-emerald-500"
           )}
         />
       </span>

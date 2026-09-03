@@ -5,6 +5,8 @@ import { PlusIcon } from '@phosphor-icons/react';
 import { HTTP_METHODS, DEFAULT_RESPONSE_BODY } from '../constants';
 import type { MockDomain, MockRoute } from '../types';
 
+const METHOD_OPTIONS = ['ALL', ...HTTP_METHODS] as const;
+
 interface NewRouteDialogProps {
   domains: MockDomain[];
   fixedDomainId?: string;
@@ -21,8 +23,8 @@ export function NewRouteDialog({
   onAdd,
 }: NewRouteDialogProps) {
   const [open, setOpen] = useState(false);
-  const [domainId, setDomainId] = useState(fixedDomainId ?? domains[0]?.id ?? 'local_mock_server');
-  const [method, setMethod] = useState<MockRoute['method']>('GET');
+  const [domainId, setDomainId] = useState(fixedDomainId ?? domains[0]?.id ?? '');
+  const [method, setMethod] = useState<string>('GET');
   const [path, setPath] = useState('/api/resource/:id');
   const [statusCode, setStatusCode] = useState('200');
   const [body, setBody] = useState(DEFAULT_RESPONSE_BODY);
@@ -31,11 +33,36 @@ export function NewRouteDialog({
   const effectiveDomainId = fixedDomainId ?? domainId;
 
   const handleAdd = () => {
-    if (!path.trim() || !effectiveDomainId) return;
-    const normalizedPath = path.trim().startsWith('/') ? path.trim() : `/${path.trim()}`;
+    const trimmedPath = path.trim();
+    if (!trimmedPath) return;
+
+    let targetDomainId = effectiveDomainId;
+    let normalizedPath = trimmedPath;
+
+    if (trimmedPath.startsWith('http://') || trimmedPath.startsWith('https://')) {
+      try {
+        const u = new URL(trimmedPath);
+        const host = u.hostname;
+        const found = domains.find((d) => d.hostname.toLowerCase() === host.toLowerCase());
+        if (found) {
+          targetDomainId = found.id;
+        } else if (!targetDomainId) {
+          targetDomainId = host;
+        }
+      } catch {
+        // Keep as is
+      }
+    } else {
+      normalizedPath = trimmedPath.startsWith('/') ? trimmedPath : `/${trimmedPath}`;
+    }
+
+    if (!targetDomainId && domains.length > 0) {
+      targetDomainId = domains[0].id;
+    }
+
     onAdd({
-      domainId: effectiveDomainId,
-      method,
+      domainId: targetDomainId || 'all-hosts',
+      method: method as MockRoute['method'],
       path: normalizedPath,
       statusCode: parseInt(statusCode, 10) || 200,
       responseBody: body,
@@ -66,12 +93,12 @@ export function NewRouteDialog({
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Target Host</Label>
               <Select value={domainId} onValueChange={(v) => setDomainId(v ?? '')}>
-                <SelectTrigger className="h-9 bg-muted/40">
-                  <SelectValue placeholder="Select host" />
+                <SelectTrigger className="h-9 bg-muted/40 font-mono text-xs">
+                  <SelectValue placeholder="Select target host" />
                 </SelectTrigger>
                 <SelectContent>
                   {domains.map((d) => (
-                    <SelectItem key={d.id} value={d.id}>
+                    <SelectItem key={d.id} value={d.id} className="font-mono text-xs">
                       {d.hostname}
                     </SelectItem>
                   ))}
@@ -83,24 +110,24 @@ export function NewRouteDialog({
           <div className="flex gap-3">
             <div className="w-28 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Method</Label>
-              <Select value={method} onValueChange={(v) => setMethod(v as MockRoute['method'])}>
-                <SelectTrigger className="h-9 bg-muted/40">
+              <Select value={method} onValueChange={(v) => setMethod(v ?? 'GET')}>
+                <SelectTrigger className="h-9 bg-muted/40 font-mono text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {HTTP_METHODS.map((m) => (
-                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                  {METHOD_OPTIONS.map((m) => (
+                    <SelectItem key={m} value={m} className="font-mono text-xs">{m}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="flex-1 space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Path</Label>
+              <Label className="text-xs text-muted-foreground">Path or Full URL</Label>
               <Input
-                placeholder="/api/resource/:id"
+                placeholder="/api/resource/:id or https://api.example.com/..."
                 value={path}
                 onChange={(e) => setPath(e.target.value)}
-                className="h-9 font-mono text-sm bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
+                className="h-9 font-mono text-xs bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
               />
             </div>
             <div className="w-20 space-y-1.5">
@@ -108,7 +135,7 @@ export function NewRouteDialog({
               <Input
                 value={statusCode}
                 onChange={(e) => setStatusCode(e.target.value)}
-                className="h-9 text-center font-mono text-sm bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
+                className="h-9 text-center font-mono text-xs bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
               />
             </div>
           </div>
@@ -131,4 +158,3 @@ export function NewRouteDialog({
 }
 
 export const NewRuleDialog = NewRouteDialog;
-

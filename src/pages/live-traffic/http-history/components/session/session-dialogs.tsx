@@ -1,4 +1,12 @@
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   Button,
   Dialog,
   DialogContent,
@@ -8,7 +16,12 @@ import {
   DialogTitle,
   Input,
 } from '@celestia-project/ui';
-import { SlidersHorizontalIcon, TrashIcon } from '@phosphor-icons/react';
+import {
+  FloppyDiskIcon,
+  LightningIcon,
+  SlidersHorizontalIcon,
+  TrashIcon,
+} from '@phosphor-icons/react';
 import type { HttpSessionSummary, SessionCaptureMode } from '@/types';
 import { formatBytes } from '../log-table/utils';
 import { SessionFilterFields } from './session-filter-fields';
@@ -28,7 +41,8 @@ export interface CreateSessionDialogProps {
     description?: string,
     captureMode?: SessionCaptureMode,
     captureFilter?: string[],
-    excludeFilter?: string[]
+    excludeFilter?: string[],
+    storageMode?: import('@/types').SessionStorageMode
   ) => Promise<void>;
   isSubmitting?: boolean;
 }
@@ -46,6 +60,8 @@ export function CreateSessionDialog({
     setDescription,
     captureMode,
     setCaptureMode,
+    storageMode,
+    setStorageMode,
     customHostInput,
     setCustomHostInput,
     customHosts,
@@ -138,6 +154,135 @@ export function CreateSessionDialog({
               onKeyDown={handleKeyDown}
               maxLength={120}
             />
+          </div>
+
+          {/* Storage Mode Selector */}
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex flex-col",
+
+              // Sizing & Spacing
+              "gap-1.5"
+            )}
+          >
+            <span
+              className={cn(
+                // Typography
+                "text-xs font-medium text-muted-foreground"
+              )}
+            >
+              Storage Mode
+            </span>
+            <div
+              className={cn(
+                // Layout & Positioning
+                "grid grid-cols-2",
+
+                // Sizing & Spacing
+                "gap-2"
+              )}
+            >
+              <button
+                type="button"
+                onClick={() => setStorageMode('persistent')}
+                className={cn(
+                  // Layout & Positioning
+                  "flex flex-col items-start text-left",
+
+                  // Sizing & Spacing
+                  "p-2.5 rounded-md",
+
+                  // Backgrounds & Borders
+                  "border",
+                  storageMode === 'persistent'
+                    ? "border-primary bg-primary/5 text-foreground"
+                    : "border-border bg-card/40 text-muted-foreground hover:bg-muted/40",
+
+                  // Interactive & States
+                  "transition-colors"
+                )}
+              >
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-center",
+
+                    // Sizing & Spacing
+                    "gap-1.5"
+                  )}
+                >
+                  <FloppyDiskIcon className="size-3.5" />
+                  <span
+                    className={cn(
+                      // Typography
+                      "text-xs font-medium",
+                      storageMode === 'persistent' ? "text-foreground font-semibold" : "text-muted-foreground"
+                    )}
+                  >
+                    Persistent
+                  </span>
+                </div>
+                <span
+                  className={cn(
+                    // Typography
+                    "text-[10px] text-muted-foreground/80 mt-0.5"
+                  )}
+                >
+                  Saved to disk, survives restarts
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStorageMode('ephemeral')}
+                className={cn(
+                  // Layout & Positioning
+                  "flex flex-col items-start text-left",
+
+                  // Sizing & Spacing
+                  "p-2.5 rounded-md",
+
+                  // Backgrounds & Borders
+                  "border",
+                  storageMode === 'ephemeral'
+                    ? "border-primary bg-primary/5 text-foreground"
+                    : "border-border bg-card/40 text-muted-foreground hover:bg-muted/40",
+
+                  // Interactive & States
+                  "transition-colors"
+                )}
+              >
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-center",
+
+                    // Sizing & Spacing
+                    "gap-1.5"
+                  )}
+                >
+                  <LightningIcon className="size-3.5 text-amber-500" weight="fill" />
+                  <span
+                    className={cn(
+                      // Typography
+                      "text-xs font-medium",
+                      storageMode === 'ephemeral' ? "text-foreground font-semibold" : "text-muted-foreground"
+                    )}
+                  >
+                    Ephemeral
+                  </span>
+                </div>
+                <span
+                  className={cn(
+                    // Typography
+                    "text-[10px] text-muted-foreground/80 mt-0.5"
+                  )}
+                >
+                  RAM only, sliding window
+                </span>
+              </button>
+            </div>
           </div>
 
           <SessionFilterFields
@@ -410,21 +555,20 @@ export function ClearSessionDataDialog({
   if (!session) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        showCloseButton={false}
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent
         className={cn(
           // Sizing & Spacing
           "sm:max-w-[420px]"
         )}
       >
-        <DialogHeader>
-          <DialogTitle className="text-destructive">Clear Session Traffic Data</DialogTitle>
-          <DialogDescription>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-destructive">Clear Session Traffic Data</AlertDialogTitle>
+          <AlertDialogDescription>
             Are you sure you want to clear all recorded traffic for{' '}
             <strong className="text-foreground">{session.name}</strong>?
-          </DialogDescription>
-        </DialogHeader>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
         <div
           className={cn(
@@ -446,33 +590,31 @@ export function ClearSessionDataDialog({
             <span className="font-semibold text-foreground">
               {session.request_count.toLocaleString()} requests
             </span>{' '}
-            ({formatBytes(session.total_size_bytes)}) recorded in this session.
+            ({formatBytes(session.total_size_bytes)}) recorded in this session, including database log rows and payload files (.bin segments).
           </p>
           <p className="text-foreground font-medium">
             The session name, notes, and traffic filtering rules will remain intact.
           </p>
         </div>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onOpenChange(false)}
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            size="xs"
             disabled={isClearing || localClearing}
           >
             Cancel
-          </Button>
-          <Button
+          </AlertDialogCancel>
+          <AlertDialogAction
+            size="xs"
             variant="destructive"
-            size="sm"
             onClick={handleClear}
             disabled={isClearing || localClearing}
           >
             {isClearing || localClearing ? 'Clearing…' : 'Clear Data'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 
@@ -501,21 +643,20 @@ export function DeleteSessionDialog({
   if (!session) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        showCloseButton={false}
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent
         className={cn(
           // Sizing & Spacing
           "sm:max-w-[420px]"
         )}
       >
-        <DialogHeader>
-          <DialogTitle className="text-destructive">Delete Session & Data</DialogTitle>
-          <DialogDescription>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-destructive">Delete Session & Data</AlertDialogTitle>
+          <AlertDialogDescription>
             Are you sure you want to permanently delete{' '}
             <strong className="text-foreground">{session.name}</strong>?
-          </DialogDescription>
-        </DialogHeader>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
         <div
           className={cn(
@@ -544,25 +685,23 @@ export function DeleteSessionDialog({
           </p>
         </div>
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onOpenChange(false)}
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            size="xs"
             disabled={isDeleting || localDeleting}
           >
             Cancel
-          </Button>
-          <Button
+          </AlertDialogCancel>
+          <AlertDialogAction
+            size="xs"
             variant="destructive"
-            size="sm"
             onClick={handleDelete}
             disabled={isDeleting || localDeleting}
           >
             {isDeleting || localDeleting ? 'Deleting…' : 'Delete & Reclaim Space'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

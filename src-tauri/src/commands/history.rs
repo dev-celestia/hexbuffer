@@ -23,6 +23,7 @@ pub async fn create_http_session(
     capture_mode: Option<String>,
     capture_filter: Option<String>,
     exclude_filter: Option<String>,
+    storage_mode: Option<String>,
 ) -> Result<HttpSessionRecord, String> {
     let rec = history.create_http_session(
         &name,
@@ -30,10 +31,20 @@ pub async fn create_http_session(
         capture_mode.as_deref(),
         capture_filter.as_deref(),
         exclude_filter.as_deref(),
+        storage_mode.as_deref(),
     )?;
 
     sync_session_filter_to_proxy_state(&rec, &proxy_state);
     Ok(rec)
+}
+
+#[tauri::command]
+pub async fn promote_session(
+    history: State<'_, HistoryBridge>,
+    payload_store: State<'_, crate::db::PayloadStore>,
+    session_id: String,
+) -> Result<(), String> {
+    crate::db::promote_session(history.database(), &payload_store, &session_id)
 }
 
 #[tauri::command]

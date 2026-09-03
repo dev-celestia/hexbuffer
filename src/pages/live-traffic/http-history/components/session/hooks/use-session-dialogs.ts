@@ -9,7 +9,8 @@ export interface UseCreateSessionDialogProps {
     description?: string,
     captureMode?: SessionCaptureMode,
     captureFilter?: string[],
-    excludeFilter?: string[]
+    excludeFilter?: string[],
+    storageMode?: import('@/types').SessionStorageMode
   ) => Promise<void>;
 }
 
@@ -21,6 +22,7 @@ export function useCreateSessionDialog({
   const [name, setName] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [captureMode, setCaptureMode] = React.useState<SessionCaptureMode>('all');
+  const [storageMode, setStorageMode] = React.useState<import('@/types').SessionStorageMode>('ephemeral');
   const [customHostInput, setCustomHostInput] = React.useState('');
   const [customHosts, setCustomHosts] = React.useState<string[]>([]);
   const [excludeHostInput, setExcludeHostInput] = React.useState('');
@@ -42,6 +44,7 @@ export function useCreateSessionDialog({
       setName(`Session - ${dateStr} ${timeStr}`);
       setDescription('');
       setCaptureMode('all');
+      setStorageMode('ephemeral');
       setCustomHostInput('');
       setCustomHosts([]);
       setExcludeHostInput('');
@@ -84,10 +87,11 @@ export function useCreateSessionDialog({
       description.trim() || undefined,
       captureMode,
       customHosts,
-      excludeHosts
+      excludeHosts,
+      storageMode
     );
     onOpenChange(false);
-  }, [name, description, captureMode, customHosts, excludeHosts, onSubmit, onOpenChange]);
+  }, [name, description, captureMode, customHosts, excludeHosts, storageMode, onSubmit, onOpenChange]);
 
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent) => {
@@ -106,6 +110,8 @@ export function useCreateSessionDialog({
     setDescription,
     captureMode,
     setCaptureMode,
+    storageMode,
+    setStorageMode,
     customHostInput,
     setCustomHostInput,
     customHosts,

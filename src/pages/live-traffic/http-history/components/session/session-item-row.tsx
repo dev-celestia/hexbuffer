@@ -8,8 +8,11 @@ import {
   TooltipTrigger,
 } from '@celestia-project/ui';
 import {
+  BroomIcon,
   CheckIcon,
+  FloppyDiskIcon,
   FunnelIcon,
+  LightningIcon,
   SlidersHorizontalIcon,
   TargetIcon,
   TrashIcon,
@@ -25,6 +28,8 @@ export interface SessionItemRowProps {
   onSelect: () => void;
   onConfigure: () => void;
   onClearData: () => void;
+  onDelete?: () => void;
+  onPromote?: () => void;
 }
 
 export function SessionItemRow({
@@ -33,8 +38,11 @@ export function SessionItemRow({
   onSelect,
   onConfigure,
   onClearData,
+  onDelete,
+  onPromote,
 }: SessionItemRowProps) {
   const mode = session.capture_mode ?? 'all';
+  const isEphemeral = session.storage_mode === 'ephemeral';
   let customHostsList: string[] = [];
   if (mode === 'custom' && session.capture_filter) {
     try {
@@ -119,6 +127,19 @@ export function SessionItemRow({
           )}
         >
           <ButtonGroup>
+            {isEphemeral && onPromote && (
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPromote();
+                }}
+                title="Save Ephemeral Session to Disk"
+              >
+                <FloppyDiskIcon className="size-4 text-amber-500" />
+              </Button>
+            )}
             <Button
               variant="outline"
               size="icon-sm"
@@ -137,10 +158,24 @@ export function SessionItemRow({
                 e.stopPropagation();
                 onClearData();
               }}
-              title="Clear Session Data (Keep Session)"
+              title="Clear Session Traffic (Keep Session)"
             >
-              <TrashIcon className="size-4" />
+              <BroomIcon className="size-4" />
             </Button>
+            {onDelete && (
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                title="Delete Session & Data"
+                className="hover:text-destructive hover:border-destructive/40"
+              >
+                <TrashIcon className="size-4" />
+              </Button>
+            )}
           </ButtonGroup>
         </div>
       </div>
@@ -155,6 +190,13 @@ export function SessionItemRow({
           "gap-1.5 pl-5 pt-0.5"
         )}
       >
+        {isEphemeral ? (
+          <Badge variant="outline" className="h-4 px-1 text-[9px] text-amber-500 border-amber-500/30">
+            <LightningIcon className="size-2.5 mr-0.5" weight="fill" />
+            Ephemeral (RAM)
+          </Badge>
+        ) : null}
+
         {mode === 'target_scope' && (
           <Badge variant="secondary" className="h-4 px-1 text-[9px]">
             <TargetIcon className="size-2.5 mr-0.5" />

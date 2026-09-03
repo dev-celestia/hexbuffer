@@ -7,10 +7,33 @@ import type { MockDomain, MockRoute } from '../../types';
 
 export function useRoutesPanel(routes: MockRoute[], domains: MockDomain[]) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedDomains, setExpandedDomains] = useState<Set<string>>(() => new Set(domains.map((d) => d.id)));
+
+  useEffect(() => {
+    setExpandedDomains((prev) => {
+      const next = new Set(prev);
+      domains.forEach((d) => next.add(d.id));
+      return next;
+    });
+  }, [domains]);
+
+  const toggleDomain = (id: string) => {
+    setExpandedDomains((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const search = searchQuery.trim().toLowerCase();
 
   const filteredRoutes = routes.filter((route) => {
+    if (!search) return true;
     const domain = domains.find((d) => d.id === route.domainId);
-    const search = searchQuery.toLowerCase();
     return (
       route.path.toLowerCase().includes(search) ||
       route.method.toLowerCase().includes(search) ||
@@ -18,14 +41,31 @@ export function useRoutesPanel(routes: MockRoute[], domains: MockDomain[]) {
     );
   });
 
-  const routesByDomain = filteredRoutes.reduce((acc, route) => {
+  const routesByDomain = routes.reduce((acc, route) => {
     const domainId = route.domainId || 'no-domain';
     if (!acc[domainId]) acc[domainId] = [];
-    acc[domainId].push(route);
+    if (!search || filteredRoutes.some((fr) => fr.id === route.id)) {
+      acc[domainId].push(route);
+    }
     return acc;
   }, {} as Record<string, MockRoute[]>);
 
-  return { searchQuery, setSearchQuery, filteredRoutes, routesByDomain };
+  const filteredDomains = domains.filter((domain) => {
+    if (!search) return true;
+    const hostnameMatches = domain.hostname.toLowerCase().includes(search);
+    const hasMatchingRoutes = (routesByDomain[domain.id]?.length ?? 0) > 0;
+    return hostnameMatches || hasMatchingRoutes;
+  });
+
+  return {
+    searchQuery,
+    setSearchQuery,
+    filteredRoutes,
+    filteredDomains,
+    routesByDomain,
+    expandedDomains,
+    toggleDomain,
+  };
 }
 
 export function useRouteEditor(

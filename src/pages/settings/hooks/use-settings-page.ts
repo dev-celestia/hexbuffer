@@ -507,6 +507,7 @@ export function useSettingsPage() {
     updateDownloading,
     updateError,
     updateInstalled,
+    updateMessage,
     updateVersion,
     handleCheckForUpdates: checkForUpdates,
     handleInstallUpdate,

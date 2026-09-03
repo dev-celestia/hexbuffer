@@ -85,6 +85,7 @@ fn main() {
             hexbuffer::commands::intercept::trust_intercept_ca,
             hexbuffer::commands::history::get_http_sessions,
             hexbuffer::commands::history::create_http_session,
+            hexbuffer::commands::history::promote_session,
             hexbuffer::commands::history::set_active_http_session,
             hexbuffer::commands::history::delete_http_session,
             hexbuffer::commands::history::rename_http_session,

@@ -24,6 +24,7 @@ export function SessionSelector() {
   const {
     sessions,
     activeSessionId,
+    activeSession,
     isCreating,
     isDeleting,
     createOpen,
@@ -39,9 +40,12 @@ export function SessionSelector() {
     handleUpdateSession,
     handleDelete,
     handleClearData,
+    handlePromote,
     currentLabel,
     isUnconfigured,
   } = useSessionSelector();
+
+  const isEphemeral = activeSession ? activeSession.storage_mode === 'ephemeral' : true;
 
   return (
     <>
@@ -51,6 +55,7 @@ export function SessionSelector() {
             <SessionSelectorTrigger
               currentLabel={currentLabel}
               isUnconfigured={isUnconfigured}
+              isEphemeral={isEphemeral}
             />
           }
         />
@@ -100,6 +105,8 @@ export function SessionSelector() {
                   onSelect={() => switchSession(session.id)}
                   onConfigure={() => setEditSessionTarget(session)}
                   onClearData={() => setClearDataSessionTarget(session)}
+                  onDelete={() => setDeleteSessionTarget(session)}
+                  onPromote={() => handlePromote(session.id)}
                 />
               ))}
             </div>

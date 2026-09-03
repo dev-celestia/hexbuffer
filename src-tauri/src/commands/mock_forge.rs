@@ -147,19 +147,60 @@ pub fn normalize_hostname(raw: &str) -> String {
     host_only.to_lowercase()
 }
 
+pub fn method_matches(route_method: &str, req_method: &str) -> bool {
+    let rm = route_method.trim();
+    rm == "*"
+        || rm.eq_ignore_ascii_case("ALL")
+        || rm.eq_ignore_ascii_case("ANY")
+        || rm.eq_ignore_ascii_case(req_method)
+}
+
+pub fn extract_host_and_path_from_route(route_path: &str) -> (Option<String>, String) {
+    let s = route_path.trim();
+    if s.starts_with("http://") || s.starts_with("https://") {
+        if let Ok(u) = url::Url::parse(s) {
+            let host = u.host_str().map(|h| h.to_lowercase());
+            let path = format!("{}{}", u.path(), if let Some(q) = u.query() { format!("?{}", q) } else { String::new() });
+            return (host, path);
+        } else if let Some(pos) = s.find("://") {
+            let after_scheme = &s[pos + 3..];
+            if let Some(slash_pos) = after_scheme.find('/') {
+                let host = after_scheme[..slash_pos].split(':').next().unwrap_or("").to_lowercase();
+                let path = after_scheme[slash_pos..].to_string();
+                return (Some(host), path);
+            } else {
+                let host = after_scheme.split(':').next().unwrap_or("").to_lowercase();
+                return (Some(host), "/".to_string());
+            }
+        }
+    }
+    (None, s.to_string())
+}
+
 pub fn path_matches(route_path: &str, req_path: &str) -> bool {
-    let clean_route = route_path.split('?').next().unwrap_or(route_path);
-    let clean_req = req_path.split('?').next().unwrap_or(req_path);
+    let clean_route = route_path.split('?').next().unwrap_or(route_path).trim();
+    let clean_req = req_path.split('?').next().unwrap_or(req_path).trim();
+
+    if clean_route == "*" || clean_route == "/*" || clean_route == clean_req {
+        return true;
+    }
+
+    if let Some(prefix) = clean_route.strip_suffix("/**") {
+        return clean_req.starts_with(prefix);
+    }
+    if let Some(prefix) = clean_route.strip_suffix("/*") {
+        return clean_req.starts_with(prefix);
+    }
 
     let r_parts: Vec<&str> = clean_route.split('/').filter(|s| !s.is_empty()).collect();
     let p_parts: Vec<&str> = clean_req.split('/').filter(|s| !s.is_empty()).collect();
-    
+
     if r_parts.len() != p_parts.len() {
         return false;
     }
-    
+
     for (r, p) in r_parts.iter().zip(p_parts.iter()) {
-        if r.starts_with(':') {
+        if r.starts_with(':') || *r == "*" {
             continue;
         }
         if r != p {
@@ -224,11 +265,10 @@ pub fn find_matching_route(
 
     // 1. If this is the Local Mock Server (localhost / 127.0.0.1)
     if is_local_server {
-        // First, check dedicated local mock server routes
         let local_routes = routes.iter().filter(|r| {
             (r.domain_id == "local_mock_server" || r.domain_id.is_empty() || r.domain_id == "localhost")
                 && r.enabled
-                && r.method.eq_ignore_ascii_case(req_method)
+                && method_matches(&r.method, req_method)
                 && path_matches(&r.path, req_path)
         });
 
@@ -266,67 +306,117 @@ pub fn find_matching_route(
         }
     }
 
-    // 2. Proxy Override matching (for external mapped domains)
-    let matching_domains: Vec<&MockDomain> = domains
-        .iter()
-        .filter(|d| {
-            if d.status != "active" || d.id == "local_mock_server" {
-                return false;
-            }
-            let dom_host_norm = normalize_hostname(&d.hostname);
-            if is_local_server && (req_host_norm == "localhost" || req_host_norm == "127.0.0.1") {
-                true
-            } else {
-                dom_host_norm == req_host_norm
-            }
-        })
-        .collect();
+    // 2. Proxy Override matching: match by hosts + path OR full url, and method
+    for r in routes.iter().filter(|r| r.enabled) {
+        if !method_matches(&r.method, req_method) {
+            continue;
+        }
 
-    for d in matching_domains {
-        let matching_routes = routes.iter().filter(|r| {
-            r.domain_id == d.id
-                && r.enabled
-                && r.method.eq_ignore_ascii_case(req_method)
-                && path_matches(&r.path, req_path)
-        });
+        let (url_host, url_path) = extract_host_and_path_from_route(&r.path);
 
-        for r in matching_routes {
-            // When matcher is disabled, match on method + path only
-            if !r.matcher_enabled {
-                return Some((d.clone(), r.clone()));
-            }
-
-            // Check request matchers (headers, query, body)
-            if !matchers_satisfied(&r.matchers, req_headers, req_query, req_body) {
+        let (matched_domain, effective_path) = if let Some(ref parsed_host) = url_host {
+            // Full URL matching: match extracted host against request host
+            let parsed_host_norm = normalize_hostname(parsed_host);
+            if parsed_host_norm != req_host_norm && parsed_host_norm != "*" {
                 continue;
             }
 
-            // Check request body matcher (for write methods)
-            if let Some(ref expected_body) = r.request_body {
-                if !expected_body.trim().is_empty() {
-                    let actual_body = String::from_utf8_lossy(req_body);
-                    if trim_json(&actual_body) != trim_json(expected_body) {
-                        continue;
-                    }
+            // Check if there is an inactive domain entry explicitly disabling this host
+            if let Some(d) = domains.iter().find(|d| normalize_hostname(&d.hostname) == req_host_norm) {
+                if d.status != "active" {
+                    continue;
                 }
             }
 
-            // Check request query params (for read methods)
-            if let Some(ref params) = r.request_query_params {
-                let active_params: Vec<&QueryParam> = params.iter().filter(|p| p.enabled).collect();
-                if !active_params.is_empty() {
-                    let all_match = active_params.iter().all(|p| {
-                        req_query.get(&p.key).map(|v| v == &p.value).unwrap_or(false)
-                    });
-                    if !all_match {
-                        continue;
-                    }
+            let dom = domains
+                .iter()
+                .find(|d| d.id == r.domain_id || normalize_hostname(&d.hostname) == req_host_norm)
+                .cloned()
+                .unwrap_or_else(|| MockDomain {
+                    id: r.domain_id.clone(),
+                    hostname: parsed_host.clone(),
+                    ssl: r.path.starts_with("https://"),
+                    status: "active".to_string(),
+                    created_at: String::new(),
+                });
+
+            (dom, url_path)
+        } else {
+            // Host + Path matching
+            let dom = domains.iter().find(|d| d.id == r.domain_id);
+            let target_host = if let Some(d) = dom {
+                if d.status != "active" {
+                    continue;
                 }
+                d.hostname.clone()
+            } else {
+                r.domain_id.clone()
+            };
+
+            let target_host_norm = normalize_hostname(&target_host);
+            let host_matches = if target_host_norm == "*" {
+                true
+            } else if let Some(suffix) = target_host_norm.strip_prefix("*.") {
+                req_host_norm.ends_with(suffix) || req_host_norm == suffix
+            } else {
+                target_host_norm == req_host_norm
+            };
+
+            if !host_matches {
+                continue;
             }
 
-            return Some((d.clone(), r.clone()));
+            let effective_dom = dom.cloned().unwrap_or_else(|| MockDomain {
+                id: r.domain_id.clone(),
+                hostname: target_host,
+                ssl: true,
+                status: "active".to_string(),
+                created_at: String::new(),
+            });
+
+            (effective_dom, r.path.clone())
+        };
+
+        if !path_matches(&effective_path, req_path) {
+            continue;
         }
+
+        // When matcher is disabled, match on method + host/path only
+        if !r.matcher_enabled {
+            return Some((matched_domain, r.clone()));
+        }
+
+        // Check request matchers (headers, query, body)
+        if !matchers_satisfied(&r.matchers, req_headers, req_query, req_body) {
+            continue;
+        }
+
+        // Check request body matcher (for write methods)
+        if let Some(ref expected_body) = r.request_body {
+            if !expected_body.trim().is_empty() {
+                let actual_body = String::from_utf8_lossy(req_body);
+                if trim_json(&actual_body) != trim_json(expected_body) {
+                    continue;
+                }
+            }
+        }
+
+        // Check request query params (for read methods)
+        if let Some(ref params) = r.request_query_params {
+            let active_params: Vec<&QueryParam> = params.iter().filter(|p| p.enabled).collect();
+            if !active_params.is_empty() {
+                let all_match = active_params.iter().all(|p| {
+                    req_query.get(&p.key).map(|v| v == &p.value).unwrap_or(false)
+                });
+                if !all_match {
+                    continue;
+                }
+            }
+        }
+
+        return Some((matched_domain, r.clone()));
     }
+
     None
 }
 

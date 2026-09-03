@@ -40,14 +40,17 @@ pub struct DeleteArtifactResult {
 }
 
 #[tauri::command]
-pub async fn get_storage_info(_app: AppHandle) -> Result<StorageInfo, String> {
+pub async fn get_storage_info(
+    _app: AppHandle,
+    payload_store: State<'_, crate::db::PayloadStore>,
+) -> Result<StorageInfo, String> {
     let app_data_dir = crate::paths::get_shared_app_dir();
     let database_path = crate::paths::get_shared_db_path();
     let browser_artifacts_path = app_data_dir.join("ai-browser-artifacts");
     let regression_artifacts_path = app_data_dir.join("regression-artifacts");
 
-    // Database size: sum main db + wal + shm files
-    let db_size: u64 = [
+    // Database size: sum main db + wal + shm files + segment .bin files
+    let sqlite_size: u64 = [
         database_path.clone(),
         database_path.with_extension("db-wal"),
         database_path.with_extension("db-shm"),
@@ -56,6 +59,9 @@ pub async fn get_storage_info(_app: AppHandle) -> Result<StorageInfo, String> {
     .filter_map(|p| fs::metadata(p).ok())
     .map(|m| m.len())
     .sum();
+
+    let segments_size = payload_store.total_disk_size_bytes();
+    let db_size = sqlite_size + segments_size;
 
     let (_, browser_size) = count_files(&browser_artifacts_path).unwrap_or((0, 0));
     let (_, regression_size) = count_files(&regression_artifacts_path).unwrap_or((0, 0));
@@ -81,6 +87,7 @@ pub async fn delete_storage_artifact(
     _app: AppHandle,
     database: State<'_, Database>,
     history: State<'_, HistoryBridge>,
+    payload_store: State<'_, crate::db::PayloadStore>,
 ) -> Result<DeleteArtifactResult, String> {
     let app_data_dir = crate::paths::get_shared_app_dir();
 
@@ -103,12 +110,18 @@ pub async fn delete_storage_artifact(
                 }
             }
 
+            // Clear all segment .bin files and ephemeral slabs
+            if let Ok(seg_bytes) = payload_store.clear_all_persistent() {
+                bytes_deleted += seg_bytes;
+            }
+            payload_store.clear_ephemeral();
+
             database.reopen_and_init().map_err(|e| e.to_string())?;
             history.reopen_and_init().map_err(|e| e.to_string())?;
 
             Ok(DeleteArtifactResult {
                 bytes_deleted,
-                label: "SQL Database".to_string(),
+                label: "SQL Database & Payloads".to_string(),
             })
         }
         "browser_artifacts" => {
@@ -177,6 +190,7 @@ pub async fn reset_all_app_data(
     app: AppHandle,
     database: State<'_, Database>,
     history: State<'_, HistoryBridge>,
+    payload_store: State<'_, crate::db::PayloadStore>,
 ) -> Result<ResetLocalDataResult, String> {
     // ponytail: stop proxy and terminate running browsers/crawls cleanly
     let _ = crate::proxy::stop();
@@ -205,6 +219,15 @@ pub async fn reset_all_app_data(
     let shm_path = db_path.with_extension("db-shm");
     if shm_path.exists() {
         let _ = fs::remove_file(&shm_path);
+    }
+
+    // Clear disk segment store and ephemeral slabs
+    let _ = payload_store.clear_all_persistent();
+    payload_store.clear_ephemeral();
+    let sessions_dir = app_data_dir.join("sessions");
+    if sessions_dir.exists() {
+        let _ = fs::remove_dir_all(&sessions_dir);
+        let _ = fs::create_dir_all(&sessions_dir);
     }
 
     // Local data directories and standalone files

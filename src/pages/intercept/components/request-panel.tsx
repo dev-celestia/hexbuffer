@@ -1,6 +1,7 @@
 
 
-import { Label, TextEditor } from '@celestia-project/ui';
+import { Button, Label, TextEditor } from '@celestia-project/ui';
+import { CodeIcon } from '@phosphor-icons/react';
 import { useTheme } from '@/components/theme-provider';
 import { useRequestPanel } from './hooks/use-request-panel';
 import { cn } from '@/lib/utils';
@@ -12,6 +13,7 @@ export function InterceptRequestPanel() {
     selectedRequestId,
     messageLabel,
     handleRawChange,
+    handleFormat,
   } = useRequestPanel();
 
   return (
@@ -33,20 +35,46 @@ export function InterceptRequestPanel() {
           "h-full p-2"
         )}
       >
-        <Label
+        <div
           className={cn(
             // Layout & Positioning
-            "block",
+            "flex items-center justify-between",
 
             // Sizing & Spacing
-            "mb-1",
-
-            // Typography
-            "text-xs text-muted-foreground"
+            "mb-1"
           )}
         >
-          Raw {messageLabel}
-        </Label>
+          <Label
+            className={cn(
+              // Layout & Positioning
+              "block",
+
+              // Typography
+              "text-xs text-muted-foreground"
+            )}
+          >
+            Raw {messageLabel}
+          </Label>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleFormat}
+            disabled={!selectedRequestId || !rawRequest.trim()}
+            className={cn(
+              // Layout & Positioning
+              "flex items-center gap-1",
+
+              // Sizing & Spacing
+              "h-6 px-2 text-xs",
+
+              // Interactive & States
+              "cursor-pointer"
+            )}
+          >
+            <CodeIcon className="size-3.5" />
+            Format
+          </Button>
+        </div>
         <div
           className={cn(
             // Layout & Positioning
