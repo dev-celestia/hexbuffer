@@ -129,58 +129,22 @@ export function IntruderPage() {
             <div
               className={cn(
                 // Layout & Positioning
-                "flex items-center min-w-0 shrink-0",
+                "flex justify-between items-center min-w-0 shrink-0 w-full",
 
                 // Sizing & Spacing
                 "gap-3"
               )}
             >
-              {page.isRunning ? (
-                <Button 
-                  size="sm" 
-                  variant="destructive" 
-                  onClick={stopIntruderUiAttack}
-                  className={cn(
-                    // Sizing & Spacing
-                    "h-7 px-2.5 gap-1.5",
-
-                    // Typography
-                    "text-xs font-medium"
-                  )}
-                >
-                  <SquareIcon className="size-3" weight="fill" />
-                  <span>Stop Attack</span>
-                </Button>
-              ) : (
-                <Button 
-                  size="sm" 
-                  variant="default"
-                  onClick={page.handleStartAttack} 
-                  disabled={!!page.startBlockedReason}
-                  className={cn(
-                    // Sizing & Spacing
-                    "h-7 px-2.5 gap-1.5",
-
-                    // Typography
-                    "text-xs font-medium"
-                  )}
-                >
-                  <PlayIcon className="size-3" weight="fill" />
-                  <span>Start Attack</span>
-                </Button>
-              )}
-
+             
+              <div className="flex items-center gap-2">
               {/* Status Indicator */}
               <div
                 className={cn(
                   // Layout & Positioning
-                  "flex items-center border-l",
+                  "flex items-center",
 
                   // Sizing & Spacing
-                  "pl-3 gap-1.5",
-
-                  // Backgrounds & Borders
-                  "border-border"
+                  "gap-1.5",
                 )}
               >
                 <span
@@ -219,6 +183,43 @@ export function IntruderPage() {
                 >
                   {page.startBlockedReason}
                 </span>
+              )}
+              </div>
+              
+
+               {page.isRunning ? (
+                <Button 
+                  size="sm" 
+                  variant="destructive" 
+                  onClick={stopIntruderUiAttack}
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-7 px-2.5 gap-1.5",
+
+                    // Typography
+                    "text-xs font-medium"
+                  )}
+                >
+                  <SquareIcon className="size-3" weight="fill" />
+                  <span>Stop</span>
+                </Button>
+              ) : (
+                <Button 
+                  size="sm" 
+                  variant="default"
+                  onClick={page.handleStartAttack} 
+                  disabled={!!page.startBlockedReason}
+                  className={cn(
+                    // Sizing & Spacing
+                    "h-7 px-2.5 gap-1.5",
+
+                    // Typography
+                    "text-xs font-medium"
+                  )}
+                >
+                  <PlayIcon className="size-3" weight="fill" />
+                  <span>Start</span>
+                </Button>
               )}
             </div>
 
