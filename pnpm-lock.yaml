@@ -18,8 +18,8 @@ importers:
         specifier: ^3.1086.0
         version: 3.1086.0
       '@celestia-project/ui':
-        specifier: ^0.3.3
-        version: 0.3.3(@date-fns/tz@1.5.0)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(immer@11.1.8)(monaco-editor@0.55.1)(react-dom@19.2.6(react@19.2.6))(react-is@17.0.2)(react@19.2.6)(redux@5.0.1)(typescript@5.8.3)
+        specifier: ^0.3.4
+        version: 0.3.4(@date-fns/tz@1.5.0)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(immer@11.1.8)(monaco-editor@0.55.1)(react-dom@19.2.6(react@19.2.6))(react-is@17.0.2)(react@19.2.6)(redux@5.0.1)(typescript@5.8.3)
       '@dnd-kit/core':
         specifier: ^6.3.1
         version: 6.3.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -86,18 +86,12 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      codemirror:
-        specifier: ^6.0.2
-        version: 6.0.2
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0
       diff:
         specifier: ^9.0.0
         version: 9.0.0
-      jspdf:
-        specifier: ^4.2.1
-        version: 4.2.1
       monaco-editor:
         specifier: 0.55.1
         version: 0.55.1
@@ -1179,8 +1173,8 @@ packages:
   '@braintree/sanitize-url@7.1.2':
     resolution: {integrity: sha512-jigsZK+sMF/cuiB7sERuo9V7N9jx+dhmHHnQyDSVdpZwVutaBu7WvNYqMDLSgFgfB30n452TP3vjDAvFC973mA==}
 
-  '@celestia-project/ui@0.3.3':
-    resolution: {integrity: sha512-gfafXDEH1HH0Z9e9HPc7oNOSufl1KONLabVUWUmgsZKev+TaOuq/a80PCCEos7/u415QMeYcuwdq+NacXj3Nqw==}
+  '@celestia-project/ui@0.3.4':
+    resolution: {integrity: sha512-XEFlVNkPcMnzatxPePglLpR2MnStSTaPIFwmQQ3DKcbAO0QlgpeGqwRpnv3/N22F2+iZyFOC3cXQ8MM71kbVJQ==}
     peerDependencies:
       react: ^19
       react-dom: ^19
@@ -7060,7 +7054,7 @@ snapshots:
 
   '@braintree/sanitize-url@7.1.2': {}
 
-  '@celestia-project/ui@0.3.3(@date-fns/tz@1.5.0)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(immer@11.1.8)(monaco-editor@0.55.1)(react-dom@19.2.6(react@19.2.6))(react-is@17.0.2)(react@19.2.6)(redux@5.0.1)(typescript@5.8.3)':
+  '@celestia-project/ui@0.3.4(@date-fns/tz@1.5.0)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(immer@11.1.8)(monaco-editor@0.55.1)(react-dom@19.2.6(react@19.2.6))(react-is@17.0.2)(react@19.2.6)(redux@5.0.1)(typescript@5.8.3)':
     dependencies:
       '@base-ui/react': 1.7.0(@date-fns/tz@1.5.0)(@types/react@19.2.15)(date-fns@4.4.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@monaco-editor/react': 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)

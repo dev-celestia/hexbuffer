@@ -97,7 +97,7 @@ export const RELEASE_NAV_ITEMS: NavItem[] = [
     flag: 'release',
   },
   {
-    label: 'Mock API',
+    label: 'API Mock',
     icon: LightningIcon,
     href: '/api-mock',
     description: 'Standalone HTTP mock server running on localhost with CORS and custom endpoints.',

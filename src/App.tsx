@@ -137,7 +137,9 @@ function AppRoutes() {
           <Route path="/scratchpad" element={<ScratchpadPage />} />
           <Route path="/mock-api" element={<MockApiPage />} />
           <Route path="/mock-forge" element={<MockApiPage />} />
+          <Route path="/api-mock" element={<MockApiPage />} />
           <Route path="/response-override" element={<ResponseOverridePage />} />
+          <Route path="/api-override" element={<ResponseOverridePage />} />
           <Route path="/kanban" element={<KanbanPage />} />
           <Route path="/file-explorer" element={<FileExplorerPage />} />
           <Route path="/terminal" element={<TerminalPage />} />

@@ -52,6 +52,8 @@ export const PAGE_COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
   '/scratchpad': ScratchpadPage,
   '/mock-api': MockApiPage,
   '/mock-forge': MockApiPage,
+  '/api-mock': MockApiPage,
   '/response-override': ResponseOverridePage,
+  '/api-override': ResponseOverridePage,
   '/terminal': TerminalPage,
 };

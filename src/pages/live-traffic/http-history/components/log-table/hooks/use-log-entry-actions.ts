@@ -21,7 +21,7 @@ import { copyText } from '@/lib/clipboard';
 import { useTargetStore } from '@/stores/target';
 import { useNavStore } from '@/stores/nav';
 import { useInterceptStore } from '@/pages/intercept/state/intercept-store';
-import { useResponseOverrideStore } from '@/stores/response-override';
+import { useResponseOverrideStore } from '@/stores/api-override';
 import type { MockDomain, MockRoute } from '@/pages/api-override/types';
 import { sendToCollection, sendRawToRepeater } from '@/triggers/repeater';
 import { cleanUrl } from '@/lib/utils';

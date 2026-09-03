@@ -170,7 +170,7 @@ export const WindowHeader = React.memo(function WindowHeader({
 
         {/* Separator between Custom Slot and Snap Layout Controls */}
         {hasHeaderSlotContent && (
-          <Separator orientation="vertical" className="h-4" />
+          <Separator orientation="vertical" className="h-6" />
         )}
 
         {/* Snap Layout Controls */}
@@ -203,7 +203,7 @@ export const WindowHeader = React.memo(function WindowHeader({
           </button>
         </div>
 
-        <Separator orientation="vertical" className="h-4" />
+        <Separator orientation="vertical" className="h-6" />
 
         {/* Window Controls */}
         <div className="flex items-center gap-0.5">

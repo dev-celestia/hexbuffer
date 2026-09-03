@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import { useResponseOverrideStore } from '@/stores/response-override';
+import { useResponseOverrideStore } from '@/stores/api-override';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
 import type { MockDomain, MockRoute } from '../types';
