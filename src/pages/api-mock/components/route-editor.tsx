@@ -376,15 +376,6 @@ export function RouteEditor({
               "gap-2.5"
             )}
           >
-            <span
-              className={cn(
-                // Typography
-                "text-xs font-bold uppercase tracking-wider text-foreground"
-              )}
-            >
-              Response
-            </span>
-
             {/* Status code input */}
             <div
               className={cn(
@@ -496,24 +487,21 @@ export function RouteEditor({
                 onClick={() => setShowPreview((v) => !v)}
                 title="Simulate incoming request and test template string rendering"
               >
-                <EyeIcon />
-                {showPreview ? "Hide Preview" : "Test Preview"}
+                {showPreview ?  "Hide Preview": <EyeIcon />  }
               </Button>
             )}
             <Button
               size="sm"
-              variant="ghost"
+              variant="outline"
               onClick={formatBody}
             >
               <CodeIcon />
-              Format
             </Button>
             <Button
               size="sm"
               onClick={saveBody}
             >
               <FloppyDiskIcon />
-              Save
             </Button>
           </div>
         </div>

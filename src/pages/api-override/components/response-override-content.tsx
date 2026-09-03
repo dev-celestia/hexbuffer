@@ -1,4 +1,4 @@
-import { RulesPanel } from './rules-panel';
+import { RulesPanel } from './rules-pane';
 import type { useResponseOverridePage } from '../hooks/use-response-override-page';
 
 interface ResponseOverrideContentProps {
