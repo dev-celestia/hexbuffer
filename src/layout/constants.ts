@@ -157,15 +157,6 @@ export const RELEASE_NAV_ITEMS: NavItem[] = [
     isNew: true,
   },
   {
-    label: 'Nuclei',
-    icon: ShieldCheckIcon,
-    href: '/nuclei',
-    description: 'Automated vulnerability scanner with Nuclei YAML templates and real-time telemetry.',
-    colors: { bg: 'bg-emerald-600 dark:bg-emerald-600', hoverBg: 'group-hover:bg-emerald-600 dark:group-hover:bg-emerald-600', border: 'border-emerald-600 dark:border-emerald-600' },
-    flag: 'release',
-    isNew: true,
-  },
-  {
     label: 'Settings',
     icon: GearSixIcon,
     href: '/settings',
@@ -185,6 +176,15 @@ export const ALPHA_NAV_ITEMS: NavItem[] = import.meta.env.PROD
         description: 'Capture and inspect real-time WebSocket network traffic.',
         colors: { bg: 'bg-blue-500 dark:bg-blue-500', hoverBg: 'group-hover:bg-blue-500 dark:group-hover:bg-blue-500', border: 'border-blue-500 dark:border-blue-500' },
         flag: 'alpha',
+      },
+      {
+        label: 'Nuclei',
+        icon: ShieldCheckIcon,
+        href: '/nuclei',
+        description: 'Automated vulnerability scanner with Nuclei YAML templates and real-time telemetry.',
+        colors: { bg: 'bg-emerald-600 dark:bg-emerald-600', hoverBg: 'group-hover:bg-emerald-600 dark:group-hover:bg-emerald-600', border: 'border-emerald-600 dark:border-emerald-600' },
+        flag: 'alpha',
+        isNew: true,
       },
       {
         label: 'Workflow',

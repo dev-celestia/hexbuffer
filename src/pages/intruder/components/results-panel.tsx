@@ -374,16 +374,13 @@ export function IntruderResultsPanel() {
                 />
                 <span>Split</span>
               </>
-            ) : (
-              <>
+            ) : ( 
                 <ArrowsOutSimpleIcon
                   className={cn(
                     // Sizing & Spacing
                     "size-3.5 mr-1"
                   )}
                 />
-                <span>Full Width</span>
-              </>
             )}
           </Button>
 
