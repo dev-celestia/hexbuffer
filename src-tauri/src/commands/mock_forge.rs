@@ -44,6 +44,19 @@ pub struct ChaosConfig {
     pub error_status: Option<u16>,
 }
 
+impl Default for ChaosConfig {
+    fn default() -> Self {
+        Self {
+            latency_mode: "none".to_string(),
+            latency_fixed: None,
+            latency_min: None,
+            latency_max: None,
+            error_rate: None,
+            error_status: None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QueryParam {
     pub key: String,
@@ -65,8 +78,11 @@ pub struct MockRoute {
     pub response_body: String,
     #[serde(rename = "responseHeaders")]
     pub response_headers: HashMap<String, String>,
+    #[serde(default)]
     pub matchers: Vec<RequestMatcher>,
+    #[serde(default)]
     pub chaos: ChaosConfig,
+    #[serde(default = "default_true")]
     pub enabled: bool,
     #[serde(rename = "matcherEnabled")]
     #[serde(default = "default_matcher_enabled")]
@@ -75,6 +91,10 @@ pub struct MockRoute {
     pub request_query_params: Option<Vec<QueryParam>>,
     #[serde(rename = "requestBody")]
     pub request_body: Option<String>,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 fn default_matcher_enabled() -> bool {
@@ -200,7 +220,7 @@ pub fn path_matches(route_path: &str, req_path: &str) -> bool {
     }
 
     for (r, p) in r_parts.iter().zip(p_parts.iter()) {
-        if r.starts_with(':') || *r == "*" {
+        if r.starts_with(':') || (r.starts_with('{') && r.ends_with('}')) || *r == "*" {
             continue;
         }
         if r != p {
@@ -208,6 +228,62 @@ pub fn path_matches(route_path: &str, req_path: &str) -> bool {
         }
     }
     true
+}
+
+pub fn extract_path_params(route_path: &str, req_path: &str) -> HashMap<String, String> {
+    let clean_route = route_path.split('?').next().unwrap_or(route_path).trim();
+    let clean_req = req_path.split('?').next().unwrap_or(req_path).trim();
+
+    let r_parts: Vec<&str> = clean_route.split('/').filter(|s| !s.is_empty()).collect();
+    let p_parts: Vec<&str> = clean_req.split('/').filter(|s| !s.is_empty()).collect();
+
+    let mut params = HashMap::new();
+    if r_parts.len() == p_parts.len() {
+        for (r, p) in r_parts.iter().zip(p_parts.iter()) {
+            if let Some(param_name) = r.strip_prefix(':') {
+                params.insert(param_name.to_string(), p.to_string());
+            } else if r.starts_with('{') && r.ends_with('}') && r.len() > 2 {
+                let param_name = &r[1..r.len() - 1];
+                params.insert(param_name.to_string(), p.to_string());
+            }
+        }
+    }
+    params
+}
+
+pub fn render_template_string(
+    template: &str,
+    path_params: &HashMap<String, String>,
+    query_params: &HashMap<String, String>,
+    req_path: &str,
+    req_method: &str,
+) -> String {
+    let mut rendered = template.to_string();
+
+    for (k, v) in path_params {
+        rendered = rendered.replace(&format!("{{{{{}}}}}", k), v);
+        rendered = rendered.replace(&format!("{{{{params.{}}}}}", k), v);
+        rendered = rendered.replace(&format!("{{{{param.{}}}}}", k), v);
+        rendered = rendered.replace(&format!("${{{}}}", k), v);
+        rendered = rendered.replace(&format!("${{params.{}}}", k), v);
+        rendered = rendered.replace(&format!("${{param.{}}}", k), v);
+    }
+
+    for (k, v) in query_params {
+        rendered = rendered.replace(&format!("{{{{query.{}}}}}", k), v);
+        rendered = rendered.replace(&format!("${{query.{}}}", k), v);
+        if !path_params.contains_key(k) {
+            rendered = rendered.replace(&format!("{{{{{}}}}}", k), v);
+            rendered = rendered.replace(&format!("${{{}}}", k), v);
+        }
+    }
+
+    rendered = rendered.replace("{{path}}", req_path);
+    rendered = rendered.replace("${path}", req_path);
+    rendered = rendered.replace("{{method}}", req_method);
+    rendered = rendered.replace("${method}", req_method);
+
+    rendered
 }
 
 fn matchers_satisfied(

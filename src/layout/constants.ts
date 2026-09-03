@@ -35,6 +35,8 @@ import repeaterIcon from '@/assets/app/repeater.png';
 import settingsIcon from '@/assets/app/settings.png';
 import jwtIcon from '@/assets/app/jwt.png';
 import portScannerIcon from '@/assets/app/port-scanner.png';
+import apiOverrideIcon from '@/assets/app/api-override.png';
+import apiMock from '@/assets/app/api-mock.png';
 
 export type ImageSource = string | { src: string };
 
@@ -47,9 +49,9 @@ export const APP_ICON_IMAGES: Record<string, ImageSource> = {
   '/repeater': repeaterIcon,
   '/settings': settingsIcon,
   '/jwt': jwtIcon,
-  'jwt': jwtIcon,
   '/port-scanner': portScannerIcon,
-  'port scanner': portScannerIcon,
+  '/api-override': apiOverrideIcon,
+  '/api-mock': apiMock,
 };
 
 export function getAppIconImage(href: string, label?: string): string | undefined {
@@ -97,7 +99,7 @@ export const RELEASE_NAV_ITEMS: NavItem[] = [
   {
     label: 'Mock API',
     icon: LightningIcon,
-    href: '/mock-api',
+    href: '/api-mock',
     description: 'Standalone HTTP mock server running on localhost with CORS and custom endpoints.',
     colors: { bg: 'bg-emerald-600 dark:bg-emerald-600', hoverBg: 'group-hover:bg-emerald-600 dark:group-hover:bg-emerald-600', border: 'border-emerald-600 dark:border-emerald-600' },
     flag: 'release',
@@ -106,7 +108,7 @@ export const RELEASE_NAV_ITEMS: NavItem[] = [
   {
     label: 'API Override',
     icon: BlueprintIcon,
-    href: '/response-override',
+    href: '/api-override',
     description: 'Map Local rules that intercept and replace responses for proxy traffic.',
     colors: { bg: 'bg-teal-600 dark:bg-teal-600', hoverBg: 'group-hover:bg-teal-600 dark:group-hover:bg-teal-600', border: 'border-teal-600 dark:border-teal-600' },
     flag: 'release',

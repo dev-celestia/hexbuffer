@@ -464,5 +464,8 @@ CREATE TABLE IF NOT EXISTS mock_routes (
 );
 
 CREATE INDEX IF NOT EXISTS idx_mock_routes_domain_id ON mock_routes(domain_id);
+
+INSERT OR IGNORE INTO mock_domains (id, hostname, ssl, status, created_at)
+VALUES ('local_mock_server', 'localhost', 0, 'active', datetime('now'));
 "#;
 

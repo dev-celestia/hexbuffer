@@ -379,12 +379,22 @@ export const useCollectionsStore = create<CollectionsState>()(
         let parsedHeaders: KeyValuePair[] = [];
         try {
           if (ep.headers) {
-            const obj = JSON.parse(ep.headers);
-            parsedHeaders = Object.entries(obj).map(([key, value]) => ({
-              key,
-              value: value as string,
-              enabled: true,
-            }));
+            const parsed = JSON.parse(ep.headers);
+            if (Array.isArray(parsed)) {
+              // Array format: [{key, value, enabled}, ...]
+              parsedHeaders = parsed.map((h: { key: string; value: string; enabled?: boolean }) => ({
+                key: String(h.key ?? ''),
+                value: String(h.value ?? ''),
+                enabled: h.enabled !== false,
+              }));
+            } else {
+              // Plain object format: {key: value, ...}
+              parsedHeaders = Object.entries(parsed).map(([key, value]) => ({
+                key,
+                value: String(value ?? ''),
+                enabled: true,
+              }));
+            }
           }
         } catch { /* ignore */ }
 

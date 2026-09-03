@@ -79,21 +79,34 @@ export function useRepeaterPage() {
     [],
   );
 
+  const [pendingCloseId, setPendingCloseId] = React.useState<string | null>(null);
+
   const onTabClose = React.useCallback(
-    async (id: string) => {
+    (id: string) => {
       if (workspaces.length <= 1) {
         toast.error('Cannot delete the last remaining workspace');
         return;
       }
-      try {
-        await deleteWorkspace(id);
-      } catch (e) {
-        console.error(e);
-        toast.error('Failed to delete workspace');
-      }
+      setPendingCloseId(id);
     },
     [workspaces.length],
   );
+
+  const confirmClose = React.useCallback(async () => {
+    if (!pendingCloseId) return;
+    try {
+      await deleteWorkspace(pendingCloseId);
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to delete workspace');
+    } finally {
+      setPendingCloseId(null);
+    }
+  }, [pendingCloseId]);
+
+  const cancelClose = React.useCallback(() => {
+    setPendingCloseId(null);
+  }, []);
 
   const onTabAdd = React.useCallback(() => {
     createWorkspace();
@@ -124,6 +137,11 @@ export function useRepeaterPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const pendingCloseName = React.useMemo(
+    () => workspaces.find((ws) => ws.id === pendingCloseId)?.name ?? '',
+    [workspaces, pendingCloseId],
+  );
+
   return {
     tabs,
     activeWorkspaceId,
@@ -133,5 +151,9 @@ export function useRepeaterPage() {
     onTabAdd,
     onCloseTabsToLeft,
     onCloseTabsToRight,
+    pendingCloseId,
+    pendingCloseName,
+    confirmClose,
+    cancelClose,
   };
 }

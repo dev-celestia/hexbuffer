@@ -105,6 +105,20 @@ impl Database {
 
     pub fn upsert_mock_route(&self, route: &MockRoute) -> SqlResult<()> {
         let conn = self.conn.lock().unwrap();
+        // Ensure domain_id exists in mock_domains to satisfy foreign key constraint
+        let default_hostname = if route.domain_id == "local_mock_server" {
+            "localhost"
+        } else if route.domain_id == "all-hosts" {
+            "*"
+        } else {
+            &route.domain_id
+        };
+        conn.execute(
+            "INSERT OR IGNORE INTO mock_domains (id, hostname, ssl, status, created_at)
+             VALUES (?1, ?2, 0, 'active', datetime('now'))",
+            params![route.domain_id, default_hostname],
+        )?;
+
         let headers_str = serde_json::to_string(&route.response_headers).unwrap_or_else(|_| "{}".to_string());
         let matchers_str = serde_json::to_string(&route.matchers).unwrap_or_else(|_| "[]".to_string());
         let chaos_str = serde_json::to_string(&route.chaos).unwrap_or_else(|_| "{}".to_string());

@@ -68,8 +68,9 @@ export function ForgeResponseView({
 
   const expandVars = (text: string) => {
     if (!text) return '';
+    const str = typeof text === 'string' ? text : String(text);
     // ponytail: expand environment variables placeholder {{key}} with value from active context
-    return text.replace(/\{\{([^}]+)\}\}/g, (_, key) => {
+    return str.replace(/\{\{([^}]+)\}\}/g, (_, key) => {
       const trimmed = key.trim();
       return trimmed in variables ? variables[trimmed] : `{{${key}}}`;
     });

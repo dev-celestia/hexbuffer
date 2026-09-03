@@ -139,8 +139,18 @@ pub async fn try_intercept(
         }
     }
 
+    let (url_host, url_path) = crate::commands::mock_forge::extract_host_and_path_from_route(&route.path);
+    let effective_path = if url_host.is_some() { url_path } else { route.path.clone() };
+    let path_params = crate::commands::mock_forge::extract_path_params(&effective_path, path_str);
+
     let body_content = if status_code == route.status_code {
-        route.response_body.clone()
+        crate::commands::mock_forge::render_template_string(
+            &route.response_body,
+            &path_params,
+            &query_map,
+            path_str,
+            &ctx.req_method,
+        )
     } else {
         format!("Simulated chaos error status: {}", status_code)
     };

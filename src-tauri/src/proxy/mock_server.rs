@@ -16,7 +16,10 @@ use tauri::{AppHandle, Emitter, Manager};
 use tokio::net::TcpListener;
 use tokio::sync::oneshot;
 
-use crate::commands::mock_forge::{find_matching_route, MockForgeState, MockServerStatus, RequestLog};
+use crate::commands::mock_forge::{
+    extract_path_params, find_matching_route, render_template_string, MockForgeState,
+    MockServerStatus, RequestLog,
+};
 
 static MOCK_SERVER_SHUTDOWN: Mutex<Option<oneshot::Sender<()>>> = Mutex::new(None);
 static MOCK_SERVER_STATUS: Mutex<Option<MockServerStatus>> = Mutex::new(None);
@@ -359,8 +362,15 @@ async fn handle_mock_server_request(
                 );
         }
 
+        let path_params = extract_path_params(&route.path, &path_str);
         let body_content = if status_code == route.status_code {
-            route.response_body.clone()
+            render_template_string(
+                &route.response_body,
+                &path_params,
+                &query_map,
+                &path_str,
+                &method_str,
+            )
         } else {
             format!("{{\"error\":\"Simulated chaos error\",\"status\":{}}}", status_code)
         };

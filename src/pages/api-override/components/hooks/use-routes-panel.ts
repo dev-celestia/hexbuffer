@@ -208,6 +208,8 @@ export function useRouteEditor(
       }));
 
       await collectionsStore.saveActiveEndpoint();
+      useNavStore.getState().openWindow('/repeater', 'Repeater');
+      useNavStore.getState().focusWindow('/repeater');
       useNavStore.getState().triggerNavBlink('/repeater');
       toast.success(`Sent override rule ${route.method} ${route.path} to Repeater!`);
     } catch (error) {

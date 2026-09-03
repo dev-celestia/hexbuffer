@@ -41,7 +41,8 @@ function getActiveVariables(): Record<string, string> {
 
 function expandVars(text: string, vars: Record<string, string>): string {
   if (!text) return '';
-  return text.replace(/\{\{([^}]+)\}\}/g, (_, key) => {
+  const str = typeof text === 'string' ? text : String(text);
+  return str.replace(/\{\{([^}]+)\}\}/g, (_, key) => {
     const trimmed = key.trim();
     return trimmed in vars ? vars[trimmed] : `{{${key}}}`;
   });

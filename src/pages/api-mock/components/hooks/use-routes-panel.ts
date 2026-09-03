@@ -35,26 +35,19 @@ export function useRouteEditor(
   onAdd: (route: Omit<MockRoute, 'id'>) => void,
 ) {
   const [body, setBody] = useState(route.responseBody);
-  const [reqBody, setReqBody] = useState(route.requestBody || '');
-  const [activeTab, setActiveTab] = useState<'config' | 'matcher' | 'response'>('config');
 
   useEffect(() => {
     setBody(route.responseBody);
-    setReqBody(route.requestBody || '');
-  }, [route.id, route.responseBody, route.requestBody]);
+  }, [route.id, route.responseBody]);
 
   const domain = domains.find((d) => d.id === route.domainId);
+  const reqBody = route.requestBody || '';
   const isWriteMethod = ['POST', 'PUT', 'PATCH'].includes(route.method);
   const queryParams = route.requestQueryParams || [];
 
   const saveBody = () => {
     onUpdate(route.id, { responseBody: body });
     toast.success('Response body updated.');
-  };
-
-  const saveReqBody = () => {
-    onUpdate(route.id, { requestBody: reqBody });
-    toast.success('Expected request payload saved.');
   };
 
   const formatBody = () => {
@@ -68,17 +61,6 @@ export function useRouteEditor(
     }
   };
 
-  const formatReqBody = () => {
-    if (!reqBody) return;
-    try {
-      const formatted = JSON.stringify(JSON.parse(reqBody), null, 2);
-      setReqBody(formatted);
-      toast.success('Prettified JSON request payload');
-    } catch {
-      toast.error('Invalid JSON structure in request payload');
-    }
-  };
-
   const handleClone = () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _id, ...rest } = route;
@@ -86,41 +68,25 @@ export function useRouteEditor(
     toast.success(`Cloned endpoint: ${route.method} ${route.path}`);
   };
 
-  const handleAddParam = () => {
-    onUpdate(route.id, {
-      requestQueryParams: [...queryParams, { key: '', value: '', enabled: true }],
-    });
-  };
-
-  const handleRemoveParam = (index: number) => {
-    onUpdate(route.id, {
-      requestQueryParams: queryParams.filter((_, i) => i !== index),
-    });
-  };
-
-  const handleParamChange = (index: number, field: 'key' | 'value', val: string) => {
-    const updated = [...queryParams];
-    updated[index] = { ...updated[index], [field]: val };
-    onUpdate(route.id, { requestQueryParams: updated });
-  };
-
-  const handleParamToggle = (index: number) => {
-    const updated = [...queryParams];
-    updated[index] = { ...updated[index], enabled: !updated[index].enabled };
-    onUpdate(route.id, { requestQueryParams: updated });
-  };
-
   const handleSendToRepeater = async () => {
     try {
       const protocol = domain?.ssl ? 'https' : 'http';
-      const hostname = domain?.hostname || 'localhost';
+      const hostname = domain?.hostname || '127.0.0.1';
+      const port = domain?.ssl ? '443' : '4000';
+      const url = `${protocol}://${hostname}:${port}${route.path}`;
 
-      const qParams = queryParams.filter(p => p.enabled && p.key);
-      const queryStr = qParams.length > 0
-        ? '?' + qParams.map(p => `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value)}`).join('&')
-        : '';
+      const headers: Record<string, string> = {
+        Host: `${hostname}:${port}`,
+        'User-Agent': 'HexBuffer-Mock-Client/1.0',
+        Accept: '*/*',
+        ...(route.responseHeaders || {}),
+      };
 
-      const url = `${protocol}://${hostname}${route.path}${queryStr}`;
+      const rawHeaders = Object.entries(headers)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join('\r\n');
+
+      const fullRequest = `${route.method} ${route.path} HTTP/1.1\r\n${rawHeaders}\r\n\r\n`;
 
       const repeaterStore = useRepeaterStore.getState();
       let ws = repeaterStore.workspaces.find(w => w.name === 'mock-api' || w.name === 'mock-forge');
@@ -168,6 +134,8 @@ export function useRouteEditor(
       }));
 
       await collectionsStore.saveActiveEndpoint();
+      useNavStore.getState().openWindow('/repeater', 'Repeater');
+      useNavStore.getState().focusWindow('/repeater');
       useNavStore.getState().triggerNavBlink('/repeater');
       toast.success(`Sent endpoint ${route.method} ${route.path} to Repeater!`);
     } catch (error) {
@@ -195,21 +163,11 @@ export function useRouteEditor(
   };
 
   return {
-    body, setBody,
-    reqBody, setReqBody,
-    activeTab, setActiveTab,
-    domain,
-    isWriteMethod,
-    queryParams,
+    body,
+    setBody,
     saveBody,
-    saveReqBody,
     formatBody,
-    formatReqBody,
     handleClone,
-    handleAddParam,
-    handleRemoveParam,
-    handleParamChange,
-    handleParamToggle,
     handleSendToRepeater,
     handleCopyUrl,
     handleCopyCurl,

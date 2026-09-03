@@ -71,7 +71,7 @@ const ScratchpadPage = React.lazy(() =>
   import("@/pages/notes").then((m) => ({ default: m.ScratchpadPage }))
 );
 const MockApiPage = React.lazy(() =>
-  import("@/pages/mock-api").then((m) => ({ default: m.MockApiPage }))
+  import("@/pages/api-mock").then((m) => ({ default: m.MockApiPage }))
 );
 const ResponseOverridePage = React.lazy(() =>
   import("@/pages/api-override").then((m) => ({ default: m.ResponseOverridePage }))

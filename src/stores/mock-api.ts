@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { MockDomain, MockApiSubTab, MockRoute, RequestLog, MockServerConfig, MockServerStatus } from '@/pages/mock-api/types';
+import type { MockDomain, MockApiSubTab, MockRoute, RequestLog, MockServerConfig, MockServerStatus } from '@/pages/api-mock/types';
 
 interface MockApiState {
   activeSubTab: MockApiSubTab;

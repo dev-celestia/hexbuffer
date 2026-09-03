@@ -9,14 +9,12 @@ import {
   SelectValue,
   TextEditor,
 } from '@celestia-project/ui';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   TrashIcon,
   PencilSimpleIcon,
   ArrowSquareOutIcon,
-  CopyIcon,
   CodeIcon,
-  CheckIcon,
   FloppyDiskIcon,
 } from '@phosphor-icons/react';
 
@@ -26,6 +24,7 @@ import { useTheme } from '@/components/theme-provider';
 import { HTTP_METHODS } from '../constants';
 import type { MockDomain, MockRoute } from '../types';
 import { useRouteEditor } from './hooks/use-routes-panel';
+import { parseRouteParams } from '../../api-mock/lib/route-template';
 
 const ALL_METHODS = ['ALL', ...HTTP_METHODS] as const;
 
@@ -65,27 +64,16 @@ export function RouteEditor({
     formatBody,
     handleClone,
     handleSendToRepeater,
-    handleCopyUrl,
-    handleCopyCurl,
   } = useRouteEditor(route, domains, onUpdate, onAdd);
 
   const [editingHeader, setEditingHeader] = useState(false);
   const [statusCodeStr, setStatusCodeStr] = useState(String(route.statusCode));
   const [editMethod, setEditMethod] = useState<string>(route.method);
   const [editPath, setEditPath] = useState(route.path);
-  const [copiedUrl, setCopiedUrl] = useState(false);
+  const dynamicParams = useMemo(() => parseRouteParams(route.path), [route.path]);
 
   const matchedDomain = domains.find((d) => d.id === route.domainId || d.hostname === route.domainId);
-  const domainHostname = matchedDomain?.hostname || (route.domainId && !route.domainId.includes('-') ? route.domainId : 'localhost');
   const isFullUrl = route.path.startsWith('http://') || route.path.startsWith('https://');
-
-  const baseUrl = isMockServer
-    ? `http://127.0.0.1:${serverPort}`
-    : isFullUrl
-    ? route.path
-    : matchedDomain
-    ? `${matchedDomain.ssl ? 'https' : 'http'}://${matchedDomain.hostname}`
-    : `https://${domainHostname}`;
 
   useEffect(() => {
     setStatusCodeStr(String(route.statusCode));
@@ -130,12 +118,6 @@ export function RouteEditor({
     setEditMethod(route.method);
     setEditPath(route.path);
     setEditingHeader(false);
-  };
-
-  const copyUrl = () => {
-    handleCopyUrl(baseUrl);
-    setCopiedUrl(true);
-    setTimeout(() => setCopiedUrl(false), 2000);
   };
 
   const displayMatchSummary = () => {
@@ -286,6 +268,19 @@ export function RouteEditor({
             >
               {displayMatchSummary()}
             </span>
+            {dynamicParams.map((p) => (
+              <Badge
+                key={p}
+                variant="secondary"
+                className={cn(
+                  // Typography
+                  "font-mono text-[10px] text-primary"
+                )}
+                title={`Dynamic route parameter :${p}. Use {{${p}}} in template.`}
+              >
+                :{p}
+              </Badge>
+            ))}
             <Button
               variant="ghost"
               size="icon"
@@ -322,28 +317,6 @@ export function RouteEditor({
                 "gap-1.5"
               )}
             >
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={copyUrl}
-                title="Copy URL"
-              >
-                {copiedUrl ? (
-                  <CheckIcon className="text-green-400" />
-                ) : (
-                  <CopyIcon />
-                )}
-                URL
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleCopyCurl(baseUrl)}
-                title="Copy cURL command"
-              >
-                <CodeIcon />
-                cURL
-              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -450,6 +423,53 @@ export function RouteEditor({
                 title="HTTP Status Code"
               />
             </div>
+
+            {dynamicParams.length > 0 && (
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center",
+
+                  // Sizing & Spacing
+                  "gap-1 ml-2"
+                )}
+              >
+                <span
+                  className={cn(
+                    // Typography
+                    "text-[11px] text-muted-foreground font-mono"
+                  )}
+                >
+                  Tags:
+                </span>
+                {dynamicParams.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`{{${p}}}`);
+                      toast.success(`Copied {{${p}}} to clipboard`);
+                    }}
+                    className={cn(
+                      // Sizing & Spacing
+                      "px-1.5 py-0.5 rounded",
+
+                      // Typography
+                      "font-mono text-[10px] font-semibold text-primary",
+
+                      // Backgrounds & Borders
+                      "bg-primary/10 border border-primary/30 hover:bg-primary/20",
+
+                      // Interactive & States
+                      "cursor-pointer"
+                    )}
+                    title={`Click to copy {{${p}}} tag to clipboard`}
+                  >
+                    {`{{${p}}}`}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div

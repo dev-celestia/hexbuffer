@@ -68,6 +68,7 @@ export function NewRouteDialog({
       responseBody: body,
       responseHeaders: { 'Content-Type': 'application/json' },
       matchers: [],
+      chaos: { latencyMode: 'none' },
       enabled: true,
       matcherEnabled: true,
     });
@@ -76,12 +77,14 @@ export function NewRouteDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Button size="sm" className="h-7 text-xs px-2.5 cursor-pointer">
-          <PlusIcon className="mr-1 h-3 w-3 stroke-[2]" />
-          {buttonLabel ?? (isLocalMock ? 'New Endpoint' : 'New Rule')}
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          <Button size="sm">
+            <PlusIcon />
+            {buttonLabel ?? (isLocalMock ? 'New Endpoint' : 'New Rule')}
+          </Button>
+        }
+      />
       <DialogContent className="sm:max-w-lg border-border bg-background">
         <DialogHeader>
           <DialogTitle className="text-sm font-bold text-foreground">
