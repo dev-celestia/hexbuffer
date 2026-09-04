@@ -84,7 +84,7 @@ export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Readon
                 INNER_SIZE,
 
                 // Backgrounds & Borders
-                "rounded-sm shadow-sm border",
+                "rounded-3xl shadow-sm border",
 
                 // Interactive & States
                 "transition-all duration-200",

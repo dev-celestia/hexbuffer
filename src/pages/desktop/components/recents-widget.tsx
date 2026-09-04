@@ -79,7 +79,7 @@ export function RecentsWidget() {
                     // Layout & Positioning
                     "flex items-center justify-center shrink-0 select-none overflow-hidden",
                     // Sizing & Spacing
-                    "size-4.5 rounded-[4px]",
+                    "size-4.5 rounded-[6px]",
                     // Backgrounds & Borders
                     item.colors
                       ? `${item.colors.bg} border border-white/20 dark:border-white/10 shadow-xs text-white`

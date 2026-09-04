@@ -173,7 +173,7 @@ export function AppLauncher() {
                             // Layout & Positioning
                             "flex items-center justify-center shrink-0 select-none overflow-hidden",
                             // Sizing & Spacing
-                            "size-8.5 rounded-lg",
+                            "size-8.5 rounded-xl",
                             // Backgrounds & Borders
                             item.colors
                               ? `${item.colors.bg} border border-white/20 dark:border-white/10 shadow-xs text-white`

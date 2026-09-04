@@ -42,7 +42,7 @@ export function DockItem({
               "flex size-full items-center justify-center overflow-hidden",
 
               // Sizing & Spacing
-              "rounded-sm",
+              "rounded-lg",
 
               // Backgrounds & Borders
               "border shadow-xs select-none",
