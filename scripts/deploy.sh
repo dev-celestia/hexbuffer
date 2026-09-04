@@ -10,7 +10,6 @@ usage() {
 Usage:
   pnpm run deploy                               Auto-increment full suite patch version, then build/upload
   pnpm run deploy -- --version 1.0.1            Deploy specific version (full suite)
-  pnpm run deploy -- --target http --version 1.0.1  Deploy specific target with exact version
   pnpm run deploy -- --no-upload                Build locally without uploading to S3
   pnpm run deploy -- --windows                  Cross-compile Windows x86_64 from macOS/Linux
   pnpm run deploy -- --windows-all              Build/upload Windows x64, x86, and ARM64
@@ -19,7 +18,6 @@ Usage:
 
 Notes:
   - Pass script args after -- when using pnpm (e.g. pnpm run deploy -- --version 1.2.0).
-  - Standalone targets build with their dedicated configs in src-tauri/targets/<name>.json.
   - Upload uses R2_ENDPOINT, R2_BUCKET, and optional UPDATER_BASE_URL.
 EOF
 }

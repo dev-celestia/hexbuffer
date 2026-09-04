@@ -9,7 +9,6 @@ usage() {
 Usage:
   ./scripts/build.sh                      Build/upload full suite (Hexbuffer)
   ./scripts/build.sh --help               Show this help
-  ./scripts/build.sh --target <name>      Build/upload specific standalone target (e.g. http, repeater, jwt)
   ./scripts/build.sh --upload             Upload existing artifacts (skip build)
   ./scripts/build.sh --no-upload          Build app locally without uploading to S3
   ./scripts/build.sh 0.1.1                Bump to exact version, then build/upload
@@ -21,7 +20,6 @@ Usage:
 EOF
 }
 
-TARGET=""
 REQUESTED_VERSION=""
 AUTO_BUMP=false
 FORCE_BUILD=false
@@ -34,15 +32,6 @@ SKIP_UPLOAD=false
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --target|-t)
-      if [ -z "${2:-}" ]; then
-        echo "Missing value for $1"
-        usage
-        exit 1
-      fi
-      TARGET="$2"
-      shift 2
-      ;;
     --upload)
       UPLOAD_ONLY=true
       shift
@@ -153,38 +142,14 @@ fi
 TARGET_CONFIG_FLAG=""
 TARGET_PREFIX=""
 
-if [ -n "$TARGET" ]; then
-  TARGET_JSON="$ROOT/src-tauri/targets/${TARGET}.json"
-  if [ ! -f "$TARGET_JSON" ]; then
-    echo "Error: Target config $TARGET_JSON not found."
-    exit 1
-  fi
-  TARGET_CONFIG_FLAG="--config src-tauri/targets/${TARGET}.json"
-  TARGET_PREFIX="targets/${TARGET}/"
-  export VITE_APP_TARGET="$TARGET"
-
-  if [ -n "$REQUESTED_VERSION" ]; then
-    "$ROOT/scripts/bump-version.sh" --target "$TARGET" "$REQUESTED_VERSION"
-  elif $AUTO_BUMP; then
-    "$ROOT/scripts/bump-version.sh" --target "$TARGET"
-  fi
-
-  VERSION=$(node -e "
-    const fs = require('fs');
-    const cfg = JSON.parse(fs.readFileSync('$TARGET_JSON', 'utf-8'));
-    console.log(cfg.version || '1.0.0');
-  ")
-  APP_DISPLAY_NAME="Target [${TARGET}]"
-else
-  if [ -n "$REQUESTED_VERSION" ]; then
-    "$ROOT/scripts/bump-version.sh" "$REQUESTED_VERSION"
-  elif $AUTO_BUMP; then
-    "$ROOT/scripts/bump-version.sh"
-  fi
-
-  VERSION="$(cat "$ROOT/VERSION")"
-  APP_DISPLAY_NAME="Hexbuffer Full Suite"
+if [ -n "$REQUESTED_VERSION" ]; then
+  "$ROOT/scripts/bump-version.sh" "$REQUESTED_VERSION"
+elif $AUTO_BUMP; then
+  "$ROOT/scripts/bump-version.sh"
 fi
+
+VERSION="$(cat "$ROOT/VERSION")"
+APP_DISPLAY_NAME="Hexbuffer Full Suite"
 
 PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 BASE_URL="${UPDATER_BASE_URL:-https://dist.0xbuffer.com}"

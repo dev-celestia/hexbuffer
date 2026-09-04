@@ -28,6 +28,7 @@ import {
 } from '@phosphor-icons/react';
 
 import httpHistoryIcon from '@/assets/app/http-history.png';
+import httpStandaloneIcon from '@/assets/standalone-app-icon/http.png';
 import interceptIcon from '@/assets/app/Intercept.png';
 import intruderIcon from '@/assets/app/intruder.png';
 import notesIcon from '@/assets/app/notes.png';
@@ -42,6 +43,8 @@ export type ImageSource = string | { src: string };
 
 export const APP_ICON_IMAGES: Record<string, ImageSource> = {
   '/http-history': httpHistoryIcon,
+  'standalone-http': httpStandaloneIcon,
+  'hexbuffer http': httpStandaloneIcon,
   '/intercept': interceptIcon,
   '/intruder': intruderIcon,
   '/scratchpad': notesIcon,

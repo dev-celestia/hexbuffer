@@ -1,9 +1,13 @@
 import * as React from 'react';
 import { toast } from 'sonner';
 
-import { getEffectiveProxyPort, useAppStore } from '@/stores/app';
+import { getEffectiveProxyPort, initProxySync, useAppStore } from '@/stores/app';
 
 export function useProxyButton() {
+  React.useEffect(() => {
+    initProxySync();
+  }, []);
+
   const proxyStatus = useAppStore((state) => state.proxyStatus);
   const proxyPort = useAppStore((state) => state.proxyPort);
   const proxyDefaultPort = useAppStore((state) => state.proxyDefaultPort);

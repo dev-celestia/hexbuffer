@@ -21,7 +21,7 @@ use std::sync::{
     atomic::{AtomicBool, AtomicU16, Ordering},
     Arc, Mutex, OnceLock,
 };
-use tauri::AppHandle;
+use tauri::{AppHandle, Emitter};
 use tokio::net::TcpListener;
 use tokio::sync::oneshot;
 
@@ -286,6 +286,14 @@ pub fn run(config: ProxyConfig, app_handle: AppHandle) {
         port
     );
 
+    let status = crate::commands::proxy::ProxyRuntimeStatus {
+        running: true,
+        port: Some(port),
+        default_port: default_proxy_port(),
+        connections: 0,
+    };
+    let _ = app_handle.emit("proxy-status-changed", &status);
+
     runtime.block_on(async move {
         tokio::select! {
             res = proxy.start() => {
@@ -299,4 +307,12 @@ pub fn run(config: ProxyConfig, app_handle: AppHandle) {
         }
     });
     clear_proxy_runtime();
+
+    let stopped_status = crate::commands::proxy::ProxyRuntimeStatus {
+        running: false,
+        port: None,
+        default_port: default_proxy_port(),
+        connections: 0,
+    };
+    let _ = app_handle.emit("proxy-status-changed", &stopped_status);
 }

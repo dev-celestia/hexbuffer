@@ -6,10 +6,31 @@ import { useNotificationStore } from './notifications';
 
 export type ProxyStatus = 'connected' | 'disconnected' | 'starting' | 'stopping';
 
-interface ProxyRuntimeStatus {
+export interface ProxyRuntimeStatus {
   running: boolean;
   port: number | null;
+  default_port?: number;
   connections: number;
+}
+
+function handleProxyStatusUpdate(status: ProxyRuntimeStatus) {
+  useAppStore.setState({
+    proxyStatus: status.running ? 'connected' : 'disconnected',
+    proxyPort: status.port,
+    ...(status.running && status.port !== null ? { proxyDefaultPort: status.port } : {}),
+  });
+}
+
+function broadcastProxyStatus(status: ProxyRuntimeStatus) {
+  if (typeof window !== 'undefined' && typeof BroadcastChannel !== 'undefined') {
+    try {
+      const channel = new BroadcastChannel('hexbuffer-proxy-sync');
+      channel.postMessage({ type: 'PROXY_STATUS_CHANGED', payload: status });
+      channel.close();
+    } catch {
+      // ignore
+    }
+  }
 }
 
 export const DEFAULT_PROXY_PORT = 8888;
@@ -136,6 +157,7 @@ export const useAppStore = create<AppState>()(
             proxyPort: status.port,
             proxyDefaultPort: status.port,
           });
+          broadcastProxyStatus(status);
         } catch (error) {
           console.error('[store] Failed to start proxy:', error);
           const errMsg = error instanceof Error ? error.message : String(error);
@@ -146,6 +168,7 @@ export const useAppStore = create<AppState>()(
             source: 'Proxy',
           });
           set({ proxyStatus: 'disconnected', proxyPort: null });
+          broadcastProxyStatus({ running: false, port: null, connections: 0 });
           throw new Error(errMsg);
         }
       },
@@ -170,6 +193,7 @@ export const useAppStore = create<AppState>()(
               ? { proxyDefaultPort: status.port }
               : {}),
           });
+          broadcastProxyStatus(status);
         } catch (error) {
           console.error('[store] Failed to stop proxy:', error);
           const status = await invoke<ProxyRuntimeStatus>('get_proxy_status');
@@ -186,6 +210,7 @@ export const useAppStore = create<AppState>()(
               ? { proxyDefaultPort: status.port }
               : {}),
           });
+          broadcastProxyStatus(status);
           throw error;
         }
       },
@@ -236,3 +261,49 @@ export const useAppStore = create<AppState>()(
     }
   )
 );
+
+let proxySyncInitialized = false;
+
+export function initProxySync() {
+  if (proxySyncInitialized || typeof window === 'undefined') {
+    return;
+  }
+  proxySyncInitialized = true;
+
+  // 1. Check current runtime status immediately on startup
+  useAppStore.getState().checkProxyStatus().catch(() => {});
+
+  // 2. Resync on window focus to ensure freshness across window switches
+  window.addEventListener('focus', () => {
+    useAppStore.getState().checkProxyStatus().catch(() => {});
+  });
+
+  // 3. Listen to Tauri backend event broadcast
+  if (Boolean((window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__)) {
+    import('@tauri-apps/api/event')
+      .then(({ listen }) => {
+        listen<ProxyRuntimeStatus>('proxy-status-changed', (event) => {
+          if (event?.payload) {
+            handleProxyStatusUpdate(event.payload);
+          }
+        }).catch((err) => {
+          console.error('[proxy-sync] Failed to listen to proxy-status-changed:', err);
+        });
+      })
+      .catch(() => {});
+  }
+
+  // 4. Cross-webview BroadcastChannel for zero-latency local frontend sync
+  if (typeof BroadcastChannel !== 'undefined') {
+    try {
+      const channel = new BroadcastChannel('hexbuffer-proxy-sync');
+      channel.onmessage = (event) => {
+        if (event?.data?.type === 'PROXY_STATUS_CHANGED' && event.data.payload) {
+          handleProxyStatusUpdate(event.data.payload);
+        }
+      };
+    } catch {
+      // ignore
+    }
+  }
+}

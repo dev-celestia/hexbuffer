@@ -11,6 +11,7 @@ import { ResponseDetailWindow } from "@/pages/live-traffic/http-history/componen
 import { suppressResizeObserverLoopErrors } from "@/lib/resize-observer-errors";
 import { useTauriFocusFix } from "@/hooks/use-tauri-focus-fix";
 import { getAppTarget, StandaloneAppView } from "@/routes/page-resolver";
+import { initProxySync } from "@/stores/app";
 import AppRoutes from "./App";
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
@@ -46,7 +47,14 @@ function MainWindowReadySignal() {
 
 function Root() {
   useTauriFocusFix();
+
+  React.useEffect(() => {
+    initProxySync();
+  }, []);
+
   const responseDetailCallId = getResponseDetailCallId();
+  const queryTarget = getAppTarget();
+
   if (responseDetailCallId) {
     return (
       <BrowserRouter>
@@ -58,13 +66,11 @@ function Root() {
     );
   }
 
-  const appTarget = getAppTarget();
-  if (appTarget) {
+  if (queryTarget) {
     return (
       <BrowserRouter>
         <ThemeProvider>
-          <StandaloneAppView target={appTarget} />
-          <MainWindowReadySignal />
+          <StandaloneAppView target={queryTarget} />
           <Toaster position="bottom-right" closeButton />
         </ThemeProvider>
       </BrowserRouter>

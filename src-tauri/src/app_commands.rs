@@ -158,3 +158,213 @@ pub async fn open_cdp_browser(_app: tauri::AppHandle, port: u16) -> Result<(), S
         "Google Chrome or Chromium was not found. Install Chrome or Chromium to use Open Browser.".to_string()
     }))
 }
+
+#[tauri::command]
+pub fn get_cli_target() -> Option<String> {
+    for arg in std::env::args().skip(1) {
+        if let Some(target) = arg.strip_prefix("--target=") {
+            return Some(target.trim_matches('"').to_string());
+        }
+        if let Some(target) = arg.strip_prefix("--subapp=") {
+            return Some(target.trim_matches('"').to_string());
+        }
+    }
+    None
+}
+
+#[tauri::command]
+pub fn create_os_desktop_shortcut(
+    _app: tauri::AppHandle,
+    tool_id: String,
+    display_name: String,
+    icon_path: Option<String>,
+) -> Result<String, String> {
+    use std::io::Write;
+
+    let desktop_dir = dirs::desktop_dir().ok_or_else(|| "Could not locate Desktop directory".to_string())?;
+    let exe_path = std::env::current_exe().map_err(|e| e.to_string())?;
+
+    // Determine the icon to use if not provided
+    let resolved_icon = icon_path.or_else(|| {
+        let default_experiment_icon = "/Users/arham/Desktop/project/apprecon/src/assets/standalone-app-icon/http.png";
+        if std::path::Path::new(default_experiment_icon).exists() {
+            Some(default_experiment_icon.to_string())
+        } else {
+            None
+        }
+    });
+
+    #[cfg(target_os = "windows")]
+    {
+        let link_path = desktop_dir.join(format!("{}.lnk", display_name));
+        let mut link = mslnk::ShellLink::new(&exe_path).map_err(|e| e.to_string())?;
+        link.set_arguments(Some(format!("--target={}", tool_id)));
+        if let Some(ref icon) = resolved_icon {
+            link.set_icon_location(Some(icon.clone()));
+        }
+        link.create_at(&link_path).map_err(|e| e.to_string())?;
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        // Check if current_exe is inside an .app bundle
+        let mut app_bundle = None;
+        let mut current = exe_path.as_path();
+        while let Some(parent) = current.parent() {
+            if parent.extension().and_then(|ext| ext.to_str()) == Some("app") {
+                app_bundle = Some(parent.to_path_buf());
+                break;
+            }
+            current = parent;
+        }
+
+        // On macOS, prefer creating a native .app launcher with osacompile so it launches silently without terminal window
+        let app_path = desktop_dir.join(format!("{}.app", display_name));
+        let mut created_target = app_path.clone();
+
+        // Remove previous launcher if it exists
+        if app_path.exists() {
+            let _ = std::fs::remove_dir_all(&app_path);
+        }
+
+        let osa_script = if let Some(bundle) = &app_bundle {
+            format!(
+                "do shell script \"open -n -a \\\"{}\\\" --args --target=\\\"{}\\\"\"",
+                bundle.display(),
+                tool_id
+            )
+        } else {
+            format!(
+                "do shell script \"\\\"{}\\\" --target=\\\"{}\\\" &\"",
+                exe_path.display(),
+                tool_id
+            )
+        };
+
+        // Try compiling to an .app using osacompile
+        let osa_result = std::process::Command::new("osacompile")
+            .arg("-e")
+            .arg(&osa_script)
+            .arg("-o")
+            .arg(&app_path)
+            .output();
+
+        let success_app = match osa_result {
+            Ok(output) => output.status.success(),
+            Err(_) => false,
+        };
+
+        if success_app {
+            // Hide the launcher from macOS Dock so it acts as an invisible background agent
+            let plist_path = app_path.join("Contents/Info.plist");
+            let plist_str = plist_path.display().to_string();
+            let _ = std::process::Command::new("/usr/libexec/PlistBuddy")
+                .args(["-c", "Add :LSUIElement bool true", &plist_str])
+                .output();
+        } else {
+            // Fallback to .command script
+            let link_path = desktop_dir.join(format!("{}.command", display_name));
+            let content = if let Some(bundle) = app_bundle {
+                format!(
+                    "#!/bin/sh\nopen -a \"{}\" --args --target=\"{}\"\n",
+                    bundle.display(),
+                    tool_id
+                )
+            } else {
+                format!(
+                    "#!/bin/sh\n\"{}\" --target=\"{}\" &\n",
+                    exe_path.display(),
+                    tool_id
+                )
+            };
+
+            let mut file = std::fs::File::create(&link_path).map_err(|e| e.to_string())?;
+            file.write_all(content.as_bytes()).map_err(|e| e.to_string())?;
+
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                let _ = std::fs::set_permissions(&link_path, std::fs::Permissions::from_mode(0o755));
+            }
+            created_target = link_path;
+        }
+
+        // Apply custom icon using macOS AppKit via swift
+        if let Some(ref icon) = resolved_icon {
+            if std::path::Path::new(icon).exists() {
+                let swift_script = format!(
+                    r#"import AppKit
+if let img = NSImage(contentsOfFile: "{}") {{
+    let ok = NSWorkspace.shared.setIcon(img, forFile: "{}", options: [])
+    print(ok)
+}}"#,
+                    icon,
+                    created_target.display()
+                );
+                let _ = std::process::Command::new("swift")
+                    .arg("-e")
+                    .arg(&swift_script)
+                    .output();
+
+                // Touch target to force Finder to refresh its icon cache
+                let _ = std::process::Command::new("touch")
+                    .arg(&created_target)
+                    .output();
+            }
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        let slug = tool_id.to_lowercase().replace(' ', "-");
+        let link_path = desktop_dir.join(format!("{}.desktop", slug));
+        let icon_line = if let Some(ref icon) = resolved_icon {
+            format!("Icon={}\n", icon)
+        } else {
+            String::new()
+        };
+        let content = format!(
+            "[Desktop Entry]\nName={}\nExec=\"{}\" --target={}\nType=Application\n{}Terminal=false\nCategories=Development;Security;\n",
+            display_name,
+            exe_path.display(),
+            tool_id,
+            icon_line
+        );
+        let mut file = std::fs::File::create(&link_path).map_err(|e| e.to_string())?;
+        file.write_all(content.as_bytes()).map_err(|e| e.to_string())?;
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = std::fs::set_permissions(&link_path, std::fs::Permissions::from_mode(0o755));
+        }
+    }
+
+    Ok(format!("Shortcut created for {}", display_name))
+}
+
+#[cfg(target_os = "macos")]
+pub fn set_macos_dock_icon_from_file(path: &std::path::Path) -> Result<(), String> {
+    use objc2::{AllocAnyThread, MainThreadMarker};
+    use objc2_app_kit::{NSApplication, NSImage};
+    use objc2_foundation::NSData;
+
+    let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
+    let mtm = unsafe { MainThreadMarker::new_unchecked() };
+    let app = NSApplication::sharedApplication(mtm);
+    let data = NSData::with_bytes(&bytes);
+    let app_icon = NSImage::initWithData(NSImage::alloc(), &data)
+        .ok_or_else(|| "Failed to create NSImage from icon data".to_string())?;
+    unsafe { app.setApplicationIconImage(Some(&app_icon)) };
+    Ok(())
+}
+
+#[tauri::command]
+pub fn set_dock_icon(icon_path: String) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        set_macos_dock_icon_from_file(std::path::Path::new(&icon_path))?;
+    }
+    let _ = icon_path;
+    Ok(())
+}

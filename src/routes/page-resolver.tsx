@@ -41,6 +41,27 @@ const IntruderPage = React.lazy(() =>
 const InterceptPage = React.lazy(() =>
   import("@/pages/intercept").then((m) => ({ default: m.InterceptPage }))
 );
+const MockApiPage = React.lazy(() =>
+  import("@/pages/api-mock").then((m) => ({ default: m.MockApiPage }))
+);
+const ResponseOverridePage = React.lazy(() =>
+  import("@/pages/api-override").then((m) => ({ default: m.ResponseOverridePage }))
+);
+const NucleiRunPage = React.lazy(() =>
+  import("@/pages/nuclei-run").then((m) => ({ default: m.NucleiRunPage }))
+);
+const RegressionPage = React.lazy(() =>
+  import("@/pages/regression").then((m) => ({ default: m.RegressionPage }))
+);
+const BrowserAutomationPage = React.lazy(() =>
+  import("@/pages/browser").then((m) => ({ default: m.BrowserAutomationPage }))
+);
+const FileExplorerPage = React.lazy(() =>
+  import("@/pages/file-explorer").then((m) => ({ default: m.FileExplorerPage }))
+);
+const SettingsPage = React.lazy(() =>
+  import("@/pages/settings").then((m) => ({ default: m.Settings }))
+);
 
 function StandaloneHttpHistoryPage() {
   React.useEffect(() => {
@@ -115,7 +136,7 @@ export function StandaloneAppView({ target }: { readonly target: string }) {
       case "http":
       case "http-history":
       case "live-traffic":
-        return <StandaloneLayout id="/http-history" title="HTTP History"><StandaloneHttpHistoryPage /></StandaloneLayout>;
+        return <StandaloneLayout id="standalone-http" title="Hexbuffer HTTP"><StandaloneHttpHistoryPage /></StandaloneLayout>;
       case "encoder":
         return <StandaloneLayout id="/encoder" title="Encoder"><EncoderPage /></StandaloneLayout>;
       case "jwt":
@@ -142,6 +163,25 @@ export function StandaloneAppView({ target }: { readonly target: string }) {
         return <StandaloneLayout id="/kanban" title="Hexbuffer Kanban"><KanbanPage /></StandaloneLayout>;
       case "terminal":
         return <StandaloneLayout id="/terminal" title="Hexbuffer Terminal"><TerminalPage /></StandaloneLayout>;
+      case "api-mock":
+      case "mock-api":
+      case "mock-forge":
+        return <StandaloneLayout id="/api-mock" title="API Mock"><MockApiPage /></StandaloneLayout>;
+      case "api-override":
+      case "response-override":
+        return <StandaloneLayout id="/api-override" title="API Override"><ResponseOverridePage /></StandaloneLayout>;
+      case "nuclei":
+      case "nuclei-run":
+      case "scanner":
+        return <StandaloneLayout id="/nuclei-run" title="Scanner"><NucleiRunPage /></StandaloneLayout>;
+      case "regression":
+        return <StandaloneLayout id="/regression" title="Regression"><RegressionPage /></StandaloneLayout>;
+      case "browser":
+        return <StandaloneLayout id="/browser" title="Browser Automation"><BrowserAutomationPage /></StandaloneLayout>;
+      case "file-explorer":
+        return <StandaloneLayout id="/file-explorer" title="File Explorer"><FileExplorerPage /></StandaloneLayout>;
+      case "settings":
+        return <StandaloneLayout id="/settings" title="Settings"><SettingsPage /></StandaloneLayout>;
       default:
         return null;
     }

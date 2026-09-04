@@ -221,6 +221,9 @@ fn main() {
             app_commands::safe_start_dragging,
             app_commands::get_cdp_targets,
             app_commands::open_cdp_browser,
+            app_commands::create_os_desktop_shortcut,
+            app_commands::get_cli_target,
+            app_commands::set_dock_icon,
             hexbuffer::commands::hash::start_hash_attack,
             hexbuffer::commands::hash::stop_hash_attack,
             hexbuffer::commands::hash::pause_hash_attack,
@@ -247,12 +250,27 @@ fn main() {
         .plugin(tauri_plugin_pty::init())
         .plugin(tauri_plugin_notification::init())
         .on_window_event(|window, event| {
-            if let tauri::WindowEvent::CloseRequested { .. } = event {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 // Only run close cleanup when the window is actually visible.
                 // Spurious CloseRequested events can fire during startup before the
                 // window is shown.
                 if !window.is_visible().unwrap_or(true) {
                     return;
+                }
+
+                if window.label() == "main" {
+                    // Check if any other windows (like subapp-* windows) are currently open
+                    let has_other_windows = window.app_handle().webview_windows().into_iter().any(|(lbl, w)| {
+                        lbl != "main" && lbl != "splashscreen" && w.is_visible().unwrap_or(false)
+                    });
+
+                    if has_other_windows {
+                        // Prevent killing the entire app process so sub-windows stay alive
+                        api.prevent_close();
+                        let _ = window.hide();
+                        crate::log("Main window hidden (sub-windows remain active)");
+                        return;
+                    }
                 }
 
                 if let Some(state) = window.try_state::<hexbuffer::AiBrowserState>() {
@@ -266,6 +284,18 @@ fn main() {
                 }
             }
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app_handle, event| {
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Reopen { .. } = event {
+                crate::log("macOS Reopen event received: revealing and focusing main suite window");
+                if let Some(main_win) = app_handle.get_webview_window("main") {
+                    let _ = main_win.show();
+                    let _ = main_win.unminimize();
+                    let _ = main_win.set_focus();
+                }
+            }
+            let _ = (app_handle, event);
+        });
 }

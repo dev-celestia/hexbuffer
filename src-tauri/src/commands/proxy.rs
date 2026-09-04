@@ -1,20 +1,27 @@
 use std::net::{SocketAddr, TcpStream};
 use std::time::Duration;
 
-use serde::Serialize;
-use tauri::AppHandle;
+use serde::{Deserialize, Serialize};
+use tauri::{AppHandle, Emitter};
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ProxyRuntimeStatus {
-    running: bool,
-    port: Option<u16>,
-    default_port: u16,
-    connections: usize,
+    pub running: bool,
+    pub port: Option<u16>,
+    pub default_port: u16,
+    pub connections: usize,
 }
 
 #[tauri::command]
 pub async fn start_proxy(app: AppHandle, port: u16, tls_port: u16) -> Result<String, String> {
     if let Some(active_port) = crate::proxy::active_proxy_port() {
+        let status = ProxyRuntimeStatus {
+            running: true,
+            port: Some(active_port),
+            default_port: crate::proxy::default_proxy_port(),
+            connections: 0,
+        };
+        let _ = app.emit("proxy-status-changed", &status);
         return Ok(format!("Proxy already running on port {}", active_port));
     }
 
@@ -36,6 +43,13 @@ pub async fn start_proxy(app: AppHandle, port: u16, tls_port: u16) -> Result<Str
         if let Some(active_port) = crate::proxy::active_proxy_port() {
             let addr = SocketAddr::from(([127, 0, 0, 1], active_port));
             if TcpStream::connect_timeout(&addr, Duration::from_millis(150)).is_ok() {
+                let status = ProxyRuntimeStatus {
+                    running: true,
+                    port: Some(active_port),
+                    default_port: crate::proxy::default_proxy_port(),
+                    connections: 0,
+                };
+                let _ = app.emit("proxy-status-changed", &status);
                 return Ok(format!(
                     "Proxy started on port {} (HTTP) and {} (HTTPS MITM)",
                     active_port, tls_port
@@ -48,8 +62,15 @@ pub async fn start_proxy(app: AppHandle, port: u16, tls_port: u16) -> Result<Str
 }
 
 #[tauri::command]
-pub async fn stop_proxy() -> Result<String, String> {
+pub async fn stop_proxy(app: AppHandle) -> Result<String, String> {
     crate::proxy::stop()?;
+    let status = ProxyRuntimeStatus {
+        running: false,
+        port: None,
+        default_port: crate::proxy::default_proxy_port(),
+        connections: 0,
+    };
+    let _ = app.emit("proxy-status-changed", &status);
     Ok("Proxy stopped".to_string())
 }
 
