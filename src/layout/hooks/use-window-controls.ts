@@ -1,21 +1,12 @@
 import * as React from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { isMacOS, useIsMac } from '@/hooks/use-is-mac';
 
-export function isMacOS(): boolean {
-  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
-    return false;
-  }
-  const userAgent = navigator.userAgent || '';
-  const platform = (navigator as any).userAgentData?.platform || navigator.platform || '';
-  return (
-    /Macintosh|Mac OS X|MacIntel|MacPPC|Mac68K|Darwin/i.test(userAgent) ||
-    /Mac/i.test(platform)
-  );
-}
+export { isMacOS, useIsMac };
 
 export function useWindowControls() {
   const [isMaximized, setIsMaximized] = React.useState(false);
-  const isMac = React.useMemo(() => isMacOS(), []);
+  const isMac = useIsMac();
 
   React.useEffect(() => {
     // Only listen for window resize / maximize state on non-Mac (Linux & Windows)

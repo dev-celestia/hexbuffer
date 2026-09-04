@@ -26,7 +26,7 @@ import { UpdateDialog } from "@/layout/taskbar/components/update-dialog";
 import { formatBytes } from "@/lib/utils";
 import { ProxyButton } from "./proxy-button";
 import { WindowControls } from "./window-controls";
-import { isMacOS } from "./hooks/use-window-controls";
+import { useIsMac } from "@/hooks/use-is-mac";
 import { cn } from "@/lib/utils";
 
 const SettingsModal = React.lazy<React.ComponentType<SettingsProps>>(() =>
@@ -49,7 +49,7 @@ interface StandaloneHeaderProps {
 }
 
 function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
-  const isMac = React.useMemo(() => isMacOS(), []);
+  const isMac = useIsMac();
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [updateDialogOpen, setUpdateDialogOpen] = React.useState(false);
   const [updateConfirmReady, setUpdateConfirmReady] = React.useState(false);

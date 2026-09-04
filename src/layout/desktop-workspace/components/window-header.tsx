@@ -11,6 +11,7 @@ import {
 } from "@phosphor-icons/react";
 
 import { ALL_NAV_ITEMS, getAppIconImage, type NavItem } from "@/layout/constants";
+import { usePlatform } from "@/hooks/use-platform";
 import { useNavStore } from "@/stores/nav";
 import { useWindowContext } from "@/providers/window-provider";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,9 @@ export const WindowHeader = React.memo(function WindowHeader({
   tileRight,
 }: WindowHeaderProps) {
   const navigate = useNavigate();
+  const { isMac, isWindows, isLinux } = usePlatform();
+  const isWindowsOrLinux = isWindows || isLinux || !isMac;
+
   const closeWindow = useNavStore((s) => s.closeWindow);
   const minimizeWindow = useNavStore((s) => s.minimizeWindow);
   const maximizeWindow = useNavStore((s) => s.maximizeWindow);
@@ -70,7 +74,7 @@ export const WindowHeader = React.memo(function WindowHeader({
         "cursor-pointer cursor-grab select-none"
       )}
     >
-      {/* Window Title */}
+      {/* Left side: Window Controls (on Mac) & Window Title */}
       <div
         className={cn(
           // Layout & Positioning
@@ -80,6 +84,85 @@ export const WindowHeader = React.memo(function WindowHeader({
           "gap-1.5 h-6"
         )}
       >
+        {/* macOS Window Controls: Color Circles Without Icon (Left) */}
+        {isMac && (
+          <>
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center",
+
+                // Sizing & Spacing
+                "gap-2 px-1"
+              )}
+            >
+              {/* Close */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeWindow(id, navigate);
+                }}
+                className={cn(
+                  // Sizing & Spacing
+                  "size-3 rounded-full",
+
+                  // Backgrounds & Borders
+                  "bg-[#ff5f56] border border-black/15",
+
+                  // Interactive & States
+                  "cursor-pointer hover:brightness-90 active:scale-95 active:brightness-75 transition-all"
+                )}
+                aria-label="Close"
+                title="Close"
+              />
+
+              {/* Minimize */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  minimizeWindow(id, navigate);
+                }}
+                className={cn(
+                  // Sizing & Spacing
+                  "size-3 rounded-full",
+
+                  // Backgrounds & Borders
+                  "bg-[#ffbd2e] border border-black/15",
+
+                  // Interactive & States
+                  "cursor-pointer hover:brightness-90 active:scale-95 active:brightness-75 transition-all"
+                )}
+                aria-label="Minimize"
+                title="Minimize"
+              />
+
+              {/* Maximize */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  maximizeWindow(id);
+                }}
+                className={cn(
+                  // Sizing & Spacing
+                  "size-3 rounded-full",
+
+                  // Backgrounds & Borders
+                  "bg-[#27c93f] border border-black/15",
+
+                  // Interactive & States
+                  "cursor-pointer hover:brightness-90 active:scale-95 active:brightness-75 transition-all"
+                )}
+                aria-label={isMaximized ? "Restore" : "Maximize"}
+                title={isMaximized ? "Restore" : "Maximize"}
+              />
+            </div>
+            <Separator orientation="vertical" className="h-6" />
+          </>
+        )}
+
         <DotsSixIcon size={16} className="text-muted-foreground/45 cursor-grab shrink-0 mr-0.5" />
 
         {imageSrc ? (
@@ -160,12 +243,27 @@ export const WindowHeader = React.memo(function WindowHeader({
         )}
       </div>
 
-      <div className="flex gap-1.5 h-6 items-center">
+      {/* Right side: Header Slots, Snap Layout Controls, Window Controls (non-Mac) */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center",
+
+          // Sizing & Spacing
+          "gap-1.5 h-6"
+        )}
+      >
         {/* Custom Header Slot / Buttons (beside split screen buttons) */}
         <div
           ref={setHeaderSlotNode}
           onMouseDown={(e) => e.stopPropagation()}
-          className="flex items-center gap-1 cursor-default select-text"
+          className={cn(
+            // Layout & Positioning
+            "flex items-center gap-1",
+
+            // Interactive & States
+            "cursor-default select-text"
+          )}
         />
 
         {/* Separator between Custom Slot and Snap Layout Controls */}
@@ -174,7 +272,18 @@ export const WindowHeader = React.memo(function WindowHeader({
         )}
 
         {/* Snap Layout Controls */}
-        <div className="flex items-center gap-1 text-muted-foreground">
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex items-center",
+
+            // Sizing & Spacing
+            "gap-1",
+
+            // Typography
+            "text-muted-foreground"
+          )}
+        >
           <button
             type="button"
             onClick={(e) => {
@@ -203,51 +312,107 @@ export const WindowHeader = React.memo(function WindowHeader({
           </button>
         </div>
 
-        <Separator orientation="vertical" className="h-6" />
+        {/* Window Controls (Windows / Linux): Icons on the Right */}
+        {isWindowsOrLinux && (
+          <>
+            <Separator orientation="vertical" className="h-6" />
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex items-center",
 
-        {/* Window Controls */}
-        <div className="flex items-center gap-0.5">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              minimizeWindow(id, navigate);
-            }}
-            className="window-control-btn p-0.5 hover:bg-muted rounded-sm cursor-pointer active:scale-95 transition-all text-muted-foreground hover:text-foreground"
-            aria-label="Minimize"
-            title="Minimize"
-          >
-            <MinusIcon className="size-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              maximizeWindow(id);
-            }}
-            className="window-control-btn p-0.5 hover:bg-muted rounded-sm cursor-pointer active:scale-95 transition-all text-muted-foreground hover:text-foreground"
-            aria-label="Maximize"
-            title="Maximize"
-          >
-            {isMaximized ? (
-              <ArrowsInSimpleIcon className="size-3.5" />
-            ) : (
-              <ArrowsOutSimpleIcon className="size-3.5" />
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              closeWindow(id, navigate);
-            }}
-            className="window-control-btn p-0.5 hover:bg-destructive/20 hover:text-destructive rounded-sm cursor-pointer active:scale-95 transition-all"
-            aria-label="Close"
-            title="Close"
-          >
-            <XIcon className="size-3.5" />
-          </button>
-        </div>
+                // Sizing & Spacing
+                "gap-0.5"
+              )}
+            >
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  minimizeWindow(id, navigate);
+                }}
+                className={cn(
+                  // Layout & Positioning
+                  "window-control-btn",
+
+                  // Sizing & Spacing
+                  "p-0.5 rounded-sm",
+
+                  // Typography
+                  "text-muted-foreground hover:text-foreground",
+
+                  // Backgrounds & Borders
+                  "hover:bg-muted",
+
+                  // Interactive & States
+                  "cursor-pointer active:scale-95 transition-all"
+                )}
+                aria-label="Minimize"
+                title="Minimize"
+              >
+                <MinusIcon className="size-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  maximizeWindow(id);
+                }}
+                className={cn(
+                  // Layout & Positioning
+                  "window-control-btn",
+
+                  // Sizing & Spacing
+                  "p-0.5 rounded-sm",
+
+                  // Typography
+                  "text-muted-foreground hover:text-foreground",
+
+                  // Backgrounds & Borders
+                  "hover:bg-muted",
+
+                  // Interactive & States
+                  "cursor-pointer active:scale-95 transition-all"
+                )}
+                aria-label="Maximize"
+                title="Maximize"
+              >
+                {isMaximized ? (
+                  <ArrowsInSimpleIcon className="size-3.5" />
+                ) : (
+                  <ArrowsOutSimpleIcon className="size-3.5" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeWindow(id, navigate);
+                }}
+                className={cn(
+                  // Layout & Positioning
+                  "window-control-btn",
+
+                  // Sizing & Spacing
+                  "p-0.5 rounded-sm",
+
+                  // Typography
+                  "text-muted-foreground",
+
+                  // Backgrounds & Borders
+                  "hover:bg-destructive/20 hover:text-destructive",
+
+                  // Interactive & States
+                  "cursor-pointer active:scale-95 transition-all"
+                )}
+                aria-label="Close"
+                title="Close"
+              >
+                <XIcon className="size-3.5" />
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

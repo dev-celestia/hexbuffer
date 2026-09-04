@@ -228,6 +228,14 @@ fn main() {
             hexbuffer::commands::hash::get_hash_attack_status,
             hexbuffer::commands::hash::compute_single_hash,
             hexbuffer::commands::hash::get_available_hash_algorithms,
+            hexbuffer::commands::nuclei::start_nuclei_scan,
+            hexbuffer::commands::nuclei::pause_nuclei_scan,
+            hexbuffer::commands::nuclei::resume_nuclei_scan,
+            hexbuffer::commands::nuclei::stop_nuclei_scan,
+            hexbuffer::commands::nuclei::get_nuclei_status,
+            hexbuffer::commands::nuclei::sync_official_nuclei_templates,
+            hexbuffer::commands::nuclei::get_cached_official_templates,
+            hexbuffer::commands::nuclei::read_template_yaml,
         ])
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())

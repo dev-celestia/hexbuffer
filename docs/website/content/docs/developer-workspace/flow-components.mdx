@@ -1,0 +1,289 @@
+---
+title: Reusable Flow Components (@xyflow/react)
+description: Developer guide and component reference for building graph-based interfaces, custom nodes, edges, and canvases using @xyflow/react.
+---
+
+# Reusable Flow Components (`@xyflow/react`)
+
+Hexbuffer provides a unified, design-system-aligned component suite for `@xyflow/react` located in `@/components/flow`. These primitives power node-based features such as **Automation Workflows** and **Regression Step Testing**, standardizing canvas controls, keyboard interactions, port handles, custom edges, and runtime status indicators.
+
+---
+
+## 1. Quick Start & Component Overview
+
+All components, types, and hooks can be imported directly from `@/components/flow`:
+
+```tsx
+import {
+  FlowCanvas,
+  FlowEmptyState,
+  FlowNodeShell,
+  FlowNodeHeader,
+  FlowNodeBody,
+  FlowNodeFooter,
+  FlowNodeHandle,
+  FlowNodeStatus,
+  FlowDeletableEdge,
+  FlowLabeledEdge,
+  FlowToolbar,
+  FlowNodeToolbar,
+  useFlowKeyboard,
+} from '@/components/flow';
+```
+
+---
+
+## 2. Canvas Primitives
+
+### `<FlowCanvas>`
+The main wrapper component for graph canvases. It automatically integrates theme-matching backgrounds, controls, minimaps, snap grid, pan-on-drag via Spacebar, and lasso selection.
+
+```tsx
+import { FlowCanvas, FlowEmptyState } from '@/components/flow';
+import type { Node, Edge } from '@xyflow/react';
+
+export function WorkflowEditor({
+  nodes,
+  edges,
+  onNodesChange,
+  onEdgesChange,
+  onConnect,
+  nodeTypes,
+  edgeTypes,
+}: {
+  nodes: Node[];
+  edges: Edge[];
+  onNodesChange: any;
+  onEdgesChange: any;
+  onConnect: any;
+  nodeTypes: any;
+  edgeTypes: any;
+}) {
+  return (
+    <FlowCanvas
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
+      nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
+      showMiniMap={true}
+      showControls={true}
+      showBackground={true}
+      showHelpBadge={true}
+      enableSpacePan={true}
+      fitView={true}
+      emptyState={
+        <FlowEmptyState
+          title="No workflow loaded"
+          description="Create or select a workflow from the sidebar to begin."
+        />
+      }
+    >
+      {/* Context menus, custom overlays, or modals */}
+    </FlowCanvas>
+  );
+}
+```
+
+#### Key Props
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `nodes` | `Node[]` | `[]` | Flow nodes array |
+| `edges` | `Edge[]` | `[]` | Flow connections array |
+| `showMiniMap` | `boolean` | `true` | Renders the styled `<FlowMiniMap>` |
+| `showControls` | `boolean` | `true` | Renders zoom/pan `<FlowControls>` |
+| `showBackground`| `boolean` | `true` | Renders dotted grid `<FlowBackground>` |
+| `showHelpBadge` | `boolean` | `true` | Renders bottom hotkey cheat sheet |
+| `enableSpacePan`| `boolean` | `true` | Enables Space+Drag pan mode |
+| `emptyState` | `ReactNode` | `undefined`| Rendered when `nodes.length === 0` |
+
+---
+
+## 3. Node Primitives
+
+Build custom nodes rapidly using the compound node structure:
+
+```tsx
+import { Position } from '@xyflow/react';
+import { GlobeIcon, SparkleIcon } from '@phosphor-icons/react';
+import {
+  FlowNodeShell,
+  FlowNodeHeader,
+  FlowNodeBody,
+  FlowNodeFooter,
+  FlowNodeHandle,
+  FlowNodeStatus,
+} from '@/components/flow';
+
+export function HttpActionNode({ id, data, selected }: any) {
+  return (
+    <FlowNodeShell
+      variant="action"
+      selected={selected}
+      status={data.status} // 'idle' | 'running' | 'success' | 'warning' | 'error'
+      tooltipTitle="HTTP Action"
+      tooltip="Sends an automated HTTP request to the target server."
+    >
+      {/* Input Target Port */}
+      <FlowNodeHandle type="target" position={Position.Top} variant="action" />
+
+      {/* Node Header */}
+      <FlowNodeHeader
+        icon={<GlobeIcon className="size-3.5" />}
+        variant="action"
+        title={data.label || 'Send Request'}
+        subtitle="Action"
+        warning={data.warningMessage}
+        actions={/* Dropdown menu or quick buttons */}
+      />
+
+      {/* Node Body */}
+      <FlowNodeBody>
+        <div className="flex items-center gap-1.5 font-mono text-[10px]">
+          <span className="font-semibold text-emerald-500">{data.method || 'GET'}</span>
+          <span className="truncate">{data.url || 'https://api.example.com'}</span>
+        </div>
+      </FlowNodeBody>
+
+      {/* Node Status Indicator */}
+      <FlowNodeStatus
+        status={data.status}
+        message={data.statusMessage}
+        durationMs={data.durationMs}
+      />
+
+      {/* Output Source Port */}
+      <FlowNodeHandle type="source" position={Position.Bottom} variant="action" />
+    </FlowNodeShell>
+  );
+}
+```
+
+### Multi-Output / Conditional Nodes
+For nodes with multiple labeled ports (e.g. `True` / `False` branches):
+
+```tsx
+<FlowNodeShell variant="condition" selected={selected}>
+  <FlowNodeHandle type="target" position={Position.Top} variant="condition" />
+  
+  <FlowNodeHeader title="Status Code Check" subtitle="Condition" />
+
+  {/* Labeled footer for branch destinations */}
+  <div className="flex items-center justify-between border-t px-3 py-1 text-[9px] font-medium">
+    <span className="text-emerald-500">True (200 OK)</span>
+    <span className="text-red-500">False (Other)</span>
+  </div>
+
+  <FlowNodeHandle
+    type="source"
+    id="true"
+    position={Position.Bottom}
+    variant="success"
+    style={{ left: '30%' }}
+  />
+  <FlowNodeHandle
+    type="source"
+    id="false"
+    position={Position.Bottom}
+    variant="destructive"
+    style={{ left: '70%' }}
+  />
+</FlowNodeShell>
+```
+
+---
+
+## 4. Edge Primitives
+
+### `<FlowDeletableEdge>`
+Renders smooth-step bezier lines with an interactive wire deletion button mounted at the center:
+
+```tsx
+import type { EdgeProps } from '@xyflow/react';
+import { FlowDeletableEdge } from '@/components/flow';
+
+export function DeletableEdge(props: EdgeProps) {
+  const handleDelete = (edgeId: string) => {
+    // Custom delete logic or dispatch event
+    console.log('Delete edge:', edgeId);
+  };
+
+  return <FlowDeletableEdge {...props} onDeleteEdge={handleDelete} />;
+}
+```
+
+### `<FlowLabeledEdge>`
+Renders smooth-step lines with floating text or status tags:
+
+```tsx
+import type { EdgeProps } from '@xyflow/react';
+import { FlowLabeledEdge } from '@/components/flow';
+
+export function LabeledBranchEdge(props: EdgeProps) {
+  return <FlowLabeledEdge {...props} label="True" />;
+}
+```
+
+---
+
+## 5. Overlay & Toolbar Primitives
+
+### `<FlowToolbar>`
+Floating control panel anchored to canvas corners (e.g. `top-left` or `top-right`):
+
+```tsx
+import { Button } from '@celestia-project/ui';
+import { FlowToolbar } from '@/components/flow';
+import { PlayIcon, ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
+
+export function CanvasTopToolbar({ onRun, onReset }: { onRun: () => void; onReset: () => void }) {
+  return (
+    <FlowToolbar position="top-left">
+      <Button variant="outline" size="sm" onClick={onRun}>
+        <PlayIcon className="mr-1 size-3.5" />
+        Run Workflow
+      </Button>
+      <Button variant="ghost" size="icon" onClick={onReset}>
+        <ArrowCounterClockwiseIcon className="size-3.5" />
+      </Button>
+    </FlowToolbar>
+  );
+}
+```
+
+---
+
+## 6. Headless Hooks
+
+### `useFlowKeyboard`
+Manages global canvas shortcuts while automatically ignoring events originating from inputs, textareas, or embedded Monaco editor instances.
+
+```tsx
+import { useFlowKeyboard } from '@/components/flow';
+
+export function CustomCanvas() {
+  const { spacePressed } = useFlowKeyboard({
+    enableSpacePan: true,
+    onDelete: () => {
+      // Custom selection deletion
+    },
+  });
+
+  return (
+    <div className={spacePressed ? 'cursor-grab active:cursor-grabbing' : ''}>
+      {/* ... */}
+    </div>
+  );
+}
+```
+
+---
+
+## 7. Design Standards & Styling Rules
+
+When creating or extending flow components in Hexbuffer:
+1. **Categorized Tailwind CSS**: Organize classes into line-separated category sections (`// Layout & Positioning`, `// Sizing & Spacing`, `// Typography`, `// Backgrounds & Borders`, `// Interactive & States`).
+2. **UI Primitives**: Always reuse styled primitives from `@celestia-project/ui` or `@/components/ui` (`Button`, `Tooltip`, `Kbd`).
+3. **Ports & Handles**: Standardize port dimensions (`12px` circle with `2px` border) to ensure alignment across different node types.

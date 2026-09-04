@@ -9,7 +9,7 @@ import { MonitorIcon, SunIcon, MoonIcon, ImageIcon, GearSixIcon, DotsSixIcon } f
 import { AppSidebar } from './taskbar';
 import { DesktopWorkspace } from './desktop-workspace';
 import { WindowControls } from './window-controls';
-import { isMacOS } from './hooks/use-window-controls';
+import { useIsMac } from '@/hooks/use-is-mac';
 import { cn } from '@/lib/utils';
 
 import whiteWallpaper from '@/assets/white-wallpaper.png';
@@ -68,7 +68,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const isMac = React.useMemo(() => isMacOS(), []);
+  const isMac = useIsMac();
 
   return (
     <ContextMenu>

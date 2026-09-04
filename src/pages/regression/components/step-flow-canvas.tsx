@@ -1,10 +1,7 @@
 import { Button } from '@celestia-project/ui';
 import React from 'react';
 import {
-  Background,
-  BackgroundVariant,
   Controls,
-  MiniMap,
   ReactFlow,
   useEdgesState,
   useNodesState,
@@ -14,6 +11,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { PlusIcon } from '@phosphor-icons/react';
+import { FlowBackground, FlowMiniMap } from '@/components/flow';
 
 import type { RegressionStepNodeData } from '../nodes/step-node';
 import type { TestStep } from '../types';
@@ -150,22 +148,9 @@ export function StepFlowCanvas({
         snapGrid={[16, 16]}
         deleteKeyCode={null}
       >
-        <Controls
-          className="!rounded-md !border !bg-background !shadow-sm"
-          position="bottom-right"
-        />
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={20}
-          size={1}
-          color="hsl(var(--muted-foreground) / 0.08)"
-        />
-        <MiniMap
-          className="!rounded-md !border !shadow-sm"
-          nodeStrokeWidth={2}
-          pannable
-          zoomable
-        />
+        <Controls className="!rounded-lg !border !bg-background !shadow-sm" position="bottom-right" />
+        <FlowBackground />
+        <FlowMiniMap />
       </ReactFlow>
 
       <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-md border bg-background/90 px-2.5 py-1.5 text-[11px] text-muted-foreground shadow-sm backdrop-blur">

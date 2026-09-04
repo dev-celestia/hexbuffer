@@ -5,6 +5,7 @@ import { relaunch } from '@tauri-apps/plugin-process';
 import { toast } from 'sonner';
 import { getCaCert, regenerateCaCert, saveCaCert, trustInterceptCa } from '@/pages/live-traffic/http-history/api';
 import { useUpdater } from '@/hooks/use-updater';
+import { useIsMac } from '@/hooks/use-is-mac';
 import { DEFAULT_PROXY_PORT, MAX_PROXY_PORT, MIN_PROXY_PORT, isValidProxyPort, useAppStore } from '@/stores/app';
 import { useBrowserAutomationStore } from '@/stores/browser-automation';
 import { AI_MODEL_OPTIONS_BY_PROVIDER } from '../constants';
@@ -467,10 +468,7 @@ export function useSettingsPage() {
     }
   }, [proxyStatus, saveProxyDefaultPort]);
 
-  const isMac = React.useMemo(() => {
-    if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
-    return /Macintosh|MacIntel|MacPPC|Mac68K|Mac/i.test(navigator.userAgent) || /Mac/i.test(navigator.platform);
-  }, []);
+  const isMac = useIsMac();
 
   return {
     isMac,

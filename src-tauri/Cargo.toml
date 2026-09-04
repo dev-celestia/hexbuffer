@@ -52,6 +52,7 @@ tempfile = "3"
 hexbuffer-proxy = "1"
 browser-crawler = { git = "https://github.com/arhamymr/browser-crawler.git" }
 hexbuffer-ai = { git = "https://github.com/arhamymr/hexbuffer-agent.git" }
+nuclei-run = { path = "../../nuclei-run" }
 rig-core = "0.7"
 thiserror = "2"
 rayon = "1.10"

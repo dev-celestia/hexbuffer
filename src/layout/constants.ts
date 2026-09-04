@@ -178,9 +178,9 @@ export const ALPHA_NAV_ITEMS: NavItem[] = import.meta.env.PROD
         flag: 'alpha',
       },
       {
-        label: 'Nuclei',
+        label: 'Nuclei Run',
         icon: ShieldCheckIcon,
-        href: '/nuclei',
+        href: '/nuclei-run',
         description: 'Automated vulnerability scanner with Nuclei YAML templates and real-time telemetry.',
         colors: { bg: 'bg-emerald-600 dark:bg-emerald-600', hoverBg: 'group-hover:bg-emerald-600 dark:group-hover:bg-emerald-600', border: 'border-emerald-600 dark:border-emerald-600' },
         flag: 'alpha',
@@ -251,15 +251,7 @@ export const ALPHA_NAV_ITEMS: NavItem[] = import.meta.env.PROD
         colors: { bg: 'bg-fuchsia-500 dark:bg-fuchsia-500', hoverBg: 'group-hover:bg-fuchsia-500 dark:group-hover:bg-fuchsia-500', border: 'border-fuchsia-500 dark:border-fuchsia-500' },
         flag: 'alpha',
       },
-      
-      {
-        label: 'XSS',
-        icon: LightningIcon,
-        href: '/xss-generator',
-        description: 'Generate cross-site scripting payloads and templates.',
-        colors: { bg: 'bg-yellow-500 dark:bg-yellow-500', hoverBg: 'group-hover:bg-yellow-500 dark:group-hover:bg-yellow-500', border: 'border-yellow-500 dark:border-yellow-500' },
-        flag: 'alpha',
-      },
+
       {
         label: 'SQL Inject',
         icon: DatabaseIcon,

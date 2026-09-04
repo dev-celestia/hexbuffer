@@ -41,9 +41,6 @@ const PortScannerPage = React.lazy(() =>
 const JwtPage = React.lazy(() =>
   import("@/pages/jwt").then((m) => ({ default: m.JwtPage }))
 );
-const XssGeneratorPage = React.lazy(() =>
-  import("@/pages/xss-generator").then((m) => ({ default: m.XssGeneratorPage }))
-);
 const SqlInjectionPage = React.lazy(() =>
   import("@/pages/sql-injection").then((m) => ({ default: m.SqlInjectionPage }))
 );
@@ -85,8 +82,8 @@ const FileExplorerPage = React.lazy(() =>
 const TerminalPage = React.lazy(() =>
   import("@/pages/terminal").then((m) => ({ default: m.TerminalPage }))
 );
-const NucleiPage = React.lazy(() =>
-  import("@/pages/nuclei").then((m) => ({ default: m.NucleiPage }))
+const NucleiRunPage = React.lazy(() =>
+  import("@/pages/nuclei-run").then((m) => ({ default: m.NucleiRunPage }))
 );
 
 
@@ -128,7 +125,6 @@ function AppRoutes() {
           <Route path="/comparer" element={<ComparerPage />} />
           <Route path="/port-scanner" element={<PortScannerPage />} />
           <Route path="/jwt" element={<JwtPage />} />
-          <Route path="/xss-generator" element={<XssGeneratorPage />} />
           <Route path="/sql-injection" element={<SqlInjectionPage />} />
           <Route path="/automation" element={<WorkflowPage />} />
           <Route path="/settings" element={<Settings />} />
@@ -143,8 +139,9 @@ function AppRoutes() {
           <Route path="/kanban" element={<KanbanPage />} />
           <Route path="/file-explorer" element={<FileExplorerPage />} />
           <Route path="/terminal" element={<TerminalPage />} />
-          <Route path="/nuclei" element={<NucleiPage />} />
-          <Route path="/scanner" element={<NucleiPage />} />
+          <Route path="/nuclei-run" element={<NucleiRunPage />} />
+          <Route path="/nuclei" element={<NucleiRunPage />} />
+          <Route path="/scanner" element={<NucleiRunPage />} />
         </Routes>
       </React.Suspense>
     </>

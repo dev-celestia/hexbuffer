@@ -6,49 +6,31 @@ This document explains the package scripts and deployment pipeline for both the 
 
 ## 1. Quick Reference: Run Scripts in `package.json`
 
-### A. Full Suite Deployment
-
-| Command | Action | Output CDN Path |
-| :--- | :--- | :--- |
-| `pnpm deploy` | Auto-increments patch version, builds full suite native binary, signs installer, and uploads to R2. | `s3://${R2_BUCKET}/latest.json` |
-| `pnpm build:app` | Builds the full suite locally without uploading to S3/R2 (`--no-upload`). | `src-tauri/target/release/bundle/` |
-| `pnpm deploy:help` | Prints the full CLI flags documentation for deployment. | Terminal output |
-
-### B. Standalone App Deployments
-
-Each standalone command builds an isolated desktop application using its specific configuration in `src-tauri/targets/<target>.json`, signs it, and publishes it under its dedicated CDN subpath:
-
-| Command | Target App | Target Config | Output CDN Path |
-| :--- | :--- | :--- | :--- |
-| `pnpm deploy:http` | **HTTP History** | `src-tauri/targets/http.json` | `s3://${R2_BUCKET}/targets/http/latest.json` |
-| `pnpm deploy:repeater` | **Repeater** | `src-tauri/targets/repeater.json` | `s3://${R2_BUCKET}/targets/repeater/latest.json` |
-| `pnpm deploy:jwt` | **JWT Analyzer** | `src-tauri/targets/jwt.json` | `s3://${R2_BUCKET}/targets/jwt/latest.json` |
-| `pnpm deploy:port-scanner` | **Port Scanner** | `src-tauri/targets/port-scanner.json` | `s3://${R2_BUCKET}/targets/port-scanner/latest.json` |
-| `pnpm deploy:encoder` | **Encoder** | `src-tauri/targets/encoder.json` | `s3://${R2_BUCKET}/targets/encoder/latest.json` |
-| `pnpm deploy:hash` | **Hash Engine** | `src-tauri/targets/hash.json` | `s3://${R2_BUCKET}/targets/hash/latest.json` |
+| Command | Action |
+| :--- | :--- |
+| `pnpm run deploy` | Auto-increments patch version, builds full suite, signs installer, and uploads to R2. |
+| `pnpm run deploy -- --version 1.2.0` | Deploys Full Suite at an exact version (`1.2.0`). |
+| `pnpm run deploy -- --target <name> --version 1.2.0` | Deploys a specific standalone target (`http`, `repeater`, `jwt`, `port-scanner`, `encoder`, `hash`) at an exact version. |
+| `pnpm run build:app` | Builds the full suite locally without uploading to S3/R2 (`--no-upload`). |
+| `pnpm run deploy -- --help` | Prints the full CLI flags documentation for deployment. |
 
 ---
 
-## 2. Version Bumping Scripts
+## 2. Deploying Standalone Applications or Setting Version
 
-Independent semantic versions can be incremented before deployment:
+You don't need multiple bump scripts. Pass the `--version` and optional `--target` arguments directly to `deploy`:
 
 ```bash
-# Bump Full Suite (updates package.json, Cargo.toml, tauri.conf.json, VERSION)
-pnpm bump:suite
+# Deploy full suite with exact version
+pnpm run deploy -- --version 1.2.0
 
-# Bump specific standalone target (updates version in src-tauri/targets/<target>.json)
-pnpm bump:http
-pnpm bump:repeater
-pnpm bump:jwt
-pnpm bump:port-scanner
-pnpm bump:encoder
-pnpm bump:hash
-```
-
-To bump to an exact version:
-```bash
-./scripts/bump-version.sh --target http 1.2.0
+# Deploy standalone target with exact version
+pnpm run deploy -- --target http --version 1.0.5
+pnpm run deploy -- --target repeater --version 1.0.2
+pnpm run deploy -- --target jwt --version 1.0.1
+pnpm run deploy -- --target port-scanner --version 1.0.1
+pnpm run deploy -- --target encoder --version 1.0.1
+pnpm run deploy -- --target hash --version 1.0.1
 ```
 
 ---

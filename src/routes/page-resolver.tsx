@@ -20,9 +20,6 @@ const RepeaterPage = React.lazy(() =>
 const PortScannerPage = React.lazy(() =>
   import("@/pages/port-scanner").then((m) => ({ default: m.PortScannerPage }))
 );
-const XssGeneratorPage = React.lazy(() =>
-  import("@/pages/xss-generator").then((m) => ({ default: m.XssGeneratorPage }))
-);
 const SqlInjectionPage = React.lazy(() =>
   import("@/pages/sql-injection").then((m) => ({ default: m.SqlInjectionPage }))
 );
@@ -135,9 +132,6 @@ export function StandaloneAppView({ target }: { readonly target: string }) {
         return <StandaloneLayout id="/intruder" title="Intruder"><IntruderPage /></StandaloneLayout>;
       case "intercept":
         return <StandaloneLayout id="/intercept" title="Intercept"><InterceptPage /></StandaloneLayout>;
-      case "xss":
-      case "xss-generator":
-        return <StandaloneLayout id="/xss-generator" title="XSS Generator"><XssGeneratorPage /></StandaloneLayout>;
       case "sqli":
       case "sql-injection":
         return <StandaloneLayout id="/sql-injection" title="SQLi Helper"><SqlInjectionPage /></StandaloneLayout>;

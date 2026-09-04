@@ -13,7 +13,6 @@ const HashPage = React.lazy(() => import("@/pages/hash").then((m) => ({ default:
 const ComparerPage = React.lazy(() => import("@/pages/comparer").then((m) => ({ default: m.ComparerPage })));
 const PortScannerPage = React.lazy(() => import("@/pages/port-scanner").then((m) => ({ default: m.PortScannerPage })));
 const JwtPage = React.lazy(() => import("@/pages/jwt").then((m) => ({ default: m.JwtPage })));
-const XssGeneratorPage = React.lazy(() => import("@/pages/xss-generator").then((m) => ({ default: m.XssGeneratorPage })));
 const SqlInjectionPage = React.lazy(() => import("@/pages/sql-injection").then((m) => ({ default: m.SqlInjectionPage })));
 const BrowserAutomationPage = React.lazy(() => import("@/pages/browser").then((m) => ({ default: m.BrowserAutomationPage })));
 const ListenerPage = React.lazy(() => import("@/pages/listener").then((m) => ({ default: m.ListenerPage })));
@@ -43,7 +42,6 @@ export const PAGE_COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
   '/comparer': ComparerPage,
   '/port-scanner': PortScannerPage,
   '/jwt': JwtPage,
-  '/xss-generator': XssGeneratorPage,
   '/sql-injection': SqlInjectionPage,
   '/automation': WorkflowPage,
   '/settings': Settings,

@@ -1,4 +1,4 @@
-import { MockServerPanel } from './mock-server-panel';
+import { MockServerPanel } from './mock-server-pane';
 import type { useMockApiPage } from '../hooks/use-mock-api-page';
 
 interface MockApiContentProps {

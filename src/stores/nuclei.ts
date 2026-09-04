@@ -11,9 +11,15 @@ import type {
   TemplateTestResult,
   ValidationDiagnostic,
   ScanSummaryStats,
-} from '@/pages/nuclei/types';
-import { DEFAULT_TEMPLATES } from '@/pages/nuclei/lib/default-templates';
-import { PRESET_OPTIONS } from '@/pages/nuclei/constants';
+  SavedTemplateGroup,
+} from '@/pages/nuclei-run/types';
+import { DEFAULT_TEMPLATES } from '@/pages/nuclei-run/lib/default-templates';
+import { PRESET_OPTIONS } from '@/pages/nuclei-run/constants';
+import {
+  syncOfficialNucleiTemplates,
+  getCachedOfficialTemplates,
+} from '@/pages/nuclei-run/lib/nuclei-ipc';
+import type { Severity } from '@/pages/nuclei-run/types';
 
 interface NucleiState {
   // Navigation & Tabs
@@ -56,14 +62,50 @@ interface NucleiState {
   autoScrollConsole: boolean;
   setAutoScrollConsole: (autoScroll: boolean) => void;
 
-  // Template Hub
+  // Templates Hub & Selection
   templates: TemplateItem[];
   setTemplates: (templates: TemplateItem[]) => void;
   selectedTemplateIds: string[];
   toggleTemplateSelection: (id: string) => void;
   selectAllTemplates: () => void;
   deselectAllTemplates: () => void;
-  selectTemplatesBySeverity: (severities: string[]) => void;
+  selectTemplatesBySeverity: (severities: Severity[]) => void;
+
+  // Active Inspector Template in Hub & Staging
+  activeInspectorTemplateId: string | null;
+  setActiveInspectorTemplateId: (id: string | null) => void;
+
+  // Saved Template Groups (Staging & Reuse)
+  savedGroups: SavedTemplateGroup[];
+  saveCurrentSelectionAsGroup: (name: string, description?: string) => void;
+  loadSavedGroup: (groupId: string) => void;
+  deleteSavedGroup: (groupId: string) => void;
+  toggleGroupSelection: (templateIds: string[], select?: boolean) => void;
+
+  // Category & Strategy Filtering
+  activeCategory: string;
+  setActiveCategory: (cat: string) => void;
+  selectCategoryTemplates: (catId: string) => void;
+
+  // GitHub Sync
+  syncStatus: {
+    isSyncing: boolean;
+    progressMessage: string;
+    totalTemplates: number;
+    lastSyncedAt?: string;
+    cachePath?: string;
+    error?: string;
+  };
+  setSyncStatus: (status: Partial<{
+    isSyncing: boolean;
+    progressMessage: string;
+    totalTemplates: number;
+    lastSyncedAt?: string;
+    cachePath?: string;
+    error?: string;
+  }>) => void;
+  syncFromGitHub: (force?: boolean) => Promise<void>;
+  checkCachedGitHubTemplates: () => Promise<void>;
 
   // Template Studio
   studioYaml: string;
@@ -90,7 +132,7 @@ interface NucleiState {
 }
 
 const DEFAULT_CONFIG: NucleiScanConfig = {
-  targets: ['https://httpbin.org'],
+  targets: [],
   template_ids: DEFAULT_TEMPLATES.map((t) => t.id),
   preset: 'quick-triage',
   concurrency: 25,
@@ -105,10 +147,10 @@ const DEFAULT_CONFIG: NucleiScanConfig = {
 };
 
 export const useNucleiStore = create<NucleiState>((set, get) => ({
-  activeTab: 'findings',
+  activeTab: 'templates',
   setActiveTab: (activeTab) => set({ activeTab }),
 
-  targetInput: 'https://httpbin.org',
+  targetInput: '',
   setTargetInput: (targetInput) => set({ targetInput }),
 
   preset: 'quick-triage',
@@ -209,9 +251,234 @@ export const useNucleiStore = create<NucleiState>((set, get) => ({
         .map((t) => t.id),
     })),
 
+  activeInspectorTemplateId: null,
+  setActiveInspectorTemplateId: (activeInspectorTemplateId) => set({ activeInspectorTemplateId }),
+
+  savedGroups: (() => {
+    try {
+      const stored = localStorage.getItem('nuclei_saved_groups');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  })(),
+
+  saveCurrentSelectionAsGroup: (name, description) => {
+    const state = get();
+    if (state.selectedTemplateIds.length === 0) return;
+    const newGroup: SavedTemplateGroup = {
+      id: `group-${Date.now()}`,
+      name: name.trim() || `Saved Group (${state.selectedTemplateIds.length})`,
+      description: description?.trim(),
+      templateIds: [...state.selectedTemplateIds],
+      createdAt: new Date().toISOString(),
+    };
+    const nextGroups = [newGroup, ...state.savedGroups];
+    try {
+      localStorage.setItem('nuclei_saved_groups', JSON.stringify(nextGroups));
+    } catch {}
+    set({ savedGroups: nextGroups });
+  },
+
+  loadSavedGroup: (groupId) => {
+    const group = get().savedGroups.find((g) => g.id === groupId);
+    if (!group) return;
+    set({ selectedTemplateIds: [...group.templateIds] });
+  },
+
+  deleteSavedGroup: (groupId) => {
+    const nextGroups = get().savedGroups.filter((g) => g.id !== groupId);
+    try {
+      localStorage.setItem('nuclei_saved_groups', JSON.stringify(nextGroups));
+    } catch {}
+    set({ savedGroups: nextGroups });
+  },
+
+  toggleGroupSelection: (templateIds, select) => {
+    set((state) => {
+      const current = new Set(state.selectedTemplateIds);
+      const shouldSelect =
+        select !== undefined ? select : !templateIds.every((id) => current.has(id));
+
+      if (shouldSelect) {
+        templateIds.forEach((id) => current.add(id));
+      } else {
+        templateIds.forEach((id) => current.delete(id));
+      }
+
+      return { selectedTemplateIds: Array.from(current) };
+    });
+  },
+
+  activeCategory: 'recon-first',
+  setActiveCategory: (activeCategory) => set({ activeCategory }),
+  selectCategoryTemplates: (catId) =>
+    set((state) => {
+      let matched: string[] = [];
+      if (catId === 'all') {
+        matched = state.templates.map((t) => t.id);
+      } else if (catId === 'recon-first') {
+        matched = state.templates
+          .filter((t) =>
+            t.tags.some((tag) =>
+              ['tech', 'panel', 'exposure', 'detection', 'recon'].includes(tag.toLowerCase())
+            )
+          )
+          .map((t) => t.id);
+      } else if (catId === 'cves-critical-high') {
+        matched = state.templates
+          .filter(
+            (t) =>
+              ['critical', 'high'].includes(t.severity) &&
+              (t.cve_id || t.tags.some((tag) => tag.toLowerCase().includes('cve')))
+          )
+          .map((t) => t.id);
+      } else if (catId === 'recent-cves') {
+        matched = state.templates
+          .filter(
+            (t) =>
+              t.tags.some((tag) => tag.includes('2025') || tag.includes('2026')) ||
+              (t.cve_id && (t.cve_id.includes('2025') || t.cve_id.includes('2026')))
+          )
+          .map((t) => t.id);
+      } else if (catId === 'dast-fuzzing') {
+        matched = state.templates
+          .filter((t) =>
+            t.tags.some((tag) =>
+              ['dast', 'fuzzing', 'xss', 'sqli', 'lfi', 'ssrf'].includes(tag.toLowerCase())
+            )
+          )
+          .map((t) => t.id);
+      } else if (catId === 'cloud-token-leaks') {
+        matched = state.templates
+          .filter((t) =>
+            t.tags.some((tag) =>
+              ['token', 'cloud', 'aws', 's3', 'azure', 'credentials'].includes(tag.toLowerCase())
+            )
+          )
+          .map((t) => t.id);
+      } else {
+        matched = state.templates
+          .filter(
+            (t) =>
+              t.tags.some((tag) => tag.toLowerCase().includes(catId)) ||
+              t.name.toLowerCase().includes(catId) ||
+              t.description.toLowerCase().includes(catId)
+          )
+          .map((t) => t.id);
+      }
+
+      return {
+        selectedTemplateIds: matched.length > 0 ? matched : state.selectedTemplateIds,
+      };
+    }),
+
+  syncStatus: {
+    isSyncing: false,
+    progressMessage: '',
+    totalTemplates: DEFAULT_TEMPLATES.length,
+  },
+  setSyncStatus: (status) =>
+    set((state) => ({
+      syncStatus: { ...state.syncStatus, ...status },
+    })),
+
+  syncFromGitHub: async (force = false) => {
+    set((state) => ({
+      syncStatus: {
+        ...state.syncStatus,
+        isSyncing: true,
+        progressMessage: 'Connecting to GitHub projectdiscovery/nuclei-templates...',
+        error: undefined,
+      },
+    }));
+
+    try {
+      const result = await syncOfficialNucleiTemplates(force);
+      const converted: TemplateItem[] = result.templates.map((t) => ({
+        id: t.id,
+        name: t.name,
+        severity: (t.severity.toLowerCase() as Severity) || 'info',
+        protocol: 'http',
+        tags: t.tags || [],
+        description: t.description || '',
+        author: t.author || 'projectdiscovery',
+        category: (t.category as any) || 'vulnerabilities',
+        source_path: t.source_path,
+        yaml_content: '',
+      }));
+
+      set((state) => {
+        const existingIds = new Set(converted.map((c) => c.id));
+        const merged = [
+          ...converted,
+          ...DEFAULT_TEMPLATES.filter((d) => !existingIds.has(d.id)),
+        ];
+        return {
+          templates: merged,
+          syncStatus: {
+            isSyncing: false,
+            progressMessage: `Synced ${result.total_templates} official templates.`,
+            totalTemplates: result.total_templates,
+            lastSyncedAt: new Date().toLocaleDateString(),
+            cachePath: result.cache_path,
+          },
+        };
+      });
+    } catch (err: any) {
+      set((state) => ({
+        syncStatus: {
+          ...state.syncStatus,
+          isSyncing: false,
+          error: err?.message || String(err),
+        },
+      }));
+    }
+  },
+
+  checkCachedGitHubTemplates: async () => {
+    try {
+      const res = await getCachedOfficialTemplates();
+      if (res.is_cached && res.templates.length > 0) {
+        const converted: TemplateItem[] = res.templates.map((t) => ({
+          id: t.id,
+          name: t.name,
+          severity: (t.severity.toLowerCase() as Severity) || 'info',
+          protocol: 'http',
+          tags: t.tags || [],
+          description: t.description || '',
+          author: t.author || 'projectdiscovery',
+          category: (t.category as any) || 'vulnerabilities',
+          source_path: t.source_path,
+          yaml_content: '',
+        }));
+
+        set((state) => {
+          const existingIds = new Set(converted.map((c) => c.id));
+          const merged = [
+            ...converted,
+            ...DEFAULT_TEMPLATES.filter((d) => !existingIds.has(d.id)),
+          ];
+          return {
+            templates: merged,
+            syncStatus: {
+              ...state.syncStatus,
+              totalTemplates: res.total_templates,
+              progressMessage: `Loaded ${res.total_templates} cached templates.`,
+              lastSyncedAt: 'Cached',
+              cachePath: res.cache_path,
+            },
+          };
+        });
+      }
+    } catch (err) {
+      console.warn('Failed to check cached GitHub templates:', err);
+    }
+  },
+
   studioYaml: DEFAULT_TEMPLATES[0]?.yaml_content || '',
   setStudioYaml: (studioYaml) => set({ studioYaml }),
-  studioTarget: 'https://httpbin.org',
+  studioTarget: '',
   setStudioTarget: (studioTarget) => set({ studioTarget }),
   studioDiagnostics: [],
   setStudioDiagnostics: (studioDiagnostics) => set({ studioDiagnostics }),

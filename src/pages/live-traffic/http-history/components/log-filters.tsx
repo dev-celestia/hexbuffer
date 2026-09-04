@@ -62,50 +62,33 @@ export function LogFilters(props: LogFiltersProps) {
       )}
     >
       <WindowHeaderSlot>
-        {isStreamManuallyPaused && (
-          <Badge
-            variant="outline"
-            className={cn(
-              // Sizing & Spacing
-              "px-1 py-0.5",
-
-              // Typography
-              "font-mono text-[10px] font-semibold text-white",
-
-              // Backgrounds & Borders
-              "rounded border-none bg-amber-600 shadow-none"
-            )}
-          >
-            paused
-          </Badge>
-        )}
-
         <ButtonGroup>
           <Button
             size="xs"
-            variant="secondary"
+            variant="ghost"
             onClick={handleToggleStreamPause}
           >
             {isStreamManuallyPaused ? (
               <>
-                <PlayIcon />
-                Resume
+                <PlayIcon className='size-3' />
+                <p className='mt-[1px]'>Resume</p>
               </>
             ) : (
               <>
-                <PauseIcon />
-                Pause
+                <PauseIcon className='size-3' />
+                <p className='mt-[1px]'>Pause</p>
               </>
             )}
           </Button>
 
           <Button
             size="xs"
-            variant="secondary"
+            variant="ghost"
             onClick={openTargetSelector}
+            className={"flex items-center"}
           >
-            <TargetIcon />
-            Target
+            <TargetIcon className='size-3' />
+            <p className='mt-[1px]'>Target</p>
           </Button>
         </ButtonGroup>
       </WindowHeaderSlot>

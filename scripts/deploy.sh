@@ -8,21 +8,17 @@ export TAURI_SIGNING_PRIVATE_KEY="dW50cnVzdGVkIGNvbW1lbnQ6IHJzaWduIGVuY3J5cHRlZC
 usage() {
   cat <<EOF
 Usage:
-  pnpm run deploy                         Auto-increment full suite patch version, then build/upload
-  pnpm run deploy -- --help               Show this help
-  pnpm run deploy -- --target http        Build/upload standalone HTTP History
-  pnpm run deploy -- --target repeater    Build/upload standalone Repeater
-  pnpm run deploy -- --target jwt         Build/upload standalone JWT Analyzer
-  pnpm run deploy -- --target port-scanner Build/upload standalone Port Scanner
-  pnpm run deploy -- --bump               Auto-increment patch version, then build/upload
-  pnpm run deploy -- --version 1.0.1      Bump to exact version, then build/upload
-  pnpm run deploy -- --windows            Cross-compile Windows x86_64 from macOS/Linux
-  pnpm run deploy -- --windows-all        Build/upload Windows x64, x86, and ARM64
-  pnpm run deploy -- --all                Build native platform + all Windows targets
+  pnpm run deploy                               Auto-increment full suite patch version, then build/upload
+  pnpm run deploy -- --version 1.0.1            Deploy specific version (full suite)
+  pnpm run deploy -- --target http --version 1.0.1  Deploy specific target with exact version
+  pnpm run deploy -- --no-upload                Build locally without uploading to S3
+  pnpm run deploy -- --windows                  Cross-compile Windows x86_64 from macOS/Linux
+  pnpm run deploy -- --windows-all              Build/upload Windows x64, x86, and ARM64
+  pnpm run deploy -- --all                      Build native platform + all Windows targets
+  pnpm run deploy -- --help                     Show this help
 
 Notes:
-  - Pass script args after -- when using pnpm.
-  - Use "pnpm run deploy"; "pnpm deploy" is a pnpm built-in command.
+  - Pass script args after -- when using pnpm (e.g. pnpm run deploy -- --version 1.2.0).
   - Standalone targets build with their dedicated configs in src-tauri/targets/<name>.json.
   - Upload uses R2_ENDPOINT, R2_BUCKET, and optional UPDATER_BASE_URL.
 EOF
