@@ -39,8 +39,11 @@ fn main() {
         }
     }
 
-    // Start a fresh log file on each launch
-    let _ = std::fs::write("/tmp/hexbuffer.log", "");
+    // Ensure log file exists without truncating other concurrent process logs
+    let _ = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open("/tmp/hexbuffer.log");
     log("Application starting...");
 
     std::panic::set_hook(Box::new(|panic_info| {
@@ -249,6 +252,33 @@ fn main() {
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_pty::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+            crate::log(&format!("Single-instance CLI args received: {:?}", argv));
+
+            // Check if a sub-app target was requested
+            let mut requested_target = None;
+            for arg in argv.into_iter().skip(1) {
+                if let Some(target) = arg.strip_prefix("--target=").or_else(|| arg.strip_prefix("--subapp=")) {
+                    requested_target = Some(target.trim_matches('"').to_lowercase());
+                    break;
+                }
+            }
+
+            if let Some(target) = requested_target {
+                crate::log(&format!("Single-instance opening sub-app window: {}", target));
+                crate::setup::open_or_focus_subapp_window(app, &target);
+            } else {
+                // Default: bring main suite window to front
+                if let Some(main_win) = app.get_webview_window("main") {
+                    let _ = main_win.show();
+                    let _ = main_win.unminimize();
+                    let _ = main_win.set_focus();
+                    #[cfg(target_os = "macos")]
+                    crate::app_commands::activate_current_process();
+                    crate::log("Single-instance revealed and focused main suite window");
+                }
+            }
+        }))
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 // Only run close cleanup when the window is actually visible.
@@ -265,7 +295,7 @@ fn main() {
                     });
 
                     if has_other_windows {
-                        // Prevent killing the entire app process so sub-windows stay alive
+                        // Keep sub-windows alive while hiding the main suite window
                         api.prevent_close();
                         let _ = window.hide();
                         crate::log("Main window hidden (sub-windows remain active)");
@@ -294,6 +324,7 @@ fn main() {
                     let _ = main_win.show();
                     let _ = main_win.unminimize();
                     let _ = main_win.set_focus();
+                    crate::app_commands::activate_current_process();
                 }
             }
             let _ = (app_handle, event);

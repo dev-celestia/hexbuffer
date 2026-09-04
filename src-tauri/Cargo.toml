@@ -23,6 +23,7 @@ tauri-plugin-shell = "2"
 tauri-plugin-os = "2"
 tauri-plugin-pty = "0.3"
 tauri-plugin-notification = { version = "2", features = ["windows7-compat"] }
+tauri-plugin-single-instance = "2"
 dirs = "6.0"
 
 [target.'cfg(windows)'.dependencies]

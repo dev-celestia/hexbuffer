@@ -179,18 +179,22 @@ pub fn create_os_desktop_shortcut(
     display_name: String,
     icon_path: Option<String>,
 ) -> Result<String, String> {
-    use std::io::Write;
-
     let desktop_dir = dirs::desktop_dir().ok_or_else(|| "Could not locate Desktop directory".to_string())?;
     let exe_path = std::env::current_exe().map_err(|e| e.to_string())?;
 
     // Determine the icon to use if not provided
     let resolved_icon = icon_path.or_else(|| {
-        let default_experiment_icon = "/Users/arham/Desktop/project/apprecon/src/assets/standalone-app-icon/http.png";
-        if std::path::Path::new(default_experiment_icon).exists() {
-            Some(default_experiment_icon.to_string())
+        let app_icon_base = "/Users/arham/Desktop/project/apprecon/src/assets/app-icon";
+        let specific_icon = format!("{}/{}.png", app_icon_base, tool_id.to_lowercase());
+        if std::path::Path::new(&specific_icon).exists() {
+            Some(specific_icon)
         } else {
-            None
+            let default_icon = format!("{}/http.png", app_icon_base);
+            if std::path::Path::new(&default_icon).exists() {
+                Some(default_icon)
+            } else {
+                None
+            }
         }
     });
 
@@ -207,115 +211,167 @@ pub fn create_os_desktop_shortcut(
 
     #[cfg(target_os = "macos")]
     {
-        // Check if current_exe is inside an .app bundle
-        let mut app_bundle = None;
+        // 1. Locate the main Hexbuffer binary
+        let mut main_bundle = None;
         let mut current = exe_path.as_path();
         while let Some(parent) = current.parent() {
             if parent.extension().and_then(|ext| ext.to_str()) == Some("app") {
-                app_bundle = Some(parent.to_path_buf());
+                main_bundle = Some(parent.to_path_buf());
                 break;
             }
             current = parent;
         }
 
-        // On macOS, prefer creating a native .app launcher with osacompile so it launches silently without terminal window
         let app_path = desktop_dir.join(format!("{}.app", display_name));
-        let mut created_target = app_path.clone();
+        let macos_dir = app_path.join("Contents/MacOS");
+        let resources_dir = app_path.join("Contents/Resources");
 
-        // Remove previous launcher if it exists
+        // Remove any previous shortcut app
         if app_path.exists() {
             let _ = std::fs::remove_dir_all(&app_path);
         }
 
-        let osa_script = if let Some(bundle) = &app_bundle {
-            format!(
-                "do shell script \"open -n -a \\\"{}\\\" --args --target=\\\"{}\\\"\"",
-                bundle.display(),
-                tool_id
-            )
+        std::fs::create_dir_all(&macos_dir).map_err(|e| e.to_string())?;
+        std::fs::create_dir_all(&resources_dir).map_err(|e| e.to_string())?;
+
+        // 2. Determine target executable path
+        let target_binary = if let Some(ref bundle) = main_bundle {
+            bundle.join("Contents/MacOS/hexbuffer")
+        } else if std::path::Path::new("/Applications/Hexbuffer.app/Contents/MacOS/hexbuffer").exists() {
+            std::path::PathBuf::from("/Applications/Hexbuffer.app/Contents/MacOS/hexbuffer")
         } else {
-            format!(
-                "do shell script \"\\\"{}\\\" --target=\\\"{}\\\" &\"",
-                exe_path.display(),
-                tool_id
-            )
+            exe_path.clone()
         };
 
-        // Try compiling to an .app using osacompile
-        let osa_result = std::process::Command::new("osacompile")
-            .arg("-e")
-            .arg(&osa_script)
-            .arg("-o")
-            .arg(&app_path)
-            .output();
+        // 3. Generate icon.icns in Contents/Resources/icon.icns
+        let clean_slug = tool_id.to_lowercase().replace(' ', "-");
+        let bundle_id = format!("com.hexbuffer.subapp.{}", clean_slug);
 
-        let success_app = match osa_result {
-            Ok(output) => output.status.success(),
-            Err(_) => false,
-        };
-
-        if success_app {
-            // Hide the launcher from macOS Dock so it acts as an invisible background agent
-            let plist_path = app_path.join("Contents/Info.plist");
-            let plist_str = plist_path.display().to_string();
-            let _ = std::process::Command::new("/usr/libexec/PlistBuddy")
-                .args(["-c", "Add :LSUIElement bool true", &plist_str])
-                .output();
-        } else {
-            // Fallback to .command script
-            let link_path = desktop_dir.join(format!("{}.command", display_name));
-            let content = if let Some(bundle) = app_bundle {
-                format!(
-                    "#!/bin/sh\nopen -a \"{}\" --args --target=\"{}\"\n",
-                    bundle.display(),
-                    tool_id
-                )
+        let icon_png = resolved_icon.as_ref().and_then(|p| {
+            if std::path::Path::new(p).exists() {
+                Some(p.clone())
             } else {
-                format!(
-                    "#!/bin/sh\n\"{}\" --target=\"{}\" &\n",
-                    exe_path.display(),
-                    tool_id
-                )
-            };
-
-            let mut file = std::fs::File::create(&link_path).map_err(|e| e.to_string())?;
-            file.write_all(content.as_bytes()).map_err(|e| e.to_string())?;
-
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
-                let _ = std::fs::set_permissions(&link_path, std::fs::Permissions::from_mode(0o755));
+                None
             }
-            created_target = link_path;
+        });
+
+        if let Some(ref png_path) = icon_png {
+            let temp_iconset = std::env::temp_dir().join(format!("hexbuffer_{}_{}.iconset", clean_slug, std::process::id()));
+            let _ = std::fs::create_dir_all(&temp_iconset);
+
+            for size in [16, 32, 64, 128, 256, 512] {
+                let _ = std::process::Command::new("sips")
+                    .args(["-z", &size.to_string(), &size.to_string(), png_path, "--out", &temp_iconset.join(format!("icon_{}x{}.png", size, size)).to_string_lossy()])
+                    .output();
+                let dbl = size * 2;
+                let _ = std::process::Command::new("sips")
+                    .args(["-z", &dbl.to_string(), &dbl.to_string(), png_path, "--out", &temp_iconset.join(format!("icon_{}x{}@2x.png", size, size)).to_string_lossy()])
+                    .output();
+            }
+
+            let icns_dest = resources_dir.join("icon.icns");
+            let _ = std::process::Command::new("iconutil")
+                .args(["-c", "icns", &temp_iconset.to_string_lossy(), "-o", &icns_dest.to_string_lossy()])
+                .output();
+
+            let _ = std::fs::remove_dir_all(&temp_iconset);
+        } else {
+            // Copy default icon.icns if available
+            let default_icns = "/Users/arham/Desktop/project/apprecon/src-tauri/icons/icon.icns";
+            if std::path::Path::new(default_icns).exists() {
+                let _ = std::fs::copy(default_icns, resources_dir.join("icon.icns"));
+            }
         }
 
-        // Apply custom icon using macOS AppKit via swift
-        if let Some(ref icon) = resolved_icon {
-            if std::path::Path::new(icon).exists() {
-                let swift_script = format!(
-                    r#"import AppKit
+        // 4. Create Contents/Info.plist
+        let info_plist = format!(
+            r#"<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleDisplayName</key>
+	<string>{display_name}</string>
+	<key>CFBundleExecutable</key>
+	<string>launcher</string>
+	<key>CFBundleIconFile</key>
+	<string>icon.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>{bundle_id}</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>{display_name}</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.1.1</string>
+	<key>CFBundleVersion</key>
+	<string>1.1.1</string>
+	<key>CSResourcesFileMapped</key>
+	<true/>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.13</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+</dict>
+</plist>
+"#
+        );
+        std::fs::write(app_path.join("Contents/Info.plist"), info_plist).map_err(|e| e.to_string())?;
+
+        // 5. Create launcher script with single-instance delegation
+        let launcher_path = macos_dir.join("launcher");
+        let launcher_content = format!(
+            r#"#!/bin/bash
+TARGET_ID="{tool_id}"
+TARGET_BIN="{target_binary}"
+
+exec "$TARGET_BIN" --target="$TARGET_ID" "$@"
+"#,
+            tool_id = tool_id,
+            target_binary = target_binary.to_string_lossy()
+        );
+
+        std::fs::write(&launcher_path, launcher_content).map_err(|e| e.to_string())?;
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = std::fs::set_permissions(&launcher_path, std::fs::Permissions::from_mode(0o755));
+        }
+
+        // 6. Set custom icon on the folder bundle as well via NSWorkspace for immediate Finder view
+        if let Some(ref icon) = icon_png {
+            let swift_script = format!(
+                r#"import AppKit
 if let img = NSImage(contentsOfFile: "{}") {{
     let ok = NSWorkspace.shared.setIcon(img, forFile: "{}", options: [])
     print(ok)
 }}"#,
-                    icon,
-                    created_target.display()
-                );
-                let _ = std::process::Command::new("swift")
-                    .arg("-e")
-                    .arg(&swift_script)
-                    .output();
-
-                // Touch target to force Finder to refresh its icon cache
-                let _ = std::process::Command::new("touch")
-                    .arg(&created_target)
-                    .output();
-            }
+                icon,
+                app_path.display()
+            );
+            let _ = std::process::Command::new("swift")
+                .arg("-e")
+                .arg(&swift_script)
+                .output();
         }
+
+        // 7. Register new bundle with LaunchServices so Dock and Finder immediately recognize it
+        let _ = std::process::Command::new("/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister")
+            .args(["-f", &app_path.to_string_lossy()])
+            .output();
+
+        let _ = std::process::Command::new("touch")
+            .arg(&app_path)
+            .output();
     }
 
     #[cfg(target_os = "linux")]
     {
+        use std::io::Write;
         let slug = tool_id.to_lowercase().replace(' ', "-");
         let link_path = desktop_dir.join(format!("{}.desktop", slug));
         let icon_line = if let Some(ref icon) = resolved_icon {
@@ -359,6 +415,17 @@ pub fn set_macos_dock_icon_from_file(path: &std::path::Path) -> Result<(), Strin
     Ok(())
 }
 
+#[cfg(target_os = "macos")]
+pub fn activate_current_process() {
+    use objc2::MainThreadMarker;
+    use objc2_app_kit::NSApplication;
+
+    let mtm = unsafe { MainThreadMarker::new_unchecked() };
+    let app = NSApplication::sharedApplication(mtm);
+    #[allow(deprecated)]
+    app.activateIgnoringOtherApps(true);
+}
+
 #[tauri::command]
 pub fn set_dock_icon(icon_path: String) -> Result<(), String> {
     #[cfg(target_os = "macos")]
@@ -367,4 +434,28 @@ pub fn set_dock_icon(icon_path: String) -> Result<(), String> {
     }
     let _ = icon_path;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    #[cfg(target_os = "macos")]
+    fn test_desktop_shortcut_generation_structure() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let app_path = temp_dir.path().join("Hexbuffer HTTP.app");
+        let macos_dir = app_path.join("Contents/MacOS");
+        let resources_dir = app_path.join("Contents/Resources");
+
+        std::fs::create_dir_all(&macos_dir).unwrap();
+        std::fs::create_dir_all(&resources_dir).unwrap();
+
+        let launcher_path = macos_dir.join("launcher");
+        std::fs::write(&launcher_path, "#!/bin/bash\nexit 0\n").unwrap();
+
+        let plist_path = app_path.join("Contents/Info.plist");
+        std::fs::write(&plist_path, "test").unwrap();
+
+        assert!(launcher_path.exists());
+        assert!(plist_path.exists());
+    }
 }

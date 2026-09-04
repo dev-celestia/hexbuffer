@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
-import { ALL_NAV_ITEMS, getAppIconImage } from '@/layout/constants';
+import { ALL_NAV_ITEMS, getAppIconImage, getAppIconFilePath, hasAppIcon } from '@/layout/constants';
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { DEFAULT_ICON_COLORS } from '../constants';
 import { openSubAppWindow, normalizeSubAppTarget } from '@/lib/sub-window';
@@ -23,6 +23,7 @@ export function useDesktopIcon({ href, label, onNavigateCurrent }: UseDesktopIco
   const colors = item?.colors || DEFAULT_ICON_COLORS;
   const description = item?.description || '';
   const imageSrc = getAppIconImage(href, label);
+  const canPinToDesktop = hasAppIcon(href, label);
   const toolTarget = normalizeSubAppTarget(href);
 
   const handleOpenSubWindow = React.useCallback(async () => {
@@ -40,18 +41,23 @@ export function useDesktopIcon({ href, label, onNavigateCurrent }: UseDesktopIco
   }, [href, onNavigateCurrent]);
 
   const handleCreateOSShortcut = React.useCallback(async () => {
+    if (!canPinToDesktop) {
+      toast.error(`Desktop shortcut is only available for apps with dedicated icons`);
+      return;
+    }
     const toastId = toast.loading(`Creating desktop shortcut for ${label}...`);
     try {
+      const iconPath = getAppIconFilePath(toolTarget, label) || getAppIconFilePath(href, label);
       await invoke('create_os_desktop_shortcut', {
         toolId: toolTarget,
         displayName: `Hexbuffer ${label}`,
-        iconPath: '/Users/arham/Desktop/project/apprecon/src/assets/standalone-app-icon/http.png',
+        iconPath,
       });
       toast.success(`Pinned "${label}" to your OS Desktop!`, { id: toastId });
     } catch (err) {
       toast.error(`Failed to create desktop shortcut: ${String(err)}`, { id: toastId });
     }
-  }, [toolTarget, label]);
+  }, [canPinToDesktop, toolTarget, href, label]);
 
   const handleClick = React.useCallback(
     (e: React.MouseEvent) => {
@@ -68,6 +74,7 @@ export function useDesktopIcon({ href, label, onNavigateCurrent }: UseDesktopIco
     colors,
     description,
     imageSrc,
+    canPinToDesktop,
     handleClick,
     handleOpenSubWindow,
     handleOpenCurrentWindow,

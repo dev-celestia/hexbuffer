@@ -1,9 +1,4 @@
-import httpHistoryIcon from '@/assets/app/http-history.png';
-import interceptIcon from '@/assets/app/Intercept.png';
-import intruderIcon from '@/assets/app/intruder.png';
-import repeaterIcon from '@/assets/app/repeater.png';
-import notesIcon from '@/assets/app/notes.png';
-import settingsIcon from '@/assets/app/settings.png';
+import { getAppIconImage } from '@/layout/constants';
 
 export type ImageSource = string | { src: string };
 
@@ -21,32 +16,32 @@ export const SPLASH_SLIDES: SplashSlide[] = [
   {
     id: 'http-history',
     name: 'HTTP History',
-    image: httpHistoryIcon,
+    image: getAppIconImage('/http-history') ?? '',
   },
   {
     id: 'intercept',
     name: 'Intercept',
-    image: interceptIcon,
+    image: getAppIconImage('/intercept') ?? '',
   },
   {
     id: 'intruder',
     name: 'Intruder',
-    image: intruderIcon,
+    image: getAppIconImage('/intruder') ?? '',
   },
   {
     id: 'repeater',
     name: 'Repeater',
-    image: repeaterIcon,
+    image: getAppIconImage('/repeater') ?? '',
   },
   {
     id: 'notes',
     name: 'Notes',
-    image: notesIcon,
+    image: getAppIconImage('/scratchpad') ?? '',
   },
   {
     id: 'settings',
     name: 'Settings',
-    image: settingsIcon,
+    image: getAppIconImage('/settings') ?? '',
   },
 ];
 

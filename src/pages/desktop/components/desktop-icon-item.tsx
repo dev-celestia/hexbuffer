@@ -29,6 +29,7 @@ export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Readon
     colors,
     description,
     imageSrc,
+    canPinToDesktop,
     handleClick,
     handleOpenSubWindow,
     handleOpenCurrentWindow,
@@ -194,7 +195,10 @@ export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Readon
           <span>Open in Main Window</span>
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem onClick={handleCreateOSShortcut}>
+        <ContextMenuItem
+          disabled={!canPinToDesktop}
+          onClick={canPinToDesktop ? handleCreateOSShortcut : undefined}
+        >
           <DesktopIcon />
           <span>Pin to OS Desktop</span>
         </ContextMenuItem>

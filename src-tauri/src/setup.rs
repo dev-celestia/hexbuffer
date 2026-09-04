@@ -68,26 +68,6 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    #[cfg(target_os = "macos")]
-    if let Some(ref clean_target) = initial_target {
-        let icon_candidate = format!("/Users/arham/Desktop/project/apprecon/src/assets/standalone-app-icon/{}.png", clean_target);
-        let fallback_icon = "/Users/arham/Desktop/project/apprecon/src/assets/standalone-app-icon/http.png";
-        let icon_to_use = if std::path::Path::new(&icon_candidate).exists() {
-            Some(icon_candidate)
-        } else if std::path::Path::new(fallback_icon).exists() {
-            Some(fallback_icon.to_string())
-        } else {
-            None
-        };
-
-        if let Some(icon) = icon_to_use {
-            crate::log(&format!("Setting macOS Dock icon to: {}", icon));
-            if let Err(e) = crate::app_commands::set_macos_dock_icon_from_file(std::path::Path::new(&icon)) {
-                crate::log(&format!("Failed to set macOS Dock icon: {}", e));
-            }
-        }
-    }
-
     #[cfg(target_os = "linux")]
     if let Some(main_window) = app.get_webview_window("main") {
         let _ = main_window.set_decorations(false);
@@ -95,42 +75,12 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     if let Some(ref clean_target) = initial_target {
-        crate::log(&format!("Launching dedicated sub-app window for: {}", clean_target));
+        crate::log(&format!("Cold-start requested for sub-app: {}", clean_target));
         // Dismiss splash screen immediately
         if let Some(splash) = app.get_webview_window("splashscreen") {
             let _ = splash.close();
         }
-
-        // Spawn dedicated subapp window with index.html?target=<clean_target>
-        let subapp_label = format!("subapp-{}", clean_target);
-        let subapp_url = format!("index.html?target={}", clean_target);
-        
-        let subapp_builder = tauri::WebviewWindowBuilder::new(
-            app,
-            &subapp_label,
-            tauri::WebviewUrl::App(subapp_url.into()),
-        )
-        .title("Hexbuffer")
-        .inner_size(1200.0, 800.0)
-        .min_inner_size(750.0, 520.0)
-        .decorations(true)
-        .transparent(true);
-
-        #[cfg(target_os = "macos")]
-        let subapp_builder = subapp_builder
-            .title_bar_style(tauri::TitleBarStyle::Overlay)
-            .hidden_title(true);
-
-        match subapp_builder.build() {
-            Ok(subapp_win) => {
-                let _ = subapp_win.show();
-                let _ = subapp_win.set_focus();
-                crate::log(&format!("Sub-app window [{}] opened successfully", subapp_label));
-            }
-            Err(e) => {
-                crate::log(&format!("Failed to open sub-app window [{}]: {}", subapp_label, e));
-            }
-        }
+        open_or_focus_subapp_window(&app.handle(), clean_target);
     }
 
     #[cfg(desktop)]
@@ -182,4 +132,51 @@ async fn check_for_updates(app: AppHandle) -> tauri_plugin_updater::Result<()> {
     }
 
     Ok(())
+}
+
+pub fn open_or_focus_subapp_window(app: &AppHandle, clean_target: &str) {
+    let subapp_label = format!("subapp-{}", clean_target);
+
+    // If window already exists, unminimize, show and focus it
+    if let Some(win) = app.get_webview_window(&subapp_label) {
+        let _ = win.unminimize();
+        let _ = win.show();
+        let _ = win.set_focus();
+        #[cfg(target_os = "macos")]
+        crate::app_commands::activate_current_process();
+        crate::log(&format!("Existing sub-app window [{}] brought to front", subapp_label));
+        return;
+    }
+
+    // Otherwise create the sub-app window
+    let subapp_url = format!("index.html?target={}", clean_target);
+    let subapp_builder = tauri::WebviewWindowBuilder::new(
+        app,
+        &subapp_label,
+        tauri::WebviewUrl::App(subapp_url.into()),
+    )
+    .title("Hexbuffer")
+    .inner_size(1200.0, 800.0)
+    .min_inner_size(750.0, 520.0)
+    .decorations(true)
+    .transparent(true);
+
+    #[cfg(target_os = "macos")]
+    let subapp_builder = subapp_builder
+        .title_bar_style(tauri::TitleBarStyle::Overlay)
+        .hidden_title(true);
+
+    match subapp_builder.build() {
+        Ok(subapp_win) => {
+            let _ = subapp_win.unminimize();
+            let _ = subapp_win.show();
+            let _ = subapp_win.set_focus();
+            #[cfg(target_os = "macos")]
+            crate::app_commands::activate_current_process();
+            crate::log(&format!("Sub-app window [{}] opened and brought to front successfully", subapp_label));
+        }
+        Err(e) => {
+            crate::log(&format!("Failed to open sub-app window [{}]: {}", subapp_label, e));
+        }
+    }
 }
