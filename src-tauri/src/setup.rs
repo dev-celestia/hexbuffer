@@ -164,7 +164,8 @@ pub fn open_or_focus_subapp_window(app: &AppHandle, clean_target: &str) {
     #[cfg(target_os = "macos")]
     let subapp_builder = subapp_builder
         .title_bar_style(tauri::TitleBarStyle::Overlay)
-        .hidden_title(true);
+        .hidden_title(true)
+        .traffic_light_position(tauri::LogicalPosition::new(20.0, 20.0));
 
     match subapp_builder.build() {
         Ok(subapp_win) => {

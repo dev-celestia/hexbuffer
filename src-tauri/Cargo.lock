@@ -4630,6 +4630,7 @@ dependencies = [
  "hickory-resolver",
  "hmac 0.12.1",
  "html5ever 0.39.0",
+ "httparse",
  "jaq-core",
  "jaq-json",
  "jaq-parse",

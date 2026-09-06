@@ -5,24 +5,6 @@ import { convertFileSrc } from '@tauri-apps/api/core';
 export const LOCAL_STORAGE_DIR_NAME = 'Hexbuffer Files';
 
 /**
- * Reads a File as a Base64 Data URL string
- */
-export function readFileAsBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        resolve(reader.result);
-      } else {
-        reject(new Error('Failed to read image as data URL'));
-      }
-    };
-    reader.onerror = () => reject(reader.error || new Error('Error reading file'));
-    reader.readAsDataURL(file);
-  });
-}
-
-/**
  * Saves a Base64 string directly to the local File Explorer directory (Hexbuffer Files/scratchpads)
  * and returns the local file path / webview asset URL so the note only stores clean file links
  * rather than heavy Base64 strings.
@@ -71,12 +53,4 @@ export async function saveBase64ToLocalExplorer(
       relativePath: preferredName,
     };
   }
-}
-
-/**
- * Creates Markdown image tag from filename and URL
- */
-export function formatMarkdownImage(fileName: string, srcUrl: string): string {
-  const cleanName = fileName.replace(/[\[\]\(\)]/g, '').trim() || 'Scratchpad Drawing';
-  return `\n\n![${cleanName}](${srcUrl})\n\n`;
 }

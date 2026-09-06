@@ -1,11 +1,9 @@
 import * as React from "react";
-import { invoke } from "@tauri-apps/api/core";
-import { relaunch } from "@tauri-apps/plugin-process";
 import {
-  ArrowCircleDownIcon,
-  CircleNotchIcon,
   DotsSixIcon,
   GearSixIcon,
+  MoonIcon,
+  SunIcon,
 } from "@phosphor-icons/react";
 import {
   Button,
@@ -16,17 +14,14 @@ import {
   DialogTitle,
   Separator,
 } from "@celestia-project/ui";
-import { toast } from "sonner";
 
-import { ALL_NAV_ITEMS, getAppIconImage, type NavItem } from "@/layout/constants";
-import { WindowProvider, useWindowContext } from "@/providers/window-provider";
+import type { NavItem } from "@/layout/constants";
+import { WindowProvider } from "@/providers/window-provider";
 import type { SettingsCategory, SettingsProps } from "@/pages/settings";
-import { useUpdater } from "@/hooks/use-updater";
-import { UpdateDialog } from "@/layout/taskbar/components/update-dialog";
-import { formatBytes } from "@/lib/utils";
-import { ProxyButton } from "./proxy-button";
-import { WindowControls } from "./window-controls";
-import { useIsMac } from "@/hooks/use-is-mac";
+import { ProxyButton } from "../proxy-button";
+import { WindowControls } from "../window-controls";
+import { useStandaloneHeader } from "./hooks/use-standalone-header";
+import { useIsFullscreen } from "@/hooks/use-platform";
 import { cn } from "@/lib/utils";
 
 const SettingsModal = React.lazy<React.ComponentType<SettingsProps>>(() =>
@@ -49,88 +44,21 @@ interface StandaloneHeaderProps {
 }
 
 function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
-  const isMac = useIsMac();
-  const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
-  const [updateDialogOpen, setUpdateDialogOpen] = React.useState(false);
-  const [updateConfirmReady, setUpdateConfirmReady] = React.useState(false);
-
-  const { setHeaderSlotNode, hasHeaderSlotContent } = useWindowContext();
-
   const {
-    currentVersion,
-    updateAvailable,
-    updateVersion,
-    downloading: updateDownloading,
-    downloadProgress,
-    downloadError,
-    updateInstalled,
-    installUpdate,
-  } = useUpdater();
-
-  React.useEffect(() => {
-    if (!updateDialogOpen || updateDownloading || updateInstalled) return;
-    const t = window.setTimeout(() => setUpdateConfirmReady(true), 250);
-    return () => window.clearTimeout(t);
-  }, [updateDialogOpen, updateDownloading, updateInstalled]);
-
-  const progressLabel =
-    downloadProgress.percent !== null
-      ? `${downloadProgress.percent}%`
-      : downloadProgress.downloadedBytes > 0
-        ? `Downloaded ${formatBytes(downloadProgress.downloadedBytes)}`
-        : "Preparing...";
-
-  const handleInstallUpdate = React.useCallback(async () => {
-    if (!updateConfirmReady) return;
-    const targetVersion = updateVersion;
-    const toastId = toast.loading(`Installing v${targetVersion}...`);
-    const result = await installUpdate();
-    if (result.ok) {
-      toast.success(`Updated to v${targetVersion}`, {
-        id: toastId,
-        description: "Restarting app to finish applying the update.",
-      });
-      window.setTimeout(async () => {
-        try {
-          await relaunch();
-        } catch (err) {
-          console.error("Failed to restart app automatically:", err);
-          toast.error("Could not restart automatically. Please restart the app manually.");
-        }
-      }, 1000);
-    } else {
-      const err = result.error || downloadError || "Update failed.";
-      toast.error("Update failed", {
-        id: toastId,
-        description: err,
-      });
-    }
-  }, [updateConfirmReady, updateVersion, installUpdate, downloadError]);
-
-  const resolvedNavItem =
-    navItem ||
-    ALL_NAV_ITEMS.find(
-      (item) =>
-        (id && (item.href === id || item.href === `/${id.replace(/^\//, "")}`)) ||
-        (title && item.label.toLowerCase() === title.toLowerCase()) ||
-        (title && title.toLowerCase().includes(item.label.toLowerCase()))
-    );
-
-  const displayTitle = title || resolvedNavItem?.label || "Hexbuffer App";
-  const imageSrc = getAppIconImage(
-    resolvedNavItem?.href || id || "",
-    resolvedNavItem?.label || displayTitle
-  );
-  const IconComponent = resolvedNavItem?.icon;
-
-  const handleDragMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.buttons === 1) {
-      const target = e.target as HTMLElement;
-      if (!target.closest('button, a, input, select, textarea, [role="button"], [data-slot]')) {
-        invoke("safe_start_dragging").catch(() => {});
-      }
-    }
-  };
+    isMac,
+    theme,
+    toggleTheme,
+    isSettingsOpen,
+    setIsSettingsOpen,
+    setHeaderSlotNode,
+    hasHeaderSlotContent,
+    resolvedNavItem,
+    displayTitle,
+    imageSrc,
+    IconComponent,
+    handleDragMouseDown,
+  } = useStandaloneHeader({ id, title, navItem });
+  const isFullscreen = useIsFullscreen();
 
   return (
     <>
@@ -143,11 +71,11 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
           "relative z-40 flex shrink-0 items-center justify-between select-none",
 
           // Sizing & Spacing
-          "h-8 px-2 border-b border-border/80",
-          isMac && "pl-20",
+          "h-11 pe-3 border-b",
+          isMac && !isFullscreen ? "ps-22" : "ps-3",
 
           // Backgrounds & Borders
-          "bg-muted/70 text-foreground",
+          "bg-background backdrop-blur-xs border-b text-foreground",
 
           // Interactive & States
           "cursor-grab active:cursor-grabbing group"
@@ -157,14 +85,12 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center min-w-0",
+            "flex items-center min-w-0 pointer-events-none",
 
             // Sizing & Spacing
-            "gap-1.5 h-6"
+            "gap-2.5"
           )}
         >
-          <Separator orientation="vertical" className="h-6 mr-2" />
-
           {imageSrc ? (
             <div
               className={cn(
@@ -172,7 +98,10 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
                 "flex items-center justify-center shrink-0 overflow-hidden select-none",
 
                 // Sizing & Spacing
-                "size-4 rounded-xs"
+                "size-5 rounded-sm",
+
+                // Backgrounds & Borders
+                "border border-border/40 shadow-2xs"
               )}
             >
               <img
@@ -195,53 +124,38 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
                 "flex items-center justify-center shrink-0 select-none",
 
                 // Sizing & Spacing
-                "size-4 rounded-xs",
+                "size-5.5 rounded-sm",
 
                 // Backgrounds & Borders
                 resolvedNavItem?.colors
                   ? `${resolvedNavItem.colors.bg} text-white shadow-2xs`
-                  : "text-muted-foreground"
+                  : "bg-muted text-muted-foreground border border-border/40"
               )}
             >
-              <IconComponent className="size-2.5 shrink-0" />
+              <IconComponent className="size-3 shrink-0" />
             </div>
           ) : null}
 
           <span
             className={cn(
+              // Sizing & Spacing
+              "max-w-[280px] sm:max-w-xs md:max-w-md truncate",
+
               // Typography
-              "text-xs font-semibold tracking-wide truncate max-w-[200px]"
+              "text-xs sm:text-sm font-semibold tracking-tight text-foreground"
             )}
           >
             {displayTitle}
           </span>
 
-          {currentVersion && (
-            <span
-              className={cn(
-                // Sizing & Spacing
-                "px-1 py-0.5 rounded-xs leading-none shrink-0",
-
-                // Typography
-                "font-mono text-[9px] text-muted-foreground/70 select-none",
-
-                // Backgrounds & Borders
-                "bg-muted/50 border border-border/40"
-              )}
-              title={`Version ${currentVersion}`}
-            >
-              v{currentVersion}
-            </span>
-          )}
-
           {resolvedNavItem?.flag && resolvedNavItem.flag !== "release" && (
             <span
               className={cn(
                 // Sizing & Spacing
-                "px-1 py-0.5 rounded-sm shrink-0 leading-none",
+                "px-1.5 py-0.5 rounded-md shrink-0 leading-none",
 
                 // Typography
-                "text-[8px] font-extrabold uppercase tracking-wider",
+                "text-[9px] font-bold uppercase tracking-wider",
 
                 // Backgrounds & Borders
                 resolvedNavItem.flag === "alpha"
@@ -261,10 +175,10 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center shrink-0",
+            "flex items-center shrink-0 pointer-events-auto",
 
             // Sizing & Spacing
-            "gap-1.5 h-6"
+            "gap-2 h-7"
           )}
         >
           {/* Custom Header Slot / Buttons */}
@@ -273,7 +187,7 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
             onMouseDown={(e) => e.stopPropagation()}
             className={cn(
               // Layout & Positioning
-              "flex items-center gap-1",
+              "flex items-center gap-1.5",
 
               // Interactive & States
               "cursor-default select-text"
@@ -282,54 +196,8 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
 
           {/* Separator between Custom Slot and Quick Tools */}
           {hasHeaderSlotContent && (
-            <Separator orientation="vertical" className="h-6" />
+            <Separator orientation="vertical" className="h-7 opacity-60" />
           )}
-
-          {/* Update Available / Downloading Indicator */}
-          {updateDownloading ? (
-            <div
-              onMouseDown={(e) => e.stopPropagation()}
-              className={cn(
-                // Layout & Positioning
-                "flex items-center gap-1 px-1.5 py-0.5 rounded-xs",
-
-                // Typography
-                "font-mono text-[10px] text-primary",
-
-                // Backgrounds & Borders
-                "bg-primary/10 border border-primary/20",
-
-                // Interactive & States
-                "animate-pulse select-none"
-              )}
-              title={progressLabel}
-            >
-              <CircleNotchIcon className="size-3 animate-spin" />
-              <span>{downloadProgress.percent !== null ? `${downloadProgress.percent}%` : "Updating…"}</span>
-            </div>
-          ) : updateAvailable ? (
-            <div onMouseDown={(e) => e.stopPropagation()}>
-              <Button
-                variant="outline"
-                size="xs"
-                onClick={() => setUpdateDialogOpen(true)}
-                className={cn(
-                  // Sizing & Spacing
-                  "h-5.5 px-1.5 gap-1",
-
-                  // Typography
-                  "text-[10px] font-medium text-emerald-600 dark:text-emerald-400",
-
-                  // Backgrounds & Borders
-                  "border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20"
-                )}
-                title={`Update v${updateVersion} is available`}
-              >
-                <ArrowCircleDownIcon className="size-3" weight="bold" />
-                <span>v{updateVersion}</span>
-              </Button>
-            </div>
-          ) : null}
 
           {/* Proxy Start / Stop Button */}
           <div
@@ -358,7 +226,7 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
               aria-label="Settings"
               className={cn(
                 // Sizing & Spacing
-                "size-6",
+                "size-7 rounded-md",
 
                 // Typography
                 "text-muted-foreground",
@@ -367,13 +235,46 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
                 "hover:bg-muted/80 hover:text-foreground active:scale-95 transition-all cursor-pointer"
               )}
             >
-              <GearSixIcon className="size-3.5" />
+              <GearSixIcon className="size-4" />
+            </Button>
+          </div>
+
+          {/* Theme Switcher Button */}
+          <div
+            onMouseDown={(e) => e.stopPropagation()}
+            className={cn(
+              // Layout & Positioning
+              "flex items-center"
+            )}
+          >
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={toggleTheme}
+              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              className={cn(
+                // Sizing & Spacing
+                "size-7 rounded-md",
+
+                // Typography
+                "text-muted-foreground",
+
+                // Interactive & States
+                "hover:bg-muted/80 hover:text-foreground active:scale-95 transition-all cursor-pointer"
+              )}
+            >
+              {theme === "dark" ? (
+                <SunIcon className="size-4" />
+              ) : (
+                <MoonIcon className="size-4" />
+              )}
             </Button>
           </div>
 
           {/* Separator between Quick Tools and Window Controls */}
           {!isMac && (
-            <Separator orientation="vertical" className="h-4" />
+            <Separator orientation="vertical" className="h-5 opacity-60" />
           )}
 
           {/* Native/Tauri window controls (on Windows/Linux) */}
@@ -391,10 +292,7 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
               size={16}
               className={cn(
                 // Layout & Positioning
-                "shrink-0 mr-0.5",
-
-                // Typography
-                "text-muted-foreground/45",
+                "shrink-0 ms-0.5",
 
                 // Interactive & States
                 "cursor-grab"
@@ -435,17 +333,6 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
           </React.Suspense>
         </DialogContent>
       </Dialog>
-
-      {/* Auto Update Confirmation Dialog */}
-      <UpdateDialog
-        open={updateDialogOpen}
-        onOpenChange={setUpdateDialogOpen}
-        updateDownloading={updateDownloading}
-        progressLabel={progressLabel}
-        updateVersion={updateVersion}
-        updateConfirmReady={updateConfirmReady}
-        onInstall={handleInstallUpdate}
-      />
     </>
   );
 }
@@ -458,6 +345,7 @@ export function StandaloneLayout({
 }: StandaloneLayoutProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const resolvedId = id || (title ? title.toLowerCase() : "standalone");
+  const isFullscreen = useIsFullscreen();
 
   return (
     <div
@@ -470,7 +358,8 @@ export function StandaloneLayout({
         "h-screen h-[100dvh] w-full",
 
         // Backgrounds & Borders
-        "bg-background border rounded-[11px]"
+        "bg-background border rounded-[11px]",
+        isFullscreen && "rounded-none border-0"
       )}
     >
       <WindowProvider id={resolvedId} isStandalone windowElement={containerRef.current}>

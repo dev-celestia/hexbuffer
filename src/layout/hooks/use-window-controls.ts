@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { isMacOS, useIsMac } from '@/hooks/use-is-mac';
+import { isMacOS, useIsMac } from '@/hooks/use-platform';
 
 export { isMacOS, useIsMac };
 

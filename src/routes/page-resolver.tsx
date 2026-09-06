@@ -1,5 +1,5 @@
 import React from "react";
-import { StandaloneLayout } from "@/layout/standalone-layout";
+import { StandaloneLayout } from "@/layout/desktop-workspace/standalone-layout";
 
 // Lazy-loaded page components for standalone targets
 const EncoderPage = React.lazy(() =>
@@ -136,7 +136,7 @@ export function StandaloneAppView({ target }: { readonly target: string }) {
       case "http":
       case "http-history":
       case "live-traffic":
-        return <StandaloneLayout id="standalone-http" title="Hexbuffer HTTP"><StandaloneHttpHistoryPage /></StandaloneLayout>;
+        return <StandaloneLayout id="standalone-http" title="HTTP"><StandaloneHttpHistoryPage /></StandaloneLayout>;
       case "encoder":
         return <StandaloneLayout id="/encoder" title="Encoder"><EncoderPage /></StandaloneLayout>;
       case "jwt":
@@ -158,11 +158,11 @@ export function StandaloneAppView({ target }: { readonly target: string }) {
         return <StandaloneLayout id="/sql-injection" title="SQLi Helper"><SqlInjectionPage /></StandaloneLayout>;
       case "notes":
       case "scratchpad":
-        return <StandaloneLayout id="/scratchpad" title="Hexbuffer Scratchpad"><ScratchpadPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/scratchpad" title="Notes"><ScratchpadPage /></StandaloneLayout>;
       case "kanban":
-        return <StandaloneLayout id="/kanban" title="Hexbuffer Kanban"><KanbanPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/kanban" title="Kanban"><KanbanPage /></StandaloneLayout>;
       case "terminal":
-        return <StandaloneLayout id="/terminal" title="Hexbuffer Terminal"><TerminalPage /></StandaloneLayout>;
+        return <StandaloneLayout id="/terminal" title="Terminal"><TerminalPage /></StandaloneLayout>;
       case "api-mock":
       case "mock-api":
       case "mock-forge":

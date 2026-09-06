@@ -25,7 +25,7 @@ export function ProxyButton({ size = 'sm', className }: ProxyButtonProps) {
       title={title}
     >
       <Button
-        variant={isConnected ? "destructive" : "outline"}
+        variant={isConnected ? "destructive" : "default"}
         size={size}
         onClick={() => onToggleProxy(!isConnected)}
         disabled={!canToggle}

@@ -27,7 +27,20 @@ export default defineConfig({
     host: "127.0.0.1",
   },
   resolve: {
+    // The UI package is linked from celestia-starter, which carries its own
+    // dev-install of React; force a single React instance across the app.
+    dedupe: ["react", "react-dom"],
     alias: [
+      {
+        // Resolve the UI package to the local celestia-starter workspace so
+        // newly added components (e.g. block-text-editor) are picked up
+        // without publishing a new package version.
+        find: /^@celestia-project\/ui$/,
+        replacement: path.resolve(
+          __dirname,
+          "../celestia-starter/packages/ui/src/index.ts"
+        ),
+      },
       {
         find: /^monaco-editor\/esm\/vs\/(.*)/,
         replacement: "monaco-editor/$1",

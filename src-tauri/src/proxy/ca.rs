@@ -53,19 +53,47 @@ pub fn regenerate_ca() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+fn is_ca_cert_valid(cert_pem: &str) -> bool {
+    if !cert_pem.contains("BEGIN CERTIFICATE") {
+        return false;
+    }
+
+    if cert_pem.contains("Hexbuffer Proxy CA") {
+        return true;
+    }
+
+    use base64::{engine::general_purpose, Engine};
+    let b64: String = cert_pem
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty() && !line.starts_with("-----"))
+        .collect();
+
+    if let Ok(der) = general_purpose::STANDARD.decode(b64.as_bytes()) {
+        let needle = b"Hexbuffer Proxy CA";
+        der.windows(needle.len()).any(|window| window == needle)
+    } else {
+        false
+    }
+}
+
 pub fn ensure_ca_exists() {
     let cert_path = get_ca_cert_path();
     let key_path = get_ca_key_path();
 
-    let needs_regen = if !cert_path.exists() || !key_path.exists() {
-        true
-    } else if let Ok(cert_content) = fs::read_to_string(&cert_path) {
-        // If certificate is using a legacy subject that does not match the proxy CA,
-        // regenerate it so leaf certificates forged by hexbuffer-proxy match the root.
-        !cert_content.contains("Hexbuffer Proxy CA")
+    let cert_valid = if let Ok(cert_content) = fs::read_to_string(&cert_path) {
+        is_ca_cert_valid(&cert_content)
     } else {
-        true
+        false
     };
+
+    let key_valid = if let Ok(key_content) = fs::read_to_string(&key_path) {
+        key_content.contains("PRIVATE KEY")
+    } else {
+        false
+    };
+
+    let needs_regen = !cert_valid || !key_valid;
 
     if needs_regen {
         eprintln!("[ca] CA files missing or outdated, regenerating...");
@@ -73,6 +101,14 @@ pub fn ensure_ca_exists() {
             eprintln!("[ca] Failed to regenerate CA: {}", e);
         } else {
             eprintln!("[ca] CA regenerated successfully");
+        }
+    } else {
+        // Ensure shared hexbuffer-ca.pem is also kept in sync if missing
+        let shared_ca_path = crate::paths::get_shared_app_dir().join("hexbuffer-ca.pem");
+        if !shared_ca_path.exists() {
+            if let Ok(cert_bytes) = fs::read(&cert_path) {
+                let _ = fs::write(&shared_ca_path, cert_bytes);
+            }
         }
     }
 }
@@ -92,8 +128,25 @@ mod tests {
 
         let cert_pem = get_ca_cert_pem();
         assert!(cert_pem.is_ok(), "CA cert PEM read should succeed");
-        assert!(cert_pem.unwrap().contains("BEGIN CERTIFICATE"));
+        let pem_str = cert_pem.unwrap();
+        assert!(pem_str.contains("BEGIN CERTIFICATE"));
+        assert!(is_ca_cert_valid(&pem_str), "CA certificate should be recognized as valid");
+
+        // Simulating second startup / ensure_ca_exists call
+        ensure_ca_exists();
+        let cert_pem_after = get_ca_cert_pem().unwrap();
+        assert_eq!(
+            pem_str, cert_pem_after,
+            "CA certificate must NOT be regenerated when valid"
+        );
 
         let _ = fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_is_ca_cert_valid() {
+        assert!(!is_ca_cert_valid(""));
+        assert!(!is_ca_cert_valid("not a cert"));
+        assert!(!is_ca_cert_valid("-----BEGIN CERTIFICATE-----\nSGVsbG8gV29ybGQ=\n-----END CERTIFICATE-----"));
     }
 }

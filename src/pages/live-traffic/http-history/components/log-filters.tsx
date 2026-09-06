@@ -64,7 +64,7 @@ export function LogFilters(props: LogFiltersProps) {
       <WindowHeaderSlot>
         <ButtonGroup>
           <Button
-            size="xs"
+            size="sm"
             variant="ghost"
             onClick={handleToggleStreamPause}
           >
@@ -82,7 +82,7 @@ export function LogFilters(props: LogFiltersProps) {
           </Button>
 
           <Button
-            size="xs"
+            size="sm"
             variant="ghost"
             onClick={openTargetSelector}
             className={"flex items-center"}

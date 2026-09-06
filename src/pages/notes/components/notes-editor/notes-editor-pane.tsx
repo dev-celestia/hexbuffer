@@ -4,7 +4,7 @@ import { useTheme } from '@/components/theme-provider';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { NotesPageHookType } from '../../hooks/use-notes-page';
-import { readFileAsBase64, formatMarkdownImage } from '../../lib/image-helpers';
+import { readFileAsBase64, formatMarkdownImage } from '@celestia-project/ui';
 import { NotesEmptyState } from '../notes-empty-state';
 import { NotesPreviewPane } from '../notes-preview';
 import { DrawingCanvasDialog } from '../drawing-canvas/drawing-canvas-dialog';

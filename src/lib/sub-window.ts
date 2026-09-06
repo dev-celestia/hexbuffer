@@ -37,9 +37,13 @@ export async function openSubAppWindow(targetOrHref: string, title?: string): Pr
       minWidth: 750,
       minHeight: 520,
       decorations: true,
-      titleBarStyle: "Overlay",
+      titleBarStyle: "overlay",
       hiddenTitle: true,
       transparent: true,
+      trafficLightPosition: {
+        x: 20,
+        y: 20,
+      },
     });
 
     subWindow.once("tauri://created", () => {

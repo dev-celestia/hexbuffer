@@ -5,7 +5,8 @@ import type { PageTabItem } from '@/layout/tabs-layout/types';
 import type { TextEditorInstance, MonacoInstance } from '@celestia-project/ui';
 import type { EditorViewMode } from '../types';
 import { downloadAsMarkdown, copyNoteToClipboard } from '../lib/helpers';
-import { saveBase64ToLocalExplorer, formatMarkdownImage } from '../lib/image-helpers';
+import { saveBase64ToLocalExplorer } from '../lib/image-helpers';
+import { formatMarkdownImage } from '@celestia-project/ui';
 
 
 export function useNotesPage() {
