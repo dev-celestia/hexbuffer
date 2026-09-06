@@ -1,4 +1,8 @@
 import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
   Badge,
   Button,
   ButtonGroup,
@@ -21,6 +25,7 @@ import {
   PauseIcon,
   PlayIcon,
   TargetIcon,
+  WarningCircleIcon,
   XIcon,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
@@ -49,6 +54,8 @@ export function LogFilters(props: LogFiltersProps) {
     removeBlacklistRule,
     highlightedHosts,
     removeHighlight,
+    showChunkWarning,
+    dismissChunkWarning,
   } = useLogFilters(props);
 
   const hasMethods = filter.methods.size > 0;
@@ -258,6 +265,63 @@ export function LogFilters(props: LogFiltersProps) {
           </ButtonGroup>
         </div>
       </div>
+
+      {showChunkWarning && (
+        <div
+          className={cn(
+            // Sizing & Spacing
+            "mt-2"
+          )}
+        >
+          <Alert
+            className={cn(
+              // Backgrounds & Borders
+              "border-amber-500/20 bg-amber-500/10 text-amber-500 dark:text-amber-400"
+            )}
+          >
+            <WarningCircleIcon
+              className={cn(
+                // Sizing & Spacing
+                "size-3.5",
+
+                // Typography
+                "text-amber-500"
+              )}
+            />
+            <AlertTitle
+              className={cn(
+                // Typography
+                "text-xs font-semibold text-foreground"
+              )}
+            >
+              Chunked Request Traffic (60 items per page)
+            </AlertTitle>
+            <AlertDescription
+              className={cn(
+                // Typography
+                "text-[11px] text-muted-foreground"
+              )}
+            >
+              Traffic logs are loaded and filtered in chunks of 60 items at a time. Filters apply to the current paginated view from the database. Use pagination below to navigate across pages.
+            </AlertDescription>
+            <AlertAction>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={dismissChunkWarning}
+                aria-label="Dismiss warning"
+              >
+                <XIcon
+                  className={cn(
+                    // Sizing & Spacing
+                    "size-3"
+                  )}
+                />
+              </Button>
+            </AlertAction>
+          </Alert>
+        </div>
+      )}
 
       <FilterChips
         blacklistRules={blacklistRules}

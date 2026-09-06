@@ -101,6 +101,22 @@ export function useLogFilters({
     };
   }, []);
 
+  const CHUNK_WARNING_KEY = 'apprecon:dismiss-chunk-warning';
+  const [showChunkWarning, setShowChunkWarning] = useState(() => {
+    try {
+      return localStorage.getItem(CHUNK_WARNING_KEY) !== 'true';
+    } catch {
+      return true;
+    }
+  });
+
+  const dismissChunkWarning = useCallback(() => {
+    setShowChunkWarning(false);
+    try {
+      localStorage.setItem(CHUNK_WARNING_KEY, 'true');
+    } catch {}
+  }, []);
+
   const blacklistRules = useBlacklistStore((s) => s.rules);
   const removeBlacklistRule = useBlacklistStore((s) => s.removeRule);
 
@@ -125,5 +141,7 @@ export function useLogFilters({
     removeBlacklistRule,
     highlightedHosts,
     removeHighlight,
+    showChunkWarning,
+    dismissChunkWarning,
   };
 }

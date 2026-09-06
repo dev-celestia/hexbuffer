@@ -34,6 +34,9 @@ export function TrafficTablePagination({
         <span>
           Showing {showingStart} – {showingEnd} of {total} {itemLabel}{total === 1 ? '' : 's'}
         </span>
+        <span className="text-[10px] text-muted-foreground/60">
+          (Chunked at 60/page)
+        </span>
       </div>
       <div className="flex items-center gap-2">
         <Button
