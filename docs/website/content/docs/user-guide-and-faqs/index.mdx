@@ -16,21 +16,16 @@ Speed up your daily workflow with built-in desktop shortcuts:
 
 | Shortcut (macOS / Win) | Action |
 | :--- | :--- |
-| `Cmd + R` / `Ctrl + R` | Send selected request to **Repeater** |
-| `Cmd + I` / `Ctrl + I` | Send selected request to **Invoker (Fuzzer)** |
-| `Cmd + K` / `Ctrl + K` | Open AI Assistant / Command Palette |
-| `Cmd + F` / `Ctrl + F` | Focus real-time traffic search bar |
-| `Cmd + \` / `Ctrl + \` | Toggle Left Navigation Sidebar |
-| `Cmd + Shift + C` | Send selected request/response to **Monaco Comparer** |
-| `Cmd + Enter` / `Ctrl + Enter` | Forward intercepted request or dispatch active Repeater request |
-
----
+| `Cmd + S` / `Ctrl + S` | Save the active request in **Repeater** |
+| `Cmd + F` / `Ctrl + F` | Search within editors and payload views |
+| `Cmd + A` / `Ctrl + A` | Select all content inside the Notes editor |
 
 ### 2. Streamlining Workspace Layouts
 Hexbuffer supports flexible multi-panel layouts:
-- **Split Views**: Keep Repeater, Live Traffic, and AI Assistant open simultaneously.
-- **Maximized Inspector Mode**: Expand the results inspector to full-width or maximized mode when analyzing large payloads.
-- **Modular Desktop Dashboard**: Arrange target, proxy, VPN, and clipboard widgets according to your daily priorities.
+- **Sub-Windows**: Open tools in separate windows to work across multiple monitors.
+- **Maximized Inspector Mode**: Expand the message inspector to full-width or maximized mode when analyzing large payloads.
+- **Modular Desktop Dashboard**: Arrange target, proxy, VPN, clipboard, and scratchpad widgets according to your daily priorities.
+- **Shortcut Manager**: Use the desktop Shortcut Manager to see every tool and widget at a glance.
 
 ---
 
@@ -38,27 +33,25 @@ Hexbuffer supports flexible multi-panel layouts:
 
 ### Optimizing Traffic Diagnostics
 - **Target Scope Hygiene**: Always define your domain target scope (e.g., `*.myapp.dev`) before starting extensive capture sessions. This filters out background operating system updates and third-party browser noise.
-- **Database Compression**: Hexbuffer automatically manages capture logs in a local SQLite database with compression, allowing you to store extensive sessions without excessive disk usage.
-
-### AI Copilot Efficiency
-- **Provide Context**: When asking the AI copilot to diagnose an issue, select the relevant request in Live Traffic so the AI can automatically read request headers and response bodies.
-- **Local Models for Offline Work**: If auditing confidential internal targets or working offline, configure local models via Ollama or LM Studio in **Settings -> AI Configuration**.
+- **Session Storage Modes**: Use persistent sessions for long-running audits and ephemeral sessions for throwaway captures so history stays lean.
+- **Chunked Pagination**: Very large sessions load 60 items per page; rely on scope filters and search to locate requests quickly, and use pagination to page through the full history.
+- **Storage Management**: Check database and log sizes in **Settings → General** and truncate or wipe data when disk usage grows.
 
 ---
 
 ## Frequently Asked Questions (FAQ)
 
 ### Q1: Why is HTTPS traffic showing certificate warning errors in my browser?
-**Answer**: You need to install Hexbuffer's Root CA Certificate into your operating system or browser's trusted certificate authority store. Go to **Settings -> CA Certificate Manager**, click **Install to System Trust Store** (or export the certificate), and restart your browser.
+**Answer**: You need to install Hexbuffer's Root CA Certificate into your operating system or browser's trusted certificate authority store. Go to **Settings → CA Certificate**, download the certificate or use the one-click macOS Keychain install, and restart your browser.
 
 ### Q2: How do I export my capture data to share with teammates?
-**Answer**: Select requests in the **Live Traffic** grid, right-click, and choose **Export to HAR**, **Export to CSV**, or **Copy as cURL**.
+**Answer**: Select requests in the **Live Traffic** grid and use the export actions (such as **Copy as cURL**) from the context menu. Notes can be exported as markdown files from the Saved Notes manager.
 
 ### Q3: Can I run Hexbuffer completely offline without an internet connection?
-**Answer**: Yes! Hexbuffer is a native desktop application. All core proxy diagnostics, repeater replaying, fuzzing, port scanning, and local AI capabilities (via Ollama or LM Studio) run 100% locally on your machine.
+**Answer**: Yes! Hexbuffer is a native desktop application. All core proxy diagnostics, interception, repeater replaying, fuzzing, mocking, and port scanning run 100% locally on your machine.
 
-### Q4: How does Peer Discovery and Sync work?
-**Answer**: Hexbuffer includes on-demand local network peer discovery, allowing team members on the same local subnet to share session captures and scope configurations without routing data through external cloud servers.
+### Q4: How do I test my frontend against an API that isn't built yet?
+**Answer**: Use the [API Mock](/docs/api-tools/api-mock) server to define routes with templated responses, latency, and error injection, then point your frontend at the local mock endpoint. To alter responses from a real backend instead, use [API Override](/docs/api-tools/api-override) rules.
 
 ---
 
@@ -66,4 +59,4 @@ Hexbuffer supports flexible multi-panel layouts:
 
 If you encounter unexpected behavior or have feature requests:
 - Submit an issue on the official [GitHub repository](https://github.com/arhamymr/apsara-cyber-tools).
-- Consult the built-in AI assistant by typing `/help` in the chat window.
+- Check the in-app **Settings** documentation tabs for proxy, certificate, and storage configuration details.

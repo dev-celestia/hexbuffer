@@ -1,0 +1,70 @@
+---
+title: Intruder & High-Speed Fuzzer
+description: Sequential payload injection, payload positions, wordlist presets, and grep-based result analysis.
+---
+
+# Intruder & High-Speed Fuzzer
+
+**Intruder** is Hexbuffer's payload fuzzing and automated request injection engine. It allows developers, QA engineers, and security auditors to test how web applications handle unexpected inputs, boundary cases, high volumes of requests, and dictionary-driven payloads.
+
+---
+
+## What is Payload Fuzzing?
+
+Fuzzing involves marking specific parameter locations within an HTTP request template (such as URL query parameters, form fields, headers, or JSON values) and injecting a series of test inputs (payloads) to analyze how the target server reacts in terms of status codes, response lengths, error patterns, and latency variations.
+
+---
+
+## Payload Positions
+
+Mark payload locations with `§...§` delimiters in the raw request (e.g., `id=§100§`):
+
+- **Auto-Detection**: Intruder automatically scans the URL, headers, and body and proposes payload positions, so you can start attacking immediately and refine markers manually afterwards.
+- **Per-Position Payloads**: Assign different payload configurations to individual marked positions.
+
+---
+
+## Payload Types & Processing
+
+- **Simple List**: Static payload lists—choose from bundled wordlist presets (parameter name lists, DNS subdomains, API endpoint lists, login fuzzing strings, usernames) or define your own entries.
+- **Runtime File**: Stream payloads from a file on disk for large dictionaries without loading them into memory.
+- **Number Range**: Generate numeric sequences with start, end, and step values plus output formatting.
+- **Payload Processing Rules**: Apply URL encoding/decoding, Base64 encoding/decoding, or MD5/SHA1/SHA256 hashing to payloads before transmission.
+
+---
+
+## Attack Engine & Concurrency Controls
+
+Powered by a Rust execution core, Intruder delivers high request throughput while giving you precise control:
+
+- **Concurrency**: Configure the number of parallel workers (default 10).
+- **Fixed Delay**: Set millisecond delays between requests to avoid triggering web application firewalls (WAF) or overwhelming staging servers.
+- **Retries**: Automatically retry failed requests.
+- **Redirect Handling**: Follow redirects up to a configurable maximum hop count.
+
+---
+
+## Grep Match, Grep Extract & Session Handling
+
+- **Grep Match**: Flag responses containing specific keywords (with optional case sensitivity) so interesting results stand out in the results table.
+- **Grep Extract**: Configure regex extractors (with replacement rules) to pull out specific tokens, error strings, or reflected text from response bodies.
+- **Session Handling Rules**: For authenticated attacks, configure a rule that extracts a fresh token from a response and updates a request header automatically.
+
+---
+
+## Result Analysis & Multi-Layout Inspector
+
+As the attack runs, Intruder populates a real-time results table:
+
+- **Filtering**: Filter results by search text, status-code classes (`2xx`, `3xx`, `4xx`, `5xx`, errors), "only grep matches," and "only errors."
+- **Full Response Inspector**: Inspect any result's full response—status, headers, body, timing, and final URL—in a split side-by-side or stacked full-width layout with a single toggle.
+
+---
+
+## Step-by-Step Workflow
+
+1. **Load Base Request**: In **Live Traffic**, right-click a request and select **Send to Intruder**.
+2. **Set Positions**: Highlight the values you want to test and mark them with `§` (or accept the auto-detected positions).
+3. **Define Payloads**: Assign a wordlist preset, runtime file, or number range to each payload position.
+4. **Configure the Engine**: Set concurrency, delays, retries, and redirect behavior; add grep match/extract rules if needed.
+5. **Start Attack**: Click **Start Attack** and monitor execution progress, status code distributions, and flagged anomalies.

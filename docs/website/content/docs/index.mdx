@@ -1,32 +1,32 @@
 ---
 title: Welcome to Hexbuffer
-description: The Unified Application Security, API Diagnostics, and AI Automation Workspace
+description: The Unified Application Security, Traffic Diagnostics, and API Testing Workspace
 ---
 
 # Redefining Web Application Reconnaissance & Security Testing
 
-**Hexbuffer** (v1.1.0) is a high-performance desktop platform designed to unify web application security diagnostics, API request crafting, network traffic analysis, visual workflow automation, and autonomous AI guidance into a single, seamless environment.
+**Hexbuffer** (v1.1.1) is a high-performance desktop platform designed to unify web application security diagnostics, network traffic analysis, API request crafting, mock server management, and response overrides into a single, seamless environment.
 
-Built with a high-speed Rust backend core, a reactive modern UI, and direct LLM agent tool triggers, Hexbuffer eliminates tool sprawl by bringing network proxying, automated parameter fuzzing, visual end-to-end regression, and AI-driven intelligence under one roof.
+Built with a high-speed Rust backend core and a reactive modern UI, Hexbuffer eliminates tool sprawl by bringing network proxying, traffic interception, automated parameter fuzzing, API mocking, and local response overrides under one roof.
 
 ---
 
 ## Why Choose Hexbuffer?
 
-Traditional web application testing often requires switching between disjointed browser extensions, standalone API clients, CLI tools, external AI chats, and isolated notes applications. **Hexbuffer** replaces this fragmented experience with an intuitive, integrated desktop suite.
+Traditional web application testing often requires switching between disjointed browser extensions, standalone API clients, separate mock servers, and isolated notes applications. **Hexbuffer** replaces this fragmented experience with an intuitive, integrated desktop suite.
 
 <Cards>
   <Card title="No Web Tool Sprawl" href="/docs/getting-started">
-    Access your proxy, API client, fuzzers, shell terminal, mock servers, and documentation in a unified workspace without context switching.
+    Access your proxy, API client, fuzzer, mock servers, and documentation in a unified workspace without context switching.
   </Card>
-  <Card title="Autonomous AI Copilot" href="/docs/ai-and-automation">
-    Leverage built-in AI agents that inspect live network traffic, generate test payloads, trigger desktop tools, and draft documentation in real time.
+  <Card title="API Mock & Response Override" href="/docs/api-tools">
+    Spin up a standalone local mock server with templated responses and chaos testing, or override live proxy responses with Map Local-style rules.
   </Card>
   <Card title="High-Speed Traffic Diagnostics" href="/docs/traffic-and-inspection">
-    Intercept, inspect, and modify HTTP/HTTPS and WebSocket traffic on the fly with millisecond responsiveness and deep packet analysis.
+    Intercept, inspect, and modify HTTP/HTTPS traffic on the fly with millisecond responsiveness and deep message analysis.
   </Card>
-  <Card title="Visual Workflow Automation" href="/docs/ai-and-automation/workflows">
-    Construct node-based automation pipelines and visual regression tests without writing tedious boilerplate code.
+  <Card title="Request Crafting & Fuzzing" href="/docs/request-crafting-and-testing">
+    Replay requests in Repeater and stress-test parameters with the Intruder engine, all backed by a multi-threaded Rust core.
   </Card>
 </Cards>
 
@@ -35,19 +35,19 @@ Traditional web application testing often requires switching between disjointed 
 ## Core Capabilities at a Glance
 
 ### 1. Modular Desktop Dashboard
-Customize your workspace with draggable widgets—monitor target scopes, proxy status, VPN connections, system clipboard history, request collections, recent files, scratchpads, and keyboard shortcuts from a central hub.
+Customize your workspace with draggable widgets—monitor target scopes, proxy status, VPN connections, system clipboard history, request collections, recent apps, scratchpads, and keyboard shortcuts from a central hub.
 
 ### 2. Real-Time Traffic & Interception
-Capture complete web interactions, monitor live HTTP and WebSocket requests, filter by domain scope, and pause in-flight traffic with active interception to edit payloads before they reach the server.
+Capture complete web interactions, monitor live HTTP requests with session management and persistent or ephemeral storage, filter by domain scope, and pause in-flight traffic with active interception to edit payloads before they reach the server.
 
 ### 3. Request Crafting & Fuzzing
-Replay and modify requests effortlessly in the multi-tab **Repeater**, execute high-speed parameter fuzzing with **Invoker** (Sniper, Battering Ram, Pitchfork, Cluster Bomb), and perform context-aware vulnerability checks for SQL Injection and XSS.
+Replay and modify requests in the multi-tab **Repeater** with collections, environment contexts, and pre/post-request scripting, then execute sequential payload injection attacks with **Intruder**—mark `§` positions, assign wordlists or numeric generators, and analyze results with grep matchers and a multi-layout inspector.
 
-### 4. Security Utilities & Out-of-Band Collaborator
-Inspect and sign JSON Web Tokens with the tabbed **JWT Tool**, perform fast TCP port scanning with **Port Scanner** (Beta), and capture asynchronous DNS, HTTP, and SMTP callbacks using the **OOB Listener**.
+### 4. API Mocking & Response Overrides
+Run a standalone **API Mock** server on localhost with dynamic route parameters, response templating, CORS handling, and chaos engineering (latency and error injection), or intercept proxy traffic with **API Override** rules to return fake responses for matched requests. Both are new in this release.
 
-### 5. AI-Powered Workspace & Developer Tools
-Collaborate with an integrated AI copilot (`Cmd+K`), execute visual E2E regression tests, spin up API mock servers with **Mock Forge**, manage project tasks with **Kanban**, execute shell commands in the integrated **PTY Terminal**, and encode/hash payloads instantly.
+### 5. Security & Productivity Utilities
+Inspect and sign JSON Web Tokens with the tabbed **JWT** tool, map open ports and services with the **Port Scanner**, keep quick notes and architecture sketches in the reworked **Notes** scratchpad with its built-in drawing canvas, and configure proxy certificates, themes, and app preferences in **Settings**.
 
 ---
 
@@ -56,8 +56,8 @@ Collaborate with an integrated AI copilot (`Cmd+K`), execute visual E2E regressi
 Get up and running quickly or dive deep into specific feature modules:
 
 - **[Getting Started](/docs/getting-started)**: Install Hexbuffer, configure the local MITM proxy, set up your root CA certificate, and capture your first request.
-- **[Traffic & Diagnostics](/docs/traffic-and-inspection)**: Master live HTTP history, WebSocket frame streaming, active interception, and side-by-side payload comparison.
-- **[Request Crafting & Testing](/docs/request-crafting-and-testing)**: Learn how to replay requests in Repeater, run fuzzers in Invoker, scan ports, and test security boundaries.
-- **[AI & Automation](/docs/ai-and-automation)**: Discover how AI copilot agents, visual workflows, and automated web crawlers accelerate your testing cycle.
-- **[Developer Workspace](/docs/developer-workspace)**: Utilize Mock Forge API servers, PTY shell terminal, Encoders, Hashers, JWT analysis, Markdown notes, and Kanban boards.
+- **[Traffic & Diagnostics](/docs/traffic-and-inspection)**: Master live HTTP history, session management, active interception, and deep message inspection.
+- **[Request Crafting & Testing](/docs/request-crafting-and-testing)**: Learn how to replay requests in Repeater, fuzz parameters with Intruder, and scan ports.
+- **[API Tools & Security](/docs/api-tools)**: Build mock servers, override live proxy responses, and decode or sign JWTs.
+- **[Notes & Workspace](/docs/workspace)**: Organize quick notes, markdown documents, and architecture sketches with the drawing canvas.
 - **[User Guide & Best Practices](/docs/user-guide-and-faqs)**: Tips for maximizing productivity, keyboard shortcuts, performance tuning, and FAQs.

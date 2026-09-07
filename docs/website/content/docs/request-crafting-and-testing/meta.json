@@ -2,9 +2,7 @@
   "title": "Request Crafting & Testing",
   "pages": [
     "index",
-    "invoker",
-    "security-utilities",
-    "listener",
+    "intruder",
     "port-scanner"
   ]
 }

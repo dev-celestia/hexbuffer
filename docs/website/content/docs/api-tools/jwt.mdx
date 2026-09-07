@@ -1,0 +1,37 @@
+---
+title: JWT Inspector & Generator (New)
+description: Decode, analyze, and sign JSON Web Tokens with vulnerability scanning and multiple signing algorithms.
+---
+
+# JWT Inspector & Generator
+
+The **JWT** module is a two-tab workspace for decoding, analyzing, and generating JSON Web Tokens.
+
+---
+
+## Decode Tab
+
+- **Live Decoding**: Paste any token and it is decoded instantly—header, payload, and signature are separated and colorized as you type, with clear error messages for malformed base64url input.
+- **Vulnerability Scanning**: Decoded tokens are automatically scanned for common JWT weaknesses. Findings are presented as severity cards (critical, high, medium, low, info), including algorithm detection issues such as unsafe `none` or weak HMAC usage.
+
+---
+
+## Generate Tab
+
+Build and sign your own tokens:
+
+- **Editable Header & Payload**: Modify the JSON header and payload directly, including the `alg` field.
+- **Signing Methods**:
+  - **HMAC (HS256/384/512)**: Sign with a shared secret.
+  - **RSA / ECDSA / PSS (RS256/384/512, ES256/384/512, PS256/384/512)**: Sign with a PEM private key.
+  - **`none`**: Produce unsigned tokens for testing algorithm-confusion scenarios.
+- **Key Generation**: One-click generation of a random secret (for HMAC) or a freshly generated private key PEM (for asymmetric algorithms).
+- **Copy & Clear**: Copy the resulting token or individual sections with a single click.
+
+---
+
+## Common Use Cases
+
+- **Auditing Tokens**: Decode session tokens from captured traffic (via **Send to JWT** style workflows or copy-paste) and inspect claims and expiry.
+- **Algorithm Testing**: Generate tokens with different algorithms to verify your API rejects weak or unexpected signing methods.
+- **Crafting Test Fixtures**: Create validly signed tokens with custom claims for authenticated test scenarios.

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { getCurrentWindow, PhysicalSize } from '@tauri-apps/api/window';
+import { getCurrentWindow, PhysicalSize, type Window } from '@tauri-apps/api/window';
 
 /**
  * Recalibrates layout and forces an immediate WKWebView rerender and scale adjustment
@@ -12,6 +12,7 @@ export function useTauriFocusFix(): void {
 
     let unlistenFocus: (() => void) | null = null;
     const pendingTimeouts: ReturnType<typeof setTimeout>[] = [];
+    let isRecoveringFullscreen = false;
 
     const forceLayoutReflow = () => {
       // 1. Trigger global resize events for React/JS layout observers & charts/monaco
@@ -28,6 +29,51 @@ export function useTauriFocusFix(): void {
         docEl.style.height = originalHeight;
         window.dispatchEvent(new Event('resize'));
       });
+    };
+
+    // In a healthy macOS fullscreen the webview fills the display, so the JS
+    // viewport roughly matches screen.width/height. After sleep/wake the webview
+    // can keep a stale frame (~1/4 screen) while `screen` stays correct.
+    const isViewportStaleInFullscreen = async (appWindow: Window): Promise<boolean> => {
+      try {
+        if (!(await appWindow.isFullscreen())) return false;
+        const staleWidth = Math.abs(window.innerWidth - screen.width);
+        const staleHeight = Math.abs(window.innerHeight - screen.height);
+        const widthTolerance = Math.max(64, screen.width * 0.15);
+        const heightTolerance = Math.max(64, screen.height * 0.15);
+        return staleWidth > widthTolerance || staleHeight > heightTolerance;
+      } catch {
+        return false;
+      }
+    };
+
+    // macOS keeps a stale WKWebView frame after sleep/wake in native fullscreen.
+    // The window-size micro-nudge does not work in fullscreen, so exit and re-enter
+    // fullscreen to force the webview to re-stretch to the real fullscreen frame.
+    // Mirrors the manual fix (exit fullscreen) but restores fullscreen afterwards.
+    const recoverFullscreenAfterWake = async (appWindow?: Window) => {
+      if (isRecoveringFullscreen) return;
+      isRecoveringFullscreen = true;
+      try {
+        const currentWindow = appWindow ?? getCurrentWindow();
+        if (!(await isViewportStaleInFullscreen(currentWindow))) return;
+
+        await currentWindow.setFullscreen(false);
+        const deadline = Date.now() + 2500;
+        while (Date.now() < deadline && (await currentWindow.isFullscreen())) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        await currentWindow.setFullscreen(true);
+
+        // Final reflow after the ~400ms native transition settles
+        const reflowTimeout = setTimeout(() => forceLayoutReflow(), 500);
+        pendingTimeouts.push(reflowTimeout);
+      } catch {
+        // Best-effort: recovery failing is no worse than the current broken state
+      } finally {
+        isRecoveringFullscreen = false;
+      }
     };
 
     const syncTauriWindowFrame = async () => {
@@ -65,6 +111,7 @@ export function useTauriFocusFix(): void {
         setTimeout(() => {
           forceLayoutReflow();
           void syncTauriWindowFrame();
+          void recoverFullscreenAfterWake();
         }, 80)
       );
 
@@ -72,6 +119,7 @@ export function useTauriFocusFix(): void {
       pendingTimeouts.push(
         setTimeout(() => {
           forceLayoutReflow();
+          void recoverFullscreenAfterWake();
         }, 250)
       );
     };

@@ -1,11 +1,11 @@
 ---
 title: Active Traffic Interception
-description: Pause, modify, and drop live HTTP requests and responses in transit.
+description: Pause, modify, and drop live HTTP requests in transit with multi-tab capture filters.
 ---
 
 # Active Traffic Interception
 
-**Active Interception** gives you full control as a live gatekeeper between your client application (web browser, mobile app, CLI tool) and the destination server. Instead of passively recording traffic, interception pauses requests and responses in-flight, allowing you to inspect headers and parameters, modify payloads on the fly, and test how both client and server handle altered data.
+**Active Interception** gives you full control as a live gatekeeper between your client application (web browser, mobile app, CLI tool) and the destination server. Instead of passively recording traffic, interception pauses requests in-flight, allowing you to inspect headers and parameters, modify payloads on the fly, and test how the server handles altered data.
 
 ---
 
@@ -13,34 +13,33 @@ description: Pause, modify, and drop live HTTP requests and responses in transit
 
 ```
 Client  ──► [ Paused in Hexbuffer Intercept ] ──► (Modified Request) ──► Target Server
-Client  ◄── (Modified Response) ◄── [ Paused in Hexbuffer Intercept ] ◄── Target Server
 ```
 
 1. **Client Dispatches Request**: Your browser or API client sends an HTTP/HTTPS request.
-2. **Hexbuffer Pauses Traffic**: When Intercept is active, the request is held before transmission.
-3. **Inspect & Alter**: Modify headers, authentication tokens, JSON bodies, or form parameters in the rich editor.
-4. **Action Executed**: Choose to **Forward** (transmit modified data), **Drop** (terminate the connection), or **Pass Through** remaining requests.
+2. **Hexbuffer Pauses Traffic**: When Intercept is enabled, the request is held before transmission.
+3. **Inspect & Alter**: Modify headers, authentication tokens, JSON bodies, or form parameters in the request editor.
+4. **Action Executed**: Choose to **Forward** (transmit modified data) or **Drop** (terminate the request).
+
+The Intercept module is tied directly to the MITM proxy—if the proxy is not connected when you enable interception, Hexbuffer prompts you to start it first.
 
 ---
 
-## Interception Modes & Controls
+## Interception Tabs & Capture Filters
 
-- **Intercept Requests**: Pause outgoing requests sent by the client.
-- **Intercept Responses**: Pause incoming responses returned by the server before the client receives them.
-- **Forward (`Cmd+Enter` / `Ctrl+Enter`)**: Dispatch the active request or response with your edits applied.
-- **Drop**: Discard the in-flight packet, simulating a network timeout or dropped connection.
-- **Pass Through**: Temporarily bypass interception for remaining queued traffic.
+Avoid getting overwhelmed by high-traffic web applications by organizing interception into targeted tabs:
+
+- **Multiple Intercept Tabs**: Add, rename, and close interception tabs (including close-to-left/right and close-all) so you can run separate interception configurations for different targets or test phases.
+- **Per-Tab Host Filters**: Each tab maintains its own capture host filter patterns. Add or remove patterns inline, and only requests matching the tab's filters are held.
+- **Send to Intercept**: Right-click a request in Live Traffic and choose **Send to Intercept** to pre-load a matching request into an interception tab.
 
 ---
 
-## Match Rules & Breakpoint Filters
+## Queue & Request Editor
 
-Avoid getting overwhelmed by high-traffic web applications by setting targeted match rules:
+The Intercept view is split into two panels:
 
-- **Host & Domain Filter**: Only pause traffic directed to specific target domains (e.g., `api.example.com`).
-- **Method Matching**: Target specific HTTP verbs (e.g., only intercept `POST` or `PUT` requests).
-- **URL Path Patterns**: Match specific routes such as `/api/v1/checkout` or `/login`.
-- **Response Status Matching**: Only pause responses matching specific status codes (e.g., `500 Server Error` or `403 Forbidden`).
+- **Queue Panel**: Lists all currently held requests. Review pending items, select one to edit, and forward or drop it.
+- **Request Panel**: Opens the selected request in a full editor for inspecting and modifying method, URL, headers, and body before dispatch.
 
 ---
 
@@ -53,7 +52,7 @@ Test whether backend APIs properly validate inputs by removing read-only flags, 
 Alter session cookies, user IDs, or role claims in transit to verify whether unauthorized users can perform administrative operations.
 
 ### 3. Server Error & Resilience Simulation
-Drop critical requests or modify server error responses to evaluate whether your frontend displays graceful fallback UI or crashes unexpectedly.
+Drop critical requests to evaluate whether your frontend displays graceful fallback UI or crashes unexpectedly.
 
 ---
 

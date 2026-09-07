@@ -1,0 +1,44 @@
+---
+title: API Override (New)
+description: Map Local-style response overrides that intercept live proxy traffic and return configured responses.
+---
+
+# API Override
+
+The **API Override** module applies **Map Local**-style rules to your MITM proxy traffic: when a proxied request matches one of your rules, Hexbuffer returns the configured fake response instead of forwarding the request upstream.
+
+---
+
+## How It Works
+
+1. **Add a Host**: Right-click any request in **Live Traffic** and choose **Send to API Override** to add the request's host as an override target.
+2. **Define Rules**: For each host, create routes specifying the method, path, status code, response body, and headers to return.
+3. **Live Override**: As proxy traffic flows, matching requests are intercepted and answered locally—nothing reaches the real server.
+4. **Toggle Freely**: Enable or disable individual domains and routes, or delete them, without restarting the proxy.
+
+---
+
+## Rule Configuration
+
+Override rules use the same structure as the [API Mock](/docs/api-tools/api-mock) server, so anything you can mock locally you can also override on live traffic:
+
+- **Path Matching**: Match paths with dynamic parameters in Express (`:id`) or OpenAPI (`{id}`) style.
+- **Request Matchers**: Optionally restrict rules to requests with specific headers, query pairs, or body content.
+- **Templated Responses**: Inject extracted path and query parameters into the response body with template variables (e.g., `{{param.id}}`).
+- **Chaos Engineering**: Apply fixed or randomized latency and error-rate injection to overridden responses—useful for testing how your client behaves when a live API degrades.
+
+Hexbuffer skips stale content-length and encoding headers when replacing responses, so the substituted body is delivered with correct framing automatically.
+
+---
+
+## Override Logging
+
+Every overridden request is logged (method, path, status, latency, headers, body) with an override source marker and streamed into the **Logs** sub-tab (buffer of 200 entries), making it easy to confirm which requests were intercepted.
+
+---
+
+## Common Use Cases
+
+- **Frontend-Backend Decoupling**: Point a live page's API calls at stubbed responses while the backend is under maintenance.
+- **Failure Simulation**: Force specific endpoints to return `500` or `429` responses to exercise error handling.
+- **Response Shaping**: Replace large production payloads with trimmed fixtures to speed up UI iteration.

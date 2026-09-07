@@ -5,7 +5,7 @@ description: Learn how to install Hexbuffer, configure HTTPS proxying, install C
 
 # Getting Started with Hexbuffer
 
-Welcome to **Hexbuffer**! This guide walks you through launching the desktop application, configuring network proxying, installing the Root Certificate Authority (CA) certificate for secure HTTPS interception, and capturing your first live HTTP and WebSocket traffic.
+Welcome to **Hexbuffer**! This guide walks you through launching the desktop application, configuring network proxying, installing the Root Certificate Authority (CA) certificate for secure HTTPS interception, and capturing your first live HTTP traffic.
 
 ---
 
@@ -15,15 +15,14 @@ After installing Hexbuffer on your operating system (macOS, Windows, or Linux), 
 
 ### Desktop Workspace Overview
 - **Modular Widget Grid**: Customize and rearrange widgets for:
-  - **Target Scope Widget**: Manage active domain scopes, view match statistics, and toggle strict scope filtering.
-  - **Proxy Control Widget**: Quickly toggle the proxy server, view the active listening port, and check connected clients.
-  - **VPN / Upstream Proxy Widget**: Configure upstream SOCKS5 / HTTP proxy chaining for routed traffic.
-  - **Clipboard History Widget**: Access recently copied snippets, URLs, and authentication tokens.
-  - **Collections & Recents Widgets**: Access pinned request collections and recently opened sessions.
-  - **Scratchpad Widget**: Fast, persistent scratch area for transient payloads and notes.
-  - **Shortcut Manager**: Quick overview and customization of global hotkeys.
-- **Left Navigation Sidebar**: Instant access to Traffic Interception, Repeater, Invoker (Fuzzer), Security Tools, Workflows, Terminal, and Settings.
-- **Global Command Palette (`Cmd+K` / `Ctrl+K`)**: Rapidly trigger tools, switch views, or prompt the AI Copilot.
+  - **Target Widget**: Manage and activate the domain scope used for monitoring.
+  - **Proxy Widget**: Quickly toggle the proxy server, view the active listening port, and check status.
+  - **VPN Widget**: Manage OpenVPN configuration files and connect with a log panel.
+  - **Clipboard Widget**: Access recently copied snippets, URLs, and authentication tokens.
+  - **Collections & Recent Apps Widgets**: Access pinned request collections and recently opened apps.
+  - **Scratchpad Widget**: Fast, persistent scratch area for transient payloads and notes—shared with the [Notes](/docs/workspace/notes) module.
+- **Left Navigation Sidebar**: Instant access to HTTP History, Intercept, Repeater, Intruder, API tools, Notes, and Settings.
+- **Shortcut Manager**: A quick overview of all tools and widgets on the desktop.
 
 ---
 
@@ -33,14 +32,14 @@ To inspect encrypted HTTPS traffic between your web browser or API clients and t
 
 ### 1. Enable the Proxy
 1. Click on **Settings** in the left sidebar (or use the Proxy Widget on the Desktop).
-2. Under **Proxy Configuration**, verify the proxy port (default: `8080` or dynamically assigned).
-3. Toggle the **Enable Local Proxy** switch to `ON`.
+2. Under **General** settings, verify the proxy listener port (default: `8080`) and save your changes.
+3. Start the proxy and confirm the "running on" indicator appears.
 
 ### 2. Install the Root CA Certificate
-1. In **Settings**, navigate to **CA Certificate Manager**.
-2. Click **Generate & Export Certificate** or **Install to System Trust Store**.
-3. Follow the automated prompt to add the Hexbuffer Root Certificate to your operating system's trusted certificates (macOS Keychain, Windows Certificate Manager, or Linux system store).
-4. For Firefox or custom HTTP clients, import the exported `.pem` / `.crt` certificate directly into the browser's certificate authority store.
+1. In **Settings**, navigate to the **CA Certificate** tab.
+2. Download the proxy CA certificate or use the one-click **Install to macOS Keychain** action.
+3. Follow the setup guide to add the Hexbuffer Root Certificate to your operating system's trusted certificates (macOS Keychain, Windows Certificate Manager, or Linux system store).
+4. For Firefox or custom HTTP clients, import the exported certificate directly into the browser's certificate authority store.
 5. Restart your browser or HTTP client to ensure it loads the newly trusted certificate.
 
 ---
@@ -49,9 +48,9 @@ To inspect encrypted HTTPS traffic between your web browser or API clients and t
 
 Now that your proxy and certificates are configured:
 
-1. Open your browser or configure your application to use `127.0.0.1:8080` as its HTTP/HTTPS proxy (or use the built-in [Embedded Browser](/docs/ai-and-automation/browser) which is pre-configured).
+1. Open your browser or configure your application to use `127.0.0.1:8080` as its HTTP/HTTPS proxy.
 2. Navigate to any target web page or send an API request.
-3. Switch back to Hexbuffer and select **Live Traffic** from the sidebar.
+3. Switch back to Hexbuffer and select **HTTP** from the sidebar.
 4. You will see requests streaming in real time, displaying HTTP methods, status codes, response times, content lengths, and endpoint paths.
 
 ---
@@ -65,7 +64,7 @@ To keep your workspace organized and eliminate noise from background operating s
 3. Toggle **Filter by Scope** to hide irrelevant background traffic.
 
 > [!TIP]
-> **Quick Actions**: Right-click any request in the Live Traffic grid to immediately **Add to Scope**, **Send to Repeater** (`Cmd+R`), **Send to Invoker** (`Cmd+I`), or **Copy as cURL**.
+> **Quick Actions**: Right-click any request in the Live Traffic grid to immediately **Add to Scope**, **Send to Repeater**, **Send to Intruder**, **Send to API Override**, or **Copy as cURL**.
 
 ---
 
@@ -74,7 +73,7 @@ To keep your workspace organized and eliminate noise from background operating s
 Hexbuffer is designed with a strict local-first architecture:
 - All proxy traffic logs, database sessions, and project notes are stored locally in an embedded SQLite database on your device.
 - No network captures or sensitive credentials are ever transmitted to third-party telemetry servers.
-- AI features can be connected to local offline LLMs (via Ollama or LM Studio) for total data sovereignty.
+- Storage management is available in **Settings → General**, where you can inspect database sizes, truncate logs, or wipe local data.
 
 ---
 
@@ -82,8 +81,8 @@ Hexbuffer is designed with a strict local-first architecture:
 
 Explore the core Hexbuffer feature guides:
 - [Live Traffic & HTTP History](/docs/traffic-and-inspection)
-- [WebSocket Traffic & Live Frames](/docs/traffic-and-inspection/websocket-history)
 - [Active Traffic Interception](/docs/traffic-and-inspection/intercept)
 - [Repeater & Request Crafting](/docs/request-crafting-and-testing)
-- [Invoker & High-Speed Fuzzer](/docs/request-crafting-and-testing/invoker)
-- [Intelligent AI Assistant](/docs/ai-and-automation)
+- [Intruder & High-Speed Fuzzer](/docs/request-crafting-and-testing/intruder)
+- [API Mock Server](/docs/api-tools/api-mock)
+- [API Override](/docs/api-tools/api-override)

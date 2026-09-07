@@ -1,6 +1,6 @@
 ---
 title: Live Traffic & HTTP History
-description: Real-time HTTP/HTTPS request monitoring, domain scope filtering, advanced search, and session management.
+description: Real-time HTTP/HTTPS request monitoring, session management, scope filtering, advanced search, and quick workflow actions.
 ---
 
 # Live Traffic & HTTP History
@@ -19,7 +19,7 @@ The main traffic grid displays incoming and outgoing network events as they occu
 - **Latency & Performance**: Precise round-trip timing in milliseconds to identify backend bottlenecks.
 - **Content Size**: Exact byte counts for request headers, request bodies, response headers, and response payloads.
 - **MIME & Content-Type**: Instant detection of JSON, XML, HTML, GraphQL, JavaScript, CSS, images, and raw binary streams.
-- **Color Tags & Notes**: Assign custom color tags and inline notes to flag noteworthy requests during security audits or API debugging.
+- **Request Body Preview**: Preview request bodies directly from log table entries without opening the full detail view.
 
 ---
 
@@ -43,27 +43,28 @@ Filter requests by HTTP status categories (`2xx`, `3xx`, `4xx`, `5xx`), MIME typ
 Right-click any request in the Live Traffic grid to access workflow triggers:
 
 - **Send to Repeater (`Cmd+R` / `Ctrl+R`)**: Clone the request into an interactive crafting tab.
-- **Send to Invoker (`Cmd+I` / `Ctrl+I`)**: Load the request into the high-speed parameter fuzzer.
-- **Send to Comparer (`Cmd+Shift+C`)**: Compare request or response payloads side-by-side.
-- **Copy as cURL / fetch**: Generate ready-to-run shell commands or JavaScript `fetch()` snippets.
+- **Send to Intruder**: Load the request into the payload fuzzer for attack configuration.
+- **Send to Intercept**: Pause matching requests in the interception queue.
+- **Send to API Override**: Add the request's host as a response override target.
+- **Send to Notes**: Save request material into a scratchpad note.
+- **Copy as cURL / Copy URL**: Generate ready-to-run shell commands or reuse endpoint URLs.
+- **Pin, Group & Highlight**: Pin rows, organize requests into groups, highlight hosts with custom colors, or blacklist hosts and host+path combinations.
 - **Add to Target Scope**: Instantly whitelist the request host in your scope settings.
 
 ---
 
 ## Session Management & Storage
 
-Hexbuffer stores session capture logs in a high-performance local SQLite database engine:
+Traffic history is organized into sessions backed by a local SQLite database:
 
-- **Automatic Session Persistence**: Never lose your capture history across app restarts.
-- **Database Compression**: Built-in data compression ensures capturing tens of thousands of requests uses minimal disk space.
-- **Export Formats**:
-  - **HAR (HTTP Archive)**: Standard format for web performance auditing and cross-tool sharing.
-  - **CSV / JSON**: Structured export for automated analysis, compliance reports, or spreadsheets.
-  - **Raw Session DB**: Save and load complete Hexbuffer capture sessions.
+- **Multiple Sessions**: Create, rename, and switch between capture sessions; each session tracks its own request count and total capture size.
+- **Storage Modes**: Choose between **persistent** sessions (history survives app restarts) and **ephemeral** sessions (kept only for the current run) per session. Ephemeral sessions are flagged in the UI so you always know what is being retained.
+- **Chunked Pagination**: Large sessions load 60 items per page with a dismissible warning banner. Log filters apply to the currently loaded page; use pagination to navigate through the full history.
+- **Expanded Detail Modal**: Open any request in an expanded modal view showing raw request/response editors plus structured tables for headers, parameters, cookies, and response bodies.
 
 ---
 
 ## Best Practices
 
 > [!TIP]
-> **Use Color Tags for Audit Triage**: Highlight authentication endpoints in Green, payment flows in Blue, and internal error responses in Red to keep complex audit sessions organized and easy to navigate!
+> **Use Sessions for Test Phases**: Create a new session for each test phase (reconnaissance, authenticated testing, regression checks) and switch storage modes to ephemeral for throwaway captures so they never clutter persistent history!
