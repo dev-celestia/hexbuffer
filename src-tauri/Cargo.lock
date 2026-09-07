@@ -4606,7 +4606,9 @@ dependencies = [
 
 [[package]]
 name = "nuclei-run"
-version = "0.1.0"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7551c5b6e3ccd257f6f60c612b3378e479a326571b505f72c3dd098f2a4e0be"
 dependencies = [
  "aes 0.8.4",
  "aes-gcm",
