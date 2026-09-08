@@ -224,14 +224,13 @@ pub async fn get_proxy_filtered(
 }
 
 #[tauri::command]
-pub async fn get_proxy_paginated(
+pub async fn get_proxy_recent(
     history: State<'_, HistoryBridge>,
-    page: u32,
-    per_page: u32,
+    limit: Option<u32>,
     filter: Option<ProxyFilter>,
     sort_order: Option<String>,
-) -> Result<PaginatedResponse<ProxyLogSummary>, String> {
-    history.get_paginated(page, per_page, filter, sort_order)
+) -> Result<Vec<ProxyLogSummary>, String> {
+    history.get_recent(limit.unwrap_or(100), filter, sort_order)
 }
 
 #[tauri::command]

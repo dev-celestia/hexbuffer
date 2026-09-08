@@ -102,7 +102,7 @@ fn main() {
             hexbuffer::commands::history::delete_proxy_by_id,
             hexbuffer::commands::history::get_proxy_all,
             hexbuffer::commands::history::get_proxy_filtered,
-            hexbuffer::commands::history::get_proxy_paginated,
+            hexbuffer::commands::history::get_proxy_recent,
             hexbuffer::commands::history::get_proxy_detail,
             hexbuffer::commands::history::get_proxy_tree,
             hexbuffer::commands::history::get_websocket_paginated,

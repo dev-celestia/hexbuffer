@@ -31,18 +31,12 @@ export function useTrafficTable({
 
   const {
     calls,
-    pagination,
     isLoading,
     newEventsCount,
     loadError,
     searchQuery,
     hasActiveFilters,
     hasScopedTab,
-    totalPages,
-    hasNextPage,
-    hasPreviousPage,
-    goToNextPage,
-    goToPreviousPage,
     handleRefresh,
     removeCallLocally,
   } = useHistoryTable({ isStreamPaused: isContextMenuOpen, activeScope });
@@ -153,9 +147,6 @@ export function useTrafficTable({
     };
   }, [visibleCalls.length, isLoading, isPinnedTabActive, hasActiveFilters, hasScopedTab]);
 
-  const showingStart = visibleCalls.length > 0 ? (pagination.page - 1) * pagination.perPage + 1 : 0;
-  const showingEnd = Math.min(pagination.page * pagination.perPage, pagination.total);
-
   return {
     columns,
     searchQuery,
@@ -171,23 +162,12 @@ export function useTrafficTable({
     groupDialogCall,
     isGroupDialogOpen,
     setIsGroupDialogOpen,
-    pagination: {
-      showingStart,
-      showingEnd,
-      total: pagination.total,
-      page: pagination.page,
-      totalPages,
-      hasPreviousPage,
-      hasNextPage,
-    },
     actions: {
       handleRefresh,
       handleRowClick,
       handleContextMenuOpenChange,
       handleNewGroup,
       removeCallLocallyWithUnpin,
-      goToNextPage,
-      goToPreviousPage,
     },
   };
 }

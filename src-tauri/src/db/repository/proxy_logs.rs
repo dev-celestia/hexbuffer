@@ -3,7 +3,7 @@ use crate::proxy::state::{ProxyFilter, ProxyRecord, ProxyRequest, ProxyResponse}
 use rusqlite::{params, Result as SqlResult};
 use uuid::Uuid;
 
-use super::types::{PaginatedResponse, ProxySummaryRow, TreeNode, TreePath};
+use super::types::{ProxySummaryRow, TreeNode, TreePath};
 use super::Database;
 
 fn build_scope_sql_clause(scope: &[String]) -> Option<String> {
@@ -558,78 +558,15 @@ impl Database {
         Ok(total)
     }
 
-    pub fn get_paginated(
+    /// Returns the latest log summaries, skipping request/response BLOBs and headers.
+    pub fn get_summary_recent(
         &self,
         session_id: Option<&str>,
-        page: u32,
-        per_page: u32,
+        limit: u32,
         sort_order: &str,
-        payload_store: Option<&PayloadStore>,
-    ) -> Result<PaginatedResponse<ProxyRecord>, String> {
+    ) -> Result<Vec<ProxySummaryRow>, String> {
         let storage_mode = self.get_session_storage_mode(session_id);
         let conn = self.traffic_conn(&storage_mode).lock().unwrap();
-        let offset = (page - 1) * per_page;
-
-        let (where_clause, params_vec): (String, Vec<Box<dyn rusqlite::ToSql>>) = match session_id {
-            Some(sid) if !sid.is_empty() => (
-                " WHERE session_id = ?".to_string(),
-                vec![Box::new(sid.to_string())],
-            ),
-            _ => (String::new(), Vec::new()),
-        };
-
-        let mut stmt = conn
-            .prepare(&format!(
-                "SELECT {} FROM http_logs{} ORDER BY timestamp {} LIMIT ? OFFSET ?",
-                SELECT_PROXY_RECORD_COLS, where_clause, sort_order
-            ))
-            .map_err(|e| e.to_string())?;
-
-        let per_page_i64 = per_page as i64;
-        let offset_i64 = offset as i64;
-        let mut all_params: Vec<&dyn rusqlite::ToSql> =
-            params_vec.iter().map(|b| b.as_ref()).collect();
-        all_params.push(&per_page_i64 as &dyn rusqlite::ToSql);
-        all_params.push(&offset_i64 as &dyn rusqlite::ToSql);
-
-        let rows = stmt
-            .query_map(all_params.as_slice(), |row| {
-                row_to_proxy_record(row, payload_store)
-            })
-            .map_err(|e| e.to_string())?;
-
-        let records = collect_records(rows);
-
-        let count_sql = format!("SELECT COUNT(*) FROM http_logs{}", where_clause);
-        let count_params: Vec<&dyn rusqlite::ToSql> =
-            params_vec.iter().map(|b| b.as_ref()).collect();
-        let total: i64 = conn
-            .query_row(&count_sql, count_params.as_slice(), |row| row.get(0))
-            .map_err(|e| e.to_string())?;
-
-        let has_more = (offset as usize + records.len()) < total as usize;
-
-        Ok(PaginatedResponse {
-            data: records,
-            total: total as usize,
-            page,
-            per_page,
-            has_more,
-        })
-    }
-
-    /// Optimized paginated query that skips request/response BLOBs and headers.
-    pub fn get_summary_paginated(
-        &self,
-        session_id: Option<&str>,
-        page: u32,
-        per_page: u32,
-        sort_order: &str,
-    ) -> Result<PaginatedResponse<ProxySummaryRow>, String> {
-        let storage_mode = self.get_session_storage_mode(session_id);
-        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
-        let offset = (page - 1) * per_page;
-        let limit = per_page + 1;
 
         let (where_clause, params_vec): (String, Vec<Box<dyn rusqlite::ToSql>>) = match session_id {
             Some(sid) if !sid.is_empty() => (
@@ -647,17 +584,15 @@ impl Database {
                     request_headers,
                     response_headers
              FROM http_logs{}
-             ORDER BY timestamp {} LIMIT ? OFFSET ?",
+             ORDER BY timestamp {} LIMIT ?",
             where_clause, sort_order
         );
 
         let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
         let limit_i64 = limit as i64;
-        let offset_i64 = offset as i64;
         let mut all_params: Vec<&dyn rusqlite::ToSql> =
             params_vec.iter().map(|b| b.as_ref()).collect();
         all_params.push(&limit_i64 as &dyn rusqlite::ToSql);
-        all_params.push(&offset_i64 as &dyn rusqlite::ToSql);
 
         let mut rows = stmt
             .query(all_params.as_slice())
@@ -667,37 +602,18 @@ impl Database {
             records.push(row_to_proxy_summary(row).map_err(|e| e.to_string())?);
         }
 
-        let has_more = records.len() > per_page as usize;
-        if has_more {
-            records.pop();
-        }
-
-        let total = if has_more {
-            offset as usize + records.len() + 1
-        } else {
-            offset as usize + records.len()
-        };
-
-        Ok(PaginatedResponse {
-            data: records,
-            total,
-            page,
-            per_page,
-            has_more,
-        })
+        Ok(records)
     }
 
-    /// Optimized filtered paginated query that skips request/response BLOBs.
-    pub fn get_filtered_summary_paginated(
+    /// Returns the latest filtered log summaries, skipping request/response BLOBs.
+    pub fn get_filtered_summary_recent(
         &self,
         filter: &ProxyFilter,
-        page: u32,
-        per_page: u32,
+        limit: u32,
         sort_order: &str,
-    ) -> Result<PaginatedResponse<ProxySummaryRow>, String> {
+    ) -> Result<Vec<ProxySummaryRow>, String> {
         let storage_mode = self.get_session_storage_mode(filter.session_id.as_deref());
         let conn = self.traffic_conn(&storage_mode).lock().unwrap();
-        let offset = (page - 1) * per_page;
 
         let mut where_sql = String::new();
         let mut params_vec: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
@@ -763,9 +679,7 @@ impl Database {
             }
         }
 
-        let limit = per_page + 1;
         let limit_i64 = limit as i64;
-        let offset_i64 = offset as i64;
 
         let data_sql = format!(
             "SELECT id, session_id, timestamp, method, url, response_status, response_status_text,
@@ -775,7 +689,7 @@ impl Database {
                     request_headers,
                     response_headers
              FROM http_logs WHERE 1=1{}
-             ORDER BY timestamp {} LIMIT ? OFFSET ?",
+             ORDER BY timestamp {} LIMIT ?",
             where_sql, sort_order
         );
 
@@ -783,7 +697,6 @@ impl Database {
         let mut all_params: Vec<&dyn rusqlite::ToSql> =
             params_vec.iter().map(|b| b.as_ref()).collect();
         all_params.push(&limit_i64 as &dyn rusqlite::ToSql);
-        all_params.push(&offset_i64 as &dyn rusqlite::ToSql);
 
         let mut rows = stmt
             .query(all_params.as_slice())
@@ -793,24 +706,7 @@ impl Database {
             records.push(row_to_proxy_summary(row).map_err(|e| e.to_string())?);
         }
 
-        let has_more = records.len() > per_page as usize;
-        if has_more {
-            records.pop();
-        }
-
-        let total = if has_more {
-            offset as usize + records.len() + 1
-        } else {
-            offset as usize + records.len()
-        };
-
-        Ok(PaginatedResponse {
-            data: records,
-            total,
-            page,
-            per_page,
-            has_more,
-        })
+        Ok(records)
     }
 
     pub fn count(&self, session_id: Option<&str>) -> Result<usize, String> {

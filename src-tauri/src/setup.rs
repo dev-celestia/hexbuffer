@@ -11,6 +11,9 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .expect("Failed to initialize updater plugin");
 
+    #[cfg(target_os = "macos")]
+    setup_macos_menu(app)?;
+
     crate::log("Initializing database...");
     let app_dir = hexbuffer::paths::get_shared_app_dir();
     std::fs::create_dir_all(&app_dir).expect("Failed to create app data dir");
@@ -115,6 +118,51 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     crate::log("Tauri setup complete");
+    Ok(())
+}
+
+/// Build a custom macOS app menu that mirrors the default Tauri menu but
+/// omits the native "Select All" item: its Cmd+A accelerator is consumed at
+/// the AppKit level before the webview sees the keydown, which breaks
+/// select-all inside Monaco editors. With no menu item claiming Cmd+A, the
+/// key falls through to the webview where Monaco handles it natively.
+#[cfg(target_os = "macos")]
+fn setup_macos_menu(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+    use tauri::menu::{MenuBuilder, SubmenuBuilder};
+
+    let app_menu = SubmenuBuilder::new(app, "Hexbuffer")
+        .about(None)
+        .separator()
+        .services()
+        .separator()
+        .hide()
+        .hide_others()
+        .show_all()
+        .separator()
+        .quit()
+        .build()?;
+
+    let edit_menu = SubmenuBuilder::new(app, "Edit")
+        .undo()
+        .redo()
+        .separator()
+        .cut()
+        .copy()
+        .paste()
+        .build()?;
+
+    let window_menu = SubmenuBuilder::new(app, "Window")
+        .minimize()
+        .maximize()
+        .separator()
+        .close_window()
+        .build()?;
+
+    let menu = MenuBuilder::new(app)
+        .items(&[&app_menu, &edit_menu, &window_menu])
+        .build()?;
+
+    app.set_menu(menu)?;
     Ok(())
 }
 

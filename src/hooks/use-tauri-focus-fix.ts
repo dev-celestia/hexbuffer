@@ -47,6 +47,18 @@ export function useTauriFocusFix(): void {
       }
     };
 
+    const waitForFullscreenState = async (
+      appWindow: Window,
+      expectedState: boolean
+    ): Promise<boolean> => {
+      const deadline = Date.now() + 2500;
+      while (Date.now() < deadline) {
+        if ((await appWindow.isFullscreen()) === expectedState) return true;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      return (await appWindow.isFullscreen()) === expectedState;
+    };
+
     // macOS keeps a stale WKWebView frame after sleep/wake in native fullscreen.
     // The window-size micro-nudge does not work in fullscreen, so exit and re-enter
     // fullscreen to force the webview to re-stretch to the real fullscreen frame.
@@ -59,16 +71,31 @@ export function useTauriFocusFix(): void {
         if (!(await isViewportStaleInFullscreen(currentWindow))) return;
 
         await currentWindow.setFullscreen(false);
-        const deadline = Date.now() + 2500;
-        while (Date.now() < deadline && (await currentWindow.isFullscreen())) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-        await new Promise((resolve) => setTimeout(resolve, 200));
-        await currentWindow.setFullscreen(true);
+        if (!(await waitForFullscreenState(currentWindow, false))) return;
 
-        // Final reflow after the ~400ms native transition settles
-        const reflowTimeout = setTimeout(() => forceLayoutReflow(), 500);
-        pendingTimeouts.push(reflowTimeout);
+        // isFullscreen() changes before the native Space animation and webview
+        // resize finish, so wait through the established macOS transition time.
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        let restored = false;
+        for (let attempt = 0; attempt < 2 && !restored; attempt += 1) {
+          try {
+            await currentWindow.setFullscreen(true);
+            restored = await waitForFullscreenState(currentWindow, true);
+          } catch {
+            // Retry once after a transient WindowServer transition failure.
+          }
+
+          if (!restored && attempt === 0) {
+            await new Promise((resolve) => setTimeout(resolve, 200));
+          }
+        }
+
+        if (!restored) return;
+
+        // Keep the recovery lock until the native entry transition settles so
+        // its focus/resize events cannot start a second recovery cycle.
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        forceLayoutReflow();
       } catch {
         // Best-effort: recovery failing is no worse than the current broken state
       } finally {

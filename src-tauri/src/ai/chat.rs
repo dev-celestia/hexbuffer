@@ -135,8 +135,7 @@ fn build_ai_chat_context(history: &crate::HistoryBridge) -> Result<AiChatContext
 
     let proxy_tree = history.get_tree(None).unwrap_or_default();
     let proxy_summary = history
-        .get_paginated(1, 30, None, Some("DESC".to_string()))
-        .map(|r| r.data)
+        .get_recent(30, None, Some("DESC".to_string()))
         .unwrap_or_default();
 
     let stashes = history.get_stashes().unwrap_or_default();

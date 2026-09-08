@@ -348,51 +348,43 @@ impl HistoryBridge {
         }
     }
 
-    pub fn get_paginated(
+    pub fn get_recent(
         &self,
-        page: u32,
-        per_page: u32,
+        limit: u32,
         filter: Option<ProxyFilter>,
         sort_order: Option<String>,
-    ) -> Result<PaginatedResponse<ProxyLogSummary>, String> {
+    ) -> Result<Vec<ProxyLogSummary>, String> {
         let filter = filter.map(|f| self.normalize_filter(f));
         let sort_order = self.normalize_sort_order(sort_order.as_deref());
 
         let result = match filter {
             Some(filter) if self.has_active_filters(&filter) => self
                 .db
-                .get_filtered_summary_paginated(&filter, page, per_page, sort_order),
+                .get_filtered_summary_recent(&filter, limit, sort_order),
             Some(ref filter) if filter.session_id.is_some() => self
                 .db
-                .get_filtered_summary_paginated(filter, page, per_page, sort_order),
-            _ => self.db.get_summary_paginated(None, page, per_page, sort_order),
+                .get_filtered_summary_recent(filter, limit, sort_order),
+            _ => self.db.get_summary_recent(None, limit, sort_order),
         }?;
 
-        Ok(PaginatedResponse {
-            data: result
-                .data
-                .into_iter()
-                .map(|r| ProxyLogSummary {
-                    id: r.id,
-                    session_id: r.session_id,
-                    timestamp: r.timestamp,
-                    method: r.method,
-                    url: r.url,
-                    response_status: r.response_status,
-                    response_status_text: r.response_status_text,
-                    request_body_size: r.request_body_size,
-                    response_body_size: r.response_body_size,
-                    server_addr: r.server_addr,
-                    user_agent: r.user_agent,
-                    host: r.host,
-                    response_content_type: r.response_content_type,
-                })
-                .collect(),
-            total: result.total,
-            page: result.page,
-            per_page: result.per_page,
-            has_more: result.has_more,
-        })
+        Ok(result
+            .into_iter()
+            .map(|r| ProxyLogSummary {
+                id: r.id,
+                session_id: r.session_id,
+                timestamp: r.timestamp,
+                method: r.method,
+                url: r.url,
+                response_status: r.response_status,
+                response_status_text: r.response_status_text,
+                request_body_size: r.request_body_size,
+                response_body_size: r.response_body_size,
+                server_addr: r.server_addr,
+                user_agent: r.user_agent,
+                host: r.host,
+                response_content_type: r.response_content_type,
+            })
+            .collect())
     }
 
     pub fn get_tree(&self, filter: Option<ProxyFilter>) -> Result<Vec<TreeNode>, String> {

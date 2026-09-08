@@ -11,8 +11,6 @@ interface HistoryQueryState {
   filter: HistoryFilterState;
   activeScope: string[] | null;
   sortOrder: 'asc' | 'desc';
-  page: number;
-  perPage: number;
   selectedCallId: string | null;
   isStreamManuallyPaused: boolean;
   refreshKey: number;
@@ -25,8 +23,6 @@ interface HistoryQueryState {
   toggleStatus: (status: string) => void;
   clearFilters: () => void;
   setSortOrder: (order: 'asc' | 'desc') => void;
-  setPage: (page: number) => void;
-  resetPage: () => void;
   setSelectedCallId: (id: string | null) => void;
   setStreamManuallyPaused: (paused: boolean) => void;
   triggerRefresh: () => void;
@@ -43,8 +39,6 @@ export const useHttpHistoryQueryStore = create<HistoryQueryState>()((set) => ({
   filter: initialFilterState(),
   activeScope: null,
   sortOrder: 'desc',
-  page: 1,
-  perPage: 60,
   selectedCallId: null,
   isStreamManuallyPaused: false,
   refreshKey: 0,
@@ -52,19 +46,16 @@ export const useHttpHistoryQueryStore = create<HistoryQueryState>()((set) => ({
   setSearch: (search) =>
     set((state) => ({
       filter: { ...state.filter, search },
-      page: 1,
     })),
 
   setFilter: (filter) =>
     set({
       filter,
-      page: 1,
     }),
 
   setPathFilter: (path) =>
     set((state) => ({
       filter: { ...state.filter, pathFilter: path },
-      page: 1,
     })),
 
   setActiveScope: (scope) =>
@@ -81,7 +72,6 @@ export const useHttpHistoryQueryStore = create<HistoryQueryState>()((set) => ({
 
       return {
         activeScope: normalizedScope,
-        page: 1,
         selectedCallId: null,
       };
     }),
@@ -97,7 +87,6 @@ export const useHttpHistoryQueryStore = create<HistoryQueryState>()((set) => ({
 
       return {
         filter: { ...state.filter, methods: next },
-        page: 1,
       };
     }),
 
@@ -112,26 +101,19 @@ export const useHttpHistoryQueryStore = create<HistoryQueryState>()((set) => ({
 
       return {
         filter: { ...state.filter, statusCodes: next },
-        page: 1,
       };
     }),
 
   clearFilters: () =>
     set({
       filter: initialFilterState(),
-      page: 1,
       selectedCallId: null,
     }),
 
   setSortOrder: (order) =>
     set({
       sortOrder: order,
-      page: 1,
     }),
-
-  setPage: (page) => set({ page }),
-
-  resetPage: () => set({ page: 1 }),
 
   setSelectedCallId: (id) => set({ selectedCallId: id }),
 

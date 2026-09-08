@@ -32,16 +32,6 @@ export default defineConfig({
     dedupe: ["react", "react-dom"],
     alias: [
       {
-        // Resolve the UI package to the local celestia-starter workspace so
-        // newly added components (e.g. block-text-editor) are picked up
-        // without publishing a new package version.
-        find: /^@celestia-project\/ui$/,
-        replacement: path.resolve(
-          __dirname,
-          "../celestia-starter/packages/ui/src/index.ts"
-        ),
-      },
-      {
         find: /^monaco-editor\/esm\/vs\/(.*)/,
         replacement: "monaco-editor/$1",
       },

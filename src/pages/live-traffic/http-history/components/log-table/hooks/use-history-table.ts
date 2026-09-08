@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { ProxyLogSummary, ProxyRecord, ApiCall } from '@/types';
 
-import { getHttpLogs } from '../../../api';
+import { getHttpLogs, HTTP_LOGS_LIMIT } from '../../../api';
 import { useHttpHistoryQueryStore, useHttpSessionStore } from '@/stores/history';
 import { useShallow } from 'zustand/react/shallow';
 import { buildHistoryQuery, hasActiveHistoryFilters } from '../../../state/build-history-query';
@@ -31,11 +31,8 @@ export function useHistoryTable({ isStreamPaused = false, activeScope: activeSco
     filter,
     activeScope: storeActiveScope,
     sortOrder,
-    page,
-    perPage,
     isStreamManuallyPaused,
     refreshKey,
-    setPage,
     setSortOrder,
     setSelectedCallId,
   } = useHttpHistoryQueryStore(
@@ -43,11 +40,8 @@ export function useHistoryTable({ isStreamPaused = false, activeScope: activeSco
       filter: state.filter,
       activeScope: state.activeScope,
       sortOrder: state.sortOrder,
-      page: state.page,
-      perPage: state.perPage,
       isStreamManuallyPaused: state.isStreamManuallyPaused,
       refreshKey: state.refreshKey,
-      setPage: state.setPage,
       setSortOrder: state.setSortOrder,
       setSelectedCallId: state.setSelectedCallId,
     }))
@@ -62,10 +56,8 @@ export function useHistoryTable({ isStreamPaused = false, activeScope: activeSco
         activeScope: effectiveActiveScope,
         sessionId: activeSessionId,
         sortOrder,
-        page,
-        perPage,
       }),
-    [filter, effectiveActiveScope, activeSessionId, sortOrder, page, perPage]
+    [filter, effectiveActiveScope, activeSessionId, sortOrder]
   );
 
   const hasActiveFilters = useMemo(
@@ -75,21 +67,14 @@ export function useHistoryTable({ isStreamPaused = false, activeScope: activeSco
   const isHistoryStreamPaused = isStreamPaused || isStreamManuallyPaused;
 
   const [calls, setCalls] = useState<ApiCall[]>([]);
-  const [pagination, setPagination] = useState({ page: 1, perPage: 60, total: 0, hasMore: false });
   const [isLoading, setIsLoading] = useState(true);
   const [newEventsCount, setNewEventsCount] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const pendingEventsCountRef = useRef(0);
   const isStreamPausedRef = useRef(isHistoryStreamPaused);
-  const lastBaseQueryRef = useRef<string>('');
-  const currentPageRef = useRef(page);
   const activeSessionIdRef = useRef(activeSessionId);
   const requestSeqRef = useRef(0);
-
-  useEffect(() => {
-    currentPageRef.current = page;
-  }, [page]);
 
   useEffect(() => {
     activeSessionIdRef.current = activeSessionId;
@@ -108,60 +93,42 @@ export function useHistoryTable({ isStreamPaused = false, activeScope: activeSco
         sessionId: activeSessionId,
         filter: query.filter,
         sortOrder: query.sortOrder,
-        perPage: query.perPage,
         refreshKey,
       }),
     [activeSessionId, query, refreshKey]
   );
 
-  const fetchPage = useCallback(
-    async (pageToLoad: number) => {
-      const currentSeq = ++requestSeqRef.current;
-      setIsLoading(true);
+  const fetchLogs = useCallback(async () => {
+    const currentSeq = ++requestSeqRef.current;
+    setIsLoading(true);
 
-      try {
-        setLoadError(null);
-        const result = await getHttpLogs(pageToLoad, query.perPage, query.filter, query.sortOrder);
+    try {
+      setLoadError(null);
+      const result = await getHttpLogs(HTTP_LOGS_LIMIT, query.filter, query.sortOrder);
 
-        if (currentSeq !== requestSeqRef.current) {
-          return;
-        }
-
-        setPagination({
-          page: pageToLoad,
-          perPage: query.perPage,
-          total: result.total,
-          hasMore: result.has_more,
-        });
-
-        const adapted = result.data.map(adaptProxySummaryToApiCall);
-        setCalls(adapted);
-      } catch (error) {
-        if (currentSeq !== requestSeqRef.current) {
-          return;
-        }
-        console.error('Failed to fetch logs:', error);
-        setLoadError(error instanceof Error ? error.message : 'Failed to load HTTP history.');
-        setCalls([]);
-      } finally {
-        if (currentSeq === requestSeqRef.current) {
-          setIsLoading(false);
-        }
+      if (currentSeq !== requestSeqRef.current) {
+        return;
       }
-    },
-    [query]
-  );
+
+      const adapted = result.map(adaptProxySummaryToApiCall);
+      setCalls(adapted);
+    } catch (error) {
+      if (currentSeq !== requestSeqRef.current) {
+        return;
+      }
+      console.error('Failed to fetch logs:', error);
+      setLoadError(error instanceof Error ? error.message : 'Failed to load HTTP history.');
+      setCalls([]);
+    } finally {
+      if (currentSeq === requestSeqRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [query]);
 
   useEffect(() => {
-    if (lastBaseQueryRef.current !== baseQueryKey && page !== 1) {
-      lastBaseQueryRef.current = baseQueryKey;
-      setPage(1);
-      return;
-    }
-
-    lastBaseQueryRef.current = baseQueryKey;
-    fetchPage(page);
-  }, [baseQueryKey, page, fetchPage, setPage]);
+    fetchLogs();
+  }, [baseQueryKey, fetchLogs]);
 
   useEffect(() => {
     let batchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -186,10 +153,10 @@ export function useHistoryTable({ isStreamPaused = false, activeScope: activeSco
         const count = pendingEventsCountRef.current;
         pendingEventsCountRef.current = 0;
 
-        if (isStreamPausedRef.current || currentPageRef.current !== 1) {
+        if (isStreamPausedRef.current) {
           setNewEventsCount((prev) => prev + count);
         } else {
-          await fetchPage(1);
+          await fetchLogs();
         }
       }, 250);
     };
@@ -200,29 +167,12 @@ export function useHistoryTable({ isStreamPaused = false, activeScope: activeSco
       unlistenPromise.then((unlisten) => unlisten());
       if (batchTimer) clearTimeout(batchTimer);
     };
-  }, [fetchPage, incrementSessionStats]);
-
-  const totalPages = Math.max(1, Math.ceil(pagination.total / pagination.perPage));
-  const hasNextPage = page < totalPages;
-  const hasPreviousPage = page > 1;
-
-  const goToNextPage = useCallback(() => {
-    if (hasNextPage) {
-      setPage(page + 1);
-    }
-  }, [hasNextPage, page, setPage]);
-
-  const goToPreviousPage = useCallback(() => {
-    if (hasPreviousPage) {
-      setPage(page - 1);
-    }
-  }, [hasPreviousPage, page, setPage]);
+  }, [fetchLogs, incrementSessionStats]);
 
   const handleRefresh = useCallback(() => {
     setNewEventsCount(0);
-    setPage(1);
-    fetchPage(1);
-  }, [fetchPage, setPage]);
+    fetchLogs();
+  }, [fetchLogs]);
 
   const toggleSortOrder = useCallback(() => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -231,10 +181,6 @@ export function useHistoryTable({ isStreamPaused = false, activeScope: activeSco
   const removeCallLocally = useCallback(
     (id: string) => {
       setCalls((prev) => prev.filter((call) => call.id !== id));
-      setPagination((prev) => ({
-        ...prev,
-        total: Math.max(0, prev.total - 1),
-      }));
       if (useHttpHistoryQueryStore.getState().selectedCallId === id) {
         setSelectedCallId(null);
       }
@@ -244,7 +190,6 @@ export function useHistoryTable({ isStreamPaused = false, activeScope: activeSco
 
   return {
     calls,
-    pagination,
     isLoading,
     newEventsCount,
     loadError,
@@ -252,12 +197,6 @@ export function useHistoryTable({ isStreamPaused = false, activeScope: activeSco
     searchQuery: filter.search,
     hasActiveFilters,
     hasScopedTab: Boolean(query.filter.scope && query.filter.scope.length > 0),
-    totalPages,
-    hasNextPage,
-    hasPreviousPage,
-    goToNextPage,
-    goToPreviousPage,
-    setPage,
     handleRefresh,
     toggleSortOrder,
     setSelectedCallId,

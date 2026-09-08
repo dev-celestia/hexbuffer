@@ -3,8 +3,6 @@ import type { ProxyFilter } from '../api';
 import type { HistoryFilterState } from '@/stores/history';
 
 export interface HistoryQuery {
-  page: number;
-  perPage: number;
   sortOrder: 'asc' | 'desc';
   filter: ProxyFilter;
 }
@@ -14,8 +12,6 @@ export function buildHistoryQuery(input: {
   activeScope: string[] | null;
   sessionId?: string | null;
   sortOrder: 'asc' | 'desc';
-  page: number;
-  perPage: number;
 }): HistoryQuery {
   const methods = normalizeStringList(Array.from(input.filter.methods));
   const scope = normalizeStringList(input.activeScope ?? []);
@@ -54,8 +50,6 @@ export function buildHistoryQuery(input: {
   }
 
   return {
-    page: input.page,
-    perPage: input.perPage,
     sortOrder: input.sortOrder,
     filter: {
       search: normalizeString(input.filter.search),

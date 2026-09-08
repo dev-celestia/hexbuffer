@@ -4,7 +4,6 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { cn } from "@/lib/utils";
 
 import { HistoryLoadingState } from "@/pages/live-traffic/components/history-loading-state";
-import { TrafficTablePagination } from "@/pages/live-traffic/components/traffic-table-pagination";
 import { CreateGroupDialog } from "../group-dialog";
 import { TrafficTableRow } from "./components/traffic-table-row";
 
@@ -34,7 +33,6 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
     groupDialogCall,
     isGroupDialogOpen,
     setIsGroupDialogOpen,
-    pagination,
     actions,
   } = useTrafficTable(props);
 
@@ -222,21 +220,6 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
             </div>
           </div>
         </div>
-
-        {/* Footer Pagination */}
-        <TrafficTablePagination
-          showingStart={pagination.showingStart}
-          showingEnd={pagination.showingEnd}
-          total={pagination.total}
-          page={pagination.page}
-          totalPages={pagination.totalPages}
-          hasPreviousPage={pagination.hasPreviousPage}
-          hasNextPage={pagination.hasNextPage}
-          isLoading={isLoading}
-          itemLabel="request"
-          onPreviousPage={actions.goToPreviousPage}
-          onNextPage={actions.goToNextPage}
-        />
       </div>
       <CreateGroupDialog
         open={isGroupDialogOpen}

@@ -2,7 +2,6 @@ import { invoke } from '@tauri-apps/api/core';
 import type {
   ProxyRecord,
   ProxyLogSummary,
-  PaginatedResponse,
   HttpSessionSummary,
   HttpSessionRecord,
   ProxyDbFilterConfig,
@@ -124,15 +123,15 @@ export async function clearHttpSessionLogs(sessionId: string): Promise<number> {
   return invokeTauri('clear_http_session_logs', { sessionId });
 }
 
+export const HTTP_LOGS_LIMIT = 100;
+
 export async function getHttpLogs(
-  page: number,
-  perPage: number = 60,
+  limit: number = HTTP_LOGS_LIMIT,
   filter?: ProxyFilter,
   sortOrder: 'asc' | 'desc' = 'desc'
-): Promise<PaginatedResponse<ProxyLogSummary>> {
-  return invokeTauri('get_proxy_paginated', {
-    page,
-    perPage,
+): Promise<ProxyLogSummary[]> {
+  return invokeTauri('get_proxy_recent', {
+    limit,
     filter,
     sortOrder,
   });
