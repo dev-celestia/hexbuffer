@@ -55,7 +55,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
       bgType: 'none',
       bgValue: '',
       theme: 'dark',
-      primaryColor: 'emerald',
+      primaryColor: 'purple',
       hiddenWidgets: DEFAULT_HIDDEN_WIDGETS,
       widgetOrder: DEFAULT_WIDGET_ORDER,
       setBg: (type, value) => set({ bgType: type, bgValue: value }),
@@ -145,7 +145,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
       merge: (persisted, current): AppSettingsState => {
         const base = current as AppSettingsState
         const state = persisted as Partial<PersistedSettings> | undefined
-        const persistedColor = (state?.primaryColor as string) === 'neutral' ? 'emerald' : state?.primaryColor
+        const persistedColor = (state?.primaryColor as string) === 'neutral' ? 'purple' : state?.primaryColor
         return {
           ...base,
           hiddenNavItems: state?.hiddenNavItems ?? base.hiddenNavItems,

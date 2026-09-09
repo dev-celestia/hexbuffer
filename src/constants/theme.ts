@@ -1,4 +1,5 @@
 export type PrimaryColor =
+  | 'purple'
   | 'emerald'
   | 'blue'
   | 'violet'
@@ -15,6 +16,13 @@ export interface PrimaryColorPreset {
 }
 
 export const PRIMARY_COLOR_PRESETS: PrimaryColorPreset[] = [
+  {
+    id: 'purple',
+    name: 'Purple',
+    swatchHex: '#E84B8A',
+    lightOklch: 'oklch(0.648 0.199 359.763)',
+    darkOklch: 'oklch(0.648 0.199 359.763)',
+  },
   {
     id: 'emerald',
     name: 'Emerald',

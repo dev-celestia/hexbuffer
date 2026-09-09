@@ -79,7 +79,7 @@ export function PageTabBar({
         {editingTabId === tab.id ? (
           <input
             ref={editingInputRef}
-            className="my-1 mx-2 h-7 w-28 rounded border bg-background px-2 text-xs outline-none focus-visible:ring-1 focus-visible:ring-green-500"
+            className="my-1 mx-2 h-7 w-28 rounded border bg-background px-2 text-xs outline-none focus-visible:ring-1 focus-visible:ring-primary"
             value={editingName}
             onChange={(event) => setEditingName(event.target.value)}
             onBlur={finishEditingTab}

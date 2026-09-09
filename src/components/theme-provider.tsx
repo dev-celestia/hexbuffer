@@ -31,7 +31,7 @@ interface ThemeProviderProps {
 export function ThemeProvider({
   children,
   defaultTheme = 'dark',
-  defaultPrimaryColor = 'emerald',
+  defaultPrimaryColor = 'purple',
 }: ThemeProviderProps) {
   // ponytail: read initial value from persisted store; fall back to prop
   const storedTheme = useAppSettingsStore((s) => s.theme);
@@ -41,7 +41,7 @@ export function ThemeProvider({
 
   const initialPrimary =
     (storedPrimaryColor as string) === 'neutral'
-      ? 'emerald'
+      ? defaultPrimaryColor
       : (storedPrimaryColor ?? defaultPrimaryColor);
 
   const [theme, setThemeState] = React.useState<Theme>(storedTheme ?? defaultTheme);

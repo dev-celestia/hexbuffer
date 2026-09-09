@@ -2,6 +2,7 @@ import * as React from 'react';
 import { SpinnerGapIcon } from '@phosphor-icons/react';
 
 import { cn } from '@/lib/utils';
+import { FloatingLinkCard } from '@/components/floating-link-card';
 import { PAGE_COMPONENT_MAP } from './page-lazy-imports';
 import { DesktopWindow } from './desktop-window';
 import { useDesktopWorkspace } from './hooks/use-desktop-workspace';
@@ -95,6 +96,9 @@ export function DesktopWorkspace({ activeChild }: Readonly<DesktopWorkspaceProps
           />
         ))}
       </div>
+
+      {/* Floating Link Card (Desktop Feature) */}
+      <FloatingLinkCard />
     </div>
   );
 }

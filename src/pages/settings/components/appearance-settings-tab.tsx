@@ -142,7 +142,7 @@ export function AppearanceSettingsTab() {
                         // Sizing & Spacing
                         "size-3",
                         // Typography
-                        preset.id === 'amber' ? "text-stone-900" : "text-white"
+                        preset.id === 'amber' || preset.id === 'purple' ? "text-stone-900" : "text-white"
                       )}
                     />
                   )}
