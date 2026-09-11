@@ -15,7 +15,7 @@ A modern, high-performance desktop workspace for web security testing, API debug
 - **⚙️ Settings** (`/settings`): Proxy configuration, root CA certificate installation, and themes.
 
 ### 🧪 Experimental (Alpha)
-> WebSocket Inspector · Visual Automation Workflows · Browser Crawler · AI Assistant (`hexbuffer-ai`) · MockForge Server · OOB Callback Listener · Port Scanner · JWT & Hash Tools · Terminal Shell
+> WebSocket Inspector · Visual Automation Workflows · Browser Crawler · AI Assistant (`hexbuffer-ai`) · MockForge Server · OOB Callback Listener · Port Scanner · JWT & Hash Tools
 
 ---
 
