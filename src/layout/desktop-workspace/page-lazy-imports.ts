@@ -24,9 +24,11 @@ const ScratchpadPage = React.lazy(() => import("@/pages/notes").then((m) => ({ d
 const MockApiPage = React.lazy(() => import("@/pages/api-mock").then((m) => ({ default: m.MockApiPage })));
 const ResponseOverridePage = React.lazy(() => import("@/pages/api-override").then((m) => ({ default: m.ResponseOverridePage })));
 const TerminalPage = React.lazy(() => import("@/pages/terminal").then((m) => ({ default: m.TerminalPage })));
+const SplitViewPage = React.lazy(() => import("@/pages/split-view").then((m) => ({ default: m.SplitViewPage })));
 
 export const PAGE_COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
   '/': DesktopPage,
+  '/split-view': SplitViewPage,
   '/http-history': HttpHistoryPage,
   '/websocket-history': WebSocketHistoryPage,
   '/intercept': InterceptPage,

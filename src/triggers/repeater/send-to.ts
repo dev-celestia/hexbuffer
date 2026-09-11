@@ -31,12 +31,24 @@ export async function openStandaloneRepeater(options: SendRawToRepeaterOptions):
   if (options.name) params.set('name', options.name);
   params.set('target', 'repeater');
 
-  const deepLinkUrl = `apprecon://repeater?${params.toString()}`;
+  const query = params.toString();
+  const deepLinkUrl = `apprecon://repeater?${query}`;
+
+  // Notify an already-open standalone Repeater window so it can load the new
+  // request live; the listener in StandaloneRepeaterPage filters by target.
+  try {
+    const { emit } = await import('@tauri-apps/api/event');
+    await emit('hexbuffer:subapp-params', query);
+  } catch {
+    // Non-Tauri context; fall through to open the window.
+  }
+
   try {
     await openUrl(deepLinkUrl);
   } catch {
-    // Fallback for dev mode or browser window
-    const webUrl = `${window.location.origin}/?${params.toString()}`;
+    // Fallback for dev mode or browser window (may be denied by the webview;
+    // the emitted params event above already reached any open window).
+    const webUrl = `${window.location.origin}/?${query}`;
     window.open(webUrl, '_blank');
   }
 }

@@ -104,10 +104,13 @@ export const useNavStore = create<NavState>()((set, get) => ({
       const y = 60 + (openCount % 8) * 30;
 
       let width = Math.min(1000, window.innerWidth - 160);
-      const height = Math.min(700, window.innerHeight - 200);
+      let height = Math.min(700, window.innerHeight - 200);
 
       if (id === '/assistant') {
         width = width / 2;
+      } else if (id === '/split-view') {
+        width = Math.min(1280, Math.max(900, window.innerWidth - 80));
+        height = Math.min(820, Math.max(600, window.innerHeight - 120));
       }
 
       const newWindow: WindowState = {

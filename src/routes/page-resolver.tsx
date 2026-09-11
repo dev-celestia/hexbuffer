@@ -62,6 +62,9 @@ const FileExplorerPage = React.lazy(() =>
 const SettingsPage = React.lazy(() =>
   import("@/pages/settings").then((m) => ({ default: m.Settings }))
 );
+const SplitViewPage = React.lazy(() =>
+  import("@/pages/split-view").then((m) => ({ default: m.SplitViewPage }))
+);
 
 function StandaloneHttpHistoryPage() {
   React.useEffect(() => {
@@ -81,12 +84,24 @@ function StandaloneHttpHistoryPage() {
 
 function StandaloneRepeaterPage() {
   React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
+    // The same deep-link payload can arrive twice (frontend emit + backend
+    // emit_to when the window already exists); skip near-identical repeats.
+    let lastQuery = "";
+    let lastAppliedAt = 0;
+
+    const applyParams = (search: string) => {
+      const params = new URLSearchParams(search);
       const endpointId = params.get("endpointId");
       const raw = params.get("raw");
       const url = params.get("url");
       const name = params.get("name");
+
+      const query = params.toString();
+      if (query && query === lastQuery && Date.now() - lastAppliedAt < 1500) {
+        return;
+      }
+      lastQuery = query;
+      lastAppliedAt = Date.now();
 
       if (endpointId) {
         import("@/stores/collections").then(({ useCollectionsStore }) => {
@@ -105,7 +120,31 @@ function StandaloneRepeaterPage() {
           });
         });
       }
+    };
+
+    applyParams(window.location.search);
+
+    // Live updates: when another window sends a new request while this window
+    // is already open, the backend (or the sending window) forwards the
+    // deep-link params through this event.
+    let unlisten: (() => void) | undefined;
+    if (typeof window !== "undefined" && Boolean((window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__)) {
+      import("@tauri-apps/api/event")
+        .then(({ listen }) =>
+          listen<string>("hexbuffer:subapp-params", (event) => {
+            if (getAppTarget() !== "repeater") return;
+            applyParams(`?${event.payload ?? ""}`);
+          })
+        )
+        .then((fn) => {
+          unlisten = fn;
+        })
+        .catch(() => {});
     }
+
+    return () => {
+      unlisten?.();
+    };
   }, []);
 
   return <RepeaterPage />;
@@ -182,6 +221,9 @@ export function StandaloneAppView({ target }: { readonly target: string }) {
         return <StandaloneLayout id="/file-explorer" title="File Explorer"><FileExplorerPage /></StandaloneLayout>;
       case "settings":
         return <StandaloneLayout id="/settings" title="Settings"><SettingsPage /></StandaloneLayout>;
+      case "split-view":
+      case "split":
+        return <StandaloneLayout id="/split-view" title="Split View"><SplitViewPage /></StandaloneLayout>;
       default:
         return null;
     }

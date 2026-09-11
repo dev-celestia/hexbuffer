@@ -85,6 +85,9 @@ const TerminalPage = React.lazy(() =>
 const NucleiRunPage = React.lazy(() =>
   import("@/pages/nuclei-run").then((m) => ({ default: m.NucleiRunPage }))
 );
+const SplitViewPage = React.lazy(() =>
+  import("@/pages/split-view").then((m) => ({ default: m.SplitViewPage }))
+);
 
 
 
@@ -142,6 +145,7 @@ function AppRoutes() {
           <Route path="/nuclei-run" element={<NucleiRunPage />} />
           <Route path="/nuclei" element={<NucleiRunPage />} />
           <Route path="/scanner" element={<NucleiRunPage />} />
+          <Route path="/split-view" element={<SplitViewPage />} />
         </Routes>
       </React.Suspense>
     </>

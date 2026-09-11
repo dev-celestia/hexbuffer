@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 use hexbuffer::commands::invoker::InvokerState;
 use hexbuffer::{
     AiBrowserState, BrowserProcessState, CollaboratorPollingState, HashEngineState, HistoryBridge,
@@ -62,12 +62,23 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
     crate::log("Building Tauri app...");
 
-    // Check if cold-started with a specific target tool (e.g. from desktop shortcut)
-    let mut initial_target: Option<String> = None;
+    // Check if cold-started with a specific target tool (e.g. from desktop shortcut
+    // or an apprecon:// deep link with optional query params)
+    let mut initial_target: Option<(String, Option<String>)> = None;
     for arg in std::env::args().skip(1) {
         if let Some(target) = arg.strip_prefix("--target=").or_else(|| arg.strip_prefix("--subapp=")) {
-            initial_target = Some(target.trim_matches('"').to_lowercase());
+            initial_target = Some((target.trim_matches('"').to_lowercase(), None));
             break;
+        }
+        if let Some(rest) = arg.trim_matches('"').strip_prefix("apprecon://") {
+            let (target, query) = match rest.split_once('?') {
+                Some((t, q)) => (t.to_lowercase(), Some(q.to_string())),
+                None => (rest.to_lowercase(), None),
+            };
+            if !target.is_empty() {
+                initial_target = Some((target, query));
+                break;
+            }
         }
     }
 
@@ -77,13 +88,13 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         crate::log("Linux window decorations disabled");
     }
 
-    if let Some(ref clean_target) = initial_target {
+    if let Some((ref clean_target, ref query)) = initial_target {
         crate::log(&format!("Cold-start requested for sub-app: {}", clean_target));
         // Dismiss splash screen immediately
         if let Some(splash) = app.get_webview_window("splashscreen") {
             let _ = splash.close();
         }
-        open_or_focus_subapp_window(&app.handle(), clean_target);
+        open_or_focus_subapp_window_with_query(&app.handle(), clean_target, query.as_deref());
     }
 
     #[cfg(desktop)]
@@ -182,7 +193,17 @@ async fn check_for_updates(app: AppHandle) -> tauri_plugin_updater::Result<()> {
     Ok(())
 }
 
-pub fn open_or_focus_subapp_window(app: &AppHandle, clean_target: &str) {
+/// Event sent to an already-open sub-app window carrying the deep-link query
+/// params (e.g. raw/endpointId for the Repeater) so it can load the new data
+/// without being closed and reopened. Mirrored by the frontend listener in
+/// src/routes/page-resolver.tsx.
+pub const SUBAPP_PARAMS_EVENT: &str = "hexbuffer:subapp-params";
+
+pub fn open_or_focus_subapp_window_with_query(
+    app: &AppHandle,
+    clean_target: &str,
+    query: Option<&str>,
+) {
     let subapp_label = format!("subapp-{}", clean_target);
 
     // If window already exists, unminimize, show and focus it
@@ -192,12 +213,37 @@ pub fn open_or_focus_subapp_window(app: &AppHandle, clean_target: &str) {
         let _ = win.set_focus();
         #[cfg(target_os = "macos")]
         crate::app_commands::activate_current_process();
-        crate::log(&format!("Existing sub-app window [{}] brought to front", subapp_label));
+
+        // Forward the deep-link payload to the live window so it can react
+        // (focus alone would silently drop the new request).
+        if let Some(query) = query {
+            match app.emit_to(subapp_label.as_str(), SUBAPP_PARAMS_EVENT, query.to_string()) {
+                Ok(_) => {
+                    crate::log(&format!(
+                        "Forwarded deep-link params to existing window [{}]: {}",
+                        subapp_label, query
+                    ));
+                }
+                Err(e) => {
+                    crate::log(&format!(
+                        "Failed to forward deep-link params to [{}]: {}",
+                        subapp_label, e
+                    ));
+                }
+            }
+        } else {
+            crate::log(&format!("Existing sub-app window [{}] brought to front", subapp_label));
+        }
         return;
     }
 
     // Otherwise create the sub-app window
-    let subapp_url = format!("index.html?target={}", clean_target);
+    let subapp_url = match query {
+        Some(query) if !query.is_empty() => {
+            format!("index.html?target={}&{}", clean_target, query)
+        }
+        _ => format!("index.html?target={}", clean_target),
+    };
     let subapp_builder = tauri::WebviewWindowBuilder::new(
         app,
         &subapp_label,

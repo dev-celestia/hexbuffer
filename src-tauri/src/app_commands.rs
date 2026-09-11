@@ -37,6 +37,9 @@ pub fn show_main_window(app: tauri::AppHandle) -> Result<(), String> {
         error.to_string()
     })?;
 
+    #[cfg(target_os = "macos")]
+    focus_window_native(&main_window);
+
     crate::log("Main window shown and focused successfully");
     Ok(())
 }
@@ -424,6 +427,73 @@ pub fn activate_current_process() {
     let app = NSApplication::sharedApplication(mtm);
     #[allow(deprecated)]
     app.activateIgnoringOtherApps(true);
+}
+
+#[cfg(target_os = "macos")]
+pub fn focus_window_native(window: &tauri::WebviewWindow) {
+    use objc2_app_kit::NSWindow;
+
+    if let Ok(ns_ptr) = window.ns_window() {
+        if !ns_ptr.is_null() {
+            unsafe {
+                if let Some(ns_win) = (ns_ptr as *const NSWindow).as_ref() {
+                    ns_win.deminiaturize(None);
+                    ns_win.makeKeyAndOrderFront(None);
+                    ns_win.makeMainWindow();
+                    ns_win.orderFrontRegardless();
+                }
+            }
+        }
+    }
+    activate_current_process();
+}
+
+/// Brings the main suite window to the front and focuses it.
+/// On macOS, clicking the Dock icon causes AppKit to perform its default reopen actions,
+/// which by default re-activates the previously active sub-window.
+/// To ensure the main window gets focus instead of any open sub-window,
+/// this helper shows/unminimizes immediately and also schedules asynchronous focus
+/// assertions on the main thread after AppKit finishes its current runloop activation pass.
+pub fn focus_main_suite_window(app: &tauri::AppHandle) {
+    let Some(main_win) = app.get_webview_window("main") else {
+        crate::log("focus_main_suite_window: main window not found");
+        return;
+    };
+
+    let _ = main_win.show();
+    let _ = main_win.unminimize();
+    let _ = main_win.set_focus();
+
+    #[cfg(target_os = "macos")]
+    {
+        focus_window_native(&main_win);
+
+        let handle = app.clone();
+        tauri::async_runtime::spawn(async move {
+            // First tick (50ms): runs right after AppKit's default reopen pass completes
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+            let h1 = handle.clone();
+            let _ = handle.run_on_main_thread(move || {
+                if let Some(win) = h1.get_webview_window("main") {
+                    let _ = win.show();
+                    let _ = win.unminimize();
+                    let _ = win.set_focus();
+                    focus_window_native(&win);
+                    crate::log("focus_main_suite_window: post-reopen assertion (50ms) applied to main window");
+                }
+            });
+
+            // Second tick (150ms): ensures any window deminiaturize animation settles
+            tokio::time::sleep(std::time::Duration::from_millis(150)).await;
+            let h2 = handle.clone();
+            let _ = handle.run_on_main_thread(move || {
+                if let Some(win) = h2.get_webview_window("main") {
+                    let _ = win.set_focus();
+                    focus_window_native(&win);
+                }
+            });
+        });
+    }
 }
 
 #[tauri::command]

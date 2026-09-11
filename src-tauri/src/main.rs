@@ -255,28 +255,33 @@ fn main() {
         .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
             crate::log(&format!("Single-instance CLI args received: {:?}", argv));
 
-            // Check if a sub-app target was requested
-            let mut requested_target = None;
+            // Check if a sub-app target was requested, either via --target= CLI
+            // args or via a full apprecon:// deep-link URL (send-to-repeater etc.)
+            let mut requested_target: Option<(String, Option<String>)> = None;
             for arg in argv.into_iter().skip(1) {
                 if let Some(target) = arg.strip_prefix("--target=").or_else(|| arg.strip_prefix("--subapp=")) {
-                    requested_target = Some(target.trim_matches('"').to_lowercase());
+                    requested_target = Some((target.trim_matches('"').to_lowercase(), None));
                     break;
+                }
+                if let Some(rest) = arg.trim_matches('"').strip_prefix("apprecon://") {
+                    let (target, query) = match rest.split_once('?') {
+                        Some((t, q)) => (t.to_lowercase(), Some(q.to_string())),
+                        None => (rest.to_lowercase(), None),
+                    };
+                    if !target.is_empty() {
+                        requested_target = Some((target, query));
+                        break;
+                    }
                 }
             }
 
-            if let Some(target) = requested_target {
+            if let Some((target, query)) = requested_target {
                 crate::log(&format!("Single-instance opening sub-app window: {}", target));
-                crate::setup::open_or_focus_subapp_window(app, &target);
+                crate::setup::open_or_focus_subapp_window_with_query(app, &target, query.as_deref());
             } else {
                 // Default: bring main suite window to front
-                if let Some(main_win) = app.get_webview_window("main") {
-                    let _ = main_win.show();
-                    let _ = main_win.unminimize();
-                    let _ = main_win.set_focus();
-                    #[cfg(target_os = "macos")]
-                    crate::app_commands::activate_current_process();
-                    crate::log("Single-instance revealed and focused main suite window");
-                }
+                crate::app_commands::focus_main_suite_window(app);
+                crate::log("Single-instance revealed and focused main suite window");
             }
         }))
         .on_window_event(|window, event| {
@@ -320,12 +325,7 @@ fn main() {
             #[cfg(target_os = "macos")]
             if let tauri::RunEvent::Reopen { .. } = event {
                 crate::log("macOS Reopen event received: revealing and focusing main suite window");
-                if let Some(main_win) = app_handle.get_webview_window("main") {
-                    let _ = main_win.show();
-                    let _ = main_win.unminimize();
-                    let _ = main_win.set_focus();
-                    crate::app_commands::activate_current_process();
-                }
+                crate::app_commands::focus_main_suite_window(app_handle);
             }
             let _ = (app_handle, event);
         });

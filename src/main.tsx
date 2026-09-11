@@ -12,6 +12,7 @@ import { suppressResizeObserverLoopErrors } from "@/lib/resize-observer-errors";
 import { useTauriFocusFix } from "@/hooks/use-tauri-focus-fix";
 import { getAppTarget, StandaloneAppView } from "@/routes/page-resolver";
 import { initProxySync } from "@/stores/app";
+import { initCrossWindowSync } from "@/stores/sync";
 import AppRoutes from "./App";
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
@@ -50,6 +51,7 @@ function Root() {
 
   React.useEffect(() => {
     initProxySync();
+    initCrossWindowSync();
   }, []);
 
   const responseDetailCallId = getResponseDetailCallId();

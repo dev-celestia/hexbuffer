@@ -30,6 +30,8 @@ interface ScratchpadState {
   closeScratchpadsToLeft: (id: string) => void;
   closeScratchpadsToRight: (id: string) => void;
   closeAllTabs: () => void;
+  /** Re-read localStorage into state; used by cross-window sync. */
+  reloadFromStorage: () => void;
 }
 
 // ponytail: keep initial state loading simple and self-contained
@@ -346,6 +348,10 @@ export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
     localStorage.setItem('desktop-scratchpad-active-id', '');
     localStorage.setItem('desktop-scratchpad', '');
     set({ openTabIds: [], activeId: '', note: '' });
+  },
+
+  reloadFromStorage: () => {
+    set(getInitialState());
   },
 }));
 

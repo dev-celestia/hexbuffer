@@ -72,12 +72,13 @@ export function NotificationAlert() {
                 'relative flex items-center justify-center shrink-0 cursor-pointer select-none',
                 // Sizing & Spacing
                 'size-7 rounded-sm',
+                // Typography
+                open ? 'text-primary' : hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground',
                 // Backgrounds & Borders
                 'transition-all duration-150',
+                open && 'bg-primary/15',
                 // Interactive & States
-                'hover:bg-muted/80 hover:scale-105 active:scale-95',
-                // Typography
-                hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'
+                'hover:bg-muted/80 hover:text-foreground hover:scale-105 active:scale-95'
               )}
               aria-label="System alerts"
             />
