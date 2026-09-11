@@ -29,9 +29,6 @@ const ScratchpadPage = React.lazy(() =>
 const KanbanPage = React.lazy(() =>
   import("@/pages/kanban").then((m) => ({ default: m.KanbanPage }))
 );
-const TerminalPage = React.lazy(() =>
-  import("@/pages/terminal").then((m) => ({ default: m.TerminalPage }))
-);
 const HttpHistoryPage = React.lazy(() =>
   import("@/pages/live-traffic/http-history").then((m) => ({ default: m.HttpHistoryPage }))
 );
@@ -200,8 +197,6 @@ export function StandaloneAppView({ target }: { readonly target: string }) {
         return <StandaloneLayout id="/scratchpad" title="Notes"><ScratchpadPage /></StandaloneLayout>;
       case "kanban":
         return <StandaloneLayout id="/kanban" title="Kanban"><KanbanPage /></StandaloneLayout>;
-      case "terminal":
-        return <StandaloneLayout id="/terminal" title="Terminal"><TerminalPage /></StandaloneLayout>;
       case "api-mock":
       case "mock-api":
       case "mock-forge":

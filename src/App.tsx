@@ -79,9 +79,6 @@ const KanbanPage = React.lazy(() =>
 const FileExplorerPage = React.lazy(() =>
   import("@/pages/file-explorer").then((m) => ({ default: m.FileExplorerPage }))
 );
-const TerminalPage = React.lazy(() =>
-  import("@/pages/terminal").then((m) => ({ default: m.TerminalPage }))
-);
 const NucleiRunPage = React.lazy(() =>
   import("@/pages/nuclei-run").then((m) => ({ default: m.NucleiRunPage }))
 );
@@ -141,7 +138,6 @@ function AppRoutes() {
           <Route path="/api-override" element={<ResponseOverridePage />} />
           <Route path="/kanban" element={<KanbanPage />} />
           <Route path="/file-explorer" element={<FileExplorerPage />} />
-          <Route path="/terminal" element={<TerminalPage />} />
           <Route path="/nuclei-run" element={<NucleiRunPage />} />
           <Route path="/nuclei" element={<NucleiRunPage />} />
           <Route path="/scanner" element={<NucleiRunPage />} />

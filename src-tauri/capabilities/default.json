@@ -41,7 +41,6 @@
     "clipboard-manager:allow-read-text",
     "notification:default",
     "process:allow-restart",
-    "clipboard-manager:default",
-    "pty:default"
+    "clipboard-manager:default"
   ]
 }

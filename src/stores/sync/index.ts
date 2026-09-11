@@ -52,7 +52,7 @@ import {
  * reception, and window-focus resync all come from this single mechanism.
  *
  * Deliberately excluded (per-window by design): nav (window manager),
- * clipboard, floating-bar-ui, notifications, terminal, jwt working state,
+ * clipboard, floating-bar-ui, notifications, jwt working state,
  * intruder / regression / browser-automation run state.
  */
 

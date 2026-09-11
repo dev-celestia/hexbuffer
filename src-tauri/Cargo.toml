@@ -21,7 +21,6 @@ tauri-plugin-process = "2"
 tauri-plugin-clipboard-manager = "2"
 tauri-plugin-shell = "2"
 tauri-plugin-os = "2"
-tauri-plugin-pty = "0.3"
 tauri-plugin-notification = { version = "2", features = ["windows7-compat"] }
 tauri-plugin-single-instance = "2"
 dirs = "6.0"
@@ -39,8 +38,8 @@ tauri-plugin-updater = "2"
 rusqlite = { version = "0.32", features = ["bundled"] }
 keyring = { version = "3.6.3", default-features = false, features = ["apple-native", "windows-native", "linux-native-sync-persistent", "crypto-rust"] }
 
-hyper = { version = "1", features = ["full"] }
-hyper-util = { version = "0.1", features = ["full"] }
+hyper = { version = "1", features = ["http1", "server"] }
+hyper-util = { version = "0.1", features = ["server", "service", "tokio"] }
 http-body-util = "0.1"
 tokio = { version = "1", features = ["full"] }
 async-trait = "0.1"
@@ -78,19 +77,22 @@ ripemd = "0.1"
 parking_lot = "0.12"
 sysinfo = "0.33"
 
-# Development profile (fast compile, debug symbols, no heavy LTO)
+# Development profile: Fast compile & link, line tables for stack traces
 [profile.dev]
 opt-level = 0
-debug = true
-lto = false
+debug = 1
 codegen-units = 256
-panic = "unwind"
-strip = false
 
-# Standalone / Release distribution profile (slim standalone binary)
+# Optimize external dependencies in dev mode for fast proxy/crypto runtime
+[profile.dev.package."*"]
+opt-level = 3
+
+# Production profile: Maximum runtime performance, fast parallel ThinLTO, stripped binary
 [profile.release]
-opt-level = "s"       # Optimize for binary size
-lto = true            # Enable Link-Time Optimization across crates
-codegen-units = 1     # Maximize dead-code elimination
-panic = "abort"       # Remove stack unwinding machinery
-strip = true          # Strip all debug symbols
+opt-level = 3
+lto = "thin"
+codegen-units = 16
+panic = "unwind"
+strip = true
+
+

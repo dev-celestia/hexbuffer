@@ -23,7 +23,6 @@ import {
   SquaresFourIcon,
   BroadcastIcon,
   FolderOpenIcon,
-  TerminalWindowIcon,
   ShieldCheckIcon,
 } from '@phosphor-icons/react';
 
@@ -344,14 +343,6 @@ export const ALPHA_NAV_ITEMS: NavItem[] = import.meta.env.PROD
         href: '/file-explorer',
         description: 'Browse, stream, and manage Cloudflare R2 object storage files.',
         colors: { bg: 'bg-zinc-900 dark:bg-zinc-900', hoverBg: 'group-hover:bg-zinc-900 dark:group-hover:bg-zinc-900', border: 'border-zinc-900 dark:border-zinc-900' },
-        flag: 'alpha',
-      },
-      {
-        label: 'Terminal',
-        icon: TerminalWindowIcon,
-        href: '/terminal',
-        description: 'Interactive command-line shell with multi-tab support.',
-        colors: { bg: 'bg-slate-700 dark:bg-slate-700', hoverBg: 'group-hover:bg-slate-700 dark:group-hover:bg-slate-700', border: 'border-slate-700 dark:border-slate-700' },
         flag: 'alpha',
       },
     ];

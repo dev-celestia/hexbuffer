@@ -93,21 +93,6 @@ export type { SendToRepeaterOptions, SendToCollectionOptions, CollectionNode } f
 
 export { openApp } from './navigation';
 
-export {
-  createTerminalSession,
-  closeTerminalSession,
-  renameTerminalSession,
-  closeTerminalTabsToLeft,
-  closeTerminalTabsToRight,
-  clearActiveTerminalSessionBuffer,
-  setTerminalFontSize,
-  setTerminalShellPath,
-  clearRecentTerminalCommands,
-  runTerminalCommand,
-  toggleTerminalSidebar,
-  restartTerminalSession,
-  setActiveTerminalId,
-} from './terminal';
 
 export {
   APP_AI_TOOL_DEFINITIONS,

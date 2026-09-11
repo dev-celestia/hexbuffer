@@ -19,7 +19,7 @@ pub(crate) fn log(msg: &str) {
 }
 
 fn main() {
-    // Set a balanced Tokio thread pool size to ensure tauri-plugin-pty's read loops have
+    // Set a balanced Tokio thread pool size to ensure async background tasks have
     // sufficient worker headroom without over-allocating threads and context-switching on low-core CPUs.
     let default_threads = std::thread::available_parallelism()
         .map(|n| (n.get() * 2).clamp(4, 16))
@@ -250,7 +250,6 @@ fn main() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_os::init())
-        .plugin(tauri_plugin_pty::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
             crate::log(&format!("Single-instance CLI args received: {:?}", argv));

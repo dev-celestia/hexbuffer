@@ -17,7 +17,6 @@ const actionLabels: Record<string, string> = {
   start_invoker_attack: 'Launching fuzzing attack',
   toggle_intercept: 'Toggling proxy interception',
   trigger_scan: 'Launching browser scan',
-  run_terminal_command: 'Executing terminal command',
 };
 
 

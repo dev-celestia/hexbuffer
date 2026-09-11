@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
-/// Returns the centralized, shared Hexbuffer data directory used across
-/// both the full suite and all standalone tool targets.
+/// Returns the centralized, shared Hexbuffer data directory.
 ///
 /// macOS: ~/Library/Application Support/com.hexbuffer
 /// Windows: %APPDATA%/Hexbuffer
