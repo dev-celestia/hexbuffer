@@ -223,6 +223,27 @@ export function HashPage() {
                 </span>
               </div>
 
+              {page.attackEngine.status === 'error' && page.attackEngine.errorMessage && (
+                <span
+                  title={page.attackEngine.errorMessage}
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-center min-w-0 truncate",
+
+                    // Sizing & Spacing
+                    "max-w-md px-1.5 py-0.5",
+
+                    // Typography
+                    "text-[10px] font-mono",
+
+                    // Backgrounds & Borders
+                    "text-red-700 dark:text-red-300 bg-red-500/10 rounded border border-red-500/20"
+                  )}
+                >
+                  {page.attackEngine.errorMessage}
+                </span>
+              )}
+
               {page.targets.length > 0 && (
                 <span
                   className={cn(

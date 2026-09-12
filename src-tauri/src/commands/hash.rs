@@ -1,16 +1,15 @@
-//! Tauri command handlers for Hash Auditing and Cracking Engine
+//! Tauri command handlers for the Hashcat-backed password cracking engine
 
 use std::sync::Arc;
 use parking_lot::Mutex;
 use tauri::{AppHandle, State};
 
-use crate::hash_engine::{
-    compute_hash_string, AttackConfig, AttackEngine, AttackStatus, HashAlgorithm,
-};
+use crate::hash_engine::{compute_hash_string, AttackConfig, AttackStatus, HashAlgorithm};
+use crate::hashcat::HashcatEngine;
 
 #[derive(Default, Clone)]
 pub struct HashEngineState {
-    pub engine: Arc<Mutex<Option<Arc<AttackEngine>>>>,
+    pub engine: Arc<Mutex<Option<Arc<HashcatEngine>>>>,
 }
 
 #[tauri::command]
@@ -26,13 +25,13 @@ pub async fn start_hash_attack(
         }
     }
 
-    let engine = Arc::new(AttackEngine::new(config));
+    let engine = Arc::new(HashcatEngine::new(config));
     *state.engine.lock() = Some(engine.clone());
 
     let app_handle = app.clone();
     tauri::async_runtime::spawn_blocking(move || {
         if let Err(e) = engine.run(app_handle) {
-            eprintln!("[hash_engine] attack run error: {e}");
+            eprintln!("[hashcat] attack run error: {e}");
         }
     });
 

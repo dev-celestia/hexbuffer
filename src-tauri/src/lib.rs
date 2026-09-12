@@ -10,6 +10,7 @@ pub mod port_scanner;
 pub mod proxy;
 pub mod sqli;
 pub mod tools;
+pub mod hashcat;
 pub mod hash_engine;
 pub mod paths;
 
