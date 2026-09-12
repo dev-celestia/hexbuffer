@@ -1,7 +1,8 @@
 
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Badge, Input, ResizableHandle, ResizablePanel, ResizablePanelGroup, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@celestia-project/ui';
+import { Badge, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { CaretDownIcon, CaretRightIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
 import { InteractionDetailPane } from './interaction-detail-pane';
 import { ListenerMetrics } from './metrics';

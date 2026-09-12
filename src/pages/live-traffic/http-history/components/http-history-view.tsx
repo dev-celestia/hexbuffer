@@ -1,4 +1,4 @@
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useRef, useState, useCallback } from 'react';
 import { LogDetailView } from './log-table/components/log-detail-view';
 

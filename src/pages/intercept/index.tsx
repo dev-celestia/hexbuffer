@@ -1,4 +1,5 @@
-import { Alert, AlertAction, AlertDescription, Badge, Button, Input, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
+import { Alert, AlertAction, AlertDescription, Badge, Button, Input } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import * as React from 'react';
 import { PauseIcon, PlayIcon, PlusIcon, XIcon } from '@phosphor-icons/react';
 

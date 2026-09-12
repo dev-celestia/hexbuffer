@@ -1,21 +1,5 @@
-import {
-  Button,
-  Input,
-  Label,
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-  ScrollArea,
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-  Textarea,
-  TextEditor,
-} from '@celestia-project/ui';
+import { Button, Input, Label, ScrollArea, Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, Textarea, TextEditor } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import * as React from 'react';
 
 import { CopyIcon, EyeIcon, EyeSlashIcon, KeyIcon, TrashIcon } from '@phosphor-icons/react';

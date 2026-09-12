@@ -1,4 +1,4 @@
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useCollectionsStore } from '@/stores/collections';
 import { CollectionsTree } from './collection-tree';
 import { ForgePanel } from './ForgePanel';

@@ -1,11 +1,5 @@
-import {
-  Button,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@celestia-project/ui';
+import { Button, ContextMenuItem, ContextMenuSeparator } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import * as React from 'react';
 import {
   HardDriveIcon,

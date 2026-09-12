@@ -1,4 +1,5 @@
-import { Badge, ResizableHandle, ResizablePanel, ResizablePanelGroup, TabsContent } from '@celestia-project/ui';
+import { Badge, TabsContent } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { ReactFlowProvider } from '@xyflow/react';
 
 import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';

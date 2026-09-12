@@ -1,5 +1,5 @@
 
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { WebSocketEntryView } from './websocket-entry-view';
 import { WebSocketTable } from './websocket-table';
 import { useWebSocketHistoryQueryStore } from '@/stores/history';

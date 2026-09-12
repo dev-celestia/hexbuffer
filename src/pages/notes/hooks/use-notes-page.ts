@@ -265,4 +265,3 @@ export function useNotesPage() {
 }
 
 export type NotesPageHookType = ReturnType<typeof useNotesPage>;
-

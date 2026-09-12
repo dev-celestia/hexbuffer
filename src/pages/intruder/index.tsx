@@ -1,11 +1,5 @@
-import {
-  Alert,
-  AlertDescription,
-  Button,
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@celestia-project/ui';
+import { Alert, AlertDescription, Button } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import * as React from 'react';
 
 import { InfoIcon, PlayIcon, SquareIcon } from '@phosphor-icons/react';

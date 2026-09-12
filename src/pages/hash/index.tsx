@@ -1,4 +1,5 @@
-import { Badge, Button, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
+import { Badge, Button } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { ArrowsClockwiseIcon, PauseIcon, PlayIcon, SquareIcon } from '@phosphor-icons/react';
 import * as React from 'react';
 

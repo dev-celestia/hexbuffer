@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, AlertAction, AlertDescription, Badge, Button, Input, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
+import { Alert, AlertAction, AlertDescription, Badge, Button, Input } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { cn } from '@/lib/utils';
 import { PlayIcon, SquareIcon, PauseIcon, ArrowCounterClockwiseIcon, InfoIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
 import { AiInsightsPanel } from './components/insight-panel';

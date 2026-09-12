@@ -1,4 +1,4 @@
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import type { SplitLayoutType } from '@/stores/split-view';
 import type { NavItem } from '@/layout/constants';
 import { SplitSlot } from './split-slot';

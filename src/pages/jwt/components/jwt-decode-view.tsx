@@ -1,16 +1,7 @@
 
 
-import {
-  Button,
-  Label,
-  type MonacoInstance,
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-  ScrollArea,
-  TextEditor,
-  type TextEditorInstance,
-} from '@celestia-project/ui';
+import { Button, Label, type MonacoInstance, ScrollArea, TextEditor, type TextEditorInstance } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import * as React from 'react';
 import { CopyIcon, TrashIcon } from '@phosphor-icons/react';
 import { useTheme } from '@/components/theme-provider';

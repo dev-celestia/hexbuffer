@@ -1,4 +1,5 @@
-import { Badge, Button, Input, ResizableHandle, ResizablePanel, ResizablePanelGroup, ScrollArea, Tabs, TabsContent, TabsList, TabsTrigger } from '@celestia-project/ui';
+import { Badge, Button, Input, ScrollArea, Tabs, TabsContent, TabsList, TabsTrigger } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useRef, useMemo, useState, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 

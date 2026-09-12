@@ -1,13 +1,5 @@
-import {
-  Badge,
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@celestia-project/ui';
+import { Badge, Tabs, TabsContent, TabsList, TabsTrigger } from '@celestia-project/ui';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { cn } from '@/lib/utils';
 
 import { useSqliPage } from './hooks/use-sqli-page';
