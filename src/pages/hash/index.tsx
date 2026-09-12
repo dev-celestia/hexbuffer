@@ -1,5 +1,5 @@
 import { Badge, Button, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
-import { ArrowsClockwiseIcon, PauseIcon, PlayIcon, SquareIcon } from '@phosphor-icons/react';
+import { ArrowsClockwiseIcon, PauseIcon, PlayIcon, SquareIcon, Warning } from '@phosphor-icons/react';
 import * as React from 'react';
 
 import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
@@ -125,7 +125,16 @@ export function HashPage() {
                 <Button
                   size="sm"
                   onClick={page.handleStartAttack}
-                  disabled={page.targets.length === 0 || !page.attackConfig}
+                  disabled={
+                    page.targets.length === 0 ||
+                    !page.attackConfig ||
+                    (page.hashcatInfo !== null && !page.hashcatInfo.available)
+                  }
+                  title={
+                    page.hashcatInfo && !page.hashcatInfo.available
+                      ? page.hashcatInfo.error || 'Hashcat is not installed'
+                      : undefined
+                  }
                 >
                   <PlayIcon className="size-3.5" weight="fill" />
                   <span>Start Attack</span>
@@ -305,7 +314,9 @@ export function HashPage() {
                   "rounded-sm"
                 )}
               >
-                Hashcat Engine
+                {page.hashcatInfo?.available
+                  ? `Hashcat ${page.hashcatInfo.version ?? ''}`.trimEnd()
+                  : 'Hashcat Engine'}
               </Badge>
               <Badge
                 variant="secondary"
@@ -408,9 +419,36 @@ export function HashPage() {
             <div
               className={cn(
                 // Layout & Positioning
-                "flex-1 min-h-0"
+                "flex flex-col flex-1 min-h-0"
               )}
             >
+              {page.hashcatInfo && !page.hashcatInfo.available && (
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-center shrink-0",
+
+                    // Sizing & Spacing
+                    "px-3 py-2 gap-2",
+
+                    // Typography
+                    "text-[11px]",
+
+                    // Backgrounds & Borders
+                    "bg-amber-500/10 border-b border-amber-500/20",
+
+                    // Interactive & States
+                    "text-amber-700 dark:text-amber-300"
+                  )}
+                >
+                  <Warning className="h-3.5 w-3.5 shrink-0" weight="fill" />
+                  <span className="font-semibold">Hashcat not found.</span>
+                  <span className="truncate">
+                    {page.hashcatInfo.error ||
+                      'Install it to enable password attacks.'}
+                  </span>
+                </div>
+              )}
               <ResizablePanelGroup orientation="horizontal" className="h-full">
                 <ResizablePanel defaultSize={35} minSize={25}>
                   <div
