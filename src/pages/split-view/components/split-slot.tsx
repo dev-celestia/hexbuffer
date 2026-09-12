@@ -100,19 +100,6 @@ export const SplitSlot = React.memo(function SplitSlot({
             ) : IconComp ? (
               <IconComp className="size-4 shrink-0 text-muted-foreground" />
             ) : null}
-
-            <span
-              className={cn(
-                // Layout & Positioning
-                "truncate",
-                // Sizing & Spacing
-                "ms-1.5",
-                // Typography
-                "text-xs font-medium text-foreground/80"
-              )}
-            >
-              {matchedItem?.label}
-            </span>
           </TooltipTrigger>
           <TooltipContent side="bottom" sideOffset={6}>
             <span className="text-xs font-medium">{matchedItem?.label}</span>
@@ -123,7 +110,7 @@ export const SplitSlot = React.memo(function SplitSlot({
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center gap-1 shrink-0"
+            "flex items-center gap-0.5 shrink-0"
           )}
         >
           <Popover open={isSwitchOpen} onOpenChange={setIsSwitchOpen}>

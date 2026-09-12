@@ -6,6 +6,9 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 import { getAppIconImage, type NavItem } from '@/layout/constants';
@@ -46,7 +49,7 @@ export function SplitAppPicker({ apps, onSelectApp }: Readonly<SplitAppPickerPro
             // Layout & Positioning
             "flex flex-wrap items-start justify-center content-start",
             // Sizing & Spacing
-            "gap-1"
+            "gap-0.5"
           )}
         >
           {apps.map((item) => {
@@ -54,35 +57,25 @@ export function SplitAppPicker({ apps, onSelectApp }: Readonly<SplitAppPickerPro
             const IconComp = item.icon;
 
             return (
-              <button
-                key={item.href}
-                type="button"
-                onClick={() => onSelectApp(item.href)}
-                className={cn(
-                  // Layout & Positioning
-                  "group flex flex-col items-center rounded-md",
-                  // Sizing & Spacing
-                  "w-20 gap-1.5 p-2",
-                  // Typography
-                  "text-xs text-muted-foreground",
-                  // Backgrounds & Borders
-                  "border border-transparent",
-                  // Interactive & States
-                  "cursor-pointer transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring active:bg-muted"
-                )}
-                aria-label={item.label}
-              >
-                <span
-                  className={cn(
-                    // Layout & Positioning
-                    "flex items-center justify-center overflow-hidden",
-                    // Sizing & Spacing
-                    "size-9 rounded-lg p-1.5",
-                    // Backgrounds & Borders
-                    item.colors
-                      ? `${item.colors.bg} border border-white/20 dark:border-white/10 shadow-xs text-white`
-                      : "bg-muted/80 border border-border/60 text-muted-foreground"
-                  )}
+              <Tooltip key={item.href}>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      onClick={() => onSelectApp(item.href)}
+                      className={cn(
+                        // Layout & Positioning
+                        "group flex items-center justify-center overflow-hidden rounded-md",
+                        // Sizing & Spacing
+                        "size-10",
+                        // Backgrounds & Borders
+                        "border border-transparent",
+                        // Interactive & States
+                        "cursor-pointer transition-colors hover:bg-muted/60 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring active:bg-muted"
+                      )}
+                      aria-label={item.label}
+                    />
+                  }
                 >
                   {imageSrc ? (
                     <img
@@ -97,21 +90,13 @@ export function SplitAppPicker({ apps, onSelectApp }: Readonly<SplitAppPickerPro
                       )}
                     />
                   ) : (
-                    <IconComp className="size-5 shrink-0 pointer-events-none" />
+                    <IconComp className="size-5 shrink-0 text-muted-foreground pointer-events-none" />
                   )}
-                </span>
-
-                <span
-                  className={cn(
-                    // Layout & Positioning
-                    "w-full truncate text-center",
-                    // Typography
-                    "leading-tight"
-                  )}
-                >
-                  {item.label}
-                </span>
-              </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" sideOffset={6}>
+                  <span className="text-xs font-medium">{item.label}</span>
+                </TooltipContent>
+              </Tooltip>
             );
           })}
         </div>

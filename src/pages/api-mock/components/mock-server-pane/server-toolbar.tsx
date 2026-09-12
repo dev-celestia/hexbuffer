@@ -246,12 +246,6 @@ export function ServerToolbar({
           <Button
             size="sm"
             className={cn(
-              // Typography
-              "font-medium text-white",
-
-              // Backgrounds & Borders
-              "bg-emerald-600 hover:bg-emerald-500",
-
               // Interactive & States
               "cursor-pointer"
             )}

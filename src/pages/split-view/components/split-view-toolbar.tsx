@@ -1,6 +1,7 @@
 import { Button, ButtonGroup, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
 import { ArrowClockwiseIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
+import { WindowHeaderSlot } from '@/providers/window-provider';
 import type { SplitLayoutType } from '@/stores/split-view';
 import { SPLIT_LAYOUT_OPTIONS } from '../constants';
 
@@ -18,17 +19,7 @@ export function SplitViewToolbar({
   onResetSlots,
 }: Readonly<SplitViewToolbarProps>) {
   return (
-    <div
-      className={cn(
-        // Layout & Positioning
-        "flex shrink-0 items-center justify-between select-none",
-        // Sizing & Spacing
-        "h-10 px-3 gap-3",
-        // Backgrounds & Borders
-        "border-b bg-muted/20"
-      )}
-    >
-      {/* Layout Switcher */}
+    <WindowHeaderSlot>
       <ButtonGroup>
         {SPLIT_LAYOUT_OPTIONS.map((opt) => {
           const isActive = layout === opt.id;
@@ -39,7 +30,7 @@ export function SplitViewToolbar({
                 render={
                   <Button
                     type="button"
-                    size="sm"
+                    size="xs"
                     variant={isActive ? 'secondary' : 'ghost'}
                     onClick={() => onLayoutChange(opt.id)}
                     aria-label={opt.title}
@@ -48,7 +39,7 @@ export function SplitViewToolbar({
                 }
               >
                 <LayoutGlyph layout={opt.id} />
-                <span className="text-xs">{opt.label}</span>
+                <span className="text-[0.625rem]">{opt.label}</span>
               </TooltipTrigger>
               <TooltipContent side="bottom" sideOffset={6}>
                 <span className="text-xs">{opt.description}</span>
@@ -58,13 +49,12 @@ export function SplitViewToolbar({
         })}
       </ButtonGroup>
 
-      {/* Reset */}
       <Tooltip>
         <TooltipTrigger
           render={
             <Button
               type="button"
-              size="icon-sm"
+              size="icon-xs"
               variant="ghost"
               onClick={onResetSlots}
               disabled={filledSlotCount === 0}
@@ -72,7 +62,7 @@ export function SplitViewToolbar({
             />
           }
         >
-          <ArrowClockwiseIcon className="size-4" />
+          <ArrowClockwiseIcon className="size-3" />
         </TooltipTrigger>
         <TooltipContent side="bottom" sideOffset={6}>
           <span className="text-xs">
@@ -80,7 +70,7 @@ export function SplitViewToolbar({
           </span>
         </TooltipContent>
       </Tooltip>
-    </div>
+    </WindowHeaderSlot>
   );
 }
 
@@ -91,7 +81,7 @@ function LayoutGlyph({ layout }: Readonly<{ layout: SplitLayoutType }>) {
         // Layout & Positioning
         "grid shrink-0",
         // Sizing & Spacing
-        "w-4.5 h-3.5 gap-px p-px rounded-[2px]",
+        "w-3.5 h-2.5 gap-px rounded-[2px]",
         layout === 'split-4' ? "grid-cols-2 grid-rows-2" : "grid-cols-2 grid-rows-1"
       )}
     >

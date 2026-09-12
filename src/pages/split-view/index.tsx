@@ -26,6 +26,7 @@ export function SplitViewPage() {
         "bg-background text-foreground"
       )}
     >
+      {/* Toolbar controls live in the window header slot */}
       <SplitViewToolbar
         layout={layout}
         filledSlotCount={filledSlotCount}

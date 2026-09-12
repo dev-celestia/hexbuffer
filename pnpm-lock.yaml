@@ -101,6 +101,9 @@ importers:
       react-hook-form:
         specifier: ^7.74.0
         version: 7.76.1(react@19.2.6)
+      react-resizable-panels:
+        specifier: ^4.12.4
+        version: 4.12.4(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react-router-dom:
         specifier: ^7.6.1
         version: 7.16.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
