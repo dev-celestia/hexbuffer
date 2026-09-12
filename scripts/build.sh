@@ -376,7 +376,11 @@ update_latest_platform() {
   export UPDATER_PLATFORM="$platform"
   export UPDATER_VERSION="$VERSION"
   export UPDATER_PUB_DATE="$PUB_DATE"
-  export UPDATER_BASE_URL="${BASE_URL%/}/${TARGET_PREFIX%/}"
+  if [ -n "${TARGET_PREFIX:-}" ]; then
+    export UPDATER_BASE_URL="${BASE_URL%/}/${TARGET_PREFIX%/}"
+  else
+    export UPDATER_BASE_URL="${BASE_URL%/}"
+  fi
   export UPDATER_BUNDLE_NAME="$bundle_name"
   export UPDATER_LATEST_JSON="$latest_json"
 
@@ -389,9 +393,12 @@ update_latest_platform() {
     latest.notes = process.env.UPDATER_NOTES || '';
     latest.pub_date = process.env.UPDATER_PUB_DATE;
 
+    const baseUrl = (process.env.UPDATER_BASE_URL || '').replace(/\/+$/, '');
+    const bundleName = (process.env.UPDATER_BUNDLE_NAME || '').replace(/^\/+/, '');
+
     latest.platforms[process.env.UPDATER_PLATFORM] = {
       signature: process.env.UPDATER_SIGNATURE,
-      url: process.env.UPDATER_BASE_URL + '/' + process.env.UPDATER_BUNDLE_NAME,
+      url: baseUrl + '/' + bundleName,
     };
 
     fs.writeFileSync(process.env.UPDATER_LATEST_JSON, JSON.stringify(latest, null, 2) + '\n');
@@ -457,7 +464,7 @@ fi
 
 echo -e "[upload] detected platform: ${GREEN}${PLATFORM}${NC}"
 
-if [ -z "$TARGET" ]; then
+if [ -z "${TARGET:-}" ]; then
   echo "[upload] uploading install script..."
   r2_cp "$ROOT/scripts/install.sh" "s3://${R2_BUCKET}/install.sh"
 fi
