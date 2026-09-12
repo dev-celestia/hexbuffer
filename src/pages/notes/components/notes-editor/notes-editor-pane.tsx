@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils';
 import type { NotesPageHookType } from '../../hooks/use-notes-page';
 import { readFileAsBase64, formatMarkdownImage } from '@celestia-project/ui';
 import { NotesEmptyState } from '../notes-empty-state';
-import { NotesPreviewPane } from '../notes-preview';
 import { DrawingCanvasDialog } from '../drawing-canvas/drawing-canvas-dialog';
 import { NotesSearchEmpty } from './notes-search-empty';
 import { NotesEditorToolbar } from './notes-editor-toolbar';
@@ -31,7 +30,6 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
     setIsSavedNotesOpen,
     isDrawingOpen,
     setIsDrawingOpen,
-    viewMode,
     handleEditorMount,
     handleSelectAll,
     handleExportActiveNote,
@@ -114,7 +112,7 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
         onExportNote={handleExportActiveNote}
       />
 
-      {/* Editor & Preview Viewport */}
+      {/* Code Editor Viewport (Raw Markdown Source) */}
       <div
         className={cn(
           // Layout & Positioning
@@ -124,29 +122,17 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
           "bg-background"
         )}
       >
-        {viewMode === 'code' && (
-          <div className="w-full h-full">
-            <TextEditor
-              value={note}
-              onChange={(value) => setNote(value ?? '')}
-              onMount={handleEditorMount}
-              language="markdown"
-              height="100%"
-              detectLinks={true}
-              theme={theme}
-            />
-          </div>
-        )}
-
-        {viewMode === 'editor' && (
-          <div className="w-full h-full min-h-0 overflow-hidden bg-muted/5">
-            <NotesPreviewPane
-              content={note}
-              onUpdateContent={setNote}
-              onOpenDrawingStudio={() => setIsDrawingOpen(true)}
-            />
-          </div>
-        )}
+        <div className="w-full h-full">
+          <TextEditor
+            value={note}
+            onChange={(value) => setNote(value ?? '')}
+            onMount={handleEditorMount}
+            language="markdown"
+            height="100%"
+            detectLinks={true}
+            theme={theme}
+          />
+        </div>
       </div>
 
       {/* Interactive Drawing & Diagram Studio Dialog */}

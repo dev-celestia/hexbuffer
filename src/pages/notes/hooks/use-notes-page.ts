@@ -3,7 +3,6 @@ import { toast } from 'sonner';
 import { useScratchpadStore } from '@/stores/scratchpad';
 import type { PageTabItem } from '@/layout/tabs-layout/types';
 import type { TextEditorInstance, MonacoInstance } from '@celestia-project/ui';
-import type { EditorViewMode } from '../types';
 import { downloadAsMarkdown, copyNoteToClipboard } from '../lib/helpers';
 import { saveBase64ToLocalExplorer } from '../lib/image-helpers';
 import { formatMarkdownImage } from '@celestia-project/ui';
@@ -32,7 +31,6 @@ export function useNotesPage() {
   const [renameValue, setRenameValue] = React.useState('');
   const [isSavedNotesOpen, setIsSavedNotesOpen] = React.useState(false);
   const [isDrawingOpen, setIsDrawingOpen] = React.useState(false);
-  const [viewMode, setViewMode] = React.useState<EditorViewMode>('code');
   const [searchQuery, setSearchQuery] = React.useState('');
 
   const editorRef = React.useRef<TextEditorInstance | null>(null);
@@ -235,8 +233,6 @@ export function useNotesPage() {
     setIsSavedNotesOpen,
     isDrawingOpen,
     setIsDrawingOpen,
-    viewMode,
-    setViewMode,
     editorRef,
     handleEditorMount,
     handleSelectAll,
