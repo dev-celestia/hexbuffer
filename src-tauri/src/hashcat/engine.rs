@@ -15,7 +15,7 @@ use serde_json::Value;
 use sysinfo::{CpuRefreshKind, MemoryRefreshKind, RefreshKind, System};
 use tauri::{AppHandle, Emitter};
 
-use crate::hash_engine::types::{
+use super::types::{
     AttackConfig, AttackMode, AttackStatus, CrackedMatchRecord, HashAlgorithm, TelemetryData,
 };
 use crate::paths::get_shared_app_dir;
@@ -101,6 +101,7 @@ impl HashcatEngine {
         let total_targets = config.targets.len();
 
         Self {
+            config,
             targets_by_hash,
             total_targets,
             is_running: Arc::new(AtomicBool::new(false)),
@@ -237,7 +238,7 @@ impl HashcatEngine {
         let mut child: Child = command
             .spawn()
             .map_err(|e| format!("Failed to launch hashcat: {e}"))?;
-        *self.child_pid.lock() = child.id() as i32;
+        *self.child_pid.lock() = Some(child.id() as i32);
 
         let stdout = child.stdout.take().expect("stdout piped");
         let stderr = child.stderr.take().expect("stderr piped");
@@ -671,7 +672,7 @@ mod tests {
 
     #[test]
     fn test_drain_outfile_emits_matches() {
-        use crate::hash_engine::types::{AttackMode, TargetHashItem};
+        use crate::hashcat::types::{AttackMode, TargetHashItem};
 
         let dir = std::env::temp_dir().join(format!("hashcat-drain-test-{}", now_millis()));
         std::fs::create_dir_all(&dir).unwrap();
@@ -686,7 +687,7 @@ mod tests {
         let config = AttackConfig {
             mode: AttackMode::Mask {
                 pattern: "?1".to_string(),
-                charset: crate::hash_engine::types::CharsetConfig::default(),
+                charset: crate::hashcat::types::CharsetConfig::default(),
             },
             algorithm: HashAlgorithm::Md5,
             targets: vec![target],

@@ -6,7 +6,7 @@
 
 use std::path::Path;
 
-use crate::hash_engine::types::{AttackConfig, AttackMode, HashAlgorithm};
+use super::types::{AttackConfig, AttackMode, HashAlgorithm};
 
 /// Maps an application algorithm to its hashcat `-m` mode number.
 /// Returns `None` for algorithms hashcat has no generic mode for.
@@ -18,6 +18,7 @@ pub fn hashcat_mode(algorithm: HashAlgorithm) -> Option<u32> {
         HashAlgorithm::Ripemd160 => 6000,
         HashAlgorithm::Sha224 => 1300,
         HashAlgorithm::Sha256 => 1400,
+        HashAlgorithm::Sha384 => 10800,
         HashAlgorithm::Sha512 => 1700,
         HashAlgorithm::Sha3_224 => 17300,
         HashAlgorithm::Sha3_256 => 17400,
@@ -103,8 +104,8 @@ pub fn build_args(
     Ok(args)
 }
 
-/// Mirrors the native engine's mask alphabet (hash_engine/candidate.rs).
-pub fn build_charset_string(config: &crate::hash_engine::types::CharsetConfig) -> String {
+/// Mirrors the native engine's mask alphabet (previously hash_engine/candidate.rs).
+pub fn build_charset_string(config: &super::types::CharsetConfig) -> String {
     let mut chars = String::new();
     if config.lower {
         chars.push_str("abcdefghijklmnopqrstuvwxyz");
@@ -166,7 +167,7 @@ fn algorithm_label(algorithm: HashAlgorithm) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::hash_engine::types::{CharsetConfig, TargetHashItem};
+    use crate::hashcat::types::{CharsetConfig, TargetHashItem};
     use std::path::PathBuf;
 
     fn sample_config(algorithm: HashAlgorithm, mode: AttackMode) -> AttackConfig {

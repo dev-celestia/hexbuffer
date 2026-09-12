@@ -1,5 +1,6 @@
 import {
   Button,
+  Checkbox,
   Select,
   SelectContent,
   SelectItem,
@@ -10,11 +11,12 @@ import {
 import { cn } from '@/lib/utils';
 import { FolderOpen, X } from '@phosphor-icons/react';
 import { open } from '@tauri-apps/plugin-dialog';
-import type { AttackMode, AttackConfig, HashType } from '../types';
+import type { AttackMode, AttackConfig, HashType, CharsetConfig } from '../types';
 import {
   ATTACK_MODE_OPTIONS,
   RULE_PRESETS,
   HASH_OPTIONS,
+  HASHCAT_UNSUPPORTED_ALGORITHMS,
 } from '../constants';
 import { useState } from 'react';
 
@@ -37,6 +39,16 @@ export function AttackConfigPanel({
   const [selectedRules, setSelectedRules] = useState<string[]>(
     config?.mode === 'straight' ? config.rules : []
   );
+  const [maskPattern, setMaskPattern] = useState(config?.mode === 'mask' ? config.pattern : '');
+  const [maskCharset, setMaskCharset] = useState<CharsetConfig>(
+    config?.mode === 'mask'
+      ? config.charset
+      : { lower: true, upper: false, digits: true, special: false, custom: '' }
+  );
+  const [hybridWordlistPath, setHybridWordlistPath] = useState(
+    config?.mode === 'hybrid' ? config.wordlistPath : ''
+  );
+  const [hybridMask, setHybridMask] = useState(config?.mode === 'hybrid' ? config.mask : '');
 
   const handleModeChange = (mode: AttackMode) => {
     setActiveMode(mode);
@@ -56,6 +68,41 @@ export function AttackConfigPanel({
           rightWordlistPath: '',
         });
         break;
+      case 'mask':
+        onConfigChange({ mode: 'mask', pattern: maskPattern, charset: maskCharset });
+        break;
+      case 'hybrid':
+        onConfigChange({ mode: 'hybrid', wordlistPath: hybridWordlistPath, mask: hybridMask });
+        break;
+    }
+  };
+
+  const updateMaskPattern = (pattern: string) => {
+    setMaskPattern(pattern);
+    if (config?.mode === 'mask') {
+      onConfigChange({ ...config, pattern });
+    }
+  };
+
+  const updateMaskCharset = (patch: Partial<CharsetConfig>) => {
+    const next = { ...maskCharset, ...patch };
+    setMaskCharset(next);
+    if (config?.mode === 'mask') {
+      onConfigChange({ ...config, charset: next });
+    }
+  };
+
+  const updateHybridWordlistPath = (path: string) => {
+    setHybridWordlistPath(path);
+    if (config?.mode === 'hybrid') {
+      onConfigChange({ ...config, wordlistPath: path });
+    }
+  };
+
+  const updateHybridMask = (mask: string) => {
+    setHybridMask(mask);
+    if (config?.mode === 'hybrid') {
+      onConfigChange({ ...config, mask });
     }
   };
 
@@ -121,11 +168,14 @@ export function AttackConfigPanel({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {HASH_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
+            {HASH_OPTIONS.map((opt) => {
+              const unsupported = HASHCAT_UNSUPPORTED_ALGORITHMS.includes(opt.value);
+              return (
+                <SelectItem key={opt.value} value={opt.value} disabled={unsupported}>
+                  {unsupported ? `${opt.label} (calculator only)` : opt.label}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>
@@ -274,6 +324,143 @@ export function AttackConfigPanel({
               onPathChange={(p) => handleWordlistPathChange('rightWordlistPath', p)}
               disabled={disabled}
             />
+          </>
+        )}
+
+        {activeMode === 'mask' && (
+          <>
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col",
+
+                // Sizing & Spacing
+                "gap-1.5"
+              )}
+            >
+              <span
+                className={cn(
+                  // Typography
+                  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+                )}
+              >
+                Mask Pattern
+              </span>
+              <Input
+                value={maskPattern}
+                onChange={(e) => updateMaskPattern(e.target.value)}
+                placeholder="e.g. pin??? or ????????"
+                disabled={disabled}
+              />
+              <span className="text-[10px] text-muted-foreground">
+                Each ? is filled with one character from the selected charset.
+              </span>
+            </div>
+
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col",
+
+                // Sizing & Spacing
+                "gap-1.5"
+              )}
+            >
+              <span
+                className={cn(
+                  // Typography
+                  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+                )}
+              >
+                Charset
+              </span>
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  "grid grid-cols-2",
+
+                  // Sizing & Spacing
+                  "gap-2"
+                )}
+              >
+                {(
+                  [
+                    { key: 'lower', label: 'Lowercase (a-z)' },
+                    { key: 'upper', label: 'Uppercase (A-Z)' },
+                    { key: 'digits', label: 'Digits (0-9)' },
+                    { key: 'special', label: 'Special (!@#$...)' },
+                  ] as const
+                ).map(({ key, label }) => (
+                  <label
+                    key={key}
+                    className={cn(
+                      // Layout & Positioning
+                      "flex items-center",
+
+                      // Sizing & Spacing
+                      "gap-2 px-2 py-1.5",
+
+                      // Backgrounds & Borders
+                      "rounded-md border border-border/60",
+
+                      // Interactive & States
+                      "cursor-pointer hover:border-primary/50 transition-colors"
+                    )}
+                  >
+                    <Checkbox
+                      checked={maskCharset[key]}
+                      onCheckedChange={(checked) => updateMaskCharset({ [key]: checked === true })}
+                      disabled={disabled}
+                    />
+                    <span className="text-[11px]">{label}</span>
+                  </label>
+                ))}
+              </div>
+              <Input
+                value={maskCharset.custom || ''}
+                onChange={(e) => updateMaskCharset({ custom: e.target.value })}
+                placeholder="Custom characters (optional)"
+                disabled={disabled}
+              />
+            </div>
+          </>
+        )}
+
+        {activeMode === 'hybrid' && (
+          <>
+            <WordlistPathPicker
+              label="Wordlist Path"
+              path={config?.mode === 'hybrid' ? config.wordlistPath : ''}
+              onPathChange={updateHybridWordlistPath}
+              disabled={disabled}
+            />
+            <div
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col",
+
+                // Sizing & Spacing
+                "gap-1.5"
+              )}
+            >
+              <span
+                className={cn(
+                  // Typography
+                  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+                )}
+              >
+                Digit Mask
+              </span>
+              <Input
+                value={hybridMask}
+                onChange={(e) => updateHybridMask(e.target.value)}
+                placeholder="e.g. ?? appends two digits"
+                disabled={disabled}
+              />
+              <span className="text-[10px] text-muted-foreground">
+                Each ? appends one digit (0-9) to every wordlist entry.
+              </span>
+            </div>
           </>
         )}
       </div>

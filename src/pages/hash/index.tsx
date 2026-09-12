@@ -279,7 +279,7 @@ export function HashPage() {
               )}
             </div>
 
-            {/* Right: Algorithm / Mode Badge */}
+            {/* Right: Engine / Algorithm / Mode Badges */}
             <div
               className={cn(
                 // Layout & Positioning
@@ -289,6 +289,24 @@ export function HashPage() {
                 "gap-2"
               )}
             >
+              <Badge
+                variant="secondary"
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center",
+
+                  // Sizing & Spacing
+                  "h-5 px-2",
+
+                  // Typography
+                  "text-[11px] font-mono",
+
+                  // Backgrounds & Borders
+                  "rounded-sm"
+                )}
+              >
+                Hashcat Engine
+              </Badge>
               <Badge
                 variant="secondary"
                 className={cn(
@@ -412,7 +430,7 @@ export function HashPage() {
                       algorithm={page.attackAlgorithm}
                       onConfigChange={page.setAttackConfig}
                       onAlgorithmChange={page.setAttackAlgorithm}
-                      disabled={page.attackEngine.status === 'running'}
+                      disabled={page.attackEngine.status === 'running' || page.attackEngine.status === 'paused'}
                     />
                   </div>
                 </ResizablePanel>
@@ -442,7 +460,7 @@ export function HashPage() {
                         targets={page.targets}
                         defaultAlgorithm={page.attackAlgorithm}
                         onTargetsChange={page.setTargets}
-                        disabled={page.attackEngine.status === 'running'}
+                        disabled={page.attackEngine.status === 'running' || page.attackEngine.status === 'paused'}
                       />
                     </div>
                   </div>

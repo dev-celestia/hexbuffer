@@ -17,7 +17,15 @@ export type HashType =
   | 'ripemd160';
 
 // Attack Mode Types
-export type AttackMode = 'straight' | 'combinator';
+export type AttackMode = 'straight' | 'combinator' | 'mask' | 'hybrid';
+
+export interface CharsetConfig {
+  lower: boolean;
+  upper: boolean;
+  digits: boolean;
+  special: boolean;
+  custom?: string;
+}
 
 export interface StraightAttackConfig {
   mode: 'straight';
@@ -31,9 +39,23 @@ export interface CombinatorAttackConfig {
   rightWordlistPath: string;
 }
 
+export interface MaskAttackConfig {
+  mode: 'mask';
+  pattern: string;
+  charset: CharsetConfig;
+}
+
+export interface HybridAttackConfig {
+  mode: 'hybrid';
+  wordlistPath: string;
+  mask: string;
+}
+
 export type AttackConfig =
   | StraightAttackConfig
-  | CombinatorAttackConfig;
+  | CombinatorAttackConfig
+  | MaskAttackConfig
+  | HybridAttackConfig;
 
 export interface TargetHash {
   id: string;
@@ -85,3 +107,10 @@ export interface RuleDefinition {
 }
 
 export type TabMode = 'calculator' | 'attack' | 'results';
+
+export interface HashcatAvailability {
+  available: boolean;
+  path: string | null;
+  version: string | null;
+  error: string | null;
+}

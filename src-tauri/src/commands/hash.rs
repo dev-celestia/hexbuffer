@@ -2,14 +2,45 @@
 
 use std::sync::Arc;
 use parking_lot::Mutex;
+use serde::Serialize;
 use tauri::{AppHandle, State};
 
-use crate::hash_engine::{compute_hash_string, AttackConfig, AttackStatus, HashAlgorithm};
-use crate::hashcat::HashcatEngine;
+use crate::hashcat::{
+    binary::probe_hashcat_version, compute_hash_string, AttackConfig, AttackStatus, HashAlgorithm,
+    HashcatEngine,
+};
 
 #[derive(Default, Clone)]
 pub struct HashEngineState {
     pub engine: Arc<Mutex<Option<Arc<HashcatEngine>>>>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HashcatAvailability {
+    pub available: bool,
+    pub path: Option<String>,
+    pub version: Option<String>,
+    pub error: Option<String>,
+}
+
+/// Upfront check so the UI can show an install banner before an attack starts.
+#[tauri::command]
+pub async fn check_hashcat_availability() -> HashcatAvailability {
+    match crate::hashcat::binary::resolve_hashcat_binary() {
+        Ok(path) => HashcatAvailability {
+            available: true,
+            path: Some(path.to_string_lossy().into_owned()),
+            version: probe_hashcat_version(&path),
+            error: None,
+        },
+        Err(error) => HashcatAvailability {
+            available: false,
+            path: None,
+            version: None,
+            error: Some(error),
+        },
+    }
 }
 
 #[tauri::command]
