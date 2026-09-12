@@ -1,4 +1,4 @@
-import { DotsSixVerticalIcon } from '@phosphor-icons/react';
+import { DotsSixIcon, DotsSixVerticalIcon } from '@phosphor-icons/react';
 import {
   Group as ResizablePrimitiveGroup,
   Panel as ResizablePrimitivePanel,
@@ -76,11 +76,11 @@ function ResizableHandle({
             "h-6 w-5 [[aria-orientation=horizontal]_&]:h-5 [[aria-orientation=horizontal]_&]:w-6",
 
             // Backgrounds & Borders
-            "rounded-md bg-border"
+            "rounded-md bg-background border"
           )}
         >
           <DotsSixVerticalIcon
-            size={12}
+            size={14}
             aria-hidden
             className={cn(
               // Backgrounds & Borders
@@ -88,7 +88,7 @@ function ResizableHandle({
             )}
           />
           <DotsSixIcon
-            size={12}
+            size={14}
             aria-hidden
             className={cn(
               // Layout & Positioning
