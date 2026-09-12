@@ -71,7 +71,9 @@ export function SplitScreenLauncher() {
           // Sizing & Spacing
           "p-1.5",
           // Backgrounds & Borders
-          "bg-popover backdrop-blur-xl shadow-xl rounded-lg"
+          "bg-popover backdrop-blur-xl shadow-xl rounded-lg",
+          //width 
+          "w-[50px]"
         )}
       >
         {SPLIT_LAYOUT_OPTIONS.map((opt) => {

@@ -30,16 +30,15 @@ export function SplitViewToolbar({
                 render={
                   <Button
                     type="button"
-                    size="xs"
-                    variant={isActive ? 'secondary' : 'ghost'}
+                    variant={'outline'}
                     onClick={() => onLayoutChange(opt.id)}
                     aria-label={opt.title}
                     aria-pressed={isActive}
                   />
                 }
               >
-                <LayoutGlyph layout={opt.id} />
-                <span className="text-[0.625rem]">{opt.label}</span>
+                <LayoutGlyph layout={opt.id} isActive={isActive} />
+                <span className={cn("text-[0.725rem]", isActive && "text-primary")}>{opt.label}</span>
               </TooltipTrigger>
               <TooltipContent side="bottom" sideOffset={6}>
                 <span className="text-xs">{opt.description}</span>
@@ -74,7 +73,7 @@ export function SplitViewToolbar({
   );
 }
 
-function LayoutGlyph({ layout }: Readonly<{ layout: SplitLayoutType }>) {
+function LayoutGlyph({ layout, isActive }: Readonly<{ layout: SplitLayoutType, isActive: boolean }>) {
   return (
     <div
       className={cn(
@@ -82,7 +81,9 @@ function LayoutGlyph({ layout }: Readonly<{ layout: SplitLayoutType }>) {
         "grid shrink-0",
         // Sizing & Spacing
         "w-3.5 h-2.5 gap-px rounded-[2px]",
-        layout === 'split-4' ? "grid-cols-2 grid-rows-2" : "grid-cols-2 grid-rows-1"
+        layout === 'split-4' ? "grid-cols-2 grid-rows-2" : "grid-cols-2 grid-rows-1",
+
+        isActive && "text-primary"
       )}
     >
       {layout === 'split-2' && (
