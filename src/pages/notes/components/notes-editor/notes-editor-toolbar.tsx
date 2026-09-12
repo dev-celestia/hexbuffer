@@ -12,10 +12,8 @@ import {
   CopyIcon,
   DownloadSimpleIcon,
   SelectionAllIcon,
-  CodeIcon,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
-import type { EditorViewMode } from '../../types';
 import type { Scratchpad } from '@/stores/scratchpad';
 
 export interface NotesEditorToolbarProps {
@@ -27,8 +25,6 @@ export interface NotesEditorToolbarProps {
   onRenameCancel: () => void;
   onStartRename: (id: string, name: string) => void;
   onOpenDrawingCanvas?: () => void;
-  viewMode: EditorViewMode;
-  onViewModeChange: (mode: EditorViewMode) => void;
   onSelectAll: () => void;
   onCopyNote: () => void;
   onExportNote: () => void;
@@ -43,8 +39,6 @@ export function NotesEditorToolbar({
   onRenameCancel,
   onStartRename,
   onOpenDrawingCanvas,
-  viewMode,
-  onViewModeChange,
   onSelectAll,
   onCopyNote,
   onExportNote,
@@ -193,60 +187,6 @@ export function NotesEditorToolbar({
           "gap-1.5"
         )}
       >
-        {/* View Mode Switcher: Editor (Visual) vs Code (Markdown) */}
-        <div
-          className={cn(
-            // Layout & Positioning
-            "flex items-center",
-
-            // Sizing & Spacing
-            "p-0.5 rounded-lg border gap-0.5",
-
-            // Backgrounds & Borders
-            "bg-muted/40"
-          )}
-        >
-          <Button
-            variant={viewMode === 'editor' ? 'default' : 'ghost'}
-            size="xs"
-            onClick={() => onViewModeChange('editor')}
-            className={cn(
-              // Sizing & Spacing
-              "h-6 px-2 py-0 gap-1",
-
-              // Typography
-              "text-xs cursor-pointer",
-
-              // Interactive & States
-              viewMode === 'editor' ? "shadow-xs font-medium" : "text-muted-foreground hover:text-foreground"
-            )}
-            title="Visual Editor (Interactive Canvas)"
-          >
-            <PencilSimpleIcon className="size-3.5" />
-            <span>Editor</span>
-          </Button>
-
-          <Button
-            variant={viewMode === 'code' ? 'default' : 'ghost'}
-            size="xs"
-            onClick={() => onViewModeChange('code')}
-            className={cn(
-              // Sizing & Spacing
-              "h-6 px-2 py-0 gap-1",
-
-              // Typography
-              "text-xs cursor-pointer",
-
-              // Interactive & States
-              viewMode === 'code' ? "shadow-xs font-medium" : "text-muted-foreground hover:text-foreground"
-            )}
-            title="Code Editor (Raw Markdown Source)"
-          >
-            <CodeIcon className="size-3.5" />
-            <span>Code</span>
-          </Button>
-        </div>
-
         {/* Quick Action Buttons Group */}
         <div
           className={cn(

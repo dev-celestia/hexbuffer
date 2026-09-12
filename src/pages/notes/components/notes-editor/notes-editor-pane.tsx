@@ -32,7 +32,6 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
     isDrawingOpen,
     setIsDrawingOpen,
     viewMode,
-    setViewMode,
     handleEditorMount,
     handleSelectAll,
     handleExportActiveNote,
@@ -110,8 +109,6 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
         onRenameCancel={handleRenameCancel}
         onStartRename={handleStartRename}
         onOpenDrawingCanvas={() => setIsDrawingOpen(true)}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
         onSelectAll={handleSelectAll}
         onCopyNote={handleCopyActiveNote}
         onExportNote={handleExportActiveNote}

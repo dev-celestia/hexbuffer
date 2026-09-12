@@ -32,7 +32,7 @@ export function useNotesPage() {
   const [renameValue, setRenameValue] = React.useState('');
   const [isSavedNotesOpen, setIsSavedNotesOpen] = React.useState(false);
   const [isDrawingOpen, setIsDrawingOpen] = React.useState(false);
-  const [viewMode, setViewMode] = React.useState<EditorViewMode>('editor');
+  const [viewMode, setViewMode] = React.useState<EditorViewMode>('code');
   const [searchQuery, setSearchQuery] = React.useState('');
 
   const editorRef = React.useRef<TextEditorInstance | null>(null);
@@ -182,13 +182,8 @@ export function useNotesPage() {
       if (saved.filePath) {
         toast.success(`Saved to File Explorer: ${saved.relativePath}`);
       }
-
-      // If in code mode, switch to editor view so user immediately sees rendered scratchpad image
-      if (viewMode === 'code') {
-        setViewMode('editor');
-      }
     },
-    [note, setNote, viewMode]
+    [note, setNote]
   );
 
 
