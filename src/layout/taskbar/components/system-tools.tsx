@@ -73,16 +73,10 @@ export function SystemTools() {
               disabled={updateDownloading}
               aria-label="Download App Update"
             >
-              {updateDownloading ? (
+              {updateDownloading && (
                 <SpinnerGapIcon className="size-3.5 animate-spin" />
-              ) : (
-                <DownloadSimpleIcon className="size-3.5" />
               )}
-              <span>{updateDownloading ? "Downloading..." : "Download"}</span>
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75" />
-                <span className="relative inline-flex size-2 rounded-full bg-green-500" />
-              </span>
+              <span>{updateDownloading ? "Downloading..." : "Update Available"}</span>
             </TooltipTrigger>
             <TooltipContent side="top" sideOffset={12}>
               {updateDownloading ? progressLabel : `Update v${updateVersion}`}

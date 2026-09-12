@@ -215,7 +215,7 @@ export function GeneralSettingsTab({ settings }: GeneralSettingsTabProps) {
         )}
         {updateError && (
           <div className="px-4 py-3">
-            <ManualUpdateCommand message="Copy this command and run it manually in your terminal to update." />
+            <ManualUpdateCommand message="Download the latest version manually from the website." />
           </div>
         )}
       </SettingsGroup>

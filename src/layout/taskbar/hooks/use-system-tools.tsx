@@ -105,7 +105,7 @@ export function useSystemTools(): UseSystemToolsReturn {
         description: (
           <div className="space-y-2">
             <p>{err.toLowerCase().includes('signature') ? 'Release signature mismatch.' : err}</p>
-            <ManualUpdateCommand className="bg-background/70 p-2" message="Run this command manually to update." />
+            <ManualUpdateCommand className="bg-background/70 p-2" message="Download the latest version manually to update." />
           </div>
         ),
       });
