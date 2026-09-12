@@ -1,12 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
-import type { HashType, TabMode, AttackConfig, TargetHash } from '../types';
+import type { HashType, TabMode, AttackConfig, TargetHash, HashcatAvailability } from '../types';
 import { useAttackEngine } from './use-attack-engine';
 
 export function useHashPage() {
   // Tab management
   const [activeTab, setActiveTab] = useState<TabMode>('calculator');
+
+  // Hashcat engine availability (checked on mount and when the attack tab opens)
+  const [hashcatInfo, setHashcatInfo] = useState<HashcatAvailability | null>(null);
 
   // Calculator mode state
   const [input, setInput] = useState('');
@@ -24,6 +27,30 @@ export function useHashPage() {
 
   // Attack engine
   const attackEngine = useAttackEngine();
+
+  // Refresh hashcat availability (mount + every attack-tab activation)
+  useEffect(() => {
+    let cancelled = false;
+
+    invoke<HashcatAvailability>('check_hashcat_availability')
+      .then((info) => {
+        if (!cancelled) setHashcatInfo(info);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setHashcatInfo({
+            available: false,
+            path: null,
+            version: null,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab === 'attack']);
 
   // Calculator: Auto-hash using Rust backend
   const handleHash = useCallback(async () => {
@@ -85,6 +112,19 @@ export function useHashPage() {
       (!attackConfig.leftWordlistPath?.trim() || !attackConfig.rightWordlistPath?.trim())
     ) {
       toast.error('Please select both wordlist files');
+      return;
+    }
+
+    if (attackConfig.mode === 'mask' && !attackConfig.pattern.trim()) {
+      toast.error('Please enter a mask pattern (use ? for each character position)');
+      return;
+    }
+
+    if (
+      attackConfig.mode === 'hybrid' &&
+      (!attackConfig.wordlistPath?.trim() || !attackConfig.mask.trim())
+    ) {
+      toast.error('Please select a wordlist and enter a digit mask');
       return;
     }
 
@@ -166,6 +206,9 @@ export function useHashPage() {
     // Tab management
     activeTab,
     setActiveTab,
+
+    // Hashcat engine availability
+    hashcatInfo,
 
     // Calculator mode
     input,

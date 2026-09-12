@@ -234,6 +234,7 @@ fn main() {
             hexbuffer::commands::hash::get_hash_attack_status,
             hexbuffer::commands::hash::compute_single_hash,
             hexbuffer::commands::hash::get_available_hash_algorithms,
+            hexbuffer::commands::hash::check_hashcat_availability,
             hexbuffer::commands::nuclei::start_nuclei_scan,
             hexbuffer::commands::nuclei::pause_nuclei_scan,
             hexbuffer::commands::nuclei::resume_nuclei_scan,

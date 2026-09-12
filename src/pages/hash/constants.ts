@@ -1,5 +1,8 @@
 import type { HashType, AttackMode, RuleDefinition } from './types';
 
+// Algorithms hashcat has no generic cracking mode for — calculator only.
+export const HASHCAT_UNSUPPORTED_ALGORITHMS: HashType[] = ['blake3', 'scrypt'];
+
 export const HASH_OPTIONS: { value: HashType; label: string; cryptoMethod: string }[] = [
   { value: 'sha256', label: 'SHA-256', cryptoMethod: 'SHA256' },
   { value: 'md5', label: 'MD5', cryptoMethod: 'MD5' },
@@ -29,6 +32,16 @@ export const ATTACK_MODE_OPTIONS: { value: AttackMode; label: string; descriptio
     value: 'combinator',
     label: 'Combinator',
     description: 'Combine words from two wordlists'
+  },
+  {
+    value: 'mask',
+    label: 'Mask',
+    description: 'Brute-force positions filled from a character set (? = one character)'
+  },
+  {
+    value: 'hybrid',
+    label: 'Hybrid',
+    description: 'Wordlist words with digit suffixes appended by a mask'
   }
 ];
 

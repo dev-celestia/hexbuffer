@@ -10,7 +10,7 @@ pub mod port_scanner;
 pub mod proxy;
 pub mod sqli;
 pub mod tools;
-pub mod hash_engine;
+pub mod hashcat;
 pub mod paths;
 
 pub use paths::{get_shared_app_dir, get_shared_db_path};

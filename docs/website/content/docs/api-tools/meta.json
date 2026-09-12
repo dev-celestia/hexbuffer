@@ -1,8 +1,0 @@
-{
-  "title": "API Tools & Security",
-  "pages": [
-    "api-mock",
-    "api-override",
-    "jwt"
-  ]
-}

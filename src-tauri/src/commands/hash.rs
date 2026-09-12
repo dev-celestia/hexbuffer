@@ -1,16 +1,46 @@
-//! Tauri command handlers for Hash Auditing and Cracking Engine
+//! Tauri command handlers for the Hashcat-backed password cracking engine
 
 use std::sync::Arc;
 use parking_lot::Mutex;
+use serde::Serialize;
 use tauri::{AppHandle, State};
 
-use crate::hash_engine::{
-    compute_hash_string, AttackConfig, AttackEngine, AttackStatus, HashAlgorithm,
+use crate::hashcat::{
+    binary::probe_hashcat_version, compute_hash_string, AttackConfig, AttackStatus, HashAlgorithm,
+    HashcatEngine,
 };
 
 #[derive(Default, Clone)]
 pub struct HashEngineState {
-    pub engine: Arc<Mutex<Option<Arc<AttackEngine>>>>,
+    pub engine: Arc<Mutex<Option<Arc<HashcatEngine>>>>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HashcatAvailability {
+    pub available: bool,
+    pub path: Option<String>,
+    pub version: Option<String>,
+    pub error: Option<String>,
+}
+
+/// Upfront check so the UI can show an install banner before an attack starts.
+#[tauri::command]
+pub async fn check_hashcat_availability() -> HashcatAvailability {
+    match crate::hashcat::binary::resolve_hashcat_binary() {
+        Ok(path) => HashcatAvailability {
+            available: true,
+            path: Some(path.to_string_lossy().into_owned()),
+            version: probe_hashcat_version(&path),
+            error: None,
+        },
+        Err(error) => HashcatAvailability {
+            available: false,
+            path: None,
+            version: None,
+            error: Some(error),
+        },
+    }
 }
 
 #[tauri::command]
@@ -26,13 +56,13 @@ pub async fn start_hash_attack(
         }
     }
 
-    let engine = Arc::new(AttackEngine::new(config));
+    let engine = Arc::new(HashcatEngine::new(config));
     *state.engine.lock() = Some(engine.clone());
 
     let app_handle = app.clone();
     tauri::async_runtime::spawn_blocking(move || {
         if let Err(e) = engine.run(app_handle) {
-            eprintln!("[hash_engine] attack run error: {e}");
+            eprintln!("[hashcat] attack run error: {e}");
         }
     });
 

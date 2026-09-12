@@ -82,6 +82,23 @@ export function useAttackEngine() {
               rightWordlistPath: config.rightWordlistPath,
             };
             break;
+          case 'mask':
+            rustMode = {
+              mode: 'mask',
+              pattern: config.pattern,
+              charset: {
+                ...config.charset,
+                custom: config.charset.custom || null,
+              },
+            };
+            break;
+          case 'hybrid':
+            rustMode = {
+              mode: 'hybrid',
+              wordlistPath: config.wordlistPath,
+              mask: config.mask,
+            };
+            break;
         }
 
         const rustConfig = {
@@ -93,7 +110,7 @@ export function useAttackEngine() {
         };
 
         await invoke('start_hash_attack', { config: rustConfig });
-        toast.success('Rust attack engine started');
+        toast.success('Hashcat engine started');
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         setStatus('error');
@@ -216,7 +233,11 @@ export function useAttackEngine() {
         if (!isMounted) return;
         setStatus('error');
         setErrorMessage(event.payload);
-        toast.error(`Engine error: ${event.payload}`);
+        if (event.payload.includes('hashcat binary not found')) {
+          toast.error(event.payload, { duration: 12000 });
+        } else {
+          toast.error(`Engine error: ${event.payload}`);
+        }
       });
     }
 

@@ -1,6 +1,5 @@
-import { Badge, Button } from '@celestia-project/ui';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { ArrowsClockwiseIcon, PauseIcon, PlayIcon, SquareIcon } from '@phosphor-icons/react';
+import { Badge, Button, ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@celestia-project/ui';
+import { ArrowsClockwiseIcon, PauseIcon, PlayIcon, SquareIcon, Warning } from '@phosphor-icons/react';
 import * as React from 'react';
 
 import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
@@ -126,7 +125,16 @@ export function HashPage() {
                 <Button
                   size="sm"
                   onClick={page.handleStartAttack}
-                  disabled={page.targets.length === 0 || !page.attackConfig}
+                  disabled={
+                    page.targets.length === 0 ||
+                    !page.attackConfig ||
+                    (page.hashcatInfo !== null && !page.hashcatInfo.available)
+                  }
+                  title={
+                    page.hashcatInfo && !page.hashcatInfo.available
+                      ? page.hashcatInfo.error || 'Hashcat is not installed'
+                      : undefined
+                  }
                 >
                   <PlayIcon className="size-3.5" weight="fill" />
                   <span>Start Attack</span>
@@ -224,6 +232,27 @@ export function HashPage() {
                 </span>
               </div>
 
+              {page.attackEngine.status === 'error' && page.attackEngine.errorMessage && (
+                <span
+                  title={page.attackEngine.errorMessage}
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-center min-w-0 truncate",
+
+                    // Sizing & Spacing
+                    "max-w-md px-1.5 py-0.5",
+
+                    // Typography
+                    "text-[10px] font-mono",
+
+                    // Backgrounds & Borders
+                    "text-red-700 dark:text-red-300 bg-red-500/10 rounded border border-red-500/20"
+                  )}
+                >
+                  {page.attackEngine.errorMessage}
+                </span>
+              )}
+
               {page.targets.length > 0 && (
                 <span
                   className={cn(
@@ -259,7 +288,7 @@ export function HashPage() {
               )}
             </div>
 
-            {/* Right: Algorithm / Mode Badge */}
+            {/* Right: Engine / Algorithm / Mode Badges */}
             <div
               className={cn(
                 // Layout & Positioning
@@ -269,6 +298,26 @@ export function HashPage() {
                 "gap-2"
               )}
             >
+              <Badge
+                variant="secondary"
+                className={cn(
+                  // Layout & Positioning
+                  "flex items-center",
+
+                  // Sizing & Spacing
+                  "h-5 px-2",
+
+                  // Typography
+                  "text-[11px] font-mono",
+
+                  // Backgrounds & Borders
+                  "rounded-sm"
+                )}
+              >
+                {page.hashcatInfo?.available
+                  ? `Hashcat ${page.hashcatInfo.version ?? ''}`.trimEnd()
+                  : 'Hashcat Engine'}
+              </Badge>
               <Badge
                 variant="secondary"
                 className={cn(
@@ -370,9 +419,36 @@ export function HashPage() {
             <div
               className={cn(
                 // Layout & Positioning
-                "flex-1 min-h-0"
+                "flex flex-col flex-1 min-h-0"
               )}
             >
+              {page.hashcatInfo && !page.hashcatInfo.available && (
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    "flex items-center shrink-0",
+
+                    // Sizing & Spacing
+                    "px-3 py-2 gap-2",
+
+                    // Typography
+                    "text-[11px]",
+
+                    // Backgrounds & Borders
+                    "bg-amber-500/10 border-b border-amber-500/20",
+
+                    // Interactive & States
+                    "text-amber-700 dark:text-amber-300"
+                  )}
+                >
+                  <Warning className="h-3.5 w-3.5 shrink-0" weight="fill" />
+                  <span className="font-semibold">Hashcat not found.</span>
+                  <span className="truncate">
+                    {page.hashcatInfo.error ||
+                      'Install it to enable password attacks.'}
+                  </span>
+                </div>
+              )}
               <ResizablePanelGroup orientation="horizontal" className="h-full">
                 <ResizablePanel defaultSize={35} minSize={25}>
                   <div
@@ -392,7 +468,7 @@ export function HashPage() {
                       algorithm={page.attackAlgorithm}
                       onConfigChange={page.setAttackConfig}
                       onAlgorithmChange={page.setAttackAlgorithm}
-                      disabled={page.attackEngine.status === 'running'}
+                      disabled={page.attackEngine.status === 'running' || page.attackEngine.status === 'paused'}
                     />
                   </div>
                 </ResizablePanel>
@@ -422,7 +498,7 @@ export function HashPage() {
                         targets={page.targets}
                         defaultAlgorithm={page.attackAlgorithm}
                         onTargetsChange={page.setTargets}
-                        disabled={page.attackEngine.status === 'running'}
+                        disabled={page.attackEngine.status === 'running' || page.attackEngine.status === 'paused'}
                       />
                     </div>
                   </div>
