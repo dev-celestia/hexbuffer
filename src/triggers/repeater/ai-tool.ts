@@ -98,18 +98,18 @@ export async function executeSendToRepeaterAiTool(args: Record<string, any>) {
   const raw = args.raw_request || '';
   const url = args.target_url || '';
   await sendRawToRepeater({ raw, url });
-  return { status: 'success', tool: 'send_to_repeater' };
+  return `Request placed in the Repeater tab${url ? ` (target: ${url})` : ''} for manual inspection.`;
 }
 
 export async function executeCreateCollectionAiTool(args: Record<string, any>) {
   const id = await createCollection(args.workspace_id, args.name);
   useNavStore.getState().triggerNavBlink('/repeater');
-  return { status: 'success', tool: 'create_collection', id, name: args.name };
+  return `Collection "${args.name}" created in Repeater (id: ${id}).`;
 }
 
 export async function executeCreateFolderAiTool(args: Record<string, any>) {
   const id = await createFolder(args.parent_id, args.name);
-  return { status: 'success', tool: 'create_folder', id, name: args.name };
+  return `Folder "${args.name}" created (id: ${id}).`;
 }
 
 export async function executeCreateEndpointAiTool(args: Record<string, any>) {
@@ -121,5 +121,5 @@ export async function executeCreateEndpointAiTool(args: Record<string, any>) {
   });
   selectEndpoint(id);
   useNavStore.getState().triggerNavBlink('/repeater');
-  return { status: 'success', tool: 'create_endpoint', id, name: args.name };
+  return `Endpoint "${args.name}" added to the Repeater collection (id: ${id}).`;
 }

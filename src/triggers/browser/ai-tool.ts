@@ -18,5 +18,5 @@ export const BROWSER_AI_TOOL_DEFINITION = {
 
 export async function executeTriggerScanAiTool(args: Record<string, any>) {
   await triggerScan({ url: args.url } as TriggerScanOptions);
-  return { status: 'success', tool: 'trigger_scan', url: args.url };
+  return `Browser scan started for ${args.url}. The crawl runs in the background; ask for crawl context once it completes.`;
 }

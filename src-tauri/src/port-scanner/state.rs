@@ -1,5 +1,6 @@
+use parking_lot::Mutex;
 use std::collections::HashMap;
-use std::sync::{atomic::AtomicBool, Arc, Mutex};
+use std::sync::{atomic::AtomicBool, Arc};
 
 #[derive(Default)]
 pub struct PortScanState {

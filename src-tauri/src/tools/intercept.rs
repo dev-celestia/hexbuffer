@@ -35,6 +35,9 @@ impl Tool for ToggleInterceptTool {
     async fn call(&self, args: Self::Args) -> Result<Self::Output, Self::Error> {
         dispatch_tool_call(Self::NAME, json!(args));
         let state = if args.enabled { "ENABLED" } else { "DISABLED" };
-        Ok(format!("Successfully set proxy traffic interception to {}.", state))
+        Ok(format!(
+            "Successfully set proxy traffic interception to {}.",
+            state
+        ))
     }
 }

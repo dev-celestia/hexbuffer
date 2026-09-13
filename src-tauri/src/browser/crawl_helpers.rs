@@ -1,7 +1,8 @@
 use super::crawl_types::{AIInsight, ActivityLog, AiBrowserState, CrawlPage, CrawlSession};
 use chrono::Utc;
+use parking_lot::Mutex;
 use std::process::{Child, Command};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use tauri::{AppHandle, Emitter, Manager};
 
 pub(crate) fn now() -> String {
@@ -13,7 +14,8 @@ pub(crate) fn normalize_strategy(_strategy: Option<String>) -> String {
 }
 
 pub(crate) fn add_log(app: &AppHandle, state: &AiBrowserState, log: ActivityLog) {
-    if let Ok(mut logs) = state.logs.lock() {
+    let mut logs = state.logs.lock();
+    {
         logs.entry(log.session_id.clone())
             .or_default()
             .push(log.clone());
@@ -61,10 +63,7 @@ pub(crate) fn update_session(
     status: &str,
     finished_at: Option<String>,
 ) -> Result<CrawlSession, String> {
-    let mut sessions = state
-        .sessions
-        .lock()
-        .map_err(|_| "Failed to lock AI browser sessions".to_string())?;
+    let mut sessions = state.sessions.lock();
     let session = sessions
         .get_mut(session_id)
         .ok_or_else(|| "Automation session not found".to_string())?;
@@ -83,11 +82,11 @@ pub(crate) fn update_session(
 }
 
 pub(crate) fn session_status(state: &AiBrowserState, session_id: &str) -> Option<String> {
-    state.sessions.lock().ok().and_then(|sessions| {
-        sessions
-            .get(session_id)
-            .map(|session| session.status.clone())
-    })
+    state
+        .sessions
+        .lock()
+        .get(session_id)
+        .map(|session| session.status.clone())
 }
 
 pub(crate) fn is_terminal_status(status: &str) -> bool {
@@ -99,10 +98,7 @@ pub(crate) fn signal_child_process_group(
     child: &Arc<Mutex<Child>>,
     signal: &str,
 ) -> Result<(), String> {
-    let pid = child
-        .lock()
-        .map_err(|_| "Failed to lock AI browser child process".to_string())?
-        .id();
+    let pid = child.lock().id();
     let target = format!("-{}", pid);
     let output = Command::new("kill")
         .arg(signal)
@@ -138,13 +134,15 @@ pub(crate) fn kill_child_process_group(child: &Arc<Mutex<Child>>) {
         return;
     }
 
-    if let Ok(mut child) = child.lock() {
+    let mut child = child.lock();
+    {
         let _ = child.kill();
     }
 }
 
 pub(crate) fn upsert_page_memory(state: &AiBrowserState, page: CrawlPage) {
-    if let Ok(mut pages) = state.pages.lock() {
+    let mut pages = state.pages.lock();
+    {
         let session_pages = pages.entry(page.session_id.clone()).or_default();
         if let Some(existing) = session_pages.iter_mut().find(|item| item.id == page.id) {
             *existing = page;

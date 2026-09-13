@@ -15,6 +15,7 @@ use super::events::{
     append_log, emit_host_insight, emit_host_insight_remove, emit_queue_stats, set_node_runtime,
 };
 use super::execution::run_workflow_task;
+use super::host_filter::normalize_host_pattern;
 use super::state::{
     cap_host_ids, enqueue_live_traffic_job_locked, pop_next_job_locked,
     prune_recent_matches_locked, AutomationRuntimeState,
@@ -33,10 +34,7 @@ pub fn ingest_proxy_record(app: &AppHandle, record: &ProxyRecord) {
     };
 
     let matches = {
-        let mut inner = match state.0.lock() {
-            Ok(inner) => inner,
-            Err(_) => return,
-        };
+        let mut inner = state.0.lock();
         let workflows = inner.workflows.clone();
         let settings = inner.settings.clone();
         let mut matches = Vec::new();
@@ -94,10 +92,7 @@ pub fn ingest_proxy_record(app: &AppHandle, record: &ProxyRecord) {
             .clone()
             .unwrap_or_else(|| "Live Traffic Captured".to_string());
         let cap = {
-            let inner = match state.0.lock() {
-                Ok(inner) => inner,
-                Err(_) => return,
-            };
+            let inner = state.0.lock();
             queue_cap_for_trigger(&trigger_node.data.config, &inner.settings)
         };
         let context = build_live_traffic_context(record, &record_parts, &trigger_node.id);
@@ -120,10 +115,7 @@ pub fn ingest_proxy_record(app: &AppHandle, record: &ProxyRecord) {
         emit_host_insight(app, &insight);
 
         {
-            let mut inner = match state.0.lock() {
-                Ok(inner) => inner,
-                Err(_) => return,
-            };
+            let mut inner = state.0.lock();
             cap_host_ids(
                 &mut inner.host_insight_ids,
                 insight_id.clone(),
@@ -164,10 +156,7 @@ pub(crate) fn schedule_live_traffic_queue(app: AppHandle) {
                 let Some(state) = app.try_state::<AutomationRuntimeState>() else {
                     return;
                 };
-                let mut inner = match state.0.lock() {
-                    Ok(inner) => inner,
-                    Err(_) => return,
-                };
+                let mut inner = state.0.lock();
                 let concurrency = inner.settings.live_traffic_concurrency.max(1);
                 if inner.active_live_traffic_jobs >= concurrency {
                     return;
@@ -207,10 +196,7 @@ pub(crate) fn schedule_live_traffic_queue(app: AppHandle) {
                 let Some(state) = app.try_state::<AutomationRuntimeState>() else {
                     return;
                 };
-                let inner = match state.0.lock() {
-                    Ok(inner) => inner,
-                    Err(_) => return,
-                };
+                let inner = state.0.lock();
                 inner
                     .workflows
                     .iter()
@@ -271,7 +257,8 @@ pub(crate) fn schedule_live_traffic_queue(app: AppHandle) {
 
 fn finish_live_traffic_job(app: &AppHandle, job: &QueueJob) {
     if let Some(state) = app.try_state::<AutomationRuntimeState>() {
-        if let Ok(mut inner) = state.0.lock() {
+        let mut inner = state.0.lock();
+        {
             inner.active_live_traffic_jobs = inner.active_live_traffic_jobs.saturating_sub(1);
         }
         emit_queue_stats(app, &state, &job.trigger_node_id);
@@ -304,32 +291,6 @@ fn header_value(headers: &HashMap<String, String>, name: &str) -> String {
         .find(|(key, _)| key.eq_ignore_ascii_case(name))
         .map(|(_, value)| value.clone())
         .unwrap_or_default()
-}
-
-fn normalize_host_pattern(value: &str) -> String {
-    let trimmed = value.trim().trim_start_matches("*.").to_lowercase();
-    if trimmed.is_empty() {
-        return String::new();
-    }
-    let candidate = if trimmed.contains("://") {
-        trimmed
-    } else {
-        format!("https://{}", trimmed)
-    };
-    url::Url::parse(&candidate)
-        .ok()
-        .and_then(|url| url.host_str().map(str::to_string))
-        .unwrap_or_else(|| {
-            candidate
-                .split('/')
-                .next()
-                .unwrap_or_default()
-                .split(':')
-                .next()
-                .unwrap_or_default()
-                .trim()
-                .to_string()
-        })
 }
 
 fn parse_url_parts(url: &str) -> RecordUrlParts {
@@ -415,10 +376,12 @@ fn matches_live_traffic_trigger(
     }
 
     let method = config_string(config, "method");
-    if !method.trim().is_empty() && !method.eq_ignore_ascii_case("ANY")
-        && !record.request.method.eq_ignore_ascii_case(&method) {
-            return false;
-        }
+    if !method.trim().is_empty()
+        && !method.eq_ignore_ascii_case("ANY")
+        && !record.request.method.eq_ignore_ascii_case(&method)
+    {
+        return false;
+    }
 
     let whitelisted_hosts = parse_host_whitelist(config.get("host").and_then(Value::as_str));
     if whitelisted_hosts.is_empty() {

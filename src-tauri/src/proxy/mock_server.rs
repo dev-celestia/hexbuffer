@@ -1,17 +1,14 @@
+use parking_lot::Mutex;
 use std::collections::HashMap;
 use std::convert::Infallible;
 use std::net::SocketAddr;
-use std::sync::Mutex;
-use std::time::Duration;
 
 use bytes::Bytes;
 use http_body_util::{BodyExt, Full};
-use hyper::header::{HeaderName, HeaderValue};
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
 use hyper::{Request, Response, StatusCode};
 use hyper_util::rt::TokioIo;
-use rand::Rng;
 use tauri::{AppHandle, Emitter, Manager};
 use tokio::net::TcpListener;
 use tokio::sync::oneshot;
@@ -25,7 +22,8 @@ static MOCK_SERVER_SHUTDOWN: Mutex<Option<oneshot::Sender<()>>> = Mutex::new(Non
 static MOCK_SERVER_STATUS: Mutex<Option<MockServerStatus>> = Mutex::new(None);
 
 pub fn get_mock_server_status() -> MockServerStatus {
-    if let Ok(guard) = MOCK_SERVER_STATUS.lock() {
+    let guard = MOCK_SERVER_STATUS.lock();
+    {
         if let Some(ref status) = *guard {
             return status.clone();
         }
@@ -40,15 +38,14 @@ pub fn get_mock_server_status() -> MockServerStatus {
 }
 
 pub fn stop_mock_server() -> Result<(), String> {
-    let mut shutdown_guard = MOCK_SERVER_SHUTDOWN
-        .lock()
-        .map_err(|e| format!("Failed to lock mock server shutdown: {}", e))?;
-    
+    let mut shutdown_guard = MOCK_SERVER_SHUTDOWN.lock();
+
     if let Some(tx) = shutdown_guard.take() {
         let _ = tx.send(());
     }
 
-    if let Ok(mut status_guard) = MOCK_SERVER_STATUS.lock() {
+    let mut status_guard = MOCK_SERVER_STATUS.lock();
+    {
         if let Some(ref mut st) = *status_guard {
             st.running = false;
             st.url = None;
@@ -68,12 +65,19 @@ pub async fn start_mock_server(
     // Stop any existing server first
     let _ = stop_mock_server();
 
-    let target_port = if preferred_port == 0 { 4000 } else { preferred_port };
+    let target_port = if preferred_port == 0 {
+        4000
+    } else {
+        preferred_port
+    };
     let bind_addr: SocketAddr = ([127, 0, 0, 1], target_port).into();
 
-    let listener = TcpListener::bind(bind_addr)
-        .await
-        .map_err(|e| format!("Failed to bind Local Mock Server to port {}: {}", target_port, e))?;
+    let listener = TcpListener::bind(bind_addr).await.map_err(|e| {
+        format!(
+            "Failed to bind Local Mock Server to port {}: {}",
+            target_port, e
+        )
+    })?;
 
     let actual_port = listener
         .local_addr()
@@ -83,9 +87,7 @@ pub async fn start_mock_server(
     let (shutdown_tx, mut shutdown_rx) = oneshot::channel::<()>();
 
     {
-        let mut shutdown_guard = MOCK_SERVER_SHUTDOWN
-            .lock()
-            .map_err(|e| format!("Failed to lock shutdown handle: {}", e))?;
+        let mut shutdown_guard = MOCK_SERVER_SHUTDOWN.lock();
         *shutdown_guard = Some(shutdown_tx);
     }
 
@@ -98,9 +100,7 @@ pub async fn start_mock_server(
     };
 
     {
-        let mut status_guard = MOCK_SERVER_STATUS
-            .lock()
-            .map_err(|e| format!("Failed to lock status handle: {}", e))?;
+        let mut status_guard = MOCK_SERVER_STATUS.lock();
         *status_guard = Some(status.clone());
     }
 
@@ -149,7 +149,8 @@ pub async fn start_mock_server(
             }
         }
 
-        if let Ok(mut status_guard) = MOCK_SERVER_STATUS.lock() {
+        let mut status_guard = MOCK_SERVER_STATUS.lock();
+        {
             if let Some(ref mut st) = *status_guard {
                 st.running = false;
                 st.url = None;
@@ -193,7 +194,11 @@ async fn handle_mock_server_request(
     let path_str = uri.path().to_string();
     let query_map: HashMap<String, String> = uri
         .query()
-        .map(|q| url::form_urlencoded::parse(q.as_bytes()).into_owned().collect())
+        .map(|q| {
+            url::form_urlencoded::parse(q.as_bytes())
+                .into_owned()
+                .collect()
+        })
         .unwrap_or_default();
 
     let mut req_headers = HashMap::new();
@@ -228,8 +233,8 @@ async fn handle_mock_server_request(
     };
 
     let matched = {
-        let domains_guard = mock_state.domains.lock().unwrap();
-        let routes_guard = mock_state.routes.lock().unwrap();
+        let domains_guard = mock_state.domains.lock();
+        let routes_guard = mock_state.routes.lock();
 
         let filtered_domains: Vec<_> = if let Some(ref did) = domain_id_filter {
             if did.is_empty() || did == "all" {
@@ -259,34 +264,7 @@ async fn handle_mock_server_request(
     };
 
     if let Some((domain, route)) = matched {
-        let mut latency_ms: u64 = 0;
-        let mut status_code = route.status_code;
-
-        // Apply chaos latency
-        if route.chaos.latency_mode == "fixed" {
-            if let Some(fixed) = route.chaos.latency_fixed {
-                latency_ms = fixed;
-                tokio::time::sleep(Duration::from_millis(fixed)).await;
-            }
-        } else if route.chaos.latency_mode == "random" {
-            if let (Some(min), Some(max)) = (route.chaos.latency_min, route.chaos.latency_max) {
-                if max >= min {
-                    let rand_val = rand::thread_rng().gen_range(min..=max);
-                    latency_ms = rand_val;
-                    tokio::time::sleep(Duration::from_millis(rand_val)).await;
-                }
-            }
-        }
-
-        // Apply chaos error rate
-        if let Some(err_rate) = route.chaos.error_rate {
-            if err_rate > 0.0 {
-                let roll = rand::thread_rng().gen_range(0.0..100.0f64);
-                if roll < err_rate {
-                    status_code = route.chaos.error_status.unwrap_or(500);
-                }
-            }
-        }
+        let (latency_ms, status_code) = super::mock_common::apply_chaos(&route).await;
 
         let elapsed = if latency_ms == 0 {
             start_time.elapsed().as_millis() as u64
@@ -312,38 +290,17 @@ async fn handle_mock_server_request(
             source: Some("mock_server".to_string()),
         };
 
-        {
-            let mut logs_lock = mock_state.logs.lock().unwrap();
-            logs_lock.insert(0, log_entry.clone());
-            if logs_lock.len() > 200 {
-                logs_lock.truncate(200);
-            }
-        }
+        super::mock_common::push_mock_log(&app_handle, &mock_state, log_entry);
 
-        let _ = app_handle.emit("mock-forge-log", log_entry);
-
-        let mut builder = Response::builder().status(
-            StatusCode::from_u16(status_code).unwrap_or(StatusCode::OK),
+        let mut builder = super::mock_common::apply_route_headers(
+            Response::builder().status(StatusCode::from_u16(status_code).unwrap_or(StatusCode::OK)),
+            &route.response_headers,
         );
 
-        let mut content_type_set = false;
-        for (k, v) in &route.response_headers {
-            if k.eq_ignore_ascii_case("content-length")
-                || k.eq_ignore_ascii_case("content-encoding")
-                || k.eq_ignore_ascii_case("transfer-encoding")
-            {
-                continue;
-            }
-            if k.eq_ignore_ascii_case("content-type") {
-                content_type_set = true;
-            }
-            if let (Ok(name), Ok(val)) = (
-                HeaderName::from_bytes(k.as_bytes()),
-                HeaderValue::from_str(v),
-            ) {
-                builder = builder.header(name, val);
-            }
-        }
+        let content_type_set = route
+            .response_headers
+            .keys()
+            .any(|k| k.eq_ignore_ascii_case("content-type"));
 
         if !content_type_set {
             builder = builder.header("Content-Type", "application/json; charset=utf-8");
@@ -372,7 +329,10 @@ async fn handle_mock_server_request(
                 &method_str,
             )
         } else {
-            format!("{{\"error\":\"Simulated chaos error\",\"status\":{}}}", status_code)
+            format!(
+                "{{\"error\":\"Simulated chaos error\",\"status\":{}}}",
+                status_code
+            )
         };
 
         builder = builder.header("Content-Length", body_content.len().to_string());
@@ -402,15 +362,7 @@ async fn handle_mock_server_request(
             source: Some("mock_server".to_string()),
         };
 
-        {
-            let mut logs_lock = mock_state.logs.lock().unwrap();
-            logs_lock.insert(0, log_entry.clone());
-            if logs_lock.len() > 200 {
-                logs_lock.truncate(200);
-            }
-        }
-
-        let _ = app_handle.emit("mock-forge-log", log_entry);
+        super::mock_common::push_mock_log(&app_handle, &mock_state, log_entry);
 
         let err_json = serde_json::json!({
             "error": "Not Found",
@@ -446,7 +398,11 @@ async fn handle_mock_server_request(
     }
 }
 
-fn build_error_response(status: StatusCode, message: &str, cors_enabled: bool) -> Response<Full<Bytes>> {
+fn build_error_response(
+    status: StatusCode,
+    message: &str,
+    cors_enabled: bool,
+) -> Response<Full<Bytes>> {
     let body = format!("{{\"error\":\"{}\"}}", message);
     let mut builder = Response::builder()
         .status(status)
@@ -460,4 +416,55 @@ fn build_error_response(status: StatusCode, message: &str, cors_enabled: bool) -
     builder
         .body(Full::new(Bytes::from(body)))
         .unwrap_or_else(|_| Response::new(Full::new(Bytes::new())))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_build_error_response_body_and_headers() {
+        let res = build_error_response(StatusCode::BAD_REQUEST, "Bad input", false);
+        let (parts, body) = res.into_parts();
+        let body = String::from_utf8(body.into_inner().unwrap_or_default().to_vec()).unwrap();
+
+        assert_eq!(parts.status, StatusCode::BAD_REQUEST);
+        assert_eq!(
+            parts.headers.get("content-type").unwrap().to_str().unwrap(),
+            "application/json"
+        );
+        assert_eq!(body, "{\"error\":\"Bad input\"}");
+        assert_eq!(
+            parts
+                .headers
+                .get("content-length")
+                .unwrap()
+                .to_str()
+                .unwrap(),
+            body.len().to_string()
+        );
+    }
+
+    #[test]
+    fn test_build_error_response_cors_toggle() {
+        let with_cors = build_error_response(StatusCode::INTERNAL_SERVER_ERROR, "oops", true);
+        assert_eq!(
+            with_cors.headers().get("access-control-allow-origin").unwrap(),
+            "*"
+        );
+
+        let without_cors = build_error_response(StatusCode::INTERNAL_SERVER_ERROR, "oops", false);
+        assert!(without_cors.headers().get("access-control-allow-origin").is_none());
+    }
+
+    #[test]
+    fn test_mock_server_status_defaults_when_stopped() {
+        // Deterministic under --test-threads=1: stop any stale server state,
+        // then the status must fall back to the disabled default.
+        stop_mock_server().unwrap();
+        let status = get_mock_server_status();
+        assert!(!status.running);
+        assert_eq!(status.port, 4000);
+        assert!(status.url.is_none());
+    }
 }

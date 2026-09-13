@@ -1,34 +1,22 @@
-
-
-import { Button, Textarea } from '@celestia-project/ui';
-import { TrashIcon } from '@phosphor-icons/react';
+import { Textarea } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 
 interface EncoderInputPanelProps {
   headerLabel: string;
   input: string;
-  mode: string;
-  isEmpty: boolean;
   onInputChange: (v: string) => void;
-  onClear: () => void;
 }
 
 export function EncoderInputPanel({
   headerLabel,
   input,
-  mode,
-  isEmpty,
   onInputChange,
-  onClear,
 }: EncoderInputPanelProps) {
   return (
     <div
       className={cn(
         // Layout & Positioning
-        "flex flex-col min-h-0",
-
-        // Backgrounds & Borders
-        "border-b lg:border-b-0 lg:border-r"
+        "flex flex-col min-h-0 h-full"
       )}
     >
       <div
@@ -43,53 +31,24 @@ export function EncoderInputPanel({
           "border-b bg-muted/10"
         )}
       >
-        <div
+        <span
           className={cn(
-            // Layout & Positioning
-            "flex items-baseline",
-
-            // Sizing & Spacing
-            "gap-2"
+            // Typography
+            "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
           )}
         >
+          {headerLabel}
+        </span>
+        {input && (
           <span
             className={cn(
-              // Typography
-              "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
-            )}
-          >
-            {headerLabel}
-          </span>
-          <span
-            className={cn(
-              // Layout & Positioning
-              "hidden sm:inline",
-
               // Typography
               "text-[10px] text-muted-foreground"
             )}
           >
-            Enter content to {mode}
+            {input.length.toLocaleString()} chars
           </span>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClear}
-          disabled={isEmpty}
-          className={cn(
-            // Sizing & Spacing
-            "h-6 w-6",
-
-            // Typography
-            "text-muted-foreground",
-
-            // Interactive & States
-            "hover:text-foreground"
-          )}
-        >
-          <TrashIcon className="h-3 w-3" />
-        </Button>
+        )}
       </div>
       <Textarea
         className={cn(
@@ -115,4 +74,3 @@ export function EncoderInputPanel({
     </div>
   );
 }
-

@@ -9,7 +9,8 @@ const LOCATE_CMD: &str = "where";
 const LOCATE_CMD: &str = "which";
 
 #[cfg(target_os = "windows")]
-const INSTALL_HINT: &str = "Install it with `choco install hashcat` or download it from hashcat.net";
+const INSTALL_HINT: &str =
+    "Install it with `choco install hashcat` or download it from hashcat.net";
 #[cfg(not(target_os = "windows"))]
 const INSTALL_HINT: &str = "Install it with `brew install hashcat`";
 
@@ -47,10 +48,7 @@ pub fn resolve_hashcat_binary() -> Result<PathBuf, String> {
 
 /// Probes `hashcat --version` and returns the version string, e.g. "v7.1.2".
 pub fn probe_hashcat_version(binary: &PathBuf) -> Option<String> {
-    let output = Command::new(binary)
-        .arg("--version")
-        .output()
-        .ok()?;
+    let output = Command::new(binary).arg("--version").output().ok()?;
     let first_line = String::from_utf8_lossy(&output.stdout)
         .lines()
         .next()?

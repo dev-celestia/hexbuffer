@@ -7,6 +7,7 @@ use uuid::Uuid;
 use crate::proxy::state::PausedRequest;
 
 use super::execution::run_workflow_task;
+use super::host_filter::{matches_host_filter, normalize_host_pattern};
 use super::state::AutomationRuntimeState;
 use super::types::{
     config_string, node_effective_type, AutomationNode, AutomationWorkflow, WorkflowContext,
@@ -24,10 +25,7 @@ pub fn ingest_intercept_paused_request(app: &AppHandle, paused_request: &PausedR
 
     let url_parts = request_url_parts(paused_request);
     let matches = {
-        let inner = match state.0.lock() {
-            Ok(inner) => inner,
-            Err(_) => return,
-        };
+        let inner = state.0.lock();
         inner
             .workflows
             .iter()
@@ -50,10 +48,7 @@ pub fn ingest_intercept_paused_request(app: &AppHandle, paused_request: &PausedR
     for (workflow, trigger_node) in matches {
         let run_token = Uuid::new_v4().to_string();
         {
-            let mut inner = match state.0.lock() {
-                Ok(inner) => inner,
-                Err(_) => return,
-            };
+            let mut inner = state.0.lock();
             inner
                 .active_run_token_by_workflow_id
                 .insert(workflow.id.clone(), run_token.clone());
@@ -197,46 +192,6 @@ fn matches_url_filter(full_url: &str, path: &str, operator: &str, value: &str) -
                 .any(|haystack| haystack.to_ascii_lowercase().contains(&value))
         }
     }
-}
-
-fn matches_host_filter(host: &str, filter: &str) -> bool {
-    let patterns = filter
-        .split([',', ';', ' ', '\n', '\t'])
-        .map(normalize_host_pattern)
-        .filter(|pattern| !pattern.is_empty())
-        .collect::<Vec<_>>();
-    if patterns.is_empty() {
-        return true;
-    }
-
-    let host = normalize_host_pattern(host);
-    patterns
-        .iter()
-        .any(|pattern| host == *pattern || host.ends_with(&format!(".{}", pattern)))
-}
-
-fn normalize_host_pattern(value: &str) -> String {
-    let trimmed = value.trim().trim_start_matches("*.").to_ascii_lowercase();
-    if trimmed.is_empty() {
-        return String::new();
-    }
-    let candidate = if trimmed.contains("://") {
-        url::Url::parse(&trimmed)
-            .ok()
-            .and_then(|url| url.host_str().map(str::to_string))
-            .unwrap_or(trimmed)
-    } else {
-        trimmed
-    };
-    candidate
-        .split('/')
-        .next()
-        .unwrap_or_default()
-        .split(':')
-        .next()
-        .unwrap_or_default()
-        .trim()
-        .to_string()
 }
 
 #[cfg(test)]

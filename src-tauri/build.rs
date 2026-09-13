@@ -5,7 +5,11 @@ use std::path::Path;
 fn main() {
     // Ensure target sidecar binary exists so tauri_build doesn't fail when building on CI or platforms missing pre-built sidecars
     if let Ok(target) = env::var("TARGET") {
-        let ext = if target.contains("windows") { ".exe" } else { "" };
+        let ext = if target.contains("windows") {
+            ".exe"
+        } else {
+            ""
+        };
         let sidecar_name = format!("binaries/ai-engine-{}{}", target, ext);
         let sidecar_path = Path::new(&sidecar_name);
 

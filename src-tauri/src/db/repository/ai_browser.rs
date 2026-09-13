@@ -5,7 +5,7 @@ use super::Database;
 
 impl Database {
     pub fn upsert_ai_browser_session(&self, session: &CrawlSession) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let updated_at = chrono::Utc::now().to_rfc3339();
         let created_at = session.started_at.as_deref().unwrap_or(&updated_at);
 
@@ -41,7 +41,7 @@ impl Database {
     }
 
     pub fn get_ai_browser_session(&self, session_id: &str) -> SqlResult<Option<CrawlSession>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
 
         conn.query_row(
             r#"SELECT id, target_url, status, strategy, max_depth, max_pages, started_at, finished_at
@@ -64,7 +64,7 @@ impl Database {
     }
 
     pub fn list_recent_ai_browser_sessions(&self, limit: u32) -> SqlResult<Vec<CrawlSession>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             r#"SELECT id, target_url, status, strategy, max_depth, max_pages, started_at, finished_at
                FROM ai_browser_sessions
@@ -91,7 +91,7 @@ impl Database {
     }
 
     pub fn delete_ai_browser_session(&self, session_id: &str) -> SqlResult<usize> {
-        let mut conn = self.conn.lock().unwrap();
+        let mut conn = self.conn.lock();
         let tx = conn.transaction()?;
 
         tx.execute(
@@ -120,7 +120,7 @@ impl Database {
     }
 
     pub fn upsert_ai_browser_page(&self, page: &CrawlPage) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let updated_at = chrono::Utc::now().to_rfc3339();
         let created_at = &page.discovered_at;
 
@@ -183,7 +183,7 @@ impl Database {
     }
 
     pub fn list_ai_browser_pages(&self, session_id: &str) -> SqlResult<Vec<CrawlPage>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             r#"SELECT id, session_id, url, title, status, depth, parent_url, http_status,
                links_found, forms_found, ai_summary, ai_used_for_analysis, interesting,
@@ -219,7 +219,7 @@ impl Database {
     }
 
     pub fn clear_ai_browser_artifact_paths(&self) -> SqlResult<usize> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             "UPDATE ai_browser_pages SET screenshot_path = NULL, rendered_html_path = NULL WHERE screenshot_path IS NOT NULL OR rendered_html_path IS NOT NULL",
             [],
@@ -227,7 +227,7 @@ impl Database {
     }
 
     pub fn insert_ai_browser_insight(&self, insight: &AIInsight) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
 
         conn.execute(
             r#"INSERT OR REPLACE INTO ai_browser_insights (
@@ -258,7 +258,7 @@ impl Database {
     }
 
     pub fn list_ai_browser_insights(&self, session_id: &str) -> SqlResult<Vec<AIInsight>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             r#"SELECT id, session_id, page_id, severity, type, title, description, url, ai_used_for_analysis,
                       analysis_source, analysis_tool_id, analysis_tool_name, reviewed, created_at
@@ -290,7 +290,7 @@ impl Database {
     }
 
     pub fn insert_ai_browser_log(&self, log: &ActivityLog) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
 
         conn.execute(
             r#"INSERT OR IGNORE INTO ai_browser_logs (
@@ -316,7 +316,7 @@ impl Database {
     }
 
     pub fn list_ai_browser_logs(&self, session_id: &str) -> SqlResult<Vec<ActivityLog>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             r#"SELECT id, session_id, level, type, message, url, ai_used_for_analysis, extra_json, created_at
                FROM ai_browser_logs WHERE session_id = ?1 ORDER BY created_at ASC"#,

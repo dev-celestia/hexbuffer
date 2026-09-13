@@ -1,9 +1,9 @@
-use tauri::{AppHandle, Emitter, Manager};
 use hexbuffer::commands::invoker::InvokerState;
 use hexbuffer::{
     AiBrowserState, BrowserProcessState, CollaboratorPollingState, HashEngineState, HistoryBridge,
     PortScanState, ProxyState, SqliScanState,
 };
+use tauri::{AppHandle, Emitter, Manager};
 
 pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(desktop)]
@@ -21,10 +21,13 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
     let db_path = hexbuffer::paths::get_shared_db_path();
     crate::log(&format!("Opening database at {:?}", db_path));
-    let database = hexbuffer::db::repository::Database::new(db_path)
-        .expect("Failed to initialize database");
+    let database =
+        hexbuffer::db::repository::Database::new(db_path).expect("Failed to initialize database");
     if let Err(e) = database.init() {
-        crate::log(&format!("FATAL: Failed to initialize database schema: {}", e));
+        crate::log(&format!(
+            "FATAL: Failed to initialize database schema: {}",
+            e
+        ));
         panic!("Failed to initialize database schema: {}", e);
     }
 
@@ -32,7 +35,8 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     std::fs::create_dir_all(&sessions_dir).expect("Failed to create sessions directory");
     let payload_store = hexbuffer::db::PayloadStore::new(sessions_dir);
 
-    let history = HistoryBridge::from_database_and_payload_store(database.clone(), payload_store.clone());
+    let history =
+        HistoryBridge::from_database_and_payload_store(database.clone(), payload_store.clone());
     crate::log("History bridge initialized with PayloadStore");
 
     hexbuffer::proxy::completion::init_proxy_log_worker(app.handle().clone());
@@ -66,7 +70,10 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     // or an apprecon:// deep link with optional query params)
     let mut initial_target: Option<(String, Option<String>)> = None;
     for arg in std::env::args().skip(1) {
-        if let Some(target) = arg.strip_prefix("--target=").or_else(|| arg.strip_prefix("--subapp=")) {
+        if let Some(target) = arg
+            .strip_prefix("--target=")
+            .or_else(|| arg.strip_prefix("--subapp="))
+        {
             initial_target = Some((target.trim_matches('"').to_lowercase(), None));
             break;
         }
@@ -89,7 +96,10 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     if let Some((ref clean_target, ref query)) = initial_target {
-        crate::log(&format!("Cold-start requested for sub-app: {}", clean_target));
+        crate::log(&format!(
+            "Cold-start requested for sub-app: {}",
+            clean_target
+        ));
         // Dismiss splash screen immediately
         if let Some(splash) = app.get_webview_window("splashscreen") {
             let _ = splash.close();
@@ -217,7 +227,11 @@ pub fn open_or_focus_subapp_window_with_query(
         // Forward the deep-link payload to the live window so it can react
         // (focus alone would silently drop the new request).
         if let Some(query) = query {
-            match app.emit_to(subapp_label.as_str(), SUBAPP_PARAMS_EVENT, query.to_string()) {
+            match app.emit_to(
+                subapp_label.as_str(),
+                SUBAPP_PARAMS_EVENT,
+                query.to_string(),
+            ) {
                 Ok(_) => {
                     crate::log(&format!(
                         "Forwarded deep-link params to existing window [{}]: {}",
@@ -232,7 +246,10 @@ pub fn open_or_focus_subapp_window_with_query(
                 }
             }
         } else {
-            crate::log(&format!("Existing sub-app window [{}] brought to front", subapp_label));
+            crate::log(&format!(
+                "Existing sub-app window [{}] brought to front",
+                subapp_label
+            ));
         }
         return;
     }
@@ -268,10 +285,16 @@ pub fn open_or_focus_subapp_window_with_query(
             let _ = subapp_win.set_focus();
             #[cfg(target_os = "macos")]
             crate::app_commands::activate_current_process();
-            crate::log(&format!("Sub-app window [{}] opened and brought to front successfully", subapp_label));
+            crate::log(&format!(
+                "Sub-app window [{}] opened and brought to front successfully",
+                subapp_label
+            ));
         }
         Err(e) => {
-            crate::log(&format!("Failed to open sub-app window [{}]: {}", subapp_label, e));
+            crate::log(&format!(
+                "Failed to open sub-app window [{}]: {}",
+                subapp_label, e
+            ));
         }
     }
 }

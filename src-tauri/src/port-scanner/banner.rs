@@ -177,7 +177,12 @@ fn http_version(version: reqwest::Version) -> &'static str {
 fn random_ehlo_hostname() -> String {
     const PREFIXES: &[&str] = &["mail", "mx", "smtp", "relay", "out", "gw"];
     const DOMAINS: &[&str] = &[
-        "local", "internal", "corp.local", "office.local", "lan", "home",
+        "local",
+        "internal",
+        "corp.local",
+        "office.local",
+        "lan",
+        "home",
     ];
     let mut rng = rand::thread_rng();
     let prefix = PREFIXES[rng.gen_range(0..PREFIXES.len())];

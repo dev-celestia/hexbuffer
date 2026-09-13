@@ -1,4 +1,4 @@
-export type CodecType = 'url' | 'base64' | 'hex';
+export type CodecType = 'url' | 'base64' | 'base64url' | 'hex' | 'binary' | 'html';
 
 export type CodecMode = 'encode' | 'decode';
 

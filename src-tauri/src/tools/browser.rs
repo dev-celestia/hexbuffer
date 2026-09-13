@@ -21,7 +21,8 @@ impl Tool for TriggerScanTool {
     async fn definition(&self, _prompt: String) -> ToolDefinition {
         ToolDefinition {
             name: Self::NAME.to_string(),
-            description: "Trigger a browser crawler or vulnerability scan against a target URL.".to_string(),
+            description: "Trigger a browser crawler or vulnerability scan against a target URL."
+                .to_string(),
             parameters: json!({
                 "type": "object",
                 "properties": {
@@ -34,6 +35,9 @@ impl Tool for TriggerScanTool {
 
     async fn call(&self, args: Self::Args) -> Result<Self::Output, Self::Error> {
         dispatch_tool_call(Self::NAME, json!(args));
-        Ok(format!("Successfully launched browser scan for target '{}'.", args.url))
+        Ok(format!(
+            "Successfully launched browser scan for target '{}'.",
+            args.url
+        ))
     }
 }

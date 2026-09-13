@@ -1,4 +1,5 @@
-use std::sync::{OnceLock, RwLock};
+use parking_lot::RwLock;
+use std::sync::OnceLock;
 
 pub mod browser;
 pub mod buffer;
@@ -16,8 +17,7 @@ pub use invoker::{StartInvokerAttackArgs, StartInvokerAttackTool};
 pub use proxy_tool::{SendHexArgs, SendHexTool};
 pub use repeater::{
     AppToolError, CreateCollectionArgs, CreateCollectionTool, CreateEndpointArgs,
-    CreateEndpointTool, CreateFolderArgs, CreateFolderTool, SendToRepeaterArgs,
-    SendToRepeaterTool,
+    CreateEndpointTool, CreateFolderArgs, CreateFolderTool, SendToRepeaterArgs, SendToRepeaterTool,
 };
 
 pub type ToolCallHandler = Box<dyn Fn(&str, serde_json::Value) + Send + Sync>;
@@ -32,15 +32,11 @@ pub fn set_tool_call_handler<F>(handler: F)
 where
     F: Fn(&str, serde_json::Value) + Send + Sync + 'static,
 {
-    if let Ok(mut lock) = get_handler_lock().write() {
-        *lock = Some(Box::new(handler));
-    }
+    *get_handler_lock().write() = Some(Box::new(handler));
 }
 
 pub fn dispatch_tool_call(name: &str, args: serde_json::Value) {
-    if let Ok(lock) = get_handler_lock().read() {
-        if let Some(ref handler) = *lock {
-            handler(name, args);
-        }
+    if let Some(ref handler) = *get_handler_lock().read() {
+        handler(name, args);
     }
 }

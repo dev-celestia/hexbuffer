@@ -1,7 +1,7 @@
 // ponytail: MockForge backend features
-use std::collections::HashMap;
-use std::sync::Mutex;
+use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use tauri::State;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -180,12 +180,24 @@ pub fn extract_host_and_path_from_route(route_path: &str) -> (Option<String>, St
     if s.starts_with("http://") || s.starts_with("https://") {
         if let Ok(u) = url::Url::parse(s) {
             let host = u.host_str().map(|h| h.to_lowercase());
-            let path = format!("{}{}", u.path(), if let Some(q) = u.query() { format!("?{}", q) } else { String::new() });
+            let path = format!(
+                "{}{}",
+                u.path(),
+                if let Some(q) = u.query() {
+                    format!("?{}", q)
+                } else {
+                    String::new()
+                }
+            );
             return (host, path);
         } else if let Some(pos) = s.find("://") {
             let after_scheme = &s[pos + 3..];
             if let Some(slash_pos) = after_scheme.find('/') {
-                let host = after_scheme[..slash_pos].split(':').next().unwrap_or("").to_lowercase();
+                let host = after_scheme[..slash_pos]
+                    .split(':')
+                    .next()
+                    .unwrap_or("")
+                    .to_lowercase();
                 let path = after_scheme[slash_pos..].to_string();
                 return (Some(host), path);
             } else {
@@ -342,14 +354,18 @@ pub fn find_matching_route(
     // 1. If this is the Local Mock Server (localhost / 127.0.0.1)
     if is_local_server {
         let local_routes = routes.iter().filter(|r| {
-            (r.domain_id == "local_mock_server" || r.domain_id.is_empty() || r.domain_id == "localhost")
+            (r.domain_id == "local_mock_server"
+                || r.domain_id.is_empty()
+                || r.domain_id == "localhost")
                 && r.enabled
                 && method_matches(&r.method, req_method)
                 && path_matches(&r.path, req_path)
         });
 
         for r in local_routes {
-            if !r.matcher_enabled || matchers_satisfied(&r.matchers, req_headers, req_query, req_body) {
+            if !r.matcher_enabled
+                || matchers_satisfied(&r.matchers, req_headers, req_query, req_body)
+            {
                 if let Some(ref expected_body) = r.request_body {
                     if !expected_body.trim().is_empty() {
                         let actual_body = String::from_utf8_lossy(req_body);
@@ -359,10 +375,14 @@ pub fn find_matching_route(
                     }
                 }
                 if let Some(ref params) = r.request_query_params {
-                    let active_params: Vec<&QueryParam> = params.iter().filter(|p| p.enabled).collect();
+                    let active_params: Vec<&QueryParam> =
+                        params.iter().filter(|p| p.enabled).collect();
                     if !active_params.is_empty() {
                         let all_match = active_params.iter().all(|p| {
-                            req_query.get(&p.key).map(|v| v == &p.value).unwrap_or(false)
+                            req_query
+                                .get(&p.key)
+                                .map(|v| v == &p.value)
+                                .unwrap_or(false)
                         });
                         if !all_match {
                             continue;
@@ -398,7 +418,10 @@ pub fn find_matching_route(
             }
 
             // Check if there is an inactive domain entry explicitly disabling this host
-            if let Some(d) = domains.iter().find(|d| normalize_hostname(&d.hostname) == req_host_norm) {
+            if let Some(d) = domains
+                .iter()
+                .find(|d| normalize_hostname(&d.hostname) == req_host_norm)
+            {
                 if d.status != "active" {
                     continue;
                 }
@@ -482,7 +505,10 @@ pub fn find_matching_route(
             let active_params: Vec<&QueryParam> = params.iter().filter(|p| p.enabled).collect();
             if !active_params.is_empty() {
                 let all_match = active_params.iter().all(|p| {
-                    req_query.get(&p.key).map(|v| v == &p.value).unwrap_or(false)
+                    req_query
+                        .get(&p.key)
+                        .map(|v| v == &p.value)
+                        .unwrap_or(false)
                 });
                 if !all_match {
                     continue;
@@ -510,14 +536,14 @@ pub fn load_mock_forge_from_db(
 ) -> Result<(), String> {
     let domains = db.get_mock_domains().map_err(|e| e.to_string())?;
     let routes = db.get_mock_routes().map_err(|e| e.to_string())?;
-    *state.domains.lock().unwrap() = domains;
-    *state.routes.lock().unwrap() = routes;
+    *state.domains.lock() = domains;
+    *state.routes.lock() = routes;
     Ok(())
 }
 
 #[tauri::command]
 pub fn mock_forge_get_domains(state: State<'_, MockForgeState>) -> Vec<MockDomain> {
-    state.domains.lock().unwrap().clone()
+    state.domains.lock().clone()
 }
 
 #[tauri::command]
@@ -536,7 +562,7 @@ pub fn mock_forge_add_domain(
     };
     db.insert_mock_domain(&domain)
         .map_err(|e| format!("Failed to save domain in database: {}", e))?;
-    state.domains.lock().unwrap().push(domain.clone());
+    state.domains.lock().push(domain.clone());
     Ok(domain)
 }
 
@@ -548,8 +574,8 @@ pub fn mock_forge_delete_domain(
 ) -> Result<(), String> {
     db.delete_mock_domain(&id)
         .map_err(|e| format!("Failed to delete domain from database: {}", e))?;
-    state.domains.lock().unwrap().retain(|d| d.id != id);
-    state.routes.lock().unwrap().retain(|r| r.domain_id != id);
+    state.domains.lock().retain(|d| d.id != id);
+    state.routes.lock().retain(|r| r.domain_id != id);
     Ok(())
 }
 
@@ -561,16 +587,20 @@ pub fn mock_forge_toggle_domain(
 ) -> Result<(), String> {
     db.toggle_mock_domain(&id)
         .map_err(|e| format!("Failed to toggle domain in database: {}", e))?;
-    let mut domains = state.domains.lock().unwrap();
+    let mut domains = state.domains.lock();
     if let Some(d) = domains.iter_mut().find(|d| d.id == id) {
-        d.status = if d.status == "active" { "inactive".to_string() } else { "active".to_string() };
+        d.status = if d.status == "active" {
+            "inactive".to_string()
+        } else {
+            "active".to_string()
+        };
     }
     Ok(())
 }
 
 #[tauri::command]
 pub fn mock_forge_get_routes(state: State<'_, MockForgeState>) -> Vec<MockRoute> {
-    state.routes.lock().unwrap().clone()
+    state.routes.lock().clone()
 }
 
 #[tauri::command]
@@ -585,7 +615,7 @@ pub fn mock_forge_add_route(
     }
     db.upsert_mock_route(&route)
         .map_err(|e| format!("Failed to save route in database: {}", e))?;
-    state.routes.lock().unwrap().push(route.clone());
+    state.routes.lock().push(route.clone());
     Ok(route)
 }
 
@@ -598,7 +628,7 @@ pub fn mock_forge_update_route(
 ) -> Result<(), String> {
     db.upsert_mock_route(&patch)
         .map_err(|e| format!("Failed to update route in database: {}", e))?;
-    let mut routes = state.routes.lock().unwrap();
+    let mut routes = state.routes.lock();
     if let Some(r) = routes.iter_mut().find(|r| r.id == id) {
         *r = patch;
     }
@@ -613,18 +643,18 @@ pub fn mock_forge_delete_route(
 ) -> Result<(), String> {
     db.delete_mock_route(&id)
         .map_err(|e| format!("Failed to delete route from database: {}", e))?;
-    state.routes.lock().unwrap().retain(|r| r.id != id);
+    state.routes.lock().retain(|r| r.id != id);
     Ok(())
 }
 
 #[tauri::command]
 pub fn mock_forge_get_logs(state: State<'_, MockForgeState>) -> Vec<RequestLog> {
-    state.logs.lock().unwrap().clone()
+    state.logs.lock().clone()
 }
 
 #[tauri::command]
 pub fn mock_forge_clear_logs(state: State<'_, MockForgeState>) {
-    state.logs.lock().unwrap().clear();
+    state.logs.lock().clear();
 }
 
 #[tauri::command]
@@ -634,13 +664,8 @@ pub async fn mock_server_start(
     domain_id: Option<String>,
     cors: Option<bool>,
 ) -> Result<MockServerStatus, String> {
-    crate::proxy::mock_server::start_mock_server(
-        app_handle,
-        port,
-        domain_id,
-        cors.unwrap_or(true),
-    )
-    .await
+    crate::proxy::mock_server::start_mock_server(app_handle, port, domain_id, cors.unwrap_or(true))
+        .await
 }
 
 #[tauri::command]
@@ -662,7 +687,10 @@ mod tests {
         assert!(path_matches("/v1/payments/:id", "/v1/payments/pay_123"));
         assert!(path_matches("/auth/login", "/auth/login"));
         assert!(!path_matches("/auth/login", "/auth/me"));
-        assert!(path_matches("/users/:id/profile/:section", "/users/1/profile/billing"));
+        assert!(path_matches(
+            "/users/:id/profile/:section",
+            "/users/1/profile/billing"
+        ));
     }
 
     #[test]
@@ -769,9 +797,15 @@ mod tests {
 
     #[test]
     fn test_normalize_hostname() {
-        assert_eq!(normalize_hostname("https://api.example.com/v1/users"), "api.example.com");
+        assert_eq!(
+            normalize_hostname("https://api.example.com/v1/users"),
+            "api.example.com"
+        );
         assert_eq!(normalize_hostname("http://localhost:3000"), "localhost");
-        assert_eq!(normalize_hostname("API.EXAMPLE.COM:8080"), "api.example.com");
+        assert_eq!(
+            normalize_hostname("API.EXAMPLE.COM:8080"),
+            "api.example.com"
+        );
         assert_eq!(normalize_hostname("  example.com  "), "example.com");
     }
 
@@ -835,7 +869,11 @@ mod tests {
         }];
         let routes = vec![MockRoute {
             id: "r1".to_string(),
-            domain_id: "d1".to_string(),
+            // Local mock server routes are stored with the reserved local
+            // domain id (mirroring the frontend's new-route-dialog default);
+            // routes tied to real domains are only reachable via proxy
+            // override matching, not the local server.
+            domain_id: "local_mock_server".to_string(),
             method: "GET".to_string(),
             path: "/v1/charges/:id".to_string(),
             status_code: 200,
@@ -870,7 +908,7 @@ mod tests {
         );
         assert!(matched.is_some());
         let (d, r) = matched.unwrap();
-        assert_eq!(d.id, "d1");
+        assert_eq!(d.id, "local_mock_server");
         assert_eq!(r.id, "r1");
     }
 }

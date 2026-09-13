@@ -46,4 +46,3 @@ pub fn stop_sqli_scan(
     state.cancel_scan(&scan_id);
     Ok(())
 }
-

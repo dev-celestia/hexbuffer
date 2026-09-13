@@ -300,9 +300,11 @@ export function pemToDer(pem: string): ArrayBuffer {
     return wrapPkcs1InPkcs8(pkcs1Der).buffer;
   }
 
+  // Labels only contain uppercase letters and spaces; keeping dashes out of
+  // the class stops the match from swallowing the body of a single-line PEM.
   const b64 = trimmed
-    .replace(/-----BEGIN [A-Z0-9 _-]+-----/gi, '')
-    .replace(/-----END [A-Z0-9 _-]+-----/gi, '')
+    .replace(/-----BEGIN [A-Z ]+-----/g, '')
+    .replace(/-----END [A-Z ]+-----/g, '')
     .replace(/\s+/g, '');
 
   return base64ToUint8Array(b64).buffer;

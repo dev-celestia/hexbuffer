@@ -1,8 +1,8 @@
+use keyring::{Entry, Error as KeyringError};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use tauri::AppHandle;
-use keyring::{Entry, Error as KeyringError};
 
 fn log(msg: &str) {
     let ts = chrono::Local::now().format("%Y-%m-%d %H:%M:%S%.3f");
@@ -82,7 +82,9 @@ pub async fn save_r2_credentials(
     let secret_access_key = secret_access_key.trim();
 
     if account_id.is_empty() || access_key_id.is_empty() || secret_access_key.is_empty() {
-        return Err("Account ID, Access Key ID, and Secret Access Key must not be empty".to_string());
+        return Err(
+            "Account ID, Access Key ID, and Secret Access Key must not be empty".to_string(),
+        );
     }
 
     // Save Secret Key to OS Keychain
@@ -148,14 +150,16 @@ pub async fn r2_http_request(
     headers: std::collections::HashMap<String, String>,
     body: Option<Vec<u8>>,
 ) -> Result<R2HttpResponse, String> {
-    log(&format!("[r2_http_request] Method: {}, URL: {}", method, url));
+    log(&format!(
+        "[r2_http_request] Method: {}, URL: {}",
+        method, url
+    ));
     let client = reqwest::Client::new();
-    let method = reqwest::Method::from_bytes(method.as_bytes())
-        .map_err(|e| {
-            let err = e.to_string();
-            log(&format!("[r2_http_request] Method parsing error: {}", err));
-            err
-        })?;
+    let method = reqwest::Method::from_bytes(method.as_bytes()).map_err(|e| {
+        let err = e.to_string();
+        log(&format!("[r2_http_request] Method parsing error: {}", err));
+        err
+    })?;
 
     let mut req = client.request(method, &url);
     for (k, v) in headers {
@@ -173,7 +177,10 @@ pub async fn r2_http_request(
         Ok(r) => r,
         Err(e) => {
             let err = e.to_string();
-            log(&format!("[r2_http_request] Network request failed: {}", err));
+            log(&format!(
+                "[r2_http_request] Network request failed: {}",
+                err
+            ));
             return Err(err);
         }
     };
@@ -204,7 +211,11 @@ pub async fn r2_http_request(
     // If status >= 400, print first 200 chars of body for error diagnosis
     if status >= 400 {
         if let Ok(body_str) = String::from_utf8(body_bytes.clone()) {
-            let truncated = if body_str.len() > 300 { &body_str[..300] } else { &body_str };
+            let truncated = if body_str.len() > 300 {
+                &body_str[..300]
+            } else {
+                &body_str
+            };
             log(&format!("[r2_http_request] Error Body: {}", truncated));
         }
     }
@@ -215,4 +226,3 @@ pub async fn r2_http_request(
         body: body_bytes,
     })
 }
-

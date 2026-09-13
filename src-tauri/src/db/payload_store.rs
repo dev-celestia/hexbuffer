@@ -1,9 +1,10 @@
-use std::collections::HashMap;
+use parking_lot::{Mutex, RwLock};
+use std::collections::{HashMap, VecDeque};
 use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::Arc;
 
 pub const MAX_BODY_SIZE: usize = 4 * 1024 * 1024; // 4 MB truncation cap
 pub const DEFAULT_EPHEMERAL_MAX_BYTES: u64 = 1536 * 1024 * 1024; // 1.5 GB
@@ -31,7 +32,7 @@ pub trait PayloadBackend: Send + Sync {
 
 pub struct EphemeralSlab {
     slabs: RwLock<HashMap<u64, Vec<u8>>>,
-    insertion_order: Mutex<Vec<u64>>,
+    insertion_order: Mutex<VecDeque<u64>>,
     next_id: AtomicU64,
     total_bytes: AtomicU64,
     max_bytes: u64,
@@ -41,7 +42,7 @@ impl EphemeralSlab {
     pub fn new(max_bytes: u64) -> Self {
         Self {
             slabs: RwLock::new(HashMap::new()),
-            insertion_order: Mutex::new(Vec::new()),
+            insertion_order: Mutex::new(VecDeque::new()),
             next_id: AtomicU64::new(1),
             total_bytes: AtomicU64::new(0),
             max_bytes,
@@ -49,9 +50,9 @@ impl EphemeralSlab {
     }
 
     pub fn clear(&self) {
-        let mut slabs = self.slabs.write().unwrap();
+        let mut slabs = self.slabs.write();
         slabs.clear();
-        let mut order = self.insertion_order.lock().unwrap();
+        let mut order = self.insertion_order.lock();
         order.clear();
         self.total_bytes.store(0, Ordering::Relaxed);
     }
@@ -75,8 +76,8 @@ impl PayloadBackend for EphemeralSlab {
             let _ = self.evict_to(target);
         }
 
-        self.slabs.write().unwrap().insert(id, data.to_vec());
-        self.insertion_order.lock().unwrap().push(id);
+        self.slabs.write().insert(id, data.to_vec());
+        self.insertion_order.lock().push_back(id);
         self.total_bytes.fetch_add(size, Ordering::Relaxed);
 
         Ok(format!("slab:{id}"))
@@ -84,15 +85,16 @@ impl PayloadBackend for EphemeralSlab {
 
     fn load(&self, reference: &str) -> Result<Option<Vec<u8>>, String> {
         let id = parse_slab_id(reference)?;
-        let slabs = self.slabs.read().unwrap();
+        let slabs = self.slabs.read();
         Ok(slabs.get(&id).cloned())
     }
 
     fn remove(&self, reference: &str) -> Result<(), String> {
         let id = parse_slab_id(reference)?;
-        let mut slabs = self.slabs.write().unwrap();
+        let mut slabs = self.slabs.write();
         if let Some(data) = slabs.remove(&id) {
-            self.total_bytes.fetch_sub(data.len() as u64, Ordering::Relaxed);
+            self.total_bytes
+                .fetch_sub(data.len() as u64, Ordering::Relaxed);
         }
         Ok(())
     }
@@ -103,13 +105,14 @@ impl PayloadBackend for EphemeralSlab {
 
     fn evict_to(&self, target_bytes: u64) -> Result<usize, String> {
         let mut evicted_count = 0;
-        let mut order = self.insertion_order.lock().unwrap();
-        let mut slabs = self.slabs.write().unwrap();
+        let mut order = self.insertion_order.lock();
+        let mut slabs = self.slabs.write();
 
         while self.total_bytes.load(Ordering::Relaxed) > target_bytes && !order.is_empty() {
-            let oldest_id = order.remove(0);
+            let oldest_id = order.pop_front().expect("order is non-empty");
             if let Some(data) = slabs.remove(&oldest_id) {
-                self.total_bytes.fetch_sub(data.len() as u64, Ordering::Relaxed);
+                self.total_bytes
+                    .fetch_sub(data.len() as u64, Ordering::Relaxed);
                 evicted_count += 1;
             }
         }
@@ -151,7 +154,8 @@ struct SessionSegmentWriter {
 
 impl SessionSegmentWriter {
     fn open_or_create(dir: PathBuf) -> Result<Self, String> {
-        fs::create_dir_all(&dir).map_err(|e| format!("Failed to create session dir {dir:?}: {e}"))?;
+        fs::create_dir_all(&dir)
+            .map_err(|e| format!("Failed to create session dir {dir:?}: {e}"))?;
 
         // Find existing segments to determine next ID & offset
         let mut max_id = 0u64;
@@ -178,10 +182,7 @@ impl SessionSegmentWriter {
             .open(&seg_path)
             .map_err(|e| format!("Failed to open segment file {seg_path:?}: {e}"))?;
 
-        let offset = file
-            .metadata()
-            .map(|m| m.len())
-            .unwrap_or(0);
+        let offset = file.metadata().map(|m| m.len()).unwrap_or(0);
 
         Ok(Self {
             dir,
@@ -195,7 +196,7 @@ impl SessionSegmentWriter {
     }
 
     fn write_payload(&self, data: &[u8]) -> Result<(u64, u64, usize), String> {
-        let mut seg = self.current_segment.lock().unwrap();
+        let mut seg = self.current_segment.lock();
 
         // Check for 1 GB rollover
         if seg.offset + (data.len() as u64) > MAX_SEGMENT_SIZE && seg.offset > 0 {
@@ -241,18 +242,22 @@ impl DiskSegmentStore {
 
     fn get_or_create_writer(&self, session_id: &str) -> Result<Arc<SessionSegmentWriter>, String> {
         {
-            let readers = self.writers.read().unwrap();
+            let readers = self.writers.read();
             if let Some(writer) = readers.get(session_id) {
                 return Ok(Arc::clone(writer));
             }
         }
 
-        let mut writers = self.writers.write().unwrap();
+        let mut writers = self.writers.write();
         if let Some(writer) = writers.get(session_id) {
             return Ok(Arc::clone(writer));
         }
 
-        let sid = if session_id.is_empty() { "default" } else { session_id };
+        let sid = if session_id.is_empty() {
+            "default"
+        } else {
+            session_id
+        };
         let session_path = self.sessions_dir.join(sid);
         let writer = Arc::new(SessionSegmentWriter::open_or_create(session_path)?);
         writers.insert(session_id.to_string(), Arc::clone(&writer));
@@ -260,9 +265,13 @@ impl DiskSegmentStore {
     }
 
     pub fn remove_session(&self, session_id: &str) -> Result<(), String> {
-        let mut writers = self.writers.write().unwrap();
+        let mut writers = self.writers.write();
         writers.remove(session_id);
-        let sid = if session_id.is_empty() { "default" } else { session_id };
+        let sid = if session_id.is_empty() {
+            "default"
+        } else {
+            session_id
+        };
         let path = self.sessions_dir.join(sid);
         if path.exists() {
             let _ = fs::remove_dir_all(path);
@@ -271,7 +280,7 @@ impl DiskSegmentStore {
     }
 
     pub fn clear_all(&self) -> Result<u64, String> {
-        let mut writers = self.writers.write().unwrap();
+        let mut writers = self.writers.write();
         writers.clear();
         let bytes_freed = compute_dir_size(&self.sessions_dir).unwrap_or(0);
         if self.sessions_dir.exists() {
@@ -290,7 +299,11 @@ impl PayloadBackend for DiskSegmentStore {
     fn store(&self, session_id: &str, data: &[u8]) -> Result<PayloadRef, String> {
         let writer = self.get_or_create_writer(session_id)?;
         let (seg_id, offset, len) = writer.write_payload(data)?;
-        let sid = if session_id.is_empty() { "default" } else { session_id };
+        let sid = if session_id.is_empty() {
+            "default"
+        } else {
+            session_id
+        };
         Ok(format!("seg:{sid}:{seg_id}:{offset}:{len}"))
     }
 
@@ -305,7 +318,8 @@ impl PayloadBackend for DiskSegmentStore {
             return Ok(None);
         }
 
-        let mut file = File::open(&path).map_err(|e| format!("Failed to open segment file {path:?}: {e}"))?;
+        let mut file =
+            File::open(&path).map_err(|e| format!("Failed to open segment file {path:?}: {e}"))?;
         file.seek(SeekFrom::Start(offset))
             .map_err(|e| format!("Failed to seek in segment file {path:?}: {e}"))?;
 
@@ -332,7 +346,7 @@ impl PayloadBackend for DiskSegmentStore {
     }
 
     fn close(&self) -> Result<(), String> {
-        let mut writers = self.writers.write().unwrap();
+        let mut writers = self.writers.write();
         writers.clear();
         Ok(())
     }
@@ -342,7 +356,9 @@ fn parse_seg_ref(reference: &str) -> Result<(&str, u64, u64, usize), String> {
     if let Some(rest) = reference.strip_prefix("seg:") {
         let parts: Vec<&str> = rest.split(':').collect();
         if parts.len() != 4 {
-            return Err(format!("Invalid segment reference '{reference}': expected 4 parts"));
+            return Err(format!(
+                "Invalid segment reference '{reference}': expected 4 parts"
+            ));
         }
         let session_id = parts[0];
         let seg_id = parts[1]
@@ -357,7 +373,9 @@ fn parse_seg_ref(reference: &str) -> Result<(&str, u64, u64, usize), String> {
 
         Ok((session_id, seg_id, offset, length))
     } else {
-        Err(format!("Reference '{reference}' is not a segment reference"))
+        Err(format!(
+            "Reference '{reference}' is not a segment reference"
+        ))
     }
 }
 
@@ -573,6 +591,51 @@ mod tests {
         let (ref2, size2, trunc2) = store.store_body("s", &large, "ephemeral");
         assert_eq!(size2, MAX_BODY_SIZE + 500);
         assert!(trunc2);
-        assert_eq!(store.load_body(&ref2).unwrap().unwrap().len(), MAX_BODY_SIZE);
+        assert_eq!(
+            store.load_body(&ref2).unwrap().unwrap().len(),
+            MAX_BODY_SIZE
+        );
+    }
+
+    #[test]
+    fn test_parse_slab_id_valid_and_invalid() {
+        assert_eq!(parse_slab_id("slab:42").unwrap(), 42);
+        assert_eq!(parse_slab_id("slab:0").unwrap(), 0);
+
+        assert!(parse_slab_id("42")
+            .unwrap_err()
+            .contains("is not a slab reference"));
+        assert!(parse_slab_id("seg:1:2:3:4")
+            .unwrap_err()
+            .contains("is not a slab reference"));
+        assert!(parse_slab_id("slab:abc")
+            .unwrap_err()
+            .contains("Invalid slab id 'abc'"));
+        assert!(parse_slab_id("slab:").is_err());
+    }
+
+    #[test]
+    fn test_parse_seg_ref_valid_and_invalid() {
+        let (session, seg_id, offset, length) = parse_seg_ref("seg:sess_9:3:1024:64").unwrap();
+        assert_eq!(session, "sess_9");
+        assert_eq!(seg_id, 3);
+        assert_eq!(offset, 1024);
+        assert_eq!(length, 64);
+
+        assert!(parse_seg_ref("slab:1")
+            .unwrap_err()
+            .contains("is not a segment reference"));
+        assert!(parse_seg_ref("seg:only:two")
+            .unwrap_err()
+            .contains("expected 4 parts"));
+        assert!(parse_seg_ref("seg:s:1:1:x")
+            .unwrap_err()
+            .contains("Invalid length"));
+        assert!(parse_seg_ref("seg:s:x:1:1")
+            .unwrap_err()
+            .contains("Invalid seg_id"));
+        assert!(parse_seg_ref("seg:s:1:x:1")
+            .unwrap_err()
+            .contains("Invalid offset"));
     }
 }

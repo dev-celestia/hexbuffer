@@ -6,39 +6,42 @@ use uuid::Uuid;
 use super::types::{ProxySummaryRow, TreeNode, TreePath};
 use super::Database;
 
-fn build_scope_sql_clause(scope: &[String]) -> Option<String> {
-    let scope_clauses: Vec<String> = scope
-        .iter()
-        .filter_map(|pattern| {
-            let value = pattern.trim();
-            if value.is_empty() {
-                return None;
-            }
+fn build_scope_sql_clause(
+    scope: &[String],
+    params_vec: &mut Vec<Box<dyn rusqlite::ToSql>>,
+) -> Option<String> {
+    let mut clause_parts: Vec<String> = Vec::new();
+    for pattern in scope {
+        let value = pattern.trim();
+        if value.is_empty() {
+            continue;
+        }
 
-            let clean = value
-                .trim_start_matches("http://")
-                .trim_start_matches("https://")
-                .trim_start_matches("*.")
-                .trim_end_matches('/');
+        let clean = value
+            .trim_start_matches("http://")
+            .trim_start_matches("https://")
+            .trim_start_matches("*.")
+            .trim_end_matches('/');
 
-            if clean.is_empty() {
-                return None;
-            }
+        if clean.is_empty() {
+            continue;
+        }
 
-            let domain_no_port = clean.split(':').next().unwrap_or(clean);
+        let domain_no_port = clean.split(':').next().unwrap_or(clean);
 
-            Some(format!(
-                "(url LIKE '%{clean}%' OR url LIKE '%{domain_no_port}%' OR server_addr LIKE '%{clean}%' OR server_addr LIKE '%{domain_no_port}%')",
-                clean = clean,
-                domain_no_port = domain_no_port
-            ))
-        })
-        .collect();
+        clause_parts.push(
+            "(url LIKE ? OR url LIKE ? OR server_addr LIKE ? OR server_addr LIKE ?)".to_string(),
+        );
+        params_vec.push(Box::new(format!("%{clean}%")));
+        params_vec.push(Box::new(format!("%{domain_no_port}%")));
+        params_vec.push(Box::new(format!("%{clean}%")));
+        params_vec.push(Box::new(format!("%{domain_no_port}%")));
+    }
 
-    if scope_clauses.is_empty() {
+    if clause_parts.is_empty() {
         None
     } else {
-        Some(format!(" AND ({})", scope_clauses.join(" OR ")))
+        Some(format!(" AND ({})", clause_parts.join(" OR ")))
     }
 }
 
@@ -55,7 +58,7 @@ impl Database {
         let target_session_id = if let Some(sid) = session_id {
             sid.to_string()
         } else {
-            let conn = self.conn.lock().unwrap();
+            let conn = self.conn.lock();
             Self::ensure_default_http_session(&conn)?
         };
 
@@ -87,7 +90,7 @@ impl Database {
             .map(|r| serde_json::to_string(&r.headers).unwrap_or_default())
             .unwrap_or_default();
 
-        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
+        let conn = self.traffic_conn(&storage_mode).lock();
         conn.execute(
             r#"INSERT INTO http_logs (
                 id, session_id, timestamp, method, url,
@@ -119,7 +122,11 @@ impl Database {
         )?;
 
         if storage_mode == "ephemeral" {
-            let _ = Self::prune_ephemeral_http_logs(&conn, payload_store, &target_session_id);
+            if let Err(e) =
+                Self::prune_ephemeral_http_logs(&conn, payload_store, &target_session_id)
+            {
+                eprintln!("[db] insert_log: failed to prune ephemeral logs: {}", e);
+            }
         }
         Ok(())
     }
@@ -205,7 +212,7 @@ impl Database {
         let mut ephemeral_records = Vec::new();
 
         {
-            let conn = self.conn.lock().unwrap();
+            let conn = self.conn.lock();
             let default_session = Self::ensure_default_http_session(&conn)?;
             drop(conn);
 
@@ -225,7 +232,7 @@ impl Database {
 
         // Write persistent batch
         if !persistent_records.is_empty() {
-            let mut conn = self.conn.lock().unwrap();
+            let mut conn = self.conn.lock();
             let tx = conn.transaction()?;
             {
                 let mut stmt = tx.prepare_cached(
@@ -293,7 +300,7 @@ impl Database {
 
         // Write ephemeral batch
         if !ephemeral_records.is_empty() {
-            let mut conn = self.ephemeral_conn.lock().unwrap();
+            let mut conn = self.ephemeral_conn.lock();
             let tx = conn.transaction()?;
             {
                 let mut stmt = tx.prepare_cached(
@@ -359,16 +366,14 @@ impl Database {
             tx.commit()?;
 
             // Prune ephemeral sessions after batch write
-            let mut session_ids: Vec<String> =
-                ephemeral_records.iter().map(|(_, sid)| sid.clone()).collect();
+            let mut session_ids: Vec<String> = ephemeral_records
+                .iter()
+                .map(|(_, sid)| sid.clone())
+                .collect();
             session_ids.sort();
             session_ids.dedup();
             for sid in session_ids {
-                let _ = Self::prune_ephemeral_http_logs(
-                    &conn,
-                    payload_store,
-                    &sid,
-                );
+                let _ = Self::prune_ephemeral_http_logs(&conn, payload_store, &sid);
             }
         }
 
@@ -378,7 +383,7 @@ impl Database {
     pub fn get_all(&self, payload_store: Option<&PayloadStore>) -> SqlResult<Vec<ProxyRecord>> {
         let mut results = Vec::new();
         {
-            let conn = self.conn.lock().unwrap();
+            let conn = self.conn.lock();
             let mut stmt = conn.prepare(&format!(
                 "SELECT {} FROM http_logs ORDER BY timestamp DESC",
                 SELECT_PROXY_RECORD_COLS
@@ -387,7 +392,7 @@ impl Database {
             results.extend(collect_records(rows));
         }
         {
-            let eph = self.ephemeral_conn.lock().unwrap();
+            let eph = self.ephemeral_conn.lock();
             let mut stmt = eph.prepare(&format!(
                 "SELECT {} FROM http_logs ORDER BY timestamp DESC",
                 SELECT_PROXY_RECORD_COLS
@@ -405,66 +410,92 @@ impl Database {
         payload_store: Option<&PayloadStore>,
     ) -> SqlResult<Vec<ProxyRecord>> {
         let storage_mode = self.get_session_storage_mode(filter.session_id.as_deref());
-        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
-        let mut sql = format!("SELECT {} FROM http_logs WHERE 1=1", SELECT_PROXY_RECORD_COLS);
-        let mut conditions = Vec::new();
+        let conn = self.traffic_conn(&storage_mode).lock();
+        let mut sql = format!(
+            "SELECT {} FROM http_logs WHERE 1=1",
+            SELECT_PROXY_RECORD_COLS
+        );
+        let mut params_vec: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
 
         if let Some(ref session_id) = filter.session_id {
             if !session_id.is_empty() {
-                conditions.push(format!("session_id = '{}'", session_id.replace('\'', "''")));
+                sql.push_str(" AND session_id = ?");
+                params_vec.push(Box::new(session_id.clone()));
             }
         }
 
         if let Some(ref search) = filter.search {
             if !search.is_empty() {
-                conditions.push(format!(
-                    "(url LIKE '%{}%' OR method LIKE '%{}%' OR server_addr LIKE '%{}%' OR request_headers LIKE '%{}%')",
-                    search, search, search, search
-                ));
+                let search_pattern = format!("%{}%", search);
+                sql.push_str(
+                    " AND (url LIKE ? OR method LIKE ? OR server_addr LIKE ? OR request_headers LIKE ?)",
+                );
+                params_vec.push(Box::new(search_pattern.clone()));
+                params_vec.push(Box::new(search_pattern.clone()));
+                params_vec.push(Box::new(search_pattern.clone()));
+                params_vec.push(Box::new(search_pattern));
             }
         }
 
         if let Some(ref path) = filter.path {
             if !path.is_empty() {
-                conditions.push(format!("url LIKE '%{}%'", path));
+                sql.push_str(" AND url LIKE ?");
+                params_vec.push(Box::new(format!("%{}%", path)));
             }
         }
 
         if let Some(ref methods) = filter.methods {
             if !methods.is_empty() {
-                let method_list: Vec<String> = methods.iter().map(|m| format!("'{}'", m)).collect();
-                conditions.push(format!("method IN ({})", method_list.join(",")));
+                sql.push_str(" AND method IN (");
+                for (i, m) in methods.iter().enumerate() {
+                    if i > 0 {
+                        sql.push_str(", ");
+                    }
+                    sql.push('?');
+                    params_vec.push(Box::new(m.clone()));
+                }
+                sql.push(')');
             }
         }
 
         if let Some(ref status_codes) = filter.status_codes {
             if !status_codes.is_empty() {
-                let status_list: Vec<String> = status_codes.iter().map(|s| s.to_string()).collect();
-                conditions.push(format!("response_status IN ({})", status_list.join(",")));
+                sql.push_str(" AND response_status IN (");
+                for (i, s) in status_codes.iter().enumerate() {
+                    if i > 0 {
+                        sql.push_str(", ");
+                    }
+                    sql.push('?');
+                    params_vec.push(Box::new(*s as i64));
+                }
+                sql.push(')');
             }
-        }
-
-        if !conditions.is_empty() {
-            sql.push_str(" AND ");
-            sql.push_str(&conditions.join(" AND "));
         }
 
         sql.push_str(" ORDER BY timestamp DESC");
 
+        let all_params: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
+
         let mut stmt = conn.prepare(&sql)?;
-        let rows = stmt.query_map([], |row| row_to_proxy_record(row, payload_store))?;
+        let rows = stmt.query_map(all_params.as_slice(), |row| {
+            row_to_proxy_record(row, payload_store)
+        })?;
 
         Ok(collect_records(rows))
     }
 
     pub fn delete_log(&self, id: &str) -> SqlResult<()> {
         {
-            let conn = self.conn.lock().unwrap();
-            let _ = conn.execute("DELETE FROM http_logs WHERE id = ?1", params![id]);
+            let conn = self.conn.lock();
+            if let Err(e) = conn.execute("DELETE FROM http_logs WHERE id = ?1", params![id]) {
+                eprintln!("[db] delete_log: failed to delete from disk DB: {}", e);
+            }
         }
         {
-            let eph = self.ephemeral_conn.lock().unwrap();
-            let _ = eph.execute("DELETE FROM http_logs WHERE id = ?1", params![id]);
+            let eph = self.ephemeral_conn.lock();
+            if let Err(e) = eph.execute("DELETE FROM http_logs WHERE id = ?1", params![id]) {
+                eprintln!("[db] delete_log: failed to delete from ephemeral DB: {}", e);
+            }
         }
         Ok(())
     }
@@ -476,7 +507,7 @@ impl Database {
     ) -> SqlResult<Option<ProxyRecord>> {
         // Try persistent DB first
         {
-            let conn = self.conn.lock().unwrap();
+            let conn = self.conn.lock();
             let mut stmt = conn.prepare(&format!(
                 "SELECT {} FROM http_logs WHERE id = ?1 LIMIT 1",
                 SELECT_PROXY_RECORD_COLS
@@ -489,7 +520,7 @@ impl Database {
 
         // Try ephemeral DB
         {
-            let eph = self.ephemeral_conn.lock().unwrap();
+            let eph = self.ephemeral_conn.lock();
             let mut stmt = eph.prepare(&format!(
                 "SELECT {} FROM http_logs WHERE id = ?1 LIMIT 1",
                 SELECT_PROXY_RECORD_COLS
@@ -505,13 +536,13 @@ impl Database {
 
     pub fn clear_logs(&self) -> SqlResult<()> {
         {
-            let conn = self.conn.lock().unwrap();
+            let conn = self.conn.lock();
             conn.execute("DELETE FROM http_logs", [])?;
             drop(conn);
             let _ = self.vacuum();
         }
         {
-            let eph = self.ephemeral_conn.lock().unwrap();
+            let eph = self.ephemeral_conn.lock();
             let _ = eph.execute("DELETE FROM http_logs", []);
         }
         Ok(())
@@ -520,40 +551,68 @@ impl Database {
     pub fn clear_logs_before(&self, cutoff_rfc3339: &str) -> SqlResult<usize> {
         let mut total = 0;
         {
-            let conn = self.conn.lock().unwrap();
-            let rows = conn.execute(
+            let mut conn = self.conn.lock();
+            let tx = conn.transaction()?;
+            let rows = tx.execute(
                 "DELETE FROM http_logs WHERE timestamp < ?1",
                 params![cutoff_rfc3339],
             )?;
-            let _ = conn.execute(
+            if let Err(e) = tx.execute(
                 "DELETE FROM websocket_messages WHERE timestamp < ?1",
                 params![cutoff_rfc3339],
-            );
-            let _ = conn.execute(
+            ) {
+                eprintln!(
+                    "[db] clear_logs_before: failed to delete websocket_messages: {}",
+                    e
+                );
+            }
+            if let Err(e) = tx.execute(
                 "DELETE FROM websocket_connections WHERE timestamp < ?1",
                 params![cutoff_rfc3339],
-            );
+            ) {
+                eprintln!(
+                    "[db] clear_logs_before: failed to delete websocket_connections: {}",
+                    e
+                );
+            }
+            tx.commit()?;
             drop(conn);
             let _ = self.vacuum();
             total += rows;
         }
         {
-            let eph = self.ephemeral_conn.lock().unwrap();
-            let rows = eph
-                .execute(
-                    "DELETE FROM http_logs WHERE timestamp < ?1",
-                    params![cutoff_rfc3339],
-                )
-                .unwrap_or(0);
-            let _ = eph.execute(
-                "DELETE FROM websocket_messages WHERE timestamp < ?1",
-                params![cutoff_rfc3339],
-            );
-            let _ = eph.execute(
-                "DELETE FROM websocket_connections WHERE timestamp < ?1",
-                params![cutoff_rfc3339],
-            );
-            total += rows;
+            let mut eph = self.ephemeral_conn.lock();
+            let tx_result = eph.transaction();
+            match tx_result {
+                Ok(tx) => {
+                    let rows = tx
+                        .execute(
+                            "DELETE FROM http_logs WHERE timestamp < ?1",
+                            params![cutoff_rfc3339],
+                        )
+                        .unwrap_or(0);
+                    if let Err(e) = tx.execute(
+                        "DELETE FROM websocket_messages WHERE timestamp < ?1",
+                        params![cutoff_rfc3339],
+                    ) {
+                        eprintln!("[db] clear_logs_before: failed to delete ephemeral websocket_messages: {}", e);
+                    }
+                    if let Err(e) = tx.execute(
+                        "DELETE FROM websocket_connections WHERE timestamp < ?1",
+                        params![cutoff_rfc3339],
+                    ) {
+                        eprintln!("[db] clear_logs_before: failed to delete ephemeral websocket_connections: {}", e);
+                    }
+                    let _ = tx.commit();
+                    total += rows;
+                }
+                Err(e) => {
+                    eprintln!(
+                        "[db] clear_logs_before: failed to begin ephemeral transaction: {}",
+                        e
+                    );
+                }
+            }
         }
         Ok(total)
     }
@@ -566,7 +625,7 @@ impl Database {
         sort_order: &str,
     ) -> Result<Vec<ProxySummaryRow>, String> {
         let storage_mode = self.get_session_storage_mode(session_id);
-        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
+        let conn = self.traffic_conn(&storage_mode).lock();
 
         let (where_clause, params_vec): (String, Vec<Box<dyn rusqlite::ToSql>>) = match session_id {
             Some(sid) if !sid.is_empty() => (
@@ -613,7 +672,7 @@ impl Database {
         sort_order: &str,
     ) -> Result<Vec<ProxySummaryRow>, String> {
         let storage_mode = self.get_session_storage_mode(filter.session_id.as_deref());
-        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
+        let conn = self.traffic_conn(&storage_mode).lock();
 
         let mut where_sql = String::new();
         let mut params_vec: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
@@ -674,7 +733,7 @@ impl Database {
         }
 
         if let Some(ref scope) = filter.scope {
-            if let Some(clause) = build_scope_sql_clause(scope) {
+            if let Some(clause) = build_scope_sql_clause(scope, &mut params_vec) {
                 where_sql.push_str(&clause);
             }
         }
@@ -711,7 +770,7 @@ impl Database {
 
     pub fn count(&self, session_id: Option<&str>) -> Result<usize, String> {
         let storage_mode = self.get_session_storage_mode(session_id);
-        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
+        let conn = self.traffic_conn(&storage_mode).lock();
         let (sql, params_vec): (String, Vec<Box<dyn rusqlite::ToSql>>) = match session_id {
             Some(sid) if !sid.is_empty() => (
                 "SELECT COUNT(*) FROM http_logs WHERE session_id = ?".to_string(),
@@ -719,8 +778,7 @@ impl Database {
             ),
             _ => ("SELECT COUNT(*) FROM http_logs".to_string(), Vec::new()),
         };
-        let params_ref: Vec<&dyn rusqlite::ToSql> =
-            params_vec.iter().map(|b| b.as_ref()).collect();
+        let params_ref: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
         let total: i64 = conn
             .query_row(&sql, params_ref.as_slice(), |row| row.get(0))
             .map_err(|e| e.to_string())?;
@@ -729,7 +787,7 @@ impl Database {
 
     pub fn get_tree(&self, filter: &ProxyFilter) -> Result<Vec<TreeNode>, String> {
         let storage_mode = self.get_session_storage_mode(filter.session_id.as_deref());
-        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
+        let conn = self.traffic_conn(&storage_mode).lock();
 
         let mut sql = String::from("SELECT url, method FROM http_logs WHERE 1=1");
         let mut params_vec: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
@@ -790,13 +848,12 @@ impl Database {
         }
 
         if let Some(ref scope) = filter.scope {
-            if let Some(clause) = build_scope_sql_clause(scope) {
+            if let Some(clause) = build_scope_sql_clause(scope, &mut params_vec) {
                 sql.push_str(&clause);
             }
         }
 
-        let all_params: Vec<&dyn rusqlite::ToSql> =
-            params_vec.iter().map(|b| b.as_ref()).collect();
+        let all_params: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
 
         let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
         let rows = stmt
@@ -832,10 +889,12 @@ impl Database {
             let host = uri.split('/').next().unwrap_or("");
 
             let host_entry = host_paths.entry(host.to_string()).or_default();
-            let path_entry = host_entry.entry(url.to_string()).or_insert_with(|| PathInfo {
-                url,
-                ..Default::default()
-            });
+            let path_entry = host_entry
+                .entry(url.to_string())
+                .or_insert_with(|| PathInfo {
+                    url,
+                    ..Default::default()
+                });
             path_entry.count += 1;
             path_entry.methods.insert(method);
         }

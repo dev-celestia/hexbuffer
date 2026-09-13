@@ -1,27 +1,24 @@
-
-
-import { Button, Textarea } from '@celestia-project/ui';
-import { CopyIcon } from '@phosphor-icons/react';
+import { Textarea } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 
 interface EncoderOutputPanelProps {
   headerLabel: string;
+  codecLabel: string;
   output: string;
   error: string | null;
-  onCopy: () => void;
 }
 
 export function EncoderOutputPanel({
   headerLabel,
+  codecLabel,
   output,
   error,
-  onCopy,
 }: EncoderOutputPanelProps) {
   return (
     <div
       className={cn(
         // Layout & Positioning
-        "flex flex-col min-h-0"
+        "flex flex-col min-h-0 h-full"
       )}
     >
       <div
@@ -36,53 +33,24 @@ export function EncoderOutputPanel({
           "border-b bg-muted/10"
         )}
       >
-        <div
+        <span
           className={cn(
-            // Layout & Positioning
-            "flex items-baseline",
-
-            // Sizing & Spacing
-            "gap-2"
+            // Typography
+            "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
           )}
         >
+          {headerLabel} · {codecLabel}
+        </span>
+        {output && (
           <span
             className={cn(
-              // Typography
-              "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
-            )}
-          >
-            {headerLabel}
-          </span>
-          <span
-            className={cn(
-              // Layout & Positioning
-              "hidden sm:inline",
-
               // Typography
               "text-[10px] text-muted-foreground"
             )}
           >
-            Auto-updates
+            {output.length.toLocaleString()} chars
           </span>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onCopy}
-          disabled={!output}
-          className={cn(
-            // Sizing & Spacing
-            "h-6 w-6",
-
-            // Typography
-            "text-muted-foreground",
-
-            // Interactive & States
-            "hover:text-foreground"
-          )}
-        >
-          <CopyIcon className="h-3 w-3" />
-        </Button>
+        )}
       </div>
       {error ? (
         <div
@@ -128,4 +96,3 @@ export function EncoderOutputPanel({
     </div>
   );
 }
-

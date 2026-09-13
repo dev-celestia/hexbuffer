@@ -1,97 +1,52 @@
-# Bug Condition Exploration Tests
+# Rust Backend Tests
 
-## Overview
+All backend tests are inline `#[cfg(test)] mod tests` blocks at the bottom of the
+module they cover. There are no integration test binaries in `tests/`, so the
+suite runs against the library target only.
 
-These tests are designed to **FAIL on unfixed code (Pingora)** to confirm the bug exists. When the tests **PASS after migration to Hudsucker**, it confirms the fix works.
-
-## Prerequisites
-
-**CRITICAL**: The proxy must be running before executing these tests.
-
-### Starting the Proxy
-
-1. Open a terminal in the `src-tauri` directory
-2. Run the application:
-   ```bash
-   cargo run
-   ```
-3. The proxy should start on port 8888
-4. Keep this terminal open while running tests
-
-### Running the Tests
-
-In a **separate terminal**, run:
+## Running
 
 ```bash
 cd src-tauri
 cargo test --lib -- --test-threads=1
 ```
 
-**Note**: Use `--test-threads=1` to run tests sequentially, as they all connect to the same proxy instance.
+`--test-threads=1` is required: a few tests touch process-global state (for
+example `proxy/mock_server.rs` assertions on the static `MOCK_SERVER_STATUS`),
+and DB/FS tests use `tempfile::tempdir()` scratch directories.
 
-## Expected Behavior
+No test in the suite requires a running proxy, database server, or network
+access. Everything runs offline with fixtures constructed in the test module.
 
-### On Unfixed Code (Pingora)
+## Conventions
 
-The tests **WILL FAIL** with messages like:
+- Naming: `test_<subject>_<behavior>` (e.g. `test_ephemeral_slab_fifo_eviction`).
+- Fixtures: small local constructors inside the test module (e.g.
+  `route_with(...)` in `proxy/mock_common.rs`, `create_test_record(...)` in
+  `proxy/state.rs`).
+- Async code is tested with `#[tokio::test]` where the unit is async (e.g.
+  chaos simulation in `proxy/mock_common.rs`); otherwise sync inner helpers are
+  preferred.
+- No dev-dependencies are required: `tempfile` and tokio's full feature set are
+  regular dependencies.
 
-```
-BUG CONFIRMED: No TLS ServerHello received. Connection is idle after CONNECT 200.
-```
+## Coverage map (unit-testable areas)
 
-This is **EXPECTED** and confirms the bug exists. The failure demonstrates that:
-- CONNECT requests receive "200 Connection Established" ✓
-- But TLS handshake never occurs ✗
-- Connection remains idle ✗
+| Area | Files with tests |
+|---|---|
+| Proxy | `proxy/state.rs`, `proxy/ca.rs`, `proxy/websocket.rs`, `proxy/mock_common.rs`, `proxy/mock_server.rs`, `proxy/mock_forge.rs` |
+| MockForge commands | `commands/mock_forge.rs`, `commands/invoker.rs` |
+| DB | `db/payload_store.rs`, `db/promotion.rs`, `db/repository/regression.rs` |
+| Automation | `automation/condition.rs`, `automation/host_filter.rs`, `automation/actions.rs`, `automation/intercept.rs`, `automation/websocket.rs`, `automation/scheduled.rs`, `automation/live_traffic.rs`, `automation/page_crawled.rs`, `automation/port_scan.rs` |
+| Port scanner | `port-scanner/targets.rs`, `port-scanner/services.rs` |
+| SQLi | `sqli/payloads.rs` |
+| Hashcat | `hashcat/args.rs`, `hashcat/binary.rs`, `hashcat/engine.rs`, `hashcat/mod.rs` |
+| AI | `ai/providers.rs` |
+| App | `app_commands.rs` |
 
-### On Fixed Code (Hudsucker)
+## Historical note
 
-After migration to Hudsucker, the tests **WILL PASS**, confirming:
-- CONNECT requests receive "200 Connection Established" ✓
-- TLS handshake completes successfully ✓
-- HTTPS traffic can be decrypted and logged ✓
-
-## Test Cases
-
-### 1. `test_connect_tunnel_tls_upgrade_example_com`
-- **Validates**: Requirements 1.1, 1.2, 1.3, 1.4
-- **Target**: example.com:443
-- **Expected on Pingora**: FAIL (no TLS ServerHello)
-- **Expected on Hudsucker**: PASS (TLS handshake completes)
-
-### 2. `test_connect_tunnel_tls_upgrade_httpbin`
-- **Validates**: Requirements 1.1, 1.2, 1.3, 1.4
-- **Target**: httpbin.org:443
-- **Expected on Pingora**: FAIL (no TLS ServerHello)
-- **Expected on Hudsucker**: PASS (TLS handshake completes)
-
-### 3. `prop_connect_tunnel_requires_tls_upgrade` (Property-Based)
-- **Validates**: Requirements 1.1, 1.2, 1.3, 1.4
-- **Targets**: Multiple hosts (example.com, httpbin.org, google.com)
-- **Expected on Pingora**: FAIL (no TLS ServerHello for any host)
-- **Expected on Hudsucker**: PASS (TLS handshake completes for all hosts)
-
-## Troubleshooting
-
-### "Failed to connect to proxy"
-- Ensure the proxy is running on port 8888
-- Check that no other service is using port 8888
-- Verify the proxy started successfully (check terminal output)
-
-### "Connection timeout"
-- This is expected on Pingora (confirms the bug)
-- The connection sits idle after CONNECT 200
-- This is the bug we're fixing
-
-### "Address already in use"
-- Another instance of the proxy is running
-- Kill the other instance or use a different port
-- Update the test proxy address if using a different port
-
-## Next Steps
-
-After documenting the test failures on Pingora:
-1. Proceed to Phase 2: Write preservation property tests
-2. Implement the migration to Hudsucker (Phases 3-7)
-3. Re-run these tests to verify the fix works
-4. Verify preservation tests still pass (no regressions)
+This directory previously documented a "Bug Condition Exploration" suite
+(`test_connect_tunnel_tls_upgrade_*`) written for the Pingora → Hudsucker proxy
+migration. Those tests were removed after the migration landed; the migration
+history is preserved in git.

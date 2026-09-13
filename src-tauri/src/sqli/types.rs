@@ -1,7 +1,8 @@
+use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SqliScanConfig {
@@ -169,19 +170,19 @@ impl SqliScanState {
     }
 
     pub fn register_scan(&self, scan_id: &str) {
-        let mut cancellations = self.cancellations.lock().unwrap();
+        let mut cancellations = self.cancellations.lock();
         cancellations.insert(scan_id.to_string(), Arc::new(AtomicBool::new(false)));
     }
 
     pub fn cancel_scan(&self, scan_id: &str) {
-        let cancellations = self.cancellations.lock().unwrap();
+        let cancellations = self.cancellations.lock();
         if let Some(flag) = cancellations.get(scan_id) {
             flag.store(true, Ordering::SeqCst);
         }
     }
 
     pub fn is_cancelled(&self, scan_id: &str) -> bool {
-        let cancellations = self.cancellations.lock().unwrap();
+        let cancellations = self.cancellations.lock();
         cancellations
             .get(scan_id)
             .map(|f| f.load(Ordering::SeqCst))
@@ -189,7 +190,7 @@ impl SqliScanState {
     }
 
     pub fn unregister_scan(&self, scan_id: &str) {
-        let mut cancellations = self.cancellations.lock().unwrap();
+        let mut cancellations = self.cancellations.lock();
         cancellations.remove(scan_id);
     }
 }

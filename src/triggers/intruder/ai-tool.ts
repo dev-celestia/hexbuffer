@@ -16,9 +16,10 @@ export const INTRUDER_AI_TOOL_DEFINITION = {
 
 export const INVOKER_AI_TOOL_DEFINITION = INTRUDER_AI_TOOL_DEFINITION;
 
-export function executeStartIntruderAttackAiTool(_args: Record<string, any>) {
+export async function executeStartIntruderAttackAiTool(args: Record<string, any>) {
   startIntruderAttack();
-  return { status: 'success', tool: 'start_intruder_attack' };
+  const strategy = args?.attack_type ? ` (strategy: ${args.attack_type})` : '';
+  return `Invoker attack launched${strategy}. Configure the payload and target in the Intruder tab.`;
 }
 
 export const executeStartInvokerAttackAiTool = executeStartIntruderAttackAiTool;

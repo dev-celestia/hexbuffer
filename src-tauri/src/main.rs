@@ -133,6 +133,7 @@ fn main() {
             hexbuffer::ai::clear_ai_api_key,
             hexbuffer::ai::save_ai_settings,
             hexbuffer::ai::send_ai_chat_message,
+            hexbuffer::ai::resolve_ai_tool_result,
             hexbuffer::ai::suggest_invoker_markers,
             hexbuffer::commands::cert::get_ca_cert,
             hexbuffer::commands::cert::save_ca_cert,
@@ -259,7 +260,10 @@ fn main() {
             // args or via a full apprecon:// deep-link URL (send-to-repeater etc.)
             let mut requested_target: Option<(String, Option<String>)> = None;
             for arg in argv.into_iter().skip(1) {
-                if let Some(target) = arg.strip_prefix("--target=").or_else(|| arg.strip_prefix("--subapp=")) {
+                if let Some(target) = arg
+                    .strip_prefix("--target=")
+                    .or_else(|| arg.strip_prefix("--subapp="))
+                {
                     requested_target = Some((target.trim_matches('"').to_lowercase(), None));
                     break;
                 }
@@ -276,8 +280,15 @@ fn main() {
             }
 
             if let Some((target, query)) = requested_target {
-                crate::log(&format!("Single-instance opening sub-app window: {}", target));
-                crate::setup::open_or_focus_subapp_window_with_query(app, &target, query.as_deref());
+                crate::log(&format!(
+                    "Single-instance opening sub-app window: {}",
+                    target
+                ));
+                crate::setup::open_or_focus_subapp_window_with_query(
+                    app,
+                    &target,
+                    query.as_deref(),
+                );
             } else {
                 // Default: bring main suite window to front
                 crate::app_commands::focus_main_suite_window(app);
@@ -295,9 +306,16 @@ fn main() {
 
                 if window.label() == "main" {
                     // Check if any other windows (like subapp-* windows) are currently open
-                    let has_other_windows = window.app_handle().webview_windows().into_iter().any(|(lbl, w)| {
-                        lbl != "main" && lbl != "splashscreen" && w.is_visible().unwrap_or(false)
-                    });
+                    let has_other_windows =
+                        window
+                            .app_handle()
+                            .webview_windows()
+                            .into_iter()
+                            .any(|(lbl, w)| {
+                                lbl != "main"
+                                    && lbl != "splashscreen"
+                                    && w.is_visible().unwrap_or(false)
+                            });
 
                     if has_other_windows {
                         // Keep sub-windows alive while hiding the main suite window

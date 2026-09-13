@@ -6,6 +6,7 @@ use uuid::Uuid;
 use crate::port_scanner::PortScanResult;
 
 use super::execution::run_workflow_task;
+use super::host_filter::matches_host_filter;
 use super::state::AutomationRuntimeState;
 use super::types::{
     config_string, node_effective_type, AutomationNode, AutomationWorkflow, WorkflowContext,
@@ -22,10 +23,7 @@ pub fn ingest_port_scan_result(app: &AppHandle, scan_id: &str, result: &PortScan
     };
 
     let matches = {
-        let inner = match state.0.lock() {
-            Ok(inner) => inner,
-            Err(_) => return,
-        };
+        let inner = state.0.lock();
         inner
             .workflows
             .iter()
@@ -48,10 +46,7 @@ pub fn ingest_port_scan_result(app: &AppHandle, scan_id: &str, result: &PortScan
     for (workflow, trigger_node) in matches {
         let run_token = Uuid::new_v4().to_string();
         {
-            let mut inner = match state.0.lock() {
-                Ok(inner) => inner,
-                Err(_) => return,
-            };
+            let mut inner = state.0.lock();
             inner
                 .active_run_token_by_workflow_id
                 .insert(workflow.id.clone(), run_token.clone());
@@ -104,46 +99,6 @@ fn matches_port_scan_trigger(result: &PortScanResult, config: &Value) -> bool {
     parse_port_filter(&port_filter)
         .map(|ports| ports.contains(&result.port))
         .unwrap_or(false)
-}
-
-fn matches_host_filter(host: &str, filter: &str) -> bool {
-    let patterns = filter
-        .split([',', ';', ' ', '\n', '\t'])
-        .map(normalize_host_pattern)
-        .filter(|pattern| !pattern.is_empty())
-        .collect::<Vec<_>>();
-    if patterns.is_empty() {
-        return true;
-    }
-
-    let host = normalize_host_pattern(host);
-    patterns
-        .iter()
-        .any(|pattern| host == *pattern || host.ends_with(&format!(".{}", pattern)))
-}
-
-fn normalize_host_pattern(value: &str) -> String {
-    let trimmed = value.trim().trim_start_matches("*.").to_ascii_lowercase();
-    if trimmed.is_empty() {
-        return String::new();
-    }
-    let candidate = if trimmed.contains("://") {
-        url::Url::parse(&trimmed)
-            .ok()
-            .and_then(|url| url.host_str().map(str::to_string))
-            .unwrap_or(trimmed)
-    } else {
-        trimmed
-    };
-    candidate
-        .split('/')
-        .next()
-        .unwrap_or_default()
-        .split(':')
-        .next()
-        .unwrap_or_default()
-        .trim()
-        .to_string()
 }
 
 fn parse_port_filter(value: &str) -> Result<Vec<u16>, String> {

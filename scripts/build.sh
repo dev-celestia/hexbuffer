@@ -185,7 +185,7 @@ detect_platform() {
 
 PLATFORM=$(detect_platform)
 
-SRC_DIR="src-tauri/target/release/bundle"
+SRC_DIR="target/release/bundle"
 BUNDLE_DIR=""
 BUNDLE_EXT=""
 INSTALLER_DIR=""
@@ -234,7 +234,7 @@ find_first_artifact() {
 
 windows_bundle_dir_for_target() {
   local rust_target="$1"
-  echo "src-tauri/target/${rust_target}/release/bundle/nsis"
+  echo "target/${rust_target}/release/bundle/nsis"
 }
 
 windows_runner_args() {

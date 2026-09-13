@@ -33,7 +33,10 @@ pub(crate) async fn run_browser_crawler_crawl(
             session_id: session_id.clone(),
             level: "info".to_string(),
             r#type: "session".to_string(),
-            message: format!("Initializing browser-crawler engine for {}", config.target_url),
+            message: format!(
+                "Initializing browser-crawler engine for {}",
+                config.target_url
+            ),
             url: Some(config.target_url.clone()),
             ai_used_for_analysis: Some(false),
             created_at: now(),
@@ -169,7 +172,8 @@ pub(crate) async fn run_browser_crawler_crawl(
                         reviewed: false,
                         created_at: current_now,
                     };
-                    if let Ok(mut insights) = state.insights.lock() {
+                    let mut insights = state.insights.lock();
+                    {
                         insights
                             .entry(insight.session_id.clone())
                             .or_default()

@@ -8,6 +8,7 @@ use crate::proxy::state::{
 };
 
 use super::events::emit_queue_stats;
+use super::host_filter::{matches_host_filter_strict, normalize_host_pattern};
 use super::live_traffic::schedule_live_traffic_queue;
 use super::state::{enqueue_live_traffic_job_locked, AutomationRuntimeState};
 use super::types::{
@@ -28,10 +29,7 @@ pub fn ingest_websocket_message(
 
     let payload_text = String::from_utf8_lossy(&record.payload).to_string();
     let matches = {
-        let inner = match state.0.lock() {
-            Ok(inner) => inner,
-            Err(_) => return,
-        };
+        let inner = state.0.lock();
         let workflows = inner.workflows.clone();
         let settings = inner.settings.clone();
 
@@ -75,10 +73,7 @@ pub fn ingest_websocket_message(
             build_websocket_context(record, host, path, url, &payload_text, &trigger_node_id);
 
         {
-            let mut inner = match state.0.lock() {
-                Ok(inner) => inner,
-                Err(_) => return,
-            };
+            let mut inner = state.0.lock();
             enqueue_live_traffic_job_locked(
                 &mut inner,
                 QueueJob {
@@ -127,7 +122,7 @@ fn matches_websocket_trigger(
         return false;
     }
 
-    if !matches_host_filter(host, &config_string(config, "host")) {
+    if !matches_host_filter_strict(host, &config_string(config, "host")) {
         return false;
     }
 
@@ -170,46 +165,6 @@ fn matches_value_filter(haystacks: &[&str], operator: &str, value: &str) -> bool
                 .any(|haystack| haystack.to_ascii_lowercase().contains(&value))
         }
     }
-}
-
-fn matches_host_filter(host: &str, filter: &str) -> bool {
-    let patterns = filter
-        .split([',', ';', ' ', '\n', '\t'])
-        .map(normalize_host_pattern)
-        .filter(|pattern| !pattern.is_empty())
-        .collect::<Vec<_>>();
-    if patterns.is_empty() {
-        return false;
-    }
-
-    let host = normalize_host_pattern(host);
-    patterns
-        .iter()
-        .any(|pattern| host == *pattern || host.ends_with(&format!(".{}", pattern)))
-}
-
-fn normalize_host_pattern(value: &str) -> String {
-    let trimmed = value.trim().trim_start_matches("*.").to_ascii_lowercase();
-    if trimmed.is_empty() {
-        return String::new();
-    }
-    let candidate = if trimmed.contains("://") {
-        url::Url::parse(&trimmed)
-            .ok()
-            .and_then(|url| url.host_str().map(str::to_string))
-            .unwrap_or(trimmed)
-    } else {
-        trimmed
-    };
-    candidate
-        .split('/')
-        .next()
-        .unwrap_or_default()
-        .split(':')
-        .next()
-        .unwrap_or_default()
-        .trim()
-        .to_string()
 }
 
 fn queue_cap_for_trigger(config: &Value, settings: &AutomationRuntimeSettings) -> usize {

@@ -1,4 +1,4 @@
-import { toggleInterceptEnabled } from './ui';
+import { useInterceptStore } from '@/pages/intercept/state/intercept-store';
 
 export const INTERCEPT_AI_TOOL_DEFINITION = {
   name: 'toggle_intercept',
@@ -15,7 +15,8 @@ export const INTERCEPT_AI_TOOL_DEFINITION = {
   },
 };
 
-export function executeToggleInterceptAiTool(args: Record<string, any>) {
-  toggleInterceptEnabled();
-  return { status: 'success', tool: 'toggle_intercept', enabled: args.enabled };
+export async function executeToggleInterceptAiTool(args: Record<string, any>) {
+  const enabled = Boolean(args.enabled);
+  await useInterceptStore.getState().toggleIntercept(enabled);
+  return `Proxy traffic interception ${enabled ? 'enabled' : 'disabled'}.`;
 }

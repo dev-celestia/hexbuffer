@@ -39,34 +39,43 @@ fn normalize_scan_host(input: &str) -> Result<String, String> {
             .ok()
             .and_then(|url| url.host_str().map(|host| host.to_string()))
     } else {
-        Some(
-            trimmed
-                .split('/')
-                .next()
-                .unwrap_or_default()
-                .trim()
-                .trim_start_matches('[')
-                .trim_end_matches(']')
-                .to_string(),
-        )
+        Some(trimmed.split('/').next().unwrap_or_default().trim().to_string())
     };
 
-    let host = parsed
+    let after_userinfo = parsed
         .unwrap_or_default()
         .split('@')
         .next_back()
         .unwrap_or_default()
-        .split(':')
-        .next()
-        .unwrap_or_default()
-        .trim()
         .to_string();
+
+    let host = strip_port_and_brackets(&after_userinfo);
 
     if host.is_empty() {
         return Err("Host is required".to_string());
     }
 
     Ok(host)
+}
+
+/// Strips brackets from IPv6 literals and a `:port` suffix from single-colon
+/// (hostname / IPv4) inputs. Bare IPv6 (multiple colons) is kept verbatim so
+/// its colons are not mistaken for a port separator.
+fn strip_port_and_brackets(host: &str) -> String {
+    let host = host.trim();
+    if let Some(rest) = host.strip_prefix('[') {
+        if let Some(end) = rest.find(']') {
+            return rest[..end].to_string();
+        }
+    }
+    if host.matches(':').count() > 1 {
+        return host.to_string();
+    }
+    host.split(':')
+        .next()
+        .unwrap_or_default()
+        .trim()
+        .to_string()
 }
 
 fn expand_ipv4_cidr(base: &str, prefix: &str) -> Result<Vec<String>, String> {
@@ -128,4 +137,92 @@ fn format_ipv4(ip: u32) -> String {
         (ip >> 8) & 0xff,
         ip & 0xff
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_expand_targets_plain_host() {
+        assert_eq!(expand_targets("example.com").unwrap(), vec!["example.com"]);
+        assert_eq!(
+            expand_targets("  scan.internal.local  ").unwrap(),
+            vec!["scan.internal.local"]
+        );
+    }
+
+    #[test]
+    fn test_expand_targets_strips_scheme_port_path_and_userinfo() {
+        assert_eq!(
+            expand_targets("https://example.com:8443/admin").unwrap(),
+            vec!["example.com"]
+        );
+        assert_eq!(
+            expand_targets("http://user:pass@example.com/path").unwrap(),
+            vec!["example.com"]
+        );
+    }
+
+    #[test]
+    fn test_expand_targets_cidr_excludes_network_and_broadcast() {
+        // /30: usable hosts are .1 and .2
+        assert_eq!(
+            expand_targets("192.168.1.0/30").unwrap(),
+            vec!["192.168.1.1", "192.168.1.2"]
+        );
+    }
+
+    #[test]
+    fn test_expand_targets_cidr_point_to_point_and_host_prefixes() {
+        // /31 keeps both addresses
+        assert_eq!(
+            expand_targets("10.0.0.0/31").unwrap(),
+            vec!["10.0.0.0", "10.0.0.1"]
+        );
+        // /32 keeps the single address
+        assert_eq!(expand_targets("10.1.2.3/32").unwrap(), vec!["10.1.2.3"]);
+        assert_eq!(expand_targets("10.1.2.3/24").unwrap().len(), 254);
+    }
+
+    #[test]
+    fn test_expand_targets_ipv6_literals() {
+        assert_eq!(expand_targets("[2001:db8::1]").unwrap(), vec!["2001:db8::1"]);
+        assert_eq!(expand_targets("[::1]").unwrap(), vec!["::1"]);
+        assert_eq!(
+            expand_targets("http://[2001:db8::1]:8080/x").unwrap(),
+            vec!["2001:db8::1"]
+        );
+    }
+
+    #[test]
+    fn test_expand_targets_rejects_invalid_input() {
+        assert!(expand_targets("").is_err());
+        assert!(expand_targets("   ").is_err());
+        assert!(expand_targets("example.com/abc").is_err());
+        assert!(expand_targets("example.com/24").is_err());
+        assert!(expand_targets("2001:db8::/64").is_err());
+        assert!(expand_targets("10.0.0.0/33").is_err());
+        assert!(expand_targets("10.0.0.0/19").is_err());
+    }
+
+    #[test]
+    fn test_normalize_scan_ports_dedupes_and_sorts() {
+        assert_eq!(
+            normalize_scan_ports(vec![8080, 80, 443, 80]).unwrap(),
+            vec![80, 443, 8080]
+        );
+        assert!(normalize_scan_ports(vec![]).is_err());
+    }
+
+    #[test]
+    fn test_shuffle_ports_keeps_all_ports() {
+        let ports = vec![80u16, 443, 8080, 22, 21];
+        let shuffled = shuffle_ports(ports.clone());
+        let mut sorted = shuffled.clone();
+        sorted.sort_unstable();
+        let mut expected = ports;
+        expected.sort_unstable();
+        assert_eq!(sorted, expected);
+    }
 }

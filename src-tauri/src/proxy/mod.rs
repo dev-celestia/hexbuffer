@@ -1,6 +1,7 @@
 pub mod ca;
 pub mod completion;
 pub mod lifecycle;
+pub mod mock_common;
 pub mod mock_forge;
 pub mod mock_server;
 pub mod state;
@@ -15,11 +16,12 @@ pub use state::{
 pub use utils::{encode_body, ensure_port_free};
 
 use hexbuffer_proxy::ProxyBuilder;
+use parking_lot::Mutex;
 use std::io;
 use std::net::Ipv4Addr;
 use std::sync::{
     atomic::{AtomicBool, AtomicU16, Ordering},
-    Arc, Mutex, OnceLock,
+    Arc, OnceLock,
 };
 use tauri::{AppHandle, Emitter};
 use tokio::net::TcpListener;
@@ -48,7 +50,8 @@ fn proxy_enabled_handle() -> &'static Mutex<Option<Arc<AtomicBool>>> {
 }
 
 pub fn set_proxy_enabled(enabled: bool) {
-    if let Ok(handle) = proxy_enabled_handle().lock() {
+    let handle = proxy_enabled_handle().lock();
+    {
         if let Some(ref flag) = *handle {
             flag.store(enabled, Ordering::Relaxed);
         }
@@ -56,7 +59,8 @@ pub fn set_proxy_enabled(enabled: bool) {
 }
 
 pub fn is_proxy_enabled() -> bool {
-    if let Ok(handle) = proxy_enabled_handle().lock() {
+    let handle = proxy_enabled_handle().lock();
+    {
         if let Some(ref flag) = *handle {
             return flag.load(Ordering::Relaxed);
         }
@@ -144,20 +148,18 @@ fn bind_proxy_listener(
 fn clear_proxy_runtime() {
     ACTIVE_PROXY_PORT.store(0, Ordering::SeqCst);
 
-    if let Ok(mut shutdown) = proxy_shutdown_sender().lock() {
+    let mut shutdown = proxy_shutdown_sender().lock();
+    {
         *shutdown = None;
     }
-    if let Ok(mut handle) = proxy_enabled_handle().lock() {
+    let mut handle = proxy_enabled_handle().lock();
+    {
         *handle = None;
     }
 }
 
 pub fn stop() -> Result<(), String> {
-    let Some(shutdown) = proxy_shutdown_sender()
-        .lock()
-        .map_err(|error| format!("{error}"))?
-        .take()
-    else {
+    let Some(shutdown) = proxy_shutdown_sender().lock().take() else {
         ACTIVE_PROXY_PORT.store(0, Ordering::SeqCst);
         return Ok(());
     };
@@ -202,17 +204,7 @@ pub fn run(config: ProxyConfig, app_handle: AppHandle) {
     let (shutdown_tx, shutdown_rx) = oneshot::channel();
 
     {
-        let mut shutdown = match proxy_shutdown_sender().lock() {
-            Ok(shutdown) => shutdown,
-            Err(error) => {
-                eprintln!(
-                    "[proxy] FATAL: Failed to acquire shutdown handle: {}",
-                    error
-                );
-                ACTIVE_PROXY_PORT.store(0, Ordering::SeqCst);
-                return;
-            }
-        };
+        let mut shutdown = proxy_shutdown_sender().lock();
 
         if shutdown.is_some() {
             eprintln!("[proxy] Proxy is already running");
@@ -268,7 +260,8 @@ pub fn run(config: ProxyConfig, app_handle: AppHandle) {
         .with_ws_handler(handler);
 
     let enabled_flag = builder.enabled_flag();
-    if let Ok(mut handle) = proxy_enabled_handle().lock() {
+    let mut handle = proxy_enabled_handle().lock();
+    {
         *handle = Some(enabled_flag);
     }
 

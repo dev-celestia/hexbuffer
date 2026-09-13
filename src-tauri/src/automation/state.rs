@@ -1,6 +1,6 @@
+use parking_lot::Mutex;
 use std::{
     collections::{HashSet, VecDeque},
-    sync::Mutex,
     time::Duration,
 };
 

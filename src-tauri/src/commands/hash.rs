@@ -1,8 +1,8 @@
 //! Tauri command handlers for the Hashcat-backed password cracking engine
 
-use std::sync::Arc;
 use parking_lot::Mutex;
 use serde::Serialize;
+use std::sync::Arc;
 use tauri::{AppHandle, State};
 
 use crate::hashcat::{

@@ -26,7 +26,9 @@ impl Tool for SendToRepeaterTool {
     async fn definition(&self, _prompt: String) -> ToolDefinition {
         ToolDefinition {
             name: Self::NAME.to_string(),
-            description: "Send an HTTP request to the Repeater tab for manual inspection and modification.".to_string(),
+            description:
+                "Send an HTTP request to the Repeater tab for manual inspection and modification."
+                    .to_string(),
             parameters: json!({
                 "type": "object",
                 "properties": {
@@ -147,7 +149,8 @@ impl Tool for CreateEndpointTool {
     async fn definition(&self, _prompt: String) -> ToolDefinition {
         ToolDefinition {
             name: Self::NAME.to_string(),
-            description: "Add an API endpoint/request to a Repeater collection or folder.".to_string(),
+            description: "Add an API endpoint/request to a Repeater collection or folder."
+                .to_string(),
             parameters: json!({
                 "type": "object",
                 "properties": {

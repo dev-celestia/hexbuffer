@@ -295,8 +295,7 @@ fn write_intercept_ca(_app: &AppHandle) -> Result<PathBuf, String> {
     std::fs::create_dir_all(&app_data_dir).map_err(|e| e.to_string())?;
 
     let ca_path = app_data_dir.join("hexbuffer-ca.pem");
-    let ca_pem =
-        crate::proxy::ca::export_ca_cert_pem().map_err(|error| format!("{error}"))?;
+    let ca_pem = crate::proxy::ca::export_ca_cert_pem().map_err(|error| format!("{error}"))?;
     std::fs::write(&ca_path, ca_pem).map_err(|e| e.to_string())?;
 
     Ok(ca_path)

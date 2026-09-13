@@ -8,6 +8,7 @@ import { usePromptInputController } from '@celestia-project/ui';
 import { useBrowserAutomationStore } from '@/stores/browser-automation';
 import { DASHBOARD_DEFAULT_AI_MODEL } from '../constants';
 import { DashboardSettingsChatTransport } from '../lib/dashboard-chat-transport';
+import { setupAiToolEventListener } from '../lib/ai-tools/listener';
 import { formatAttachedFileContent } from '../lib/file-utils';
 import type { ChatMessageRecord, CrawlCompletedEvent, CrawlHumanInputRequest, DashboardAiSettings, DashboardChatMessage, HumanSelectionRequest, IntentClarificationRequest } from '../types';
 
@@ -161,6 +162,24 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
   useEffect(() => {
     clarificationRef.current = pendingClarification;
   }, [pendingClarification]);
+
+  // Listen for AI tool execution requests dispatched by the Rust engine
+  // (`ai:execute-tool`) and report the real outcome back via `resolve_ai_tool_result`
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+
+    setupAiToolEventListener()
+      .then((fn) => {
+        unlisten = fn;
+      })
+      .catch((error) => {
+        console.error('Failed to set up AI tool event listener:', error);
+      });
+
+    return () => {
+      unlisten?.();
+    };
+  }, []);
 
   // Listen for crawl human input requests from the backend
   useEffect(() => {

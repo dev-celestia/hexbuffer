@@ -39,3 +39,5 @@ binaries
 
 /reference
 .agents/
+# pnpm local store (global store is root-owned; see .npmrc)
+.pnpm-store/

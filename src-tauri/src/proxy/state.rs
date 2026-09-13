@@ -1,5 +1,5 @@
+use parking_lot::Mutex;
 use std::collections::HashMap;
-use std::sync::Mutex;
 use uuid::Uuid;
 
 pub use super::types::*;
@@ -34,11 +34,11 @@ impl ProxyState {
     }
 
     pub fn get_mode(&self) -> InterceptMode {
-        self.0.lock().unwrap().intercept_mode.clone()
+        self.0.lock().intercept_mode.clone()
     }
 
     pub fn set_mode(&self, mode: InterceptMode) {
-        let mut inner = self.0.lock().unwrap();
+        let mut inner = self.0.lock();
         if mode == InterceptMode::Disabled && inner.intercept_mode == InterceptMode::Enabled {
             let paused_requests = inner.paused_requests.clone();
             for paused_request in &paused_requests {
@@ -58,7 +58,7 @@ impl ProxyState {
     }
 
     pub fn get_status(&self) -> InterceptStatus {
-        let inner = self.0.lock().unwrap();
+        let inner = self.0.lock();
         InterceptStatus {
             mode: inner.intercept_mode.clone(),
             paused_count: inner.paused_requests.len(),
@@ -66,13 +66,12 @@ impl ProxyState {
     }
 
     pub fn add_paused_request(&self, req: PausedRequest) {
-        self.0.lock().unwrap().paused_requests.push(req);
+        self.0.lock().paused_requests.push(req);
     }
 
     pub fn get_paused_request(&self, id: &Uuid) -> Option<PausedRequest> {
         self.0
             .lock()
-            .unwrap()
             .paused_requests
             .iter()
             .find(|r| r.id == *id)
@@ -80,11 +79,11 @@ impl ProxyState {
     }
 
     pub fn get_all_paused(&self) -> Vec<PausedRequest> {
-        self.0.lock().unwrap().paused_requests.clone()
+        self.0.lock().paused_requests.clone()
     }
 
     pub fn set_intercept_scope(&self, tab_id: String, capture_patterns: Vec<String>) {
-        let mut inner = self.0.lock().unwrap();
+        let mut inner = self.0.lock();
         inner.active_intercept_tab_id = Some(tab_id);
         inner.intercept_capture_patterns = capture_patterns
             .into_iter()
@@ -104,7 +103,7 @@ impl ProxyState {
             .to_lowercase();
         let host_without_port = host.split(':').next().unwrap_or(&host);
 
-        let inner = self.0.lock().unwrap();
+        let inner = self.0.lock();
         let tab_id = inner.active_intercept_tab_id.clone()?;
 
         if inner.intercept_capture_patterns.is_empty() {
@@ -130,7 +129,7 @@ impl ProxyState {
         request: Option<ProxyRequest>,
         intercept_response: bool,
     ) -> bool {
-        let mut inner = self.0.lock().unwrap();
+        let mut inner = self.0.lock();
         let existed = inner.paused_requests.iter().any(|r| r.id == *id);
 
         if existed {
@@ -148,7 +147,7 @@ impl ProxyState {
     }
 
     pub fn forward_paused_response(&self, id: &Uuid, response: Option<ProxyResponse>) -> bool {
-        let mut inner = self.0.lock().unwrap();
+        let mut inner = self.0.lock();
         let existed = inner.paused_requests.iter().any(|r| r.id == *id);
 
         if existed {
@@ -162,7 +161,7 @@ impl ProxyState {
     }
 
     pub fn drop_paused_request(&self, id: &Uuid) -> bool {
-        let mut inner = self.0.lock().unwrap();
+        let mut inner = self.0.lock();
         let existed = inner.paused_requests.iter().any(|r| r.id == *id);
 
         if existed {
@@ -174,11 +173,11 @@ impl ProxyState {
     }
 
     pub fn take_paused_action(&self, id: &Uuid) -> Option<InterceptAction> {
-        self.0.lock().unwrap().paused_actions.remove(id)
+        self.0.lock().paused_actions.remove(id)
     }
 
     pub fn forward_paused_by_tab(&self, tab_id: &str) -> usize {
-        let mut inner = self.0.lock().unwrap();
+        let mut inner = self.0.lock();
         let matching_requests: Vec<PausedRequest> = inner
             .paused_requests
             .iter()
@@ -206,16 +205,16 @@ impl ProxyState {
     }
 
     pub fn clear_records(&self) {
-        self.0.lock().unwrap().records.clear();
+        self.0.lock().records.clear();
     }
 
     pub fn clear_records_before(&self, cutoff: &chrono::DateTime<chrono::Utc>) {
-        let mut inner = self.0.lock().unwrap();
+        let mut inner = self.0.lock();
         inner.records.retain(|r| r.timestamp >= *cutoff);
     }
 
     pub fn delete_record(&self, id: &Uuid) -> Option<ProxyRecord> {
-        let mut inner = self.0.lock().unwrap();
+        let mut inner = self.0.lock();
         inner
             .records
             .iter()
@@ -224,15 +223,15 @@ impl ProxyState {
     }
 
     pub fn get_bypass_patterns(&self) -> Vec<String> {
-        self.0.lock().unwrap().intercept_bypass_patterns.clone()
+        self.0.lock().intercept_bypass_patterns.clone()
     }
 
     pub fn set_bypass_patterns(&self, patterns: Vec<String>) {
-        self.0.lock().unwrap().intercept_bypass_patterns = patterns;
+        self.0.lock().intercept_bypass_patterns = patterns;
     }
 
     pub fn add_bypass_pattern(&self, pattern: String) -> Vec<String> {
-        let mut inner = self.0.lock().unwrap();
+        let mut inner = self.0.lock();
         let trimmed = pattern.trim().to_string();
         if !trimmed.is_empty() && !inner.intercept_bypass_patterns.contains(&trimmed) {
             inner.intercept_bypass_patterns.push(trimmed);
@@ -241,7 +240,7 @@ impl ProxyState {
     }
 
     pub fn remove_bypass_pattern(&self, pattern: &str) -> Vec<String> {
-        let mut inner = self.0.lock().unwrap();
+        let mut inner = self.0.lock();
         inner.intercept_bypass_patterns.retain(|p| p != pattern);
         inner.intercept_bypass_patterns.clone()
     }
@@ -259,7 +258,7 @@ impl ProxyState {
             .next()
             .unwrap_or(uri);
 
-        let inner = self.0.lock().unwrap();
+        let inner = self.0.lock();
         for pattern in &inner.intercept_bypass_patterns {
             if let Some(domain) = pattern.strip_prefix("*.") {
                 if host.ends_with(domain) {
@@ -273,16 +272,16 @@ impl ProxyState {
     }
 
     pub fn get_db_filter_config(&self) -> ProxyDbFilterConfig {
-        self.0.lock().unwrap().db_filter_config.clone()
+        self.0.lock().db_filter_config.clone()
     }
 
     pub fn set_db_filter_config(&self, config: ProxyDbFilterConfig) {
-        self.0.lock().unwrap().db_filter_config = config;
+        self.0.lock().db_filter_config = config;
     }
 
     // ponytail: evaluate if a proxy request should be inserted into sqlite DB
     pub fn should_record_to_db(&self, record: &ProxyRecord) -> bool {
-        let inner = self.0.lock().unwrap();
+        let inner = self.0.lock();
         let config = &inner.db_filter_config;
 
         if !config.enabled {
@@ -345,7 +344,7 @@ impl ProxyState {
         uri: &str,
         headers: &std::collections::HashMap<String, String>,
     ) -> bool {
-        let inner = self.0.lock().unwrap();
+        let inner = self.0.lock();
         let config = &inner.db_filter_config;
 
         if !config.enabled {
@@ -409,7 +408,11 @@ fn extract_candidate_hosts(
     let mut candidates = Vec::new();
 
     // 1. Host or :authority header
-    if let Some(hdr) = headers.get("host").or_else(|| headers.get("Host")).or_else(|| headers.get(":authority")) {
+    if let Some(hdr) = headers
+        .get("host")
+        .or_else(|| headers.get("Host"))
+        .or_else(|| headers.get(":authority"))
+    {
         let clean = hdr.split(':').next().unwrap_or("").trim().to_lowercase();
         if !clean.is_empty() && !candidates.contains(&clean) {
             candidates.push(clean);
@@ -429,7 +432,8 @@ fn extract_candidate_hosts(
             .unwrap_or("")
             .trim()
             .to_lowercase();
-        if !clean.is_empty() && clean != "null" && clean != "opaque" && !candidates.contains(&clean) {
+        if !clean.is_empty() && clean != "null" && clean != "opaque" && !candidates.contains(&clean)
+        {
             candidates.push(clean);
         }
     }
@@ -556,7 +560,11 @@ mod tests {
             exclude_hosts: vec![],
         });
 
-        let rec = create_test_record("https://google.com/search", Some("google.com"), "google.com:443");
+        let rec = create_test_record(
+            "https://google.com/search",
+            Some("google.com"),
+            "google.com:443",
+        );
         assert!(state.should_record_to_db(&rec));
     }
 
@@ -572,19 +580,35 @@ mod tests {
         });
 
         // In scope matching wildcard
-        let rec1 = create_test_record("https://sub.target.com/users", Some("sub.target.com"), "sub.target.com:443");
+        let rec1 = create_test_record(
+            "https://sub.target.com/users",
+            Some("sub.target.com"),
+            "sub.target.com:443",
+        );
         assert!(state.should_record_to_db(&rec1));
 
         // In scope matching exact host
-        let rec2 = create_test_record("https://api.example.com/v1", Some("api.example.com"), "api.example.com:443");
+        let rec2 = create_test_record(
+            "https://api.example.com/v1",
+            Some("api.example.com"),
+            "api.example.com:443",
+        );
         assert!(state.should_record_to_db(&rec2));
 
         // Out of scope
-        let rec3 = create_test_record("https://google.com/gen_204", Some("google.com"), "google.com:443");
+        let rec3 = create_test_record(
+            "https://google.com/gen_204",
+            Some("google.com"),
+            "google.com:443",
+        );
         assert!(!state.should_record_to_db(&rec3));
 
         // Excluded host even if matching wildcard
-        let rec4 = create_test_record("https://analytics.target.com/track", Some("analytics.target.com"), "analytics.target.com:443");
+        let rec4 = create_test_record(
+            "https://analytics.target.com/track",
+            Some("analytics.target.com"),
+            "analytics.target.com:443",
+        );
         assert!(!state.should_record_to_db(&rec4));
     }
 
@@ -599,10 +623,18 @@ mod tests {
             exclude_hosts: vec![],
         });
 
-        let rec1 = create_test_record("https://api.internal.corp:8443/data", Some("api.internal.corp:8443"), "api.internal.corp:8443");
+        let rec1 = create_test_record(
+            "https://api.internal.corp:8443/data",
+            Some("api.internal.corp:8443"),
+            "api.internal.corp:8443",
+        );
         assert!(state.should_record_to_db(&rec1));
 
-        let rec2 = create_test_record("https://other.corp/data", Some("other.corp"), "other.corp:443");
+        let rec2 = create_test_record(
+            "https://other.corp/data",
+            Some("other.corp"),
+            "other.corp:443",
+        );
         assert!(!state.should_record_to_db(&rec2));
     }
 
@@ -617,8 +649,11 @@ mod tests {
             exclude_hosts: vec![],
         });
 
-        let rec = create_test_record("https://api.example.com", Some("api.example.com"), "api.example.com:443");
+        let rec = create_test_record(
+            "https://api.example.com",
+            Some("api.example.com"),
+            "api.example.com:443",
+        );
         assert!(!state.should_record_to_db(&rec));
     }
 }
-

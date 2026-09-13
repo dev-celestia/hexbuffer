@@ -18,12 +18,10 @@ pub fn show_main_window(app: tauri::AppHandle) -> Result<(), String> {
     }
 
     // Show and focus main window
-    let main_window = app
-        .get_webview_window("main")
-        .ok_or_else(|| {
-            crate::log("ERROR: main window was not found");
-            "main window was not found".to_string()
-        })?;
+    let main_window = app.get_webview_window("main").ok_or_else(|| {
+        crate::log("ERROR: main window was not found");
+        "main window was not found".to_string()
+    })?;
 
     #[cfg(target_os = "linux")]
     let _ = main_window.set_decorations(false);
@@ -63,7 +61,8 @@ pub async fn get_cdp_targets(port: u16) -> Result<String, String> {
         .timeout(std::time::Duration::from_secs(3))
         .build()
         .map_err(|e| e.to_string())?;
-    let resp = client.get(&url)
+    let resp = client
+        .get(&url)
         .send()
         .await
         .map_err(|e| e.to_string())?
@@ -126,8 +125,8 @@ pub async fn open_cdp_browser(_app: tauri::AppHandle, port: u16) -> Result<(), S
         }
     }
 
-    let profile_dir = hexbuffer::paths::get_shared_app_dir()
-        .join(format!("cdp-browser-profile-{}", port));
+    let profile_dir =
+        hexbuffer::paths::get_shared_app_dir().join(format!("cdp-browser-profile-{}", port));
     std::fs::create_dir_all(&profile_dir).map_err(|e| e.to_string())?;
 
     let proxy_port = hexbuffer::proxy::active_proxy_port().unwrap_or(8888);
@@ -182,7 +181,8 @@ pub fn create_os_desktop_shortcut(
     display_name: String,
     icon_path: Option<String>,
 ) -> Result<String, String> {
-    let desktop_dir = dirs::desktop_dir().ok_or_else(|| "Could not locate Desktop directory".to_string())?;
+    let desktop_dir =
+        dirs::desktop_dir().ok_or_else(|| "Could not locate Desktop directory".to_string())?;
     let exe_path = std::env::current_exe().map_err(|e| e.to_string())?;
 
     // Determine the icon to use if not provided
@@ -240,7 +240,9 @@ pub fn create_os_desktop_shortcut(
         // 2. Determine target executable path
         let target_binary = if let Some(ref bundle) = main_bundle {
             bundle.join("Contents/MacOS/hexbuffer")
-        } else if std::path::Path::new("/Applications/Hexbuffer.app/Contents/MacOS/hexbuffer").exists() {
+        } else if std::path::Path::new("/Applications/Hexbuffer.app/Contents/MacOS/hexbuffer")
+            .exists()
+        {
             std::path::PathBuf::from("/Applications/Hexbuffer.app/Contents/MacOS/hexbuffer")
         } else {
             exe_path.clone()
@@ -259,22 +261,50 @@ pub fn create_os_desktop_shortcut(
         });
 
         if let Some(ref png_path) = icon_png {
-            let temp_iconset = std::env::temp_dir().join(format!("hexbuffer_{}_{}.iconset", clean_slug, std::process::id()));
+            let temp_iconset = std::env::temp_dir().join(format!(
+                "hexbuffer_{}_{}.iconset",
+                clean_slug,
+                std::process::id()
+            ));
             let _ = std::fs::create_dir_all(&temp_iconset);
 
             for size in [16, 32, 64, 128, 256, 512] {
                 let _ = std::process::Command::new("sips")
-                    .args(["-z", &size.to_string(), &size.to_string(), png_path, "--out", &temp_iconset.join(format!("icon_{}x{}.png", size, size)).to_string_lossy()])
+                    .args([
+                        "-z",
+                        &size.to_string(),
+                        &size.to_string(),
+                        png_path,
+                        "--out",
+                        &temp_iconset
+                            .join(format!("icon_{}x{}.png", size, size))
+                            .to_string_lossy(),
+                    ])
                     .output();
                 let dbl = size * 2;
                 let _ = std::process::Command::new("sips")
-                    .args(["-z", &dbl.to_string(), &dbl.to_string(), png_path, "--out", &temp_iconset.join(format!("icon_{}x{}@2x.png", size, size)).to_string_lossy()])
+                    .args([
+                        "-z",
+                        &dbl.to_string(),
+                        &dbl.to_string(),
+                        png_path,
+                        "--out",
+                        &temp_iconset
+                            .join(format!("icon_{}x{}@2x.png", size, size))
+                            .to_string_lossy(),
+                    ])
                     .output();
             }
 
             let icns_dest = resources_dir.join("icon.icns");
             let _ = std::process::Command::new("iconutil")
-                .args(["-c", "icns", &temp_iconset.to_string_lossy(), "-o", &icns_dest.to_string_lossy()])
+                .args([
+                    "-c",
+                    "icns",
+                    &temp_iconset.to_string_lossy(),
+                    "-o",
+                    &icns_dest.to_string_lossy(),
+                ])
                 .output();
 
             let _ = std::fs::remove_dir_all(&temp_iconset);
@@ -322,7 +352,8 @@ pub fn create_os_desktop_shortcut(
 </plist>
 "#
         );
-        std::fs::write(app_path.join("Contents/Info.plist"), info_plist).map_err(|e| e.to_string())?;
+        std::fs::write(app_path.join("Contents/Info.plist"), info_plist)
+            .map_err(|e| e.to_string())?;
 
         // 5. Create launcher script with single-instance delegation
         let launcher_path = macos_dir.join("launcher");
@@ -342,7 +373,8 @@ exec "$TARGET_BIN" --target="$TARGET_ID" "$@"
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
-            let _ = std::fs::set_permissions(&launcher_path, std::fs::Permissions::from_mode(0o755));
+            let _ =
+                std::fs::set_permissions(&launcher_path, std::fs::Permissions::from_mode(0o755));
         }
 
         // 6. Set custom icon on the folder bundle as well via NSWorkspace for immediate Finder view
@@ -367,9 +399,7 @@ if let img = NSImage(contentsOfFile: "{}") {{
             .args(["-f", &app_path.to_string_lossy()])
             .output();
 
-        let _ = std::process::Command::new("touch")
-            .arg(&app_path)
-            .output();
+        let _ = std::process::Command::new("touch").arg(&app_path).output();
     }
 
     #[cfg(target_os = "linux")]
@@ -390,7 +420,8 @@ if let img = NSImage(contentsOfFile: "{}") {{
             icon_line
         );
         let mut file = std::fs::File::create(&link_path).map_err(|e| e.to_string())?;
-        file.write_all(content.as_bytes()).map_err(|e| e.to_string())?;
+        file.write_all(content.as_bytes())
+            .map_err(|e| e.to_string())?;
 
         #[cfg(unix)]
         {

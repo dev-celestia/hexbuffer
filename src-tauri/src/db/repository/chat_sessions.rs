@@ -5,7 +5,7 @@ use super::Database;
 
 impl Database {
     pub fn create_chat_session(&self, title: &str) -> SqlResult<ChatSessionRecord> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let id = uuid::Uuid::new_v4().to_string();
         let now = chrono::Utc::now().to_rfc3339();
 
@@ -23,7 +23,7 @@ impl Database {
     }
 
     pub fn list_chat_sessions(&self) -> SqlResult<Vec<ChatSessionRecord>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             "SELECT id, title, created_at, updated_at FROM ai_chat_sessions ORDER BY updated_at DESC",
         )?;
@@ -39,7 +39,7 @@ impl Database {
     }
 
     pub fn rename_chat_session(&self, id: &str, title: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
             "UPDATE ai_chat_sessions SET title = ?1, updated_at = ?2 WHERE id = ?3",
@@ -49,13 +49,13 @@ impl Database {
     }
 
     pub fn delete_chat_session(&self, id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute("DELETE FROM ai_chat_sessions WHERE id = ?1", params![id])?;
         Ok(())
     }
 
     pub fn get_chat_messages(&self, session_id: &str) -> SqlResult<Vec<ChatMessageRecord>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             "SELECT id, session_id, role, content, created_at FROM ai_chat_messages WHERE session_id = ?1 ORDER BY created_at ASC",
         )?;
@@ -76,7 +76,7 @@ impl Database {
         session_id: &str,
         messages: &[ChatMessageRecord],
     ) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
 
         conn.execute("BEGIN IMMEDIATE", [])?;
 

@@ -21,7 +21,9 @@ impl Tool for StartInvokerAttackTool {
     async fn definition(&self, _prompt: String) -> ToolDefinition {
         ToolDefinition {
             name: Self::NAME.to_string(),
-            description: "Launch a brute-force or payload injection attack using the Invoker engine.".to_string(),
+            description:
+                "Launch a brute-force or payload injection attack using the Invoker engine."
+                    .to_string(),
             parameters: json!({
                 "type": "object",
                 "properties": {
@@ -34,6 +36,9 @@ impl Tool for StartInvokerAttackTool {
     async fn call(&self, args: Self::Args) -> Result<Self::Output, Self::Error> {
         dispatch_tool_call(Self::NAME, json!(args));
         let attack_type = args.attack_type.unwrap_or_else(|| "sniper".to_string());
-        Ok(format!("Successfully launched Invoker attack (Type: {}).", attack_type))
+        Ok(format!(
+            "Successfully launched Invoker attack (Type: {}).",
+            attack_type
+        ))
     }
 }

@@ -102,7 +102,6 @@ CREATE TABLE IF NOT EXISTS documents (
 CREATE INDEX IF NOT EXISTS idx_documents_updated_at ON documents(updated_at);
 "#;
 
-
 pub const CREATE_AI_BROWSER_TABLES: &str = r#"
 CREATE TABLE IF NOT EXISTS ai_browser_sessions (
     id TEXT PRIMARY KEY,
@@ -468,4 +467,3 @@ CREATE INDEX IF NOT EXISTS idx_mock_routes_domain_id ON mock_routes(domain_id);
 INSERT OR IGNORE INTO mock_domains (id, hostname, ssl, status, created_at)
 VALUES ('local_mock_server', 'localhost', 0, 'active', datetime('now'));
 "#;
-

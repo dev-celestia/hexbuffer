@@ -53,14 +53,22 @@ pub fn get_shared_db_path() -> PathBuf {
         #[cfg(target_os = "macos")]
         if let Ok(home) = std::env::var("HOME") {
             let candidates = [
-                PathBuf::from(&home).join("Library/Application Support/com.hexbuffer.security/hexbuffer.db"),
-                PathBuf::from(&home).join("Library/Application Support/com.hexbuffer.http-history/hexbuffer.db"),
+                PathBuf::from(&home)
+                    .join("Library/Application Support/com.hexbuffer.security/hexbuffer.db"),
+                PathBuf::from(&home)
+                    .join("Library/Application Support/com.hexbuffer.http-history/hexbuffer.db"),
             ];
             for candidate in candidates {
                 if candidate.exists() {
                     let _ = std::fs::copy(&candidate, &db_path);
-                    let _ = std::fs::copy(candidate.with_extension("db-wal"), db_path.with_extension("db-wal"));
-                    let _ = std::fs::copy(candidate.with_extension("db-shm"), db_path.with_extension("db-shm"));
+                    let _ = std::fs::copy(
+                        candidate.with_extension("db-wal"),
+                        db_path.with_extension("db-wal"),
+                    );
+                    let _ = std::fs::copy(
+                        candidate.with_extension("db-shm"),
+                        db_path.with_extension("db-shm"),
+                    );
                     break;
                 }
             }

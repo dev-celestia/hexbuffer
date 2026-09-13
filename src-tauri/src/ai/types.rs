@@ -50,6 +50,8 @@ pub struct AiChatRequest {
     pub messages: Vec<AiChatMessage>,
     pub workspaces: Option<Vec<WorkspaceInfo>>,
     pub active_workspace_id: Option<String>,
+    #[serde(default)]
+    pub request_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -137,9 +139,6 @@ pub struct ChatMessageRecord {
     pub content: String,
     pub created_at: String,
 }
-
-
-
 
 fn default_ai_key_status() -> BTreeMap<String, bool> {
     use super::providers::AI_PROVIDERS;

@@ -1,4 +1,5 @@
-use std::sync::{Arc, Mutex};
+use parking_lot::Mutex;
+use std::sync::Arc;
 
 /// Proxy network buffer state owned by main app runtime
 #[derive(Debug, Clone)]
@@ -24,10 +25,13 @@ impl ProxyBufferState {
             ));
         }
 
-        if let Ok(mut lock) = self.active_buffers.lock() {
+        let mut lock = self.active_buffers.lock();
+        {
             lock.push(format!("{target_addr}:{hex_data}"));
         }
 
-        Ok(format!("Dispatched {byte_count} bytes hex payload to {target_addr}"))
+        Ok(format!(
+            "Dispatched {byte_count} bytes hex payload to {target_addr}"
+        ))
     }
 }

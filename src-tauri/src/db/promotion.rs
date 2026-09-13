@@ -1,5 +1,5 @@
-use rusqlite::params;
 use chrono::Utc;
+use rusqlite::params;
 
 use crate::db::payload_store::PayloadStore;
 use crate::db::repository::Database;
@@ -41,7 +41,7 @@ pub fn promote_session(
     }
 
     let ephemeral_logs: Vec<EphemeralLogRow> = {
-        let eph_conn = database.ephemeral_conn().lock().unwrap();
+        let eph_conn = database.ephemeral_conn().lock();
         let mut stmt = eph_conn
             .prepare(
                 r#"SELECT id, session_id, timestamp, method, url,
@@ -118,7 +118,7 @@ pub fn promote_session(
     }
 
     let (ephemeral_ws_conns, ephemeral_ws_msgs) = {
-        let eph_conn = database.ephemeral_conn().lock().unwrap();
+        let eph_conn = database.ephemeral_conn().lock();
         let mut stmt_conns = eph_conn
             .prepare(
                 r#"SELECT id, session_id, timestamp, url, host, path,
@@ -184,7 +184,7 @@ pub fn promote_session(
     let mut slabs_to_remove: Vec<String> = Vec::new();
 
     {
-        let mut disk_conn = database.disk_conn().lock().unwrap();
+        let mut disk_conn = database.disk_conn().lock();
         let tx = disk_conn
             .transaction()
             .map_err(|e| format!("Failed to begin disk transaction: {e}"))?;
@@ -196,7 +196,8 @@ pub fn promote_session(
             // Flush request body slab to disk segment
             if log.req_payload_ref.starts_with("slab:") {
                 if let Ok(Some(body)) = payload_store.load_body(&log.req_payload_ref) {
-                    let (stored_ref, _, _) = payload_store.store_body(session_id, &body, "persistent");
+                    let (stored_ref, _, _) =
+                        payload_store.store_body(session_id, &body, "persistent");
                     new_req_ref = stored_ref;
                     slabs_to_remove.push(log.req_payload_ref);
                 }
@@ -205,7 +206,8 @@ pub fn promote_session(
             // Flush response body slab to disk segment
             if log.res_payload_ref.starts_with("slab:") {
                 if let Ok(Some(body)) = payload_store.load_body(&log.res_payload_ref) {
-                    let (stored_ref, _, _) = payload_store.store_body(session_id, &body, "persistent");
+                    let (stored_ref, _, _) =
+                        payload_store.store_body(session_id, &body, "persistent");
                     new_res_ref = stored_ref;
                     slabs_to_remove.push(log.res_payload_ref);
                 }
@@ -303,13 +305,19 @@ pub fn promote_session(
 
     // 5. Clean up ephemeral DB
     {
-        let eph_conn = database.ephemeral_conn().lock().unwrap();
-        let _ = eph_conn.execute("DELETE FROM http_logs WHERE session_id = ?1", params![session_id]);
+        let eph_conn = database.ephemeral_conn().lock();
+        let _ = eph_conn.execute(
+            "DELETE FROM http_logs WHERE session_id = ?1",
+            params![session_id],
+        );
         let _ = eph_conn.execute(
             "DELETE FROM websocket_messages WHERE connection_id IN (SELECT id FROM websocket_connections WHERE session_id = ?1)",
             params![session_id],
         );
-        let _ = eph_conn.execute("DELETE FROM websocket_connections WHERE session_id = ?1", params![session_id]);
+        let _ = eph_conn.execute(
+            "DELETE FROM websocket_connections WHERE session_id = ?1",
+            params![session_id],
+        );
     }
 
     // 6. Remove freed slabs from RAM
@@ -381,15 +389,23 @@ mod tests {
 
         // Verify log exists in ephemeral DB, but not in disk DB
         {
-            let eph = database.ephemeral_conn().lock().unwrap();
+            let eph = database.ephemeral_conn().lock();
             let count: i64 = eph
-                .query_row("SELECT COUNT(*) FROM http_logs WHERE session_id = ?1", params![session.id], |r| r.get(0))
+                .query_row(
+                    "SELECT COUNT(*) FROM http_logs WHERE session_id = ?1",
+                    params![session.id],
+                    |r| r.get(0),
+                )
                 .unwrap();
             assert_eq!(count, 1);
 
-            let disk = database.disk_conn().lock().unwrap();
+            let disk = database.disk_conn().lock();
             let disk_count: i64 = disk
-                .query_row("SELECT COUNT(*) FROM http_logs WHERE session_id = ?1", params![session.id], |r| r.get(0))
+                .query_row(
+                    "SELECT COUNT(*) FROM http_logs WHERE session_id = ?1",
+                    params![session.id],
+                    |r| r.get(0),
+                )
                 .unwrap();
             assert_eq!(disk_count, 0);
         }
@@ -399,20 +415,32 @@ mod tests {
 
         // 4. Verify log moved to disk DB and deleted from ephemeral DB
         {
-            let eph = database.ephemeral_conn().lock().unwrap();
+            let eph = database.ephemeral_conn().lock();
             let count: i64 = eph
-                .query_row("SELECT COUNT(*) FROM http_logs WHERE session_id = ?1", params![session.id], |r| r.get(0))
+                .query_row(
+                    "SELECT COUNT(*) FROM http_logs WHERE session_id = ?1",
+                    params![session.id],
+                    |r| r.get(0),
+                )
                 .unwrap();
             assert_eq!(count, 0);
 
-            let disk = database.disk_conn().lock().unwrap();
+            let disk = database.disk_conn().lock();
             let disk_count: i64 = disk
-                .query_row("SELECT COUNT(*) FROM http_logs WHERE session_id = ?1", params![session.id], |r| r.get(0))
+                .query_row(
+                    "SELECT COUNT(*) FROM http_logs WHERE session_id = ?1",
+                    params![session.id],
+                    |r| r.get(0),
+                )
                 .unwrap();
             assert_eq!(disk_count, 1);
 
             let mode: String = disk
-                .query_row("SELECT storage_mode FROM http_sessions WHERE id = ?1", params![session.id], |r| r.get(0))
+                .query_row(
+                    "SELECT storage_mode FROM http_sessions WHERE id = ?1",
+                    params![session.id],
+                    |r| r.get(0),
+                )
                 .unwrap();
             assert_eq!(mode, "persistent");
         }
@@ -483,7 +511,7 @@ mod tests {
 
         // Count should be exactly 149 (no pruning before 150)
         {
-            let eph = database.ephemeral_conn().lock().unwrap();
+            let eph = database.ephemeral_conn().lock();
             let count: i64 = eph
                 .query_row(
                     "SELECT COUNT(*) FROM http_logs WHERE session_id = ?1",
@@ -526,7 +554,7 @@ mod tests {
 
         // Verify count trimmed from 150 down to baseline 100
         {
-            let eph = database.ephemeral_conn().lock().unwrap();
+            let eph = database.ephemeral_conn().lock();
             let count: i64 = eph
                 .query_row(
                     "SELECT COUNT(*) FROM http_logs WHERE session_id = ?1",
@@ -539,11 +567,9 @@ mod tests {
             // Verify oldest 50 were pruned
             for id in &created_ids[..50] {
                 let exists: bool = eph
-                    .query_row(
-                        "SELECT 1 FROM http_logs WHERE id = ?1",
-                        params![id],
-                        |_| Ok(true),
-                    )
+                    .query_row("SELECT 1 FROM http_logs WHERE id = ?1", params![id], |_| {
+                        Ok(true)
+                    })
                     .unwrap_or(false);
                 assert!(!exists, "Oldest row {} should have been pruned", id);
             }
@@ -551,11 +577,9 @@ mod tests {
             // Verify newest 100 exist in SQLite
             for id in &created_ids[50..] {
                 let exists: bool = eph
-                    .query_row(
-                        "SELECT 1 FROM http_logs WHERE id = ?1",
-                        params![id],
-                        |_| Ok(true),
-                    )
+                    .query_row("SELECT 1 FROM http_logs WHERE id = ?1", params![id], |_| {
+                        Ok(true)
+                    })
                     .unwrap_or(false);
                 assert!(exists, "New row {} should be present", id);
             }

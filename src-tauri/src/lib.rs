@@ -4,21 +4,21 @@ pub mod browser;
 pub mod collaborator;
 pub mod commands;
 pub mod db;
+pub mod hashcat;
 pub mod history;
+pub mod paths;
 #[path = "port-scanner/mod.rs"]
 pub mod port_scanner;
 pub mod proxy;
 pub mod sqli;
 pub mod tools;
-pub mod hashcat;
-pub mod paths;
 
 pub use paths::{get_shared_app_dir, get_shared_db_path};
 
 pub use ai::{
-    clear_ai_api_key, get_ai_key_status, get_ai_settings, save_ai_settings,
-    send_ai_chat_message, set_ai_api_key, suggest_invoker_markers, AiSettings, ChatMessageRecord,
-    ChatSessionRecord, InvokerMarkerSuggestionRequest, InvokerMarkerSuggestionResponse,
+    clear_ai_api_key, get_ai_key_status, get_ai_settings, save_ai_settings, send_ai_chat_message,
+    set_ai_api_key, suggest_invoker_markers, AiSettings, ChatMessageRecord, ChatSessionRecord,
+    InvokerMarkerSuggestionRequest, InvokerMarkerSuggestionResponse,
 };
 pub use browser::{AIInsight, ActivityLog, AiBrowserState, CrawlConfig, CrawlPage, CrawlSession};
 pub use collaborator::{
@@ -30,19 +30,19 @@ pub use commands::browser::{
     ai_browser_submit_human_input, browser_batch, browser_click, browser_close, browser_execute,
     browser_fill, browser_navigate, browser_open, browser_press, browser_screenshot,
     browser_snapshot, browser_type, delete_ai_browser_session, get_ai_browser_session,
-    get_browser_status, list_ai_browser_insights, list_ai_browser_logs,
-    list_ai_browser_pages, list_recent_ai_browser_sessions, stop_all_active_crawls,
-    stop_browser_process, BrowserProcessState,
+    get_browser_status, list_ai_browser_insights, list_ai_browser_logs, list_ai_browser_pages,
+    list_recent_ai_browser_sessions, stop_all_active_crawls, stop_browser_process,
+    BrowserProcessState,
 };
-pub use db::repository::{
-    Database, DocumentRecord, PaginatedResponse, TreeNode, TreePath, StashRecord,
-    StashEndpointRecord, ContextRecord, ChronicleLogRecord,
-};
+pub use commands::hash::HashEngineState;
 pub use db::payload_store::PayloadStore;
 pub use db::promotion::promote_session;
+pub use db::repository::{
+    ChronicleLogRecord, ContextRecord, Database, DocumentRecord, PaginatedResponse,
+    StashEndpointRecord, StashRecord, TreeNode, TreePath,
+};
 pub use history::{
-    HistoryBridge, ProxyLogSummary, WebSocketConnectionDetail,
-    WebSocketConnectionSummary,
+    HistoryBridge, ProxyLogSummary, WebSocketConnectionDetail, WebSocketConnectionSummary,
 };
 pub use port_scanner::{scan_ports, stop_port_scan, PortScanState};
 pub use proxy::ca::export_ca_cert_pem;
@@ -59,5 +59,3 @@ pub use sqli::{
     start_sqli_scan, stop_sqli_scan, SqliParam, SqliParamLocation, SqliRiskLevel, SqliScanResult,
     SqliSeverity, SqliTechnique, SqliVulnerability,
 };
-pub use commands::hash::HashEngineState;
-

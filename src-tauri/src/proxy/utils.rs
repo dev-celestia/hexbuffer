@@ -126,5 +126,3 @@ pub fn is_captive_portal(uri: &str) -> bool {
         || lower.contains("connectivitycheck.gstatic.com")
         || lower.contains("msftconnecttest.com")
 }
-
-

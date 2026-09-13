@@ -60,7 +60,8 @@ pub(crate) fn append_log(
         output_data,
     };
     if let Some(state) = app.try_state::<AutomationRuntimeState>() {
-        if let Ok(mut inner) = state.0.lock() {
+        let mut inner = state.0.lock();
+        {
             let logs = inner
                 .logs_by_workflow_id
                 .entry(workflow_id.to_string())
@@ -109,10 +110,7 @@ pub(crate) fn clear_workflow_runtime(app: &AppHandle, workflow_id: &str) {
 
 pub(crate) fn emit_runtime(app: &AppHandle, state: &State<'_, AutomationRuntimeState>) {
     let payload = {
-        let inner = match state.0.lock() {
-            Ok(inner) => inner,
-            Err(_) => return,
-        };
+        let inner = state.0.lock();
         WorkflowRuntimeEvent {
             running_workflow_ids: inner.running_workflow_ids.iter().cloned().collect(),
             active_run_workflow_id: inner.active_run_workflow_id.clone(),
@@ -129,7 +127,8 @@ pub(crate) fn mark_workflow_running(
     executing_node_id: Option<String>,
 ) {
     if let Some(state) = app.try_state::<AutomationRuntimeState>() {
-        if let Ok(mut inner) = state.0.lock() {
+        let mut inner = state.0.lock();
+        {
             inner.aborted_workflow_ids.remove(workflow_id);
             inner
                 .active_run_token_by_workflow_id
@@ -149,7 +148,8 @@ pub(crate) fn mark_workflow_run_finished(
     keep_abort: bool,
 ) {
     if let Some(state) = app.try_state::<AutomationRuntimeState>() {
-        if let Ok(mut inner) = state.0.lock() {
+        let mut inner = state.0.lock();
+        {
             if inner
                 .active_run_token_by_workflow_id
                 .get(workflow_id)
@@ -177,14 +177,13 @@ pub(crate) fn is_workflow_run_cancelled(
     run_token: &str,
 ) -> bool {
     app.try_state::<AutomationRuntimeState>()
-        .and_then(|state| {
-            state.0.lock().ok().map(|inner| {
-                inner.aborted_workflow_ids.contains_key(workflow_id)
-                    || inner
-                        .active_run_token_by_workflow_id
-                        .get(workflow_id)
-                        .is_some_and(|active_token| active_token != run_token)
-            })
+        .map(|state| {
+            let inner = state.0.lock();
+            inner.aborted_workflow_ids.contains_key(workflow_id)
+                || inner
+                    .active_run_token_by_workflow_id
+                    .get(workflow_id)
+                    .is_some_and(|active_token| active_token != run_token)
         })
         .unwrap_or(false)
 }
@@ -193,11 +192,8 @@ pub(crate) fn log_abort_and_finish_run(app: &AppHandle, workflow_id: &str, run_t
     let reason = app
         .try_state::<AutomationRuntimeState>()
         .and_then(|state| {
-            state
-                .0
-                .lock()
-                .ok()
-                .and_then(|inner| inner.aborted_workflow_ids.get(workflow_id).cloned())
+            let inner = state.0.lock();
+            inner.aborted_workflow_ids.get(workflow_id).cloned()
         })
         .unwrap_or_else(|| "superseded".to_string());
     append_log(
@@ -221,10 +217,7 @@ pub(crate) fn emit_queue_stats(
     trigger_node_id: &str,
 ) {
     let payload = {
-        let inner = match state.0.lock() {
-            Ok(inner) => inner,
-            Err(_) => return,
-        };
+        let inner = state.0.lock();
         let current = inner.queue_stats_by_trigger_id.get(trigger_node_id);
         LiveTrafficQueueStatsEvent {
             trigger_node_id: trigger_node_id.to_string(),
@@ -241,10 +234,7 @@ pub(crate) fn emit_queue_stats(
 
 pub(crate) fn emit_all_queue_stats(app: &AppHandle, state: &State<'_, AutomationRuntimeState>) {
     let trigger_ids = {
-        let inner = match state.0.lock() {
-            Ok(inner) => inner,
-            Err(_) => return,
-        };
+        let inner = state.0.lock();
         let mut ids: HashSet<String> = inner.queue_stats_by_trigger_id.keys().cloned().collect();
         ids.extend(inner.trigger_queues.keys().cloned());
         ids.into_iter().collect::<Vec<_>>()
@@ -258,7 +248,8 @@ pub(crate) fn emit_all_queue_stats(app: &AppHandle, state: &State<'_, Automation
 
 pub(crate) fn emit_host_insight(app: &AppHandle, insight: &LiveTrafficHostInsightEvent) {
     if let Some(state) = app.try_state::<AutomationRuntimeState>() {
-        if let Ok(mut inner) = state.0.lock() {
+        let mut inner = state.0.lock();
+        {
             inner
                 .ui_telemetry_queue
                 .push_back(AutomationUiTelemetryItem::HostInsight(insight.clone()));
@@ -272,7 +263,8 @@ pub(crate) fn emit_host_insight(app: &AppHandle, insight: &LiveTrafficHostInsigh
 
 pub(crate) fn emit_host_insight_remove(app: &AppHandle, id: String) {
     if let Some(state) = app.try_state::<AutomationRuntimeState>() {
-        if let Ok(mut inner) = state.0.lock() {
+        let mut inner = state.0.lock();
+        {
             inner
                 .ui_telemetry_queue
                 .push_back(AutomationUiTelemetryItem::RemoveHostInsight(id));
@@ -287,10 +279,7 @@ pub(crate) fn ack_ui_telemetry_batch(
     batch_id: &str,
 ) {
     {
-        let mut inner = match state.0.lock() {
-            Ok(inner) => inner,
-            Err(_) => return,
-        };
+        let mut inner = state.0.lock();
         if inner.ui_telemetry_in_flight_batch_id.as_deref() != Some(batch_id) {
             return;
         }
@@ -310,10 +299,7 @@ pub(crate) fn emit_next_ui_telemetry_batch(
     state: &State<'_, AutomationRuntimeState>,
 ) {
     let decision = {
-        let mut inner = match state.0.lock() {
-            Ok(inner) => inner,
-            Err(_) => return,
-        };
+        let mut inner = state.0.lock();
         if inner.ui_telemetry_in_flight_batch_id.is_some() || inner.ui_telemetry_queue.is_empty() {
             return;
         }
@@ -351,10 +337,7 @@ pub(crate) fn flush_ui_telemetry_batch(app: &AppHandle) {
         return;
     };
     let payload = {
-        let mut inner = match state.0.lock() {
-            Ok(inner) => inner,
-            Err(_) => return,
-        };
+        let mut inner = state.0.lock();
         build_priority_ui_telemetry_batch_locked(&mut inner)
     };
 
@@ -470,7 +453,8 @@ fn schedule_delayed_ui_telemetry_emit(app: AppHandle, delay: Duration) {
         let Some(state) = app.try_state::<AutomationRuntimeState>() else {
             return;
         };
-        if let Ok(mut inner) = state.0.lock() {
+        let mut inner = state.0.lock();
+        {
             inner.ui_telemetry_emit_scheduled = false;
         }
         emit_next_ui_telemetry_batch(&app, &state);
@@ -479,7 +463,8 @@ fn schedule_delayed_ui_telemetry_emit(app: AppHandle, delay: Duration) {
 
 fn push_ui_telemetry(app: &AppHandle, item: AutomationUiTelemetryItem) {
     if let Some(state) = app.try_state::<AutomationRuntimeState>() {
-        if let Ok(mut inner) = state.0.lock() {
+        let mut inner = state.0.lock();
+        {
             inner.ui_telemetry_queue.push_back(item);
         }
         emit_next_ui_telemetry_batch(app, &state);

@@ -27,7 +27,8 @@ pub fn compute_hash_string(input: &[u8], algorithm: HashAlgorithm) -> String {
         HashAlgorithm::Sha3_512 => hex::encode(compute_sha3_512(input)),
         HashAlgorithm::Ripemd160 => hex::encode(compute_ripemd160(input)),
         HashAlgorithm::Argon2 => {
-            let salt = SaltString::from_b64("somesalt12345678").unwrap_or_else(|_| SaltString::generate(&mut rand::thread_rng()));
+            let salt = SaltString::from_b64("somesalt12345678")
+                .unwrap_or_else(|_| SaltString::generate(&mut rand::thread_rng()));
             let argon2 = Argon2::default();
             argon2
                 .hash_password(input, &salt)
@@ -155,7 +156,8 @@ pub fn compute_ripemd160(input: &[u8]) -> [u8; 20] {
 #[inline(always)]
 pub fn compute_scrypt(input: &[u8]) -> Vec<u8> {
     let salt = b"hexbuffer_salt16";
-    let params = scrypt::Params::new(14, 8, 1, 32).unwrap_or_else(|_| scrypt::Params::new(10, 8, 1, 32).unwrap());
+    let params = scrypt::Params::new(14, 8, 1, 32)
+        .unwrap_or_else(|_| scrypt::Params::new(10, 8, 1, 32).unwrap());
     let mut output = [0u8; 32];
     let _ = scrypt::scrypt(input, salt, &params, &mut output);
     output.to_vec()

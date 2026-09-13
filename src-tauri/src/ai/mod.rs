@@ -5,6 +5,7 @@ pub mod commands;
 pub mod keyring;
 pub mod providers;
 pub mod settings;
+pub mod tool_loop;
 pub mod types;
 
 use std::collections::BTreeMap;
@@ -66,6 +67,12 @@ pub async fn send_ai_chat_message(
     chat::send_ai_chat_message_impl(app, history, request).await
 }
 
+/// Completes a pending AI tool execution dispatched to the frontend via `ai:execute-tool`.
+#[tauri::command]
+pub fn resolve_ai_tool_result(id: String, success: bool, message: String) -> Result<bool, String> {
+    Ok(tool_loop::resolve_tool_result(&id, success, message))
+}
+
 #[tauri::command]
 pub async fn suggest_invoker_markers(
     app: AppHandle,
@@ -73,4 +80,3 @@ pub async fn suggest_invoker_markers(
 ) -> Result<InvokerMarkerSuggestionResponse, String> {
     auto_mark::suggest_invoker_markers_impl(app, request).await
 }
-

@@ -35,7 +35,7 @@ impl Database {
     // ── Test Cases ────────────────────────────────────────────────────────
 
     pub fn list_regression_test_cases(&self) -> SqlResult<Vec<RegressionTestCaseRecord>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             "SELECT id, test_name, name, description, target_url, steps_json, enabled, created_at, updated_at \
              FROM regression_test_cases ORDER BY updated_at DESC",
@@ -56,8 +56,11 @@ impl Database {
         rows.collect()
     }
 
-    pub fn get_regression_test_case(&self, id: &str) -> SqlResult<Option<RegressionTestCaseRecord>> {
-        let conn = self.conn.lock().unwrap();
+    pub fn get_regression_test_case(
+        &self,
+        id: &str,
+    ) -> SqlResult<Option<RegressionTestCaseRecord>> {
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             "SELECT id, test_name, name, description, target_url, steps_json, enabled, created_at, updated_at \
              FROM regression_test_cases WHERE id = ?1",
@@ -92,7 +95,7 @@ impl Database {
         steps_json: &str,
         enabled: bool,
     ) -> SqlResult<RegressionTestCaseRecord> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let now = chrono::Utc::now().to_rfc3339();
         let enabled_int = if enabled { 1 } else { 0 };
 
@@ -130,15 +133,18 @@ impl Database {
     }
 
     pub fn delete_regression_test_case(&self, id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
-        conn.execute("DELETE FROM regression_test_cases WHERE id = ?1", params![id])?;
+        let conn = self.conn.lock();
+        conn.execute(
+            "DELETE FROM regression_test_cases WHERE id = ?1",
+            params![id],
+        )?;
         Ok(())
     }
 
     // ── Runs ──────────────────────────────────────────────────────────────
 
     pub fn list_regression_runs(&self, test_case_id: &str) -> SqlResult<Vec<RegressionRunRecord>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             "SELECT id, test_case_id, status, step_results_json, ai_verdict, \
              started_at, finished_at, error, created_at \
@@ -166,7 +172,7 @@ impl Database {
         test_case_id: &str,
         status: &str,
     ) -> SqlResult<RegressionRunRecord> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let now = chrono::Utc::now().to_rfc3339();
 
         conn.execute(
@@ -196,7 +202,7 @@ impl Database {
         ai_verdict: Option<&str>,
         error: Option<&str>,
     ) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let now = chrono::Utc::now().to_rfc3339();
 
         conn.execute(
@@ -210,14 +216,10 @@ impl Database {
     // ── Relational Regression Dashboard Seeding & Fetching ──────────────
 
     pub fn seed_relational_data_if_empty(&self) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
-        
-        let count: i32 = conn.query_row(
-            "SELECT COUNT(*) FROM r_projects",
-            [],
-            |row| row.get(0)
-        )?;
-        
+        let conn = self.conn.lock();
+
+        let count: i32 = conn.query_row("SELECT COUNT(*) FROM r_projects", [], |row| row.get(0))?;
+
         if count > 0 {
             return Ok(());
         }
@@ -227,26 +229,61 @@ impl Database {
         let p2_id = "p-oobserver-2222";
         conn.execute(
             "INSERT INTO r_projects (id, name, repository_url, created_at) VALUES (?1, ?2, ?3, ?4)",
-            params![p1_id, "hexbuffer-frontend", "https://github.com/arhamymr/apsara-cyber-tools", "2026-07-01T12:00:00Z"],
+            params![
+                p1_id,
+                "hexbuffer-frontend",
+                "https://github.com/arhamymr/apsara-cyber-tools",
+                "2026-07-01T12:00:00Z"
+            ],
         )?;
         conn.execute(
             "INSERT INTO r_projects (id, name, repository_url, created_at) VALUES (?1, ?2, ?3, ?4)",
-            params![p2_id, "oob-server-backend", "https://github.com/arhamymr/oob-server", "2026-07-01T12:00:00Z"],
+            params![
+                p2_id,
+                "oob-server-backend",
+                "https://github.com/arhamymr/oob-server",
+                "2026-07-01T12:00:00Z"
+            ],
         )?;
 
         // Seed Environments
         let env_dev = "env-dev";
         let env_stg = "env-stg";
         let env_prd = "env-prd";
-        conn.execute("INSERT INTO r_execution_environments (id, name, description) VALUES (?1, ?2, ?3)", params![env_dev, "Development", "Local dev and CI sandboxed checks"])?;
-        conn.execute("INSERT INTO r_execution_environments (id, name, description) VALUES (?1, ?2, ?3)", params![env_stg, "Staging", "Pre-release testing environment"])?;
-        conn.execute("INSERT INTO r_execution_environments (id, name, description) VALUES (?1, ?2, ?3)", params![env_prd, "Production", "Critical live system checks"])?;
+        conn.execute(
+            "INSERT INTO r_execution_environments (id, name, description) VALUES (?1, ?2, ?3)",
+            params![env_dev, "Development", "Local dev and CI sandboxed checks"],
+        )?;
+        conn.execute(
+            "INSERT INTO r_execution_environments (id, name, description) VALUES (?1, ?2, ?3)",
+            params![env_stg, "Staging", "Pre-release testing environment"],
+        )?;
+        conn.execute(
+            "INSERT INTO r_execution_environments (id, name, description) VALUES (?1, ?2, ?3)",
+            params![env_prd, "Production", "Critical live system checks"],
+        )?;
 
         // Seed Test Suites for hexbuffer-frontend
         let s1_id = "suite-auth";
         let s2_id = "suite-kanban";
-        conn.execute("INSERT INTO r_test_suites (id, project_id, file_path, title) VALUES (?1, ?2, ?3, ?4)", params![s1_id, p1_id, "tests/auth/login.spec.ts", "Authentication Tests"])?;
-        conn.execute("INSERT INTO r_test_suites (id, project_id, file_path, title) VALUES (?1, ?2, ?3, ?4)", params![s2_id, p1_id, "tests/kanban/board.spec.ts", "Kanban Board Tests"])?;
+        conn.execute(
+            "INSERT INTO r_test_suites (id, project_id, file_path, title) VALUES (?1, ?2, ?3, ?4)",
+            params![
+                s1_id,
+                p1_id,
+                "tests/auth/login.spec.ts",
+                "Authentication Tests"
+            ],
+        )?;
+        conn.execute(
+            "INSERT INTO r_test_suites (id, project_id, file_path, title) VALUES (?1, ?2, ?3, ?4)",
+            params![
+                s2_id,
+                p1_id,
+                "tests/kanban/board.spec.ts",
+                "Kanban Board Tests"
+            ],
+        )?;
 
         // Seed Test Cases
         let tc1_id = "tc-login-success";
@@ -335,8 +372,10 @@ impl Database {
     }
 
     pub fn list_projects(&self) -> SqlResult<Vec<ProjectRecord>> {
-        let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare("SELECT id, name, repository_url, created_at FROM r_projects ORDER BY name ASC")?;
+        let conn = self.conn.lock();
+        let mut stmt = conn.prepare(
+            "SELECT id, name, repository_url, created_at FROM r_projects ORDER BY name ASC",
+        )?;
         let rows = stmt.query_map([], |row| {
             Ok(ProjectRecord {
                 id: row.get(0)?,
@@ -349,8 +388,10 @@ impl Database {
     }
 
     pub fn list_environments(&self) -> SqlResult<Vec<EnvironmentRecord>> {
-        let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare("SELECT id, name, description FROM r_execution_environments ORDER BY name ASC")?;
+        let conn = self.conn.lock();
+        let mut stmt = conn.prepare(
+            "SELECT id, name, description FROM r_execution_environments ORDER BY name ASC",
+        )?;
         let rows = stmt.query_map([], |row| {
             Ok(EnvironmentRecord {
                 id: row.get(0)?,
@@ -361,9 +402,13 @@ impl Database {
         rows.collect()
     }
 
-    pub fn list_regression_runs_relational(&self, project_id: Option<&str>, environment_id: Option<&str>) -> SqlResult<Vec<RelationalRunRecord>> {
-        let conn = self.conn.lock().unwrap();
-        
+    pub fn list_regression_runs_relational(
+        &self,
+        project_id: Option<&str>,
+        environment_id: Option<&str>,
+    ) -> SqlResult<Vec<RelationalRunRecord>> {
+        let conn = self.conn.lock();
+
         let mut query = "SELECT r.id, r.project_id, p.name, r.environment_id, e.name, r.build_number, r.branch_name, r.commit_sha, \
                          r.status, r.sign_off_status, r.sign_off_by, r.sign_off_notes, r.started_at, r.ended_at, \
                          r.total_tests, r.passed_tests, r.failed_tests, r.skipped_tests, r.flaky_tests \
@@ -371,9 +416,9 @@ impl Database {
                          JOIN r_projects p ON r.project_id = p.id \
                          LEFT JOIN r_execution_environments e ON r.environment_id = e.id \
                          WHERE 1=1".to_string();
-                         
+
         let mut params_vec: Vec<String> = Vec::new();
-        
+
         if let Some(p_id) = project_id {
             query.push_str(" AND r.project_id = ?");
             params_vec.push(p_id.to_string());
@@ -382,11 +427,14 @@ impl Database {
             query.push_str(" AND r.environment_id = ?");
             params_vec.push(e_id.to_string());
         }
-        
+
         query.push_str(" ORDER BY r.started_at DESC");
-        
+
         let mut stmt = conn.prepare(&query)?;
-        let params_ref: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|s| s as &dyn rusqlite::ToSql).collect();
+        let params_ref: Vec<&dyn rusqlite::ToSql> = params_vec
+            .iter()
+            .map(|s| s as &dyn rusqlite::ToSql)
+            .collect();
         let rows = stmt.query_map(&*params_ref, |row| {
             Ok(RelationalRunRecord {
                 id: row.get(0)?,
@@ -414,7 +462,7 @@ impl Database {
     }
 
     pub fn list_test_run_results(&self, run_id: &str) -> SqlResult<Vec<TestRunResultRecord>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             "SELECT tr.id, tr.run_id, tr.test_case_id, tc.title, ts.title, ts.file_path, \
              tr.browser, tr.device, tr.status, tr.duration_ms, tr.retry_attempts, tr.is_flaky, \
@@ -426,7 +474,7 @@ impl Database {
              WHERE tr.run_id = ?1 \
              ORDER BY tr.executed_at ASC"
         )?;
-        
+
         let rows = stmt.query_map(params![run_id], |row| {
             Ok(TestRunResultRecord {
                 id: row.get(0)?,
@@ -453,7 +501,7 @@ impl Database {
     }
 
     pub fn list_error_signatures(&self) -> SqlResult<Vec<ErrorSignatureRecord>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare("SELECT id, error_message_summary, error_hash, first_seen_at FROM r_error_signatures ORDER BY first_seen_at DESC")?;
         let rows = stmt.query_map([], |row| {
             Ok(ErrorSignatureRecord {
@@ -546,11 +594,10 @@ mod tests {
 
     #[test]
     fn test_seed_relational_data_if_empty() {
-        let db = Database::new(std::path::PathBuf::from(":memory:")).expect("failed to create in-memory db");
+        let db = Database::new(std::path::PathBuf::from(":memory:"))
+            .expect("failed to create in-memory db");
         db.init().expect("db init failed");
         let projects = db.list_projects().expect("failed to list projects");
         assert_eq!(projects.len(), 2);
     }
 }
-
-

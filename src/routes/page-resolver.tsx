@@ -150,16 +150,18 @@ function StandaloneRepeaterPage() {
 export function getAppTarget(): string | null {
   // 1. Check build-time environment variable
   const envTarget = import.meta.env.VITE_APP_TARGET;
-  if (envTarget && envTarget !== "suite" && envTarget !== "main") {
-    return envTarget.toLowerCase();
+  const normalizedEnvTarget = envTarget?.toLowerCase();
+  if (normalizedEnvTarget && normalizedEnvTarget !== "suite" && normalizedEnvTarget !== "main") {
+    return normalizedEnvTarget;
   }
 
   // 2. Check runtime query parameter (?target=encoder or ?standalone=jwt)
   if (typeof window !== "undefined") {
     const params = new URLSearchParams(window.location.search);
     const queryTarget = params.get("target") || params.get("standalone");
-    if (queryTarget && queryTarget !== "suite") {
-      return queryTarget.toLowerCase();
+    const normalizedQueryTarget = queryTarget?.toLowerCase();
+    if (normalizedQueryTarget && normalizedQueryTarget !== "suite") {
+      return normalizedQueryTarget;
     }
   }
 

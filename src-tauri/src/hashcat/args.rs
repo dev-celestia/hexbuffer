@@ -91,7 +91,10 @@ pub fn build_args(
             args.push(hash_file.to_string_lossy().into_owned());
             args.push(expand_wildcards(pattern, "?1"));
         }
-        AttackMode::Hybrid { wordlist_path, mask } => {
+        AttackMode::Hybrid {
+            wordlist_path,
+            mask,
+        } => {
             // The previous engine appended digits only for hybrid attacks.
             args.push("-a".to_string());
             args.push("6".to_string());
@@ -255,9 +258,7 @@ mod tests {
         );
 
         let args = build_args(&config, &hash_file, &outfile, None).expect("valid args");
-        assert!(args
-            .iter()
-            .any(|a| a == "--custom-charset1=0123456789"));
+        assert!(args.iter().any(|a| a == "--custom-charset1=0123456789"));
         assert!(args.contains(&"pin?1?1?1".to_string()));
     }
 

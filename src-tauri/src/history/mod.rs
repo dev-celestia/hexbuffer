@@ -64,14 +64,23 @@ impl HistoryBridge {
     pub fn new(path: PathBuf) -> Result<Self, String> {
         let db = Database::new(path).map_err(|e| e.to_string())?;
         db.init().map_err(|e| e.to_string())?;
-        Ok(Self { db, payload_store: None })
+        Ok(Self {
+            db,
+            payload_store: None,
+        })
     }
 
     pub fn from_database(db: Database) -> Self {
-        Self { db, payload_store: None }
+        Self {
+            db,
+            payload_store: None,
+        }
     }
 
-    pub fn from_database_and_payload_store(db: Database, payload_store: crate::db::PayloadStore) -> Self {
+    pub fn from_database_and_payload_store(
+        db: Database,
+        payload_store: crate::db::PayloadStore,
+    ) -> Self {
         Self {
             db,
             payload_store: Some(payload_store),
@@ -170,13 +179,20 @@ impl HistoryBridge {
 
     // ── Logs ───────────────────────────────────────────────────────
 
-    pub fn insert_record(&self, record: &ProxyRecord, session_id: Option<&str>) -> Result<(), String> {
+    pub fn insert_record(
+        &self,
+        record: &ProxyRecord,
+        session_id: Option<&str>,
+    ) -> Result<(), String> {
         self.db
             .insert_log(record, session_id, self.payload_store.as_ref())
             .map_err(|e| e.to_string())
     }
 
-    pub fn insert_records_batch(&self, records: &[(ProxyRecord, Option<String>)]) -> Result<(), String> {
+    pub fn insert_records_batch(
+        &self,
+        records: &[(ProxyRecord, Option<String>)],
+    ) -> Result<(), String> {
         self.db
             .insert_logs_batch(records, self.payload_store.as_ref())
             .map_err(|e| e.to_string())
@@ -281,7 +297,9 @@ impl HistoryBridge {
     }
 
     pub fn save_stash_endpoint(&self, record: &crate::StashEndpointRecord) -> Result<(), String> {
-        self.db.upsert_stash_endpoint(record).map_err(|e| e.to_string())
+        self.db
+            .upsert_stash_endpoint(record)
+            .map_err(|e| e.to_string())
     }
 
     pub fn delete_stash_endpoint(&self, id: &str) -> Result<(), String> {
@@ -323,7 +341,9 @@ impl HistoryBridge {
     }
 
     pub fn clear_before(&self, cutoff_rfc3339: &str) -> Result<usize, String> {
-        self.db.clear_logs_before(cutoff_rfc3339).map_err(|e| e.to_string())
+        self.db
+            .clear_logs_before(cutoff_rfc3339)
+            .map_err(|e| e.to_string())
     }
 
     pub fn delete_by_id(&self, log_id: &str) -> Result<(), String> {
@@ -331,20 +351,28 @@ impl HistoryBridge {
     }
 
     pub fn get_all(&self) -> Result<Vec<ProxyRecord>, String> {
-        self.db.get_all(self.payload_store.as_ref()).map_err(|e| e.to_string())
+        self.db
+            .get_all(self.payload_store.as_ref())
+            .map_err(|e| e.to_string())
     }
 
     pub fn get_by_id(&self, log_id: &str) -> Result<Option<ProxyRecord>, String> {
-        self.db.get_by_id(log_id, self.payload_store.as_ref()).map_err(|e| e.to_string())
+        self.db
+            .get_by_id(log_id, self.payload_store.as_ref())
+            .map_err(|e| e.to_string())
     }
 
     pub fn get_filtered(&self, filter: ProxyFilter) -> Result<Vec<ProxyRecord>, String> {
         let filter = self.normalize_filter(filter);
 
         if self.has_active_filters(&filter) {
-            self.db.get_filtered(&filter, self.payload_store.as_ref()).map_err(|e| e.to_string())
+            self.db
+                .get_filtered(&filter, self.payload_store.as_ref())
+                .map_err(|e| e.to_string())
         } else {
-            self.db.get_all(self.payload_store.as_ref()).map_err(|e| e.to_string())
+            self.db
+                .get_all(self.payload_store.as_ref())
+                .map_err(|e| e.to_string())
         }
     }
 

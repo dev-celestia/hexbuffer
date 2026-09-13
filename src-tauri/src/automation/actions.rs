@@ -269,7 +269,6 @@ async fn execute_send_webhook(node: &AutomationNode, input_data: &Value) -> Resu
     ))
 }
 
-
 fn execute_create_finding(
     app: &AppHandle,
     node: &AutomationNode,
@@ -582,6 +581,7 @@ async fn execute_ai_analyze(
         }],
         workspaces: None,
         active_workspace_id: None,
+        request_id: None,
     };
     let response = crate::ai::send_ai_chat_message(app.clone(), history, request).await?;
 
@@ -769,8 +769,7 @@ fn execute_export_json(
         serde_json::to_string_pretty(&value).map_err(|error| error.to_string())?
     };
 
-    let dir = crate::paths::get_shared_app_dir()
-        .join("automation-exports");
+    let dir = crate::paths::get_shared_app_dir().join("automation-exports");
     fs::create_dir_all(&dir).map_err(|error| error.to_string())?;
     let path = dir.join(filename);
     fs::write(&path, content).map_err(|error| error.to_string())?;
@@ -812,13 +811,7 @@ fn param_bool(params: &Value, key: &str, fallback: bool) -> bool {
 
 fn run_script_actions_allowed(app: &AppHandle) -> bool {
     app.try_state::<AutomationRuntimeState>()
-        .and_then(|state| {
-            state
-                .0
-                .lock()
-                .ok()
-                .map(|inner| inner.settings.allow_run_script_actions)
-        })
+        .map(|state| state.0.lock().settings.allow_run_script_actions)
         .unwrap_or(false)
 }
 

@@ -1,11 +1,11 @@
-use rusqlite::{params, Result as SqlResult};
-use super::types::{StashRecord, StashEndpointRecord, ContextRecord, ChronicleLogRecord};
+use super::types::{ChronicleLogRecord, ContextRecord, StashEndpointRecord, StashRecord};
 use super::Database;
+use rusqlite::{params, Result as SqlResult};
 
 impl Database {
     // --- Stashes (folders) ---
     pub fn get_stashes(&self) -> SqlResult<Vec<StashRecord>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             "SELECT id, name, parent_id, sort_order, created_at, updated_at FROM stashes ORDER BY sort_order ASC, name ASC"
         )?;
@@ -23,7 +23,7 @@ impl Database {
     }
 
     pub fn upsert_stash(&self, record: &StashRecord) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             r#"INSERT INTO stashes (id, name, parent_id, sort_order, created_at, updated_at)
                VALUES (?1, ?2, ?3, ?4, ?5, ?6)
@@ -32,20 +32,27 @@ impl Database {
                    parent_id = excluded.parent_id,
                    sort_order = excluded.sort_order,
                    updated_at = excluded.updated_at"#,
-            params![record.id, record.name, record.parent_id, record.sort_order, record.created_at, record.updated_at],
+            params![
+                record.id,
+                record.name,
+                record.parent_id,
+                record.sort_order,
+                record.created_at,
+                record.updated_at
+            ],
         )?;
         Ok(())
     }
 
     pub fn delete_stash(&self, id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute("DELETE FROM stashes WHERE id = ?1", params![id])?;
         Ok(())
     }
 
     // --- Stash Endpoints ---
     pub fn get_stash_endpoints(&self) -> SqlResult<Vec<StashEndpointRecord>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             "SELECT id, stash_id, name, method, url, headers, body, body_type, pre_script, test_script, sort_order, created_at, updated_at 
              FROM stash_endpoints ORDER BY sort_order ASC, created_at ASC"
@@ -71,7 +78,7 @@ impl Database {
     }
 
     pub fn upsert_stash_endpoint(&self, record: &StashEndpointRecord) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             r#"INSERT INTO stash_endpoints (id, stash_id, name, method, url, headers, body, body_type, pre_script, test_script, sort_order, created_at, updated_at)
                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
@@ -97,16 +104,16 @@ impl Database {
     }
 
     pub fn delete_stash_endpoint(&self, id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute("DELETE FROM stash_endpoints WHERE id = ?1", params![id])?;
         Ok(())
     }
 
     // --- Contexts (environments) ---
     pub fn get_contexts(&self) -> SqlResult<Vec<ContextRecord>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
-            "SELECT id, name, variables, created_at, updated_at FROM contexts ORDER BY name ASC"
+            "SELECT id, name, variables, created_at, updated_at FROM contexts ORDER BY name ASC",
         )?;
         let rows = stmt.query_map([], |row| {
             Ok(ContextRecord {
@@ -121,7 +128,7 @@ impl Database {
     }
 
     pub fn upsert_context(&self, record: &ContextRecord) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             r#"INSERT INTO contexts (id, name, variables, created_at, updated_at)
                VALUES (?1, ?2, ?3, ?4, ?5)
@@ -129,20 +136,26 @@ impl Database {
                    name = excluded.name,
                    variables = excluded.variables,
                    updated_at = excluded.updated_at"#,
-            params![record.id, record.name, record.variables, record.created_at, record.updated_at],
+            params![
+                record.id,
+                record.name,
+                record.variables,
+                record.created_at,
+                record.updated_at
+            ],
         )?;
         Ok(())
     }
 
     pub fn delete_context(&self, id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute("DELETE FROM contexts WHERE id = ?1", params![id])?;
         Ok(())
     }
 
     // --- Chronicle (request history) ---
     pub fn get_chronicle_logs(&self, limit: u32) -> SqlResult<Vec<ChronicleLogRecord>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             "SELECT id, timestamp, method, url, request_headers, request_body, response_status, response_status_text, response_headers, response_body, duration_ms
              FROM chronicle_logs ORDER BY timestamp DESC LIMIT ?1"
@@ -166,7 +179,7 @@ impl Database {
     }
 
     pub fn add_chronicle_log(&self, record: &ChronicleLogRecord) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             r#"INSERT INTO chronicle_logs (id, timestamp, method, url, request_headers, request_body, response_status, response_status_text, response_headers, response_body, duration_ms)
                VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)"#,
@@ -181,7 +194,7 @@ impl Database {
     }
 
     pub fn clear_chronicle_logs(&self) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute("DELETE FROM chronicle_logs", [])?;
         Ok(())
     }

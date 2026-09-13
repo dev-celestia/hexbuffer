@@ -8,16 +8,26 @@ import { useWindowContext } from "@/providers/window-provider";
 export function getStandaloneTarget(): string | null {
   // 1. Build-time environment variable
   const envTarget = import.meta.env.VITE_APP_TARGET;
-  if (envTarget && envTarget !== "suite" && envTarget !== "main") {
-    return envTarget.toLowerCase();
+  const normalizedEnvTarget = envTarget?.toLowerCase();
+  if (
+    normalizedEnvTarget &&
+    normalizedEnvTarget !== "suite" &&
+    normalizedEnvTarget !== "main"
+  ) {
+    return normalizedEnvTarget;
   }
 
   // 2. Runtime query parameter (?target=... or ?standalone=...)
   if (typeof window !== "undefined") {
     const params = new URLSearchParams(window.location.search);
     const queryTarget = params.get("target") || params.get("standalone");
-    if (queryTarget && queryTarget !== "suite" && queryTarget !== "main") {
-      return queryTarget.toLowerCase();
+    const normalizedQueryTarget = queryTarget?.toLowerCase();
+    if (
+      normalizedQueryTarget &&
+      normalizedQueryTarget !== "suite" &&
+      normalizedQueryTarget !== "main"
+    ) {
+      return normalizedQueryTarget;
     }
   }
 

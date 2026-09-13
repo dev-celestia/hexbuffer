@@ -90,3 +90,51 @@ pub fn detect_service(port: u16, banner: Option<&str>) -> &'static str {
         service_name(port)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_service_name_known_ports() {
+        assert_eq!(service_name(22), "ssh");
+        assert_eq!(service_name(80), "http");
+        assert_eq!(service_name(443), "https");
+        assert_eq!(service_name(3306), "mysql");
+        assert_eq!(service_name(6379), "redis");
+        assert_eq!(service_name(27017), "mongodb");
+    }
+
+    #[test]
+    fn test_service_name_unknown_ports() {
+        assert_eq!(service_name(1), "unknown");
+        assert_eq!(service_name(65535), "unknown");
+    }
+
+    #[test]
+    fn test_detect_service_without_banner_falls_back_to_port() {
+        assert_eq!(detect_service(80, None), "http");
+        assert_eq!(detect_service(12345, None), "unknown");
+    }
+
+    #[test]
+    fn test_detect_service_banner_overrides_port() {
+        assert_eq!(detect_service(2222, Some("SSH-2.0-OpenSSH_9.6")), "ssh");
+        assert_eq!(detect_service(9999, Some("220 smtp.example.com ESMTP")), "smtp");
+        assert_eq!(detect_service(9999, Some("redis_version:7.0")), "redis");
+        assert_eq!(detect_service(9999, Some("MySQL server error")), "mysql");
+    }
+
+    #[test]
+    fn test_detect_service_http_banner_respects_tls_ports() {
+        assert_eq!(detect_service(8080, Some("HTTP/1.1 200 OK")), "http");
+        assert_eq!(detect_service(80, Some("<html><body>hi</body></html>")), "http");
+        assert_eq!(detect_service(443, Some("HTTP/1.1 200 OK")), "https");
+        assert_eq!(detect_service(8443, Some("HTTP/1.1 404 Not Found")), "https");
+    }
+
+    #[test]
+    fn test_detect_service_unrecognized_banner_falls_back_to_port() {
+        assert_eq!(detect_service(22, Some("garbage noise")), "ssh");
+    }
+}

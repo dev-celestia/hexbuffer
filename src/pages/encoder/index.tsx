@@ -1,7 +1,8 @@
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { cn } from '@/lib/utils';
 import { useEncoderPage } from './hooks/use-encoder-page';
-import { EncoderToolbar } from './components/encoder-toolbar';
+import { CODEC_LABELS } from './constants';
+import { EncoderTransformColumn } from './components/encoder-transform-column';
 import { EncoderInputPanel } from './components/encoder-input-panel';
 import { EncoderOutputPanel } from './components/encoder-output-panel';
 
@@ -30,19 +31,6 @@ export function EncoderPage() {
           "border bg-card rounded-md"
         )}
       >
-        <EncoderToolbar
-          activeType={page.activeType}
-          onTypeChange={page.setActiveType}
-          mode={page.mode}
-          onModeChange={page.setMode}
-          currentMode={page.currentMode}
-          output={page.output}
-          isEmpty={page.isEmpty}
-          onSwap={page.handleSwap}
-          onCopy={page.handleCopy}
-          onClear={page.handleClear}
-        />
-
         <main
           className={cn(
             // Layout & Positioning
@@ -53,25 +41,38 @@ export function EncoderPage() {
           )}
         >
           <ResizablePanelGroup orientation="horizontal" className="h-full min-h-0">
-            <ResizablePanel defaultSize={50} minSize={25}>
+            <ResizablePanel defaultSize="40%" minSize="25%">
               <EncoderInputPanel
                 headerLabel={page.currentMode.source}
                 input={page.input}
-                mode={page.mode}
-                isEmpty={page.isEmpty}
                 onInputChange={page.setInput}
+              />
+            </ResizablePanel>
+
+            <ResizableHandle withHandle />
+
+            <ResizablePanel defaultSize="220px" minSize="190px" maxSize="300px">
+              <EncoderTransformColumn
+                activeType={page.activeType}
+                onTypeChange={page.setActiveType}
+                mode={page.mode}
+                onModeChange={page.setMode}
+                output={page.output}
+                isEmpty={page.isEmpty}
+                onSwap={page.handleSwap}
+                onCopy={page.handleCopy}
                 onClear={page.handleClear}
               />
             </ResizablePanel>
 
             <ResizableHandle withHandle />
 
-            <ResizablePanel defaultSize={50} minSize={25}>
+            <ResizablePanel defaultSize="40%" minSize="25%">
               <EncoderOutputPanel
                 headerLabel={page.currentMode.target}
+                codecLabel={CODEC_LABELS[page.activeType]}
                 output={page.output}
                 error={page.error}
-                onCopy={page.handleCopy}
               />
             </ResizablePanel>
           </ResizablePanelGroup>

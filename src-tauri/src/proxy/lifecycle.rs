@@ -1,5 +1,6 @@
+use parking_lot::Mutex;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::time::Duration;
 
 use hexbuffer_proxy::WebSocketMessage as Message;
@@ -119,21 +120,30 @@ impl HttpHandler for AppHandler {
         }
 
         let raw_uri = parts.uri.to_string();
-        let (host, full_url) = if raw_uri.starts_with("http://") || raw_uri.starts_with("https://") {
-            let parsed_host = parts.uri.host().map(|h| {
-                if let Some(port) = parts.uri.port_u16() {
-                    if (raw_uri.starts_with("https://") && port == 443) || (raw_uri.starts_with("http://") && port == 80) {
-                        h.to_string()
+        let (host, full_url) = if raw_uri.starts_with("http://") || raw_uri.starts_with("https://")
+        {
+            let parsed_host = parts
+                .uri
+                .host()
+                .map(|h| {
+                    if let Some(port) = parts.uri.port_u16() {
+                        if (raw_uri.starts_with("https://") && port == 443)
+                            || (raw_uri.starts_with("http://") && port == 80)
+                        {
+                            h.to_string()
+                        } else {
+                            format!("{}:{}", h, port)
+                        }
                     } else {
-                        format!("{}:{}", h, port)
+                        h.to_string()
                     }
-                } else {
-                    h.to_string()
-                }
-            }).unwrap_or_default();
+                })
+                .unwrap_or_default();
             (parsed_host, raw_uri)
         } else {
-            let host_header = ctx.req_headers.get("host")
+            let host_header = ctx
+                .req_headers
+                .get("host")
                 .or_else(|| ctx.req_headers.get("Host"))
                 .or_else(|| ctx.req_headers.get(":authority"))
                 .cloned()
@@ -145,7 +155,11 @@ impl HttpHandler for AppHandler {
                     }
                 });
 
-            let scheme = if ctx.req_headers.get("x-forwarded-proto").map(|v| v.eq_ignore_ascii_case("http")).unwrap_or(false)
+            let scheme = if ctx
+                .req_headers
+                .get("x-forwarded-proto")
+                .map(|v| v.eq_ignore_ascii_case("http"))
+                .unwrap_or(false)
                 || host_header.ends_with(":80")
             {
                 "http"
@@ -170,7 +184,11 @@ impl HttpHandler for AppHandler {
             (host_header, normalized_url)
         };
 
-        ctx.server_addr = if !host.is_empty() { host } else { http_ctx.host.clone() };
+        ctx.server_addr = if !host.is_empty() {
+            host
+        } else {
+            http_ctx.host.clone()
+        };
         ctx.req_uri = full_url;
 
         let body_bytes = match body.into_bytes().await {
@@ -204,8 +222,11 @@ impl HttpHandler for AppHandler {
                 let intercept_tab_id = proxy_state.matching_intercept_tab_id(&ctx.req_uri);
 
                 if intercept_tab_id.is_none() {
-                    self.pending_ctxs.lock().unwrap().insert(http_ctx.id, ctx.clone());
-                    let mut req = Request::from_parts(parts, Body::from(bytes::Bytes::from(body_bytes.to_vec())));
+                    self.pending_ctxs.lock().insert(http_ctx.id, ctx.clone());
+                    let mut req = Request::from_parts(
+                        parts,
+                        Body::from(bytes::Bytes::from(body_bytes.to_vec())),
+                    );
                     req.headers_mut().insert("x-rusxy", "1".parse().unwrap());
                     return Ok(RequestOrResponse::Request(req));
                 }
@@ -299,7 +320,7 @@ impl HttpHandler for AppHandler {
         parts.headers.remove("if-none-match");
         parts.headers.remove("if-modified-since");
 
-        self.pending_ctxs.lock().unwrap().insert(http_ctx.id, ctx.clone());
+        self.pending_ctxs.lock().insert(http_ctx.id, ctx.clone());
 
         let request_body = if body_modified {
             ctx.req_body.clone()
@@ -317,10 +338,13 @@ impl HttpHandler for AppHandler {
         http_ctx: &mut HttpContext,
         res: Response<Body>,
     ) -> hexbuffer_proxy::Result<Response<Body>> {
-        let mut ctx = match self.pending_ctxs.lock().unwrap().remove(&http_ctx.id) {
+        let mut ctx = match self.pending_ctxs.lock().remove(&http_ctx.id) {
             Some(c) => c,
             None => {
-                eprintln!("[lifecycle] ERROR: No ctx found for req_id={} in handle_response", http_ctx.id);
+                eprintln!(
+                    "[lifecycle] ERROR: No ctx found for req_id={} in handle_response",
+                    http_ctx.id
+                );
                 return Ok(res);
             }
         };
@@ -438,20 +462,19 @@ impl HttpHandler for AppHandler {
         }
 
         if ctx.req_method != "CONNECT" {
-            save_and_emit(&ctx, &self.app_handle);
+            save_and_emit(&ctx, &self.app_handle).await;
         }
 
-        Ok(Response::from_parts(parts, Body::from(bytes::Bytes::from(response_body))))
+        Ok(Response::from_parts(
+            parts,
+            Body::from(bytes::Bytes::from(response_body)),
+        ))
     }
 }
 
 #[async_trait::async_trait]
 impl hexbuffer_proxy::WebSocketHandler for AppHandler {
-    async fn on_upgrade(
-        &self,
-        ctx: &mut HttpContext,
-        request: Request<Body>,
-    ) -> Request<Body> {
+    async fn on_upgrade(&self, ctx: &mut HttpContext, request: Request<Body>) -> Request<Body> {
         let connection_id = uuid::Uuid::new_v4();
         let client_addr = ctx.client_addr.to_string();
         let req_uri = request.uri().to_string();
@@ -459,35 +482,30 @@ impl hexbuffer_proxy::WebSocketHandler for AppHandler {
         let req_headers: HashMap<String, String> = request
             .headers()
             .iter()
-            .filter_map(|(k, v)| v.to_str().ok().map(|s| (k.as_str().to_string(), s.to_string())))
+            .filter_map(|(k, v)| {
+                v.to_str()
+                    .ok()
+                    .map(|s| (k.as_str().to_string(), s.to_string()))
+            })
             .collect();
 
         let (host, path, url) = websocket::parse_websocket_target(&req_uri, &req_headers);
         let key = format!("{}|{}|{}", client_addr, host, path);
 
-        let should_record = if let Some(proxy_state) = self.app_handle.try_state::<crate::proxy::ProxyState>() {
-            proxy_state.should_record_ws_to_db(&host, &req_uri, &req_headers)
-        } else {
-            true
-        };
+        let should_record =
+            if let Some(proxy_state) = self.app_handle.try_state::<crate::proxy::ProxyState>() {
+                proxy_state.should_record_ws_to_db(&host, &req_uri, &req_headers)
+            } else {
+                true
+            };
 
         if should_record {
-            self.ws_connections
-                .lock()
-                .unwrap()
-                .insert(key, connection_id);
-
-            let mut session_id = String::new();
-            if let Some(history) = self.app_handle.try_state::<crate::HistoryBridge>() {
-                if let Ok(Some(active)) = history.get_active_http_session() {
-                    session_id = active.id;
-                }
-            }
+            self.ws_connections.lock().insert(key, connection_id);
 
             let now = chrono::Utc::now();
             let record = crate::proxy::state::WebSocketConnectionRecord {
                 id: connection_id,
-                session_id,
+                session_id: String::new(),
                 timestamp: now,
                 url,
                 host,
@@ -502,13 +520,27 @@ impl hexbuffer_proxy::WebSocketHandler for AppHandler {
                 last_activity_at: now,
             };
 
-            if let Some(history) = self.app_handle.try_state::<crate::HistoryBridge>() {
-                if let Err(e) = history.insert_websocket_connection(&record) {
-                    eprintln!("[websocket] failed to insert WS connection: {}", e);
+            // SQLite session lookup + insert are blocking; keep them off the
+            // async runtime and emit once the record is persisted.
+            let app_handle = self.app_handle.clone();
+            let saved = tauri::async_runtime::spawn_blocking(move || {
+                let mut record = record;
+                if let Some(history) = app_handle.try_state::<crate::HistoryBridge>() {
+                    if let Ok(Some(active)) = history.get_active_http_session() {
+                        record.session_id = active.id;
+                    }
+                    if let Err(e) = history.insert_websocket_connection(&record) {
+                        eprintln!("[websocket] failed to insert WS connection: {}", e);
+                    }
                 }
-            }
-            if let Err(e) = self.app_handle.emit("websocket-connection", &record) {
-                eprintln!("[websocket] failed to emit WS connection event: {}", e);
+                record
+            })
+            .await;
+
+            if let Ok(record) = saved {
+                if let Err(e) = self.app_handle.emit("websocket-connection", &record) {
+                    eprintln!("[websocket] failed to emit WS connection event: {}", e);
+                }
             }
         }
 
@@ -527,11 +559,6 @@ impl hexbuffer_proxy::WebSocketHandler for AppHandler {
         };
         let client_addr = ctx.client_addr.to_string();
         let uri = ctx.host.clone();
-
-        eprintln!(
-            "[websocket] handle_message dir={:?} client={} uri={}",
-            ws_direction, client_addr, uri
-        );
 
         let message_type = match &msg {
             Message::Text(_) => WebSocketMessageType::Text,
@@ -565,7 +592,7 @@ impl hexbuffer_proxy::WebSocketHandler for AppHandler {
         let (host, path, url) = websocket::parse_websocket_target(&uri_str, &empty_headers);
         let key = format!("{}|{}|{}", client_addr, host, path);
 
-        let connection_id = self.ws_connections.lock().unwrap().get(&key).copied();
+        let connection_id = self.ws_connections.lock().get(&key).copied();
 
         if let Some(connection_id) = connection_id {
             let now = chrono::Utc::now();
@@ -579,10 +606,19 @@ impl hexbuffer_proxy::WebSocketHandler for AppHandler {
                 payload_size: payload.len(),
             };
 
-            if let Some(history) = self.app_handle.try_state::<crate::HistoryBridge>() {
-                if let Err(e) = history.insert_websocket_message(&message_record) {
-                    eprintln!("[websocket] failed to save message: {}", e);
-                }
+            {
+                // SQLite write is blocking and runs per message; keep it off the
+                // async runtime. Awaited so messages persist in arrival order.
+                let app_handle = self.app_handle.clone();
+                let record = message_record.clone();
+                let saved = tauri::async_runtime::spawn_blocking(move || {
+                    if let Some(history) = app_handle.try_state::<crate::HistoryBridge>() {
+                        if let Err(e) = history.insert_websocket_message(&record) {
+                            eprintln!("[websocket] failed to save message: {}", e);
+                        }
+                    }
+                });
+                let _ = saved.await;
             }
 
             if let Err(e) = self.app_handle.emit("websocket-message", &message_record) {
@@ -598,7 +634,7 @@ impl hexbuffer_proxy::WebSocketHandler for AppHandler {
             );
 
             if matches!(&msg, Message::Close(_)) {
-                self.ws_connections.lock().unwrap().remove(&key);
+                self.ws_connections.lock().remove(&key);
                 eprintln!("[websocket] connection closed conn_id={}", connection_id);
             }
         } else {
@@ -608,7 +644,6 @@ impl hexbuffer_proxy::WebSocketHandler for AppHandler {
             );
         }
 
-        println!("[websocket] message: {:?}", msg);
         Some(msg)
     }
 
@@ -618,8 +653,11 @@ impl hexbuffer_proxy::WebSocketHandler for AppHandler {
         let empty_headers = HashMap::new();
         let (host, path, _) = websocket::parse_websocket_target(&uri_str, &empty_headers);
         let key = format!("{}|{}|{}", client_addr, host, path);
-        if let Some(conn_id) = self.ws_connections.lock().unwrap().remove(&key) {
-            eprintln!("[websocket] connection closed via on_close conn_id={}", conn_id);
+        if let Some(conn_id) = self.ws_connections.lock().remove(&key) {
+            eprintln!(
+                "[websocket] connection closed via on_close conn_id={}",
+                conn_id
+            );
         }
     }
 }

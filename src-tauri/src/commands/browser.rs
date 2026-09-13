@@ -8,13 +8,14 @@ pub use crate::browser::{
 };
 
 // ── Agent browser types ──
+use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
-    Arc, Mutex,
+    Arc,
 };
 use tauri::{AppHandle, Emitter, State};
 use uuid::Uuid;
@@ -23,8 +24,8 @@ fn active_ai_browser_worker_count(state: &AiBrowserState, session_id: &str) -> u
     state
         .children
         .lock()
-        .ok()
-        .and_then(|children| children.get(session_id).map(|items| items.len()))
+        .get(session_id)
+        .map(|items| items.len())
         .unwrap_or(0)
 }
 
@@ -156,10 +157,7 @@ pub fn get_browser_status(
     _app: AppHandle,
     state: State<'_, BrowserProcessState>,
 ) -> Result<BrowserStatus, String> {
-    let mut child = state
-        .child
-        .lock()
-        .map_err(|_| "Failed to lock browser process state".to_string())?;
+    let mut child = state.child.lock();
 
     if let Some(ref mut process) = *child {
         if process.try_wait().map_err(|e| e.to_string())?.is_some() {
@@ -170,10 +168,7 @@ pub fn get_browser_status(
     let running = child.is_some();
     let pid = child.as_ref().map(|p| p.id());
 
-    let session = state
-        .session_name
-        .lock()
-        .map_err(|_| "Failed to lock session name".to_string())?;
+    let session = state.session_name.lock();
     let session_name = session.clone();
     drop(session);
 
@@ -195,10 +190,7 @@ pub fn browser_open(
     let browser_path = find_agent_browser(&app)?;
 
     {
-        let mut child = state
-            .child
-            .lock()
-            .map_err(|_| "Failed to lock browser process state".to_string())?;
+        let mut child = state.child.lock();
 
         if let Some(mut process) = child.take() {
             let _ = process.kill();
@@ -225,10 +217,7 @@ pub fn browser_open(
     }
 
     {
-        let mut session = state
-            .session_name
-            .lock()
-            .map_err(|_| "Failed to lock session name".to_string())?;
+        let mut session = state.session_name.lock();
         *session = "hexbuffer-browser".to_string();
     }
 
@@ -246,10 +235,7 @@ pub fn browser_close(
 }
 
 pub fn stop_browser_process(state: &BrowserProcessState) -> Result<(), String> {
-    let mut child = state
-        .child
-        .lock()
-        .map_err(|_| "Failed to lock browser process state".to_string())?;
+    let mut child = state.child.lock();
 
     if let Some(mut process) = child.take() {
         let _ = process.kill();
@@ -267,10 +253,7 @@ pub fn browser_snapshot(
     let browser_path = find_agent_browser(&app)?;
 
     let session = {
-        let s = state
-            .session_name
-            .lock()
-            .map_err(|_| "Failed to lock session name".to_string())?;
+        let s = state.session_name.lock();
         s.clone()
     };
 
@@ -297,10 +280,7 @@ pub fn browser_click(
     let browser_path = find_agent_browser(&app)?;
 
     let session = {
-        let s = state
-            .session_name
-            .lock()
-            .map_err(|_| "Failed to lock session name".to_string())?;
+        let s = state.session_name.lock();
         s.clone()
     };
 
@@ -327,10 +307,7 @@ pub fn browser_fill(
     let browser_path = find_agent_browser(&app)?;
 
     let session = {
-        let s = state
-            .session_name
-            .lock()
-            .map_err(|_| "Failed to lock session name".to_string())?;
+        let s = state.session_name.lock();
         s.clone()
     };
 
@@ -362,10 +339,7 @@ pub fn browser_navigate(
     let browser_path = find_agent_browser(&app)?;
 
     let session = {
-        let s = state
-            .session_name
-            .lock()
-            .map_err(|_| "Failed to lock session name".to_string())?;
+        let s = state.session_name.lock();
         s.clone()
     };
 
@@ -392,10 +366,7 @@ pub fn browser_type(
     let browser_path = find_agent_browser(&app)?;
 
     let session = {
-        let s = state
-            .session_name
-            .lock()
-            .map_err(|_| "Failed to lock session name".to_string())?;
+        let s = state.session_name.lock();
         s.clone()
     };
 
@@ -427,10 +398,7 @@ pub fn browser_press(
     let browser_path = find_agent_browser(&app)?;
 
     let session = {
-        let s = state
-            .session_name
-            .lock()
-            .map_err(|_| "Failed to lock session name".to_string())?;
+        let s = state.session_name.lock();
         s.clone()
     };
 
@@ -456,10 +424,7 @@ pub fn browser_screenshot(
     let browser_path = find_agent_browser(&app)?;
 
     let session = {
-        let s = state
-            .session_name
-            .lock()
-            .map_err(|_| "Failed to lock session name".to_string())?;
+        let s = state.session_name.lock();
         s.clone()
     };
 
@@ -485,10 +450,7 @@ pub fn browser_batch(
     let browser_path = find_agent_browser(&app)?;
 
     let session = {
-        let s = state
-            .session_name
-            .lock()
-            .map_err(|_| "Failed to lock session name".to_string())?;
+        let s = state.session_name.lock();
         s.clone()
     };
 
@@ -556,11 +518,7 @@ pub async fn ai_browser_start_crawl(
     }
 
     let session_id = session_id.unwrap_or_else(|| format!("crawl-{}", Uuid::new_v4()));
-    let session_exists_in_memory = state
-        .sessions
-        .lock()
-        .map_err(|_| "Failed to lock AI browser sessions".to_string())?
-        .contains_key(&session_id);
+    let session_exists_in_memory = state.sessions.lock().contains_key(&session_id);
     let appending_existing_session = append_existing.unwrap_or(false) || session_exists_in_memory;
 
     let session = CrawlSession {
@@ -575,29 +533,14 @@ pub async fn ai_browser_start_crawl(
     };
 
     {
-        let mut sessions = state
-            .sessions
-            .lock()
-            .map_err(|_| "Failed to lock AI browser sessions".to_string())?;
+        let mut sessions = state.sessions.lock();
         sessions.insert(session.id.clone(), session.clone());
     }
     {
         if !appending_existing_session {
-            state
-                .pages
-                .lock()
-                .map_err(|_| "Failed to lock AI browser pages".to_string())?
-                .insert(session.id.clone(), Vec::new());
-            state
-                .insights
-                .lock()
-                .map_err(|_| "Failed to lock AI browser insights".to_string())?
-                .insert(session.id.clone(), Vec::new());
-            state
-                .logs
-                .lock()
-                .map_err(|_| "Failed to lock AI browser logs".to_string())?
-                .insert(session.id.clone(), Vec::new());
+            state.pages.lock().insert(session.id.clone(), Vec::new());
+            state.insights.lock().insert(session.id.clone(), Vec::new());
+            state.logs.lock().insert(session.id.clone(), Vec::new());
         }
     }
     let cancel_flag = Arc::new(AtomicBool::new(false));
@@ -605,7 +548,6 @@ pub async fn ai_browser_start_crawl(
     state
         .cancellations
         .lock()
-        .map_err(|_| "Failed to lock AI browser cancellations".to_string())?
         .entry(session.id.clone())
         .or_default()
         .insert(worker_id.clone(), cancel_flag.clone());
@@ -722,7 +664,8 @@ pub async fn ai_browser_start_crawl(
         )
         .await;
 
-        if let Ok(mut cancellations) = state_for_task.cancellations.lock() {
+        let mut cancellations = state_for_task.cancellations.lock();
+        {
             if let Some(session_cancellations) = cancellations.get_mut(&session_id_for_task) {
                 session_cancellations.remove(&worker_id_for_task);
                 if session_cancellations.is_empty() {
@@ -730,7 +673,8 @@ pub async fn ai_browser_start_crawl(
                 }
             }
         }
-        if let Ok(mut children) = state_for_task.children.lock() {
+        let mut children = state_for_task.children.lock();
+        {
             if let Some(session_children) = children.get_mut(&session_id_for_task) {
                 session_children.remove(&worker_id_for_task);
                 if session_children.is_empty() {
@@ -798,14 +742,14 @@ pub async fn ai_browser_start_crawl(
                 let insights = state_for_task
                     .insights
                     .lock()
-                    .ok()
-                    .and_then(|map| map.get(&session_id_for_task).cloned())
+                    .get(&session_id_for_task)
+                    .cloned()
                     .unwrap_or_default();
                 let pages = state_for_task
                     .pages
                     .lock()
-                    .ok()
-                    .and_then(|map| map.get(&session_id_for_task).cloned())
+                    .get(&session_id_for_task)
+                    .cloned()
                     .unwrap_or_default();
 
                 let insight_titles: Vec<String> = insights
@@ -863,12 +807,7 @@ pub async fn ai_browser_pause_crawl(
         return Ok(());
     }
 
-    let children = state
-        .children
-        .lock()
-        .map_err(|_| "Failed to lock AI browser child processes".to_string())?
-        .get(&session_id)
-        .cloned();
+    let children = state.children.lock().get(&session_id).cloned();
     if let Some(children) = children {
         for child in children.values() {
             signal_child_process_group(child, "-STOP")?;
@@ -909,12 +848,7 @@ pub async fn ai_browser_resume_crawl(
         return Ok(());
     }
 
-    let children = state
-        .children
-        .lock()
-        .map_err(|_| "Failed to lock AI browser child processes".to_string())?
-        .get(&session_id)
-        .cloned();
+    let children = state.children.lock().get(&session_id).cloned();
     if let Some(children) = children {
         for child in children.values() {
             signal_child_process_group(child, "-CONT")?;
@@ -954,22 +888,12 @@ pub async fn ai_browser_submit_human_input(
     let _ = fields;
 
     if action == "stop-crawl" {
-        if let Some(cancel_flags) = state
-            .cancellations
-            .lock()
-            .map_err(|_| "Failed to lock AI browser cancellations".to_string())?
-            .remove(&session_id)
-        {
+        if let Some(cancel_flags) = state.cancellations.lock().remove(&session_id) {
             for cancel_flag in cancel_flags.values() {
                 cancel_flag.store(true, Ordering::SeqCst);
             }
         }
-        if let Some(children) = state
-            .children
-            .lock()
-            .map_err(|_| "Failed to lock AI browser child processes".to_string())?
-            .remove(&session_id)
-        {
+        if let Some(children) = state.children.lock().remove(&session_id) {
             for child in children.values() {
                 kill_child_process_group(child);
             }
@@ -1008,23 +932,13 @@ pub async fn ai_browser_stop_crawl(
     state: State<'_, AiBrowserState>,
     session_id: String,
 ) -> Result<(), String> {
-    if let Some(cancel_flags) = state
-        .cancellations
-        .lock()
-        .map_err(|_| "Failed to lock AI browser cancellations".to_string())?
-        .remove(&session_id)
-    {
+    if let Some(cancel_flags) = state.cancellations.lock().remove(&session_id) {
         for cancel_flag in cancel_flags.values() {
             cancel_flag.store(true, Ordering::SeqCst);
         }
     }
 
-    if let Some(children) = state
-        .children
-        .lock()
-        .map_err(|_| "Failed to lock AI browser child processes".to_string())?
-        .remove(&session_id)
-    {
+    if let Some(children) = state.children.lock().remove(&session_id) {
         for child in children.values() {
             kill_child_process_group(child);
         }
@@ -1053,43 +967,34 @@ pub async fn ai_browser_stop_crawl(
 /// Stop every crawl session that is currently running or paused.
 /// Called when the app is about to close while crawls are still active.
 pub fn stop_all_active_crawls(app: &AppHandle, state: &AiBrowserState) {
-    let mut active_sessions: HashSet<String> = state
-        .sessions
-        .lock()
-        .ok()
-        .map(|sessions| {
-            sessions
-                .values()
-                .filter(|s| s.status == "running" || s.status == "paused")
-                .map(|s| s.id.clone())
-                .collect()
-        })
-        .unwrap_or_default();
+    let mut active_sessions: HashSet<String> = {
+        let sessions = state.sessions.lock();
+        sessions
+            .values()
+            .filter(|s| s.status == "running" || s.status == "paused")
+            .map(|s| s.id.clone())
+            .collect()
+    };
 
-    if let Ok(children) = state.children.lock() {
+    let children = state.children.lock();
+    {
         active_sessions.extend(children.keys().cloned());
     }
 
     for session_id in &active_sessions {
-        if let Some(cancel_flags) = state
-            .cancellations
-            .lock()
-            .ok()
-            .and_then(|mut c| c.remove(session_id))
-        {
+        let mut cancellations = state.cancellations.lock();
+        if let Some(cancel_flags) = cancellations.remove(session_id) {
             for flag in cancel_flags.values() {
                 flag.store(true, Ordering::SeqCst);
             }
         }
 
-        if let Some(children) = state
-            .children
-            .lock()
-            .ok()
-            .and_then(|mut c| c.remove(session_id))
         {
-            for child in children.values() {
-                kill_child_process_group(child);
+            let mut children = state.children.lock();
+            if let Some(session_children) = children.remove(session_id) {
+                for child in session_children.values() {
+                    kill_child_process_group(child);
+                }
             }
         }
 
@@ -1120,48 +1025,22 @@ pub async fn delete_ai_browser_session(
     history: State<'_, crate::HistoryBridge>,
     session_id: String,
 ) -> Result<(), String> {
-    if let Some(cancel_flags) = state
-        .cancellations
-        .lock()
-        .map_err(|_| "Failed to lock AI browser cancellations".to_string())?
-        .remove(&session_id)
-    {
+    if let Some(cancel_flags) = state.cancellations.lock().remove(&session_id) {
         for cancel_flag in cancel_flags.values() {
             cancel_flag.store(true, Ordering::SeqCst);
         }
     }
 
-    if let Some(children) = state
-        .children
-        .lock()
-        .map_err(|_| "Failed to lock AI browser child processes".to_string())?
-        .remove(&session_id)
-    {
+    if let Some(children) = state.children.lock().remove(&session_id) {
         for child in children.values() {
             kill_child_process_group(child);
         }
     }
 
-    state
-        .sessions
-        .lock()
-        .map_err(|_| "Failed to lock AI browser sessions".to_string())?
-        .remove(&session_id);
-    state
-        .pages
-        .lock()
-        .map_err(|_| "Failed to lock AI browser pages".to_string())?
-        .remove(&session_id);
-    state
-        .insights
-        .lock()
-        .map_err(|_| "Failed to lock AI browser insights".to_string())?
-        .remove(&session_id);
-    state
-        .logs
-        .lock()
-        .map_err(|_| "Failed to lock AI browser logs".to_string())?
-        .remove(&session_id);
+    state.sessions.lock().remove(&session_id);
+    state.pages.lock().remove(&session_id);
+    state.insights.lock().remove(&session_id);
+    state.logs.lock().remove(&session_id);
 
     for page in history.list_ai_browser_pages(&session_id)? {
         for artifact_path in [page.screenshot_path, page.rendered_html_path]
@@ -1192,7 +1071,6 @@ pub async fn get_ai_browser_session(
     state
         .sessions
         .lock()
-        .map_err(|_| "Failed to lock AI browser sessions".to_string())?
         .get(&session_id)
         .cloned()
         .ok_or_else(|| "Automation session not found".to_string())
@@ -1212,7 +1090,6 @@ pub async fn list_ai_browser_pages(
     Ok(state
         .pages
         .lock()
-        .map_err(|_| "Failed to lock AI browser pages".to_string())?
         .get(&session_id)
         .cloned()
         .unwrap_or_default())
@@ -1232,7 +1109,6 @@ pub async fn list_ai_browser_insights(
     Ok(state
         .insights
         .lock()
-        .map_err(|_| "Failed to lock AI browser insights".to_string())?
         .get(&session_id)
         .cloned()
         .unwrap_or_default())
@@ -1252,7 +1128,6 @@ pub async fn list_ai_browser_logs(
     Ok(state
         .logs
         .lock()
-        .map_err(|_| "Failed to lock AI browser logs".to_string())?
         .get(&session_id)
         .cloned()
         .unwrap_or_default())
@@ -1265,4 +1140,3 @@ pub async fn list_recent_ai_browser_sessions(
 ) -> Result<Vec<CrawlSession>, String> {
     history.list_recent_ai_browser_sessions(limit.unwrap_or(20))
 }
-

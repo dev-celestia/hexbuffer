@@ -2,6 +2,7 @@ mod actions;
 mod condition;
 mod events;
 mod execution;
+mod host_filter;
 mod intercept;
 mod live_traffic;
 mod page_crawled;
@@ -45,10 +46,7 @@ pub async fn automation_sync_workflows(
     settings: AutomationRuntimeSettings,
 ) -> Result<(), String> {
     {
-        let mut inner = state
-            .0
-            .lock()
-            .map_err(|_| "Automation runtime lock poisoned")?;
+        let mut inner = state.0.lock();
         let next_ids: HashSet<String> = workflows
             .iter()
             .map(|workflow| workflow.id.clone())
@@ -100,10 +98,7 @@ pub async fn automation_update_settings(
     settings: AutomationRuntimeSettings,
 ) -> Result<(), String> {
     {
-        let mut inner = state
-            .0
-            .lock()
-            .map_err(|_| "Automation runtime lock poisoned")?;
+        let mut inner = state.0.lock();
         inner.settings = normalize_settings(settings);
     }
     emit_all_queue_stats(&app, &state);
@@ -124,10 +119,7 @@ pub async fn automation_run_workflow(
     let run_token = Uuid::new_v4().to_string();
 
     let workflow = {
-        let mut inner = state
-            .0
-            .lock()
-            .map_err(|_| "Automation runtime lock poisoned")?;
+        let mut inner = state.0.lock();
         let workflow = inner
             .workflows
             .iter()
@@ -167,10 +159,7 @@ pub async fn automation_abort_workflow(
     reason: Option<String>,
 ) -> Result<(), String> {
     {
-        let mut inner = state
-            .0
-            .lock()
-            .map_err(|_| "Automation runtime lock poisoned")?;
+        let mut inner = state.0.lock();
         abort_workflow_locked(
             &mut inner,
             &workflow_id,
@@ -190,10 +179,7 @@ pub async fn automation_pause_workflow(
     workflow_id: String,
 ) -> Result<(), String> {
     {
-        let mut inner = state
-            .0
-            .lock()
-            .map_err(|_| "Automation runtime lock poisoned")?;
+        let mut inner = state.0.lock();
         inner.paused_workflow_ids.insert(workflow_id.clone());
         abort_workflow_locked(&mut inner, &workflow_id, "paused");
     }
@@ -210,10 +196,7 @@ pub async fn automation_resume_workflow(
     workflow_id: String,
 ) -> Result<(), String> {
     {
-        let mut inner = state
-            .0
-            .lock()
-            .map_err(|_| "Automation runtime lock poisoned")?;
+        let mut inner = state.0.lock();
         inner.paused_workflow_ids.remove(&workflow_id);
     }
     emit_runtime(&app, &state);
@@ -227,10 +210,7 @@ pub async fn automation_clear_logs(
     state: State<'_, AutomationRuntimeState>,
     workflow_id: Option<String>,
 ) -> Result<(), String> {
-    let mut inner = state
-        .0
-        .lock()
-        .map_err(|_| "Automation runtime lock poisoned")?;
+    let mut inner = state.0.lock();
     if let Some(workflow_id) = workflow_id {
         inner.logs_by_workflow_id.remove(&workflow_id);
     } else {
@@ -244,10 +224,7 @@ pub async fn automation_clear_host_insights(
     state: State<'_, AutomationRuntimeState>,
     trigger_node_id: Option<String>,
 ) -> Result<(), String> {
-    let mut inner = state
-        .0
-        .lock()
-        .map_err(|_| "Automation runtime lock poisoned")?;
+    let mut inner = state.0.lock();
     if trigger_node_id.is_none() {
         inner.host_insight_ids.clear();
         inner.captured_host_ids.clear();

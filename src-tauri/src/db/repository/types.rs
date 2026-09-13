@@ -118,4 +118,3 @@ pub struct ChronicleLogRecord {
     pub response_body: Option<String>,
     pub duration_ms: Option<i64>,
 }
-

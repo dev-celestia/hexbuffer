@@ -63,7 +63,7 @@ impl Database {
         exclude_filter: Option<&str>,
         storage_mode: Option<&str>,
     ) -> SqlResult<HttpSessionRecord> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let id = uuid::Uuid::new_v4().to_string();
         let now = chrono::Utc::now().to_rfc3339();
         let mode = capture_mode.unwrap_or("all").trim();
@@ -110,7 +110,7 @@ impl Database {
         capture_filter: &str,
         exclude_filter: &str,
     ) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
             "UPDATE http_sessions SET capture_mode = ?1, capture_filter = ?2, exclude_filter = ?3, updated_at = ?4 WHERE id = ?5",
@@ -120,7 +120,7 @@ impl Database {
     }
 
     pub fn get_session_storage_mode(&self, session_id: Option<&str>) -> String {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         if let Some(sid) = session_id {
             if !sid.is_empty() {
                 if let Ok(mode) = conn.query_row(
@@ -143,7 +143,7 @@ impl Database {
     }
 
     pub fn list_http_sessions(&self) -> SqlResult<Vec<HttpSessionSummary>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             r#"SELECT 
                 s.id, s.name, s.created_at, s.updated_at, s.is_active, s.description,
@@ -185,7 +185,8 @@ impl Database {
             let mut summary = row?;
             // If the session is ephemeral, check ephemeral_conn for live count & size
             if summary.storage_mode == "ephemeral" {
-                if let Ok(eph) = self.ephemeral_conn.lock() {
+                let eph = self.ephemeral_conn.lock();
+                {
                     let counts: Result<(i64, i64), _> = eph.query_row(
                         r#"SELECT COUNT(id),
                                   COALESCE(SUM(COALESCE(req_body_size, 0) + COALESCE(res_body_size, 0)), 0)
@@ -206,7 +207,7 @@ impl Database {
     }
 
     pub fn get_active_http_session(&self) -> SqlResult<Option<HttpSessionRecord>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             "SELECT id, name, created_at, updated_at, is_active, description, COALESCE(capture_mode, 'all'), COALESCE(capture_filter, '[]'), COALESCE(exclude_filter, '[]'), COALESCE(storage_mode, 'persistent') FROM http_sessions WHERE is_active = 1 LIMIT 1",
         )?;
@@ -241,7 +242,7 @@ impl Database {
     }
 
     pub fn set_active_http_session(&self, session_id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute("UPDATE http_sessions SET is_active = 0", [])?;
         let rows = conn.execute(
             "UPDATE http_sessions SET is_active = 1, updated_at = ?1 WHERE id = ?2",
@@ -255,7 +256,7 @@ impl Database {
     }
 
     pub fn rename_http_session(&self, session_id: &str, name: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let now = chrono::Utc::now().to_rfc3339();
         conn.execute(
             "UPDATE http_sessions SET name = ?1, updated_at = ?2 WHERE id = ?3",
@@ -266,17 +267,48 @@ impl Database {
 
     pub fn clear_http_session_logs(&self, session_id: &str) -> SqlResult<usize> {
         // Clear from disk DB
-        let conn = self.conn.lock().unwrap();
-        let rows = conn.execute("DELETE FROM http_logs WHERE session_id = ?1", params![session_id])?;
-        let _ = conn.execute("DELETE FROM websocket_messages WHERE connection_id IN (SELECT id FROM websocket_connections WHERE session_id = ?1)", params![session_id]);
-        let _ = conn.execute("DELETE FROM websocket_connections WHERE session_id = ?1", params![session_id]);
+        let mut conn = self.conn.lock();
+        let tx = conn.transaction()?;
+        let rows = tx.execute(
+            "DELETE FROM http_logs WHERE session_id = ?1",
+            params![session_id],
+        )?;
+        if let Err(e) = tx.execute("DELETE FROM websocket_messages WHERE connection_id IN (SELECT id FROM websocket_connections WHERE session_id = ?1)", params![session_id]) {
+            eprintln!("[db] clear_http_session_logs: failed to delete websocket_messages: {}", e);
+        }
+        if let Err(e) = tx.execute(
+            "DELETE FROM websocket_connections WHERE session_id = ?1",
+            params![session_id],
+        ) {
+            eprintln!(
+                "[db] clear_http_session_logs: failed to delete websocket_connections: {}",
+                e
+            );
+        }
+        tx.commit()?;
         drop(conn);
 
         // Clear from ephemeral DB as well
-        let eph = self.ephemeral_conn.lock().unwrap();
-        let eph_rows = eph.execute("DELETE FROM http_logs WHERE session_id = ?1", params![session_id]).unwrap_or(0);
-        let _ = eph.execute("DELETE FROM websocket_messages WHERE connection_id IN (SELECT id FROM websocket_connections WHERE session_id = ?1)", params![session_id]);
-        let _ = eph.execute("DELETE FROM websocket_connections WHERE session_id = ?1", params![session_id]);
+        let mut eph = self.ephemeral_conn.lock();
+        let mut eph_rows = 0;
+        if let Ok(tx) = eph.transaction() {
+            eph_rows = tx
+                .execute(
+                    "DELETE FROM http_logs WHERE session_id = ?1",
+                    params![session_id],
+                )
+                .unwrap_or(0);
+            if let Err(e) = tx.execute("DELETE FROM websocket_messages WHERE connection_id IN (SELECT id FROM websocket_connections WHERE session_id = ?1)", params![session_id]) {
+                eprintln!("[db] clear_http_session_logs: failed to delete ephemeral websocket_messages: {}", e);
+            }
+            if let Err(e) = tx.execute(
+                "DELETE FROM websocket_connections WHERE session_id = ?1",
+                params![session_id],
+            ) {
+                eprintln!("[db] clear_http_session_logs: failed to delete ephemeral websocket_connections: {}", e);
+            }
+            let _ = tx.commit();
+        }
         drop(eph);
 
         // Run vacuum to reclaim deleted space in disk DB
@@ -285,10 +317,11 @@ impl Database {
     }
 
     pub fn delete_http_session(&self, session_id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
-        
+        let mut conn = self.conn.lock();
+        let tx = conn.transaction()?;
+
         // Find if this was the active session
-        let was_active: bool = conn
+        let was_active: bool = tx
             .query_row(
                 "SELECT is_active FROM http_sessions WHERE id = ?1",
                 params![session_id],
@@ -300,14 +333,35 @@ impl Database {
             .unwrap_or(false);
 
         // Delete child tables first to avoid foreign key issues
-        let _ = conn.execute("DELETE FROM websocket_messages WHERE connection_id IN (SELECT id FROM websocket_connections WHERE session_id = ?1)", params![session_id]);
-        let _ = conn.execute("DELETE FROM websocket_connections WHERE session_id = ?1", params![session_id]);
-        let _ = conn.execute("DELETE FROM http_logs WHERE session_id = ?1", params![session_id]);
-        conn.execute("DELETE FROM http_sessions WHERE id = ?1", params![session_id])?;
+        if let Err(e) = tx.execute("DELETE FROM websocket_messages WHERE connection_id IN (SELECT id FROM websocket_connections WHERE session_id = ?1)", params![session_id]) {
+            eprintln!("[db] delete_http_session: failed to delete websocket_messages: {}", e);
+        }
+        if let Err(e) = tx.execute(
+            "DELETE FROM websocket_connections WHERE session_id = ?1",
+            params![session_id],
+        ) {
+            eprintln!(
+                "[db] delete_http_session: failed to delete websocket_connections: {}",
+                e
+            );
+        }
+        if let Err(e) = tx.execute(
+            "DELETE FROM http_logs WHERE session_id = ?1",
+            params![session_id],
+        ) {
+            eprintln!(
+                "[db] delete_http_session: failed to delete http_logs: {}",
+                e
+            );
+        }
+        tx.execute(
+            "DELETE FROM http_sessions WHERE id = ?1",
+            params![session_id],
+        )?;
 
         // If the active session was deleted, make the latest remaining session active or create a new one
         if was_active {
-            let next_id: Option<String> = conn
+            let next_id: Option<String> = tx
                 .query_row(
                     "SELECT id FROM http_sessions ORDER BY created_at DESC LIMIT 1",
                     [],
@@ -316,7 +370,7 @@ impl Database {
                 .ok();
 
             if let Some(nid) = next_id {
-                conn.execute(
+                tx.execute(
                     "UPDATE http_sessions SET is_active = 1 WHERE id = ?1",
                     params![nid],
                 )?;
@@ -324,21 +378,48 @@ impl Database {
                 let id = uuid::Uuid::new_v4().to_string();
                 let now = chrono::Utc::now().to_rfc3339();
                 let name = format!("Session - {}", chrono::Local::now().format("%d %b %H:%M"));
-                conn.execute(
+                tx.execute(
                     "INSERT INTO http_sessions (id, name, created_at, updated_at, is_active, description, storage_mode) VALUES (?1, ?2, ?3, ?4, 1, 'Default session', 'ephemeral')",
                     params![id, name, now, now],
                 )?;
             }
         }
 
+        tx.commit()?;
         drop(conn);
 
         // Clean up from ephemeral DB
-        let eph = self.ephemeral_conn.lock().unwrap();
-        let _ = eph.execute("DELETE FROM http_logs WHERE session_id = ?1", params![session_id]);
-        let _ = eph.execute("DELETE FROM websocket_messages WHERE connection_id IN (SELECT id FROM websocket_connections WHERE session_id = ?1)", params![session_id]);
-        let _ = eph.execute("DELETE FROM websocket_connections WHERE session_id = ?1", params![session_id]);
-        let _ = eph.execute("DELETE FROM http_sessions WHERE id = ?1", params![session_id]);
+        let mut eph = self.ephemeral_conn.lock();
+        if let Ok(tx) = eph.transaction() {
+            if let Err(e) = tx.execute(
+                "DELETE FROM http_logs WHERE session_id = ?1",
+                params![session_id],
+            ) {
+                eprintln!(
+                    "[db] delete_http_session: failed to delete ephemeral http_logs: {}",
+                    e
+                );
+            }
+            if let Err(e) = tx.execute("DELETE FROM websocket_messages WHERE connection_id IN (SELECT id FROM websocket_connections WHERE session_id = ?1)", params![session_id]) {
+                eprintln!("[db] delete_http_session: failed to delete ephemeral websocket_messages: {}", e);
+            }
+            if let Err(e) = tx.execute(
+                "DELETE FROM websocket_connections WHERE session_id = ?1",
+                params![session_id],
+            ) {
+                eprintln!("[db] delete_http_session: failed to delete ephemeral websocket_connections: {}", e);
+            }
+            if let Err(e) = tx.execute(
+                "DELETE FROM http_sessions WHERE id = ?1",
+                params![session_id],
+            ) {
+                eprintln!(
+                    "[db] delete_http_session: failed to delete ephemeral http_sessions: {}",
+                    e
+                );
+            }
+            let _ = tx.commit();
+        }
         drop(eph);
 
         // Reclaim disk space
@@ -347,7 +428,7 @@ impl Database {
     }
 
     pub fn vacuum(&self) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute("VACUUM", [])?;
         Ok(())
     }
@@ -382,7 +463,10 @@ impl Database {
                     [],
                     |r| r.get(0),
                 )?;
-                conn.execute("UPDATE http_sessions SET is_active = 1 WHERE id = ?1", params![latest_id])?;
+                conn.execute(
+                    "UPDATE http_sessions SET is_active = 1 WHERE id = ?1",
+                    params![latest_id],
+                )?;
                 latest_id
             }
         };

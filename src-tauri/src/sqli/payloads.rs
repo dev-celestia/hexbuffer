@@ -297,3 +297,101 @@ impl SqliChecker {
             || lower.contains("warning") && lower.contains("mysql")
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::sqli::types::SqliTechnique;
+
+    #[test]
+    fn test_get_payloads_returns_payloads_for_every_technique() {
+        let payloads = SqliPayloads::default();
+        for technique in [
+            SqliTechnique::BooleanBlind,
+            SqliTechnique::TimeBased,
+            SqliTechnique::Union,
+            SqliTechnique::ErrorBased,
+        ] {
+            assert!(
+                !payloads.get_payloads(technique, "mysql").is_empty(),
+                "expected payloads for technique {technique:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_get_payloads_dbms_aliases_and_fallback() {
+        let payloads = SqliPayloads::default();
+
+        assert_eq!(
+            payloads.get_payloads(SqliTechnique::Union, "postgres"),
+            payloads.get_payloads(SqliTechnique::Union, "postgresql")
+        );
+        assert_eq!(
+            payloads.get_payloads(SqliTechnique::Union, "sqlserver"),
+            payloads.get_payloads(SqliTechnique::Union, "mssql")
+        );
+        assert_eq!(
+            payloads.get_payloads(SqliTechnique::Union, "MYSQL"),
+            payloads.get_payloads(SqliTechnique::Union, "mysql")
+        );
+        // Unknown DBMS falls back to MySQL payloads
+        assert_eq!(
+            payloads.get_payloads(SqliTechnique::BooleanBlind, "firebird"),
+            payloads.get_payloads(SqliTechnique::BooleanBlind, "mysql")
+        );
+    }
+
+    #[test]
+    fn test_detect_dbms_signatures() {
+        let payloads = SqliPayloads::default();
+        assert_eq!(
+            payloads.detect_dbms("You have an error in your SQL syntax"),
+            Some("MySQL".to_string())
+        );
+        assert_eq!(
+            payloads.detect_dbms("PSQLException: relation missing"),
+            Some("PostgreSQL".to_string())
+        );
+        assert_eq!(
+            payloads.detect_dbms("Microsoft SQL Server, error 500"),
+            Some("MSSQL".to_string())
+        );
+        assert_eq!(
+            payloads.detect_dbms("ORA-00942: table does not exist"),
+            Some("Oracle".to_string())
+        );
+        assert_eq!(
+            payloads.detect_dbms("SQLite3::SQLException"),
+            Some("SQLite".to_string())
+        );
+        assert_eq!(payloads.detect_dbms("200 OK, all good"), None);
+    }
+
+    #[test]
+    fn test_sqli_checker_boolean_and_time() {
+        assert!(SqliChecker::is_boolean_true("different output", "original"));
+        assert!(!SqliChecker::is_boolean_true("same", "same"));
+
+        assert!(SqliChecker::is_time_based_suspicious(5000, 100, 1000));
+        assert!(!SqliChecker::is_time_based_suspicious(1100, 100, 1000)); // threshold is strict
+    }
+
+    #[test]
+    fn test_sqli_checker_union_signature() {
+        assert!(SqliChecker::has_union_signature("UNION SELECT username FROM users"));
+        assert!(SqliChecker::has_union_signature("value is NULL"));
+        assert!(SqliChecker::has_union_signature("1=1"));
+        assert!(!SqliChecker::has_union_signature("just a normal page"));
+    }
+
+    #[test]
+    fn test_sqli_checker_error_signature() {
+        assert!(SqliChecker::has_error_signature("SQL syntax error near"));
+        assert!(SqliChecker::has_error_signature("ORA-00942"));
+        assert!(SqliChecker::has_error_signature("MySQL server crashed"));
+        assert!(SqliChecker::has_error_signature("PostgreSQL exception"));
+        assert!(SqliChecker::has_error_signature("sqlite3: malformed input"));
+        assert!(!SqliChecker::has_error_signature("all good here"));
+    }
+}

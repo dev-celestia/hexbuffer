@@ -1,42 +1,57 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import type { CodecType, CodecMode } from '../types';
-import { MODE_LABELS } from '../constants';
+import { CODECS, MODE_LABELS } from '../constants';
 import { convert } from '../lib/codec-functions';
+import { copyText } from '@/lib/clipboard';
+
+const CODEC_IDS = CODECS.map((codec) => codec.id);
+const STORAGE_KEYS = {
+  activeType: 'encoder.activeType',
+  mode: 'encoder.mode',
+} as const;
+
+function loadStoredType(): CodecType {
+  const stored = localStorage.getItem(STORAGE_KEYS.activeType);
+  return CODEC_IDS.includes(stored as CodecType) ? (stored as CodecType) : 'url';
+}
+
+function loadStoredMode(): CodecMode {
+  const stored = localStorage.getItem(STORAGE_KEYS.mode);
+  return stored === 'decode' ? 'decode' : 'encode';
+}
 
 export function useEncoderPage() {
   const [input, setInput] = useState('');
-  const [activeType, setActiveType] = useState<CodecType>('url');
-  const [mode, setMode] = useState<CodecMode>('encode');
-  const [output, setOutput] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [activeType, setActiveType] = useState<CodecType>(loadStoredType);
+  const [mode, setMode] = useState<CodecMode>(loadStoredMode);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.activeType, activeType);
+  }, [activeType]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.mode, mode);
+  }, [mode]);
+
+  const { output, error } = useMemo(
+    () => convert(input, activeType, mode),
+    [input, activeType, mode],
+  );
 
   const currentMode = useMemo(() => MODE_LABELS[mode], [mode]);
 
-  const handleConvert = useCallback(() => {
-    const result = convert(input, activeType, mode);
-    setOutput(result.output);
-    setError(result.error);
-  }, [input, activeType, mode]);
-
-  // Auto-convert on input/type/mode change
-  useEffect(() => {
-    handleConvert();
-  }, [handleConvert]);
-
   const handleCopy = useCallback(async () => {
     if (output) {
-      await navigator.clipboard.writeText(output);
+      await copyText(output);
     }
   }, [output]);
 
   const handleClear = useCallback(() => {
     setInput('');
-    setOutput('');
-    setError(null);
   }, []);
 
   const handleSwap = useCallback(() => {
-    setMode((currentMode) => (currentMode === 'encode' ? 'decode' : 'encode'));
+    setMode((current) => (current === 'encode' ? 'decode' : 'encode'));
     setInput(output || input);
   }, [output, input]);
 

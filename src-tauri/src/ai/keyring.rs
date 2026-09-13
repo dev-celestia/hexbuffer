@@ -1,6 +1,7 @@
 use keyring::{Entry, Error as KeyringError};
+use parking_lot::Mutex;
 use std::collections::BTreeMap;
-use std::sync::{Mutex, OnceLock};
+use std::sync::OnceLock;
 
 use super::providers::normalize_ai_provider;
 
@@ -58,16 +59,13 @@ fn ai_api_key_cache() -> &'static Mutex<BTreeMap<String, String>> {
 fn cached_ai_api_key(provider: &str) -> Result<Option<String>, String> {
     Ok(ai_api_key_cache()
         .lock()
-        .map_err(|_| "Failed to lock AI API key cache".to_string())?
         .get(provider)
         .cloned()
         .filter(|key| !key.trim().is_empty()))
 }
 
 fn cache_ai_api_key(provider: &str, api_key: Option<String>) -> Result<(), String> {
-    let mut cache = ai_api_key_cache()
-        .lock()
-        .map_err(|_| "Failed to lock AI API key cache".to_string())?;
+    let mut cache = ai_api_key_cache().lock();
 
     if let Some(api_key) = api_key.filter(|key| !key.trim().is_empty()) {
         cache.insert(provider.to_string(), api_key);

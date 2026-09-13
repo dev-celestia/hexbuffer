@@ -35,15 +35,13 @@ pub struct ProxyRecord {
     pub server_addr: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[derive(Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub enum WebSocketConnectionState {
     Open,
     #[default]
     Closed,
     Error,
 }
-
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum WebSocketMessageDirection {
@@ -166,9 +164,23 @@ impl ProxyFilter {
         let mut candidate_domains = Vec::new();
 
         // 1. Origin header (for CORS requests initiated by app JS)
-        if let Some(origin) = record.request.headers.get("origin").or_else(|| record.request.headers.get("Origin")) {
-            let clean = origin.trim_start_matches("http://").trim_start_matches("https://");
-            let dom = clean.split('/').next().unwrap_or("").split(':').next().unwrap_or("").trim();
+        if let Some(origin) = record
+            .request
+            .headers
+            .get("origin")
+            .or_else(|| record.request.headers.get("Origin"))
+        {
+            let clean = origin
+                .trim_start_matches("http://")
+                .trim_start_matches("https://");
+            let dom = clean
+                .split('/')
+                .next()
+                .unwrap_or("")
+                .split(':')
+                .next()
+                .unwrap_or("")
+                .trim();
             if !dom.is_empty() && dom != "null" && dom != "opaque" {
                 candidate_domains.push(dom.to_lowercase());
             }
@@ -177,20 +189,41 @@ impl ProxyFilter {
         // 2. Request URI host
         if record.request.uri.contains("://") {
             if let Some(after_scheme) = record.request.uri.split("://").nth(1) {
-                let dom = after_scheme.split('/').next().unwrap_or("").split(':').next().unwrap_or("").trim();
+                let dom = after_scheme
+                    .split('/')
+                    .next()
+                    .unwrap_or("")
+                    .split(':')
+                    .next()
+                    .unwrap_or("")
+                    .trim();
                 if !dom.is_empty() {
                     candidate_domains.push(dom.to_lowercase());
                 }
             }
         } else if !record.request.uri.starts_with('/') {
-            let dom = record.request.uri.split('/').next().unwrap_or("").split(':').next().unwrap_or("").trim();
+            let dom = record
+                .request
+                .uri
+                .split('/')
+                .next()
+                .unwrap_or("")
+                .split(':')
+                .next()
+                .unwrap_or("")
+                .trim();
             if !dom.is_empty() {
                 candidate_domains.push(dom.to_lowercase());
             }
         }
 
         // 4. Host header
-        if let Some(host_hdr) = record.request.headers.get("host").or_else(|| record.request.headers.get("Host")) {
+        if let Some(host_hdr) = record
+            .request
+            .headers
+            .get("host")
+            .or_else(|| record.request.headers.get("Host"))
+        {
             let dom = host_hdr.split(':').next().unwrap_or("").trim();
             if !dom.is_empty() {
                 candidate_domains.push(dom.to_lowercase());
@@ -214,7 +247,10 @@ impl ProxyFilter {
             let domain_target = pattern_lower.strip_prefix("*.").unwrap_or(&pattern_lower);
 
             for dom in &candidate_domains {
-                if dom == domain_target || dom.ends_with(&format!(".{}", domain_target)) || dom.contains(domain_target) {
+                if dom == domain_target
+                    || dom.ends_with(&format!(".{}", domain_target))
+                    || dom.contains(domain_target)
+                {
                     return true;
                 }
             }
@@ -233,7 +269,10 @@ impl ProxyFilter {
         for pattern in scope {
             let pattern_lower = pattern.trim().to_lowercase();
             let domain_target = pattern_lower.strip_prefix("*.").unwrap_or(&pattern_lower);
-            if host == domain_target || host.ends_with(&format!(".{}", domain_target)) || host.contains(domain_target) {
+            if host == domain_target
+                || host.ends_with(&format!(".{}", domain_target))
+                || host.contains(domain_target)
+            {
                 return true;
             }
         }
@@ -279,4 +318,3 @@ impl Default for ProxyDbFilterConfig {
         }
     }
 }
-

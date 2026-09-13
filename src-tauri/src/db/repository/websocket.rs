@@ -15,7 +15,7 @@ impl Database {
         let session_id = if !record.session_id.is_empty() {
             record.session_id.clone()
         } else {
-            let conn = self.conn.lock().unwrap();
+            let conn = self.conn.lock();
             Database::get_active_session_id(&conn).unwrap_or_default()
         };
 
@@ -25,7 +25,7 @@ impl Database {
         let response_headers =
             serde_json::to_string(&record.handshake_response_headers).unwrap_or_default();
 
-        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
+        let conn = self.traffic_conn(&storage_mode).lock();
         conn.execute(
             r#"INSERT INTO websocket_connections (
                 id, session_id, timestamp, url, host, path,
@@ -56,7 +56,7 @@ impl Database {
         // Find if connection is in ephemeral or persistent DB
         let conn_id = record.connection_id.to_string();
         let is_in_eph = {
-            let eph = self.ephemeral_conn.lock().unwrap();
+            let eph = self.ephemeral_conn.lock();
             eph.query_row(
                 "SELECT 1 FROM websocket_connections WHERE id = ?1",
                 params![conn_id],
@@ -66,9 +66,9 @@ impl Database {
         };
 
         let conn = if is_in_eph {
-            self.ephemeral_conn.lock().unwrap()
+            self.ephemeral_conn.lock()
         } else {
-            self.conn.lock().unwrap()
+            self.conn.lock()
         };
 
         conn.execute(
@@ -90,21 +90,20 @@ impl Database {
             r#"UPDATE websocket_connections
                SET message_count = message_count + 1, last_activity_at = ?2
                WHERE id = ?1"#,
-            params![
-                conn_id,
-                record.timestamp.to_rfc3339()
-            ],
+            params![conn_id, record.timestamp.to_rfc3339()],
         )?;
 
         if is_in_eph {
-            let msg_count: i64 = conn.query_row(
-                "SELECT COUNT(*) FROM websocket_messages WHERE connection_id = ?1",
-                params![conn_id],
-                |r| r.get(0),
-            ).unwrap_or(0);
+            let msg_count: i64 = conn
+                .query_row(
+                    "SELECT COUNT(*) FROM websocket_messages WHERE connection_id = ?1",
+                    params![conn_id],
+                    |r| r.get(0),
+                )
+                .unwrap_or(0);
 
             if msg_count >= 150 {
-                let _ = conn.execute(
+                if let Err(e) = conn.execute(
                     "DELETE FROM websocket_messages \
                      WHERE connection_id = ?1 AND id IN ( \
                          SELECT id FROM websocket_messages \
@@ -113,7 +112,12 @@ impl Database {
                          LIMIT -1 OFFSET 100 \
                      )",
                     params![conn_id],
-                );
+                ) {
+                    eprintln!(
+                        "[db] insert_websocket_message: failed to prune ephemeral messages: {}",
+                        e
+                    );
+                }
             }
         }
         Ok(())
@@ -121,12 +125,12 @@ impl Database {
 
     pub fn clear_websocket_logs(&self) -> SqlResult<()> {
         {
-            let conn = self.conn.lock().unwrap();
+            let conn = self.conn.lock();
             conn.execute("DELETE FROM websocket_messages", [])?;
             conn.execute("DELETE FROM websocket_connections", [])?;
         }
         {
-            let eph = self.ephemeral_conn.lock().unwrap();
+            let eph = self.ephemeral_conn.lock();
             let _ = eph.execute("DELETE FROM websocket_messages", []);
             let _ = eph.execute("DELETE FROM websocket_connections", []);
         }
@@ -135,14 +139,14 @@ impl Database {
 
     pub fn delete_websocket_connection(&self, id: &str) -> SqlResult<()> {
         {
-            let conn = self.conn.lock().unwrap();
+            let conn = self.conn.lock();
             conn.execute(
                 "DELETE FROM websocket_connections WHERE id = ?1",
                 params![id],
             )?;
         }
         {
-            let eph = self.ephemeral_conn.lock().unwrap();
+            let eph = self.ephemeral_conn.lock();
             let _ = eph.execute(
                 "DELETE FROM websocket_connections WHERE id = ?1",
                 params![id],
@@ -157,11 +161,15 @@ impl Database {
         page: u32,
         per_page: u32,
     ) -> Result<PaginatedResponse<WebSocketConnectionRecord>, String> {
-        let storage_mode = self.get_session_storage_mode(filter.and_then(|f| f.session_id.as_deref()));
-        let conn = self.traffic_conn(&storage_mode).lock().unwrap();
+        let storage_mode =
+            self.get_session_storage_mode(filter.and_then(|f| f.session_id.as_deref()));
+        let conn = self.traffic_conn(&storage_mode).lock();
         let offset = (page - 1) * per_page;
 
-        let mut sql = format!("SELECT {} FROM websocket_connections WHERE 1=1", SELECT_WS_CONNECTION_COLS);
+        let mut sql = format!(
+            "SELECT {} FROM websocket_connections WHERE 1=1",
+            SELECT_WS_CONNECTION_COLS
+        );
         let mut params_vec: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
 
         if let Some(filter) = filter {
@@ -212,10 +220,13 @@ impl Database {
         &self,
         id: &str,
     ) -> Result<Option<WebSocketConnectionRecord>, String> {
-        let sql = format!("SELECT {} FROM websocket_connections WHERE id = ?1 LIMIT 1", SELECT_WS_CONNECTION_COLS);
+        let sql = format!(
+            "SELECT {} FROM websocket_connections WHERE id = ?1 LIMIT 1",
+            SELECT_WS_CONNECTION_COLS
+        );
         // Try persistent DB first
         {
-            let conn = self.conn.lock().unwrap();
+            let conn = self.conn.lock();
             let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
             let mut rows = stmt.query(params![id]).map_err(|e| e.to_string())?;
             if let Some(row) = rows.next().map_err(|e| e.to_string())? {
@@ -227,7 +238,7 @@ impl Database {
 
         // Try ephemeral DB
         {
-            let eph = self.ephemeral_conn.lock().unwrap();
+            let eph = self.ephemeral_conn.lock();
             let mut stmt = eph.prepare(&sql).map_err(|e| e.to_string())?;
             let mut rows = stmt.query(params![id]).map_err(|e| e.to_string())?;
             if let Some(row) = rows.next().map_err(|e| e.to_string())? {
@@ -247,7 +258,7 @@ impl Database {
         let sql = "SELECT id, connection_id, timestamp, direction, message_type, payload, payload_size FROM websocket_messages WHERE connection_id = ?1 ORDER BY timestamp ASC";
         // Try persistent DB first
         {
-            let conn = self.conn.lock().unwrap();
+            let conn = self.conn.lock();
             let mut stmt = conn.prepare(sql).map_err(|e| e.to_string())?;
             let rows = stmt
                 .query_map(params![connection_id], row_to_websocket_message_record)
@@ -260,7 +271,7 @@ impl Database {
 
         // Try ephemeral DB
         {
-            let eph = self.ephemeral_conn.lock().unwrap();
+            let eph = self.ephemeral_conn.lock();
             let mut stmt = eph.prepare(sql).map_err(|e| e.to_string())?;
             let rows = stmt
                 .query_map(params![connection_id], row_to_websocket_message_record)

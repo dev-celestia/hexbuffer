@@ -1,10 +1,10 @@
-use rusqlite::{params, Result as SqlResult};
-use crate::commands::mock_forge::{MockDomain, MockRoute, ChaosConfig};
 use super::Database;
+use crate::commands::mock_forge::{ChaosConfig, MockDomain, MockRoute};
+use rusqlite::{params, Result as SqlResult};
 
 impl Database {
     pub fn get_mock_domains(&self) -> SqlResult<Vec<MockDomain>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             "SELECT id, hostname, ssl, status, created_at FROM mock_domains ORDER BY created_at ASC"
         )?;
@@ -22,7 +22,7 @@ impl Database {
     }
 
     pub fn insert_mock_domain(&self, domain: &MockDomain) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             "INSERT INTO mock_domains (id, hostname, ssl, status, created_at)
              VALUES (?1, ?2, ?3, ?4, ?5)
@@ -43,13 +43,13 @@ impl Database {
     }
 
     pub fn delete_mock_domain(&self, id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute("DELETE FROM mock_domains WHERE id = ?1", params![id])?;
         Ok(())
     }
 
     pub fn toggle_mock_domain(&self, id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             "UPDATE mock_domains
              SET status = CASE WHEN status = 'active' THEN 'inactive' ELSE 'active' END
@@ -60,7 +60,7 @@ impl Database {
     }
 
     pub fn get_mock_routes(&self) -> SqlResult<Vec<MockRoute>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             "SELECT id, domain_id, method, path, status_code, response_body, response_headers, matchers, chaos, enabled, matcher_enabled, request_query_params, request_body FROM mock_routes"
         )?;
@@ -71,7 +71,7 @@ impl Database {
             let enabled_int: i32 = row.get(9)?;
             let matcher_enabled_int: i32 = row.get(10)?;
             let query_params_str: Option<String> = row.get(11)?;
-            
+
             let response_headers = serde_json::from_str(&headers_str).unwrap_or_default();
             let matchers = serde_json::from_str(&matchers_str).unwrap_or_default();
             let chaos = serde_json::from_str(&chaos_str).unwrap_or_else(|_| ChaosConfig {
@@ -104,7 +104,7 @@ impl Database {
     }
 
     pub fn upsert_mock_route(&self, route: &MockRoute) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         // Ensure domain_id exists in mock_domains to satisfy foreign key constraint
         let default_hostname = if route.domain_id == "local_mock_server" {
             "localhost"
@@ -119,10 +119,15 @@ impl Database {
             params![route.domain_id, default_hostname],
         )?;
 
-        let headers_str = serde_json::to_string(&route.response_headers).unwrap_or_else(|_| "{}".to_string());
-        let matchers_str = serde_json::to_string(&route.matchers).unwrap_or_else(|_| "[]".to_string());
+        let headers_str =
+            serde_json::to_string(&route.response_headers).unwrap_or_else(|_| "{}".to_string());
+        let matchers_str =
+            serde_json::to_string(&route.matchers).unwrap_or_else(|_| "[]".to_string());
         let chaos_str = serde_json::to_string(&route.chaos).unwrap_or_else(|_| "{}".to_string());
-        let query_params_str = route.request_query_params.as_ref().and_then(|q| serde_json::to_string(q).ok());
+        let query_params_str = route
+            .request_query_params
+            .as_ref()
+            .and_then(|q| serde_json::to_string(q).ok());
 
         conn.execute(
             "INSERT INTO mock_routes (id, domain_id, method, path, status_code, response_body, response_headers, matchers, chaos, enabled, matcher_enabled, request_query_params, request_body)
@@ -160,7 +165,7 @@ impl Database {
     }
 
     pub fn delete_mock_route(&self, id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute("DELETE FROM mock_routes WHERE id = ?1", params![id])?;
         Ok(())
     }

@@ -23,10 +23,7 @@ pub fn ingest_scan_completed(
     };
 
     let matches = {
-        let inner = match state.0.lock() {
-            Ok(inner) => inner,
-            Err(_) => return,
-        };
+        let inner = state.0.lock();
         inner
             .workflows
             .clone()
@@ -55,10 +52,7 @@ pub fn ingest_scan_completed(
         let context = build_scan_completed_context(session, pages, insights, &trigger_node_id);
 
         {
-            let mut inner = match state.0.lock() {
-                Ok(inner) => inner,
-                Err(_) => return,
-            };
+            let mut inner = state.0.lock();
             enqueue_live_traffic_job_locked(
                 &mut inner,
                 QueueJob {

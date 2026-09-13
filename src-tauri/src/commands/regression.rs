@@ -1,9 +1,10 @@
+use parking_lot::Mutex;
 use std::{
-    io::{BufRead, BufReader},
-    process::{Command, Stdio, Child},
-    thread,
-    sync::{Mutex, OnceLock},
     collections::HashMap,
+    io::{BufRead, BufReader},
+    process::{Child, Command, Stdio},
+    sync::OnceLock,
+    thread,
 };
 
 #[cfg(unix)]
@@ -55,8 +56,7 @@ pub async fn run_regression_test(
     let config_json = serde_json::to_string(&test_case_value)
         .map_err(|e| format!("Failed to serialize test case: {}", e))?;
 
-    let artifact_dir = crate::paths::get_shared_app_dir()
-        .join("regression-artifacts");
+    let artifact_dir = crate::paths::get_shared_app_dir().join("regression-artifacts");
     std::fs::create_dir_all(&artifact_dir).map_err(|e| e.to_string())?;
 
     // Read AI settings for provider/model
@@ -78,7 +78,10 @@ pub async fn run_regression_test(
         .env("XBUFFER_AI_PROVIDER", &settings.provider)
         .env("HEXBUFFER_AI_MODEL", &settings.model)
         .env("AI_SDK_LOG_WARNINGS", "false")
-        .env("HEXBUFFER_AI_ARTIFACT_DIR", artifact_dir.to_string_lossy().to_string());
+        .env(
+            "HEXBUFFER_AI_ARTIFACT_DIR",
+            artifact_dir.to_string_lossy().to_string(),
+        );
 
     let mut command: Command = sidecar_command.into();
     command
@@ -107,7 +110,7 @@ pub async fn run_regression_test(
         .take()
         .ok_or_else(|| "Failed to capture sidecar stdout".to_string())?;
 
-    get_running_processes().lock().unwrap().insert(run_id.clone(), child);
+    get_running_processes().lock().insert(run_id.clone(), child);
 
     let app_clone = app.clone();
     let run_id_clone = run_id.clone();
@@ -131,10 +134,7 @@ pub async fn run_regression_test(
                 Err(_) => continue,
             };
 
-            let event_type = message
-                .get("type")
-                .and_then(Value::as_str)
-                .unwrap_or("");
+            let event_type = message.get("type").and_then(Value::as_str).unwrap_or("");
 
             match event_type {
                 "regression:test_started" => {
@@ -218,7 +218,7 @@ pub async fn run_regression_test(
             }
         }
         // Remove process from active map on completion
-        get_running_processes().lock().unwrap().remove(&run_id_clone);
+        get_running_processes().lock().remove(&run_id_clone);
     });
 
     Ok(serde_json::json!({
@@ -231,34 +231,29 @@ pub async fn run_regression_test(
 /// Abort a running regression test sidecar process.
 #[tauri::command]
 pub async fn abort_regression_test(app: AppHandle, run_id: String) -> Result<(), String> {
-    if let Some(mut child) = get_running_processes().lock().unwrap().remove(&run_id) {
+    if let Some(mut child) = get_running_processes().lock().remove(&run_id) {
         let _ = child.kill();
-        
+
         if let Some(db) = app.try_state::<Database>() {
-            let _ = db.finish_regression_run(
-                &run_id,
-                "aborted",
-                "[]",
-                None,
-                Some("Aborted by user"),
-            );
+            let _ =
+                db.finish_regression_run(&run_id, "aborted", "[]", None, Some("Aborted by user"));
         }
-        let _ = app.emit("regression:test-finished", serde_json::json!({
-            "runId": run_id,
-            "status": "aborted",
-            "stepResults": [],
-            "aiVerdict": null,
-            "error": "Aborted by user"
-        }));
+        let _ = app.emit(
+            "regression:test-finished",
+            serde_json::json!({
+                "runId": run_id,
+                "status": "aborted",
+                "stepResults": [],
+                "aiVerdict": null,
+                "error": "Aborted by user"
+            }),
+        );
     }
     Ok(())
 }
 
 #[tauri::command]
-pub async fn scrape_page_for_steps(
-    app: AppHandle,
-    target_url: String,
-) -> Result<Value, String> {
+pub async fn scrape_page_for_steps(app: AppHandle, target_url: String) -> Result<Value, String> {
     let settings = crate::ai::read_ai_settings(&app).unwrap_or_default();
 
     let sidecar_command = app
@@ -317,10 +312,7 @@ pub async fn scrape_page_for_steps(
             Err(_) => continue,
         };
 
-        let event_type = message
-            .get("type")
-            .and_then(Value::as_str)
-            .unwrap_or("");
+        let event_type = message.get("type").and_then(Value::as_str).unwrap_or("");
 
         match event_type {
             "scrape:result" => {
@@ -419,10 +411,7 @@ pub async fn run_regression_step(
             Err(_) => continue,
         };
 
-        let event_type = message
-            .get("type")
-            .and_then(Value::as_str)
-            .unwrap_or("");
+        let event_type = message.get("type").and_then(Value::as_str).unwrap_or("");
 
         match event_type {
             "step:result" => {
@@ -513,8 +502,8 @@ pub async fn save_regression_test_case(
         .get("steps")
         .cloned()
         .unwrap_or(serde_json::json!([]));
-    let steps_json = serde_json::to_string(&steps)
-        .map_err(|e| format!("Failed to serialize steps: {}", e))?;
+    let steps_json =
+        serde_json::to_string(&steps).map_err(|e| format!("Failed to serialize steps: {}", e))?;
     let enabled = test_case
         .get("enabled")
         .and_then(Value::as_bool)
@@ -591,9 +580,7 @@ pub async fn list_regression_runs(
 }
 
 #[tauri::command]
-pub async fn list_projects(
-    state: tauri::State<'_, Database>,
-) -> Result<serde_json::Value, String> {
+pub async fn list_projects(state: tauri::State<'_, Database>) -> Result<serde_json::Value, String> {
     let records = state
         .list_projects()
         .map_err(|e| format!("Failed to list projects: {}", e))?;
@@ -642,4 +629,3 @@ pub async fn list_error_signatures(
         .map_err(|e| format!("Failed to list error signatures: {}", e))?;
     serde_json::to_value(records).map_err(|e| e.to_string())
 }
-

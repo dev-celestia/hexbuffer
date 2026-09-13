@@ -5,7 +5,7 @@ use super::Database;
 
 impl Database {
     pub fn get_documents(&self) -> SqlResult<Vec<DocumentRecord>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             r#"SELECT id, name, title, sections, custom_sections, removed_built_in_sections, api_entries, created_at, updated_at
                FROM documents
@@ -17,7 +17,7 @@ impl Database {
     }
 
     pub fn upsert_document(&self, document: &DocumentRecord) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let sections = serde_json::to_string(&document.sections).unwrap_or_else(|_| "{}".into());
         let custom_sections =
             serde_json::to_string(&document.custom_sections).unwrap_or_else(|_| "[]".into());
@@ -55,7 +55,7 @@ impl Database {
     }
 
     pub fn delete_document(&self, id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute("DELETE FROM documents WHERE id = ?1", params![id])?;
         Ok(())
     }

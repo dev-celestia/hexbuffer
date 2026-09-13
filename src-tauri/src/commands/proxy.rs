@@ -58,7 +58,10 @@ pub async fn start_proxy(app: AppHandle, port: u16, tls_port: u16) -> Result<Str
         }
     }
 
-    Err(format!("Timed out waiting for proxy to start on port {}", port))
+    Err(format!(
+        "Timed out waiting for proxy to start on port {}",
+        port
+    ))
 }
 
 #[tauri::command]
@@ -112,4 +115,3 @@ pub async fn set_proxy_db_filter(
     proxy_state.set_db_filter_config(config);
     Ok(())
 }
-

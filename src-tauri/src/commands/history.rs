@@ -1,8 +1,8 @@
+use crate::db::repository::{HttpSessionRecord, HttpSessionSummary};
 use crate::{
     DocumentRecord, HistoryBridge, PaginatedResponse, ProxyFilter, ProxyLogSummary, ProxyRecord,
     ProxyState, TreeNode, WebSocketConnectionDetail, WebSocketConnectionSummary, WebSocketFilter,
 };
-use crate::db::repository::{HttpSessionRecord, HttpSessionSummary};
 use tauri::State;
 
 // ── HTTP Sessions ──────────────────────────────────────────────────
@@ -69,7 +69,12 @@ pub async fn update_http_session_filter(
     capture_filter: String,
     exclude_filter: String,
 ) -> Result<(), String> {
-    history.update_http_session_filter(&session_id, &capture_mode, &capture_filter, &exclude_filter)?;
+    history.update_http_session_filter(
+        &session_id,
+        &capture_mode,
+        &capture_filter,
+        &exclude_filter,
+    )?;
     if let Ok(Some(active)) = history.get_active_http_session() {
         if active.id == session_id {
             sync_session_filter_to_proxy_state(&active, &proxy_state);
@@ -85,8 +90,10 @@ fn sync_session_filter_to_proxy_state(session: &HttpSessionRecord, proxy_state: 
         _ => crate::proxy::types::ProxyRecordMode::All,
     };
 
-    let custom_hosts: Vec<String> = serde_json::from_str(&session.capture_filter).unwrap_or_default();
-    let exclude_hosts: Vec<String> = serde_json::from_str(&session.exclude_filter).unwrap_or_default();
+    let custom_hosts: Vec<String> =
+        serde_json::from_str(&session.capture_filter).unwrap_or_default();
+    let exclude_hosts: Vec<String> =
+        serde_json::from_str(&session.exclude_filter).unwrap_or_default();
 
     let mut current_config = proxy_state.get_db_filter_config();
     current_config.mode = mode;

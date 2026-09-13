@@ -6,6 +6,7 @@ use uuid::Uuid;
 use crate::browser::crawl_types::CrawlPage;
 
 use super::events::emit_queue_stats;
+use super::host_filter::{matches_host_filter, normalize_host_pattern};
 use super::live_traffic::schedule_live_traffic_queue;
 use super::state::{enqueue_live_traffic_job_locked, AutomationRuntimeState};
 use super::types::{
@@ -20,10 +21,7 @@ pub fn ingest_crawled_page(app: &AppHandle, page: &CrawlPage) {
 
     let parts = UrlParts::from_url(&page.url);
     let matches = {
-        let inner = match state.0.lock() {
-            Ok(inner) => inner,
-            Err(_) => return,
-        };
+        let inner = state.0.lock();
         let workflows = inner.workflows.clone();
         let settings = inner.settings.clone();
 
@@ -59,10 +57,7 @@ pub fn ingest_crawled_page(app: &AppHandle, page: &CrawlPage) {
         let trigger_node_id = trigger_node.id.clone();
 
         {
-            let mut inner = match state.0.lock() {
-                Ok(inner) => inner,
-                Err(_) => return,
-            };
+            let mut inner = state.0.lock();
             enqueue_live_traffic_job_locked(
                 &mut inner,
                 QueueJob {
@@ -142,22 +137,6 @@ impl UrlParts {
     }
 }
 
-fn matches_host_filter(host: &str, filter: &str) -> bool {
-    let patterns = filter
-        .split([',', ';', ' ', '\n', '\t'])
-        .map(normalize_host_pattern)
-        .filter(|pattern| !pattern.is_empty())
-        .collect::<Vec<_>>();
-    if patterns.is_empty() {
-        return true;
-    }
-
-    let host = normalize_host_pattern(host);
-    patterns
-        .iter()
-        .any(|pattern| host == *pattern || host.ends_with(&format!(".{}", pattern)))
-}
-
 fn matches_value_filter(haystacks: &[&str], operator: &str, value: &str) -> bool {
     let value = value.trim();
     if value.is_empty() {
@@ -178,30 +157,6 @@ fn matches_value_filter(haystacks: &[&str], operator: &str, value: &str) -> bool
                 .any(|haystack| haystack.to_ascii_lowercase().contains(&value))
         }
     }
-}
-
-fn normalize_host_pattern(value: &str) -> String {
-    let trimmed = value.trim().trim_start_matches("*.").to_ascii_lowercase();
-    if trimmed.is_empty() {
-        return String::new();
-    }
-    let candidate = if trimmed.contains("://") {
-        url::Url::parse(&trimmed)
-            .ok()
-            .and_then(|url| url.host_str().map(str::to_string))
-            .unwrap_or(trimmed)
-    } else {
-        trimmed
-    };
-    candidate
-        .split('/')
-        .next()
-        .unwrap_or_default()
-        .split(':')
-        .next()
-        .unwrap_or_default()
-        .trim()
-        .to_string()
 }
 
 fn queue_cap_for_trigger(config: &Value, settings: &AutomationRuntimeSettings) -> usize {

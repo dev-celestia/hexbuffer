@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
-import { createUIMessageStream, type ChatTransport } from 'ai';
+import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+import { createUIMessageStream, type ChatTransport, type UIMessageStreamWriter } from 'ai';
 import { useRepeaterStore } from '@/stores/repeater';
 import type { DashboardAiSettings, DashboardChatMessage } from '../types';
 
@@ -18,6 +19,21 @@ interface AiChatResponse {
   model: string;
   content: string;
   actions?: AiChatAction[];
+}
+
+interface AiChatStartedEvent {
+  requestId: string;
+  provider: string;
+  model: string;
+}
+
+interface AiChatDeltaEvent {
+  requestId: string;
+  delta: string;
+}
+
+interface AiChatFinishedEvent {
+  requestId: string;
 }
 
 function getMessageText(message: DashboardChatMessage) {
@@ -63,41 +79,117 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
       execute: async ({ writer }) => {
         let provider = aiSettings?.provider;
         let model = aiSettings?.model;
-        let content = '';
-
-        try {
-          if (!aiSettings?.hasApiKey || !aiSettings.allowThirdPartyAiSharing) {
-            content = fallbackContent(aiSettings);
-          } else {
-            const repeaterStore = useRepeaterStore.getState();
-            const response = await invoke<AiChatResponse>('send_ai_chat_message', {
-              request: {
-                messages: toProviderMessages(messages),
-                workspaces: repeaterStore.workspaces.map((w) => ({ id: w.id, name: w.name })),
-                activeWorkspaceId: repeaterStore.activeWorkspaceId,
-              },
-            });
-            provider = response.provider;
-            model = response.model;
-            content = response.content;
-          }
-        } catch (error) {
-          content = fallbackContent(aiSettings, error);
-        }
-
         const textId = `response-${Date.now()}`;
 
-        writer.write({
-          type: 'start',
-          messageMetadata: {
-            model,
-            provider,
-          },
-        });
-        writer.write({ type: 'text-start', id: textId });
-        writer.write({ type: 'text-delta', id: textId, delta: content });
-        writer.write({ type: 'text-end', id: textId });
-        writer.write({ type: 'finish', finishReason: 'stop' });
+        if (!aiSettings?.hasApiKey || !aiSettings.allowThirdPartyAiSharing) {
+          writeAssistantText(writer, textId, fallbackContent(aiSettings), provider, model);
+          return;
+        }
+
+        // The Rust engine emits `ai-chat:started` / `ai-chat:delta` / `ai-chat:finished`
+        // events while generating. Bridge them into the UI message stream so the reply
+        // renders progressively instead of popping in all at once.
+        const requestId = crypto.randomUUID();
+        let started = false;
+        let finished = false;
+        let streamedLength = 0;
+        const unlisteners: UnlistenFn[] = [];
+        const cleanup = () => {
+          while (unlisteners.length) {
+            unlisteners.pop()?.();
+          }
+        };
+
+        const ensureStarted = () => {
+          if (started) return;
+          started = true;
+          writer.write({
+            type: 'start',
+            messageMetadata: {
+              model,
+              provider,
+            },
+          });
+          writer.write({ type: 'text-start', id: textId });
+        };
+
+        const finishStream = () => {
+          if (finished) return;
+          finished = true;
+          writer.write({ type: 'text-end', id: textId });
+          writer.write({ type: 'finish', finishReason: 'stop' });
+        };
+
+        try {
+          unlisteners.push(
+            await listen<AiChatStartedEvent>('ai-chat:started', (event) => {
+              if (event.payload.requestId !== requestId) return;
+              provider = event.payload.provider as DashboardAiSettings['provider'];
+              model = event.payload.model;
+              ensureStarted();
+            }),
+          );
+
+          unlisteners.push(
+            await listen<AiChatDeltaEvent>('ai-chat:delta', (event) => {
+              if (event.payload.requestId !== requestId) return;
+              ensureStarted();
+              streamedLength += event.payload.delta.length;
+              writer.write({
+                type: 'text-delta',
+                id: textId,
+                delta: event.payload.delta,
+              });
+            }),
+          );
+
+          unlisteners.push(
+            await listen<AiChatFinishedEvent>('ai-chat:finished', (event) => {
+              if (event.payload.requestId !== requestId) return;
+              finishStream();
+            }),
+          );
+
+          const repeaterStore = useRepeaterStore.getState();
+          const response = await invoke<AiChatResponse>('send_ai_chat_message', {
+            request: {
+              requestId,
+              messages: toProviderMessages(messages),
+              workspaces: repeaterStore.workspaces.map((w) => ({ id: w.id, name: w.name })),
+              activeWorkspaceId: repeaterStore.activeWorkspaceId,
+            },
+          });
+          provider = response.provider;
+          model = response.model;
+
+          ensureStarted();
+
+          // Flush any content the delta events did not deliver (e.g. a dropped event).
+          if (!finished && response.content.length > streamedLength) {
+            writer.write({
+              type: 'text-delta',
+              id: textId,
+              delta: response.content.slice(streamedLength),
+            });
+          }
+
+          finishStream();
+        } catch (error) {
+          if (started && !finished) {
+            writer.write({ type: 'text-end', id: textId });
+            writer.write({ type: 'finish', finishReason: 'error' });
+          } else if (!started) {
+            writeAssistantText(
+              writer,
+              textId,
+              fallbackContent(aiSettings, error),
+              provider,
+              model,
+            );
+          }
+        } finally {
+          cleanup();
+        }
       },
     });
   }
@@ -105,4 +197,24 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
   async reconnectToStream() {
     return null;
   }
+}
+
+function writeAssistantText(
+  writer: UIMessageStreamWriter<DashboardChatMessage>,
+  textId: string,
+  content: string,
+  provider: DashboardAiSettings['provider'] | undefined,
+  model: string | undefined,
+) {
+  writer.write({
+    type: 'start',
+    messageMetadata: {
+      model,
+      provider,
+    },
+  });
+  writer.write({ type: 'text-start', id: textId });
+  writer.write({ type: 'text-delta', id: textId, delta: content });
+  writer.write({ type: 'text-end', id: textId });
+  writer.write({ type: 'finish', finishReason: 'stop' });
 }

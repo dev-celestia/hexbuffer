@@ -3,11 +3,12 @@
 // mutex dropped before blocking osascript, log size capped, password cleared
 // from state post-connect (frontend side).
 
-use std::sync::{Arc, Mutex};
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::process::{Child, Command, Stdio};
-use std::path::PathBuf;
+use parking_lot::Mutex;
 use std::io::{BufRead, BufReader};
+use std::path::PathBuf;
+use std::process::{Child, Command, Stdio};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use tauri::{AppHandle, Emitter, State};
 
 /// Seconds to wait for OpenVPN to reach 'connected' before auto-killing.
@@ -118,7 +119,7 @@ fn find_openvpn_binary() -> Result<PathBuf, String> {
 
 /// Push a log line, evicting the oldest entry if over the cap.
 fn push_log(logs: &Arc<Mutex<Vec<String>>>, line: String) {
-    let mut guard = logs.lock().unwrap();
+    let mut guard = logs.lock();
     if guard.len() >= MAX_LOG_LINES {
         guard.drain(0..1);
     }
@@ -144,7 +145,9 @@ fn ensure_setuid_root(bin_path: &std::path::Path) -> Result<(), String> {
     // We use single-quoted shell escaping; the path must not contain single quotes.
     let bin_str = bin_path.to_string_lossy();
     if bin_str.contains('\'') {
-        return Err("OpenVPN binary path contains an invalid character (single quote).".to_string());
+        return Err(
+            "OpenVPN binary path contains an invalid character (single quote).".to_string(),
+        );
     }
     let script = format!(
         "do shell script \"chown root:wheel '{}' && chmod 4755 '{}'\" with administrator privileges",
@@ -186,13 +189,17 @@ pub async fn start_vpn(
 
     // ── Fix #9: single-flight AtomicBool gate ──────────────────────────────
     // compare_exchange ensures only one call proceeds even under rapid IPC bursts.
-    if state_inner.starting.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst).is_err() {
+    if state_inner
+        .starting
+        .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+        .is_err()
+    {
         return Err("VPN is already starting.".to_string());
     }
 
     // Also guard against already-connected state.
     {
-        let status = state_inner.status.lock().unwrap();
+        let status = state_inner.status.lock();
         if *status == "connecting" || *status == "connected" {
             state_inner.starting.store(false, Ordering::SeqCst);
             return Err("VPN is already connecting or connected.".to_string());
@@ -210,25 +217,31 @@ pub async fn start_vpn(
 
     // Clear logs and set status.
     {
-        let mut logs = state_inner.logs.lock().unwrap();
+        let mut logs = state_inner.logs.lock();
         logs.clear();
         logs.push("Starting OpenVPN...".to_string());
         drop(logs);
-        let mut status = state_inner.status.lock().unwrap();
+        let mut status = state_inner.status.lock();
         *status = "connecting".to_string();
-        let mut cp = state_inner.config_path.lock().unwrap();
+        let mut cp = state_inner.config_path.lock();
         *cp = Some(canonical_config.to_string_lossy().to_string());
     }
 
-    let _ = app.emit("vpn:status", serde_json::json!({ "status": "connecting", "error": null }));
+    let _ = app.emit(
+        "vpn:status",
+        serde_json::json!({ "status": "connecting", "error": null }),
+    );
 
     // ── Fix #4: trusted binary resolution ─────────────────────────────────
     let openvpn_bin = match find_openvpn_binary() {
         Ok(p) => p,
         Err(e) => {
-            let mut status = state_inner.status.lock().unwrap();
+            let mut status = state_inner.status.lock();
             *status = "error".to_string();
-            let _ = app.emit("vpn:status", serde_json::json!({ "status": "error", "error": e }));
+            let _ = app.emit(
+                "vpn:status",
+                serde_json::json!({ "status": "error", "error": e }),
+            );
             state_inner.starting.store(false, Ordering::SeqCst);
             return Err(e);
         }
@@ -248,15 +261,24 @@ pub async fn start_vpn(
             };
 
             if needs_elevation {
-                push_log(&state_inner.logs, "Prompting for administrator authorization...".to_string());
+                push_log(
+                    &state_inner.logs,
+                    "Prompting for administrator authorization...".to_string(),
+                );
                 let _ = app.emit("vpn:log", "Prompting for administrator authorization...");
 
                 if let Err(e) = ensure_setuid_root(&openvpn_bin) {
-                    push_log(&state_inner.logs, format!("[ERROR] Authorization failed: {}", e));
+                    push_log(
+                        &state_inner.logs,
+                        format!("[ERROR] Authorization failed: {}", e),
+                    );
                     let _ = app.emit("vpn:log", format!("[ERROR] Authorization failed: {}", e));
-                    let mut status = state_inner.status.lock().unwrap();
+                    let mut status = state_inner.status.lock();
                     *status = "error".to_string();
-                    let _ = app.emit("vpn:status", serde_json::json!({ "status": "error", "error": e.clone() }));
+                    let _ = app.emit(
+                        "vpn:status",
+                        serde_json::json!({ "status": "error", "error": e.clone() }),
+                    );
                     state_inner.starting.store(false, Ordering::SeqCst);
                     return Err(e);
                 }
@@ -267,7 +289,10 @@ pub async fn start_vpn(
     }
 
     // Build OpenVPN arguments using the canonical config path.
-    let mut args = vec!["--config".to_string(), canonical_config.to_string_lossy().to_string()];
+    let mut args = vec![
+        "--config".to_string(),
+        canonical_config.to_string_lossy().to_string(),
+    ];
 
     if let Some(ref s) = server {
         if !s.is_empty() {
@@ -325,15 +350,21 @@ pub async fn start_vpn(
 
     // Store NamedTempFile in state so it stays alive until we explicitly drop it.
     {
-        let mut auth_guard = state_inner.auth_file.lock().unwrap();
+        let mut auth_guard = state_inner.auth_file.lock();
         *auth_guard = temp_auth;
     }
 
-    log(&format!("Starting OpenVPN. Protocol: {:?}, Access: {:?}", protocol, access));
+    log(&format!(
+        "Starting OpenVPN. Protocol: {:?}, Access: {:?}",
+        protocol, access
+    ));
 
     // Spawn process.
     let mut command = Command::new(&openvpn_bin);
-    command.args(&args).stdout(Stdio::piped()).stderr(Stdio::piped());
+    command
+        .args(&args)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
 
     #[cfg(unix)]
     {
@@ -353,12 +384,15 @@ pub async fn start_vpn(
         Err(e) => {
             let err_msg = format!("Failed to spawn OpenVPN: {e}");
             // ── Fix #7: drop auth file on all error paths ──────────────────
-            let mut auth_guard = state_inner.auth_file.lock().unwrap();
+            let mut auth_guard = state_inner.auth_file.lock();
             auth_guard.take(); // NamedTempFile deleted on Drop
             drop(auth_guard);
-            let mut status = state_inner.status.lock().unwrap();
+            let mut status = state_inner.status.lock();
             *status = "error".to_string();
-            let _ = app.emit("vpn:status", serde_json::json!({ "status": "error", "error": err_msg }));
+            let _ = app.emit(
+                "vpn:status",
+                serde_json::json!({ "status": "error", "error": err_msg }),
+            );
             state_inner.starting.store(false, Ordering::SeqCst);
             return Err(err_msg);
         }
@@ -369,7 +403,7 @@ pub async fn start_vpn(
         Some(s) => s,
         None => {
             let _ = child.kill();
-            let mut auth_guard = state_inner.auth_file.lock().unwrap();
+            let mut auth_guard = state_inner.auth_file.lock();
             auth_guard.take();
             state_inner.starting.store(false, Ordering::SeqCst);
             return Err("Failed to open stdout pipe.".to_string());
@@ -379,7 +413,7 @@ pub async fn start_vpn(
         Some(s) => s,
         None => {
             let _ = child.kill();
-            let mut auth_guard = state_inner.auth_file.lock().unwrap();
+            let mut auth_guard = state_inner.auth_file.lock();
             auth_guard.take();
             state_inner.starting.store(false, Ordering::SeqCst);
             return Err("Failed to open stderr pipe.".to_string());
@@ -390,7 +424,7 @@ pub async fn start_vpn(
     state_inner.starting.store(false, Ordering::SeqCst);
 
     {
-        let mut child_guard = state_inner.child.lock().unwrap();
+        let mut child_guard = state_inner.child.lock();
         *child_guard = Some(child);
     }
 
@@ -405,12 +439,15 @@ pub async fn start_vpn(
             let _ = app_stdout.emit("vpn:log", line_str.clone());
 
             if line_str.contains("Initialization Sequence Completed") {
-                let mut status_guard = state_stdout.status.lock().unwrap();
+                let mut status_guard = state_stdout.status.lock();
                 *status_guard = "connected".to_string();
-                let _ = app_stdout.emit("vpn:status", serde_json::json!({
-                    "status": "connected",
-                    "error": null,
-                }));
+                let _ = app_stdout.emit(
+                    "vpn:status",
+                    serde_json::json!({
+                        "status": "connected",
+                        "error": null,
+                    }),
+                );
             }
         }
     });
@@ -437,32 +474,42 @@ pub async fn start_vpn(
             let mut status_to_emit = None;
 
             {
-                let mut child_guard = state_monitor.child.lock().unwrap();
+                let mut child_guard = state_monitor.child.lock();
                 if let Some(ref mut child) = *child_guard {
                     match child.try_wait() {
                         Ok(Some(exit_status)) => {
                             *child_guard = None;
-                            let final_status = if exit_status.success() { "disconnected" } else { "error" };
+                            let final_status = if exit_status.success() {
+                                "disconnected"
+                            } else {
+                                "error"
+                            };
                             let err_msg = if exit_status.success() {
                                 None
                             } else {
-                                Some(format!("OpenVPN exited with code: {:?}", exit_status.code()))
+                                Some(format!(
+                                    "OpenVPN exited with code: {:?}",
+                                    exit_status.code()
+                                ))
                             };
-                            let mut s = state_monitor.status.lock().unwrap();
+                            let mut s = state_monitor.status.lock();
                             *s = final_status.to_string();
                             // Drop auth file on natural exit.
-                            let mut auth = state_monitor.auth_file.lock().unwrap();
+                            let mut auth = state_monitor.auth_file.lock();
                             auth.take();
                             status_to_emit = Some((final_status.to_string(), err_msg));
                         }
                         Ok(None) => {}
                         Err(e) => {
                             *child_guard = None;
-                            let mut s = state_monitor.status.lock().unwrap();
+                            let mut s = state_monitor.status.lock();
                             *s = "error".to_string();
-                            let mut auth = state_monitor.auth_file.lock().unwrap();
+                            let mut auth = state_monitor.auth_file.lock();
                             auth.take();
-                            status_to_emit = Some(("error".to_string(), Some(format!("Process query failed: {}", e))));
+                            status_to_emit = Some((
+                                "error".to_string(),
+                                Some(format!("Process query failed: {}", e)),
+                            ));
                         }
                     }
                 } else {
@@ -471,7 +518,10 @@ pub async fn start_vpn(
             }
 
             if let Some((status, err)) = status_to_emit {
-                let _ = app_monitor.emit("vpn:status", serde_json::json!({ "status": status, "error": err }));
+                let _ = app_monitor.emit(
+                    "vpn:status",
+                    serde_json::json!({ "status": status, "error": err }),
+                );
                 break;
             }
         }
@@ -484,7 +534,7 @@ pub async fn start_vpn(
         for remaining in (0..CONNECT_TIMEOUT_SECS).rev() {
             std::thread::sleep(std::time::Duration::from_secs(1));
 
-            let status = state_timeout.status.lock().unwrap().clone();
+            let status = state_timeout.status.lock().clone();
             if status != "connecting" {
                 return;
             }
@@ -492,35 +542,51 @@ pub async fn start_vpn(
                 break;
             }
             if remaining % 10 == 0 {
-                let _ = app_timeout.emit("vpn:log", format!("Still connecting... timeout in {}s", remaining));
+                let _ = app_timeout.emit(
+                    "vpn:log",
+                    format!("Still connecting... timeout in {}s", remaining),
+                );
             }
         }
 
         // Final re-check before killing.
         {
-            let status = state_timeout.status.lock().unwrap().clone();
+            let status = state_timeout.status.lock().clone();
             if status != "connecting" {
                 return;
             }
         }
 
-        let _ = app_timeout.emit("vpn:log", format!("[ERROR] Connection timed out after {}s.", CONNECT_TIMEOUT_SECS));
+        let _ = app_timeout.emit(
+            "vpn:log",
+            format!(
+                "[ERROR] Connection timed out after {}s.",
+                CONNECT_TIMEOUT_SECS
+            ),
+        );
 
         // ── Fix #8: take child out of mutex before blocking kill ───────────
         let child_taken = {
-            let mut guard = state_timeout.child.lock().unwrap();
+            let mut guard = state_timeout.child.lock();
             guard.take()
         };
         if let Some(mut child) = child_taken {
             let pid = child.id();
             #[cfg(target_os = "macos")]
             {
-                let osa = format!("do shell script \"kill -9 {}\" with administrator privileges", pid);
-                let _ = std::process::Command::new("osascript").args(["-e", &osa]).output();
+                let osa = format!(
+                    "do shell script \"kill -9 {}\" with administrator privileges",
+                    pid
+                );
+                let _ = std::process::Command::new("osascript")
+                    .args(["-e", &osa])
+                    .output();
             }
             #[cfg(all(unix, not(target_os = "macos")))]
             {
-                let _ = std::process::Command::new("kill").args(["-9", &pid.to_string()]).output();
+                let _ = std::process::Command::new("kill")
+                    .args(["-9", &pid.to_string()])
+                    .output();
             }
             #[cfg(not(unix))]
             {
@@ -530,16 +596,19 @@ pub async fn start_vpn(
         }
 
         {
-            let mut auth = state_timeout.auth_file.lock().unwrap();
+            let mut auth = state_timeout.auth_file.lock();
             auth.take(); // NamedTempFile deleted on Drop
         }
 
-        let mut s = state_timeout.status.lock().unwrap();
+        let mut s = state_timeout.status.lock();
         *s = "error".to_string();
-        let _ = app_timeout.emit("vpn:status", serde_json::json!({
-            "status": "error",
-            "error": format!("Connection timed out after {}s.", CONNECT_TIMEOUT_SECS),
-        }));
+        let _ = app_timeout.emit(
+            "vpn:status",
+            serde_json::json!({
+                "status": "error",
+                "error": format!("Connection timed out after {}s.", CONNECT_TIMEOUT_SECS),
+            }),
+        );
     });
 
     Ok(())
@@ -553,7 +622,7 @@ pub async fn stop_vpn(app: AppHandle, state: State<'_, VpnState>) -> Result<(), 
 
     // ── Fix #8: take child out of mutex BEFORE blocking osascript call ──────
     let child_taken = {
-        let mut guard = state_inner.child.lock().unwrap();
+        let mut guard = state_inner.child.lock();
         guard.take()
     };
 
@@ -569,23 +638,41 @@ pub async fn stop_vpn(app: AppHandle, state: State<'_, VpnState>) -> Result<(), 
         // Combine process termination AND route cleanup into a SINGLE osascript execution
         // so macOS prompts for administrator authorization exactly ONCE.
         let combined_cmd = format!("{} && bash '{}'", kill_cmd, script_path);
-        let osa = format!("do shell script \"{}\" with administrator privileges", combined_cmd);
+        let osa = format!(
+            "do shell script \"{}\" with administrator privileges",
+            combined_cmd
+        );
 
-        let _ = app.emit("vpn:log", "Terminating OpenVPN and cleaning up VPN routes...");
-        match std::process::Command::new("osascript").args(["-e", &osa]).output() {
+        let _ = app.emit(
+            "vpn:log",
+            "Terminating OpenVPN and cleaning up VPN routes...",
+        );
+        match std::process::Command::new("osascript")
+            .args(["-e", &osa])
+            .output()
+        {
             Ok(out) if out.status.success() => {
                 let stdout = String::from_utf8_lossy(&out.stdout).trim().to_string();
                 if !stdout.is_empty() {
                     let _ = app.emit("vpn:log", stdout);
                 }
-                let _ = app.emit("vpn:log", "OpenVPN stopped and routes cleaned up successfully.");
+                let _ = app.emit(
+                    "vpn:log",
+                    "OpenVPN stopped and routes cleaned up successfully.",
+                );
             }
             Ok(out) => {
                 let stderr = String::from_utf8_lossy(&out.stderr).trim().to_string();
-                let _ = app.emit("vpn:log", format!("[WARNING] Stop/cleanup output: {}", stderr));
+                let _ = app.emit(
+                    "vpn:log",
+                    format!("[WARNING] Stop/cleanup output: {}", stderr),
+                );
             }
             Err(e) => {
-                let _ = app.emit("vpn:log", format!("[ERROR] Failed to spawn osascript: {}", e));
+                let _ = app.emit(
+                    "vpn:log",
+                    format!("[ERROR] Failed to spawn osascript: {}", e),
+                );
             }
         }
 
@@ -597,10 +684,14 @@ pub async fn stop_vpn(app: AppHandle, state: State<'_, VpnState>) -> Result<(), 
     #[cfg(all(unix, not(target_os = "macos")))]
     {
         if let Some(mut child) = child_taken {
-            let _ = std::process::Command::new("kill").args(["-9", &child.id().to_string()]).output();
+            let _ = std::process::Command::new("kill")
+                .args(["-9", &child.id().to_string()])
+                .output();
             let _ = child.wait();
         } else {
-            let _ = std::process::Command::new("pkill").args(["-9", "openvpn"]).output();
+            let _ = std::process::Command::new("pkill")
+                .args(["-9", "openvpn"])
+                .output();
         }
     }
 
@@ -614,26 +705,29 @@ pub async fn stop_vpn(app: AppHandle, state: State<'_, VpnState>) -> Result<(), 
 
     // Drop auth file (NamedTempFile auto-deletes).
     {
-        let mut auth_guard = state_inner.auth_file.lock().unwrap();
+        let mut auth_guard = state_inner.auth_file.lock();
         if auth_guard.take().is_some() {
             let _ = app.emit("vpn:log", "Temporary auth file removed.");
         }
     }
 
     {
-        let mut logs = state_inner.logs.lock().unwrap();
+        let mut logs = state_inner.logs.lock();
         logs.clear();
     }
 
     {
-        let mut cp = state_inner.config_path.lock().unwrap();
+        let mut cp = state_inner.config_path.lock();
         *cp = None;
     }
 
-    let mut status_guard = state_inner.status.lock().unwrap();
+    let mut status_guard = state_inner.status.lock();
     *status_guard = "disconnected".to_string();
 
-    let _ = app.emit("vpn:status", serde_json::json!({ "status": "disconnected", "error": null }));
+    let _ = app.emit(
+        "vpn:status",
+        serde_json::json!({ "status": "disconnected", "error": null }),
+    );
     let _ = app.emit("vpn:log", "VPN stopped.");
 
     Ok(())
@@ -642,22 +736,26 @@ pub async fn stop_vpn(app: AppHandle, state: State<'_, VpnState>) -> Result<(), 
 #[tauri::command]
 pub async fn get_vpn_status(state: State<'_, VpnState>) -> Result<VpnStatusResponse, String> {
     let state_inner = state.inner().clone();
-    let mut status_guard = state_inner.status.lock().unwrap();
+    let mut status_guard = state_inner.status.lock();
 
     let openvpn_active = is_openvpn_running();
     if *status_guard == "disconnected" && openvpn_active {
         *status_guard = "connected".to_string();
     } else if *status_guard == "connected" && !openvpn_active {
-        let child_guard = state_inner.child.lock().unwrap();
+        let child_guard = state_inner.child.lock();
         if child_guard.is_none() {
             *status_guard = "disconnected".to_string();
         }
     }
 
     let status = status_guard.clone();
-    let logs = state_inner.logs.lock().unwrap().clone();
-    let config_path = state_inner.config_path.lock().unwrap().clone();
-    Ok(VpnStatusResponse { status, logs, config_path })
+    let logs = state_inner.logs.lock().clone();
+    let config_path = state_inner.config_path.lock().clone();
+    Ok(VpnStatusResponse {
+        status,
+        logs,
+        config_path,
+    })
 }
 
 /// Re-runs the osascript privilege escalation prompt unconditionally.
@@ -668,7 +766,10 @@ pub async fn request_vpn_permissions() -> Result<(), String> {
     {
         let bin = find_openvpn_binary()?;
         if !bin.exists() {
-            return Err("OpenVPN binary not found. Please install OpenVPN (brew install openvpn).".to_string());
+            return Err(
+                "OpenVPN binary not found. Please install OpenVPN (brew install openvpn)."
+                    .to_string(),
+            );
         }
         ensure_setuid_root(&bin)?;
         Ok(())

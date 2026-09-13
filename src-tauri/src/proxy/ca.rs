@@ -13,9 +13,10 @@ pub fn init_ca_dir(app_data_dir: PathBuf) {
 }
 
 fn get_ca_dir() -> PathBuf {
-    CA_ROOT.get().cloned().unwrap_or_else(|| {
-        crate::paths::get_shared_app_dir().join(".hexbuffer")
-    })
+    CA_ROOT
+        .get()
+        .cloned()
+        .unwrap_or_else(|| crate::paths::get_shared_app_dir().join(".hexbuffer"))
 }
 
 fn get_ca_cert_path() -> PathBuf {
@@ -26,8 +27,7 @@ fn get_ca_key_path() -> PathBuf {
     get_ca_dir().join("ca-key.pem")
 }
 
-pub fn create_proxy_authority(
-) -> Result<CertificationAuthority, Box<dyn std::error::Error>> {
+pub fn create_proxy_authority() -> Result<CertificationAuthority, Box<dyn std::error::Error>> {
     let ca_dir = get_ca_dir();
     fs::create_dir_all(&ca_dir)?;
     let ca = CertificationAuthority::new_in(&ca_dir);
@@ -130,7 +130,10 @@ mod tests {
         assert!(cert_pem.is_ok(), "CA cert PEM read should succeed");
         let pem_str = cert_pem.unwrap();
         assert!(pem_str.contains("BEGIN CERTIFICATE"));
-        assert!(is_ca_cert_valid(&pem_str), "CA certificate should be recognized as valid");
+        assert!(
+            is_ca_cert_valid(&pem_str),
+            "CA certificate should be recognized as valid"
+        );
 
         // Simulating second startup / ensure_ca_exists call
         ensure_ca_exists();
@@ -147,6 +150,8 @@ mod tests {
     fn test_is_ca_cert_valid() {
         assert!(!is_ca_cert_valid(""));
         assert!(!is_ca_cert_valid("not a cert"));
-        assert!(!is_ca_cert_valid("-----BEGIN CERTIFICATE-----\nSGVsbG8gV29ybGQ=\n-----END CERTIFICATE-----"));
+        assert!(!is_ca_cert_valid(
+            "-----BEGIN CERTIFICATE-----\nSGVsbG8gV29ybGQ=\n-----END CERTIFICATE-----"
+        ));
     }
 }

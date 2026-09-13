@@ -295,11 +295,9 @@ impl HashcatEngine {
                             }
                             sigterm_sent_at = Some(Instant::now());
                         }
-                        Some(sent) if sent.elapsed() > Duration::from_secs(3) => {
-                            unsafe {
-                                libc::kill(pid, libc::SIGKILL);
-                            }
-                        }
+                        Some(sent) if sent.elapsed() > Duration::from_secs(3) => unsafe {
+                            libc::kill(pid, libc::SIGKILL);
+                        },
                         Some(_) => {}
                     }
                 }

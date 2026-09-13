@@ -5,10 +5,11 @@ mod state;
 mod targets;
 mod types;
 
+use parking_lot::Mutex;
 use scanner::scan_single_port;
 use std::sync::{
     atomic::{AtomicBool, AtomicUsize, Ordering},
-    Arc, Mutex,
+    Arc,
 };
 use targets::{expand_targets, normalize_scan_ports, shuffle_ports};
 use tauri::{AppHandle, Emitter, State};
@@ -63,16 +64,15 @@ pub async fn scan_ports(
     let delay_ms = request
         .delay_ms
         .unwrap_or(if stealth { STEALTH_DEFAULT_DELAY_MS } else { 0 });
-    let jitter_ms = request
-        .jitter_ms
-        .unwrap_or(if stealth { STEALTH_DEFAULT_JITTER_MS } else { 0 });
+    let jitter_ms = request.jitter_ms.unwrap_or(if stealth {
+        STEALTH_DEFAULT_JITTER_MS
+    } else {
+        0
+    });
     let cancel_flag = Arc::new(AtomicBool::new(false));
 
     {
-        let mut cancellations = scan_state
-            .cancellations
-            .lock()
-            .map_err(|_| "Failed to acquire scanner state".to_string())?;
+        let mut cancellations = scan_state.cancellations.lock();
         cancellations.insert(request.scan_id.clone(), cancel_flag.clone());
     }
 
@@ -130,7 +130,8 @@ pub async fn scan_ports(
                 let is_open = result.state == "open";
                 if is_open {
                     crate::automation::ingest_port_scan_result(&app, &scan_id, &result);
-                    if let Ok(mut results) = results.lock() {
+                    let mut results = results.lock();
+                    {
                         results.push(result.clone());
                     }
                     let _ = app.emit(&format!("port-scan-result-{}", scan_id), result);
@@ -151,7 +152,8 @@ pub async fn scan_ports(
     while let Some(_) = join_set.join_next().await {}
 
     let was_cancelled = cancel_flag.load(Ordering::Relaxed);
-    if let Ok(mut cancellations) = scan_state.cancellations.lock() {
+    let mut cancellations = scan_state.cancellations.lock();
+    {
         cancellations.remove(&request.scan_id);
     }
 
@@ -162,20 +164,14 @@ pub async fn scan_ports(
     };
     let _ = app.emit(&format!("port-scan-progress-{}", request.scan_id), progress);
 
-    let mut results = results
-        .lock()
-        .map_err(|_| "Failed to collect scan results".to_string())?
-        .clone();
+    let mut results = results.lock().clone();
     results.sort_by(|a, b| a.host.cmp(&b.host).then(a.port.cmp(&b.port)));
     Ok(results)
 }
 
 #[tauri::command]
 pub fn stop_port_scan(scan_state: State<'_, PortScanState>, scan_id: String) -> Result<(), String> {
-    let cancellations = scan_state
-        .cancellations
-        .lock()
-        .map_err(|_| "Failed to acquire scanner state".to_string())?;
+    let cancellations = scan_state.cancellations.lock();
 
     if let Some(cancel_flag) = cancellations.get(&scan_id) {
         cancel_flag.store(true, Ordering::Relaxed);

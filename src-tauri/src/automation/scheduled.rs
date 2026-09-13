@@ -19,10 +19,7 @@ pub(crate) fn ensure_scheduled_trigger_scheduler(
     state: &State<'_, AutomationRuntimeState>,
 ) {
     {
-        let mut inner = match state.0.lock() {
-            Ok(inner) => inner,
-            Err(_) => return,
-        };
+        let mut inner = state.0.lock();
         if inner.scheduled_scheduler_started {
             return;
         }
@@ -43,10 +40,7 @@ fn tick_scheduled_triggers(app: &AppHandle) {
     };
 
     let due_runs = {
-        let mut inner = match state.0.lock() {
-            Ok(inner) => inner,
-            Err(_) => return,
-        };
+        let mut inner = state.0.lock();
         let now = Instant::now();
         let mut due_runs = Vec::new();
 

@@ -22,12 +22,12 @@ pub fn init_proxy_log_worker(app_handle: AppHandle) {
                 Some(item) = rx.recv() => {
                     buffer.push(item);
                     if buffer.len() >= 50 {
-                        flush_log_buffer(&app_handle, &mut buffer);
+                        flush_log_buffer(&app_handle, &mut buffer).await;
                     }
                 }
                 _ = interval.tick() => {
                     if !buffer.is_empty() {
-                        flush_log_buffer(&app_handle, &mut buffer);
+                        flush_log_buffer(&app_handle, &mut buffer).await;
                     }
                 }
             }
@@ -35,16 +35,22 @@ pub fn init_proxy_log_worker(app_handle: AppHandle) {
     });
 }
 
-fn flush_log_buffer(app_handle: &AppHandle, buffer: &mut Vec<(ProxyRecord, Option<String>)>) {
+async fn flush_log_buffer(app_handle: &AppHandle, buffer: &mut Vec<(ProxyRecord, Option<String>)>) {
     if buffer.is_empty() {
         return;
     }
     let records = std::mem::replace(buffer, Vec::with_capacity(64));
-    if let Some(history) = app_handle.try_state::<crate::HistoryBridge>() {
-        if let Err(e) = history.insert_records_batch(&records) {
-            eprintln!("[completion] failed to batch insert to DB: {}", e);
+    let app_handle = app_handle.clone();
+    // SQLite + payload file writes are blocking; keep them off the async runtime.
+    // Awaited by the worker so batches commit in arrival order.
+    let flush = tauri::async_runtime::spawn_blocking(move || {
+        if let Some(history) = app_handle.try_state::<crate::HistoryBridge>() {
+            if let Err(e) = history.insert_records_batch(&records) {
+                eprintln!("[completion] failed to batch insert to DB: {}", e);
+            }
         }
-    }
+    });
+    let _ = flush.await;
 }
 
 pub fn build_record(ctx: &Ctx) -> ProxyRecord {
@@ -72,7 +78,7 @@ pub fn build_record(ctx: &Ctx) -> ProxyRecord {
     }
 }
 
-pub fn save_and_emit(ctx: &Ctx, app_handle: &tauri::AppHandle) {
+pub async fn save_and_emit(ctx: &Ctx, app_handle: &tauri::AppHandle) {
     let txn = build_record(ctx);
 
     // ponytail: check if DB recording filter permits this record
@@ -82,43 +88,67 @@ pub fn save_and_emit(ctx: &Ctx, app_handle: &tauri::AppHandle) {
         }
     }
 
-    let mut session_id = String::new();
-    let mut session_id_opt: Option<String> = None;
-
-    if let Some(history) = app_handle.try_state::<crate::HistoryBridge>() {
-        if let Ok(Some(s)) = history.get_active_http_session() {
-            session_id = s.id.clone();
-            session_id_opt = Some(s.id);
-        }
-    }
-
-    if let Some(sender) = LOG_SENDER.get() {
-        let _ = sender.send((txn.clone(), session_id_opt));
-    } else if let Some(history) = app_handle.try_state::<crate::HistoryBridge>() {
-        if let Err(e) = history.insert_record(&txn, session_id_opt.as_deref()) {
-            eprintln!("[completion] failed to insert to DB: {}", e);
-        }
-    }
-
-    crate::automation::ingest_proxy_record(app_handle, &txn);
+    // SQLite read is blocking; keep it off the async runtime.
+    let session_handle = app_handle.clone();
+    let active_session = tauri::async_runtime::spawn_blocking(move || {
+        session_handle
+            .try_state::<crate::HistoryBridge>()
+            .and_then(|history| history.get_active_http_session().ok().flatten())
+            .map(|s| s.id)
+    })
+    .await;
+    let session_id_opt = active_session.unwrap_or(None);
 
     let summary = crate::ProxyLogSummary {
         id: txn.id.to_string(),
-        session_id,
+        session_id: session_id_opt.clone().unwrap_or_default(),
         timestamp: txn.timestamp.to_rfc3339(),
         method: txn.request.method.clone(),
         url: txn.request.uri.clone(),
         response_status: txn.response.as_ref().map(|r| r.status_code),
         response_status_text: txn.response.as_ref().map(|r| r.status_text.clone()),
         response_content_type: txn.response.as_ref().and_then(|r| {
-            r.headers.iter().find(|(k, _)| k.eq_ignore_ascii_case("content-type")).map(|(_, v)| v.clone())
+            r.headers
+                .iter()
+                .find(|(k, _)| k.eq_ignore_ascii_case("content-type"))
+                .map(|(_, v)| v.clone())
         }),
         request_body_size: txn.request.body.len(),
         response_body_size: txn.response.as_ref().map(|r| r.body.len()).unwrap_or(0),
         server_addr: txn.server_addr.clone(),
-        user_agent: txn.request.headers.iter().find(|(k, _)| k.eq_ignore_ascii_case("user-agent")).map(|(_, v)| v.clone()),
-        host: txn.request.headers.iter().find(|(k, _)| k.eq_ignore_ascii_case("host") || k.eq_ignore_ascii_case(":authority")).map(|(_, v)| v.clone()),
+        user_agent: txn
+            .request
+            .headers
+            .iter()
+            .find(|(k, _)| k.eq_ignore_ascii_case("user-agent"))
+            .map(|(_, v)| v.clone()),
+        host: txn
+            .request
+            .headers
+            .iter()
+            .find(|(k, _)| k.eq_ignore_ascii_case("host") || k.eq_ignore_ascii_case(":authority"))
+            .map(|(_, v)| v.clone()),
     };
+
+    crate::automation::ingest_proxy_record(app_handle, &txn);
+
+    // Persist first (moved into the channel to avoid cloning full bodies),
+    // then notify the UI from the already-built summary.
+    if let Some(sender) = LOG_SENDER.get() {
+        let _ = sender.send((txn, session_id_opt));
+    } else {
+        // Fallback when the batching worker isn't initialized: insert directly,
+        // still off the async runtime.
+        let app_handle = app_handle.clone();
+        let fallback = tauri::async_runtime::spawn_blocking(move || {
+            if let Some(history) = app_handle.try_state::<crate::HistoryBridge>() {
+                if let Err(e) = history.insert_record(&txn, session_id_opt.as_deref()) {
+                    eprintln!("[completion] failed to insert to DB: {}", e);
+                }
+            }
+        });
+        let _ = fallback.await;
+    }
 
     if let Err(e) = app_handle.emit("proxy-record", &summary) {
         eprintln!("[completion] failed to emit event: {}", e);

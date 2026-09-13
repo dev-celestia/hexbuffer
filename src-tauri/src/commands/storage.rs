@@ -5,9 +5,9 @@ use tauri::{AppHandle, Manager, State};
 
 use crate::db::repository::Database;
 use crate::{
-    stop_all_active_crawls, stop_browser_process, AiBrowserState, BrowserProcessState, HistoryBridge,
+    stop_all_active_crawls, stop_browser_process, AiBrowserState, BrowserProcessState,
+    HistoryBridge,
 };
-
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -206,7 +206,7 @@ pub async fn reset_all_app_data(
     history.close_connection().map_err(|e| e.to_string())?;
 
     let app_data_dir = crate::paths::get_shared_app_dir();
-    
+
     // DB files
     let db_path = crate::paths::get_shared_db_path();
     if db_path.exists() {

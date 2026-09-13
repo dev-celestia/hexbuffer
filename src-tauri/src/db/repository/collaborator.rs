@@ -7,7 +7,7 @@ use super::Database;
 
 impl Database {
     pub fn insert_collaborator_server(&self, server: &CollaboratorServer) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             "INSERT INTO collaborator_servers (id, name, url, api_key, status, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
             params![server.id, server.name, server.url, server.api_key, server.status, server.created_at, server.updated_at],
@@ -16,7 +16,7 @@ impl Database {
     }
 
     pub fn update_collaborator_server(&self, server: &CollaboratorServer) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             "UPDATE collaborator_servers SET name = ?2, url = ?3, api_key = ?4, status = ?5, updated_at = ?6 WHERE id = ?1",
             params![server.id, server.name, server.url, server.api_key, server.status, server.updated_at],
@@ -25,7 +25,7 @@ impl Database {
     }
 
     pub fn delete_collaborator_server(&self, id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             "DELETE FROM collaborator_servers WHERE id = ?1",
             params![id],
@@ -34,7 +34,7 @@ impl Database {
     }
 
     pub fn list_collaborator_servers(&self) -> SqlResult<Vec<CollaboratorServer>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut stmt = conn.prepare(
             "SELECT id, name, url, api_key, status, created_at, updated_at FROM collaborator_servers ORDER BY created_at DESC",
         )?;
@@ -54,7 +54,7 @@ impl Database {
     }
 
     pub fn get_collaborator_server(&self, id: &str) -> SqlResult<Option<CollaboratorServer>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.query_row(
             "SELECT id, name, url, api_key, status, created_at, updated_at FROM collaborator_servers WHERE id = ?1",
             params![id],
@@ -74,7 +74,7 @@ impl Database {
     }
 
     pub fn insert_collaborator_payload(&self, p: &CollaboratorPayload) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             "INSERT INTO collaborator_payloads (id, server_id, identifier, payload_url, name, description, tags, interaction_count, status, created_at, last_seen_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
             params![p.id, p.server_id, p.identifier, p.payload_url, p.name, p.description, p.tags, p.interaction_count, p.status, p.created_at, p.last_seen_at],
@@ -86,7 +86,7 @@ impl Database {
         &self,
         server_id: Option<&str>,
     ) -> SqlResult<Vec<CollaboratorPayload>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let result = match server_id {
             Some(sid) => {
                 let mut stmt = conn.prepare(
@@ -123,7 +123,7 @@ impl Database {
     }
 
     pub fn get_collaborator_payload(&self, id: &str) -> SqlResult<Option<CollaboratorPayload>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.query_row(
             "SELECT id, server_id, identifier, payload_url, name, description, tags, interaction_count, status, created_at, last_seen_at FROM collaborator_payloads WHERE id = ?1",
             params![id],
@@ -133,7 +133,7 @@ impl Database {
     }
 
     pub fn update_collaborator_payload_status(&self, id: &str, status: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             "UPDATE collaborator_payloads SET status = ?2 WHERE id = ?1",
             params![id, status],
@@ -142,7 +142,7 @@ impl Database {
     }
 
     pub fn delete_collaborator_payload(&self, id: &str) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             "DELETE FROM collaborator_payloads WHERE id = ?1",
             params![id],
@@ -155,7 +155,7 @@ impl Database {
         id: &str,
         count: i64,
     ) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             "UPDATE collaborator_payloads SET interaction_count = interaction_count + ?2, last_seen_at = ?3 WHERE id = ?1",
             params![id, count, chrono::Utc::now().to_rfc3339()],
@@ -164,7 +164,7 @@ impl Database {
     }
 
     pub fn insert_collaborator_interaction(&self, i: &CollaboratorInteraction) -> SqlResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.execute(
             "INSERT OR IGNORE INTO collaborator_interactions (id, payload_id, interaction_type, source_ip, method, path, headers, raw_request, request_body, server_response, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
             params![i.id, i.payload_id, i.interaction_type, i.source_ip, i.method, i.path, i.headers, i.raw_request, i.request_body, i.server_response, i.timestamp],
@@ -177,7 +177,7 @@ impl Database {
         payload_id: Option<&str>,
         interaction_type: Option<&str>,
     ) -> SqlResult<Vec<CollaboratorInteraction>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let mut sql = String::from(
             "SELECT id, payload_id, interaction_type, source_ip, method, path, headers, raw_request, request_body, server_response, timestamp FROM collaborator_interactions WHERE 1=1",
         );
@@ -221,7 +221,7 @@ impl Database {
         &self,
         id: &str,
     ) -> SqlResult<Option<CollaboratorInteraction>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         conn.query_row(
             "SELECT id, payload_id, interaction_type, source_ip, method, path, headers, raw_request, request_body, server_response, timestamp FROM collaborator_interactions WHERE id = ?1",
             params![id],
@@ -245,7 +245,7 @@ impl Database {
     }
 
     pub fn get_collaborator_dashboard_stats(&self) -> SqlResult<CollaboratorDashboardStats> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock();
         let today = chrono::Utc::now().format("%Y-%m-%d").to_string();
 
         let active_payloads: i64 = conn.query_row(

@@ -1,6 +1,7 @@
+use parking_lot::Mutex;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use base64::{engine::general_purpose, Engine};
@@ -174,14 +175,14 @@ pub async fn start_invoker_attack(
     state
         .cancellations
         .lock()
-        .map_err(|_| "Failed to lock invoker state".to_string())?
         .insert(attack_id.clone(), cancel_flag.clone());
 
     let event_id = attack_id.clone();
     let cancellations = state.cancellations.clone();
     tokio::spawn(async move {
         run_invoker_attack(app, event_id.clone(), config, cancel_flag).await;
-        if let Ok(mut cancellations) = cancellations.lock() {
+        let mut cancellations = cancellations.lock();
+        {
             cancellations.remove(&event_id);
         }
     });
@@ -194,12 +195,7 @@ pub async fn stop_invoker_attack(
     state: State<'_, InvokerState>,
     attack_id: String,
 ) -> Result<(), String> {
-    if let Some(cancel_flag) = state
-        .cancellations
-        .lock()
-        .map_err(|_| "Failed to lock invoker state".to_string())?
-        .remove(&attack_id)
-    {
+    if let Some(cancel_flag) = state.cancellations.lock().remove(&attack_id) {
         cancel_flag.store(true, Ordering::Relaxed);
     }
 
@@ -441,10 +437,8 @@ pub async fn send_invoker_request_once(
     );
 
     if config.session_handling.enabled {
-        if let (Some(header_name), Ok(current_session)) = (
-            config.session_handling.update_header_name.as_ref(),
-            session_value.lock(),
-        ) {
+        if let Some(header_name) = config.session_handling.update_header_name.as_ref() {
+            let current_session = session_value.lock();
             if let Some(value) = current_session.as_ref() {
                 headers.insert(header_name.clone(), value.clone());
             }
@@ -492,7 +486,8 @@ pub async fn send_invoker_request_once(
     if config.session_handling.enabled {
         if let Some(next_session) = extract_session_value(&response_body, &config.session_handling)
         {
-            if let Ok(mut current_session) = session_value.lock() {
+            let mut current_session = session_value.lock();
+            {
                 *current_session = Some(next_session);
             }
         }
@@ -1168,19 +1163,34 @@ mod tests {
         payload_values.insert("position_3".to_string(), "bob".to_string());
 
         let mut position_index = 0;
-        let url = replace_marked_values_tracked(&req.url, &payload_values, &defaults, &mut position_index);
+        let url = replace_marked_values_tracked(
+            &req.url,
+            &payload_values,
+            &defaults,
+            &mut position_index,
+        );
         assert_eq!(url, "https://example.com/api?id=999");
         assert_eq!(position_index, 1);
 
         let mut sorted_headers: Vec<_> = req.headers.iter().collect();
         sorted_headers.sort_by_key(|(k, _)| k.to_lowercase());
         for (_name, value) in sorted_headers {
-            let replaced_h = replace_marked_values_tracked(value, &payload_values, &defaults, &mut position_index);
+            let replaced_h = replace_marked_values_tracked(
+                value,
+                &payload_values,
+                &defaults,
+                &mut position_index,
+            );
             assert_eq!(replaced_h, "Bearer secret_jwt");
         }
         assert_eq!(position_index, 2);
 
-        let body = replace_marked_values_tracked(&req.body, &payload_values, &defaults, &mut position_index);
+        let body = replace_marked_values_tracked(
+            &req.body,
+            &payload_values,
+            &defaults,
+            &mut position_index,
+        );
         assert_eq!(body, "{\"user\":\"bob\"}");
         assert_eq!(position_index, 3);
     }
