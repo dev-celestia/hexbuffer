@@ -24,18 +24,65 @@ pub async fn suggest_invoker_markers_impl(
     }
 
     let config = super::chat::build_ai_config(&settings, &api_key);
+    let client = super::providers::create_openai_client(&config)?;
 
-    let engine = hexbuffer_ai::AiEngine::new(config);
+    let mut builder = client
+        .agent(&config.model)
+        .preamble(
+            "You are an expert web security payload marker insertion tool for security scanners. Analyze the raw HTTP request and insert marker symbols ($target$) around injection points for security testing.",
+        );
 
-    let engine_req = hexbuffer_ai::InvokerMarkerSuggestionRequest {
-        raw_request: request.raw_request.clone(),
-        target_parameter: None,
+    if let Some(temp) = config.temperature {
+        builder = builder.temperature(temp);
+    }
+    if let Some(tokens) = config.max_tokens {
+        builder = builder.max_tokens(tokens);
+    }
+
+    let agent = builder.build();
+
+    let prompt = format!(
+        "Analyze this raw HTTP request and identify high-value parameter injection points for fuzzing or vulnerability testing.\n\nRAW REQUEST:\n{}\n\nReturn JSON output matching exact format:\n{{\n  \"marked_request\": \"...\",\n  \"parameters\": [\"...\"],\n  \"explanation\": \"...\"\n}}",
+        request.raw_request
+    );
+
+    use rig::completion::Prompt;
+    let response = agent
+        .prompt(&prompt)
+        .await
+        .map_err(|error| format!("Completion error: {error}"))?;
+
+    let clean_json = if response.contains("```json") {
+        response
+            .split("```json")
+            .nth(1)
+            .unwrap_or("")
+            .split("```")
+            .next()
+            .unwrap_or("")
+            .trim()
+    } else if response.contains("```") {
+        response
+            .split("```")
+            .nth(1)
+            .unwrap_or("")
+            .split("```")
+            .next()
+            .unwrap_or("")
+            .trim()
+    } else {
+        response.trim()
     };
 
-    let result = engine
-        .suggest_invoker_markers(engine_req)
-        .await
-        .map_err(|error| error.to_string())?;
+    #[derive(serde::Deserialize, Default)]
+    struct ParsedSuggestion {
+        #[serde(default)]
+        parameters: Vec<String>,
+        #[serde(default)]
+        explanation: String,
+    }
+
+    let result: ParsedSuggestion = serde_json::from_str(clean_json).unwrap_or_default();
 
     let mut suggestions = Vec::new();
     let mut candidate_count = 0;

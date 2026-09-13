@@ -76,7 +76,7 @@ enum ToolAuthorization {
 /// explicitly here; anything unknown falls back to the configured security policy
 /// (fail-closed) and, even when that policy would approve it, still requires
 /// confirmation because it is not on the reviewed auto-approve list.
-fn authorize_tool(policy: &hexbuffer_ai::SecurityApprovalPolicy, tool_name: &str) -> ToolAuthorization {
+fn authorize_tool(policy: &super::policy::SecurityApprovalPolicy, tool_name: &str) -> ToolAuthorization {
     if tool_name == CRAWL_CONTEXT_TOOL || AUTO_APPROVED_TOOLS.contains(&tool_name) {
         return ToolAuthorization::AutoApproved;
     }
@@ -494,13 +494,13 @@ pub struct ToolLoopOutput {
 pub async fn run_tool_loop(
     app: &AppHandle,
     window_label: &str,
-    config: &hexbuffer_ai::AiConfig,
-    policy: &hexbuffer_ai::SecurityApprovalPolicy,
+    config: &super::types::AiConfig,
+    policy: &super::policy::SecurityApprovalPolicy,
     history: Vec<Message>,
     prompt: String,
 ) -> Result<ToolLoopOutput, String> {
     let client =
-        hexbuffer_ai::providers::create_openai_client(config).map_err(|e| e.to_string())?;
+        super::providers::create_openai_client(config).map_err(|e| e.to_string())?;
     let model = client.completion_model(&config.model);
     let tools = tool_definitions().await;
 

@@ -160,3 +160,42 @@ fn default_ai_key_status() -> BTreeMap<String, bool> {
     }
     status
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AiConfig {
+    pub provider: String,
+    pub model: String,
+    pub api_key: Option<String>,
+    pub base_url: Option<String>,
+    pub temperature: Option<f64>,
+    pub max_tokens: Option<u64>,
+}
+
+impl AiConfig {
+    pub fn new(
+        provider: impl Into<String>,
+        model: impl Into<String>,
+        api_key: impl Into<String>,
+    ) -> Self {
+        Self {
+            provider: provider.into(),
+            model: model.into(),
+            api_key: Some(api_key.into()),
+            base_url: None,
+            temperature: None,
+            max_tokens: None,
+        }
+    }
+
+    pub fn deepseek(model: impl Into<String>, api_key: impl Into<String>) -> Self {
+        Self {
+            provider: "deepseek".to_string(),
+            model: model.into(),
+            api_key: Some(api_key.into()),
+            base_url: Some("https://api.deepseek.com/v1".to_string()),
+            temperature: None,
+            max_tokens: None,
+        }
+    }
+}
+

@@ -74,7 +74,7 @@ pub async fn send_ai_chat_message_impl(
         });
     }
 
-    let policy = hexbuffer_ai::SecurityApprovalPolicy::default_policy();
+    let policy = super::policy::SecurityApprovalPolicy::default_policy();
 
     let output =
         tool_loop::run_tool_loop(&app, &window_label, &config, &policy, loop_history, prompt)
@@ -244,13 +244,13 @@ fn split_conversation(
 
 /// Builds the engine config for the configured provider. The `openai-compatible` provider
 /// points the OpenAI-compatible client at the user's custom base URL.
-pub(crate) fn build_ai_config(settings: &AiSettings, api_key: &str) -> hexbuffer_ai::AiConfig {
+pub(crate) fn build_ai_config(settings: &AiSettings, api_key: &str) -> super::types::AiConfig {
     if super::providers::is_openai_compatible(&settings.provider) {
-        let mut config = hexbuffer_ai::AiConfig::new(&settings.provider, &settings.model, api_key);
+        let mut config = super::types::AiConfig::new(&settings.provider, &settings.model, api_key);
         config.base_url = settings.custom_base_url.clone();
         config
     } else {
-        hexbuffer_ai::AiConfig::deepseek(&settings.model, api_key)
+        super::types::AiConfig::deepseek(&settings.model, api_key)
     }
 }
 

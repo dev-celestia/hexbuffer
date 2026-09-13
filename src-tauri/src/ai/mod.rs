@@ -4,6 +4,7 @@ pub mod commands;
 
 pub mod embeddings;
 pub mod keyring;
+pub mod policy;
 pub mod providers;
 pub mod settings;
 pub mod tool_loop;
@@ -13,8 +14,9 @@ use std::collections::BTreeMap;
 use tauri::{AppHandle, State};
 
 // Type re-exports
+pub use policy::SecurityApprovalPolicy;
 pub use types::{
-    AiChatRequest, AiChatResponse, AiSettings, ChatMessageRecord, ChatSessionRecord,
+    AiChatRequest, AiChatResponse, AiConfig, AiSettings, ChatMessageRecord, ChatSessionRecord,
     InvokerMarkerSuggestionRequest, InvokerMarkerSuggestionResponse,
 };
 

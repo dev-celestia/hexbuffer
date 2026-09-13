@@ -333,7 +333,7 @@ pub(crate) async fn run_browser_crawler_crawl(
     _worker_id: String,
     cancel_flag: Arc<AtomicBool>,
     control: Arc<CrawlControl>,
-    analysis: Option<hexbuffer_ai::AiConfig>,
+    analysis: Option<crate::ai::types::AiConfig>,
 ) -> Result<(), String> {
     if cancel_flag.load(Ordering::SeqCst) || control.is_cancelled() {
         return Ok(());
@@ -376,7 +376,7 @@ pub(crate) async fn run_browser_crawler_crawl(
     // configuration is available (no key, no consent, or provider init failure).
     let analyzer: Option<PageAnalyzer> = if config.enable_ai_insights {
         analysis.and_then(|ai_config| {
-            match hexbuffer_ai::providers::create_openai_client(&ai_config) {
+            match crate::ai::providers::create_openai_client(&ai_config) {
                 Ok(client) => Some(PageAnalyzer {
                     model: Arc::new(client.completion_model(&ai_config.model)),
                     semaphore: Arc::new(tokio::sync::Semaphore::new(ANALYSIS_CONCURRENCY)),
