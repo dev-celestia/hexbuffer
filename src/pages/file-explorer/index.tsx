@@ -23,6 +23,7 @@ import { FileGrid } from './components/file-grid';
 import { FileToolbar } from './components/file-toolbar';
 import { FileDropOverlay } from './components/file-drop-overlay';
 import { WordlistsTab } from './components/wordlists/wordlists-tab';
+import { ContextBankTab } from './components/context-bank/context-bank-tab';
 
 export function FileExplorerPage() {
   const page = useFileExplorerPage();
@@ -410,6 +411,8 @@ export function FileExplorerPage() {
             </div>
           </div>
         );
+      case 'context-bank':
+        return <ContextBankTab />;
       default:
         return (
           /* Wordlists On-Demand Hub */

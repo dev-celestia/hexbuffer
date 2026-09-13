@@ -386,3 +386,49 @@ CREATE INDEX IF NOT EXISTS idx_mock_routes_domain_id ON mock_routes(domain_id);
 INSERT OR IGNORE INTO mock_domains (id, hostname, ssl, status, created_at)
 VALUES ('local_mock_server', 'localhost', 0, 'active', datetime('now'));
 "#;
+
+pub const CREATE_CONTEXT_BANK_TABLES: &str = r#"
+CREATE TABLE IF NOT EXISTS context_bank_entries (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    tags TEXT NOT NULL DEFAULT '[]',
+    source_type TEXT NOT NULL DEFAULT 'user',
+    source_ref TEXT,
+    url TEXT,
+    pinned INTEGER NOT NULL DEFAULT 0,
+    embedding BLOB,
+    embedding_model TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_context_bank_pinned ON context_bank_entries(pinned);
+CREATE INDEX IF NOT EXISTS idx_context_bank_updated_at ON context_bank_entries(updated_at);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS context_bank_fts USING fts5(
+    title, content, tags,
+    content='context_bank_entries',
+    content_rowid='rowid'
+);
+
+CREATE TRIGGER IF NOT EXISTS context_bank_fts_insert
+AFTER INSERT ON context_bank_entries BEGIN
+    INSERT INTO context_bank_fts(rowid, title, content, tags)
+    VALUES (new.rowid, new.title, new.content, new.tags);
+END;
+
+CREATE TRIGGER IF NOT EXISTS context_bank_fts_delete
+AFTER DELETE ON context_bank_entries BEGIN
+    INSERT INTO context_bank_fts(context_bank_fts, rowid, title, content, tags)
+    VALUES ('delete', old.rowid, old.title, old.content, old.tags);
+END;
+
+CREATE TRIGGER IF NOT EXISTS context_bank_fts_update
+AFTER UPDATE ON context_bank_entries BEGIN
+    INSERT INTO context_bank_fts(context_bank_fts, rowid, title, content, tags)
+    VALUES ('delete', old.rowid, old.title, old.content, old.tags);
+    INSERT INTO context_bank_fts(rowid, title, content, tags)
+    VALUES (new.rowid, new.title, new.content, new.tags);
+END;
+"#;

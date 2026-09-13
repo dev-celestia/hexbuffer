@@ -41,6 +41,10 @@ const TOOL_RESULT_MAX_CHARS: usize = 4000;
 
 /// Native read-only tool: returns crawl session data straight from the app database.
 const CRAWL_CONTEXT_TOOL: &str = "get_crawl_context";
+/// Native context-bank tools: keyword search over, and saving notes into, the
+/// user-curated knowledge bank.
+const CONTEXT_BANK_SEARCH_TOOL: &str = "search_context_bank";
+const CONTEXT_BANK_SAVE_TOOL: &str = "save_context_note";
 
 /// Tier 1 — execute immediately: landing/local tools with no external side effects.
 const AUTO_APPROVED_TOOLS: &[&str] = &[
@@ -48,6 +52,8 @@ const AUTO_APPROVED_TOOLS: &[&str] = &[
     "create_collection",
     "create_folder",
     "create_endpoint",
+    CONTEXT_BANK_SEARCH_TOOL,
+    CONTEXT_BANK_SAVE_TOOL,
 ];
 
 /// Tier 2 — require explicit user confirmation in chat before executing: tools that
@@ -188,7 +194,43 @@ fn crawl_context_definition() -> ToolDefinition {
 async fn tool_definitions() -> Vec<ToolDefinition> {
     let mut definitions = frontend_tool_definitions().await;
     definitions.push(crawl_context_definition());
+    definitions.extend(context_bank_tool_definitions());
     definitions
+}
+
+fn context_bank_tool_definitions() -> Vec<ToolDefinition> {
+    vec![
+        ToolDefinition {
+            name: CONTEXT_BANK_SEARCH_TOOL.to_string(),
+            description: "Search the user's context bank: a curated knowledge base of notes \
+            and saved findings about their targets (endpoints, auth quirks, prior results). \
+            Returns the most relevant entries for a keyword query."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "query": { "type": "string", "description": "Keyword query, e.g. \"leaderboard auth\" or \"api BusinessEvent\"" }
+                },
+                "required": ["query"]
+            }),
+        },
+        ToolDefinition {
+            name: CONTEXT_BANK_SAVE_TOOL.to_string(),
+            description: "Save a note into the user's context bank for future sessions — e.g. \
+            a finding about a target, an endpoint quirk, or credentials format. The user can \
+            review and delete saved notes in File Explorer → Context Bank."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "title": { "type": "string", "description": "Short note title, e.g. \"Leaderboard endpoint uses signed tokens\"" },
+                    "content": { "type": "string", "description": "The note body: what was learned, where, and why it matters" },
+                    "tags": { "type": "array", "items": { "type": "string" }, "description": "Optional short tags, e.g. [\"auth\", \"api\"]" }
+                },
+                "required": ["title", "content"]
+            }),
+        },
+    ]
 }
 
 fn execute_crawl_context(app: &AppHandle) -> String {
@@ -197,6 +239,117 @@ fn execute_crawl_context(app: &AppHandle) -> String {
         Ok(value) => serde_json::to_string(&value)
             .unwrap_or_else(|error| format!("Failed to serialize crawl context: {error}")),
         Err(error) => format!("Failed to load crawl context: {error}"),
+    }
+}
+
+fn execute_context_bank_search(app: &AppHandle, args: &Value) -> String {
+    let query = args
+        .get("query")
+        .and_then(|value| value.as_str())
+        .unwrap_or("")
+        .trim();
+    if query.is_empty() {
+        return "No query provided.".to_string();
+    }
+
+    let state = app.state::<crate::HistoryBridge>();
+    match state.search_context_bank_keyword(query, 8) {
+        Ok(entries) if entries.is_empty() => {
+            format!("No context bank entries match '{query}'.")
+        }
+        Ok(entries) => {
+            let payload: Vec<Value> = entries
+                .iter()
+                .map(|entry| {
+                    json!({
+                        "title": entry.title,
+                        "content": entry.content,
+                        "tags": entry.tags,
+                        "url": entry.url,
+                        "sourceType": entry.source_type,
+                    })
+                })
+                .collect();
+            serde_json::to_string(&payload)
+                .unwrap_or_else(|error| format!("Failed to serialize results: {error}"))
+        }
+        Err(error) => format!("Context bank search failed: {error}"),
+    }
+}
+
+async fn execute_context_bank_save(app: &AppHandle, args: &Value) -> String {
+    let title = args
+        .get("title")
+        .and_then(|value| value.as_str())
+        .unwrap_or("")
+        .trim();
+    let content = args
+        .get("content")
+        .and_then(|value| value.as_str())
+        .unwrap_or("")
+        .trim();
+    if title.is_empty() || content.is_empty() {
+        return "Failed: both 'title' and 'content' are required to save a context note."
+            .to_string();
+    }
+
+    let tags: Vec<String> = args
+        .get("tags")
+        .and_then(|value| value.as_array())
+        .map(|items| {
+            items
+                .iter()
+                .filter_map(|item| item.as_str())
+                .map(str::trim)
+                .filter(|tag| !tag.is_empty())
+                .map(str::to_lowercase)
+                .collect()
+        })
+        .unwrap_or_default();
+
+    let mut entry = crate::db::repository::types::ContextBankEntry {
+        id: uuid::Uuid::new_v4().to_string(),
+        title: title.to_string(),
+        content: content.to_string(),
+        tags,
+        source_type: "ai".to_string(),
+        source_ref: None,
+        url: None,
+        pinned: false,
+        embedding: None,
+        embedding_model: None,
+        created_at: chrono::Utc::now().to_rfc3339(),
+        updated_at: chrono::Utc::now().to_rfc3339(),
+    };
+
+    // Embed for vector retrieval when an embeddings endpoint is configured.
+    let settings = match crate::ai::read_ai_settings(app) {
+        Ok(settings) => settings,
+        Err(error) => return format!("Failed to save context note (settings unavailable): {error}"),
+    };
+    if let Ok(Some(config)) = super::embeddings::resolve_embeddings_config(&settings, app) {
+        let model = super::embeddings::build_embedding_model(&config);
+        let text = format!("{}\n{}", entry.title, entry.content);
+        match super::embeddings::embed_text(&model, &text).await {
+            Ok(vector) => {
+                entry.embedding = Some(vector);
+                entry.embedding_model = Some(config.model);
+            }
+            Err(error) => {
+                eprintln!("[context-bank] embedding failed on AI save (stored without vector): {error}");
+            }
+        }
+    }
+
+    let state = app.state::<crate::HistoryBridge>();
+    match state.upsert_context_bank_entry(&entry) {
+        Ok(()) => format!(
+            "Saved to the context bank: \"{}\" ({} tag(s)). The user can review it in \
+            File Explorer → Context Bank.",
+            entry.title,
+            entry.tags.len()
+        ),
+        Err(error) => format!("Failed to save the context note: {error}"),
     }
 }
 
@@ -215,6 +368,28 @@ async fn execute_tool_call(
         actions.push(AiChatAction {
             action: tool_name.to_string(),
             payload: json!({}),
+            result: Some(result.clone()),
+            created_at,
+        });
+        return result;
+    }
+
+    if tool_name == CONTEXT_BANK_SEARCH_TOOL {
+        let result = execute_context_bank_search(app, &args);
+        actions.push(AiChatAction {
+            action: tool_name.to_string(),
+            payload: args,
+            result: Some(result.clone()),
+            created_at,
+        });
+        return result;
+    }
+
+    if tool_name == CONTEXT_BANK_SAVE_TOOL {
+        let result = execute_context_bank_save(app, &args).await;
+        actions.push(AiChatAction {
+            action: tool_name.to_string(),
+            payload: args,
             result: Some(result.clone()),
             created_at,
         });

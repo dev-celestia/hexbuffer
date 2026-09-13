@@ -118,3 +118,34 @@ pub struct ChronicleLogRecord {
     pub response_body: Option<String>,
     pub duration_ms: Option<i64>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContextBankEntry {
+    pub id: String,
+    pub title: String,
+    pub content: String,
+    #[serde(default)]
+    pub tags: Vec<String>,
+    #[serde(default = "default_context_source_type")]
+    pub source_type: String,
+    #[serde(default)]
+    pub source_ref: Option<String>,
+    #[serde(default)]
+    pub url: Option<String>,
+    #[serde(default)]
+    pub pinned: bool,
+    /// Embedding vector (f64 LE blob in SQLite); never sent to the frontend.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub embedding: Option<Vec<f64>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub embedding_model: Option<String>,
+    #[serde(default)]
+    pub created_at: String,
+    #[serde(default)]
+    pub updated_at: String,
+}
+
+fn default_context_source_type() -> String {
+    "user".to_string()
+}

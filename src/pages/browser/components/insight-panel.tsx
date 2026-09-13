@@ -1,6 +1,8 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Badge, Button, Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, ScrollArea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@celestia-project/ui';
 import { memo } from 'react';
-import { CheckCircleIcon, ScanSmileyIcon } from '@phosphor-icons/react';
+import { BookmarkSimpleIcon, CheckCircleIcon, ScanSmileyIcon } from '@phosphor-icons/react';
+import { invoke } from '@tauri-apps/api/core';
+import { toast } from 'sonner';
 
 import { HighlightedText } from '@/components/highlighted-text';
 
@@ -71,6 +73,27 @@ function AiInsightsPanelComponent({
     toggleInsightReviewed,
     severityOrder,
   } = useAiInsightsPanel(insights);
+
+  const handleSaveInsightToContextBank = async (insight: AIInsight) => {
+    try {
+      await invoke('save_context_bank_entry', {
+        entry: {
+          id: '',
+          title: insight.title,
+          content: insight.description,
+          tags: [insight.type, insight.severity].filter(Boolean),
+          sourceType: 'insight',
+          sourceRef: insight.id,
+          url: insight.url ?? null,
+          pinned: false,
+        },
+      });
+      toast.success('Saved insight to Context Bank');
+    } catch (error) {
+      console.error('Failed to save to Context Bank:', error);
+      toast.error(`Failed to save to Context Bank: ${error}`);
+    }
+  };
 
   return (
     <section
@@ -480,7 +503,7 @@ function AiInsightsPanelComponent({
                       <div
                         className={cn(
                           // Layout & Positioning
-                          "flex flex-wrap mt-1"
+                          "flex flex-wrap items-center gap-1 mt-1"
                         )}
                       >
                         <Button
@@ -501,6 +524,26 @@ function AiInsightsPanelComponent({
                         >
                           <CheckCircleIcon className="h-3.5 w-3.5" />
                           {insight.reviewed ? 'Unreview' : 'Review'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className={cn(
+                            // Sizing & Spacing
+                            "h-6 px-2",
+
+                            // Typography
+                            "text-xs"
+                          )}
+                          onKeyDown={(event) => event.stopPropagation()}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void handleSaveInsightToContextBank(insight);
+                          }}
+                          title="Save this finding into the Context Bank"
+                        >
+                          <BookmarkSimpleIcon className="h-3.5 w-3.5" />
+                          Context Bank
                         </Button>
                       </div>
                     </div>
@@ -623,6 +666,16 @@ function AiInsightsPanelComponent({
           </ScrollArea>
 
           <DialogFooter>
+            {detailItem?.type === 'insight' && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => void handleSaveInsightToContextBank(detailItem.insight)}
+              >
+                <BookmarkSimpleIcon className="size-3.5 mr-1" />
+                Save to Context Bank
+              </Button>
+            )}
             <Button size="sm" variant="outline" onClick={handleDetailOpenPage} disabled={!detailPage}>
               Open Page
             </Button>

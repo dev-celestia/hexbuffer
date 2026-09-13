@@ -2,6 +2,7 @@ pub mod ai_browser;
 pub mod api_collection;
 pub mod chat_sessions;
 pub mod collaborator;
+pub mod context_bank;
 pub mod documents;
 pub mod http_sessions;
 pub mod mock_forge;
@@ -182,6 +183,7 @@ impl Database {
     fn create_all_tables(conn: &Connection) -> SqlResult<()> {
         conn.execute_batch(crate::db::schema::CREATE_DOCUMENTS_TABLE)?;
         conn.execute_batch(crate::db::schema::CREATE_AI_BROWSER_TABLES)?;
+        conn.execute_batch(crate::db::schema::CREATE_CONTEXT_BANK_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_COLLABORATOR_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_AI_CHAT_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_REGRESSION_TABLES)?;

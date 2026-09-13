@@ -1,0 +1,220 @@
+import * as React from 'react';
+import { invoke } from '@tauri-apps/api/core';
+import { toast } from 'sonner';
+import type { ContextBankEntry, ReindexResult } from '../types';
+
+interface AiSettingsResponse {
+  embeddingsBaseUrl?: string | null;
+  embeddingsModel?: string | null;
+}
+
+export function useContextBank() {
+  const [entries, setEntries] = React.useState<ContextBankEntry[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [editingEntry, setEditingEntry] = React.useState<ContextBankEntry | null>(null);
+  const [deletingEntry, setDeletingEntry] = React.useState<ContextBankEntry | null>(null);
+  const [reindexing, setReindexing] = React.useState(false);
+  const [embeddingsActive, setEmbeddingsActive] = React.useState(false);
+  const [embeddingsModel, setEmbeddingsModel] = React.useState<string | null>(null);
+
+  const fetchAiSettings = React.useCallback(async () => {
+    try {
+      const settings = await invoke<AiSettingsResponse>('get_ai_settings');
+      const active = !!(settings.embeddingsBaseUrl?.trim() && settings.embeddingsModel?.trim());
+      setEmbeddingsActive(active);
+      setEmbeddingsModel(settings.embeddingsModel?.trim() || null);
+    } catch {
+      setEmbeddingsActive(false);
+      setEmbeddingsModel(null);
+    }
+  }, []);
+
+  const loadEntries = React.useCallback(async (query?: string) => {
+    try {
+      setLoading(true);
+      const data = await invoke<ContextBankEntry[]>('list_context_bank_entries', {
+        query: query?.trim() ? query.trim() : null,
+      });
+      setEntries(data);
+      if (selectedId && !data.some((e) => e.id === selectedId)) {
+        setSelectedId(null);
+      }
+    } catch (error) {
+      console.error('Failed to load context bank entries:', error);
+      toast.error(`Failed to load context bank: ${error}`);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedId]);
+
+  React.useEffect(() => {
+    void fetchAiSettings();
+  }, [fetchAiSettings]);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      void loadEntries(searchQuery);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery, loadEntries]);
+
+  const selectedEntry = React.useMemo(
+    () => entries.find((e) => e.id === selectedId) ?? null,
+    [entries, selectedId]
+  );
+
+  const embeddedCount = React.useMemo(
+    () => entries.filter((e) => Boolean(e.embeddingModel)).length,
+    [entries]
+  );
+
+  const handleRefresh = React.useCallback(() => {
+    void fetchAiSettings();
+    void loadEntries(searchQuery);
+  }, [fetchAiSettings, loadEntries, searchQuery]);
+
+  const handleOpenCreate = React.useCallback(() => {
+    setEditingEntry(null);
+    setDialogOpen(true);
+  }, []);
+
+  const handleOpenEdit = React.useCallback((entry: ContextBankEntry) => {
+    setEditingEntry(entry);
+    setDialogOpen(true);
+  }, []);
+
+  const handleTogglePin = React.useCallback(
+    async (entry: ContextBankEntry, event?: React.MouseEvent) => {
+      if (event) {
+        event.stopPropagation();
+      }
+      const nextPinned = !entry.pinned;
+      try {
+        await invoke('set_context_bank_entry_pinned', {
+          entryId: entry.id,
+          pinned: nextPinned,
+        });
+        setEntries((current) =>
+          current.map((item) =>
+            item.id === entry.id ? { ...item, pinned: nextPinned } : item
+          )
+        );
+        toast.success(nextPinned ? 'Entry pinned' : 'Entry unpinned');
+      } catch (error) {
+        console.error('Failed to toggle pin:', error);
+        toast.error(`Failed to pin entry: ${error}`);
+      }
+    },
+    []
+  );
+
+  const handleSaveEntry = React.useCallback(
+    async (draft: {
+      title: string;
+      content: string;
+      tags: string[];
+      url?: string;
+    }) => {
+      try {
+        const payload: ContextBankEntry = {
+          id: editingEntry?.id ?? '',
+          title: draft.title.trim(),
+          content: draft.content.trim(),
+          tags: draft.tags,
+          sourceType: editingEntry?.sourceType ?? 'user',
+          sourceRef: editingEntry?.sourceRef ?? null,
+          url: draft.url?.trim() || null,
+          pinned: editingEntry?.pinned ?? false,
+          createdAt: editingEntry?.createdAt ?? '',
+          updatedAt: '',
+        };
+
+        const saved = await invoke<ContextBankEntry>('save_context_bank_entry', {
+          entry: payload,
+        });
+
+        setDialogOpen(false);
+        setEditingEntry(null);
+        setSelectedId(saved.id);
+        await loadEntries(searchQuery);
+        toast.success(editingEntry ? 'Entry updated' : 'Entry created');
+      } catch (error) {
+        console.error('Failed to save context bank entry:', error);
+        toast.error(`Failed to save entry: ${error}`);
+        throw error;
+      }
+    },
+    [editingEntry, loadEntries, searchQuery]
+  );
+
+  const handleDeleteEntry = React.useCallback(
+    async (id: string) => {
+      try {
+        await invoke('delete_context_bank_entry', { entryId: id });
+        if (selectedId === id) {
+          setSelectedId(null);
+        }
+        setDeletingEntry(null);
+        setEntries((current) => current.filter((item) => item.id !== id));
+        toast.success('Entry deleted');
+      } catch (error) {
+        console.error('Failed to delete context bank entry:', error);
+        toast.error(`Failed to delete entry: ${error}`);
+      }
+    },
+    [selectedId]
+  );
+
+  const handleReindex = React.useCallback(async () => {
+    try {
+      setReindexing(true);
+      const result = await invoke<ReindexResult>('reindex_context_bank_embeddings');
+      toast.success(
+        `Reindexed embeddings: ${result.embedded} updated, ${result.failed} failed (${result.total} total)`
+      );
+      await loadEntries(searchQuery);
+    } catch (error) {
+      console.error('Failed to reindex embeddings:', error);
+      toast.error(`Reindexing failed: ${error}`);
+    } finally {
+      setReindexing(false);
+    }
+  }, [loadEntries, searchQuery]);
+
+  const handleCopyContent = React.useCallback((text: string) => {
+    void navigator.clipboard.writeText(text);
+    toast.success('Content copied to clipboard');
+  }, []);
+
+  return {
+    entries,
+    loading,
+    searchQuery,
+    setSearchQuery,
+    selectedId,
+    setSelectedId,
+    selectedEntry,
+    dialogOpen,
+    setDialogOpen,
+    editingEntry,
+    deletingEntry,
+    setDeletingEntry,
+    reindexing,
+    embeddingsActive,
+    embeddingsModel,
+    embeddedCount,
+    handleRefresh,
+    handleOpenCreate,
+    handleOpenEdit,
+    handleTogglePin,
+    handleSaveEntry,
+    handleDeleteEntry,
+    handleReindex,
+    handleCopyContent,
+  };
+}
+
+export type ContextBankState = ReturnType<typeof useContextBank>;

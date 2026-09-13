@@ -87,7 +87,7 @@ fn load_r2_client() -> Result<Client, String> {
         .region(Region::new("auto"))
         .endpoint_url(endpoint)
         .force_path_style(true)
-        .credentials(Credentials::new(
+        .credentials_provider(Credentials::new(
             settings.access_key_id.trim(),
             secret_access_key,
             None,
@@ -284,7 +284,7 @@ pub async fn r2_list_objects(bucket: String, prefix: String) -> Result<R2Listing
                 key: key.to_string(),
                 size: c.size(),
                 last_modified_ms: c.last_modified().map(|dt| {
-                    dt.epoch().saturating_mul(1000) + (dt.subsec_nanos() / 1_000_000)
+                    dt.secs().saturating_mul(1000) + (dt.subsec_nanos() / 1_000_000) as i64
                 }),
             })
         })
@@ -430,7 +430,7 @@ pub async fn r2_upload_file(
 
         let mut uploaded_parts: Vec<(i32, String)> = Vec::with_capacity(num_parts);
 
-        for batch in tasks.chunks(UPLOAD_PART_CONCURRENCY) {
+        for batch in tasks.chunks_mut(UPLOAD_PART_CONCURRENCY) {
             let mut handles = Vec::with_capacity(batch.len());
             for task in batch {
                 let client = client.clone();
@@ -544,7 +544,7 @@ pub async fn r2_download_object(
         .collect()
         .await
         .map_err(|e| e.to_string())?
-        .into_vec();
+        .to_vec();
 
     if let Some(parent) = local_path.parent() {
         tokio::fs::create_dir_all(parent)
@@ -565,7 +565,7 @@ pub async fn r2_presign_url(
     expires_seconds: u64,
 ) -> Result<String, String> {
     let client = load_r2_client()?;
-    let presigning = PresigningConfig::with_expiry(Duration::from_secs(expires_seconds))
+    let presigning = PresigningConfig::expires_in(Duration::from_secs(expires_seconds))
         .map_err(|e| e.to_string())?;
     let presigned = client
         .get_object()

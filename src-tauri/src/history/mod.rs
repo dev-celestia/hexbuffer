@@ -689,6 +689,75 @@ impl HistoryBridge {
             .replace_chat_messages(session_id, messages)
             .map_err(|e| e.to_string())
     }
+
+    // ── Context Bank ──────────────────────────────────────────────
+
+    pub fn upsert_context_bank_entry(
+        &self,
+        entry: &crate::db::repository::types::ContextBankEntry,
+    ) -> Result<(), String> {
+        self.db.upsert_context_bank_entry(entry).map_err(|e| e.to_string())
+    }
+
+    pub fn get_context_bank_entry(
+        &self,
+        entry_id: &str,
+    ) -> Result<Option<crate::db::repository::types::ContextBankEntry>, String> {
+        self.db.get_context_bank_entry(entry_id).map_err(|e| e.to_string())
+    }
+
+    pub fn delete_context_bank_entry(&self, entry_id: &str) -> Result<usize, String> {
+        self.db.delete_context_bank_entry(entry_id).map_err(|e| e.to_string())
+    }
+
+    pub fn set_context_bank_entry_pinned(
+        &self,
+        entry_id: &str,
+        pinned: bool,
+    ) -> Result<(), String> {
+        self.db
+            .set_context_bank_entry_pinned(entry_id, pinned)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn list_context_bank_entries(
+        &self,
+        query: Option<String>,
+    ) -> Result<Vec<crate::db::repository::types::ContextBankEntry>, String> {
+        self.db.list_context_bank_entries(query).map_err(|e| e.to_string())
+    }
+
+    pub fn search_context_bank_keyword(
+        &self,
+        query: &str,
+        limit: i64,
+    ) -> Result<Vec<crate::db::repository::types::ContextBankEntry>, String> {
+        self.db
+            .search_context_bank_keyword(query, limit)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn context_bank_entries_with_embeddings(
+        &self,
+        embedding_model: &str,
+    ) -> Result<Vec<crate::db::repository::types::ContextBankEntry>, String> {
+        self.db
+            .context_bank_entries_with_embeddings(embedding_model)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn context_bank_entries_missing_embeddings(
+        &self,
+        embedding_model: &str,
+    ) -> Result<Vec<crate::db::repository::types::ContextBankEntry>, String> {
+        self.db
+            .context_bank_entries_missing_embeddings(embedding_model)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn count_context_bank_entries(&self) -> Result<i64, String> {
+        self.db.count_context_bank_entries().map_err(|e| e.to_string())
+    }
 }
 
 fn normalize_optional_string(value: Option<String>) -> Option<String> {

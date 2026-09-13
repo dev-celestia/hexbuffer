@@ -7,13 +7,14 @@ import { handleFileGridKeyDown } from '../lib/keyboard-nav';
 import type { PageTabItem } from '@/layout/tabs-layout/types';
 import type { FileItem } from '../components/file-grid';
 
-export type FileExplorerTabId = 'r2' | 'local' | 'wordlists';
+export type FileExplorerTabId = 'r2' | 'local' | 'wordlists' | 'context-bank';
 export type FileExplorerViewMode = 'list' | 'grid';
 
 export const FILE_EXPLORER_TABS: PageTabItem[] = [
   { id: 'local', name: 'Local Files' },
   { id: 'r2', name: 'R2 Storage' },
   { id: 'wordlists', name: 'Wordlists Hub' },
+  { id: 'context-bank', name: 'Context Bank' },
 ];
 
 export function useFileExplorerPage() {

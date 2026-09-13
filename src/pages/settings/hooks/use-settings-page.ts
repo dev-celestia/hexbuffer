@@ -17,6 +17,10 @@ export interface AiSettings {
   hasApiKey: boolean;
   allowThirdPartyAiSharing: boolean;
   customBaseUrl?: string | null;
+  embeddingsBaseUrl?: string | null;
+  embeddingsModel?: string | null;
+  /** Transient: typed into the settings UI, persisted to the OS keychain on save. */
+  embeddingsApiKey?: string;
 }
 
 export interface StorageInfo {
@@ -177,19 +181,20 @@ export function useSettingsPage() {
   const loadR2Settings = React.useCallback(async () => {
     try {
       setR2Loading(true);
+      // Public status only — the secret access key never leaves the Rust process
       const settings = await invoke<{
         accountId: string;
         accessKeyId: string;
-        secretAccessKey: string;
-        customEndpointUrl?: string;
-      } | null>('get_r2_settings');
+        customEndpointUrl?: string | null;
+        hasSecret: boolean;
+      } | null>('r2_credentials_status');
 
       if (settings) {
         setR2AccountId(settings.accountId);
         setR2AccessKeyId(settings.accessKeyId);
         setR2SecretAccessKey('');
         setR2CustomEndpointUrl(settings.customEndpointUrl ?? '');
-        setR2HasSecretKey(!!settings.secretAccessKey);
+        setR2HasSecretKey(settings.hasSecret);
       } else {
         setR2AccountId('');
         setR2AccessKeyId('');
@@ -211,15 +216,11 @@ export function useSettingsPage() {
   const handleSaveR2Settings = React.useCallback(async () => {
     try {
       setR2Saving(true);
-      let secretToSave = r2SecretAccessKey.trim();
-      if (!secretToSave && r2HasSecretKey) {
-        const settings = await invoke<{ secretAccessKey: string } | null>('get_r2_settings');
-        if (settings) {
-          secretToSave = settings.secretAccessKey;
-        }
-      }
+      // Blank secret field keeps the existing keychain entry (backend keeps
+      // the stored secret when secretAccessKey is null)
+      const secretInput = r2SecretAccessKey.trim();
 
-      if (!r2AccountId.trim() || !r2AccessKeyId.trim() || !secretToSave) {
+      if (!r2AccountId.trim() || !r2AccessKeyId.trim() || (!secretInput && !r2HasSecretKey)) {
         toast.error('Account ID, Access Key ID, and Secret Access Key must not be empty');
         return;
       }
@@ -227,7 +228,7 @@ export function useSettingsPage() {
       await invoke('save_r2_credentials', {
         accountId: r2AccountId.trim(),
         accessKeyId: r2AccessKeyId.trim(),
-        secretAccessKey: secretToSave,
+        secretAccessKey: secretInput || null,
         customEndpointUrl: r2CustomEndpointUrl.trim() || null,
       });
 
@@ -404,12 +405,25 @@ export function useSettingsPage() {
         setProviderKeyStatus(nextKeyStatus);
       }
 
-      // FloppyDisk provider/model settings to backend (without the key)
-      const settingsToSave = { ...aiSettings, apiKey: '' };
+      // Context-bank embeddings key: keyring-only pseudo provider.
+      if (aiSettings.embeddingsApiKey?.trim()) {
+        nextKeyStatus = await invoke<AiKeyStatus>('set_ai_api_key', {
+          provider: 'embeddings',
+          apiKey: aiSettings.embeddingsApiKey.trim(),
+        });
+        setProviderKeyStatus(nextKeyStatus);
+      }
+
+      // FloppyDisk provider/model settings to backend (without the keys)
+      const settingsToSave = { ...aiSettings, apiKey: '', embeddingsApiKey: '' };
       const savedSettings = await invoke<AiSettings>('save_ai_settings', {
         settings: settingsToSave,
       });
-      setAiSettings({ ...savedSettings, hasApiKey: !!nextKeyStatus[savedSettings.provider] });
+      setAiSettings({
+        ...savedSettings,
+        hasApiKey: !!nextKeyStatus[savedSettings.provider],
+        embeddingsApiKey: '',
+      });
       toast.success('AI settings saved');
     } catch (error) {
       console.error('Failed to save AI settings:', error);
@@ -435,6 +449,23 @@ export function useSettingsPage() {
       setAiSettingsSaving(false);
     }
   }, [aiSettings.provider]);
+
+  const handleClearEmbeddingsApiKey = React.useCallback(async () => {
+    try {
+      setAiSettingsSaving(true);
+      const nextKeyStatus = await invoke<AiKeyStatus>('clear_ai_api_key', {
+        provider: 'embeddings',
+      });
+      setProviderKeyStatus(nextKeyStatus);
+      setAiSettings((current) => ({ ...current, embeddingsApiKey: '' }));
+      toast.success('Embeddings API key cleared');
+    } catch (error) {
+      console.error('Failed to clear embeddings API key:', error);
+      toast.error(`Failed to clear embeddings API key: ${error}`);
+    } finally {
+      setAiSettingsSaving(false);
+    }
+  }, []);
 
   const handleSaveProxyDefaultPort = React.useCallback(async () => {
     const parsedPort = Number(proxyPortDraft);
@@ -492,6 +523,7 @@ export function useSettingsPage() {
     handleInstallMacCert,
     handleRegenerateCert,
     handleClearAiApiKey,
+    handleClearEmbeddingsApiKey,
     handleDeleteAllData,
     handleResetProxyDefaultPort,
     handleSaveProxyDefaultPort,

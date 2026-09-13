@@ -34,6 +34,7 @@ chrome
 reference
 .pnpm-store
 target
+target-verify
 target-tauri
 binaries
 

@@ -1,11 +1,15 @@
-pub(crate) const AI_PROVIDERS: [&str; 2] = ["deepseek", "openai-compatible"];
+pub(crate) const AI_PROVIDERS: [&str; 3] = ["deepseek", "openai-compatible", "embeddings"];
 
 pub const OPENAI_COMPATIBLE_PROVIDER: &str = "openai-compatible";
+/// Keyring-only pseudo provider holding the optional context-bank embeddings key.
+/// Not exposed in the frontend provider selector.
+pub const EMBEDDINGS_KEY_PROVIDER: &str = "embeddings";
 
 pub fn api_key_env_name(provider: &str) -> Result<&'static str, String> {
     match provider {
         "deepseek" => Ok("DEEPSEEK_API_KEY"),
         "openai-compatible" => Ok("OPENAI_COMPATIBLE_API_KEY"),
+        "embeddings" => Ok("EMBEDDINGS_API_KEY"),
         _ => Err(format!("Unsupported AI provider: {}", provider)),
     }
 }
@@ -15,6 +19,7 @@ pub(crate) fn normalize_ai_provider(provider: &str) -> Result<&str, String> {
     match provider {
         "deepseek" => Ok(provider),
         OPENAI_COMPATIBLE_PROVIDER => Ok(provider),
+        EMBEDDINGS_KEY_PROVIDER => Ok(provider),
         _ => Err(format!("Unsupported AI provider: {}", provider)),
     }
 }

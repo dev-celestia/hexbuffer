@@ -1,4 +1,4 @@
-import { Button, Checkbox, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@celestia-project/ui';
+import { Badge, Button, Checkbox, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@celestia-project/ui';
 import * as React from 'react';
 import { WarningCircleIcon, EyeIcon, EyeSlashIcon, FloppyDiskIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
@@ -24,7 +24,9 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
     aiSettingsLoading,
     aiSettingsSaving,
     handleClearAiApiKey,
+    handleClearEmbeddingsApiKey,
     handleSaveAiSettings,
+    providerKeyStatus,
     updateAiProvider,
     updateAiSettings,
   } = settings;
@@ -35,6 +37,13 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
   const modelOptions = AI_MODEL_OPTIONS_BY_PROVIDER[aiSettings.provider] ?? [];
   const [showApiKey, setShowApiKey] = React.useState(false);
   const [apiKeyInput, setApiKeyInput] = React.useState(aiSettings.apiKey);
+  const [showEmbeddingsKey, setShowEmbeddingsKey] = React.useState(false);
+  const [embeddingsKeyInput, setEmbeddingsKeyInput] = React.useState(
+    aiSettings.embeddingsApiKey ?? '',
+  );
+  const embeddingsConfigured =
+    !!aiSettings.embeddingsBaseUrl?.trim() && !!aiSettings.embeddingsModel?.trim();
+  const hasEmbeddingsKey = !!providerKeyStatus?.embeddings;
   const isSavingNewApiKey = apiKeyInput.trim().length > 0;
   const canSaveAiSettings = !isSavingNewApiKey || aiSettings.allowThirdPartyAiSharing;
   const canSaveOpenAiCompatible =
@@ -46,14 +55,25 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
     setShowApiKey(false);
   }, [aiSettings.apiKey, aiSettings.provider]);
 
+  React.useEffect(() => {
+    setEmbeddingsKeyInput(aiSettings.embeddingsApiKey ?? '');
+    setShowEmbeddingsKey(false);
+  }, [aiSettings.embeddingsApiKey]);
+
   const handleApiKeyChange = (value: string) => {
     setApiKeyInput(value);
     updateAiSettings({ apiKey: value });
   };
 
+  const handleEmbeddingsKeyChange = (value: string) => {
+    setEmbeddingsKeyInput(value);
+    updateAiSettings({ embeddingsApiKey: value });
+  };
+
   return (
-    <SettingsGroup label="Provider" description="Configure BYOK and the model used by the AI workflow.">
-      <SettingsRow label="Provider">
+    <>
+      <SettingsGroup label="Provider" description="Configure BYOK and the model used by the AI workflow.">
+        <SettingsRow label="Provider">
         <Select
           value={aiSettings.provider}
           onValueChange={updateAiProvider}
@@ -336,6 +356,135 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
           </p>
         </div>
       )}
-    </SettingsGroup>
+      </SettingsGroup>
+
+      <SettingsGroup
+        label="Embeddings (Context Bank RAG)"
+        description="Optional OpenAI-compatible embeddings endpoint used by the Context Bank for semantic vector search. Leave blank to use SQLite FTS5 keyword search."
+      >
+        <SettingsRow
+          label="Embeddings Base URL"
+          description="OpenAI-compatible /embeddings endpoint (e.g. https://api.openai.com/v1, http://localhost:11434/v1)."
+        >
+          <Input
+            value={aiSettings.embeddingsBaseUrl ?? ''}
+            onChange={(event) => updateAiSettings({ embeddingsBaseUrl: event.target.value })}
+            placeholder="https://api.openai.com/v1"
+            disabled={aiSettingsLoading}
+            className={cn(
+              // Sizing & Spacing
+              "w-72"
+            )}
+          />
+        </SettingsRow>
+        <SettingsRow
+          label="Embeddings Model"
+          description="Model identifier (e.g. text-embedding-3-small, nomic-embed-text)."
+        >
+          <Input
+            value={aiSettings.embeddingsModel ?? ''}
+            onChange={(event) => updateAiSettings({ embeddingsModel: event.target.value })}
+            placeholder="text-embedding-3-small"
+            disabled={aiSettingsLoading}
+            className={cn(
+              // Sizing & Spacing
+              "w-56"
+            )}
+          />
+        </SettingsRow>
+        <SettingsRow
+          label="Embeddings API Key"
+          description={
+            hasEmbeddingsKey
+              ? 'A key is saved in your OS credential store.'
+              : 'Optional for local models (e.g. Ollama). Saved to the OS credential store under provider "embeddings".'
+          }
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "relative",
+
+              // Sizing & Spacing
+              "w-56"
+            )}
+          >
+            <Input
+              type={showEmbeddingsKey ? 'text' : 'password'}
+              value={embeddingsKeyInput}
+              onChange={(event) => handleEmbeddingsKeyChange(event.target.value)}
+              placeholder={
+                hasEmbeddingsKey && !embeddingsKeyInput
+                  ? '••••••••••••••••••••••••'
+                  : 'sk-… (optional for Ollama)'
+              }
+              disabled={aiSettingsLoading}
+              className={cn(
+                // Sizing & Spacing
+                "pr-9"
+              )}
+            />
+            <button
+              type="button"
+              onClick={() => setShowEmbeddingsKey((prev) => !prev)}
+              className={cn(
+                // Layout & Positioning
+                "absolute right-2 top-1/2 -translate-y-1/2",
+
+                // Sizing & Spacing
+                "rounded p-0.5",
+
+                // Typography
+                "text-muted-foreground",
+
+                // Interactive & States
+                "hover:text-foreground"
+              )}
+              tabIndex={-1}
+            >
+              {showEmbeddingsKey ? (
+                <EyeSlashIcon
+                  className={cn(
+                    // Sizing & Spacing
+                    "size-4"
+                  )}
+                />
+              ) : (
+                <EyeIcon
+                  className={cn(
+                    // Sizing & Spacing
+                    "size-4"
+                  )}
+                />
+              )}
+            </button>
+          </div>
+        </SettingsRow>
+        <SettingsRow
+          label="Vector Search Status"
+          description={
+            embeddingsConfigured
+              ? 'Semantic vector retrieval is enabled using your configured embeddings model.'
+              : 'Vector search is inactive; falling back to SQLite FTS5 full-text keyword retrieval.'
+          }
+        >
+          <Badge variant={embeddingsConfigured ? 'default' : 'secondary'}>
+            {embeddingsConfigured ? 'Vector Search Active' : 'FTS5 Keyword Only'}
+          </Badge>
+        </SettingsRow>
+        {hasEmbeddingsKey ? (
+          <SettingsRow label="Embeddings Key Action">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleClearEmbeddingsApiKey}
+              disabled={aiSettingsLoading || aiSettingsSaving}
+            >
+              Clear Embeddings Key
+            </Button>
+          </SettingsRow>
+        ) : null}
+      </SettingsGroup>
+    </>
   );
 }

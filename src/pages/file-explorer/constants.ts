@@ -16,9 +16,6 @@ export const PREVIEWABLE_EXTENSIONS = {
   pdf: ['pdf'],
 };
 
-export const MULTIPART_CHUNK_SIZE = 5 * 1024 * 1024; // 5MB minimum S3 chunk size
-export const MULTIPART_THRESHOLD = 50 * 1024 * 1024; // 50MB
-
 export const WORDLISTS_MANIFEST_URL = 'https://raw.githubusercontent.com/dev-celestia/wordlists/main/wordlists.json';
 export const WORDLISTS_RAW_BASE_URL = 'https://raw.githubusercontent.com/dev-celestia/wordlists/main/';
 export const WORDLISTS_DIR_NAME = 'Wordlists';

@@ -18,6 +18,12 @@ pub struct AiSettings {
     /// Base URL for the `openai-compatible` provider (e.g. `https://api.openai.com/v1`).
     #[serde(default)]
     pub custom_base_url: Option<String>,
+    /// Optional embeddings endpoint used by the context bank vector search
+    /// (OpenAI-compatible `/embeddings`). Empty = keyword fallback only.
+    #[serde(default)]
+    pub embeddings_base_url: Option<String>,
+    #[serde(default)]
+    pub embeddings_model: Option<String>,
 }
 
 impl Default for AiSettings {
@@ -30,6 +36,8 @@ impl Default for AiSettings {
             provider_key_status: default_ai_key_status(),
             allow_third_party_ai_sharing: false,
             custom_base_url: None,
+            embeddings_base_url: None,
+            embeddings_model: None,
         }
     }
 }

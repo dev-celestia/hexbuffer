@@ -2,6 +2,7 @@ pub mod auto_mark;
 pub mod chat;
 pub mod commands;
 
+pub mod embeddings;
 pub mod keyring;
 pub mod providers;
 pub mod settings;
