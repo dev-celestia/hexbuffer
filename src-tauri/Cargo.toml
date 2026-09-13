@@ -13,6 +13,7 @@ name = "hexbuffer"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
+aws-sdk-s3 = "1"
 tauri = { version = "2", features = ["protocol-asset", "macos-private-api", "unstable"] }
 tauri-plugin-opener = "2"
 tauri-plugin-dialog = "2"

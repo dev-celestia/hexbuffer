@@ -1,13 +1,15 @@
 import { Badge, Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Input, ScrollArea } from '@celestia-project/ui';
 import { FileTextIcon, FolderIcon, MagnifyingGlassIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
-import { PAYLOAD_CATEGORIES, type PredefinedPayload } from '../data/predefined-payloads';
-import { usePayloadPresetDialog } from './hooks/use-payload-preset-dialog';
+import {
+  usePayloadPresetDialog,
+  type PayloadPresetEntry,
+} from './hooks/use-payload-preset-dialog';
 
 export interface IntruderPayloadPresetDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUsePayload: (payload: PredefinedPayload) => void;
+  onUsePayload: (payload: PayloadPresetEntry) => void;
 }
 
 export type InvokerPayloadPresetDialogProps = IntruderPayloadPresetDialogProps;
@@ -18,6 +20,7 @@ export function IntruderPayloadPresetDialog({
   onUsePayload,
 }: IntruderPayloadPresetDialogProps) {
   const {
+    categories,
     selectedCategory,
     selectedPayloadId,
     search,
@@ -26,11 +29,13 @@ export function IntruderPayloadPresetDialog({
     selectedPayload,
     previewValues,
     hiddenPreviewCount,
+    previewLoading,
+    selectedMetaLabel,
     handleCategorySelect,
     setSelectedPayloadId,
     handleUsePayload,
     handleClose,
-  } = usePayloadPresetDialog({ onUsePayload, onOpenChange });
+  } = usePayloadPresetDialog({ open, onUsePayload, onOpenChange });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -43,7 +48,7 @@ export function IntruderPayloadPresetDialog({
           <div className="border-r bg-muted/40 p-2">
             <div className="mb-2 px-2 text-xs font-medium text-muted-foreground">Categories</div>
             <div className="grid gap-1">
-              {PAYLOAD_CATEGORIES.map((category) => (
+              {categories.map((category) => (
                 <button
                   key={category}
                   type="button"
@@ -87,7 +92,7 @@ export function IntruderPayloadPresetDialog({
                       <span className="truncate text-sm font-medium">{payload.name}</span>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      {payload.values.length} payloads
+                      {payload.metaLabel}
                     </div>
                   </button>
                 ))}
@@ -111,14 +116,16 @@ export function IntruderPayloadPresetDialog({
                     </p>
                   </div>
                   <Badge variant="secondary" className="shrink-0">
-                    {selectedPayload.values.length} items
+                    {selectedMetaLabel}
                   </Badge>
                 </div>
 
                 <ScrollArea className="h-[410px] rounded-md border bg-muted/20">
                   <pre className="whitespace-pre-wrap p-3 font-mono text-xs leading-relaxed">
-                    {previewValues.join('\n')}
-                    {hiddenPreviewCount > 0
+                    {previewLoading
+                      ? 'Loading preview…'
+                      : previewValues.join('\n')}
+                    {!previewLoading && hiddenPreviewCount > 0
                       ? `\n\n... ${hiddenPreviewCount.toLocaleString()} more payloads`
                       : ''}
                   </pre>

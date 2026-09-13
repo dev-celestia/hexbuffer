@@ -6,7 +6,7 @@ import {
   type PayloadConfig,
   type PayloadType,
 } from '../../types';
-import type { PredefinedPayload } from '../../data/predefined-payloads';
+import type { PayloadPresetEntry } from './use-payload-preset-dialog';
 
 export const NUMBER_RANGE_PREVIEW_LIMIT = 8;
 
@@ -181,15 +181,26 @@ export function usePayloadsTab() {
   );
 
   const handleUsePreset = React.useCallback(
-    (payload: PredefinedPayload) => {
+    (preset: PayloadPresetEntry) => {
       if (!selectedPositionName) {
+        return;
+      }
+
+      // Downloaded wordlists are streamed from disk at runtime; bundled
+      // presets are inlined into the payload config.
+      if (preset.kind === 'file' && preset.filePath) {
+        updatePositionPayload(selectedPositionName, {
+          payload_type: 'RuntimeFile',
+          values: [],
+          file_path: preset.filePath,
+        });
         return;
       }
 
       updatePositionPayload(selectedPositionName, {
         payload_type: 'SimpleList',
-        values: payload.values,
-        file_path: `Preset: ${payload.name}`,
+        values: preset.values,
+        file_path: `Preset: ${preset.name}`,
       });
     },
     [selectedPositionName, updatePositionPayload]

@@ -15,3 +15,17 @@ export function safePathSegments(...parts: (string | undefined)[]): string[] {
   }
   return segments;
 }
+
+/**
+ * Strict single-segment check for user-typed file/folder names. Unlike
+ * safePathSegments (which strips), callers here reject so a name that
+ * would escape or nest outside the workspace is never silently rewritten.
+ */
+export function isSafeFileName(name: string): boolean {
+  return (
+    name.length > 0 &&
+    name !== '.' &&
+    name !== '..' &&
+    !/[/\\]/.test(name)
+  );
+}

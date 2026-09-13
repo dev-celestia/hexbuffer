@@ -1,8 +1,13 @@
+use aws_sdk_s3::config::{BehaviorVersion, Credentials, Region};
+use aws_sdk_s3::presigning::PresigningConfig;
+use aws_sdk_s3::primitives::ByteStream;
+use aws_sdk_s3::Client;
 use keyring::{Entry, Error as KeyringError};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
-use tauri::AppHandle;
+use std::time::Duration;
+use tauri::{AppHandle, Emitter, Manager};
 
 fn log(msg: &str) {
     let ts = chrono::Local::now().format("%Y-%m-%d %H:%M:%S%.3f");
@@ -17,21 +22,15 @@ fn log(msg: &str) {
 
 const R2_KEYRING_SERVICE: &str = "hexbuffer.r2";
 const R2_KEYRING_USER: &str = "default_secret";
+const MULTIPART_CHUNK_SIZE: usize = 5 * 1024 * 1024; // 5MB minimum S3 chunk size
+const MULTIPART_THRESHOLD: usize = 50 * 1024 * 1024; // 50MB
+const UPLOAD_PART_CONCURRENCY: usize = 3;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct R2Settings {
     pub account_id: String,
     pub access_key_id: String,
-    pub custom_endpoint_url: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct R2SettingsWithSecret {
-    pub account_id: String,
-    pub access_key_id: String,
-    pub secret_access_key: String,
     pub custom_endpoint_url: Option<String>,
 }
 
@@ -44,16 +43,36 @@ fn r2_settings_path() -> Result<PathBuf, String> {
     Ok(app_dir.join("r2-settings.json"))
 }
 
-/// Host:port of the configured R2 endpoint (custom endpoint if set, otherwise
-/// the account-specific R2 domain), or None when R2 is not configured.
-fn expected_r2_authority() -> Result<Option<String>, String> {
+/// Strips empty, ".", and ".." segments so remote-provided keys/bucket names
+/// can never escape the intended directory when they touch the filesystem.
+fn sanitize_key_segments(input: &str) -> Vec<String> {
+    input
+        .split(['/', '\\'])
+        .filter(|s| !s.is_empty() && *s != "." && *s != "..")
+        .map(|s| s.to_string())
+        .collect()
+}
+
+fn read_settings() -> Result<R2Settings, String> {
     let path = r2_settings_path()?;
     if !path.exists() {
-        return Ok(None);
+        return Err("R2 credentials are not configured".to_string());
     }
-
     let content = fs::read_to_string(path).map_err(|error| error.to_string())?;
-    let settings: R2Settings = serde_json::from_str(&content).map_err(|error| error.to_string())?;
+    serde_json::from_str(&content).map_err(|error| error.to_string())
+}
+
+/// Builds an S3 client from the saved settings + OS keychain secret.
+/// The secret access key never leaves this process.
+fn load_r2_client() -> Result<Client, String> {
+    let settings = read_settings()?;
+    let secret_access_key = match keyring_entry()?.get_password() {
+        Ok(pw) => pw,
+        Err(KeyringError::NoEntry) => {
+            return Err("R2 secret access key is not configured".to_string())
+        }
+        Err(error) => return Err(format!("OS Keychain error: {}", error)),
+    };
 
     let endpoint = match settings.custom_endpoint_url.as_deref().map(str::trim) {
         Some(endpoint) if !endpoint.is_empty() => endpoint.to_string(),
@@ -63,69 +82,89 @@ fn expected_r2_authority() -> Result<Option<String>, String> {
         ),
     };
 
-    let url = reqwest::Url::parse(&endpoint)
-        .map_err(|error| format!("Invalid configured R2 endpoint: {}", error))?;
-    Ok(url_authority(&url))
+    let config = aws_sdk_s3::Config::builder()
+        .behavior_version(BehaviorVersion::latest())
+        .region(Region::new("auto"))
+        .endpoint_url(endpoint)
+        .force_path_style(true)
+        .credentials(Credentials::new(
+            settings.access_key_id.trim(),
+            secret_access_key,
+            None,
+            None,
+            "R2",
+        ))
+        .build();
+
+    Ok(Client::from_conf(config))
 }
 
-/// Lowercased host:port (with default port applied) so endpoint comparison
-/// cannot be bypassed by a differing port.
-fn url_authority(url: &reqwest::Url) -> Option<String> {
-    let host = url.host_str()?;
-    let authority = match url.port_or_known_default() {
-        Some(port) => format!("{}:{}", host, port),
-        None => host.to_string(),
-    };
-    Some(authority.to_lowercase())
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct R2CredentialsStatus {
+    pub account_id: String,
+    pub access_key_id: String,
+    pub custom_endpoint_url: Option<String>,
+    pub has_secret: bool,
 }
 
+/// Replaces the old get_r2_settings: reports configuration state without
+/// ever sending the secret access key to the webview.
 #[tauri::command]
-pub async fn get_r2_settings(_app: AppHandle) -> Result<Option<R2SettingsWithSecret>, String> {
+pub async fn r2_credentials_status() -> Result<Option<R2CredentialsStatus>, String> {
     let path = r2_settings_path()?;
     if !path.exists() {
         return Ok(None);
     }
 
-    let content = fs::read_to_string(path).map_err(|error| error.to_string())?;
-    let settings: R2Settings = serde_json::from_str(&content).map_err(|error| error.to_string())?;
-
-    // Look up secret key in Keychain
-    let secret_access_key = match keyring_entry()?.get_password() {
-        Ok(pw) => pw,
-        Err(KeyringError::NoEntry) => "".to_string(),
+    let settings = read_settings()?;
+    let has_secret = match keyring_entry()?.get_password() {
+        Ok(pw) => !pw.is_empty(),
+        Err(KeyringError::NoEntry) => false,
         Err(error) => return Err(format!("OS Keychain error: {}", error)),
     };
 
-    Ok(Some(R2SettingsWithSecret {
+    Ok(Some(R2CredentialsStatus {
         account_id: settings.account_id,
         access_key_id: settings.access_key_id,
-        secret_access_key,
         custom_endpoint_url: settings.custom_endpoint_url,
+        has_secret,
     }))
 }
 
 #[tauri::command]
 pub async fn save_r2_credentials(
-    _app: AppHandle,
     account_id: String,
     access_key_id: String,
-    secret_access_key: String,
+    secret_access_key: Option<String>,
     custom_endpoint_url: Option<String>,
 ) -> Result<(), String> {
     let account_id = account_id.trim();
     let access_key_id = access_key_id.trim();
-    let secret_access_key = secret_access_key.trim();
 
-    if account_id.is_empty() || access_key_id.is_empty() || secret_access_key.is_empty() {
-        return Err(
-            "Account ID, Access Key ID, and Secret Access Key must not be empty".to_string(),
-        );
+    if account_id.is_empty() || access_key_id.is_empty() {
+        return Err("Account ID and Access Key ID must not be empty".to_string());
     }
 
-    // Save Secret Key to OS Keychain
-    keyring_entry()?
-        .set_password(secret_access_key)
-        .map_err(|e| format!("Failed to save secret in OS Keychain: {}", e))?;
+    // An empty/absent secret keeps the existing keychain entry so the
+    // settings UI can save metadata changes without re-entering the secret.
+    match secret_access_key.as_deref().map(str::trim) {
+        Some(secret) if !secret.is_empty() => {
+            keyring_entry()?
+                .set_password(secret)
+                .map_err(|e| format!("Failed to save secret in OS Keychain: {}", e))?;
+        }
+        _ => {
+            match keyring_entry()?.get_password() {
+                Ok(pw) if !pw.is_empty() => {}
+                _ => {
+                    return Err(
+                        "Secret Access Key must not be empty on first setup".to_string()
+                    )
+                }
+            }
+        }
+    }
 
     // Save metadata to cleartext JSON config file
     let settings = R2Settings {
@@ -155,7 +194,7 @@ pub async fn save_r2_credentials(
 }
 
 #[tauri::command]
-pub async fn clear_r2_credentials(_app: AppHandle) -> Result<(), String> {
+pub async fn clear_r2_credentials() -> Result<(), String> {
     // Delete config file
     let path = r2_settings_path()?;
     if path.exists() {
@@ -171,109 +210,369 @@ pub async fn clear_r2_credentials(_app: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
-#[derive(serde::Serialize)]
-pub struct R2HttpResponse {
-    pub status: u16,
-    pub headers: std::collections::HashMap<String, String>,
-    pub body: Vec<u8>,
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct R2FolderEntry {
+    pub prefix: String,
+    pub name: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct R2FileEntry {
+    pub name: String,
+    pub key: String,
+    pub size: Option<i64>,
+    pub last_modified_ms: Option<i64>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct R2Listing {
+    pub folders: Vec<R2FolderEntry>,
+    pub files: Vec<R2FileEntry>,
 }
 
 #[tauri::command]
-pub async fn r2_http_request(
-    method: String,
-    url: String,
-    headers: std::collections::HashMap<String, String>,
-    body: Option<Vec<u8>>,
-) -> Result<R2HttpResponse, String> {
-    // Only the configured R2 endpoint is reachable through this command —
-    // it must never act as a general-purpose proxy for the webview.
-    let allowed_authority = expected_r2_authority()?;
-    let parsed_url = reqwest::Url::parse(&url)
-        .map_err(|error| format!("Invalid request URL: {}", error))?;
-    let request_authority = url_authority(&parsed_url)
-        .ok_or_else(|| "Request URL has no host".to_string())?;
+pub async fn r2_list_buckets() -> Result<Vec<String>, String> {
+    let client = load_r2_client()?;
+    let res = client.list_buckets().send().await.map_err(|e| e.to_string())?;
+    let names = res
+        .buckets()
+        .iter()
+        .filter_map(|b| b.name().map(|n| n.to_string()))
+        .collect();
+    Ok(names)
+}
 
-    if allowed_authority.as_deref() != Some(request_authority.as_str()) {
-        log(&format!(
-            "[r2_http_request] Rejected request to non-configured endpoint: {}",
-            request_authority
-        ));
-        return Err("Request host does not match the configured R2 endpoint".to_string());
-    }
+#[tauri::command]
+pub async fn r2_list_objects(bucket: String, prefix: String) -> Result<R2Listing, String> {
+    let client = load_r2_client()?;
+    let res = client
+        .list_objects_v2()
+        .bucket(&bucket)
+        .prefix(&prefix)
+        .delimiter("/")
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
 
-    log(&format!(
-        "[r2_http_request] Method: {}, URL: {}",
-        method, url
-    ));
-    let client = reqwest::Client::new();
-    let method = reqwest::Method::from_bytes(method.as_bytes()).map_err(|e| {
-        let err = e.to_string();
-        log(&format!("[r2_http_request] Method parsing error: {}", err));
-        err
-    })?;
+    let folders = res
+        .common_prefixes()
+        .iter()
+        .filter_map(|p| {
+            let prefix = p.prefix()?;
+            let name = prefix.trim_end_matches('/').rsplit('/').next()?.to_string();
+            Some(R2FolderEntry {
+                prefix: prefix.to_string(),
+                name,
+            })
+        })
+        .collect();
 
-    let mut req = client.request(method, &url);
-    for (k, v) in headers {
-        if k.to_lowercase() == "host" {
-            continue;
-        }
-        req = req.header(k, v);
-    }
+    let files = res
+        .contents()
+        .iter()
+        .filter_map(|c| {
+            let key = c.key()?;
+            let name = key.rsplit('/').next()?.to_string();
+            if name.is_empty() {
+                return None;
+            }
+            Some(R2FileEntry {
+                name,
+                key: key.to_string(),
+                size: c.size(),
+                last_modified_ms: c.last_modified().map(|dt| {
+                    dt.epoch().saturating_mul(1000) + (dt.subsec_nanos() / 1_000_000)
+                }),
+            })
+        })
+        .filter(|f| f.key != prefix)
+        .collect();
 
-    if let Some(b) = body {
-        req = req.body(b);
-    }
+    Ok(R2Listing { folders, files })
+}
 
-    let res = match req.send().await {
-        Ok(r) => r,
-        Err(e) => {
-            let err = e.to_string();
-            log(&format!(
-                "[r2_http_request] Network request failed: {}",
-                err
-            ));
-            return Err(err);
-        }
+#[tauri::command]
+pub async fn r2_put_object_empty(bucket: String, key: String) -> Result<(), String> {
+    let client = load_r2_client()?;
+    client
+        .put_object()
+        .bucket(&bucket)
+        .key(&key)
+        .body(ByteStream::from(Vec::new()))
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn r2_delete_object(bucket: String, key: String) -> Result<(), String> {
+    let client = load_r2_client()?;
+    client
+        .delete_object()
+        .bucket(&bucket)
+        .key(&key)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn r2_create_bucket(name: String) -> Result<(), String> {
+    let client = load_r2_client()?;
+    client
+        .create_bucket()
+        .bucket(&name)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn r2_delete_bucket(name: String) -> Result<(), String> {
+    let client = load_r2_client()?;
+    client
+        .delete_bucket()
+        .bucket(&name)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct R2UploadProgress {
+    pub file_name: String,
+    pub progress: u32,
+}
+
+fn emit_upload_progress(app: &AppHandle, file_name: &str, progress: u32) {
+    let payload = R2UploadProgress {
+        file_name: file_name.to_string(),
+        progress,
     };
+    if let Err(err) = app.emit("r2-upload-progress", payload) {
+        log(&format!("[r2_upload_file] Emit progress failed: {}", err));
+    }
+}
 
-    let status = res.status().as_u16();
-    let mut res_headers = std::collections::HashMap::new();
-    for (k, v) in res.headers() {
-        if let Ok(val_str) = v.to_str() {
-            res_headers.insert(k.to_string(), val_str.to_string());
-        }
+struct UploadPartTask {
+    number: i32,
+    body: Vec<u8>,
+}
+
+#[tauri::command]
+pub async fn r2_upload_file(
+    app: AppHandle,
+    bucket: String,
+    key: String,
+    source_path: String,
+    content_type: Option<String>,
+) -> Result<(), String> {
+    let client = load_r2_client()?;
+
+    // The key arrives composed by the renderer (prefix + file name); enforce
+    // the same sanitization here so a compromised webview cannot write
+    // outside the intended prefix.
+    let safe_key = sanitize_key_segments(&key).join("/");
+    if safe_key.is_empty() {
+        return Err("Invalid object key".to_string());
     }
 
-    let body_bytes = match res.bytes().await {
-        Ok(b) => b.to_vec(),
-        Err(e) => {
-            let err = e.to_string();
-            log(&format!("[r2_http_request] Reading body failed: {}", err));
-            return Err(err);
-        }
-    };
+    let file_name = safe_key.rsplit('/').next().unwrap_or("file").to_string();
+    let file_bytes = tokio::fs::read(&source_path)
+        .await
+        .map_err(|e| format!("Failed to read source file: {}", e))?;
 
-    log(&format!(
-        "[r2_http_request] Status: {}, Body size: {} bytes",
-        status,
-        body_bytes.len()
-    ));
+    if file_bytes.len() <= MULTIPART_THRESHOLD {
+        emit_upload_progress(&app, &file_name, 10);
+        client
+            .put_object()
+            .bucket(&bucket)
+            .key(&safe_key)
+            .content_type(content_type.unwrap_or_else(|| "application/octet-stream".to_string()))
+            .body(ByteStream::from(file_bytes))
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+        emit_upload_progress(&app, &file_name, 100);
+    } else {
+        let init = client
+            .create_multipart_upload()
+            .bucket(&bucket)
+            .key(&safe_key)
+            .content_type(content_type.unwrap_or_else(|| "application/octet-stream".to_string()))
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+        let upload_id = init
+            .upload_id()
+            .ok_or_else(|| "Multipart upload failed to initialize".to_string())?
+            .to_string();
 
-    // If status >= 400, print first 200 chars of body for error diagnosis
-    if status >= 400 {
-        if let Ok(body_str) = String::from_utf8(body_bytes.clone()) {
-            let truncated = if body_str.len() > 300 {
-                &body_str[..300]
-            } else {
-                &body_str
-            };
-            log(&format!("[r2_http_request] Error Body: {}", truncated));
+        let total_size = file_bytes.len();
+        let num_parts = total_size.div_ceil(MULTIPART_CHUNK_SIZE);
+        let mut tasks = Vec::with_capacity(num_parts);
+        for i in 0..num_parts {
+            let start = i * MULTIPART_CHUNK_SIZE;
+            let end = std::cmp::min(start + MULTIPART_CHUNK_SIZE, total_size);
+            tasks.push(UploadPartTask {
+                number: (i + 1) as i32,
+                body: file_bytes[start..end].to_vec(),
+            });
         }
+
+        let mut uploaded_parts: Vec<(i32, String)> = Vec::with_capacity(num_parts);
+
+        for batch in tasks.chunks(UPLOAD_PART_CONCURRENCY) {
+            let mut handles = Vec::with_capacity(batch.len());
+            for task in batch {
+                let client = client.clone();
+                let bucket = bucket.clone();
+                let key = safe_key.clone();
+                let upload_id = upload_id.clone();
+                let body = std::mem::take(&mut task.body);
+                let number = task.number;
+                handles.push(tokio::spawn(async move {
+                    let out = client
+                        .upload_part()
+                        .bucket(&bucket)
+                        .key(&key)
+                        .upload_id(&upload_id)
+                        .part_number(number)
+                        .body(ByteStream::from(body))
+                        .send()
+                        .await
+                        .map_err(|e| e.to_string())?;
+                    let etag = out
+                        .e_tag()
+                        .ok_or_else(|| format!("Part {} returned no ETag", number))?
+                        .to_string();
+                    Ok::<(i32, String), String>((number, etag))
+                }));
+            }
+
+            for handle in handles {
+                let result = handle
+                    .await
+                    .map_err(|e| format!("Upload part task failed: {}", e))?;
+                uploaded_parts.push(result?);
+            }
+
+            emit_upload_progress(
+                &app,
+                &file_name,
+                (uploaded_parts.len() * 100 / num_parts) as u32,
+            );
+        }
+
+        uploaded_parts.sort_by_key(|(number, _)| *number);
+        let parts: Vec<aws_sdk_s3::types::CompletedPart> = uploaded_parts
+            .into_iter()
+            .map(|(number, etag)| {
+                aws_sdk_s3::types::CompletedPart::builder()
+                    .part_number(number)
+                    .e_tag(etag)
+                    .build()
+            })
+            .collect();
+
+        client
+            .complete_multipart_upload()
+            .bucket(&bucket)
+            .key(&safe_key)
+            .upload_id(&upload_id)
+            .multipart_upload(
+                aws_sdk_s3::types::CompletedMultipartUpload::builder()
+                    .set_parts(Some(parts))
+                    .build(),
+            )
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        emit_upload_progress(&app, &file_name, 100);
     }
 
-    Ok(R2HttpResponse {
-        status,
-        headers: res_headers,
-        body: body_bytes,
-    })
+    Ok(())
+}
+
+/// Streams the object into the local cache (app data / r2_cache) and returns
+/// the cached file path. Cached files are returned as-is.
+#[tauri::command]
+pub async fn r2_download_object(
+    app: AppHandle,
+    bucket: String,
+    key: String,
+) -> Result<String, String> {
+    let client = load_r2_client()?;
+
+    let mut segments = sanitize_key_segments(&bucket);
+    segments.extend(sanitize_key_segments(&key));
+    if segments.is_empty() {
+        return Err("Invalid object key".to_string());
+    }
+
+    let cache_dir = app.path().app_local_data_dir().map_err(|e| e.to_string())?;
+    let mut local_path = cache_dir.join("r2_cache");
+    for segment in &segments {
+        local_path.push(segment);
+    }
+
+    if tokio::fs::try_exists(&local_path)
+        .await
+        .map_err(|e| e.to_string())?
+    {
+        return Ok(local_path.to_string_lossy().to_string());
+    }
+
+    let output = client
+        .get_object()
+        .bucket(&bucket)
+        .key(&key)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+    let bytes = output
+        .body
+        .collect()
+        .await
+        .map_err(|e| e.to_string())?
+        .into_vec();
+
+    if let Some(parent) = local_path.parent() {
+        tokio::fs::create_dir_all(parent)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+    tokio::fs::write(&local_path, bytes)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(local_path.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+pub async fn r2_presign_url(
+    bucket: String,
+    key: String,
+    expires_seconds: u64,
+) -> Result<String, String> {
+    let client = load_r2_client()?;
+    let presigning = PresigningConfig::with_expiry(Duration::from_secs(expires_seconds))
+        .map_err(|e| e.to_string())?;
+    let presigned = client
+        .get_object()
+        .bucket(&bucket)
+        .key(&key)
+        .presigned(presigning)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(presigned.uri().to_string())
 }

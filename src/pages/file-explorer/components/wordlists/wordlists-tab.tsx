@@ -18,7 +18,7 @@ export function WordlistsTab() {
 
   const totalWordlists = hub.allItems.length;
   const totalInstalled = React.useMemo(
-    () => hub.allItems.filter((i) => i.status === 'installed').length,
+    () => hub.allItems.filter((i) => i.status === 'installed' || i.status === 'bundled').length,
     [hub.allItems]
   );
 

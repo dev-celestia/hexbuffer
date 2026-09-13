@@ -83,6 +83,7 @@ export function WordlistPreviewPane({
   }
 
   const isInstalled = item.status === 'installed';
+  const isBundled = item.status === 'bundled';
   const isDownloading = item.status === 'downloading';
 
   return (
@@ -116,7 +117,12 @@ export function WordlistPreviewPane({
         >
           Wordlist Preview
         </span>
-        {isInstalled ? (
+        {isBundled ? (
+          <span className="inline-flex items-center gap-1 text-[10px] text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded font-semibold">
+            <CheckCircleIcon className="size-3" />
+            Bundled
+          </span>
+        ) : isInstalled ? (
           <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded font-semibold">
             <CheckCircleIcon className="size-3" />
             Ready
@@ -194,7 +200,7 @@ export function WordlistPreviewPane({
               <div className="min-w-0">
                 <span className="text-[9px] text-muted-foreground block">File Size</span>
                 <span className="text-[11px] font-mono font-medium text-foreground">
-                  {formatBytes(item.fileSize)}
+                  {isBundled ? 'Built-in' : formatBytes(item.fileSize)}
                 </span>
               </div>
             </div>
@@ -211,6 +217,7 @@ export function WordlistPreviewPane({
           </div>
 
           {/* Action Buttons */}
+          {!isBundled && (
           <div className="flex items-center gap-1.5 pt-0.5">
             {isInstalled ? (
               <>
@@ -265,6 +272,7 @@ export function WordlistPreviewPane({
               <GlobeIcon className="size-3.5" />
             </Button>
           </div>
+          )}
         </div>
 
         {/* Preview Content Section */}

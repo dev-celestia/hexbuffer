@@ -5,6 +5,7 @@ import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { openPath } from '@tauri-apps/plugin-opener';
 import { toast } from 'sonner';
 import { DEFAULT_FLOWCHART_BASE64 } from '../constants';
+import { isSafeFileName } from '../lib/path';
 
 export const LOCAL_STORAGE_DIR_NAME = 'Hexbuffer Files';
 
@@ -162,6 +163,11 @@ export function useLocalStorage() {
   const handleCreateFolder = React.useCallback(async (name: string) => {
     const clean = name.trim();
     if (!clean) return;
+    // Reject traversal/nesting so the folder stays inside the workspace
+    if (!isSafeFileName(clean)) {
+      toast.error('Folder name cannot contain "/" or "\\"');
+      return;
+    }
     try {
       const newPath = await join(currentPath, clean);
       await mkdir(newPath);
@@ -175,6 +181,10 @@ export function useLocalStorage() {
   const handleRenameItem = React.useCallback(async (item: LocalItem, newName: string) => {
     const clean = newName.trim();
     if (!clean || clean === item.name) return;
+    if (!isSafeFileName(clean)) {
+      toast.error('Name cannot contain "/" or "\\"');
+      return;
+    }
     try {
       const parentIdx = Math.max(item.path.lastIndexOf('/'), item.path.lastIndexOf('\\'));
       const parent = item.path.slice(0, parentIdx);

@@ -4,6 +4,7 @@ import {
   CheckCircleIcon,
   CircleNotchIcon,
   FileTextIcon,
+  PackageIcon,
   TrashIcon,
   FolderOpenIcon,
   EyeIcon,
@@ -27,6 +28,13 @@ interface WordlistsTableProps {
 
 function WordlistStatus({ item }: { item: WordlistItemWithStatus }) {
   switch (item.status) {
+    case 'bundled':
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded font-semibold">
+          <PackageIcon className="size-3" />
+          <span>Bundled</span>
+        </span>
+      );
     case 'installed':
       return (
         <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded font-semibold">
@@ -156,6 +164,7 @@ export function WordlistsTable({
           {items.map((item) => {
             const isSelected = selectedItem?.id === item.id;
             const isInstalled = item.status === 'installed';
+            const isBundled = item.status === 'bundled';
             const isDownloading = item.status === 'downloading';
 
             return (
@@ -163,7 +172,7 @@ export function WordlistsTable({
                 key={item.id}
                 onClick={() => onSelectItem(item)}
                 onDoubleClick={() => {
-                  if (isInstalled) {
+                  if (isInstalled || isBundled) {
                     onPreview(item);
                   } else {
                     onDownload(item);
@@ -199,7 +208,7 @@ export function WordlistsTable({
                         "size-4 shrink-0",
 
                         // Typography & Colors
-                        isInstalled ? "text-primary" : "text-muted-foreground"
+                        isInstalled || isBundled ? "text-primary" : "text-muted-foreground"
                       )}
                     />
                     <div className="min-w-0 flex flex-col">
@@ -256,7 +265,26 @@ export function WordlistsTable({
                       "gap-1"
                     )}
                   >
-                    {isInstalled ? (
+                    {isBundled ? (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onPreview(item);
+                        }}
+                        className={cn(
+                          // Sizing & Spacing
+                          "size-6 p-0",
+
+                          // Typography & Colors
+                          "text-muted-foreground hover:text-foreground"
+                        )}
+                        title="Preview wordlist"
+                      >
+                        <EyeIcon className="size-3.5" />
+                      </Button>
+                    ) : isInstalled ? (
                       <>
                         <Button
                           size="sm"

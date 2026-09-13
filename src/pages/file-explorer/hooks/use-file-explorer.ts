@@ -1,33 +1,34 @@
 import * as React from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import { open } from '@tauri-apps/plugin-dialog';
-import { writeFile, readFile, exists, mkdir } from '@tauri-apps/plugin-fs';
+import { exists } from '@tauri-apps/plugin-fs';
 import { openPath } from '@tauri-apps/plugin-opener';
 import { appLocalDataDir, join } from '@tauri-apps/api/path';
 import { toast } from 'sonner';
 import { copyText } from '@/lib/clipboard';
-import {
-  S3Client,
-  ListBucketsCommand,
-  ListObjectsV2Command,
-  PutObjectCommand,
-  DeleteObjectCommand,
-  GetObjectCommand,
-  CreateBucketCommand,
-  DeleteBucketCommand,
-} from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { MULTIPART_THRESHOLD } from '../constants';
-import { tauriRequestHandler } from '../lib/tauri-s3-transport';
-import { uploadMultipart } from '../lib/s3-multipart-upload';
 import { getMimeType } from '../lib/mime';
 import { safePathSegments } from '../lib/path';
 import type { R2Item, R2Credentials } from '../types';
 
+export interface R2UploadProgressEvent {
+  fileName: string;
+  progress: number;
+}
+
+interface R2Listing {
+  folders: { prefix: string; name: string }[];
+  files: {
+    name: string;
+    key: string;
+    size?: number;
+    lastModifiedMs?: number;
+  }[];
+}
+
 export function useFileExplorer() {
   const [loading, setLoading] = React.useState(true);
   const [credentials, setCredentials] = React.useState<R2Credentials | null>(null);
-  const [s3Client, setS3Client] = React.useState<S3Client | null>(null);
   const [buckets, setBuckets] = React.useState<string[]>([]);
   const [currentBucket, setCurrentBucket] = React.useState<string>('');
   const [currentPrefix, setCurrentPrefix] = React.useState<string>('');
@@ -47,39 +48,33 @@ export function useFileExplorer() {
     }
   });
 
+  // Upload progress comes from the Rust uploader via the event system
+  React.useEffect(() => {
+    const unlisten = listen<R2UploadProgressEvent>('r2-upload-progress', (event) => {
+      setUploadProgress({
+        fileName: event.payload.fileName,
+        progress: event.payload.progress,
+      });
+    });
+    return () => {
+      void unlisten.then((dispose) => dispose());
+    };
+  }, []);
 
-
-  // 1. Fetch credentials on mount
+  // 1. Check credentials configuration (secret stays in the Rust process)
   const fetchCredentials = React.useCallback(async () => {
     try {
       setLoading(true);
-      const settings = await invoke<R2Credentials | null>('get_r2_settings');
-      if (settings && settings.accountId && settings.accessKeyId && settings.secretAccessKey) {
-        setCredentials(settings);
-        
-        // Initialize client
-        const endpoint = settings.customEndpointUrl?.trim() 
-          ? settings.customEndpointUrl.trim() 
-          : `https://${settings.accountId.trim()}.r2.cloudflarestorage.com`;
-        
-        const client = new S3Client({
-          endpoint,
-          region: 'auto',
-          requestHandler: tauriRequestHandler,
-          forcePathStyle: true,
-          credentials: {
-            accessKeyId: settings.accessKeyId.trim(),
-            secretAccessKey: settings.secretAccessKey.trim(),
-          },
-        });
-        setS3Client(client);
+      const status = await invokeStatus();
+      if (status) {
+        setCredentials(status);
       } else {
         setCredentials(null);
-        setS3Client(null);
       }
     } catch (err) {
       console.error('Failed to load R2 credentials:', err);
       toast.error(`Error loading storage settings: ${err}`);
+      setCredentials(null);
     } finally {
       setLoading(false);
     }
@@ -89,14 +84,12 @@ export function useFileExplorer() {
     void fetchCredentials();
   }, [fetchCredentials]);
 
-  // 2. Discover buckets once client is initialized
+  // 2. Discover buckets once credentials are configured
   const loadBuckets = React.useCallback(async () => {
-    if (!s3Client) return;
+    if (!credentials) return;
     try {
       setLoading(true);
-      const command = new ListBucketsCommand({});
-      const res = await s3Client.send(command);
-      const bucketNames = (res.Buckets ?? []).map((b) => b.Name ?? '').filter(Boolean);
+      const bucketNames = await invoke<string[]>('r2_list_buckets');
       const merged = Array.from(new Set([...bucketNames, ...customBuckets]));
       setBuckets(merged);
       if (merged.length > 0 && !currentBucket) {
@@ -108,23 +101,17 @@ export function useFileExplorer() {
       if (customBuckets.length > 0 && !currentBucket) {
         setCurrentBucket(customBuckets[0]);
       }
-      
-      const errMsg = String(err);
-      if (errMsg.includes('DOMParser') || errMsg.includes('XML') || errMsg.includes('deserialization') || errMsg.includes('404')) {
-        toast.error('S3 endpoint returned an invalid response. If using a bucket-specific custom domain, clear Custom Endpoint in Settings and manually add bucket.');
-      } else {
-        toast.error(`Could not autodiscover R2 Buckets: ${err}. You can manually add a bucket name in the sidebar.`);
-      }
+      toast.error(`Could not autodiscover R2 Buckets: ${err}. You can manually add a bucket name in the sidebar.`);
     } finally {
       setLoading(false);
     }
-  }, [s3Client, currentBucket, customBuckets]);
+  }, [credentials, currentBucket, customBuckets]);
 
   React.useEffect(() => {
-    if (s3Client) {
+    if (credentials) {
       void loadBuckets();
     }
-  }, [s3Client, loadBuckets]);
+  }, [credentials, loadBuckets]);
 
   // ponytail: support actual R2 bucket CRUD, with local fallback for custom buckets if server actions fail (e.g. permission limits)
   const handleAddCustomBucket = React.useCallback(async (name: string) => {
@@ -135,9 +122,9 @@ export function useFileExplorer() {
       return;
     }
     setLoading(true);
-    if (s3Client) {
+    if (credentials) {
       try {
-        await s3Client.send(new CreateBucketCommand({ Bucket: clean }));
+        await invoke('r2_create_bucket', { name: clean });
         toast.success(`Bucket '${clean}' created on R2`);
       } catch (err) {
         console.warn('R2 bucket creation failed, fallback to local registration:', err);
@@ -160,13 +147,13 @@ export function useFileExplorer() {
     setBuckets((prev) => Array.from(new Set([...prev, clean])));
     setCurrentBucket(clean);
     setLoading(false);
-  }, [s3Client, buckets]);
+  }, [credentials, buckets]);
 
   const handleRemoveBucket = React.useCallback(async (name: string) => {
     setLoading(true);
-    if (s3Client) {
+    if (credentials) {
       try {
-        await s3Client.send(new DeleteBucketCommand({ Bucket: name }));
+        await invoke('r2_delete_bucket', { name });
         toast.success(`Bucket '${name}' deleted from R2`);
       } catch (err) {
         console.error('Failed to delete bucket from R2:', err);
@@ -182,43 +169,34 @@ export function useFileExplorer() {
     setBuckets((prev) => prev.filter((b) => b !== name));
     setCurrentBucket((prev) => (prev === name ? '' : prev));
     setLoading(false);
-    if (s3Client) {
+    if (credentials) {
       void loadBuckets();
     }
-  }, [s3Client, loadBuckets]);
+  }, [credentials, loadBuckets]);
 
   // 3. List objects under current prefix
   const listItems = React.useCallback(async () => {
-    if (!s3Client || !currentBucket) return;
+    if (!credentials || !currentBucket) return;
     try {
       setLoading(true);
-      const command = new ListObjectsV2Command({
-        Bucket: currentBucket,
-        Prefix: currentPrefix,
-        Delimiter: '/',
-      });
-      const res = await s3Client.send(command);
-
-      const folders: R2Item[] = (res.CommonPrefixes ?? []).map((p) => {
-        const fullPrefix = p.Prefix ?? '';
-        const parts = fullPrefix.slice(0, -1).split('/');
-        const name = parts[parts.length - 1] ?? '';
-        return {
-          type: 'folder',
-          name,
-          key: fullPrefix,
-        };
+      const listing = await invoke<R2Listing>('r2_list_objects', {
+        bucket: currentBucket,
+        prefix: currentPrefix,
       });
 
-      const files: R2Item[] = (res.Contents ?? [])
-        .map((c) => ({
-          type: 'file' as const,
-          name: c.Key?.split('/').pop() ?? '',
-          key: c.Key ?? '',
-          size: c.Size,
-          lastModified: c.LastModified,
-        }))
-        .filter((file) => file.key !== currentPrefix && file.name !== '');
+      const folders: R2Item[] = listing.folders.map((f) => ({
+        type: 'folder',
+        name: f.name,
+        key: f.prefix,
+      }));
+
+      const files: R2Item[] = listing.files.map((f) => ({
+        type: 'file',
+        name: f.name,
+        key: f.key,
+        size: f.size,
+        lastModified: f.lastModifiedMs !== undefined ? new Date(f.lastModifiedMs) : undefined,
+      }));
 
       setItems([...folders, ...files]);
       setSelectedItem(null);
@@ -228,13 +206,13 @@ export function useFileExplorer() {
     } finally {
       setLoading(false);
     }
-  }, [s3Client, currentBucket, currentPrefix]);
+  }, [credentials, currentBucket, currentPrefix]);
 
   React.useEffect(() => {
-    if (s3Client && currentBucket) {
+    if (credentials && currentBucket) {
       void listItems();
     }
-  }, [s3Client, currentBucket, currentPrefix, listItems]);
+  }, [credentials, currentBucket, currentPrefix, listItems]);
 
   // 4. Update cache status for current items
   const updateCacheStatuses = React.useCallback(async () => {
@@ -273,27 +251,27 @@ export function useFileExplorer() {
   // 6. Copy Public URL
   const handleCopyPublicUrl = async (item: R2Item) => {
     if (!credentials) return;
-    
+
     let publicUrl = '';
     if (credentials.customEndpointUrl) {
       publicUrl = `${credentials.customEndpointUrl.replace(/\/$/, '')}/${item.key}`;
     } else {
       publicUrl = `https://${credentials.accountId}.r2.cloudflarestorage.com/${currentBucket}/${item.key}`;
     }
-    
+
     await copyText(publicUrl);
     toast.success('Public URL copied to clipboard');
   };
 
-  // 7. Copy Presigned URL
+  // 7. Copy Presigned URL (signed in the Rust process)
   const handleCopyPresignedUrl = async (item: R2Item, expirationSeconds: number) => {
-    if (!s3Client || !currentBucket) return;
+    if (!credentials || !currentBucket) return;
     try {
-      const command = new GetObjectCommand({
-        Bucket: currentBucket,
-        Key: item.key,
+      const url = await invoke<string>('r2_presign_url', {
+        bucket: currentBucket,
+        key: item.key,
+        expiresSeconds: expirationSeconds,
       });
-      const url = await getSignedUrl(s3Client, command, { expiresIn: expirationSeconds });
       await copyText(url);
       toast.success(`Presigned URL (valid for ${expirationSeconds / 3600}h) copied to clipboard`);
     } catch (err) {
@@ -304,18 +282,13 @@ export function useFileExplorer() {
 
   // 8. Create folder placeholder
   const handleCreateFolder = async (folderName: string) => {
-    if (!s3Client || !currentBucket || !folderName.trim()) return;
+    if (!credentials || !currentBucket || !folderName.trim()) return;
     const cleanName = folderName.trim().replace(/\/$/, '');
     const folderKey = `${currentPrefix}${cleanName}/`;
 
     try {
       setCreatingFolder(true);
-      const command = new PutObjectCommand({
-        Bucket: currentBucket,
-        Key: folderKey,
-        Body: new Uint8Array(0),
-      });
-      await s3Client.send(command);
+      await invoke('r2_put_object_empty', { bucket: currentBucket, key: folderKey });
       toast.success(`Folder '${cleanName}' created successfully`);
       void listItems();
     } catch (err) {
@@ -328,15 +301,11 @@ export function useFileExplorer() {
 
   // 9. Delete item
   const handleDeleteItem = async (item: R2Item) => {
-    if (!s3Client || !currentBucket) return;
+    if (!credentials || !currentBucket) return;
     setDeletingKey(item.key);
     // ponytail: use toast.promise for clean loading, success, and error feedback without boilerplate
     const deletePromise = (async () => {
-      const command = new DeleteObjectCommand({
-        Bucket: currentBucket,
-        Key: item.key,
-      });
-      await s3Client.send(command);
+      await invoke('r2_delete_object', { bucket: currentBucket, key: item.key });
       await listItems();
     })();
 
@@ -355,41 +324,23 @@ export function useFileExplorer() {
     }
   };
 
-  // 10. File Upload (Direct & Multipart)
+  // 10. File Upload — the Rust side handles single-part vs multipart and
+  // reports progress via the "r2-upload-progress" event
   const uploadFileFromPath = React.useCallback(async (filePath: string) => {
-    if (!s3Client || !currentBucket) return;
-    const fileBytes = await readFile(filePath);
+    if (!credentials || !currentBucket) return;
     const fileName = filePath.split(/[/\\]/).pop() ?? 'uploaded-file';
     const key = `${currentPrefix}${fileName}`;
-    const contentType = getMimeType(fileName);
 
-    if (fileBytes.length <= MULTIPART_THRESHOLD) {
-      setUploadProgress({ fileName, progress: 10 });
-      const command = new PutObjectCommand({
-        Bucket: currentBucket,
-        Key: key,
-        Body: fileBytes,
-        ContentType: contentType,
-      });
-      await s3Client.send(command);
-      setUploadProgress({ fileName, progress: 100 });
-      toast.success(`Uploaded '${fileName}' successfully`);
-    } else {
-      setUploadProgress({ fileName, progress: 0 });
-      await uploadMultipart({
-        s3Client,
-        bucket: currentBucket,
-        key,
-        fileBytes,
-        contentType,
-        onProgress: (p) => setUploadProgress({ fileName, progress: p }),
-      });
-      toast.success(`Multipart uploaded '${fileName}' successfully (${(fileBytes.length / 1024 / 1024).toFixed(2)} MB)`);
-    }
-  }, [s3Client, currentBucket, currentPrefix]);
+    await invoke('r2_upload_file', {
+      bucket: currentBucket,
+      key,
+      sourcePath: filePath,
+      contentType: getMimeType(fileName),
+    });
+  }, [credentials, currentBucket, currentPrefix]);
 
   const runUploads = React.useCallback(async (paths: string[]) => {
-    if (!s3Client || !currentBucket || paths.length === 0) return;
+    if (!credentials || !currentBucket || paths.length === 0) return;
     try {
       setLoading(true);
       for (const path of paths) {
@@ -403,7 +354,7 @@ export function useFileExplorer() {
       setUploadProgress(null);
       setLoading(false);
     }
-  }, [s3Client, currentBucket, listItems, uploadFileFromPath]);
+  }, [credentials, currentBucket, listItems, uploadFileFromPath]);
 
   const handleUploadFile = React.useCallback(async () => {
     try {
@@ -426,9 +377,10 @@ export function useFileExplorer() {
     await runUploads(paths);
   }, [runUploads]);
 
-  // 11. File caching download and open streaming
+  // 11. File caching download and open streaming — Rust writes the cache
+  // copy and returns its path
   const handleOpenFile = async (item: R2Item) => {
-    if (!s3Client || !currentBucket || item.type !== 'file') return;
+    if (!credentials || !currentBucket || item.type !== 'file') return;
     try {
       setLoading(true);
       const localData = await appLocalDataDir();
@@ -442,35 +394,19 @@ export function useFileExplorer() {
       }
 
       toast.loading(`Streaming '${item.name}' from Cloudflare R2...`);
-      const command = new GetObjectCommand({
-        Bucket: currentBucket,
-        Key: item.key,
+      const cachedPath = await invoke<string>('r2_download_object', {
+        bucket: currentBucket,
+        key: item.key,
       });
-      const response = await s3Client.send(command);
-      const bytes = await response.Body?.transformToByteArray();
 
-      if (!bytes) {
-        throw new Error('Empty file content received');
-      }
-
-      const lastSlash = localPath.lastIndexOf('/');
-      if (lastSlash !== -1) {
-        const parentDir = localPath.substring(0, lastSlash);
-        if (!(await exists(parentDir))) {
-          await mkdir(parentDir, { recursive: true });
-        }
-      }
-
-      await writeFile(localPath, bytes);
-      
       setCacheStatus((prev) => ({
         ...prev,
-        [item.key]: { isCached: true, localPath },
+        [item.key]: { isCached: true, localPath: cachedPath },
       }));
 
       toast.dismiss();
       toast.success(`Cached & opening '${item.name}'`);
-      await openPath(localPath);
+      await openPath(cachedPath);
     } catch (err) {
       toast.dismiss();
       console.error('Failed to stream / open file:', err);
@@ -515,5 +451,23 @@ export function useFileExplorer() {
     handleAddCustomBucket,
     handleRemoveBucket,
     refreshList: listItems,
+  };
+}
+
+/** Public (non-secret) credential status reported by the Rust process. */
+async function invokeStatus(): Promise<R2Credentials | null> {
+  const status = await invoke<{
+    accountId: string;
+    accessKeyId: string;
+    customEndpointUrl?: string | null;
+    hasSecret: boolean;
+  } | null>('r2_credentials_status');
+
+  if (!status || !status.hasSecret) return null;
+  return {
+    accountId: status.accountId,
+    accessKeyId: status.accessKeyId,
+    secretAccessKey: '', // never leaves the Rust process
+    customEndpointUrl: status.customEndpointUrl ?? undefined,
   };
 }

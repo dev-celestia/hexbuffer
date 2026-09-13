@@ -1,3 +1,5 @@
+import type { BundledWordlist } from './data/bundled-wordlists';
+
 export interface R2Item {
   type: 'folder' | 'file';
   name: string;
@@ -20,11 +22,12 @@ export interface WordlistManifestItem {
   tags: string[];
 }
 
-export type WordlistDownloadStatus = 'idle' | 'downloading' | 'installed' | 'error';
+export type WordlistDownloadStatus = 'idle' | 'downloading' | 'installed' | 'error' | 'bundled';
 
 export interface WordlistItemWithStatus extends WordlistManifestItem {
   id: string;
   status: WordlistDownloadStatus;
+  bundledWordlist?: BundledWordlist;
   localPath?: string;
   fileSize?: number;
   downloadProgress?: number;

@@ -12,6 +12,8 @@ import {
   WORDLISTS_MANIFEST_URL,
   WORDLISTS_RAW_BASE_URL,
 } from '../constants';
+import { safePathSegments } from '../lib/path';
+import { BUNDLED_WORDLISTS } from '../data/bundled-wordlists';
 import type {
   WordlistCategoryTag,
   WordlistItemWithStatus,
@@ -19,6 +21,41 @@ import type {
 } from '../types';
 
 const CACHE_KEY = 'hexbuffer_wordlists_manifest_cache';
+
+// Bundled wordlists ship with the app and are always available — they are the
+// same catalog the Intruder payload preset dialog sources from.
+const BUNDLED_HUB_ITEMS: WordlistItemWithStatus[] = BUNDLED_WORDLISTS.map((wordlist) => ({
+  href: `bundled/${wordlist.id}`,
+  lines: wordlist.values.length,
+  name: wordlist.name,
+  tags: [wordlist.category.toLowerCase()],
+  id: `bundled:${wordlist.id}`,
+  status: 'bundled',
+  bundledWordlist: wordlist,
+}));
+
+// The manifest is remote-controlled content: it must never be able to steer
+// local write paths outside the wordlists directory.
+function wordlistRelativeSegments(href: string): string[] {
+  const segments = safePathSegments(href);
+  if (segments[0]?.toLowerCase() === 'wordlists') segments.shift();
+  return segments;
+}
+
+function isWordlistManifest(value: unknown): value is WordlistManifestItem[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (entry) =>
+        !!entry &&
+        typeof entry === 'object' &&
+        typeof (entry as WordlistManifestItem).href === 'string' &&
+        typeof (entry as WordlistManifestItem).name === 'string' &&
+        typeof (entry as WordlistManifestItem).lines === 'number' &&
+        Array.isArray((entry as WordlistManifestItem).tags)
+    )
+  );
+}
 
 export function useWordlistsHub() {
   const [wordlistsDir, setWordlistsDir] = React.useState<string>('');
@@ -63,21 +100,22 @@ export function useWordlistsHub() {
 
       return Promise.all(
         manifestList.map(async (item) => {
+          const segments = wordlistRelativeSegments(item.href);
           try {
-            // href like "wordlists/passwords/000webhost.txt" -> normalize relative path
-            const relativePath = item.href.replace(/^wordlists[/\\]/, '');
-            const localPath = await join(baseDir, relativePath);
-            const fileExists = await exists(localPath);
+            if (segments.length > 0) {
+              const localPath = await join(baseDir, ...segments);
+              const fileExists = await exists(localPath);
 
-            if (fileExists) {
-              const fileStat = await stat(localPath);
-              return {
-                ...item,
-                id: item.href,
-                status: 'installed',
-                localPath,
-                fileSize: fileStat.size,
-              };
+              if (fileExists) {
+                const fileStat = await stat(localPath);
+                return {
+                  ...item,
+                  id: item.href,
+                  status: 'installed',
+                  localPath,
+                  fileSize: fileStat.size,
+                };
+              }
             }
           } catch {
             // Ignore stat/exists errors
@@ -105,7 +143,10 @@ export function useWordlistsHub() {
           try {
             const cached = localStorage.getItem(CACHE_KEY);
             if (cached) {
-              manifest = JSON.parse(cached) as WordlistManifestItem[];
+              const parsed: unknown = JSON.parse(cached);
+              if (isWordlistManifest(parsed)) {
+                manifest = parsed;
+              }
             }
           } catch {
             // Ignore parse errors
@@ -117,7 +158,11 @@ export function useWordlistsHub() {
           if (!res.ok) {
             throw new Error(`HTTP error ${res.status}: ${res.statusText}`);
           }
-          manifest = (await res.json()) as WordlistManifestItem[];
+          const json: unknown = await res.json();
+          if (!isWordlistManifest(json)) {
+            throw new Error('Wordlists manifest has an unexpected format');
+          }
+          manifest = json;
           try {
             localStorage.setItem(CACHE_KEY, JSON.stringify(manifest));
           } catch (e) {
@@ -153,15 +198,22 @@ export function useWordlistsHub() {
     }
   }, [wordlistsDir, fetchManifest]);
 
+  // Bundled entries are always available, so merge them in front of the
+  // remote manifest catalog.
+  const catalogItems = React.useMemo<WordlistItemWithStatus[]>(
+    () => [...BUNDLED_HUB_ITEMS, ...items],
+    [items]
+  );
+
   // Extract all unique tags with count stats
   const tags = React.useMemo<WordlistCategoryTag[]>(() => {
     const map = new Map<string, { count: number; installedCount: number }>();
 
-    for (const item of items) {
+    for (const item of catalogItems) {
       for (const tag of item.tags) {
         const current = map.get(tag) || { count: 0, installedCount: 0 };
         current.count += 1;
-        if (item.status === 'installed') {
+        if (item.status === 'installed' || item.status === 'bundled') {
           current.installedCount += 1;
         }
         map.set(tag, current);
@@ -182,7 +234,7 @@ export function useWordlistsHub() {
   const filteredItems = React.useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
-    return items.filter((item) => {
+    return catalogItems.filter((item) => {
       const matchesTag = selectedTag === 'all' || item.tags.includes(selectedTag);
       if (!matchesTag) return false;
 
@@ -193,7 +245,7 @@ export function useWordlistsHub() {
         item.tags.some((t) => t.toLowerCase().includes(q))
       );
     });
-  }, [items, selectedTag, searchQuery]);
+  }, [catalogItems, selectedTag, searchQuery]);
 
   // Download single wordlist
   const downloadWordlist = React.useCallback(
@@ -215,14 +267,15 @@ export function useWordlistsHub() {
         }
         const text = await res.text();
 
-        const relativePath = item.href.replace(/^wordlists[/\\]/, '');
-        const targetPath = await join(wordlistsDir, relativePath);
+        const segments = wordlistRelativeSegments(item.href);
+        if (segments.length === 0) {
+          throw new Error('Invalid wordlist path in manifest');
+        }
+        const targetPath = await join(wordlistsDir, ...segments);
 
         // Ensure parent directories exist
-        const parts = relativePath.split(/[/\\]/);
-        if (parts.length > 1) {
-          const parentFolderRelative = parts.slice(0, -1).join('/');
-          const parentFolder = await join(wordlistsDir, parentFolderRelative);
+        if (segments.length > 1) {
+          const parentFolder = await join(wordlistsDir, ...segments.slice(0, -1));
           const parentExists = await exists(parentFolder);
           if (!parentExists) {
             await mkdir(parentFolder, { recursive: true });
@@ -262,11 +315,11 @@ export function useWordlistsHub() {
     async (tag: string) => {
       if (!wordlistsDir) return;
       const targetItems = items.filter(
-        (i) => (tag === 'all' || i.tags.includes(tag)) && i.status !== 'installed'
+        (i) => (tag === 'all' || i.tags.includes(tag)) && i.status === 'idle'
       );
 
       if (targetItems.length === 0) {
-        toast.info('All wordlists in this category are already downloaded.');
+        toast.info('All wordlists in this category are already downloaded or bundled.');
         return;
       }
 
@@ -340,6 +393,12 @@ export function useWordlistsHub() {
       setPreviewLoading(true);
       setPreviewContent(null);
 
+      if (item.status === 'bundled' && item.bundledWordlist) {
+        setPreviewContent(item.bundledWordlist.values.slice(0, 100).join('\n'));
+        setPreviewLoading(false);
+        return;
+      }
+
       try {
         if (item.status === 'installed' && item.localPath) {
           const raw = await readTextFile(item.localPath);
@@ -374,7 +433,7 @@ export function useWordlistsHub() {
 
   return {
     items: filteredItems,
-    allItems: items,
+    allItems: catalogItems,
     loading,
     wordlistsDir,
     tags,
