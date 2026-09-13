@@ -47,8 +47,7 @@ pub(crate) fn resolve_request_target(
 pub async fn try_intercept(app_handle: &AppHandle, ctx: &Ctx) -> Option<RequestOrResponse> {
     let mock_state = app_handle.try_state::<crate::commands::mock_forge::MockForgeState>()?;
 
-    let (host_str, path_str, query_map) =
-        resolve_request_target(&ctx.req_uri, &ctx.req_headers);
+    let (host_str, path_str, query_map) = resolve_request_target(&ctx.req_uri, &ctx.req_headers);
 
     let matched = {
         let domains_guard = mock_state.domains.lock();
@@ -137,10 +136,8 @@ mod tests {
     #[test]
     fn test_resolve_request_target_absolute_url() {
         let headers = HashMap::from([("host".to_string(), "ignored.example.com".to_string())]);
-        let (host, path, query) = resolve_request_target(
-            "https://api.example.com:8443/v1/users?id=7&tag=a",
-            &headers,
-        );
+        let (host, path, query) =
+            resolve_request_target("https://api.example.com:8443/v1/users?id=7&tag=a", &headers);
 
         // URL host wins over the (decoy) Host header; default ports are dropped
         assert_eq!(host, "api.example.com");
@@ -166,8 +163,7 @@ mod tests {
 
     #[test]
     fn test_resolve_request_target_no_host_anywhere() {
-        let (host, path, query) =
-            resolve_request_target("/health?probe=1", &HashMap::new());
+        let (host, path, query) = resolve_request_target("/health?probe=1", &HashMap::new());
         assert_eq!(host, "");
         assert_eq!(path, "/health");
         assert_eq!(query.get("probe").unwrap(), "1");
@@ -184,8 +180,10 @@ mod tests {
 
     #[test]
     fn test_resolve_request_target_decodes_query_values() {
-        let (_, _, query) =
-            resolve_request_target("https://example.com/?a=hello+world&b=%20x%20", &HashMap::new());
+        let (_, _, query) = resolve_request_target(
+            "https://example.com/?a=hello+world&b=%20x%20",
+            &HashMap::new(),
+        );
         assert_eq!(query.get("a").unwrap(), "hello world");
         assert_eq!(query.get("b").unwrap(), " x ");
     }

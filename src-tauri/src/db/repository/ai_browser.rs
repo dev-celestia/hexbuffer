@@ -119,6 +119,42 @@ impl Database {
         Ok(deleted)
     }
 
+    pub fn insert_ai_browser_edge(
+        &self,
+        session_id: &str,
+        from_url: &str,
+        to_url: &str,
+        source: &str,
+    ) -> SqlResult<()> {
+        let conn = self.conn.lock();
+
+        let exists: Option<i64> = conn
+            .query_row(
+                "SELECT 1 FROM ai_browser_edges WHERE session_id = ?1 AND from_url = ?2 AND to_url = ?3 LIMIT 1",
+                params![session_id, from_url, to_url],
+                |row| row.get(0),
+            )
+            .optional()?;
+        if exists.is_some() {
+            return Ok(());
+        }
+
+        conn.execute(
+            "INSERT INTO ai_browser_edges (id, session_id, from_url, to_url, source, created_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            params![
+                uuid::Uuid::new_v4().to_string(),
+                session_id,
+                from_url,
+                to_url,
+                source,
+                chrono::Utc::now().to_rfc3339(),
+            ],
+        )?;
+
+        Ok(())
+    }
+
     pub fn upsert_ai_browser_page(&self, page: &CrawlPage) -> SqlResult<()> {
         let conn = self.conn.lock();
         let updated_at = chrono::Utc::now().to_rfc3339();

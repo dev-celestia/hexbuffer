@@ -1,16 +1,18 @@
 use super::crawl_types::{AIInsight, ActivityLog, AiBrowserState, CrawlPage, CrawlSession};
 use chrono::Utc;
-use parking_lot::Mutex;
-use std::process::{Child, Command};
-use std::sync::Arc;
 use tauri::{AppHandle, Emitter, Manager};
 
 pub(crate) fn now() -> String {
     Utc::now().to_rfc3339()
 }
 
-pub(crate) fn normalize_strategy(_strategy: Option<String>) -> String {
-    "bfs".to_string()
+pub(crate) fn normalize_strategy(strategy: Option<String>) -> String {
+    match strategy.as_deref().map(str::trim).map(str::to_lowercase) {
+        Some(value) if value == "dfs" || value == "depth-first" || value == "depthfirst" => {
+            "dfs".to_string()
+        }
+        _ => "bfs".to_string(),
+    }
 }
 
 pub(crate) fn add_log(app: &AppHandle, state: &AiBrowserState, log: ActivityLog) {
@@ -91,53 +93,6 @@ pub(crate) fn session_status(state: &AiBrowserState, session_id: &str) -> Option
 
 pub(crate) fn is_terminal_status(status: &str) -> bool {
     matches!(status, "completed" | "failed" | "stopped")
-}
-
-#[cfg(unix)]
-pub(crate) fn signal_child_process_group(
-    child: &Arc<Mutex<Child>>,
-    signal: &str,
-) -> Result<(), String> {
-    let pid = child.lock().id();
-    let target = format!("-{}", pid);
-    let output = Command::new("kill")
-        .arg(signal)
-        .arg(&target)
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::piped())
-        .output()
-        .map_err(|error| format!("Failed to signal AI browser sidecar: {}", error))?;
-
-    if output.status.success() {
-        Ok(())
-    } else {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        eprintln!("[ai-browser] kill {} {}: {}", signal, target, stderr.trim());
-        Err(format!(
-            "Failed to signal AI browser sidecar with {}",
-            signal
-        ))
-    }
-}
-
-#[cfg(not(unix))]
-pub(crate) fn signal_child_process_group(
-    _child: &Arc<Mutex<Child>>,
-    _signal: &str,
-) -> Result<(), String> {
-    Err("Pause and resume are not supported on this platform yet".to_string())
-}
-
-pub(crate) fn kill_child_process_group(child: &Arc<Mutex<Child>>) {
-    #[cfg(unix)]
-    if signal_child_process_group(child, "-KILL").is_ok() {
-        return;
-    }
-
-    let mut child = child.lock();
-    {
-        let _ = child.kill();
-    }
 }
 
 pub(crate) fn upsert_page_memory(state: &AiBrowserState, page: CrawlPage) {

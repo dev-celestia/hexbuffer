@@ -265,7 +265,11 @@ impl Database {
         Ok(())
     }
 
-    pub fn clear_http_session_logs(&self, session_id: &str) -> SqlResult<usize> {
+    pub fn clear_http_session_logs(
+        &self,
+        session_id: &str,
+        payload_store: Option<&crate::db::payload_store::PayloadStore>,
+    ) -> SqlResult<usize> {
         // Clear from disk DB
         let mut conn = self.conn.lock();
         let tx = conn.transaction()?;
@@ -291,6 +295,19 @@ impl Database {
         // Clear from ephemeral DB as well
         let mut eph = self.ephemeral_conn.lock();
         let mut eph_rows = 0;
+        // Collect ephemeral slab refs first so the stored bodies can be reclaimed.
+        let mut payload_refs: Vec<String> = Vec::new();
+        if let Ok(mut stmt) = eph
+            .prepare("SELECT req_payload_ref, res_payload_ref FROM http_logs WHERE session_id = ?1")
+        {
+            if let Ok(rows) = stmt.query_map(params![session_id], |row| {
+                Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+            }) {
+                for pair in rows.flatten() {
+                    payload_refs.extend([pair.0, pair.1]);
+                }
+            }
+        }
         if let Ok(tx) = eph.transaction() {
             eph_rows = tx
                 .execute(
@@ -310,13 +327,18 @@ impl Database {
             let _ = tx.commit();
         }
         drop(eph);
+        Self::release_payload_refs(payload_refs, payload_store);
 
         // Run vacuum to reclaim deleted space in disk DB
         let _ = self.vacuum();
         Ok(rows + eph_rows)
     }
 
-    pub fn delete_http_session(&self, session_id: &str) -> SqlResult<()> {
+    pub fn delete_http_session(
+        &self,
+        session_id: &str,
+        payload_store: Option<&crate::db::payload_store::PayloadStore>,
+    ) -> SqlResult<()> {
         let mut conn = self.conn.lock();
         let tx = conn.transaction()?;
 
@@ -390,6 +412,19 @@ impl Database {
 
         // Clean up from ephemeral DB
         let mut eph = self.ephemeral_conn.lock();
+        // Collect ephemeral slab refs first so the stored bodies can be reclaimed.
+        let mut payload_refs: Vec<String> = Vec::new();
+        if let Ok(mut stmt) = eph
+            .prepare("SELECT req_payload_ref, res_payload_ref FROM http_logs WHERE session_id = ?1")
+        {
+            if let Ok(rows) = stmt.query_map(params![session_id], |row| {
+                Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+            }) {
+                for pair in rows.flatten() {
+                    payload_refs.extend([pair.0, pair.1]);
+                }
+            }
+        }
         if let Ok(tx) = eph.transaction() {
             if let Err(e) = tx.execute(
                 "DELETE FROM http_logs WHERE session_id = ?1",
@@ -421,6 +456,7 @@ impl Database {
             let _ = tx.commit();
         }
         drop(eph);
+        Self::release_payload_refs(payload_refs, payload_store);
 
         // Reclaim disk space
         let _ = self.vacuum();

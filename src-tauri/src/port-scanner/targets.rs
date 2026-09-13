@@ -39,7 +39,14 @@ fn normalize_scan_host(input: &str) -> Result<String, String> {
             .ok()
             .and_then(|url| url.host_str().map(|host| host.to_string()))
     } else {
-        Some(trimmed.split('/').next().unwrap_or_default().trim().to_string())
+        Some(
+            trimmed
+                .split('/')
+                .next()
+                .unwrap_or_default()
+                .trim()
+                .to_string(),
+        )
     };
 
     let after_userinfo = parsed
@@ -187,7 +194,10 @@ mod tests {
 
     #[test]
     fn test_expand_targets_ipv6_literals() {
-        assert_eq!(expand_targets("[2001:db8::1]").unwrap(), vec!["2001:db8::1"]);
+        assert_eq!(
+            expand_targets("[2001:db8::1]").unwrap(),
+            vec!["2001:db8::1"]
+        );
         assert_eq!(expand_targets("[::1]").unwrap(), vec!["::1"]);
         assert_eq!(
             expand_targets("http://[2001:db8::1]:8080/x").unwrap(),

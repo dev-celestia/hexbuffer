@@ -120,7 +120,10 @@ mod tests {
     #[test]
     fn test_detect_service_banner_overrides_port() {
         assert_eq!(detect_service(2222, Some("SSH-2.0-OpenSSH_9.6")), "ssh");
-        assert_eq!(detect_service(9999, Some("220 smtp.example.com ESMTP")), "smtp");
+        assert_eq!(
+            detect_service(9999, Some("220 smtp.example.com ESMTP")),
+            "smtp"
+        );
         assert_eq!(detect_service(9999, Some("redis_version:7.0")), "redis");
         assert_eq!(detect_service(9999, Some("MySQL server error")), "mysql");
     }
@@ -128,9 +131,15 @@ mod tests {
     #[test]
     fn test_detect_service_http_banner_respects_tls_ports() {
         assert_eq!(detect_service(8080, Some("HTTP/1.1 200 OK")), "http");
-        assert_eq!(detect_service(80, Some("<html><body>hi</body></html>")), "http");
+        assert_eq!(
+            detect_service(80, Some("<html><body>hi</body></html>")),
+            "http"
+        );
         assert_eq!(detect_service(443, Some("HTTP/1.1 200 OK")), "https");
-        assert_eq!(detect_service(8443, Some("HTTP/1.1 404 Not Found")), "https");
+        assert_eq!(
+            detect_service(8443, Some("HTTP/1.1 404 Not Found")),
+            "https"
+        );
     }
 
     #[test]

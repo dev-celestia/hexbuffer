@@ -151,7 +151,10 @@ mod tests {
 
     #[test]
     fn test_matches_host_filter_normalizes_host_input() {
-        assert!(matches_host_filter("https://API.Example.com:443/x", "example.com"));
+        assert!(matches_host_filter(
+            "https://API.Example.com:443/x",
+            "example.com"
+        ));
     }
 
     #[test]

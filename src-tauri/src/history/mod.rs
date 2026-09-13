@@ -55,6 +55,7 @@ pub struct WebSocketConnectionDetail {
     pub messages: Vec<WebSocketMessageRecord>,
 }
 
+#[derive(Clone)]
 pub struct HistoryBridge {
     db: Database,
     payload_store: Option<crate::db::PayloadStore>,
@@ -154,11 +155,12 @@ impl HistoryBridge {
     }
 
     pub fn delete_http_session(&self, session_id: &str) -> Result<(), String> {
+        // Reclaims persistent segment files for this session (no-op for slab refs).
         if let Some(ps) = &self.payload_store {
             let _ = ps.remove_session(session_id);
         }
         self.db
-            .delete_http_session(session_id)
+            .delete_http_session(session_id, self.payload_store.as_ref())
             .map_err(|e| e.to_string())
     }
 
@@ -169,11 +171,12 @@ impl HistoryBridge {
     }
 
     pub fn clear_http_session_logs(&self, session_id: &str) -> Result<usize, String> {
+        // Reclaims persistent segment files for this session (no-op for slab refs).
         if let Some(ps) = &self.payload_store {
             let _ = ps.remove_session(session_id);
         }
         self.db
-            .clear_http_session_logs(session_id)
+            .clear_http_session_logs(session_id, self.payload_store.as_ref())
             .map_err(|e| e.to_string())
     }
 
@@ -225,6 +228,17 @@ impl HistoryBridge {
     pub fn upsert_ai_browser_page(&self, page: &CrawlPage) -> Result<(), String> {
         self.db
             .upsert_ai_browser_page(page)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn insert_ai_browser_edge(
+        &self,
+        session_id: &str,
+        from_url: &str,
+        to_url: &str,
+    ) -> Result<(), String> {
+        self.db
+            .insert_ai_browser_edge(session_id, from_url, to_url, "crawler")
             .map_err(|e| e.to_string())
     }
 
@@ -347,7 +361,9 @@ impl HistoryBridge {
     }
 
     pub fn delete_by_id(&self, log_id: &str) -> Result<(), String> {
-        self.db.delete_log(log_id).map_err(|e| e.to_string())
+        self.db
+            .delete_log(log_id, self.payload_store.as_ref())
+            .map_err(|e| e.to_string())
     }
 
     pub fn get_all(&self) -> Result<Vec<ProxyRecord>, String> {

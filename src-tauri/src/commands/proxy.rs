@@ -2,7 +2,7 @@ use std::net::{SocketAddr, TcpStream};
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, Manager};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ProxyRuntimeStatus {
@@ -42,7 +42,13 @@ pub async fn start_proxy(app: AppHandle, port: u16, tls_port: u16) -> Result<Str
         tokio::time::sleep(Duration::from_millis(100)).await;
         if let Some(active_port) = crate::proxy::active_proxy_port() {
             let addr = SocketAddr::from(([127, 0, 0, 1], active_port));
-            if TcpStream::connect_timeout(&addr, Duration::from_millis(150)).is_ok() {
+            // Blocking probe: keep it off the async runtime workers.
+            let reachable = tauri::async_runtime::spawn_blocking(move || {
+                TcpStream::connect_timeout(&addr, Duration::from_millis(150)).is_ok()
+            })
+            .await
+            .unwrap_or(false);
+            if reachable {
                 let status = ProxyRuntimeStatus {
                     running: true,
                     port: Some(active_port),
@@ -67,6 +73,11 @@ pub async fn start_proxy(app: AppHandle, port: u16, tls_port: u16) -> Result<Str
 #[tauri::command]
 pub async fn stop_proxy(app: AppHandle) -> Result<String, String> {
     crate::proxy::stop()?;
+    // The proxy runtime is gone, so its intercept poll tasks died with it;
+    // dropping leftover paused requests/actions prevents stale state leaks.
+    if let Some(proxy_state) = app.try_state::<crate::proxy::ProxyState>() {
+        proxy_state.clear_intercept_state();
+    }
     let status = ProxyRuntimeStatus {
         running: false,
         port: None,
@@ -90,7 +101,12 @@ pub async fn get_proxy_status() -> Result<ProxyRuntimeStatus, String> {
     };
 
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
-    let running = TcpStream::connect_timeout(&addr, Duration::from_millis(200)).is_ok();
+    // Blocking probe: keep it off the async runtime workers.
+    let running = tauri::async_runtime::spawn_blocking(move || {
+        TcpStream::connect_timeout(&addr, Duration::from_millis(200)).is_ok()
+    })
+    .await
+    .unwrap_or(false);
 
     Ok(ProxyRuntimeStatus {
         running,

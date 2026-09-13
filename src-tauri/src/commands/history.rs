@@ -5,13 +5,26 @@ use crate::{
 };
 use tauri::State;
 
+/// Runs a blocking SQLite/HistoryBridge call off the async runtime so slow
+/// queries and VACUUMs can't stall Tokio workers or the UI event loop.
+async fn run_blocking<T, F>(task: F) -> Result<T, String>
+where
+    F: FnOnce() -> Result<T, String> + Send + 'static,
+    T: Send + 'static,
+{
+    tauri::async_runtime::spawn_blocking(task)
+        .await
+        .map_err(|e| format!("background task failed: {}", e))?
+}
+
 // ── HTTP Sessions ──────────────────────────────────────────────────
 
 #[tauri::command]
 pub async fn get_http_sessions(
     history: State<'_, HistoryBridge>,
 ) -> Result<Vec<HttpSessionSummary>, String> {
-    history.list_http_sessions()
+    let history = history.inner().clone();
+    run_blocking(move || history.list_http_sessions()).await
 }
 
 #[tauri::command]
@@ -25,14 +38,18 @@ pub async fn create_http_session(
     exclude_filter: Option<String>,
     storage_mode: Option<String>,
 ) -> Result<HttpSessionRecord, String> {
-    let rec = history.create_http_session(
-        &name,
-        description.as_deref(),
-        capture_mode.as_deref(),
-        capture_filter.as_deref(),
-        exclude_filter.as_deref(),
-        storage_mode.as_deref(),
-    )?;
+    let history = history.inner().clone();
+    let rec = run_blocking(move || {
+        history.create_http_session(
+            &name,
+            description.as_deref(),
+            capture_mode.as_deref(),
+            capture_filter.as_deref(),
+            exclude_filter.as_deref(),
+            storage_mode.as_deref(),
+        )
+    })
+    .await?;
 
     sync_session_filter_to_proxy_state(&rec, &proxy_state);
     Ok(rec)
@@ -44,7 +61,9 @@ pub async fn promote_session(
     payload_store: State<'_, crate::db::PayloadStore>,
     session_id: String,
 ) -> Result<(), String> {
-    crate::db::promote_session(history.database(), &payload_store, &session_id)
+    let database = history.database().clone();
+    let payload_store = payload_store.inner().clone();
+    run_blocking(move || crate::db::promote_session(&database, &payload_store, &session_id)).await
 }
 
 #[tauri::command]
@@ -53,8 +72,14 @@ pub async fn set_active_http_session(
     proxy_state: State<'_, ProxyState>,
     session_id: String,
 ) -> Result<(), String> {
-    history.set_active_http_session(&session_id)?;
-    if let Ok(Some(sess)) = history.get_active_http_session() {
+    let history = history.inner().clone();
+    let sess = run_blocking(move || {
+        history.set_active_http_session(&session_id)?;
+        history.get_active_http_session()
+    })
+    .await?;
+
+    if let Some(sess) = sess {
         sync_session_filter_to_proxy_state(&sess, &proxy_state);
     }
     Ok(())
@@ -69,13 +94,20 @@ pub async fn update_http_session_filter(
     capture_filter: String,
     exclude_filter: String,
 ) -> Result<(), String> {
-    history.update_http_session_filter(
-        &session_id,
-        &capture_mode,
-        &capture_filter,
-        &exclude_filter,
-    )?;
-    if let Ok(Some(active)) = history.get_active_http_session() {
+    let session_id_for_task = session_id.clone();
+    let history = history.inner().clone();
+    let active = run_blocking(move || {
+        history.update_http_session_filter(
+            &session_id_for_task,
+            &capture_mode,
+            &capture_filter,
+            &exclude_filter,
+        )?;
+        history.get_active_http_session()
+    })
+    .await?;
+
+    if let Some(active) = active {
         if active.id == session_id {
             sync_session_filter_to_proxy_state(&active, &proxy_state);
         }
@@ -109,7 +141,8 @@ pub async fn delete_http_session(
     session_id: String,
 ) -> Result<(), String> {
     proxy_state.clear_records();
-    history.delete_http_session(&session_id)
+    let history = history.inner().clone();
+    run_blocking(move || history.delete_http_session(&session_id)).await
 }
 
 #[tauri::command]
@@ -118,7 +151,8 @@ pub async fn rename_http_session(
     session_id: String,
     name: String,
 ) -> Result<(), String> {
-    history.rename_http_session(&session_id, &name)
+    let history = history.inner().clone();
+    run_blocking(move || history.rename_http_session(&session_id, &name)).await
 }
 
 #[tauri::command]
@@ -128,7 +162,8 @@ pub async fn clear_http_session_logs(
     session_id: String,
 ) -> Result<usize, String> {
     proxy_state.clear_records();
-    history.clear_http_session_logs(&session_id)
+    let history = history.inner().clone();
+    run_blocking(move || history.clear_http_session_logs(&session_id)).await
 }
 
 // ── Proxy Logs ─────────────────────────────────────────────────────
@@ -139,7 +174,8 @@ pub async fn clear_proxy_all(
     proxy_state: State<'_, ProxyState>,
 ) -> Result<(), String> {
     proxy_state.clear_records();
-    history.clear_all()
+    let history = history.inner().clone();
+    run_blocking(move || history.clear_all()).await
 }
 
 #[tauri::command]
@@ -149,11 +185,16 @@ pub async fn clear_proxy_by_date(
     keep_range: String,
     custom_date: Option<String>,
 ) -> Result<usize, String> {
+    let history = history.inner().clone();
+
     if keep_range == "all" {
         proxy_state.clear_records();
-        let _ = history.clear_websocket_all();
-        history.clear_all()?;
-        return Ok(0);
+        return run_blocking(move || {
+            let _ = history.clear_websocket_all();
+            history.clear_all()?;
+            Ok(0)
+        })
+        .await;
     }
 
     let now = chrono::Utc::now();
@@ -179,14 +220,15 @@ pub async fn clear_proxy_by_date(
 
     let cutoff_rfc3339 = cutoff.to_rfc3339();
     proxy_state.clear_records_before(&cutoff);
-    history.clear_before(&cutoff_rfc3339)
+    run_blocking(move || history.clear_before(&cutoff_rfc3339)).await
 }
 
 #[tauri::command]
 pub async fn get_documents(
     history: State<'_, HistoryBridge>,
 ) -> Result<Vec<DocumentRecord>, String> {
-    history.get_documents()
+    let history = history.inner().clone();
+    run_blocking(move || history.get_documents()).await
 }
 
 #[tauri::command]
@@ -194,7 +236,8 @@ pub async fn save_document(
     history: State<'_, HistoryBridge>,
     document: DocumentRecord,
 ) -> Result<(), String> {
-    history.save_document(&document)
+    let history = history.inner().clone();
+    run_blocking(move || history.save_document(&document)).await
 }
 
 #[tauri::command]
@@ -202,7 +245,8 @@ pub async fn delete_document(
     history: State<'_, HistoryBridge>,
     document_id: String,
 ) -> Result<(), String> {
-    history.delete_document(&document_id)
+    let history = history.inner().clone();
+    run_blocking(move || history.delete_document(&document_id)).await
 }
 
 #[tauri::command]
@@ -214,12 +258,14 @@ pub async fn delete_proxy_by_id(
     if let Ok(id) = uuid::Uuid::parse_str(&log_id) {
         proxy_state.delete_record(&id);
     }
-    history.delete_by_id(&log_id)
+    let history = history.inner().clone();
+    run_blocking(move || history.delete_by_id(&log_id)).await
 }
 
 #[tauri::command]
 pub async fn get_proxy_all(history: State<'_, HistoryBridge>) -> Result<Vec<ProxyRecord>, String> {
-    history.get_all()
+    let history = history.inner().clone();
+    run_blocking(move || history.get_all()).await
 }
 
 #[tauri::command]
@@ -227,7 +273,8 @@ pub async fn get_proxy_filtered(
     history: State<'_, HistoryBridge>,
     filter: ProxyFilter,
 ) -> Result<Vec<ProxyRecord>, String> {
-    history.get_filtered(filter)
+    let history = history.inner().clone();
+    run_blocking(move || history.get_filtered(filter)).await
 }
 
 #[tauri::command]
@@ -237,7 +284,8 @@ pub async fn get_proxy_recent(
     filter: Option<ProxyFilter>,
     sort_order: Option<String>,
 ) -> Result<Vec<ProxyLogSummary>, String> {
-    history.get_recent(limit.unwrap_or(100), filter, sort_order)
+    let history = history.inner().clone();
+    run_blocking(move || history.get_recent(limit.unwrap_or(100), filter, sort_order)).await
 }
 
 #[tauri::command]
@@ -245,8 +293,10 @@ pub async fn get_proxy_detail(
     history: State<'_, HistoryBridge>,
     log_id: String,
 ) -> Result<ProxyRecord, String> {
-    history
-        .get_by_id(&log_id)?
+    let history = history.inner().clone();
+    let log_id_for_task = log_id.clone();
+    run_blocking(move || history.get_by_id(&log_id_for_task))
+        .await?
         .ok_or_else(|| format!("Log not found: {}", log_id))
 }
 
@@ -255,7 +305,8 @@ pub async fn get_proxy_tree(
     history: State<'_, HistoryBridge>,
     filter: Option<ProxyFilter>,
 ) -> Result<Vec<TreeNode>, String> {
-    history.get_tree(filter)
+    let history = history.inner().clone();
+    run_blocking(move || history.get_tree(filter)).await
 }
 
 #[tauri::command]
@@ -265,7 +316,8 @@ pub async fn get_websocket_paginated(
     per_page: u32,
     filter: Option<WebSocketFilter>,
 ) -> Result<PaginatedResponse<WebSocketConnectionSummary>, String> {
-    history.get_websocket_paginated(page, per_page, filter)
+    let history = history.inner().clone();
+    run_blocking(move || history.get_websocket_paginated(page, per_page, filter)).await
 }
 
 #[tauri::command]
@@ -273,14 +325,17 @@ pub async fn get_websocket_detail(
     history: State<'_, HistoryBridge>,
     connection_id: String,
 ) -> Result<WebSocketConnectionDetail, String> {
-    history
-        .get_websocket_detail(&connection_id)?
+    let history = history.inner().clone();
+    let connection_id_for_task = connection_id.clone();
+    run_blocking(move || history.get_websocket_detail(&connection_id_for_task))
+        .await?
         .ok_or_else(|| format!("WebSocket connection not found: {}", connection_id))
 }
 
 #[tauri::command]
 pub async fn clear_websocket_all(history: State<'_, HistoryBridge>) -> Result<(), String> {
-    history.clear_websocket_all()
+    let history = history.inner().clone();
+    run_blocking(move || history.clear_websocket_all()).await
 }
 
 #[tauri::command]
@@ -288,5 +343,6 @@ pub async fn delete_websocket_by_id(
     history: State<'_, HistoryBridge>,
     connection_id: String,
 ) -> Result<(), String> {
-    history.delete_websocket_connection(&connection_id)
+    let history = history.inner().clone();
+    run_blocking(move || history.delete_websocket_connection(&connection_id)).await
 }

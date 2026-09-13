@@ -7,6 +7,9 @@ import {
   AI_API_KEY_PLACEHOLDERS,
   AI_MODEL_OPTIONS_BY_PROVIDER,
   AI_PROVIDER_OPTIONS,
+  OPENAI_COMPATIBLE_BASE_URL_EXAMPLES,
+  OPENAI_COMPATIBLE_BASE_URL_PLACEHOLDER,
+  OPENAI_COMPATIBLE_PROVIDER_ID,
 } from '../constants';
 import type { SettingsPageState } from '../hooks/use-settings-page';
 import { SettingsGroup, SettingsRow } from './settings-group';
@@ -28,11 +31,15 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
 
   const selectedProvider = AI_PROVIDER_OPTIONS.find((provider) => provider.id === aiSettings.provider);
   const selectedProviderLabel = selectedProvider?.label ?? 'AI';
+  const isOpenAiCompatible = aiSettings.provider === OPENAI_COMPATIBLE_PROVIDER_ID;
   const modelOptions = AI_MODEL_OPTIONS_BY_PROVIDER[aiSettings.provider] ?? [];
   const [showApiKey, setShowApiKey] = React.useState(false);
   const [apiKeyInput, setApiKeyInput] = React.useState(aiSettings.apiKey);
   const isSavingNewApiKey = apiKeyInput.trim().length > 0;
   const canSaveAiSettings = !isSavingNewApiKey || aiSettings.allowThirdPartyAiSharing;
+  const canSaveOpenAiCompatible =
+    !isOpenAiCompatible ||
+    (!!aiSettings.model.trim() && !!aiSettings.customBaseUrl?.trim());
 
   React.useEffect(() => {
     setApiKeyInput(aiSettings.apiKey);
@@ -70,33 +77,63 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
           </SelectContent>
         </Select>
       </SettingsRow>
-      <SettingsRow label="Model">
-        <Select
-          value={aiSettings.model}
-          onValueChange={(model) => {
-            if (model) {
-              updateAiSettings({ model });
-            }
-          }}
-          disabled={aiSettingsLoading}
+      {isOpenAiCompatible ? (
+        <SettingsRow
+          label="Base URL"
+          description={`OpenAI-compatible chat completions endpoint. Examples: ${OPENAI_COMPATIBLE_BASE_URL_EXAMPLES.join(', ')}`}
         >
-          <SelectTrigger
-            id="ai-model"
+          <Input
+            value={aiSettings.customBaseUrl ?? ''}
+            onChange={(event) => updateAiSettings({ customBaseUrl: event.target.value })}
+            placeholder={OPENAI_COMPATIBLE_BASE_URL_PLACEHOLDER}
+            disabled={aiSettingsLoading}
+            className={cn(
+              // Sizing & Spacing
+              "w-72"
+            )}
+          />
+        </SettingsRow>
+      ) : null}
+      <SettingsRow label="Model">
+        {isOpenAiCompatible ? (
+          <Input
+            value={aiSettings.model}
+            onChange={(event) => updateAiSettings({ model: event.target.value })}
+            placeholder="e.g. gpt-4o-mini, llama3.1:8b"
+            disabled={aiSettingsLoading}
             className={cn(
               // Sizing & Spacing
               "w-40"
             )}
+          />
+        ) : (
+          <Select
+            value={aiSettings.model}
+            onValueChange={(model) => {
+              if (model) {
+                updateAiSettings({ model });
+              }
+            }}
+            disabled={aiSettingsLoading}
           >
-            <SelectValue placeholder="Select model" />
-          </SelectTrigger>
-          <SelectContent>
-            {modelOptions.map((model) => (
-              <SelectItem key={model} value={model}>
-                {model}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            <SelectTrigger
+              id="ai-model"
+              className={cn(
+                // Sizing & Spacing
+                "w-40"
+              )}
+            >
+              <SelectValue placeholder="Select model" />
+            </SelectTrigger>
+            <SelectContent>
+              {modelOptions.map((model) => (
+                <SelectItem key={model} value={model}>
+                  {model}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </SettingsRow>
       <SettingsRow
         label={`${selectedProviderLabel} API Key`}
@@ -243,7 +280,7 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
           <Button
             size="sm"
             onClick={handleSaveAiSettings}
-            disabled={aiSettingsLoading || aiSettingsSaving || !canSaveAiSettings}
+            disabled={aiSettingsLoading || aiSettingsSaving || !canSaveAiSettings || !canSaveOpenAiCompatible}
           >
             <FloppyDiskIcon
               className={cn(
@@ -278,6 +315,24 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
             )}
           >
             Enable third-party AI data sharing before saving or using an API key.
+          </p>
+        </div>
+      )}
+
+      {isOpenAiCompatible && !canSaveOpenAiCompatible && (
+        <div
+          className={cn(
+            // Sizing & Spacing
+            "px-4 py-2"
+          )}
+        >
+          <p
+            className={cn(
+              // Typography
+              "text-xs text-amber-700 dark:text-amber-300"
+            )}
+          >
+            Enter a base URL and model name for the OpenAI-compatible provider.
           </p>
         </div>
       )}

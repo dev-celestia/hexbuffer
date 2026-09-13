@@ -1,7 +1,6 @@
 use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::process::Child;
 use std::sync::{atomic::AtomicBool, Arc};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -114,6 +113,8 @@ pub struct AiBrowserState {
     pub(crate) pages: Arc<Mutex<HashMap<String, Vec<CrawlPage>>>>,
     pub(crate) insights: Arc<Mutex<HashMap<String, Vec<AIInsight>>>>,
     pub(crate) logs: Arc<Mutex<HashMap<String, Vec<ActivityLog>>>>,
-    pub(crate) children: Arc<Mutex<HashMap<String, HashMap<String, Arc<Mutex<Child>>>>>>,
+    /// Live crawl engine controls keyed by session id then worker id. Pause, resume and
+    /// stop commands drive the running celestia-spider crawl through these handles.
+    pub(crate) controls: Arc<Mutex<HashMap<String, HashMap<String, Arc<celestia_spider::CrawlControl>>>>>,
     pub(crate) cancellations: Arc<Mutex<HashMap<String, HashMap<String, Arc<AtomicBool>>>>>,
 }

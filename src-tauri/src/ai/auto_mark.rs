@@ -23,11 +23,7 @@ pub async fn suggest_invoker_markers_impl(
         return Err(format!("No {} API key provided", settings.provider));
     }
 
-    let config = if settings.provider.to_lowercase() == "deepseek" {
-        hexbuffer_ai::AiConfig::deepseek(&settings.model, &api_key)
-    } else {
-        hexbuffer_ai::AiConfig::new(&settings.provider, &settings.model, &api_key)
-    };
+    let config = super::chat::build_ai_config(&settings, &api_key);
 
     let engine = hexbuffer_ai::AiEngine::new(config);
 

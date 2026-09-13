@@ -379,7 +379,9 @@ mod tests {
 
     #[test]
     fn test_sqli_checker_union_signature() {
-        assert!(SqliChecker::has_union_signature("UNION SELECT username FROM users"));
+        assert!(SqliChecker::has_union_signature(
+            "UNION SELECT username FROM users"
+        ));
         assert!(SqliChecker::has_union_signature("value is NULL"));
         assert!(SqliChecker::has_union_signature("1=1"));
         assert!(!SqliChecker::has_union_signature("just a normal page"));

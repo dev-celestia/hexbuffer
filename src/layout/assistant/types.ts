@@ -1,13 +1,14 @@
 import type { UIMessage } from '@ai-sdk/react';
 
 
-export type DashboardAiProvider = 'deepseek';
+export type DashboardAiProvider = 'deepseek' | 'openai-compatible';
 
 export interface DashboardAiSettings {
   provider: DashboardAiProvider;
   model: string;
   hasApiKey: boolean;
   allowThirdPartyAiSharing: boolean;
+  customBaseUrl?: string | null;
 }
 
 export interface DashboardChatMetadata {

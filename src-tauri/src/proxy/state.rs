@@ -208,6 +208,15 @@ impl ProxyState {
         self.0.lock().records.clear();
     }
 
+    /// Drops all pending intercepted requests and queued actions. Called when
+    /// the proxy stops: the tasks holding those connections die with the
+    /// runtime, so any leftover entries would otherwise leak until app exit.
+    pub fn clear_intercept_state(&self) {
+        let mut inner = self.0.lock();
+        inner.paused_requests.clear();
+        inner.paused_actions.clear();
+    }
+
     pub fn clear_records_before(&self, cutoff: &chrono::DateTime<chrono::Utc>) {
         let mut inner = self.0.lock();
         inner.records.retain(|r| r.timestamp >= *cutoff);

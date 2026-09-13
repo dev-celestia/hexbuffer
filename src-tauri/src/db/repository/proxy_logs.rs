@@ -216,12 +216,24 @@ impl Database {
             let default_session = Self::ensure_default_http_session(&conn)?;
             drop(conn);
 
+            // Cache the per-session storage mode so a batch of 50 records
+            // doesn't re-lock the disk DB up to 50 times for the same lookup.
+            let mut mode_cache: std::collections::HashMap<String, String> =
+                std::collections::HashMap::new();
+
             for (record, session_id) in records {
                 let sid = match session_id.as_deref() {
                     Some(s) if !s.trim().is_empty() => s.trim().to_string(),
                     _ => default_session.clone(),
                 };
-                let mode = self.get_session_storage_mode(Some(&sid));
+                let mode = match mode_cache.get(&sid) {
+                    Some(m) => m.clone(),
+                    None => {
+                        let m = self.get_session_storage_mode(Some(&sid));
+                        mode_cache.insert(sid.clone(), m.clone());
+                        m
+                    }
+                };
                 if mode == "ephemeral" {
                     ephemeral_records.push((record, sid));
                 } else {
@@ -484,20 +496,59 @@ impl Database {
         Ok(collect_records(rows))
     }
 
-    pub fn delete_log(&self, id: &str) -> SqlResult<()> {
+    pub fn delete_log(&self, id: &str, payload_store: Option<&PayloadStore>) -> SqlResult<()> {
+        // Collect payload refs first so the stored bodies can be reclaimed.
+        let mut payload_refs: Vec<String> = Vec::new();
         {
             let conn = self.conn.lock();
+            if let Ok(mut stmt) =
+                conn.prepare("SELECT req_payload_ref, res_payload_ref FROM http_logs WHERE id = ?1")
+            {
+                if let Ok(rows) = stmt.query_map(params![id], |row| {
+                    Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+                }) {
+                    for pair in rows.flatten() {
+                        payload_refs.extend([pair.0, pair.1]);
+                    }
+                }
+            }
             if let Err(e) = conn.execute("DELETE FROM http_logs WHERE id = ?1", params![id]) {
                 eprintln!("[db] delete_log: failed to delete from disk DB: {}", e);
             }
         }
         {
             let eph = self.ephemeral_conn.lock();
+            if let Ok(mut stmt) =
+                eph.prepare("SELECT req_payload_ref, res_payload_ref FROM http_logs WHERE id = ?1")
+            {
+                if let Ok(rows) = stmt.query_map(params![id], |row| {
+                    Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+                }) {
+                    for pair in rows.flatten() {
+                        payload_refs.extend([pair.0, pair.1]);
+                    }
+                }
+            }
             if let Err(e) = eph.execute("DELETE FROM http_logs WHERE id = ?1", params![id]) {
                 eprintln!("[db] delete_log: failed to delete from ephemeral DB: {}", e);
             }
         }
+        Self::release_payload_refs(payload_refs, payload_store);
         Ok(())
+    }
+
+    /// Releases payload bodies (e.g. RAM slab entries) referenced by deleted
+    /// log rows. Disk segment refs are append-only and ignored.
+    pub(crate) fn release_payload_refs(refs: Vec<String>, payload_store: Option<&PayloadStore>) {
+        if let Some(store) = payload_store {
+            for r in refs {
+                if !r.is_empty() && r.starts_with("slab:") {
+                    if let Err(e) = store.remove_body(&r) {
+                        eprintln!("[db] failed to release payload {}: {}", r, e);
+                    }
+                }
+            }
+        }
     }
 
     pub fn get_by_id(

@@ -6,6 +6,11 @@ import { useTrackedActions, clearTrackedActions } from '../lib/ai-tools';
 import { AI_MODEL_OPTIONS_BY_PROVIDER } from '@/pages/settings/constants';
 
 // ponytail: removed active page auto-detection to simplify system context and rely on explicit mentions
+const PROVIDER_LABELS: Record<string, string> = {
+  deepseek: 'DeepSeek',
+  'openai-compatible': 'OpenAI Compatible',
+};
+
 export function useAiChatPane() {
   const setMessagesRef = useRef<((messages: UIMessage<unknown>[]) => void) | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
@@ -45,7 +50,7 @@ export function useAiChatPane() {
     onSaveMessages: saveMessages,
   });
 
-  const providerDisplay = 'DeepSeek';
+  const providerDisplay = PROVIDER_LABELS[provider] ?? provider;
   const modelOptions = AI_MODEL_OPTIONS_BY_PROVIDER[aiSettings.provider] ?? [];
 
   const trackedActions = useTrackedActions();

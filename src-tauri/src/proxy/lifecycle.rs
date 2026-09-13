@@ -5,6 +5,7 @@ use std::time::Duration;
 
 use hexbuffer_proxy::WebSocketMessage as Message;
 use hexbuffer_proxy::{Body, HttpContext, HttpHandler, RequestOrResponse};
+use http_body_util::BodyExt;
 use hyper::{header::HeaderName, header::HeaderValue, Method, Request, Response, StatusCode, Uri};
 use tauri::{AppHandle, Emitter, Manager};
 
@@ -14,6 +15,34 @@ use crate::proxy::state::{
     WebSocketMessageDirection, WebSocketMessageRecord, WebSocketMessageType,
 };
 use crate::proxy::websocket;
+
+/// Responses larger than this are streamed straight through to the client
+/// without being buffered: they are not recorded and not intercept-editable.
+const MAX_BUFFERED_RESPONSE_BODY_BYTES: usize = 64 * 1024 * 1024;
+/// Bodies on records sent to the persistence worker are capped so the
+/// unbounded log channel and any in-memory record retention stay bounded.
+/// The payload store applies its own (smaller) storage cap afterwards.
+pub const MAX_RECORDED_BODY_BYTES: usize = 32 * 1024 * 1024;
+
+/// Flattens a header into the recording map. Duplicate names are preserved by
+/// joining values (", " per RFC 9110 §5.2; "; " for Set-Cookie, which must not
+/// be comma-merged) instead of silently overwritten.
+fn record_header(headers: &mut std::collections::HashMap<String, String>, name: &str, value: &str) {
+    match headers.get_mut(name) {
+        Some(existing) => {
+            let separator = if name.eq_ignore_ascii_case("set-cookie") {
+                "; "
+            } else {
+                ", "
+            };
+            existing.push_str(separator);
+            existing.push_str(value);
+        }
+        None => {
+            headers.insert(name.to_string(), value.to_string());
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct Ctx {
@@ -114,8 +143,7 @@ impl HttpHandler for AppHandler {
 
         for (name, value) in parts.headers.iter() {
             if let Ok(v) = value.to_str() {
-                ctx.req_headers
-                    .insert(name.as_str().to_string(), v.to_string());
+                record_header(&mut ctx.req_headers, name.as_str(), v);
             }
         }
 
@@ -195,6 +223,10 @@ impl HttpHandler for AppHandler {
             Ok(bytes) => bytes,
             Err(e) => {
                 eprintln!("[lifecycle] Failed to read request body: {}", e);
+                // The body may be partially consumed; dropping the stale
+                // content-length keeps the upstream framing consistent for
+                // the now-empty body.
+                parts.headers.remove(hyper::header::CONTENT_LENGTH);
                 return Ok(RequestOrResponse::Request(Request::from_parts(
                     parts,
                     Body::from(bytes::Bytes::new()),
@@ -223,10 +255,8 @@ impl HttpHandler for AppHandler {
 
                 if intercept_tab_id.is_none() {
                     self.pending_ctxs.lock().insert(http_ctx.id, ctx.clone());
-                    let mut req = Request::from_parts(
-                        parts,
-                        Body::from(bytes::Bytes::from(body_bytes.to_vec())),
-                    );
+                    // Bytes clone is a refcount bump, not a full body copy.
+                    let mut req = Request::from_parts(parts, Body::from(body_bytes.clone()));
                     req.headers_mut().insert("x-rusxy", "1".parse().unwrap());
                     return Ok(RequestOrResponse::Request(req));
                 }
@@ -323,11 +353,12 @@ impl HttpHandler for AppHandler {
         self.pending_ctxs.lock().insert(http_ctx.id, ctx.clone());
 
         let request_body = if body_modified {
-            ctx.req_body.clone()
+            bytes::Bytes::from(ctx.req_body.clone())
         } else {
-            body_bytes.to_vec()
+            // Bytes clone is a refcount bump, not a full body copy.
+            body_bytes.clone()
         };
-        let mut req = Request::from_parts(parts, Body::from(bytes::Bytes::from(request_body)));
+        let mut req = Request::from_parts(parts, Body::from(request_body));
         req.headers_mut().insert("x-rusxy", "1".parse().unwrap());
 
         Ok(RequestOrResponse::Request(req))
@@ -359,23 +390,97 @@ impl HttpHandler for AppHandler {
 
         for (name, value) in res.headers().iter() {
             if let Ok(v) = value.to_str() {
-                ctx.res_headers
-                    .insert(name.as_str().to_string(), v.to_string());
+                record_header(&mut ctx.res_headers, name.as_str(), v);
             }
         }
 
         let (mut parts, body) = res.into_parts();
 
-        let body_bytes = match body.into_bytes().await {
-            Ok(bytes) => bytes,
-            Err(e) => {
-                eprintln!("[lifecycle] Failed to read response body: {}", e);
-                return Ok(Response::from_parts(parts, Body::from(bytes::Bytes::new())));
+        // Buffering exists for recording/interception only; the crate streams
+        // whatever body we return back to the client. Responses declared
+        // larger than the cap are streamed through untouched — not recorded
+        // and not intercept-editable — instead of being buffered in full.
+        let content_length: Option<u64> = parts
+            .headers
+            .get(hyper::header::CONTENT_LENGTH)
+            .and_then(|v| v.to_str().ok())
+            .and_then(|v| v.parse().ok());
+
+        if ctx.req_method != "CONNECT"
+            && content_length.unwrap_or(0) > MAX_BUFFERED_RESPONSE_BODY_BYTES as u64
+        {
+            eprintln!(
+                "[lifecycle] Response body of {} bytes exceeds buffer cap ({}); streaming through unrecorded: {}",
+                content_length.unwrap_or(0),
+                MAX_BUFFERED_RESPONSE_BODY_BYTES,
+                ctx.req_uri
+            );
+            ctx.res_body = Vec::new();
+            save_and_emit(&ctx, &self.app_handle).await;
+            return Ok(Response::from_parts(parts, body));
+        }
+
+        let body_bytes: bytes::Bytes = match body {
+            Body::Full(bytes) => bytes,
+            Body::Streaming(boxed) => {
+                if content_length.is_some() {
+                    // Bounded by the declared content-length (checked against
+                    // the cap above).
+                    match boxed.collect().await {
+                        Ok(collected) => collected.to_bytes(),
+                        Err(e) => {
+                            eprintln!("[lifecycle] Failed to read response body: {}", e);
+                            // The body may be partially consumed; dropping the
+                            // stale content-length keeps the client-side
+                            // framing consistent.
+                            parts.headers.remove(hyper::header::CONTENT_LENGTH);
+                            return Ok(Response::from_parts(
+                                parts,
+                                Body::from(bytes::Bytes::new()),
+                            ));
+                        }
+                    }
+                } else {
+                    // No content-length (chunked): cap the collection so a
+                    // huge or unbounded stream can't exhaust memory. Exceeding
+                    // the cap fails the transaction with a visible 502.
+                    match http_body_util::Limited::new(boxed, MAX_BUFFERED_RESPONSE_BODY_BYTES)
+                        .collect()
+                        .await
+                    {
+                        Ok(collected) => collected.to_bytes(),
+                        Err(e) => {
+                            if e.is::<http_body_util::LengthLimitError>() {
+                                eprintln!(
+                                    "[lifecycle] Chunked response exceeded buffer cap ({} bytes) — {}",
+                                    MAX_BUFFERED_RESPONSE_BODY_BYTES, ctx.req_uri
+                                );
+                                return Ok(Response::builder()
+                                    .status(StatusCode::BAD_GATEWAY)
+                                    .header("content-type", "text/plain; charset=utf-8")
+                                    .body(Body::from(bytes::Bytes::from(
+                                        "Response body exceeded proxy buffer limit",
+                                    )))
+                                    .unwrap_or_else(|_| {
+                                        Response::new(Body::from(bytes::Bytes::new()))
+                                    }));
+                            }
+                            eprintln!("[lifecycle] Failed to read response body: {}", e);
+                            parts.headers.remove(hyper::header::CONTENT_LENGTH);
+                            return Ok(Response::from_parts(
+                                parts,
+                                Body::from(bytes::Bytes::new()),
+                            ));
+                        }
+                    }
+                }
             }
         };
+
         ctx.res_body = body_bytes.to_vec();
 
-        let mut response_body = body_bytes.to_vec();
+        // Bytes clone is a refcount bump, not a full body copy.
+        let mut response_body = body_bytes.clone();
 
         if ctx.req_method != "CONNECT" {
             let proxy_state = self.app_handle.state::<crate::proxy::ProxyState>();
@@ -454,7 +559,7 @@ impl HttpHandler for AppHandler {
 
                         ctx.res_body = modified.body.clone();
                         ctx.res_content_decoded = false;
-                        response_body = modified.body;
+                        response_body = bytes::Bytes::from(modified.body);
                     }
                     _ => {}
                 }
@@ -465,10 +570,7 @@ impl HttpHandler for AppHandler {
             save_and_emit(&ctx, &self.app_handle).await;
         }
 
-        Ok(Response::from_parts(
-            parts,
-            Body::from(bytes::Bytes::from(response_body)),
-        ))
+        Ok(Response::from_parts(parts, Body::from(response_body)))
     }
 }
 
@@ -479,15 +581,15 @@ impl hexbuffer_proxy::WebSocketHandler for AppHandler {
         let client_addr = ctx.client_addr.to_string();
         let req_uri = request.uri().to_string();
 
-        let req_headers: HashMap<String, String> = request
-            .headers()
-            .iter()
-            .filter_map(|(k, v)| {
-                v.to_str()
-                    .ok()
-                    .map(|s| (k.as_str().to_string(), s.to_string()))
-            })
-            .collect();
+        let req_headers: HashMap<String, String> = {
+            let mut headers = HashMap::new();
+            for (name, value) in request.headers().iter() {
+                if let Ok(v) = value.to_str() {
+                    record_header(&mut headers, name.as_str(), v);
+                }
+            }
+            headers
+        };
 
         let (host, path, url) = websocket::parse_websocket_target(&req_uri, &req_headers);
         let key = format!("{}|{}|{}", client_addr, host, path);

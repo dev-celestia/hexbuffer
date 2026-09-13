@@ -16,6 +16,7 @@ export interface AiSettings {
   apiKey: string;
   hasApiKey: boolean;
   allowThirdPartyAiSharing: boolean;
+  customBaseUrl?: string | null;
 }
 
 export interface StorageInfo {

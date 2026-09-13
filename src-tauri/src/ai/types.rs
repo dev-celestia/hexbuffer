@@ -15,6 +15,9 @@ pub struct AiSettings {
     pub provider_key_status: BTreeMap<String, bool>,
     #[serde(default)]
     pub allow_third_party_ai_sharing: bool,
+    /// Base URL for the `openai-compatible` provider (e.g. `https://api.openai.com/v1`).
+    #[serde(default)]
+    pub custom_base_url: Option<String>,
 }
 
 impl Default for AiSettings {
@@ -26,6 +29,7 @@ impl Default for AiSettings {
             has_api_key: false,
             provider_key_status: default_ai_key_status(),
             allow_third_party_ai_sharing: false,
+            custom_base_url: None,
         }
     }
 }

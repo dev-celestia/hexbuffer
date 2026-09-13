@@ -8,6 +8,11 @@ interface DashboardChatBody {
   aiSettings?: DashboardAiSettings;
 }
 
+const PROVIDER_LABELS: Record<string, string> = {
+  deepseek: 'DeepSeek',
+  'openai-compatible': 'OpenAI Compatible',
+};
+
 interface AiChatAction {
   action: string;
   payload: Record<string, unknown>;
@@ -62,7 +67,9 @@ function fallbackContent(aiSettings: DashboardAiSettings | undefined, error?: un
     return 'Enable third-party AI sharing in Settings before sending chat messages or app context to the configured AI provider.';
   }
 
-  return `I could not reach DeepSeek right now: ${error instanceof Error ? error.message : String(error)
+  return `I could not reach ${
+    aiSettings?.provider ? PROVIDER_LABELS[aiSettings.provider] ?? aiSettings.provider : 'the AI provider'
+  } right now: ${error instanceof Error ? error.message : String(error)
     }`;
 }
 

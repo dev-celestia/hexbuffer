@@ -4,8 +4,8 @@ use tauri::{AppHandle, Emitter, State};
 
 use super::keyring::read_required_ai_api_key;
 use super::settings::read_ai_settings;
-use super::types::{AiChatContext, AiChatCrawlContext, AiChatRequest, AiChatResponse, AiSettings};
 use super::tool_loop;
+use super::types::{AiChatContext, AiChatCrawlContext, AiChatRequest, AiChatResponse, AiSettings};
 
 pub async fn send_ai_chat_message_impl(
     app: AppHandle,
@@ -23,15 +23,12 @@ pub async fn send_ai_chat_message_impl(
     let context = build_ai_chat_context(&history)?;
     let context_json = serde_json::to_string(&context).ok();
 
-    let config = if settings.provider.to_lowercase() == "deepseek" {
-        hexbuffer_ai::AiConfig::deepseek(&settings.model, &api_key)
-    } else {
-        hexbuffer_ai::AiConfig::new(&settings.provider, &settings.model, &api_key)
-    };
+    let config = build_ai_config(&settings, &api_key);
 
-    let request_id = request.request_id.clone().unwrap_or_else(|| {
-        format!("chat-{}", chrono::Utc::now().timestamp_millis())
-    });
+    let request_id = request
+        .request_id
+        .clone()
+        .unwrap_or_else(|| format!("chat-{}", chrono::Utc::now().timestamp_millis()));
 
     let _ = app.emit(
         "ai-chat:started",
@@ -123,15 +120,27 @@ fn split_conversation(
     }
 }
 
+/// Builds the engine config for the configured provider. The `openai-compatible` provider
+/// points the OpenAI-compatible client at the user's custom base URL.
+pub(crate) fn build_ai_config(settings: &AiSettings, api_key: &str) -> hexbuffer_ai::AiConfig {
+    if super::providers::is_openai_compatible(&settings.provider) {
+        let mut config = hexbuffer_ai::AiConfig::new(&settings.provider, &settings.model, api_key);
+        config.base_url = settings.custom_base_url.clone();
+        config
+    } else {
+        hexbuffer_ai::AiConfig::deepseek(&settings.model, api_key)
+    }
+}
+
 pub fn ensure_third_party_ai_sharing_allowed(settings: &AiSettings) -> Result<(), String> {
     if settings.allow_third_party_ai_sharing {
         return Ok(());
     }
 
-    Err(
-        "Third-party AI sharing is disabled. Enable it in Settings before sending prompts, chat messages, crawl context, page summaries, logs, insights, URLs, or analysis context to DeepSeek."
-            .to_string(),
-    )
+    Err(format!(
+        "Third-party AI sharing is disabled. Enable it in Settings before sending prompts, chat messages, crawl context, page summaries, logs, insights, URLs, or analysis context to {}.",
+        settings.provider
+    ))
 }
 
 fn build_ai_chat_context(history: &crate::HistoryBridge) -> Result<AiChatContext, String> {
@@ -155,7 +164,13 @@ fn build_ai_chat_context(history: &crate::HistoryBridge) -> Result<AiChatContext
 
 fn build_crawl_context(
     history: &crate::HistoryBridge,
-) -> Result<(Vec<crate::commands::browser::CrawlSession>, Option<AiChatCrawlContext>), String> {
+) -> Result<
+    (
+        Vec<crate::commands::browser::CrawlSession>,
+        Option<AiChatCrawlContext>,
+    ),
+    String,
+> {
     let crawl_sessions = history
         .list_recent_ai_browser_sessions(5)
         .map_err(|e| e.to_string())?;

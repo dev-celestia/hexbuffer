@@ -113,8 +113,11 @@ export const TROUBLESHOOTING_GUIDES = [
 
 export const SECURITY_NOTICE_ICON = WarningCircleIcon;
 
+export const OPENAI_COMPATIBLE_PROVIDER_ID = 'openai-compatible';
+
 export const AI_PROVIDER_OPTIONS = [
   { id: 'deepseek', label: 'DeepSeek' },
+  { id: OPENAI_COMPATIBLE_PROVIDER_ID, label: 'OpenAI Compatible' },
 ];
 
 export const AI_MODEL_OPTIONS_BY_PROVIDER: Record<string, string[]> = {
@@ -122,8 +125,19 @@ export const AI_MODEL_OPTIONS_BY_PROVIDER: Record<string, string[]> = {
     'deepseek-v4-flash',
     'deepseek-v4-pro',
   ],
+  [OPENAI_COMPATIBLE_PROVIDER_ID]: [],
 };
 
 export const AI_API_KEY_PLACEHOLDERS: Record<string, string> = {
   deepseek: 'sk-...',
+  [OPENAI_COMPATIBLE_PROVIDER_ID]: 'sk-... (any OpenAI-compatible key)',
 };
+
+export const OPENAI_COMPATIBLE_BASE_URL_PLACEHOLDER = 'https://api.openai.com/v1';
+
+export const OPENAI_COMPATIBLE_BASE_URL_EXAMPLES = [
+  'https://api.openai.com/v1',
+  'https://openrouter.ai/api/v1',
+  'http://localhost:11434/v1 (Ollama)',
+  'http://localhost:1234/v1 (LM Studio)',
+];

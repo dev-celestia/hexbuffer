@@ -345,6 +345,10 @@ fn main() {
                 crate::log("macOS Reopen event received: revealing and focusing main suite window");
                 crate::app_commands::focus_main_suite_window(app_handle);
             }
+            if let tauri::RunEvent::ExitRequested { .. } = event {
+                // Persist any buffered proxy log records before shutdown.
+                hexbuffer::proxy::completion::flush_proxy_log_buffer_on_exit(app_handle);
+            }
             let _ = (app_handle, event);
         });
 }

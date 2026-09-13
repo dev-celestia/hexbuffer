@@ -449,12 +449,18 @@ mod tests {
     fn test_build_error_response_cors_toggle() {
         let with_cors = build_error_response(StatusCode::INTERNAL_SERVER_ERROR, "oops", true);
         assert_eq!(
-            with_cors.headers().get("access-control-allow-origin").unwrap(),
+            with_cors
+                .headers()
+                .get("access-control-allow-origin")
+                .unwrap(),
             "*"
         );
 
         let without_cors = build_error_response(StatusCode::INTERNAL_SERVER_ERROR, "oops", false);
-        assert!(without_cors.headers().get("access-control-allow-origin").is_none());
+        assert!(without_cors
+            .headers()
+            .get("access-control-allow-origin")
+            .is_none());
     }
 
     #[test]

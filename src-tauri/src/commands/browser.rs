@@ -1,11 +1,12 @@
 use crate::browser::crawl_helpers::{
-    add_log, is_terminal_status, kill_child_process_group, normalize_strategy, now,
-    persist_session, session_status, signal_child_process_group, update_session,
+    add_log, is_terminal_status, normalize_strategy, now, persist_session, session_status,
+    update_session,
 };
 use crate::browser::crawl_runner::run_browser_crawler_crawl;
 pub use crate::browser::{
     AIInsight, ActivityLog, AiBrowserState, CrawlConfig, CrawlPage, CrawlSession,
 };
+use celestia_spider::CrawlControl;
 
 // ── Agent browser types ──
 use parking_lot::Mutex;
@@ -22,11 +23,25 @@ use uuid::Uuid;
 
 fn active_ai_browser_worker_count(state: &AiBrowserState, session_id: &str) -> usize {
     state
-        .children
+        .controls
         .lock()
         .get(session_id)
         .map(|items| items.len())
         .unwrap_or(0)
+}
+
+fn cancel_session_controls(state: &AiBrowserState, session_id: &str) {
+    let controls = state.controls.lock().get(session_id).cloned();
+    if let Some(controls) = controls {
+        for control in controls.values() {
+            control.cancel();
+        }
+    }
+}
+
+fn remove_session_controls(state: &AiBrowserState, session_id: &str) {
+    let mut controls = state.controls.lock();
+    controls.remove(session_id);
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -551,6 +566,13 @@ pub async fn ai_browser_start_crawl(
         .entry(session.id.clone())
         .or_default()
         .insert(worker_id.clone(), cancel_flag.clone());
+    let crawl_control: Arc<CrawlControl> = Arc::new(CrawlControl::default());
+    state
+        .controls
+        .lock()
+        .entry(session.id.clone())
+        .or_default()
+        .insert(worker_id.clone(), crawl_control.clone());
 
     persist_session(&app, &session);
     if appending_existing_session {
@@ -653,6 +675,7 @@ pub async fn ai_browser_start_crawl(
         }
     };
     let cancel_flag_for_task = cancel_flag.clone();
+    let control_for_task = crawl_control.clone();
     tauri::async_runtime::spawn(async move {
         let sidecar_result = run_browser_crawler_crawl(
             app_for_task.clone(),
@@ -661,11 +684,12 @@ pub async fn ai_browser_start_crawl(
             session_id_for_task.clone(),
             worker_id_for_task.clone(),
             cancel_flag_for_task.clone(),
+            control_for_task.clone(),
         )
         .await;
 
-        let mut cancellations = state_for_task.cancellations.lock();
         {
+            let mut cancellations = state_for_task.cancellations.lock();
             if let Some(session_cancellations) = cancellations.get_mut(&session_id_for_task) {
                 session_cancellations.remove(&worker_id_for_task);
                 if session_cancellations.is_empty() {
@@ -673,12 +697,12 @@ pub async fn ai_browser_start_crawl(
                 }
             }
         }
-        let mut children = state_for_task.children.lock();
         {
-            if let Some(session_children) = children.get_mut(&session_id_for_task) {
-                session_children.remove(&worker_id_for_task);
-                if session_children.is_empty() {
-                    children.remove(&session_id_for_task);
+            let mut controls = state_for_task.controls.lock();
+            if let Some(session_controls) = controls.get_mut(&session_id_for_task) {
+                session_controls.remove(&worker_id_for_task);
+                if session_controls.is_empty() {
+                    controls.remove(&session_id_for_task);
                 }
             }
         }
@@ -699,7 +723,7 @@ pub async fn ai_browser_start_crawl(
                     session_id: session_id_for_task.clone(),
                     level: "error".to_string(),
                     r#type: "error".to_string(),
-                    message: format!("Sidecar crawl worker failed: {}", error),
+                    message: format!("Crawl worker failed: {}", error),
                     url: None,
                     ai_used_for_analysis: None,
                     created_at: now(),
@@ -807,10 +831,10 @@ pub async fn ai_browser_pause_crawl(
         return Ok(());
     }
 
-    let children = state.children.lock().get(&session_id).cloned();
-    if let Some(children) = children {
-        for child in children.values() {
-            signal_child_process_group(child, "-STOP")?;
+    let controls = state.controls.lock().get(&session_id).cloned();
+    if let Some(controls) = controls {
+        for control in controls.values() {
+            control.pause();
         }
     }
 
@@ -848,10 +872,10 @@ pub async fn ai_browser_resume_crawl(
         return Ok(());
     }
 
-    let children = state.children.lock().get(&session_id).cloned();
-    if let Some(children) = children {
-        for child in children.values() {
-            signal_child_process_group(child, "-CONT")?;
+    let controls = state.controls.lock().get(&session_id).cloned();
+    if let Some(controls) = controls {
+        for control in controls.values() {
+            control.resume();
         }
     }
 
@@ -893,11 +917,8 @@ pub async fn ai_browser_submit_human_input(
                 cancel_flag.store(true, Ordering::SeqCst);
             }
         }
-        if let Some(children) = state.children.lock().remove(&session_id) {
-            for child in children.values() {
-                kill_child_process_group(child);
-            }
-        }
+        cancel_session_controls(&state, &session_id);
+        remove_session_controls(&state, &session_id);
         update_session(&app, &state, &session_id, "stopped", Some(now()))?;
     } else if !session_status(&state, &session_id)
         .as_deref()
@@ -938,11 +959,8 @@ pub async fn ai_browser_stop_crawl(
         }
     }
 
-    if let Some(children) = state.children.lock().remove(&session_id) {
-        for child in children.values() {
-            kill_child_process_group(child);
-        }
-    }
+    cancel_session_controls(&state, &session_id);
+    remove_session_controls(&state, &session_id);
 
     update_session(&app, &state, &session_id, "stopped", Some(now()))?;
     add_log(
@@ -976,27 +994,23 @@ pub fn stop_all_active_crawls(app: &AppHandle, state: &AiBrowserState) {
             .collect()
     };
 
-    let children = state.children.lock();
     {
-        active_sessions.extend(children.keys().cloned());
+        let controls = state.controls.lock();
+        active_sessions.extend(controls.keys().cloned());
     }
 
     for session_id in &active_sessions {
-        let mut cancellations = state.cancellations.lock();
-        if let Some(cancel_flags) = cancellations.remove(session_id) {
-            for flag in cancel_flags.values() {
-                flag.store(true, Ordering::SeqCst);
-            }
-        }
-
         {
-            let mut children = state.children.lock();
-            if let Some(session_children) = children.remove(session_id) {
-                for child in session_children.values() {
-                    kill_child_process_group(child);
+            let mut cancellations = state.cancellations.lock();
+            if let Some(cancel_flags) = cancellations.remove(session_id) {
+                for flag in cancel_flags.values() {
+                    flag.store(true, Ordering::SeqCst);
                 }
             }
         }
+
+        cancel_session_controls(state, session_id);
+        remove_session_controls(state, session_id);
 
         let _ = update_session(app, state, session_id, "stopped", Some(now()));
 
@@ -1031,11 +1045,8 @@ pub async fn delete_ai_browser_session(
         }
     }
 
-    if let Some(children) = state.children.lock().remove(&session_id) {
-        for child in children.values() {
-            kill_child_process_group(child);
-        }
-    }
+    cancel_session_controls(&state, &session_id);
+    remove_session_controls(&state, &session_id);
 
     state.sessions.lock().remove(&session_id);
     state.pages.lock().remove(&session_id);

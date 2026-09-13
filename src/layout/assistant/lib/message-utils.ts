@@ -24,11 +24,16 @@ export function hasContent(message: DashboardChatMessage) {
   );
 }
 
+const PROVIDER_LABELS: Record<string, string> = {
+  deepseek: 'DeepSeek',
+  'openai-compatible': 'OpenAI Compatible',
+};
+
 export function providerLabel(message: DashboardChatMessage) {
   if (message.role !== 'assistant' || !message.metadata?.provider) {
     return null;
   }
 
-  const provider = 'DeepSeek';
+  const provider = PROVIDER_LABELS[message.metadata.provider] ?? message.metadata.provider;
   return [provider, message.metadata.model].filter(Boolean).join(' ');
 }

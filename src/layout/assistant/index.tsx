@@ -606,15 +606,23 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                         value={model}
                       >
                         <PromptInputSelectTrigger className="border border-border">
-                          <ModelSelectorLogo provider="deepseek" className="size-4" />
+                          <ModelSelectorLogo provider={provider} className="size-4" />
                           <PromptInputSelectValue />
                         </PromptInputSelectTrigger>
                         <PromptInputSelectContent>
-                          {modelOptions.map((option) => (
-                            <PromptInputSelectItem key={option} value={option}>
-                              {option}
+                          {modelOptions.length > 0 ? (
+                            modelOptions.map((option) => (
+                              <PromptInputSelectItem key={option} value={option}>
+                                {option}
+                              </PromptInputSelectItem>
+                            ))
+                          ) : (
+                            // OpenAI-compatible models are free-text in Settings; show the
+                            // configured model as the only option so the value stays selectable.
+                            <PromptInputSelectItem value={model}>
+                              {model || 'Set model in Settings'}
                             </PromptInputSelectItem>
-                          ))}
+                          )}
                         </PromptInputSelectContent>
                       </PromptInputSelect>
                     </PromptInputTools>

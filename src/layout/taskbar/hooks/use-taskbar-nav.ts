@@ -75,11 +75,7 @@ export function useSidebarNav() {
   // Track pathname changes to update recent apps list and mark as seen
   React.useEffect(() => {
     const matchedItem = visibleNavItems.find((item) => item.href === pathname);
-    if (
-      matchedItem &&
-      pathname !== '/' &&
-      pathname !== '/assistant'
-    ) {
+    if (matchedItem && pathname !== '/') {
       addRecentApp(pathname);
       markNewAppSeen(pathname);
     }
@@ -97,7 +93,6 @@ export function useSidebarNav() {
       .filter(
         (href) =>
           href !== '/' &&
-          href !== '/assistant' &&
           !pinnedNavItems.includes(href)
       )
       .map((href) => visibleNavItems.find((item) => item.href === href))

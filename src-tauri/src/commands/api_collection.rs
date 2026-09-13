@@ -7,6 +7,17 @@ use tauri::State;
 
 use crate::{ChronicleLogRecord, ContextRecord, HistoryBridge, StashEndpointRecord, StashRecord};
 
+/// Runs a blocking SQLite call off the async runtime.
+async fn run_blocking<T, F>(task: F) -> Result<T, String>
+where
+    F: FnOnce() -> Result<T, String> + Send + 'static,
+    T: Send + 'static,
+{
+    tauri::async_runtime::spawn_blocking(task)
+        .await
+        .map_err(|e| format!("background task failed: {}", e))?
+}
+
 #[derive(Debug, Deserialize)]
 pub struct ForgeRequest {
     pub method: String,
@@ -92,7 +103,8 @@ pub async fn send_forge_request(request: ForgeRequest) -> Result<ForgeResponse, 
 
 #[tauri::command]
 pub async fn get_stashes(history: State<'_, HistoryBridge>) -> Result<Vec<StashRecord>, String> {
-    history.get_stashes()
+    let history = history.inner().clone();
+    run_blocking(move || history.get_stashes()).await
 }
 
 #[tauri::command]
@@ -100,19 +112,22 @@ pub async fn save_stash(
     history: State<'_, HistoryBridge>,
     record: StashRecord,
 ) -> Result<(), String> {
-    history.save_stash(&record)
+    let history = history.inner().clone();
+    run_blocking(move || history.save_stash(&record)).await
 }
 
 #[tauri::command]
 pub async fn delete_stash(history: State<'_, HistoryBridge>, id: String) -> Result<(), String> {
-    history.delete_stash(&id)
+    let history = history.inner().clone();
+    run_blocking(move || history.delete_stash(&id)).await
 }
 
 #[tauri::command]
 pub async fn get_stash_endpoints(
     history: State<'_, HistoryBridge>,
 ) -> Result<Vec<StashEndpointRecord>, String> {
-    history.get_stash_endpoints()
+    let history = history.inner().clone();
+    run_blocking(move || history.get_stash_endpoints()).await
 }
 
 #[tauri::command]
@@ -120,7 +135,8 @@ pub async fn save_stash_endpoint(
     history: State<'_, HistoryBridge>,
     record: StashEndpointRecord,
 ) -> Result<(), String> {
-    history.save_stash_endpoint(&record)
+    let history = history.inner().clone();
+    run_blocking(move || history.save_stash_endpoint(&record)).await
 }
 
 #[tauri::command]
@@ -128,7 +144,8 @@ pub async fn delete_stash_endpoint(
     history: State<'_, HistoryBridge>,
     id: String,
 ) -> Result<(), String> {
-    history.delete_stash_endpoint(&id)
+    let history = history.inner().clone();
+    run_blocking(move || history.delete_stash_endpoint(&id)).await
 }
 
 #[tauri::command]
@@ -141,12 +158,14 @@ pub async fn save_context(
     history: State<'_, HistoryBridge>,
     record: ContextRecord,
 ) -> Result<(), String> {
-    history.save_context(&record)
+    let history = history.inner().clone();
+    run_blocking(move || history.save_context(&record)).await
 }
 
 #[tauri::command]
 pub async fn delete_context(history: State<'_, HistoryBridge>, id: String) -> Result<(), String> {
-    history.delete_context(&id)
+    let history = history.inner().clone();
+    run_blocking(move || history.delete_context(&id)).await
 }
 
 #[tauri::command]
@@ -154,7 +173,8 @@ pub async fn get_chronicle_logs(
     history: State<'_, HistoryBridge>,
     limit: u32,
 ) -> Result<Vec<ChronicleLogRecord>, String> {
-    history.get_chronicle_logs(limit)
+    let history = history.inner().clone();
+    run_blocking(move || history.get_chronicle_logs(limit)).await
 }
 
 #[tauri::command]
@@ -162,10 +182,12 @@ pub async fn add_chronicle_log(
     history: State<'_, HistoryBridge>,
     record: ChronicleLogRecord,
 ) -> Result<(), String> {
-    history.add_chronicle_log(&record)
+    let history = history.inner().clone();
+    run_blocking(move || history.add_chronicle_log(&record)).await
 }
 
 #[tauri::command]
 pub async fn clear_chronicle_logs(history: State<'_, HistoryBridge>) -> Result<(), String> {
-    history.clear_chronicle_logs()
+    let history = history.inner().clone();
+    run_blocking(move || history.clear_chronicle_logs()).await
 }

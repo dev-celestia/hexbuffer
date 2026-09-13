@@ -84,7 +84,9 @@ async fn frontend_tool_definitions() -> Vec<ToolDefinition> {
         crate::tools::ToggleInterceptTool
             .definition(String::new())
             .await,
-        crate::tools::TriggerScanTool.definition(String::new()).await,
+        crate::tools::TriggerScanTool
+            .definition(String::new())
+            .await,
         crate::tools::WriteDocumentTool
             .definition(String::new())
             .await,
@@ -115,9 +117,8 @@ async fn tool_definitions() -> Vec<ToolDefinition> {
 fn execute_crawl_context(app: &AppHandle) -> String {
     let state = app.state::<crate::HistoryBridge>();
     match super::chat::build_crawl_context_value(&state) {
-        Ok(value) => serde_json::to_string(&value).unwrap_or_else(|error| {
-            format!("Failed to serialize crawl context: {error}")
-        }),
+        Ok(value) => serde_json::to_string(&value)
+            .unwrap_or_else(|error| format!("Failed to serialize crawl context: {error}")),
         Err(error) => format!("Failed to load crawl context: {error}"),
     }
 }
@@ -232,7 +233,8 @@ pub async fn run_tool_loop(
     history: Vec<Message>,
     prompt: String,
 ) -> Result<ToolLoopOutput, String> {
-    let client = hexbuffer_ai::providers::create_openai_client(config).map_err(|e| e.to_string())?;
+    let client =
+        hexbuffer_ai::providers::create_openai_client(config).map_err(|e| e.to_string())?;
     let model = client.completion_model(&config.model);
     let tools = tool_definitions().await;
 
@@ -251,10 +253,7 @@ pub async fn run_tool_loop(
             additional_params: None,
         };
 
-        let response = model
-            .completion(request)
-            .await
-            .map_err(|e| e.to_string())?;
+        let response = model.completion(request).await.map_err(|e| e.to_string())?;
 
         match response.choice {
             ModelChoice::Message(text) => {

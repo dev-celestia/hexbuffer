@@ -59,7 +59,7 @@ md-5 = "0.10"
 rand = "0.8"
 tempfile = "3"
 hexbuffer-proxy = "1"
-browser-crawler = { git = "https://github.com/arhamymr/browser-crawler.git" }
+celestia-spider = "0.2"
 hexbuffer-ai = { git = "https://github.com/arhamymr/hexbuffer-agent.git" }
 nuclei-run = "1.0.0"
 rig-core = "0.7"
