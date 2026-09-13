@@ -11,8 +11,22 @@ pub struct AppToolError(pub String);
 // 1. SendToRepeaterTool
 #[derive(Deserialize, Serialize)]
 pub struct SendToRepeaterArgs {
-    pub raw_request: String,
+    #[serde(default)]
+    pub raw_request: Option<String>,
+    #[serde(default)]
     pub target_url: Option<String>,
+    #[serde(default)]
+    pub url: Option<String>,
+    #[serde(default)]
+    pub host: Option<String>,
+    #[serde(default)]
+    pub method: Option<String>,
+    #[serde(default)]
+    pub headers: Option<std::collections::HashMap<String, String>>,
+    #[serde(default)]
+    pub body: Option<String>,
+    #[serde(default)]
+    pub name: Option<String>,
 }
 
 pub struct SendToRepeaterTool;
@@ -27,15 +41,25 @@ impl Tool for SendToRepeaterTool {
         ToolDefinition {
             name: Self::NAME.to_string(),
             description:
-                "Send an HTTP request to the Repeater tab for manual inspection and modification."
+                "Send an HTTP request to the Repeater tab for manual inspection and modification. \
+                Accepts either a complete raw HTTP request, or a partial/unfinished request such \
+                as a bare URL path (e.g. \"api/users?page=1\"). Normalize the request yourself \
+                before calling: infer the method (default GET), path, query, headers and body. \
+                Required: `url` (absolute or relative path) plus `host` for relative paths — if \
+                the host cannot be determined from the app context or the user's message, ask \
+                the user for it instead of calling this tool."
                     .to_string(),
             parameters: json!({
                 "type": "object",
                 "properties": {
-                    "raw_request": { "type": "string", "description": "Raw HTTP request string including headers and body" },
-                    "target_url": { "type": "string", "description": "Optional target URL or host" }
-                },
-                "required": ["raw_request"]
+                    "raw_request": { "type": "string", "description": "Complete raw HTTP request (request line, headers, body). Omit when the user only provided a URL path or fragment; then use `url` instead." },
+                    "url": { "type": "string", "description": "Absolute URL or relative path taken from the user, e.g. \"api/Lms/Synchronous/leaderboard?businessEventId=96218820\" or \"https://host/api/x\"." },
+                    "host": { "type": "string", "description": "Origin for relative paths, e.g. \"https://example.com\". Prefer a host seen in the recent proxy traffic from the app context; if none fits, ask the user for the host instead of calling this tool." },
+                    "method": { "type": "string", "description": "HTTP method (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS). Defaults to GET when omitted or unknown." },
+                    "headers": { "type": "object", "description": "Optional request headers key-value map" },
+                    "body": { "type": "string", "description": "Optional request body (POST/PUT/PATCH)" },
+                    "name": { "type": "string", "description": "Optional endpoint name shown in Repeater" }
+                }
             }),
         }
     }

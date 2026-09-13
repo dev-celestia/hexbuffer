@@ -1,23 +1,104 @@
+import { invoke } from '@tauri-apps/api/core';
 import { useNavStore } from '@/stores/nav';
 import { createCollection, createFolder, createEndpoint, selectEndpoint } from './management';
 import { sendRawToRepeater } from './send-to';
 
+const HTTP_METHOD_PATTERN = /^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS|TRACE|CONNECT)$/;
+
+interface ProxyRecentSummary {
+  url?: string;
+  host?: string;
+}
+
+function looksLikeRawHttpRequest(raw: string): boolean {
+  const firstLine = raw.split(/\r?\n/, 1)[0]?.trim() ?? '';
+  return /^[A-Z]+\s+\S+\s+HTTP\//i.test(firstLine);
+}
+
+function normalizeHeaders(value: unknown): Record<string, string> | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const entries = Object.entries(value as Record<string, unknown>)
+    .filter(([key]) => key.trim().length > 0)
+    .map(([key, entry]) => [key.trim(), String(entry)] as const);
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+}
+
+function normalizeOrigin(host: string): string {
+  const trimmed = host.trim().replace(/\/+$/, '');
+  if (!trimmed) return '';
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
+/**
+ * Resolves an origin for relative paths: an explicit host wins, otherwise the most
+ * recent proxy traffic provides the likely target.
+ */
+async function resolveOrigin(explicitHost: string): Promise<string> {
+  if (explicitHost) return normalizeOrigin(explicitHost);
+
+  try {
+    const recent = await invoke<ProxyRecentSummary[]>('get_proxy_recent', {
+      limit: 10,
+      sortOrder: 'DESC',
+    });
+    for (const entry of recent ?? []) {
+      if (entry.url) {
+        try {
+          return new URL(entry.url).origin;
+        } catch {
+          // Fall through to the host field.
+        }
+      }
+      if (entry.host) {
+        const origin = normalizeOrigin(entry.host);
+        if (origin) return origin;
+      }
+    }
+  } catch {
+    // No proxy history available; leave the path relative.
+  }
+  return '';
+}
+
 export const REPEATER_AI_TOOL_DEFINITION = {
   name: 'send_to_repeater',
-  description: 'Send an HTTP request to the Repeater tab for manual inspection and modification.',
+  description:
+    'Send an HTTP request to the Repeater tab for manual inspection and modification. Accepts a complete raw HTTP request OR a partial request such as a bare URL path (e.g. "api/users?page=1"). Normalize the request yourself before calling: infer the method (default GET), path, query, headers and body. Required: `url` (absolute or relative path) plus `host` for relative paths — if the host cannot be determined from the app context or the user\'s message, ask the user for it instead of calling this tool.',
   parameters: {
     type: 'object',
     properties: {
       raw_request: {
         type: 'string',
-        description: 'Raw HTTP request string including headers and body',
+        description:
+          'Complete raw HTTP request (request line, headers, body). Omit when the user only provided a URL path or fragment; use `url` instead.',
       },
-      target_url: {
+      url: {
         type: 'string',
-        description: 'Optional target URL or host',
+        description:
+          'Absolute URL or relative path taken from the user, e.g. "api/Lms/Synchronous/leaderboard?businessEventId=96218820" or "https://host/api/x".',
+      },
+      host: {
+        type: 'string',
+        description:
+          'Origin for relative paths, e.g. "https://example.com". Prefer a host seen in the recent proxy traffic from the app context; if none fits, ask the user for the host instead of calling this tool.',
+      },
+      method: {
+        type: 'string',
+        description: 'HTTP method. Defaults to GET when omitted or unknown.',
+      },
+      headers: {
+        type: 'object',
+        description: 'Optional request headers key-value map',
+      },
+      body: {
+        type: 'string',
+        description: 'Optional request body (POST/PUT/PATCH)',
+      },
+      name: {
+        type: 'string',
+        description: 'Optional endpoint name shown in Repeater',
       },
     },
-    required: ['raw_request'],
   },
 };
 
@@ -95,10 +176,50 @@ export const CREATE_ENDPOINT_AI_TOOL_DEFINITION = {
 };
 
 export async function executeSendToRepeaterAiTool(args: Record<string, any>) {
-  const raw = args.raw_request || '';
-  const url = args.target_url || '';
-  await sendRawToRepeater({ raw, url });
-  return `Request placed in the Repeater tab${url ? ` (target: ${url})` : ''} for manual inspection.`;
+  let raw = typeof args.raw_request === 'string' ? args.raw_request.trim() : '';
+  let url = String(args.url ?? args.path ?? args.target_url ?? '').trim();
+  const method = HTTP_METHOD_PATTERN.test(String(args.method ?? '').toUpperCase())
+    ? String(args.method).toUpperCase()
+    : 'GET';
+  const headers = normalizeHeaders(args.headers);
+  const body = typeof args.body === 'string' ? args.body.trim() : '';
+  const explicitHost = String(args.host ?? args.origin ?? '').trim();
+  const name = typeof args.name === 'string' && args.name.trim() ? args.name.trim() : undefined;
+
+  // A complete raw HTTP request is forwarded untouched.
+  if (raw && looksLikeRawHttpRequest(raw)) {
+    await sendRawToRepeater({ raw, url: url || undefined, name });
+    return `Request sent to the Repeater tab${url ? ` (target: ${url})` : ''} for manual inspection.`;
+  }
+
+  // Interpret fragments: a bare path/URL (or text without a request line) becomes
+  // the target of a canonical request, defaulting to GET.
+  if (!url && raw) {
+    url = raw;
+    raw = '';
+  }
+  if (!url) {
+    throw new Error('Nothing to send: provide a raw HTTP request or a URL/path.');
+  }
+
+  if (!/^https?:\/\//i.test(url)) {
+    const path = url.startsWith('/') ? url : `/${url}`;
+    const origin = await resolveOrigin(explicitHost);
+    url = origin ? `${origin}${path}` : path;
+  }
+
+  await sendRawToRepeater({
+    url,
+    method,
+    headers,
+    body: body || undefined,
+    name: name ?? `${method} ${url}`,
+  });
+
+  if (!/^https?:\/\//i.test(url)) {
+    return `Request (${method} ${url}) sent to the Repeater tab with a relative path — set the target host in Repeater before sending.`;
+  }
+  return `Request (${method} ${url}) sent to the Repeater tab for manual inspection.`;
 }
 
 export async function executeCreateCollectionAiTool(args: Record<string, any>) {

@@ -7,11 +7,23 @@ use crate::collaborator::{
 };
 use crate::history::HistoryBridge;
 
+/// Runs a blocking SQLite call off the async runtime.
+async fn run_blocking<T, F>(task: F) -> Result<T, String>
+where
+    F: FnOnce() -> Result<T, String> + Send + 'static,
+    T: Send + 'static,
+{
+    tauri::async_runtime::spawn_blocking(task)
+        .await
+        .map_err(|e| format!("background task failed: {}", e))?
+}
+
 #[tauri::command]
 pub async fn list_collaborator_servers(
     history: State<'_, HistoryBridge>,
 ) -> Result<Vec<CollaboratorServer>, String> {
-    history.list_collaborator_servers()
+    let history = history.inner().clone();
+    run_blocking(move || history.list_collaborator_servers()).await
 }
 
 #[tauri::command]
@@ -52,7 +64,8 @@ pub async fn delete_collaborator_server(
     history: State<'_, HistoryBridge>,
     id: String,
 ) -> Result<(), String> {
-    history.delete_collaborator_server(&id)
+    let history = history.inner().clone();
+    run_blocking(move || history.delete_collaborator_server(&id)).await
 }
 
 #[tauri::command]
@@ -169,7 +182,8 @@ pub async fn list_collaborator_payloads(
     history: State<'_, HistoryBridge>,
     server_id: Option<String>,
 ) -> Result<Vec<CollaboratorPayload>, String> {
-    history.list_collaborator_payloads(server_id.as_deref())
+    let history = history.inner().clone();
+    run_blocking(move || history.list_collaborator_payloads(server_id.as_deref())).await
 }
 
 #[tauri::command]
@@ -177,7 +191,8 @@ pub async fn delete_collaborator_payload(
     history: State<'_, HistoryBridge>,
     id: String,
 ) -> Result<(), String> {
-    history.delete_collaborator_payload(&id)
+    let history = history.inner().clone();
+    run_blocking(move || history.delete_collaborator_payload(&id)).await
 }
 
 #[tauri::command]
@@ -185,7 +200,8 @@ pub async fn archive_collaborator_payload(
     history: State<'_, HistoryBridge>,
     id: String,
 ) -> Result<(), String> {
-    history.update_collaborator_payload_status(&id, "archived")
+    let history = history.inner().clone();
+    run_blocking(move || history.update_collaborator_payload_status(&id, "archived")).await
 }
 
 #[tauri::command]
@@ -194,7 +210,11 @@ pub async fn list_collaborator_interactions(
     payload_id: Option<String>,
     interaction_type: Option<String>,
 ) -> Result<Vec<CollaboratorInteraction>, String> {
-    history.list_collaborator_interactions(payload_id.as_deref(), interaction_type.as_deref())
+    let history = history.inner().clone();
+    run_blocking(move || {
+        history.list_collaborator_interactions(payload_id.as_deref(), interaction_type.as_deref())
+    })
+    .await
 }
 
 #[tauri::command]
@@ -202,7 +222,8 @@ pub async fn get_collaborator_interaction(
     history: State<'_, HistoryBridge>,
     id: String,
 ) -> Result<Option<CollaboratorInteraction>, String> {
-    history.get_collaborator_interaction(&id)
+    let history = history.inner().clone();
+    run_blocking(move || history.get_collaborator_interaction(&id)).await
 }
 
 #[tauri::command]
@@ -291,7 +312,8 @@ async fn fetch_interactions_from_server(
 pub async fn get_collaborator_dashboard_stats(
     history: State<'_, HistoryBridge>,
 ) -> Result<CollaboratorDashboardStats, String> {
-    history.get_collaborator_dashboard_stats()
+    let history = history.inner().clone();
+    run_blocking(move || history.get_collaborator_dashboard_stats()).await
 }
 
 fn generate_payload_identifier() -> String {

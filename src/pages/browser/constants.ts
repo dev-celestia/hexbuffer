@@ -1,9 +1,4 @@
-import type {
-  ActivityLogType,
-  CrawlPageStatus,
-  CrawlSetupConfig,
-  InsightSeverity,
-} from './types';
+import type { CrawlSetupConfig } from './types';
 
 export const DEFAULT_CRAWL_SETUP: CrawlSetupConfig = {
   targetUrl: 'https://example.com',
@@ -21,42 +16,9 @@ export const DEFAULT_CRAWL_SETUP: CrawlSetupConfig = {
   headless: true,
 };
 
-export const PAGE_STATUS_LABELS: Record<CrawlPageStatus, string> = {
-  queued: 'Queued',
-  current: 'Current',
-  visited: 'Visited',
-  error: 'Error',
-  blocked: 'Blocked',
-};
+export type CrawlViewTab = 'activity' | 'findings';
 
-export const PAGE_STATUS_MARKERS: Record<CrawlPageStatus, string> = {
-  queued: '○',
-  current: '●',
-  visited: '✓',
-  error: '!',
-  blocked: '×',
-};
-
-export const INSIGHT_SEVERITIES: InsightSeverity[] = ['info', 'low', 'medium', 'high', 'critical'];
-
-export const LOG_TYPES: ActivityLogType[] = [
-  'session',
-  'navigation',
-  'extraction',
-  'ai',
-  'human',
-  'policy',
-  'error',
-  'queue',
-];
-
-export const INSIGHT_TYPES = [
-  'authentication',
-  'login-form',
-  'upload-form',
-  'admin-route',
-  'hidden-route',
-  'javascript-route',
-  'error-page',
-  'interesting-page',
+export const CRAWL_VIEW_TABS: Array<{ id: CrawlViewTab; name: string }> = [
+  { id: 'activity', name: 'Activity' },
+  { id: 'findings', name: 'Findings' },
 ];

@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { useAppStore } from '@/stores/app';
-import { useBrowserAutomationStore, type ActionLogEntry } from '@/stores/browser-automation';
+import { useBrowserAutomationStore } from '@/stores/browser-automation';
 import { useShallow } from 'zustand/react/shallow';
-import { buildCrawlTree } from '../lib/crawl-data';
 import type {
   ActivityLog,
   AIInsight,
@@ -11,14 +10,11 @@ import type {
   CrawlSession,
   HumanInputRequest,
 } from '../types';
+import type { CrawlViewTab } from '../constants';
 
 export function useBrowserAutomationPage() {
   const {
     tabs,
-    activeTabId,
-    setActiveTabId,
-    renameTab,
-    closeTab,
     overview,
     updateSetup,
     saveConfig,
@@ -35,10 +31,6 @@ export function useBrowserAutomationPage() {
   } = useBrowserAutomationStore(
     useShallow((s) => ({
       tabs: s.tabs,
-      activeTabId: s.activeTabId,
-      setActiveTabId: s.setActiveTabId,
-      renameTab: s.renameTab,
-      closeTab: s.closeTab,
       overview: s.overview,
       updateSetup: s.updateSetup,
       saveConfig: s.saveConfig,
@@ -55,15 +47,14 @@ export function useBrowserAutomationPage() {
     }))
   );
 
-  const activeTab = useMemo(
-    () => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0] ?? null,
-    [activeTabId, tabs]
-  );
+  const [viewTab, setViewTab] = useState<CrawlViewTab>('activity');
+
+  // Single-session view: always render the first crawl session tab.
+  const activeTab = useMemo(() => tabs[0] ?? null, [tabs]);
 
   const pages = activeTab?.pages ?? [];
   const insights = activeTab?.insights ?? [];
   const logs = activeTab?.logs ?? [];
-  const selectedPageId = activeTab?.selectedPageId ?? null;
   const search = activeTab?.search ?? '';
 
   useEffect(() => {
@@ -134,19 +125,6 @@ export function useBrowserAutomationPage() {
     applyHumanInputRequested,
   ]);
 
-  const filteredPages = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return pages.filter((page) =>
-      !query ||
-      page.url.toLowerCase().includes(query) ||
-      page.title?.toLowerCase().includes(query)
-    );
-  }, [search, pages]);
-
-  const crawlTree = useMemo(() => buildCrawlTree(filteredPages), [filteredPages]);
-
-  const selectedPage = pages.find((page) => page.id === selectedPageId) ?? null;
-
   const filteredInsights = useMemo(() => {
     const query = search.trim().toLowerCase();
     return insights.filter((insight) =>
@@ -173,7 +151,7 @@ export function useBrowserAutomationPage() {
   const interestingPages = useMemo(() => {
     const next = pages.filter((page) => page.interesting && page.status !== 'queued');
     const last = lastInterestingPagesRef.current;
-    
+
     // ponytail: compare key fields of the list items to preserve array reference when contents are identical
     const isSame =
       next.length === last.length &&
@@ -203,40 +181,23 @@ export function useBrowserAutomationPage() {
     (state) => state.setBrowserAutomationSafetyAlertDismissed
   );
 
-  // Derive status and isRunning from active tab session
   const status = activeTab?.session?.status ?? 'idle';
   const isRunning = status === 'running';
-
-  // Transform logs into ActionLogEntry format for the panel
-  const actionLogs = useMemo(() => {
-    const tabLogs = activeTab?.logs ?? [];
-    return tabLogs.map((l) => ({
-      timestamp: new Date(l.createdAt),
-      type: (l.type === 'session' || l.type === 'policy' || l.type === 'human' ? 'command' : l.type === 'error' ? 'error' : l.type === 'ai' ? 'ai' : 'result') as ActionLogEntry['type'],
-      message: l.message,
-    }));
-  }, [activeTab?.logs]);
+  const sessionOverview = overview(activeTab?.id);
 
   return {
-    tabs: tabs.map((tab) => ({ id: tab.id, name: tab.name })),
-    activeTabId,
-    setActiveTabId,
-    renameTab,
-    closeTab,
     activeTab,
-    crawlTree,
-    selectedPage,
+    viewTab,
+    setViewTab,
     filteredInsights,
     filteredLogs,
     interestingPages,
-    overview: overview(activeTab?.id),
-    // Absorbed from index.tsx
+    overview: sessionOverview,
     updateSetup,
     saveConfig,
     clearLogs,
     status,
     isRunning,
-    actionLogs,
     search,
     setSearch,
     browserAutomationSafetyAlertDismissed,

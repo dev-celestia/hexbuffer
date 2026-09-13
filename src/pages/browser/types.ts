@@ -123,7 +123,3 @@ export interface CrawlOverview {
   formsFound: number;
   durationSeconds: number;
 }
-
-export interface CrawlTreeNode extends CrawlPage {
-  children: CrawlTreeNode[];
-}

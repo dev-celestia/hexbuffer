@@ -1,9 +1,9 @@
 use super::crawl_helpers::{add_log, now, persist_insight, persist_page, upsert_page_memory};
 use super::crawl_types::{AIInsight, ActivityLog, AiBrowserState, CrawlConfig, CrawlPage};
+use celestia_spider::{extract_links, transform_html_to_ir};
 use celestia_spider::{
     CrawlControl, CrawlResult, CrawlerEvent, Options as SpiderOptions, Runner, Strategy,
 };
-use celestia_spider::{extract_links, transform_html_to_ir};
 use parking_lot::Mutex;
 use std::collections::HashMap;
 use std::sync::{
@@ -34,7 +34,12 @@ fn is_interesting_page(markdown: &str) -> bool {
 }
 
 fn map_strategy(config: &CrawlConfig) -> Strategy {
-    match config.strategy.as_deref().map(str::trim).map(str::to_lowercase) {
+    match config
+        .strategy
+        .as_deref()
+        .map(str::trim)
+        .map(str::to_lowercase)
+    {
         Some(value) if value == "dfs" || value == "depth-first" || value == "depthfirst" => {
             Strategy::DepthFirst
         }
@@ -69,8 +74,7 @@ fn build_spider_options(config: &CrawlConfig, seed_url: &str) -> SpiderOptions {
     } else if delay_ms > 0 {
         options.rate_limit = (1000 / delay_ms).max(1) as usize;
     }
-    let proxy_port = crate::proxy::active_proxy_port();
-    if proxy_port != 0 {
+    if let Some(proxy_port) = crate::proxy::active_proxy_port() {
         options.proxy = format!("http://127.0.0.1:{}", proxy_port);
     }
     options.form_extraction = true;
@@ -106,7 +110,11 @@ pub(crate) async fn run_browser_crawler_crawl(
             r#type: "session".to_string(),
             message: format!(
                 "Initializing celestia-spider engine ({} engine) for {}",
-                if config.headless { "headless" } else { "standard" },
+                if config.headless {
+                    "headless"
+                } else {
+                    "standard"
+                },
                 seed_url
             ),
             url: Some(seed_url.clone()),
@@ -227,11 +235,7 @@ pub(crate) async fn run_browser_crawler_crawl(
                 message: format!(
                     "Crawled page: {} ({}){}",
                     url,
-                    if title.is_empty() {
-                        "No Title"
-                    } else {
-                        &title
-                    },
+                    if title.is_empty() { "No Title" } else { &title },
                     tech_note
                 ),
                 url: Some(url.clone()),
@@ -362,7 +366,10 @@ pub(crate) async fn run_browser_crawler_crawl(
                                 r#type: "session".to_string(),
                                 message: format!(
                                     "Engine finished: {} pages, {} skipped, {} failed in {} ms",
-                                    summary.results, summary.skipped, summary.failed, summary.duration_ms
+                                    summary.results,
+                                    summary.skipped,
+                                    summary.failed,
+                                    summary.duration_ms
                                 ),
                                 url: None,
                                 ai_used_for_analysis: Some(false),
@@ -386,7 +393,11 @@ pub(crate) async fn run_browser_crawler_crawl(
         .await
         .map_err(|error| format!("celestia-spider crawl failed: {}", error))?;
 
-    let cancelled_note = if summary.cancelled { " (cancelled)" } else { "" };
+    let cancelled_note = if summary.cancelled {
+        " (cancelled)"
+    } else {
+        ""
+    };
     add_log(
         &app,
         &state,

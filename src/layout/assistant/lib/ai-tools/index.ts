@@ -3,6 +3,7 @@ export * from './definitions';
 export * from './executor';
 export * from './listener';
 export * from './tracker';
+export * from './confirmation';
 export * from './repeater';
 export * from './intruder';
 export * from './intercept';

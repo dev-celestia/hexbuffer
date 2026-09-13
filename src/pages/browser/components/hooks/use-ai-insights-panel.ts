@@ -1,4 +1,5 @@
 import { useMemo, useState, type KeyboardEvent } from 'react';
+import { openUrl } from '@tauri-apps/plugin-opener';
 import { useBrowserAutomationStore } from '@/stores/browser-automation';
 import type { AIInsight, CrawlPage, InsightSeverity } from '../../types';
 
@@ -28,7 +29,6 @@ export function useAiInsightsPanel(insights: AIInsight[]) {
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all');
   const [detailItem, setDetailItem] = useState<DetailItem | null>(null);
 
-  const selectPage = useBrowserAutomationStore((s) => s.selectPage);
   const toggleInsightReviewed = useBrowserAutomationStore((s) => s.toggleInsightReviewed);
 
   const visibleInsights = useMemo(() => {
@@ -58,9 +58,9 @@ export function useAiInsightsPanel(insights: AIInsight[]) {
 
   function handleDetailOpenPage() {
     const page = getDetailPage();
-    if (!page) return;
+    if (!page?.url) return;
 
-    selectPage(page.id);
+    void openUrl(page.url);
     setDetailItem(null);
   }
 

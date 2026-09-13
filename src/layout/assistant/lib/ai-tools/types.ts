@@ -8,4 +8,6 @@ export interface AppAiToolCallPayload {
   id: string;
   tool_name: string;
   arguments: Record<string, any>;
+  /** High-risk tools require explicit user confirmation before the executor runs. */
+  requiresConfirmation?: boolean;
 }

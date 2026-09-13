@@ -23,6 +23,17 @@ fn get_running_processes() -> &'static Mutex<HashMap<String, Child>> {
     RUNNING_PROCESSES.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
+/// Runs a blocking SQLite or process-waiting call off the async runtime.
+async fn run_blocking<T, F>(task: F) -> Result<T, String>
+where
+    F: FnOnce() -> Result<T, String> + Send + 'static,
+    T: Send + 'static,
+{
+    tauri::async_runtime::spawn_blocking(task)
+        .await
+        .map_err(|e| format!("background task failed: {}", e))?
+}
+
 /// Spawn the AI engine sidecar in regression mode and relay its stdout events
 /// to the Tauri frontend in real time.
 #[tauri::command]
@@ -31,18 +42,22 @@ pub async fn run_regression_test(
     state: tauri::State<'_, Database>,
     test_case_id: String,
 ) -> Result<Value, String> {
-    // Load test case from DB
-    let record = state
-        .get_regression_test_case(&test_case_id)
-        .map_err(|e| format!("Failed to load test case: {}", e))?
-        .ok_or_else(|| format!("Test case not found: {}", test_case_id))?;
+    // Load test case from DB and create the run record off the async runtime.
+    let db = state.inner().clone();
+    let test_case_id_for_task = test_case_id.clone();
+    let record = run_blocking(move || {
+        let record = db
+            .get_regression_test_case(&test_case_id_for_task)
+            .map_err(|e| format!("Failed to load test case: {}", e))?
+            .ok_or_else(|| format!("Test case not found: {}", test_case_id_for_task))?;
 
-    let run_id = Uuid::new_v4().to_string();
-
-    // Create run record
-    state
-        .create_regression_run(&run_id, &test_case_id, "queued")
-        .map_err(|e| format!("Failed to create run record: {}", e))?;
+        let run_id = Uuid::new_v4().to_string();
+        db.create_regression_run(&run_id, &test_case_id_for_task, "queued")
+            .map_err(|e| format!("Failed to create run record: {}", e))?;
+        Ok((record, run_id))
+    })
+    .await?;
+    let (record, run_id) = record;
 
     // Build config for the sidecar
     let test_case_value: Value = serde_json::json!({
@@ -231,12 +246,25 @@ pub async fn run_regression_test(
 /// Abort a running regression test sidecar process.
 #[tauri::command]
 pub async fn abort_regression_test(app: AppHandle, run_id: String) -> Result<(), String> {
-    if let Some(mut child) = get_running_processes().lock().remove(&run_id) {
+    // End the lock guard's lifetime before awaiting below.
+    let child_opt = get_running_processes().lock().remove(&run_id);
+    if let Some(mut child) = child_opt {
         let _ = child.kill();
 
         if let Some(db) = app.try_state::<Database>() {
-            let _ =
-                db.finish_regression_run(&run_id, "aborted", "[]", None, Some("Aborted by user"));
+            let db = db.inner().clone();
+            let run_id_for_task = run_id.clone();
+            let _ = run_blocking(move || {
+                db.finish_regression_run(
+                    &run_id_for_task,
+                    "aborted",
+                    "[]",
+                    None,
+                    Some("Aborted by user"),
+                )
+                .map_err(|e| e.to_string())
+            })
+            .await;
         }
         let _ = app.emit(
             "regression:test-finished",
@@ -283,62 +311,67 @@ pub async fn scrape_page_for_steps(app: AppHandle, target_url: String) -> Result
     #[cfg(unix)]
     command.process_group(0);
 
-    let mut child = command
-        .spawn()
-        .map_err(|e| format!("Failed to start scrape sidecar: {}", e))?;
+    // The sidecar runs synchronously until it emits a result — potentially
+    // minutes — so the whole spawn/read/wait cycle stays off the async runtime.
+    run_blocking(move || {
+        let mut child = command
+            .spawn()
+            .map_err(|e| format!("Failed to start scrape sidecar: {}", e))?;
 
-    let stdout = child
-        .stdout
-        .take()
-        .ok_or_else(|| "Failed to capture sidecar stdout".to_string())?;
+        let stdout = child
+            .stdout
+            .take()
+            .ok_or_else(|| "Failed to capture sidecar stdout".to_string())?;
 
-    // Read all stdout lines and look for scrape result
-    let reader = BufReader::new(stdout);
-    let mut last_error: Option<String> = None;
+        // Read all stdout lines and look for scrape result
+        let reader = BufReader::new(stdout);
+        let mut last_error: Option<String> = None;
 
-    for line in reader.lines() {
-        let line = match line {
-            Ok(l) => l,
-            Err(_) => break,
-        };
+        for line in reader.lines() {
+            let line = match line {
+                Ok(l) => l,
+                Err(_) => break,
+            };
 
-        let trimmed = line.trim();
-        if trimmed.is_empty() {
-            continue;
-        }
+            let trimmed = line.trim();
+            if trimmed.is_empty() {
+                continue;
+            }
 
-        let message: Value = match serde_json::from_str(trimmed) {
-            Ok(m) => m,
-            Err(_) => continue,
-        };
+            let message: Value = match serde_json::from_str(trimmed) {
+                Ok(m) => m,
+                Err(_) => continue,
+            };
 
-        let event_type = message.get("type").and_then(Value::as_str).unwrap_or("");
+            let event_type = message.get("type").and_then(Value::as_str).unwrap_or("");
 
-        match event_type {
-            "scrape:result" => {
-                // Return the scraped data
-                if let Some(data) = message.get("data") {
-                    return Ok(data.clone());
+            match event_type {
+                "scrape:result" => {
+                    // Return the scraped data
+                    if let Some(data) = message.get("data") {
+                        return Ok(data.clone());
+                    }
+                    return Ok(message);
                 }
-                return Ok(message);
+                "scrape:failed" => {
+                    last_error = Some(
+                        message
+                            .get("error")
+                            .and_then(Value::as_str)
+                            .unwrap_or("Unknown scrape error")
+                            .to_string(),
+                    );
+                }
+                _ => {}
             }
-            "scrape:failed" => {
-                last_error = Some(
-                    message
-                        .get("error")
-                        .and_then(Value::as_str)
-                        .unwrap_or("Unknown scrape error")
-                        .to_string(),
-                );
-            }
-            _ => {}
         }
-    }
 
-    // Wait for process to finish
-    let _ = child.wait();
+        // Wait for process to finish
+        let _ = child.wait();
 
-    Err(last_error.unwrap_or_else(|| "No scrape result received from sidecar".to_string()))
+        Err(last_error.unwrap_or_else(|| "No scrape result received from sidecar".to_string()))
+    })
+    .await
 }
 
 /// Spawn the AI engine sidecar to run a single regression step via Playwright.
@@ -382,71 +415,79 @@ pub async fn run_regression_step(
     #[cfg(unix)]
     command.process_group(0);
 
-    let mut child = command
-        .spawn()
-        .map_err(|e| format!("Failed to start single-step sidecar: {}", e))?;
+    // The sidecar runs synchronously until it emits a result — potentially
+    // minutes — so the whole spawn/read/wait cycle stays off the async runtime.
+    run_blocking(move || {
+        let mut child = command
+            .spawn()
+            .map_err(|e| format!("Failed to start single-step sidecar: {}", e))?;
 
-    let stdout = child
-        .stdout
-        .take()
-        .ok_or_else(|| "Failed to capture sidecar stdout".to_string())?;
+        let stdout = child
+            .stdout
+            .take()
+            .ok_or_else(|| "Failed to capture sidecar stdout".to_string())?;
 
-    // Read all stdout lines and look for step result
-    let reader = BufReader::new(stdout);
-    let mut last_error: Option<String> = None;
+        // Read all stdout lines and look for step result
+        let reader = BufReader::new(stdout);
+        let mut last_error: Option<String> = None;
 
-    for line in reader.lines() {
-        let line = match line {
-            Ok(l) => l,
-            Err(_) => break,
-        };
+        for line in reader.lines() {
+            let line = match line {
+                Ok(l) => l,
+                Err(_) => break,
+            };
 
-        let trimmed = line.trim();
-        if trimmed.is_empty() {
-            continue;
-        }
+            let trimmed = line.trim();
+            if trimmed.is_empty() {
+                continue;
+            }
 
-        let message: Value = match serde_json::from_str(trimmed) {
-            Ok(m) => m,
-            Err(_) => continue,
-        };
+            let message: Value = match serde_json::from_str(trimmed) {
+                Ok(m) => m,
+                Err(_) => continue,
+            };
 
-        let event_type = message.get("type").and_then(Value::as_str).unwrap_or("");
+            let event_type = message.get("type").and_then(Value::as_str).unwrap_or("");
 
-        match event_type {
-            "step:result" => {
-                // Return the step result data
-                if let Some(data) = message.get("data") {
-                    return Ok(data.clone());
+            match event_type {
+                "step:result" => {
+                    // Return the step result data
+                    if let Some(data) = message.get("data") {
+                        return Ok(data.clone());
+                    }
+                    return Ok(message);
                 }
-                return Ok(message);
+                "step:failed" => {
+                    last_error = Some(
+                        message
+                            .get("error")
+                            .and_then(Value::as_str)
+                            .unwrap_or("Unknown step error")
+                            .to_string(),
+                    );
+                }
+                _ => {}
             }
-            "step:failed" => {
-                last_error = Some(
-                    message
-                        .get("error")
-                        .and_then(Value::as_str)
-                        .unwrap_or("Unknown step error")
-                        .to_string(),
-                );
-            }
-            _ => {}
         }
-    }
 
-    // Wait for process to finish
-    let _ = child.wait();
+        // Wait for process to finish
+        let _ = child.wait();
 
-    Err(last_error.unwrap_or_else(|| "No step result received from sidecar".to_string()))
+        Err(last_error.unwrap_or_else(|| "No step result received from sidecar".to_string()))
+    })
+    .await
 }
 
 #[tauri::command]
 pub async fn list_regression_test_cases(
     state: tauri::State<'_, Database>,
 ) -> Result<Vec<Value>, String> {
-    let records = state
-        .list_regression_test_cases()
-        .map_err(|e| format!("Failed to list test cases: {}", e))?;
+    let db = state.inner().clone();
+    let records = run_blocking(move || {
+        db.list_regression_test_cases()
+            .map_err(|e| format!("Failed to list test cases: {}", e))
+    })
+    .await?;
 
     let cases: Vec<Value> = records
         .into_iter()
@@ -515,8 +556,9 @@ pub async fn save_regression_test_case(
         id
     };
 
-    let record = state
-        .save_regression_test_case(
+    let db = state.inner().clone();
+    let record = run_blocking(move || {
+        db.save_regression_test_case(
             &actual_id,
             &test_name,
             &name,
@@ -525,7 +567,9 @@ pub async fn save_regression_test_case(
             &steps_json,
             enabled,
         )
-        .map_err(|e| format!("Failed to save test case: {}", e))?;
+        .map_err(|e| format!("Failed to save test case: {}", e))
+    })
+    .await?;
 
     Ok(serde_json::json!({
         "id": record.id,
@@ -545,9 +589,12 @@ pub async fn delete_regression_test_case(
     state: tauri::State<'_, Database>,
     id: String,
 ) -> Result<(), String> {
-    state
-        .delete_regression_test_case(&id)
-        .map_err(|e| format!("Failed to delete test case: {}", e))
+    let db = state.inner().clone();
+    run_blocking(move || {
+        db.delete_regression_test_case(&id)
+            .map_err(|e| format!("Failed to delete test case: {}", e))
+    })
+    .await
 }
 
 #[tauri::command]
@@ -555,9 +602,12 @@ pub async fn list_regression_runs(
     state: tauri::State<'_, Database>,
     test_case_id: String,
 ) -> Result<Vec<Value>, String> {
-    let records = state
-        .list_regression_runs(&test_case_id)
-        .map_err(|e| format!("Failed to list runs: {}", e))?;
+    let db = state.inner().clone();
+    let records = run_blocking(move || {
+        db.list_regression_runs(&test_case_id)
+            .map_err(|e| format!("Failed to list runs: {}", e))
+    })
+    .await?;
 
     let runs: Vec<Value> = records
         .into_iter()
@@ -581,9 +631,12 @@ pub async fn list_regression_runs(
 
 #[tauri::command]
 pub async fn list_projects(state: tauri::State<'_, Database>) -> Result<serde_json::Value, String> {
-    let records = state
-        .list_projects()
-        .map_err(|e| format!("Failed to list projects: {}", e))?;
+    let db = state.inner().clone();
+    let records = run_blocking(move || {
+        db.list_projects()
+            .map_err(|e| format!("Failed to list projects: {}", e))
+    })
+    .await?;
     serde_json::to_value(records).map_err(|e| e.to_string())
 }
 
@@ -591,9 +644,12 @@ pub async fn list_projects(state: tauri::State<'_, Database>) -> Result<serde_js
 pub async fn list_environments(
     state: tauri::State<'_, Database>,
 ) -> Result<serde_json::Value, String> {
-    let records = state
-        .list_environments()
-        .map_err(|e| format!("Failed to list environments: {}", e))?;
+    let db = state.inner().clone();
+    let records = run_blocking(move || {
+        db.list_environments()
+            .map_err(|e| format!("Failed to list environments: {}", e))
+    })
+    .await?;
     serde_json::to_value(records).map_err(|e| e.to_string())
 }
 
@@ -603,9 +659,12 @@ pub async fn list_regression_runs_relational(
     project_id: Option<String>,
     environment_id: Option<String>,
 ) -> Result<serde_json::Value, String> {
-    let records = state
-        .list_regression_runs_relational(project_id.as_deref(), environment_id.as_deref())
-        .map_err(|e| format!("Failed to list relational runs: {}", e))?;
+    let db = state.inner().clone();
+    let records = run_blocking(move || {
+        db.list_regression_runs_relational(project_id.as_deref(), environment_id.as_deref())
+            .map_err(|e| format!("Failed to list relational runs: {}", e))
+    })
+    .await?;
     serde_json::to_value(records).map_err(|e| e.to_string())
 }
 
@@ -614,9 +673,12 @@ pub async fn list_test_run_results(
     state: tauri::State<'_, Database>,
     run_id: String,
 ) -> Result<serde_json::Value, String> {
-    let records = state
-        .list_test_run_results(&run_id)
-        .map_err(|e| format!("Failed to list test run results: {}", e))?;
+    let db = state.inner().clone();
+    let records = run_blocking(move || {
+        db.list_test_run_results(&run_id)
+            .map_err(|e| format!("Failed to list test run results: {}", e))
+    })
+    .await?;
     serde_json::to_value(records).map_err(|e| e.to_string())
 }
 
@@ -624,8 +686,11 @@ pub async fn list_test_run_results(
 pub async fn list_error_signatures(
     state: tauri::State<'_, Database>,
 ) -> Result<serde_json::Value, String> {
-    let records = state
-        .list_error_signatures()
-        .map_err(|e| format!("Failed to list error signatures: {}", e))?;
+    let db = state.inner().clone();
+    let records = run_blocking(move || {
+        db.list_error_signatures()
+            .map_err(|e| format!("Failed to list error signatures: {}", e))
+    })
+    .await?;
     serde_json::to_value(records).map_err(|e| e.to_string())
 }

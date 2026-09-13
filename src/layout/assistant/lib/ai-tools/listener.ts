@@ -1,28 +1,24 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+import { addPendingToolConfirmation, describeToolResult } from './confirmation';
 import { executeAiToolCall } from './executor';
 import type { AppAiToolCallPayload } from './types';
 
-function describeToolResult(result: unknown): string {
-  if (typeof result === 'string') return result;
-  if (result && typeof result === 'object' && 'message' in result) {
-    return String((result as { message: unknown }).message);
-  }
-  try {
-    return JSON.stringify(result);
-  } catch {
-    return 'Tool executed.';
-  }
-}
-
 /**
- * Listens for Tauri IPC events emitted by the Rust AI engine (`ai:execute-tool`),
- * executes the tool through the frontend triggers, and reports the real outcome
- * back to the engine so the model can react to it.
+ * Listens for Tauri IPC events emitted by the Rust AI engine (`ai:execute-tool`).
+ * Tools flagged `requiresConfirmation` are parked as pending confirmation cards for
+ * the user to approve or deny; the rest execute immediately. Either way the real
+ * outcome is reported back to the engine via `resolve_ai_tool_result`.
  */
 export async function setupAiToolEventListener(): Promise<UnlistenFn> {
   return listen<AppAiToolCallPayload>('ai:execute-tool', async (event) => {
-    const { id, tool_name, arguments: args } = event.payload;
+    const { id, tool_name, arguments: args, requiresConfirmation } = event.payload;
+
+    if (requiresConfirmation) {
+      addPendingToolConfirmation({ id, toolName: tool_name, arguments: args, createdAt: Date.now() });
+      return;
+    }
+
     try {
       const result = await executeAiToolCall(tool_name, args);
       await invoke('resolve_ai_tool_result', {

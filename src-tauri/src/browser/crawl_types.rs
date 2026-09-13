@@ -115,6 +115,7 @@ pub struct AiBrowserState {
     pub(crate) logs: Arc<Mutex<HashMap<String, Vec<ActivityLog>>>>,
     /// Live crawl engine controls keyed by session id then worker id. Pause, resume and
     /// stop commands drive the running celestia-spider crawl through these handles.
-    pub(crate) controls: Arc<Mutex<HashMap<String, HashMap<String, Arc<celestia_spider::CrawlControl>>>>>,
+    pub(crate) controls:
+        Arc<Mutex<HashMap<String, HashMap<String, Arc<celestia_spider::CrawlControl>>>>>,
     pub(crate) cancellations: Arc<Mutex<HashMap<String, HashMap<String, Arc<AtomicBool>>>>>,
 }

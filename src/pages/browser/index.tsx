@@ -1,15 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Alert, AlertAction, AlertDescription, Badge, Button, Input } from '@celestia-project/ui';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { useEffect, useRef, useState } from 'react';
+import { Alert, AlertAction, AlertDescription, Badge, Button, Input, Tabs, TabsList, TabsTrigger } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 import { PlayIcon, SquareIcon, PauseIcon, ArrowCounterClockwiseIcon, InfoIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
 import { AiInsightsPanel } from './components/insight-panel';
-import { ActionLogPanel } from './components/ActionLogPanel';
+import { CrawlConsole } from './components/crawl-console';
 import { CrawlSetupScreen } from './components/setup-screen';
-import { CrawlTreePanel } from './components/tree-panel';
-import { PageDetailPanel } from './components/page-detail-panel';
+import { CRAWL_VIEW_TABS, DEFAULT_CRAWL_SETUP, type CrawlViewTab } from './constants';
 
-import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { getCrawlStatusColor } from '@/lib/status-colors';
 import { useProxyStart } from '@/hooks/use-proxy-start';
 import { useBrowserAutomationPage } from './hooks/use-page';
@@ -46,11 +43,7 @@ export function BrowserAutomationPage() {
     };
   }, []);
 
-  if (!page.activeTab) {
-    return null;
-  }
-
-  const { setup, expandedPageIds, search } = page.activeTab;
+  const setup = page.activeTab?.setup ?? DEFAULT_CRAWL_SETUP;
 
   return (
     <>
@@ -146,147 +139,144 @@ export function BrowserAutomationPage() {
         </div>
       )}
 
-      <TabbedPageLayout
-        tabs={page.tabs}
-        activeTabId={page.activeTabId}
-        onTabChange={page.setActiveTabId}
-        onTabRename={page.renameTab}
-        onTabClose={page.closeTab}
+      <div
         className={cn(
           // Layout & Positioning
-          "flex flex-col min-h-0",
+          "flex flex-col min-h-0 overflow-hidden",
 
           // Sizing & Spacing
-          "h-full"
-        )}
-        contentClassName={cn(
-          // Layout & Positioning
-          "flex-1 min-h-0 overflow-hidden",
-
-          // Sizing & Spacing
-          "m-2",
+          "h-full m-2 mt-0",
 
           // Backgrounds & Borders
           "border rounded-md bg-background"
         )}
       >
-        <div
+        <header
           className={cn(
             // Layout & Positioning
-            "flex flex-col min-h-0",
+            "flex flex-wrap items-center justify-between shrink-0 select-none overflow-x-auto min-w-0",
 
             // Sizing & Spacing
-            "h-full"
+            "px-3 py-2 gap-3",
+
+            // Backgrounds & Borders
+            "border-b bg-muted/20"
           )}
         >
-          <header
+          <div
             className={cn(
               // Layout & Positioning
-              "flex flex-wrap items-center justify-between shrink-0 select-none overflow-x-auto min-w-0",
+              "relative flex items-center min-w-0"
+            )}
+          >
+            <MagnifyingGlassIcon
+              className={cn(
+                // Layout & Positioning
+                "absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none",
+
+                // Sizing & Spacing
+                "size-3.5",
+
+                // Typography
+                "text-muted-foreground"
+              )}
+            />
+            <Input
+              type="text"
+              value={localSearch}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder="Search logs and findings…"
+              className={cn(
+                // Sizing & Spacing
+                "h-7 w-48 pl-7 pr-7 text-xs",
+
+                // Backgrounds & Borders
+                "bg-background border-input",
+
+                // Interactive & States
+                "focus:w-64 transition-all duration-150"
+              )}
+            />
+            {localSearch && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className={cn(
+                  // Layout & Positioning
+                  "absolute right-2 top-1/2 -translate-y-1/2",
+
+                  // Typography
+                  "text-muted-foreground",
+
+                  // Interactive & States
+                  "hover:text-foreground cursor-pointer"
+                )}
+                aria-label="Clear search"
+              >
+                <XIcon className="size-3" />
+              </button>
+            )}
+          </div>
+
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center shrink-0",
 
               // Sizing & Spacing
-              "px-3 py-2 gap-3",
-
-              // Backgrounds & Borders
-              "border-b bg-muted/20"
+              "gap-2"
             )}
           >
             <div
               className={cn(
                 // Layout & Positioning
-                "relative flex items-center min-w-0"
-              )}
-            >
-              <MagnifyingGlassIcon
-                className={cn(
-                  // Layout & Positioning
-                  "absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none",
-
-                  // Sizing & Spacing
-                  "size-3.5",
-
-                  // Typography
-                  "text-muted-foreground"
-                )}
-              />
-              <Input
-                type="text"
-                value={localSearch}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                placeholder="Search pages, logs, insights…"
-                className={cn(
-                  // Sizing & Spacing
-                  "h-7 w-48 pl-7 pr-7 text-xs",
-
-                  // Backgrounds & Borders
-                  "bg-background border-input",
-
-                  // Interactive & States
-                  "focus:w-64 transition-all duration-150"
-                )}
-              />
-              {localSearch && (
-                <button
-                  type="button"
-                  onClick={handleClearSearch}
-                  className={cn(
-                    // Layout & Positioning
-                    "absolute right-2 top-1/2 -translate-y-1/2",
-
-                    // Typography
-                    "text-muted-foreground",
-
-                    // Interactive & States
-                    "hover:text-foreground cursor-pointer"
-                  )}
-                  aria-label="Clear search"
-                >
-                  <XIcon className="size-3" />
-                </button>
-              )}
-            </div>
-
-            <div
-              className={cn(
-                // Layout & Positioning
-                "flex items-center shrink-0",
+                "flex items-center",
 
                 // Sizing & Spacing
                 "gap-2"
               )}
             >
-              <div
+              <Badge
+                variant="outline"
                 className={cn(
-                  // Layout & Positioning
-                  "flex items-center",
-
                   // Sizing & Spacing
-                  "gap-2"
+                  "px-1.5 py-0.5",
+
+                  // Typography
+                  "text-[10px] font-mono font-semibold text-white",
+
+                  // Backgrounds & Borders
+                  "rounded shadow-none border-none",
+
+                  getCrawlStatusColor(page.status)
                 )}
               >
-                <Badge
-                  variant="outline"
+                {page.status}
+              </Badge>
+
+              {/* Start/Stop/Pause/Resume */}
+              {(page.status === 'idle' || page.status === 'completed' || page.status === 'failed' || page.status === 'stopped') && (
+                <Button
+                  size="sm"
+                  onClick={startBrowserCrawl}
                   className={cn(
                     // Sizing & Spacing
-                    "px-1.5 py-0.5",
+                    "h-7 px-2.5 gap-1.5",
 
                     // Typography
-                    "text-[10px] font-mono font-semibold text-white",
-
-                    // Backgrounds & Borders
-                    "rounded shadow-none border-none",
-
-                    getCrawlStatusColor(page.status)
+                    "text-xs font-medium"
                   )}
                 >
-                  {page.status}
-                </Badge>
-
-                {/* Start/Stop/Pause/Resume */}
-                {(page.status === 'idle' || page.status === 'completed' || page.status === 'failed' || page.status === 'stopped') && (
+                  <PlayIcon className="size-3" weight="fill" />
+                  <span>Start</span>
+                </Button>
+              )}
+              {page.status === 'running' && (
+                <>
                   <Button
                     size="sm"
-                    onClick={startBrowserCrawl}
+                    variant="outline"
+                    onClick={toggleBrowserCrawl}
                     className={cn(
                       // Sizing & Spacing
                       "h-7 px-2.5 gap-1.5",
@@ -295,130 +285,125 @@ export function BrowserAutomationPage() {
                       "text-xs font-medium"
                     )}
                   >
-                    <PlayIcon className="size-3" weight="fill" />
-                    <span>Start</span>
+                    <PauseIcon className="size-3" weight="fill" />
+                    <span>Pause</span>
                   </Button>
-                )}
-                {page.status === 'running' && (
-                  <>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={toggleBrowserCrawl}
-                      className={cn(
-                        // Sizing & Spacing
-                        "h-7 px-2.5 gap-1.5",
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={stopBrowserCrawl}
+                    className={cn(
+                      // Sizing & Spacing
+                      "h-7 px-2.5 gap-1.5",
 
-                        // Typography
-                        "text-xs font-medium"
-                      )}
-                    >
-                      <PauseIcon className="size-3" weight="fill" />
-                      <span>Pause</span>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={stopBrowserCrawl}
-                      className={cn(
-                        // Sizing & Spacing
-                        "h-7 px-2.5 gap-1.5",
+                      // Typography
+                      "text-xs font-medium"
+                    )}
+                  >
+                    <SquareIcon className="size-3" weight="fill" />
+                    <span>Stop</span>
+                  </Button>
+                </>
+              )}
+              {page.status === 'paused' && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={toggleBrowserCrawl}
+                    className={cn(
+                      // Sizing & Spacing
+                      "h-7 px-2.5 gap-1.5",
 
-                        // Typography
-                        "text-xs font-medium"
-                      )}
-                    >
-                      <SquareIcon className="size-3" weight="fill" />
-                      <span>Stop</span>
-                    </Button>
-                  </>
-                )}
-                {page.status === 'paused' && (
-                  <>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={toggleBrowserCrawl}
-                      className={cn(
-                        // Sizing & Spacing
-                        "h-7 px-2.5 gap-1.5",
+                      // Typography
+                      "text-xs font-medium"
+                    )}
+                  >
+                    <ArrowCounterClockwiseIcon className="size-3" />
+                    <span>Resume</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={stopBrowserCrawl}
+                    className={cn(
+                      // Sizing & Spacing
+                      "h-7 px-2.5 gap-1.5",
 
-                        // Typography
-                        "text-xs font-medium"
-                      )}
-                    >
-                      <ArrowCounterClockwiseIcon className="size-3" />
-                      <span>Resume</span>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={stopBrowserCrawl}
-                      className={cn(
-                        // Sizing & Spacing
-                        "h-7 px-2.5 gap-1.5",
-
-                        // Typography
-                        "text-xs font-medium"
-                      )}
-                    >
-                      <SquareIcon className="size-3" weight="fill" />
-                      <span>Stop</span>
-                    </Button>
-                  </>
-                )}
-              </div>
-
-              <CrawlSetupScreen
-                setup={setup}
-                disabled={page.isRunning}
-                onSetupChange={page.updateSetup}
-                onSave={page.saveConfig}
-              />
+                      // Typography
+                      "text-xs font-medium"
+                    )}
+                  >
+                    <SquareIcon className="size-3" weight="fill" />
+                    <span>Stop</span>
+                  </Button>
+                </>
+              )}
             </div>
-          </header>
 
-          <main
+            <CrawlSetupScreen
+              setup={setup}
+              disabled={page.isRunning}
+              onSetupChange={page.updateSetup}
+              onSave={page.saveConfig}
+            />
+          </div>
+        </header>
+
+        <Tabs
+          value={page.viewTab}
+          onValueChange={(value) => page.setViewTab(value as CrawlViewTab)}
+          className={cn(
+            // Layout & Positioning
+            "flex flex-col flex-1 min-h-0"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "shrink-0",
+
+              // Sizing & Spacing
+              "px-3 py-1.5",
+
+              // Backgrounds & Borders
+              "border-b"
+            )}
+          >
+            <TabsList>
+              {CRAWL_VIEW_TABS.map((tab) => (
+                <TabsTrigger key={tab.id} value={tab.id}>
+                  {tab.name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+
+          <div
             className={cn(
               // Layout & Positioning
               "flex-1 min-h-0"
             )}
           >
-            <ResizablePanelGroup orientation="vertical" className="h-full min-h-0">
-              <ResizablePanel defaultSize={60} minSize={20}>
-                <ResizablePanelGroup orientation="horizontal" className="h-full min-h-0">
-                  <ResizablePanel defaultSize={20} minSize={20}>
-                    <CrawlTreePanel
-                      nodes={page.crawlTree}
-                      selectedPageId={page.selectedPage?.id ?? null}
-                      expandedPageIds={expandedPageIds}
-                      searchQuery={search}
-                      crawlStatus={page.status}
-                    />
-                  </ResizablePanel>
-                  <ResizableHandle withHandle />
-                  <ResizablePanel defaultSize={20} minSize={20}>
-                    <PageDetailPanel page={page.selectedPage} searchQuery={search} />
-                  </ResizablePanel>
-                  <ResizableHandle withHandle />
-                  <ResizablePanel defaultSize={20} minSize={20}>
-                    <AiInsightsPanel
-                      insights={page.filteredInsights}
-                      interestingPages={page.interestingPages}
-                      searchQuery={search}
-                    />
-                  </ResizablePanel>
-                </ResizablePanelGroup>
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={40} minSize={14}>
-                <ActionLogPanel actions={page.actionLogs} onClear={page.clearLogs} />
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </main>
-        </div>
-      </TabbedPageLayout>
+            {page.viewTab === 'activity' ? (
+              <CrawlConsole
+                logs={page.filteredLogs}
+                overview={page.overview}
+                targetUrl={page.activeTab?.session?.targetUrl}
+                insightsCount={page.filteredInsights.length}
+                searchQuery={page.search}
+                onClearLogs={page.clearLogs}
+              />
+            ) : (
+              <AiInsightsPanel
+                insights={page.filteredInsights}
+                interestingPages={page.interestingPages}
+                searchQuery={page.search}
+              />
+            )}
+          </div>
+        </Tabs>
+      </div>
     </>
   );
 }
-

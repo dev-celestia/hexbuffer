@@ -37,11 +37,13 @@ import type { FileUIPart } from 'ai';
 import { ChatSessionList } from './components/chat-session-list';
 import { HumanSelectionCard } from './components/human-selection-card';
 import { IntentClarificationCard } from './components/intent-clarification-card';
+import { ToolConfirmationCard } from './components/tool-confirmation-card';
 import { SuggestionBar } from './components/suggestion-bar';
 import { PageMentionChip } from './components/page-mention-chip';
 import { PageMentionPopover } from './components/page-mention-popover';
 import { useAiChatPane } from './hooks/use-ai-chat-pane';
 import { usePageMentions } from './hooks/use-page-mentions';
+import { usePendingToolConfirmations } from './lib/ai-tools/confirmation';
 import { getFileParts, getMessageText, getReasoningParts, hasContent, providerLabel } from './lib/message-utils';
 import { parseAttachedFilesFromMessage, getUserPromptOnly } from './lib/file-utils';
 import { cn } from '@/lib/utils';
@@ -220,6 +222,7 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
   } = usePageMentions();
 
   const attachments = usePromptInputAttachments();
+  const pendingToolConfirmations = usePendingToolConfirmations();
 
   // Wrap handleSubmit to include mentioned pages and clear them after
   const wrappedHandleSubmit = useCallback(
@@ -451,6 +454,15 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                       </MessageContent>
                     </Message>
                   ) : null}
+
+                  {/* High-risk tool confirmation cards */}
+                  {pendingToolConfirmations.map((confirmation) => (
+                    <Message key={confirmation.id} from="assistant">
+                      <MessageContent>
+                        <ToolConfirmationCard confirmation={confirmation} />
+                      </MessageContent>
+                    </Message>
+                  ))}
 
                   {/* Loading shimmer while waiting for assistant response */}
                   {status === 'submitted' ? (
