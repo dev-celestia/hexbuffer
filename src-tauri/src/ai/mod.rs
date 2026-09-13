@@ -61,16 +61,24 @@ pub fn save_ai_settings(app: AppHandle, settings: AiSettings) -> Result<AiSettin
 #[tauri::command]
 pub async fn send_ai_chat_message(
     app: AppHandle,
+    window: tauri::Window,
     history: State<'_, crate::HistoryBridge>,
     request: AiChatRequest,
 ) -> Result<AiChatResponse, String> {
-    chat::send_ai_chat_message_impl(app, history, request).await
+    // Tool calls and chat events are scoped to the window that started the chat.
+    chat::send_ai_chat_message_impl(app, window.label().to_string(), history, request).await
 }
 
 /// Completes a pending AI tool execution dispatched to the frontend via `ai:execute-tool`.
+/// The caller must echo back the per-call secret token delivered with the event.
 #[tauri::command]
-pub fn resolve_ai_tool_result(id: String, success: bool, message: String) -> Result<bool, String> {
-    Ok(tool_loop::resolve_tool_result(&id, success, message))
+pub fn resolve_ai_tool_result(
+    id: String,
+    token: String,
+    success: bool,
+    message: String,
+) -> Result<bool, String> {
+    Ok(tool_loop::resolve_tool_result(&id, &token, success, message))
 }
 
 #[tauri::command]

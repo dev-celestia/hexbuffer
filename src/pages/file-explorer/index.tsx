@@ -1,6 +1,7 @@
 import { Button, ContextMenuItem, ContextMenuSeparator } from '@celestia-project/ui';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import * as React from 'react';
+import type { PanelImperativeHandle } from 'react-resizable-panels';
 import {
   HardDriveIcon,
   GearSixIcon,
@@ -20,11 +21,30 @@ import { ExplorerSidebar } from './components/explorer-sidebar';
 import { ExplorerDetailsPane } from './components/explorer-details-pane';
 import { FileGrid } from './components/file-grid';
 import { FileToolbar } from './components/file-toolbar';
+import { FileDropOverlay } from './components/file-drop-overlay';
 import { WordlistsTab } from './components/wordlists/wordlists-tab';
 
 export function FileExplorerPage() {
   const page = useFileExplorerPage();
   const { explorer, local } = page;
+
+  // Details pane stays mounted and collapses/expands so the user's resized
+  // width survives selection changes
+  const detailsPanelRef = React.useRef<PanelImperativeHandle | null>(null);
+  React.useEffect(() => {
+    const panel = detailsPanelRef.current;
+    if (!panel) return;
+    if (explorer.selectedItem) {
+      if (panel.isCollapsed()) {
+        panel.expand();
+        // expand() is a no-op if the panel has no previous size — fall back
+        // to a sensible default width
+        if (panel.isCollapsed()) panel.resize('24%');
+      }
+    } else if (!panel.isCollapsed()) {
+      panel.collapse();
+    }
+  }, [explorer.selectedItem]);
 
   // Render Onboarding state if R2 credentials are not configured and on R2 tab
   if (!explorer.loading && !explorer.credentials && page.activeTab === 'r2') {
@@ -122,7 +142,7 @@ export function FileExplorerPage() {
           <div
             className={cn(
               // Layout & Positioning
-              "flex flex-col flex-1 min-w-0 min-h-0"
+              "relative flex flex-col flex-1 min-w-0 min-h-0"
             )}
           >
             <FileToolbar
@@ -144,14 +164,15 @@ export function FileExplorerPage() {
             />
 
             <div
+              ref={page.r2DropZoneRef}
               className={cn(
                 // Layout & Positioning
-                "flex-1 min-h-0 min-w-0"
+                "relative flex-1 min-h-0 min-w-0"
               )}
             >
               <ResizablePanelGroup orientation="horizontal" className="h-full min-h-0">
                 {/* Left Buckets Sidebar */}
-                <ResizablePanel defaultSize={22} minSize={15} maxSize={35}>
+                <ResizablePanel defaultSize="22" minSize="15" maxSize="35">
                   <div
                     className={cn(
                       // Layout & Positioning
@@ -178,7 +199,7 @@ export function FileExplorerPage() {
                 <ResizableHandle withHandle />
 
                 {/* Center File Grid Area */}
-                <ResizablePanel defaultSize={explorer.selectedItem ? 52 : 78} minSize={30}>
+                <ResizablePanel defaultSize="78" minSize="30">
                   <div
                     className={cn(
                       // Layout & Positioning
@@ -189,7 +210,7 @@ export function FileExplorerPage() {
                     )}
                   >
                     <FileGrid
-                      items={explorer.items.map((item) => ({ ...item, id: item.key }))}
+                      items={page.r2GridItems}
                       selectedItem={
                         explorer.selectedItem
                           ? { ...explorer.selectedItem, id: explorer.selectedItem.key }
@@ -197,6 +218,9 @@ export function FileExplorerPage() {
                       }
                       loading={explorer.loading}
                       deletingId={explorer.deletingKey}
+                      deleteTarget={page.deleteTarget}
+                      onDeleteTargetChange={page.setDeleteTarget}
+                      onContainerKeyDown={page.handleR2GridKeyDown}
                       onSelectItem={(item) =>
                         explorer.setSelectedItem(explorer.items.find((i) => i.key === item.id) ?? null)
                       }
@@ -220,7 +244,7 @@ export function FileExplorerPage() {
                         const cached = explorer.cacheStatus[item.id]?.isCached;
                         if (item.type === 'folder') return null;
                         return (
-                          <span className="absolute right-0 bottom-1">
+                          <span className="absolute end-0 bottom-1">
                             <span
                               className={cn(
                                 "block size-1.5 rounded-full",
@@ -271,32 +295,45 @@ export function FileExplorerPage() {
                   </div>
                 </ResizablePanel>
 
-                {/* Right Details Pane */}
-                {explorer.selectedItem && (
-                  <>
-                    <ResizableHandle withHandle />
-                    <ResizablePanel defaultSize={26} minSize={18} maxSize={40}>
-                      <div
-                        className={cn(
-                          // Layout & Positioning
-                          "flex flex-col min-h-0",
+                {/* Right Details Pane — persistent & collapsible */}
+                <ResizableHandle
+                  withHandle
+                  className={cn(
+                    !explorer.selectedItem && "pointer-events-none opacity-0"
+                  )}
+                />
+                <ResizablePanel
+                  panelRef={detailsPanelRef}
+                  collapsible
+                  collapsedSize={0}
+                  defaultSize={0}
+                  minSize="18"
+                  maxSize="40"
+                >
+                  <div
+                    className={cn(
+                      // Layout & Positioning
+                      "flex flex-col min-h-0",
 
-                          // Sizing & Spacing
-                          "h-full"
-                        )}
-                      >
-                        <ExplorerDetailsPane
-                          item={explorer.selectedItem}
-                          cacheStatus={explorer.cacheStatus}
-                          onOpenFile={explorer.handleOpenFile}
-                          onCopyPublicUrl={explorer.handleCopyPublicUrl}
-                          onCopyPresignedUrl={explorer.handleCopyPresignedUrl}
-                        />
-                      </div>
-                    </ResizablePanel>
-                  </>
-                )}
+                      // Sizing & Spacing
+                      "h-full"
+                    )}
+                  >
+                    <ExplorerDetailsPane
+                      item={explorer.selectedItem}
+                      cacheStatus={explorer.cacheStatus}
+                      onOpenFile={explorer.handleOpenFile}
+                      onCopyPublicUrl={explorer.handleCopyPublicUrl}
+                      onCopyPresignedUrl={explorer.handleCopyPresignedUrl}
+                    />
+                  </div>
+                </ResizablePanel>
               </ResizablePanelGroup>
+
+              <FileDropOverlay
+                show={page.r2DropActive}
+                title="Drop files to upload to this folder"
+              />
             </div>
           </div>
         );
@@ -306,7 +343,7 @@ export function FileExplorerPage() {
           <div
             className={cn(
               // Layout & Positioning
-              "flex flex-col flex-1 min-w-0 min-h-0"
+              "relative flex flex-col flex-1 min-w-0 min-h-0"
             )}
           >
             <FileToolbar
@@ -317,7 +354,7 @@ export function FileExplorerPage() {
               onCreateFolder={local.handleCreateFolder}
               actionLabel="Import"
               actionIcon={<DownloadSimpleIcon className="size-3.5" />}
-              onActionClick={local.handleImportFile}
+              onActionClick={() => local.handleImportFile()}
               searchQuery={local.searchQuery}
               onSearchChange={local.setSearchQuery}
               onRefresh={local.refresh}
@@ -326,13 +363,14 @@ export function FileExplorerPage() {
               loading={local.loading}
             />
             <div
+              ref={page.localDropZoneRef}
               className={cn(
                 // Layout & Positioning
-                "flex-1 min-h-0 min-w-0"
+                "relative flex-1 min-h-0 min-w-0"
               )}
             >
               <FileGrid
-                items={local.items.map((item) => ({ ...item, id: item.path }))}
+                items={page.localGridItems}
                 selectedItem={
                   local.selectedItem
                     ? { ...local.selectedItem, id: local.selectedItem.path }
@@ -340,6 +378,9 @@ export function FileExplorerPage() {
                 }
                 loading={local.loading}
                 deletingId={local.deletingPath}
+                deleteTarget={page.deleteTarget}
+                onDeleteTargetChange={page.setDeleteTarget}
+                onContainerKeyDown={page.handleLocalGridKeyDown}
                 onSelectItem={(item) =>
                   local.setSelectedItem(local.items.find((i) => i.path === item.id) ?? null)
                 }
@@ -360,6 +401,11 @@ export function FileExplorerPage() {
                 onRenameCommit={page.localCommitRename}
                 onRenameCancel={page.localCancelRename}
                 renameInputRef={page.localRenameInputRef}
+              />
+
+              <FileDropOverlay
+                show={page.localDropActive}
+                title="Drop files to import into this folder"
               />
             </div>
           </div>
@@ -401,7 +447,7 @@ export function FileExplorerPage() {
           <div
             className={cn(
               // Layout & Positioning
-              "absolute bottom-4 right-4 z-50",
+              "absolute bottom-4 end-4 z-50",
 
               // Sizing & Spacing
               "w-80 p-3 rounded-lg border shadow-lg gap-2",
@@ -422,7 +468,7 @@ export function FileExplorerPage() {
                 "text-xs font-medium"
               )}
             >
-              <span className="truncate pr-3 text-foreground">
+              <span className="truncate pe-3 text-foreground">
                 {explorer.uploadProgress.fileName}
               </span>
               <span className="shrink-0 text-primary font-mono text-[11px]">

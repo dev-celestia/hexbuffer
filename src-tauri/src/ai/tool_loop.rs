@@ -98,7 +98,16 @@ pub struct ToolExecutionOutcome {
 }
 
 type PendingResultSender = tokio::sync::oneshot::Sender<ToolExecutionOutcome>;
-type PendingResultMap = HashMap<String, PendingResultSender>;
+
+/// A pending frontend tool call. The secret `token` is delivered only to the
+/// requesting window's webview and must be echoed back by `resolve_ai_tool_result`,
+/// so unrelated webview contexts cannot forge tool outcomes.
+struct PendingToolCall {
+    sender: PendingResultSender,
+    token: String,
+}
+
+type PendingResultMap = HashMap<String, PendingToolCall>;
 
 static PENDING_TOOL_RESULTS: OnceLock<Mutex<PendingResultMap>> = OnceLock::new();
 static CALL_COUNTER: AtomicU64 = AtomicU64::new(0);
@@ -109,17 +118,18 @@ fn pending_map() -> &'static Mutex<PendingResultMap> {
 
 /// Completes a pending frontend tool execution. Called from the `resolve_ai_tool_result`
 /// Tauri command once the frontend executor finished (or failed) running the tool.
-/// Returns true when a waiting tool call was matched.
-pub fn resolve_tool_result(id: &str, success: bool, message: String) -> bool {
-    let sender = pending_map()
+/// Returns true when a waiting tool call was matched by id AND token.
+pub fn resolve_tool_result(id: &str, token: &str, success: bool, message: String) -> bool {
+    let pending = pending_map()
         .lock()
         .ok()
-        .and_then(|mut pending| pending.remove(id));
-    match sender {
-        Some(sender) => sender
+        .and_then(|mut calls| calls.remove(id));
+    match pending {
+        Some(call) if call.token == token => call
+            .sender
             .send(ToolExecutionOutcome { success, message })
             .is_ok(),
-        None => false,
+        _ => false,
     }
 }
 
@@ -192,6 +202,7 @@ fn execute_crawl_context(app: &AppHandle) -> String {
 
 async fn execute_tool_call(
     app: &AppHandle,
+    window_label: &str,
     tool_name: &str,
     args: Value,
     requires_confirmation: bool,
@@ -210,14 +221,22 @@ async fn execute_tool_call(
         return result;
     }
 
-    // Frontend-executed tool: register a waiter, emit the call event, and block until
-    // the frontend reports the real outcome (execution, user denial, or timeout).
+    // Frontend-executed tool: register a waiter, emit the call event scoped to the
+    // requesting window with a per-call secret token, and block until the frontend
+    // reports the real outcome (execution, user denial, or timeout).
     let call_id = next_call_id();
+    let token = uuid::Uuid::new_v4().to_string();
     let (sender, receiver) = tokio::sync::oneshot::channel::<ToolExecutionOutcome>();
     pending_map()
         .lock()
         .expect("tool result map poisoned")
-        .insert(call_id.clone(), sender);
+        .insert(
+            call_id.clone(),
+            PendingToolCall {
+                sender,
+                token: token.clone(),
+            },
+        );
 
     let timeout_secs = if requires_confirmation {
         CONFIRMATION_TIMEOUT_SECS
@@ -225,10 +244,12 @@ async fn execute_tool_call(
         AUTO_TOOL_TIMEOUT_SECS
     };
 
-    let emitted = app.emit(
+    let emitted = app.emit_to(
+        window_label,
         "ai:execute-tool",
         json!({
             "id": call_id,
+            "token": token,
             "tool_name": tool_name,
             "arguments": args.clone(),
             "requiresConfirmation": requires_confirmation,
@@ -297,6 +318,7 @@ pub struct ToolLoopOutput {
 /// back into the conversation, and the model continues until it produces a final answer.
 pub async fn run_tool_loop(
     app: &AppHandle,
+    window_label: &str,
     config: &hexbuffer_ai::AiConfig,
     policy: &hexbuffer_ai::SecurityApprovalPolicy,
     history: Vec<Message>,
@@ -345,6 +367,7 @@ pub async fn run_tool_loop(
                     authz => {
                         execute_tool_call(
                             app,
+                            window_label,
                             &name,
                             args,
                             matches!(authz, ToolAuthorization::RequiresConfirmation),

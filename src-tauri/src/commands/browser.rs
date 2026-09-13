@@ -625,9 +625,33 @@ pub async fn ai_browser_start_crawl(
     let session_id_for_task = session.id.clone();
     let worker_id_for_task = worker_id.clone();
     let settings = crate::ai::read_ai_settings(&app)?;
-    let _api_key_for_task = match crate::ai::ensure_third_party_ai_sharing_allowed(&settings) {
+    let page_analysis = match crate::ai::ensure_third_party_ai_sharing_allowed(&settings) {
         Ok(()) => match crate::ai::read_optional_ai_api_key(&settings.provider) {
-            Ok(api_key) => api_key,
+            Ok(Some(api_key)) if !api_key.trim().is_empty() => {
+                Some(crate::ai::chat::build_ai_config(&settings, &api_key))
+            }
+            Ok(_) => {
+                add_log(
+                    &app,
+                    &state,
+                    ActivityLog {
+                        id: Uuid::new_v4().to_string(),
+                        session_id: session.id.clone(),
+                        level: "info".to_string(),
+                        r#type: "ai".to_string(),
+                        message: format!(
+                            "No {} API key saved. This crawl will use deterministic local analysis.",
+                            settings.provider
+                        ),
+                        url: Some(session.target_url.clone()),
+                        ai_used_for_analysis: Some(false),
+                        created_at: now(),
+                        extra: None,
+                        human_input_request: None,
+                    },
+                );
+                None
+            }
             Err(error) => {
                 add_log(
                     &app,
@@ -638,7 +662,7 @@ pub async fn ai_browser_start_crawl(
                         level: "warning".to_string(),
                         r#type: "ai".to_string(),
                         message: format!(
-                            "Could not read the saved {} API key, so this crawl will continue without AI key injection. {}",
+                            "Could not read the saved {} API key, so AI page analysis is disabled for this crawl. {}",
                             settings.provider, error
                         ),
                         url: Some(session.target_url.clone()),
@@ -676,6 +700,7 @@ pub async fn ai_browser_start_crawl(
     };
     let cancel_flag_for_task = cancel_flag.clone();
     let control_for_task = crawl_control.clone();
+    let analysis_for_task = page_analysis;
     tauri::async_runtime::spawn(async move {
         let sidecar_result = run_browser_crawler_crawl(
             app_for_task.clone(),
@@ -685,6 +710,7 @@ pub async fn ai_browser_start_crawl(
             worker_id_for_task.clone(),
             cancel_flag_for_task.clone(),
             control_for_task.clone(),
+            analysis_for_task,
         )
         .await;
 

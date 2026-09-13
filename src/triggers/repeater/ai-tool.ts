@@ -208,6 +208,14 @@ export async function executeSendToRepeaterAiTool(args: Record<string, any>) {
     url = origin ? `${origin}${path}` : path;
   }
 
+  // Only http(s) targets may land in Repeater — reject anything with another scheme.
+  const schemeMatch = /^([a-z][a-z0-9+.-]*):/i.exec(url);
+  if (schemeMatch && !/^https?:$/i.test(schemeMatch[1] + ':')) {
+    throw new Error(
+      `Unsupported URL scheme "${schemeMatch[1]}:" — only http(s) targets can be sent to Repeater.`,
+    );
+  }
+
   await sendRawToRepeater({
     url,
     method,

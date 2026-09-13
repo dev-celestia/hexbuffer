@@ -1,8 +1,11 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createUIMessageStream, type ChatTransport, type UIMessageStreamWriter } from 'ai';
 import { useRepeaterStore } from '@/stores/repeater';
 import type { DashboardAiSettings, DashboardChatMessage } from '../types';
+
+const WINDOW_EVENT_TARGET = { kind: 'AnyLabel' as const, label: getCurrentWindow().label };
 
 interface DashboardChatBody {
   aiSettings?: DashboardAiSettings;
@@ -129,32 +132,44 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
 
         try {
           unlisteners.push(
-            await listen<AiChatStartedEvent>('ai-chat:started', (event) => {
-              if (event.payload.requestId !== requestId) return;
-              provider = event.payload.provider as DashboardAiSettings['provider'];
-              model = event.payload.model;
-              ensureStarted();
-            }),
+            await listen<AiChatStartedEvent>(
+              'ai-chat:started',
+              (event) => {
+                if (event.payload.requestId !== requestId) return;
+                provider = event.payload.provider as DashboardAiSettings['provider'];
+                model = event.payload.model;
+                ensureStarted();
+              },
+              { target: WINDOW_EVENT_TARGET },
+            ),
           );
 
           unlisteners.push(
-            await listen<AiChatDeltaEvent>('ai-chat:delta', (event) => {
-              if (event.payload.requestId !== requestId) return;
-              ensureStarted();
-              streamedLength += event.payload.delta.length;
-              writer.write({
-                type: 'text-delta',
-                id: textId,
-                delta: event.payload.delta,
-              });
-            }),
+            await listen<AiChatDeltaEvent>(
+              'ai-chat:delta',
+              (event) => {
+                if (event.payload.requestId !== requestId) return;
+                ensureStarted();
+                streamedLength += event.payload.delta.length;
+                writer.write({
+                  type: 'text-delta',
+                  id: textId,
+                  delta: event.payload.delta,
+                });
+              },
+              { target: WINDOW_EVENT_TARGET },
+            ),
           );
 
           unlisteners.push(
-            await listen<AiChatFinishedEvent>('ai-chat:finished', (event) => {
-              if (event.payload.requestId !== requestId) return;
-              finishStream();
-            }),
+            await listen<AiChatFinishedEvent>(
+              'ai-chat:finished',
+              (event) => {
+                if (event.payload.requestId !== requestId) return;
+                finishStream();
+              },
+              { target: WINDOW_EVENT_TARGET },
+            ),
           );
 
           const repeaterStore = useRepeaterStore.getState();

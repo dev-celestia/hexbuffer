@@ -187,11 +187,16 @@ export function useLocalStorage() {
     }
   }, [currentPath, listDir]);
 
-  const handleImportFile = React.useCallback(async () => {
+  const handleImportFile = React.useCallback(async (preselectedPaths?: string[]) => {
     try {
-      const selected = await openDialog({ multiple: true });
-      if (!selected) return;
-      const paths = Array.isArray(selected) ? selected : [selected];
+      let paths: string[];
+      if (preselectedPaths && preselectedPaths.length > 0) {
+        paths = preselectedPaths;
+      } else {
+        const selected = await openDialog({ multiple: true });
+        if (!selected) return;
+        paths = Array.isArray(selected) ? selected : [selected];
+      }
       const { copyFile } = await import('@tauri-apps/plugin-fs');
       for (const srcPath of paths) {
         const sep = srcPath.includes('/') ? '/' : '\\';

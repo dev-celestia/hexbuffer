@@ -58,6 +58,13 @@ export function FileToolbar({
   const [folderNameInput, setFolderNameInput] = React.useState('');
   const [creating, setCreating] = React.useState(false);
 
+  // Collapse deep paths to "root … tail" instead of relying on invisible scrolling
+  const MAX_VISIBLE_CRUMBS = 4;
+  const crumbsCollapsed = breadcrumbs.length > MAX_VISIBLE_CRUMBS;
+  const visibleCrumbs: (BreadcrumbCrumb | null)[] = crumbsCollapsed
+    ? [breadcrumbs[0], null, ...breadcrumbs.slice(-(MAX_VISIBLE_CRUMBS - 2))]
+    : breadcrumbs;
+
   const handleCreateSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!folderNameInput.trim()) return;
@@ -88,7 +95,7 @@ export function FileToolbar({
       <div
         className={cn(
           // Layout & Positioning
-          "flex items-center overflow-x-auto min-w-0 scrollbar-none",
+          "flex items-center overflow-hidden min-w-0",
 
           // Sizing & Spacing
           "gap-1"
@@ -129,15 +136,37 @@ export function FileToolbar({
             "text-xs font-medium text-muted-foreground"
           )}
         >
-          {breadcrumbs.map((crumb, idx) => {
-            const isLast = idx === breadcrumbs.length - 1;
+          {visibleCrumbs.map((crumb, idx) => {
+            const isLast = idx === visibleCrumbs.length - 1;
+            if (!crumb) {
+              return (
+                <React.Fragment key={`ellipsis-${idx}`}>
+                  {idx > 0 && (
+                    <CaretRightIcon className="size-3 text-muted-foreground/40 shrink-0" />
+                  )}
+                  <span
+                    className={cn(
+                      // Sizing & Spacing
+                      "px-0.5 shrink-0",
+
+                      // Typography & Colors
+                      "text-muted-foreground/60"
+                    )}
+                    title={`${breadcrumbs.length - (MAX_VISIBLE_CRUMBS - 1)} hidden levels`}
+                  >
+                    …
+                  </span>
+                </React.Fragment>
+              );
+            }
             return (
-              <React.Fragment key={idx}>
+              <React.Fragment key={`${crumb.id}-${idx}`}>
                 {idx > 0 && <CaretRightIcon className="size-3 text-muted-foreground/40 shrink-0" />}
                 <button
                   type="button"
                   onClick={() => !isLast && onNavigateTo(crumb.id)}
                   disabled={isLast || loading}
+                  title={crumb.label}
                   className={cn(
                     // Sizing & Spacing
                     "truncate max-w-[180px] px-1.5 py-0.5 rounded",
@@ -169,8 +198,6 @@ export function FileToolbar({
           "gap-2"
         )}
       >
-       
-
         {/* Create Folder form or trigger */}
         {showFolderInput ? (
           <form
@@ -287,17 +314,20 @@ export function FileToolbar({
           </Button>
         </ButtonGroup>
 
-         {/* Search input */}
+         {/* Search input — fixed-width zone so focus never shifts the toolbar */}
         <div
           className={cn(
             // Layout & Positioning
-            "relative flex items-center"
+            "relative flex items-center",
+
+            // Sizing & Spacing
+            "w-44"
           )}
         >
           <MagnifyingGlassIcon
             className={cn(
               // Layout & Positioning
-              "absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none",
+              "absolute start-2.5 top-1/2 -translate-y-1/2 pointer-events-none",
 
               // Sizing & Spacing
               "size-3.5",
@@ -312,16 +342,13 @@ export function FileToolbar({
             placeholder="Search files…"
             className={cn(
               // Sizing & Spacing
-              "h-7 w-44 pl-7 pr-7",
+              "h-7 w-full ps-7 pe-7",
 
               // Typography
               "text-xs font-sans bg-background",
 
               // Backgrounds & Borders
-              "border-input",
-
-              // Interactive & States
-              "focus:w-60 transition-all duration-150"
+              "border-input"
             )}
             disabled={actionDisabled}
           />
@@ -331,7 +358,7 @@ export function FileToolbar({
               onClick={() => onSearchChange('')}
               className={cn(
                 // Layout & Positioning
-                "absolute right-2 top-1/2 -translate-y-1/2",
+                "absolute end-2 top-1/2 -translate-y-1/2",
 
                 // Typography & Colors
                 "text-muted-foreground hover:text-foreground"

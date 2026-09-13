@@ -39,14 +39,49 @@ fn keyring_entry() -> Result<Entry, String> {
     Entry::new(R2_KEYRING_SERVICE, R2_KEYRING_USER).map_err(|e| e.to_string())
 }
 
-fn r2_settings_path(_app: &AppHandle) -> Result<PathBuf, String> {
+fn r2_settings_path() -> Result<PathBuf, String> {
     let app_dir = crate::paths::get_shared_app_dir();
     Ok(app_dir.join("r2-settings.json"))
 }
 
+/// Host:port of the configured R2 endpoint (custom endpoint if set, otherwise
+/// the account-specific R2 domain), or None when R2 is not configured.
+fn expected_r2_authority() -> Result<Option<String>, String> {
+    let path = r2_settings_path()?;
+    if !path.exists() {
+        return Ok(None);
+    }
+
+    let content = fs::read_to_string(path).map_err(|error| error.to_string())?;
+    let settings: R2Settings = serde_json::from_str(&content).map_err(|error| error.to_string())?;
+
+    let endpoint = match settings.custom_endpoint_url.as_deref().map(str::trim) {
+        Some(endpoint) if !endpoint.is_empty() => endpoint.to_string(),
+        _ => format!(
+            "https://{}.r2.cloudflarestorage.com",
+            settings.account_id.trim()
+        ),
+    };
+
+    let url = reqwest::Url::parse(&endpoint)
+        .map_err(|error| format!("Invalid configured R2 endpoint: {}", error))?;
+    Ok(url_authority(&url))
+}
+
+/// Lowercased host:port (with default port applied) so endpoint comparison
+/// cannot be bypassed by a differing port.
+fn url_authority(url: &reqwest::Url) -> Option<String> {
+    let host = url.host_str()?;
+    let authority = match url.port_or_known_default() {
+        Some(port) => format!("{}:{}", host, port),
+        None => host.to_string(),
+    };
+    Some(authority.to_lowercase())
+}
+
 #[tauri::command]
-pub async fn get_r2_settings(app: AppHandle) -> Result<Option<R2SettingsWithSecret>, String> {
-    let path = r2_settings_path(&app)?;
+pub async fn get_r2_settings(_app: AppHandle) -> Result<Option<R2SettingsWithSecret>, String> {
+    let path = r2_settings_path()?;
     if !path.exists() {
         return Ok(None);
     }
@@ -71,7 +106,7 @@ pub async fn get_r2_settings(app: AppHandle) -> Result<Option<R2SettingsWithSecr
 
 #[tauri::command]
 pub async fn save_r2_credentials(
-    app: AppHandle,
+    _app: AppHandle,
     account_id: String,
     access_key_id: String,
     secret_access_key: String,
@@ -108,7 +143,7 @@ pub async fn save_r2_credentials(
         },
     };
 
-    let path = r2_settings_path(&app)?;
+    let path = r2_settings_path()?;
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).map_err(|error| error.to_string())?;
     }
@@ -120,9 +155,9 @@ pub async fn save_r2_credentials(
 }
 
 #[tauri::command]
-pub async fn clear_r2_credentials(app: AppHandle) -> Result<(), String> {
+pub async fn clear_r2_credentials(_app: AppHandle) -> Result<(), String> {
     // Delete config file
-    let path = r2_settings_path(&app)?;
+    let path = r2_settings_path()?;
     if path.exists() {
         let _ = fs::remove_file(path);
     }
@@ -150,6 +185,22 @@ pub async fn r2_http_request(
     headers: std::collections::HashMap<String, String>,
     body: Option<Vec<u8>>,
 ) -> Result<R2HttpResponse, String> {
+    // Only the configured R2 endpoint is reachable through this command —
+    // it must never act as a general-purpose proxy for the webview.
+    let allowed_authority = expected_r2_authority()?;
+    let parsed_url = reqwest::Url::parse(&url)
+        .map_err(|error| format!("Invalid request URL: {}", error))?;
+    let request_authority = url_authority(&parsed_url)
+        .ok_or_else(|| "Request URL has no host".to_string())?;
+
+    if allowed_authority.as_deref() != Some(request_authority.as_str()) {
+        log(&format!(
+            "[r2_http_request] Rejected request to non-configured endpoint: {}",
+            request_authority
+        ));
+        return Err("Request host does not match the configured R2 endpoint".to_string());
+    }
+
     log(&format!(
         "[r2_http_request] Method: {}, URL: {}",
         method, url

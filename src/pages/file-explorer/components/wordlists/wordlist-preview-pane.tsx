@@ -15,7 +15,9 @@ import {
 import { Badge, Button } from '@celestia-project/ui';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { copyText } from '@/lib/clipboard';
 import { WORDLISTS_RAW_BASE_URL } from '../../constants';
+import { formatBytes } from '../../lib/format';
 import type { WordlistItemWithStatus } from '../../types';
 
 interface WordlistPreviewPaneProps {
@@ -27,13 +29,6 @@ interface WordlistPreviewPaneProps {
   onOpen: (item: WordlistItemWithStatus) => void;
 }
 
-function formatBytes(bytes?: number): string {
-  if (!bytes) return '—';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 export function WordlistPreviewPane({
   item,
   previewContent,
@@ -42,17 +37,23 @@ export function WordlistPreviewPane({
   onDelete,
   onOpen,
 }: WordlistPreviewPaneProps) {
-  const handleCopyUrl = () => {
+  const handleCopyUrl = async () => {
     if (!item) return;
     const url = `${WORDLISTS_RAW_BASE_URL}${item.href}`;
-    navigator.clipboard.writeText(url);
-    toast.success('Copied download URL');
+    if (await copyText(url)) {
+      toast.success('Copied download URL');
+    } else {
+      toast.error('Failed to copy URL');
+    }
   };
 
-  const handleCopyPreview = () => {
+  const handleCopyPreview = async () => {
     if (!previewContent) return;
-    navigator.clipboard.writeText(previewContent);
-    toast.success('Copied preview lines');
+    if (await copyText(previewContent)) {
+      toast.success('Copied preview lines');
+    } else {
+      toast.error('Failed to copy preview');
+    }
   };
 
   if (!item) {

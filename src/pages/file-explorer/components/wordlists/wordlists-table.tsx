@@ -11,6 +11,7 @@ import {
 } from '@phosphor-icons/react';
 import { Badge, Button } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
+import { formatBytes } from '../../lib/format';
 import type { WordlistItemWithStatus } from '../../types';
 
 interface WordlistsTableProps {
@@ -22,13 +23,6 @@ interface WordlistsTableProps {
   onOpen: (item: WordlistItemWithStatus) => void;
   onPreview: (item: WordlistItemWithStatus) => void;
   loading: boolean;
-}
-
-function formatBytes(bytes?: number): string {
-  if (!bytes) return '';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function WordlistStatus({ item }: { item: WordlistItemWithStatus }) {
@@ -189,7 +183,7 @@ export function WordlistsTable({
                 )}
               >
                 {/* Wordlist Name & Path */}
-                <td className="py-2 px-3 font-sans">
+                <td className="py-2 px-3 font-sans min-w-[200px]">
                   <div
                     className={cn(
                       // Layout & Positioning
@@ -242,17 +236,17 @@ export function WordlistsTable({
                 </td>
 
                 {/* Lines */}
-                <td className="py-2 px-3 text-right font-mono text-[11px] text-muted-foreground whitespace-nowrap">
+                <td className="py-2 px-3 text-right font-mono text-[11px] text-muted-foreground whitespace-nowrap w-24">
                   {item.lines.toLocaleString()}
                 </td>
 
                 {/* Status */}
-                <td className="py-2 px-3 text-center whitespace-nowrap font-sans">
+                <td className="py-2 px-3 text-center whitespace-nowrap font-sans w-28">
                   <WordlistStatus item={item} />
                 </td>
 
                 {/* Actions */}
-                <td className="py-2 px-3 text-right whitespace-nowrap font-sans">
+                <td className="py-2 px-3 text-right whitespace-nowrap font-sans w-28">
                   <div
                     className={cn(
                       // Layout & Positioning

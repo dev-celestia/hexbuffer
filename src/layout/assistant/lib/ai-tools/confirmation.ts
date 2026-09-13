@@ -4,6 +4,8 @@ import { executeAiToolCall } from './executor';
 
 export interface PendingToolConfirmation {
   id: string;
+  /** Per-call secret from the engine; must be echoed back when resolving. */
+  token: string;
   toolName: string;
   arguments: Record<string, any>;
   createdAt: number;
@@ -77,21 +79,31 @@ export async function approveToolConfirmation(id: string): Promise<void> {
     const result = await executeAiToolCall(confirmation.toolName, confirmation.arguments);
     await invoke('resolve_ai_tool_result', {
       id,
+      token: confirmation.token,
       success: true,
       message: describeToolResult(result),
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`[AI Tool Confirmation] Error executing ${confirmation.toolName}:`, error);
-    await invoke('resolve_ai_tool_result', { id, success: false, message }).catch(() => {});
+    await invoke('resolve_ai_tool_result', {
+      id,
+      token: confirmation.token,
+      success: false,
+      message,
+    }).catch(() => {});
   }
 }
 
 /** User denied: report the refusal to the engine without executing anything. */
 export async function denyToolConfirmation(id: string): Promise<void> {
+  const confirmation = pendingConfirmations.find((item) => item.id === id);
   removePendingToolConfirmation(id);
+  if (!confirmation) return;
+
   await invoke('resolve_ai_tool_result', {
     id,
+    token: confirmation.token,
     success: false,
     message: 'The user denied this tool execution.',
   }).catch(() => {});

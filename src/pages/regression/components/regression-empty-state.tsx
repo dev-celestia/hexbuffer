@@ -1,17 +1,48 @@
+import { FlaskIcon } from '@phosphor-icons/react';
 import { Button } from '@celestia-project/ui';
-import { FlaskIcon, PlusIcon } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 
-export function RegressionEmptyState({ onCreate }: { onCreate: () => void }) {
+interface RegressionEmptyStateProps {
+  onCreate: () => void;
+}
+
+export function RegressionEmptyState({ onCreate }: RegressionEmptyStateProps) {
   return (
-    <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-      <FlaskIcon className="mb-3 size-10 text-muted-foreground/30" />
-      <p className="mb-1 text-sm font-medium">No test case open</p>
-      <p className="max-w-sm text-xs text-muted-foreground">
-        Create a new test case to start building regression coverage.
+    <div
+      className={cn(
+        // Layout & Positioning
+        'flex flex-col items-center justify-center gap-3 h-full',
+
+        // Sizing & Spacing
+        'p-8',
+
+        // Typography
+        'text-center'
+      )}
+    >
+      <FlaskIcon className="h-8 w-8 text-muted-foreground/50" />
+      <div
+        className={cn(
+          // Typography
+          'text-sm font-semibold'
+        )}
+      >
+        No test case selected
+      </div>
+      <p
+        className={cn(
+          // Sizing & Spacing
+          'max-w-sm',
+
+          // Typography
+          'text-[11px] text-muted-foreground'
+        )}
+      >
+        Create a test case, write its regression conditions as Nuclei YAML, then run it against
+        your target. A matcher hit counts as a passed condition.
       </p>
-      <Button size="sm" variant="outline" className="mt-4" onClick={onCreate}>
-        <PlusIcon className="size-4" />
-        New test case
+      <Button size="sm" onClick={onCreate}>
+        New Test Case
       </Button>
     </div>
   );

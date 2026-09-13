@@ -112,12 +112,6 @@ impl Database {
 
             let _ = Self::ensure_default_http_session(&conn)?;
 
-            Self::ensure_column(
-                &conn,
-                "regression_test_cases",
-                "test_name",
-                "TEXT NOT NULL DEFAULT 'Default Test'",
-            )?;
             Self::ensure_column(&conn, "ai_browser_pages", "ai_used_for_analysis", "INTEGER")?;
             Self::ensure_column(&conn, "ai_browser_pages", "screenshot_path", "TEXT")?;
             Self::ensure_column(&conn, "ai_browser_pages", "rendered_html_path", "TEXT")?;
@@ -168,8 +162,6 @@ impl Database {
             eph.execute_batch("PRAGMA temp_store = MEMORY;")?;
             Self::init_traffic_schema(&eph)?;
         }
-
-        self.seed_relational_data_if_empty()?;
         Ok(())
     }
 

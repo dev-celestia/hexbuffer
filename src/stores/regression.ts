@@ -1,313 +1,261 @@
 import { create } from 'zustand';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
-import type { TestCase, TestRun, StepResult, AiVerdict, RegressionLogEntry } from '@/pages/regression/types';
-
-function normalizeTestCase(testCase: TestCase): TestCase {
-  return {
-    ...testCase,
-    testName: testCase.testName || 'Default Test',
-    name: testCase.name || 'New Test Case',
-    description: testCase.description || '',
-    targetUrl: testCase.targetUrl || '',
-    steps: testCase.steps || [],
-    enabled: testCase.enabled ?? true,
-  };
-}
+import type {
+  RegressionCondition,
+  RegressionFinding,
+  RegressionRun,
+  RegressionScript,
+  RegressionScriptInput,
+  RunMessage,
+  RunProgress,
+} from '@/pages/regression/types';
 
 interface RegressionState {
-  testCases: TestCase[];
-  runs: Record<string, TestRun[]>; // testCaseId → runs
-  activeRun: { testCaseId: string; runId: string; status: string } | null;
-  liveSteps: StepResult[];
-  logs: RegressionLogEntry[];
-  queue: string[];
+  scripts: RegressionScript[];
+  runsByScript: Record<string, RegressionRun[]>;
+  activeRun: { runId: string; scriptId: string; status: string } | null;
+  liveConditions: RegressionCondition[];
+  liveFindings: RegressionFinding[];
+  liveMessages: RunMessage[];
+  progress: RunProgress | null;
 
-  // Actions
-  loadTestCases: () => Promise<void>;
-  saveTestCase: (tc: TestCase) => Promise<TestCase>;
-  deleteTestCase: (id: string) => Promise<void>;
-  runTest: (testCaseId: string) => Promise<{ runId: string }>;
-  loadRuns: (testCaseId: string) => Promise<void>;
-  clearLogs: () => void;
-  runSingleStep: (testCaseId: string, stepIndex: number) => Promise<StepResult | null>;
-  runAll: (testCaseIds: string[]) => Promise<void>;
-  stopQueue: () => void;
-  abortTest: () => Promise<void>;
+  loadScripts: () => Promise<void>;
+  saveScript: (script: RegressionScriptInput) => Promise<RegressionScript>;
+  deleteScript: (id: string) => Promise<void>;
+  loadRuns: (scriptId: string) => Promise<void>;
+  runScript: (
+    scriptId: string,
+    options?: { concurrency?: number; rateLimitRps?: number },
+  ) => Promise<{ runId: string }>;
+  abortRun: () => Promise<void>;
+  clearLiveRun: () => void;
 
-  // Internal
   _startListening: () => Promise<void>;
-  _stopListening: () => void;
 }
 
 let unlisteners: Array<() => void> = [];
 let listening = false;
 
-export const useRegressionStore = create<RegressionState>()((set, get) => ({
-  testCases: [],
-  runs: {},
-  activeRun: null,
-  liveSteps: [],
-  logs: [],
-  queue: [],
+function isLiveRun(state: RegressionState, runId: string): boolean {
+  return state.activeRun?.runId === runId;
+}
 
-  loadTestCases: async () => {
-    const cases = await invoke<TestCase[]>('list_regression_test_cases');
-    set({
-      testCases: cases.map(normalizeTestCase),
-    });
+export const useRegressionStore = create<RegressionState>()((set, get) => ({
+  scripts: [],
+  runsByScript: {},
+  activeRun: null,
+  liveConditions: [],
+  liveFindings: [],
+  liveMessages: [],
+  progress: null,
+
+  loadScripts: async () => {
+    const scripts = await invoke<RegressionScript[]>('list_regression_scripts');
+    set({ scripts });
   },
 
-  saveTestCase: async (tc) => {
-    const normalized = normalizeTestCase(tc);
-    const saved = await invoke<TestCase>('save_regression_test_case', {
-      testCase: {
-        id: normalized.id,
-        testName: normalized.testName,
-        name: normalized.name,
-        description: normalized.description,
-        targetUrl: normalized.targetUrl,
-        steps: normalized.steps,
-        enabled: normalized.enabled,
+  saveScript: async (script) => {
+    const saved = await invoke<RegressionScript>('save_regression_script', {
+      script: {
+        id: script.id,
+        name: script.name,
+        description: script.description,
+        targetUrl: script.targetUrl,
+        yaml: script.yaml,
+        enabled: script.enabled,
       },
     });
-    const normalizedSaved = normalizeTestCase(saved);
-    const testCases = get().testCases.map((c) => (c.id === normalizedSaved.id ? normalizedSaved : c));
-    if (!testCases.find((c) => c.id === normalizedSaved.id)) {
-      testCases.unshift(normalizedSaved);
-    }
-    set({ testCases });
-    return normalizedSaved;
+    const scripts = get().scripts.filter((s) => s.id !== saved.id);
+    scripts.unshift(saved);
+    set({ scripts });
+    return saved;
   },
 
-  deleteTestCase: async (id) => {
-    await invoke('delete_regression_test_case', { id });
-    const testCases = get().testCases.filter((c) => c.id !== id);
-    const runs = { ...get().runs };
-    delete runs[id];
-    set({ testCases, runs });
+  deleteScript: async (id) => {
+    await invoke('delete_regression_script', { id });
+    const runsByScript = { ...get().runsByScript };
+    delete runsByScript[id];
+    set({
+      scripts: get().scripts.filter((s) => s.id !== id),
+      runsByScript,
+      activeRun:
+        get().activeRun?.scriptId === id ? null : get().activeRun,
+    });
   },
 
-  runTest: async (testCaseId) => {
-    const result = await invoke<{ runId: string }>('run_regression_test', {
-      testCaseId,
+  loadRuns: async (scriptId) => {
+    const runs = await invoke<RegressionRun[]>('list_regression_script_runs', {
+      scriptId,
+    });
+    set({ runsByScript: { ...get().runsByScript, [scriptId]: runs } });
+  },
+
+  runScript: async (scriptId, options) => {
+    const result = await invoke<{ runId: string }>('run_regression_script', {
+      scriptId,
+      concurrency: options?.concurrency ?? null,
+      rateLimitRps: options?.rateLimitRps ?? null,
     });
 
-    // Start listening for progress events
     await get()._startListening();
 
     set({
-      activeRun: { testCaseId, runId: result.runId, status: 'queued' },
-      liveSteps: [],
-      logs: [],
+      activeRun: { runId: result.runId, scriptId, status: 'running' },
+      liveConditions: [],
+      liveFindings: [],
+      liveMessages: [],
+      progress: null,
     });
 
     return result;
   },
 
-  loadRuns: async (testCaseId) => {
-    const runs = await invoke<TestRun[]>('list_regression_runs', {
-      testCaseId,
-    });
-    set({ runs: { ...get().runs, [testCaseId]: runs } });
-  },
-
-  clearLogs: () => {
-    set({ logs: [] });
-  },
-
-  runSingleStep: async (testCaseId, stepIndex) => {
-    const tc = get().testCases.find((c) => c.id === testCaseId);
-    if (!tc) return null;
-
-    const step = tc.steps[stepIndex];
-    if (!step) return null;
-
-    try {
-      const result = await invoke<StepResult>('run_regression_step', {
-        stepJson: step,
-        targetUrl: tc.targetUrl,
-      });
-      return result;
-    } catch (error) {
-      console.error('Failed to run single step:', error);
-      return null;
-    }
-  },
-
-  runAll: async (testCaseIds) => {
-    if (testCaseIds.length === 0) return;
-    const [firstId, ...rest] = testCaseIds;
-    set({ queue: rest });
-    await get().runTest(firstId);
-  },
-
-  stopQueue: () => {
-    set({ queue: [] });
-  },
-
-  abortTest: async () => {
+  abortRun: async () => {
     const activeRun = get().activeRun;
     if (!activeRun) return;
     try {
-      await invoke('abort_regression_test', { runId: activeRun.runId });
-      set({
-        activeRun: { ...activeRun, status: 'aborted' },
-        queue: [],
-      });
+      await invoke('abort_regression_run', { runId: activeRun.runId });
+      set({ activeRun: { ...activeRun, status: 'aborted' } });
     } catch (error) {
-      console.error('Failed to abort test:', error);
+      console.error('Failed to abort regression run:', error);
     }
+  },
+
+  clearLiveRun: () => {
+    set({
+      activeRun: null,
+      liveConditions: [],
+      liveFindings: [],
+      liveMessages: [],
+      progress: null,
+    });
   },
 
   _startListening: async () => {
     if (listening) return;
     listening = true;
 
-    const u1 = await listen<{ runId: string; testCaseId: string; targetUrl: string; stepCount: number }>(
-      'regression:test-started',
-      (event) => {
-        const activeRun = get().activeRun;
-        if (!activeRun || activeRun.runId !== event.payload.runId) return;
+    const unlistenStarted = await listen<{
+      runId: string;
+      scriptId: string;
+      totalTemplates: number;
+      totalTargets: number;
+    }>('regression://scan-started', (event) => {
+      if (!isLiveRun(get(), event.payload.runId)) return;
+      set((s) => ({
+        activeRun: s.activeRun
+          ? { ...s.activeRun, status: 'running' }
+          : s.activeRun,
+        liveMessages: [
+          ...s.liveMessages,
+          {
+            level: 'info',
+            message: `Scan started: ${event.payload.totalTemplates} condition(s) against ${event.payload.totalTargets} target(s)`,
+            at: new Date().toISOString(),
+          },
+        ],
+      }));
+    });
 
-        set((s) => ({
-          activeRun: s.activeRun
-            ? { ...s.activeRun, status: 'running' }
-            : null,
-        }));
-      }
+    const unlistenProgress = await listen<RunProgress & { runId: string }>(
+      'regression://progress',
+      (event) => {
+        if (!isLiveRun(get(), event.payload.runId)) return;
+        const { runId: _runId, ...progress } = event.payload;
+        set({ progress });
+      },
     );
 
-    const u2 = await listen<{ runId: string; stepIndex: number; kind: string }>(
-      'regression:step-started',
+    const unlistenFinding = await listen<{ runId: string; finding: RegressionFinding }>(
+      'regression://finding',
       (event) => {
-        const activeRun = get().activeRun;
-        if (!activeRun || activeRun.runId !== event.payload.runId) return;
-
-        const step: StepResult = {
-          stepIndex: event.payload.stepIndex,
-          kind: event.payload.kind as StepResult['kind'],
-          status: 'running',
-          error: null,
-          screenshotPath: null,
-          durationMs: 0,
-          startedAt: new Date().toISOString(),
-          finishedAt: null,
-        };
-        set((s) => ({ liveSteps: [...s.liveSteps, step] }));
-      }
-    );
-
-    const u3 = await listen<{ runId: string; stepIndex: number; kind: string; durationMs: number; screenshotPath: string | null }>(
-      'regression:step-completed',
-      (event) => {
-        const activeRun = get().activeRun;
-        if (!activeRun || activeRun.runId !== event.payload.runId) return;
-
+        if (!isLiveRun(get(), event.payload.runId)) return;
+        const finding = event.payload.finding;
         set((s) => ({
-          liveSteps: s.liveSteps.map((st) =>
-            st.stepIndex === event.payload.stepIndex
-              ? { ...st, status: 'passed', durationMs: event.payload.durationMs, screenshotPath: event.payload.screenshotPath, finishedAt: new Date().toISOString() }
-              : st
+          liveFindings: [...s.liveFindings, finding],
+          liveConditions: s.liveConditions.map((c) =>
+            c.id === finding.templateId
+              ? {
+                  ...c,
+                  status: 'passed',
+                  matchedUrl: finding.matchedUrl,
+                  extracted: finding.extractedResults,
+                }
+              : c,
           ),
         }));
-      }
+      },
     );
 
-    const u4 = await listen<{ runId: string; stepIndex: number; kind: string; error: string; screenshotPath: string | null }>(
-      'regression:step-failed',
+    const unlistenError = await listen<{ runId: string; target: string; message: string }>(
+      'regression://scan-error',
       (event) => {
-        const activeRun = get().activeRun;
-        if (!activeRun || activeRun.runId !== event.payload.runId) return;
-
+        if (!isLiveRun(get(), event.payload.runId)) return;
         set((s) => ({
-          liveSteps: s.liveSteps.map((st) =>
-            st.stepIndex === event.payload.stepIndex
-              ? { ...st, status: 'failed', error: event.payload.error, screenshotPath: event.payload.screenshotPath, finishedAt: new Date().toISOString() }
-              : st
-          ),
+          liveMessages: [
+            ...s.liveMessages,
+            {
+              level: 'error',
+              message: `${event.payload.target}: ${event.payload.message}`,
+              at: new Date().toISOString(),
+            },
+          ],
         }));
-      }
+      },
     );
 
-    const u5 = await listen<{ runId: string; status: string; passedSteps: number; failedSteps: number; aiVerdict: AiVerdict | null }>(
-      'regression:test-finished',
+    const unlistenAborted = await listen<{ runId: string }>(
+      'regression://scan-aborted',
       (event) => {
-        const activeRun = get().activeRun;
-        if (!activeRun || activeRun.runId !== event.payload.runId) return;
-
-        set((s) => ({
-          activeRun: s.activeRun
-            ? { ...s.activeRun, status: event.payload.status }
-            : null,
-        }));
-        // Reload runs for the test case
-        get().loadRuns(activeRun.testCaseId);
-
-        // Process next item in queue after a tiny delay
-        setTimeout(() => {
-          const nextQueue = get().queue;
-          if (nextQueue.length > 0) {
-            const nextCaseId = nextQueue[0];
-            set({ queue: nextQueue.slice(1) });
-            get().runTest(nextCaseId);
-          }
-        }, 100);
-      }
-    );
-
-    const u6 = await listen<{ runId: string; error: string }>(
-      'regression:test-failed',
-      (event) => {
-        const activeRun = get().activeRun;
-        if (!activeRun || activeRun.runId !== event.payload.runId) return;
-
+        if (!isLiveRun(get(), event.payload.runId)) return;
         set((s) => ({
           activeRun: s.activeRun
-            ? { ...s.activeRun, status: 'failed' }
-            : null,
+            ? { ...s.activeRun, status: 'aborted' }
+            : s.activeRun,
+          liveMessages: [
+            ...s.liveMessages,
+            {
+              level: 'warning',
+              message: 'Run aborted by user',
+              at: new Date().toISOString(),
+            },
+          ],
         }));
-
-        // Process next item in queue after a tiny delay
-        setTimeout(() => {
-          const nextQueue = get().queue;
-          if (nextQueue.length > 0) {
-            const nextCaseId = nextQueue[0];
-            set({ queue: nextQueue.slice(1) });
-            get().runTest(nextCaseId);
-          }
-        }, 100);
-      }
+      },
     );
 
-    const u7 = await listen<{ runId?: string; level?: string; logType?: string; message?: string; url?: string; createdAt?: string }>(
-      'regression:log-created',
-      (event) => {
-        const activeRun = get().activeRun;
-        if (event.payload.runId && activeRun && event.payload.runId !== activeRun.runId) return;
+    const unlistenCompleted = await listen<{
+      runId: string;
+      scriptId: string;
+      status: string;
+      conditions: RegressionCondition[];
+      findings: RegressionFinding[];
+      messages: RunMessage[];
+      passedConditions: number;
+      failedConditions: number;
+      elapsedMillis: number | null;
+      error: string | null;
+    }>('regression://scan-completed', (event) => {
+      if (!isLiveRun(get(), event.payload.runId)) return;
+      set((s) => ({
+        activeRun: s.activeRun
+          ? { ...s.activeRun, status: event.payload.status }
+          : s.activeRun,
+        liveConditions: event.payload.conditions,
+        liveFindings: event.payload.findings,
+        liveMessages: event.payload.messages,
+      }));
+      get().loadRuns(event.payload.scriptId);
+    });
 
-        set((s) => ({
-          logs: [...s.logs, {
-            id: crypto.randomUUID(),
-            runId: event.payload.runId || '',
-            level: (event.payload.level as 'info' | 'warning' | 'error') || 'info',
-            logType: event.payload.logType || 'regression',
-            message: event.payload.message || '',
-            url: event.payload.url || undefined,
-            createdAt: event.payload.createdAt || new Date().toISOString(),
-          }],
-        }));
-      }
-    );
-
-    unlisteners = [u1, u2, u3, u4, u5, u6, u7];
-  },
-
-  _stopListening: () => {
-    for (const u of unlisteners) {
-      u();
-    }
-    unlisteners = [];
-    listening = false;
+    unlisteners = [
+      unlistenStarted,
+      unlistenProgress,
+      unlistenFinding,
+      unlistenError,
+      unlistenAborted,
+      unlistenCompleted,
+    ];
   },
 }));

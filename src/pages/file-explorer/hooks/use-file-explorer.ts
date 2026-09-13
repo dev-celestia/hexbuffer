@@ -20,6 +20,8 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { MULTIPART_THRESHOLD } from '../constants';
 import { tauriRequestHandler } from '../lib/tauri-s3-transport';
 import { uploadMultipart } from '../lib/s3-multipart-upload';
+import { getMimeType } from '../lib/mime';
+import { safePathSegments } from '../lib/path';
 import type { R2Item, R2Credentials } from '../types';
 
 export function useFileExplorer() {
@@ -242,7 +244,8 @@ export function useFileExplorer() {
 
     for (const item of items) {
       if (item.type === 'file') {
-        const cachePath = await join(localData, 'r2_cache', currentBucket, item.key);
+        // S3 keys may legally contain "../" — sanitize before they touch the filesystem
+        const cachePath = await join(localData, 'r2_cache', ...safePathSegments(currentBucket, item.key));
         const fileExists = await exists(cachePath);
         statusMap[item.key] = { isCached: fileExists, localPath: cachePath };
       }
@@ -353,8 +356,56 @@ export function useFileExplorer() {
   };
 
   // 10. File Upload (Direct & Multipart)
-  const handleUploadFile = async () => {
+  const uploadFileFromPath = React.useCallback(async (filePath: string) => {
     if (!s3Client || !currentBucket) return;
+    const fileBytes = await readFile(filePath);
+    const fileName = filePath.split(/[/\\]/).pop() ?? 'uploaded-file';
+    const key = `${currentPrefix}${fileName}`;
+    const contentType = getMimeType(fileName);
+
+    if (fileBytes.length <= MULTIPART_THRESHOLD) {
+      setUploadProgress({ fileName, progress: 10 });
+      const command = new PutObjectCommand({
+        Bucket: currentBucket,
+        Key: key,
+        Body: fileBytes,
+        ContentType: contentType,
+      });
+      await s3Client.send(command);
+      setUploadProgress({ fileName, progress: 100 });
+      toast.success(`Uploaded '${fileName}' successfully`);
+    } else {
+      setUploadProgress({ fileName, progress: 0 });
+      await uploadMultipart({
+        s3Client,
+        bucket: currentBucket,
+        key,
+        fileBytes,
+        contentType,
+        onProgress: (p) => setUploadProgress({ fileName, progress: p }),
+      });
+      toast.success(`Multipart uploaded '${fileName}' successfully (${(fileBytes.length / 1024 / 1024).toFixed(2)} MB)`);
+    }
+  }, [s3Client, currentBucket, currentPrefix]);
+
+  const runUploads = React.useCallback(async (paths: string[]) => {
+    if (!s3Client || !currentBucket || paths.length === 0) return;
+    try {
+      setLoading(true);
+      for (const path of paths) {
+        await uploadFileFromPath(path);
+      }
+      void listItems();
+    } catch (err) {
+      console.error('Upload failed:', err);
+      toast.error(`Upload failed: ${err}`);
+    } finally {
+      setUploadProgress(null);
+      setLoading(false);
+    }
+  }, [s3Client, currentBucket, listItems, uploadFileFromPath]);
+
+  const handleUploadFile = React.useCallback(async () => {
     try {
       const filePath = await open({
         multiple: false,
@@ -362,69 +413,18 @@ export function useFileExplorer() {
       });
 
       if (!filePath) return;
-
-      setLoading(true);
-      const fileBytes = await readFile(filePath as string);
-      const fileName = (filePath as string).split(/[/\\]/).pop() ?? 'uploaded-file';
-      const key = `${currentPrefix}${fileName}`;
-
-      const getMimeType = (name: string): string => {
-        const ext = name.split('.').pop()?.toLowerCase();
-        switch (ext) {
-          case 'pdf': return 'application/pdf';
-          case 'png': return 'image/png';
-          case 'jpg':
-          case 'jpeg': return 'image/jpeg';
-          case 'gif': return 'image/gif';
-          case 'webp': return 'image/webp';
-          case 'svg': return 'image/svg+xml';
-          case 'json': return 'application/json';
-          case 'txt': return 'text/plain';
-          case 'md': return 'text/markdown';
-          case 'html': return 'text/html';
-          case 'css': return 'text/css';
-          case 'js': return 'application/javascript';
-          case 'ts': return 'application/typescript';
-          default: return 'application/octet-stream';
-        }
-      };
-
-      const contentType = getMimeType(fileName);
-
-      if (fileBytes.length <= MULTIPART_THRESHOLD) {
-        setUploadProgress({ fileName, progress: 10 });
-        const command = new PutObjectCommand({
-          Bucket: currentBucket,
-          Key: key,
-          Body: fileBytes,
-          ContentType: contentType,
-        });
-        await s3Client.send(command);
-        setUploadProgress({ fileName, progress: 100 });
-        toast.success(`Uploaded '${fileName}' successfully`);
-      } else {
-        setUploadProgress({ fileName, progress: 0 });
-        await uploadMultipart({
-          s3Client,
-          bucket: currentBucket,
-          key,
-          fileBytes,
-          contentType,
-          onProgress: (p) => setUploadProgress({ fileName, progress: p }),
-        });
-        toast.success(`Multipart uploaded '${fileName}' successfully (${(fileBytes.length / 1024 / 1024).toFixed(2)} MB)`);
-      }
-
-      setUploadProgress(null);
-      void listItems();
+      await runUploads([filePath as string]);
     } catch (err) {
       console.error('Upload failed:', err);
       toast.error(`Upload failed: ${err}`);
       setUploadProgress(null);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [runUploads]);
+
+  // Upload one or more files dropped onto the workspace (paths from Tauri drag-drop)
+  const handleUploadPaths = React.useCallback(async (paths: string[]) => {
+    await runUploads(paths);
+  }, [runUploads]);
 
   // 11. File caching download and open streaming
   const handleOpenFile = async (item: R2Item) => {
@@ -432,7 +432,7 @@ export function useFileExplorer() {
     try {
       setLoading(true);
       const localData = await appLocalDataDir();
-      const localPath = await join(localData, 'r2_cache', currentBucket, item.key);
+      const localPath = await join(localData, 'r2_cache', ...safePathSegments(currentBucket, item.key));
 
       const fileExists = await exists(localPath);
       if (fileExists) {
@@ -510,6 +510,7 @@ export function useFileExplorer() {
     handleDeleteItem,
     deletingKey,
     handleUploadFile,
+    handleUploadPaths,
     handleOpenFile,
     handleAddCustomBucket,
     handleRemoveBucket,

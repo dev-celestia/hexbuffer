@@ -1,17 +1,8 @@
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@celestia-project/ui';
+import { ContextMenu, ContextMenuTrigger, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
 import * as React from 'react';
-import { FolderOpenIcon, TrashIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { getFileIconSrc, getFolderIconSrc } from '../lib/file-icons';
+import { FileContextMenuContent } from './file-context-menu';
 
 import type { FileItem } from './file-grid';
 
@@ -22,10 +13,10 @@ interface FileGridCardProps<T extends FileItem> {
   renameValue?: string;
   onSelectItem: (item: T) => void;
   onDoubleClickItem: (item: T) => void;
-  onDeleteItem: (item: T) => void;
+  onRequestDelete: (item: T) => void;
   renderExtraContextMenuItems?: (item: T) => React.ReactNode;
   renderGridStatusOverlay?: (item: T) => React.ReactNode;
-  onRenameStart?: (e: React.MouseEvent, item: T) => void;
+  onRenameStart?: (item: T) => void;
   onRenameChange?: (value: string) => void;
   onRenameCommit?: (item: T) => void;
   onRenameCancel?: () => void;
@@ -40,7 +31,7 @@ export function FileGridCard<T extends FileItem>({
   renameValue,
   onSelectItem,
   onDoubleClickItem,
-  onDeleteItem,
+  onRequestDelete,
   renderExtraContextMenuItems,
   renderGridStatusOverlay,
   onRenameStart,
@@ -53,6 +44,7 @@ export function FileGridCard<T extends FileItem>({
   const cardContent = (
     <ContextMenuTrigger>
       <div
+        data-file-item
         onClick={() => onSelectItem(item)}
         onDoubleClick={() => onDoubleClickItem(item)}
         onContextMenu={() => onSelectItem(item)}
@@ -117,15 +109,16 @@ export function FileGridCard<T extends FileItem>({
           {isRenaming && onRenameChange && onRenameCommit && onRenameCancel ? (
             <input
               ref={(el) => {
-                if (renameInputRef) {
-                  (renameInputRef as any).current = el;
-                }
+                if (renameInputRef) renameInputRef.current = el;
               }}
               value={renameValue}
               onChange={(e) => onRenameChange(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') onRenameCommit(item);
-                if (e.key === 'Escape') onRenameCancel();
+                if (e.key === 'Escape') {
+                  e.stopPropagation();
+                  onRenameCancel();
+                }
               }}
               onClick={(e) => e.stopPropagation()}
               onBlur={() => onRenameCommit(item)}
@@ -189,32 +182,13 @@ export function FileGridCard<T extends FileItem>({
         </Tooltip>
       )}
 
-      <ContextMenuContent className="w-44 font-sans text-xs">
-        <ContextMenuItem onClick={() => onDoubleClickItem(item)}>
-          <FolderOpenIcon className="mr-2 size-3.5" />
-          <span>{item.type === 'folder' ? 'Open Folder' : 'Open'}</span>
-        </ContextMenuItem>
-
-        {onRenameStart && (
-          <ContextMenuItem onClick={(e) => onRenameStart(e as any, item)}>
-            <PencilSimpleIcon className="mr-2 size-3.5" />
-            <span>Rename</span>
-          </ContextMenuItem>
-        )}
-
-        {renderExtraContextMenuItems && renderExtraContextMenuItems(item)}
-
-        <ContextMenuSeparator />
-        <ContextMenuItem
-          variant="destructive"
-          onClick={() => {
-            onDeleteItem(item);
-          }}
-        >
-          <TrashIcon className="mr-2 size-3.5" />
-          <span>Delete</span>
-        </ContextMenuItem>
-      </ContextMenuContent>
+      <FileContextMenuContent
+        item={item}
+        onOpen={onDoubleClickItem}
+        onRequestDelete={onRequestDelete}
+        onStartRename={onRenameStart}
+        renderExtraItems={renderExtraContextMenuItems}
+      />
     </ContextMenu>
   );
 }

@@ -583,7 +583,16 @@ async fn execute_ai_analyze(
         active_workspace_id: None,
         request_id: None,
     };
-    let response = crate::ai::send_ai_chat_message(app.clone(), history, request).await?;
+    // Automation-driven analysis has no originating chat window; target the main
+    // window. If the model requests tools, events go there and simply time out
+    // (fail-closed) when no assistant is listening.
+    let response = crate::ai::send_ai_chat_message(
+        app.clone(),
+        app.get_window("main").expect("main window"),
+        history,
+        request,
+    )
+    .await?;
 
     Ok(merge_action_output(
         input_data,

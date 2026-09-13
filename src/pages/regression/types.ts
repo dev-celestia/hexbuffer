@@ -1,140 +1,77 @@
-// Regression test case step types — discriminated union of all supported step kinds.
-// Mirrored in the sidecar Zod schemas (sidecars/lib/regression/types.mjs).
+// Regression feature types — Nuclei YAML script testing
 
-export type StepKind =
-  | 'navigate'
-  | 'click'
-  | 'fill'
-  | 'wait'
-  | 'screenshot'
-  | 'assert-visible'
-  | 'assert-text'
-  | 'assert-url'
-  | 'ai-verify';
-
-export interface TestStep {
-  kind: StepKind;
-  /** CSS / text selector for click/fill/assert steps */
-  selector?: string;
-  /** Fill value for 'fill' step, URL for 'navigate', text for 'assert-text' */
-  value?: string;
-  /** Wait duration in milliseconds */
-  ms?: number;
-  /** Screenshot name (saved to artifact dir) */
-  name?: string;
-  /** Natural-language prompt for ai-verify step */
-  prompt?: string;
-  /** URL pattern for assert-url (string match or regex) */
-  pattern?: string;
-}
-
-export interface TestCase {
+export interface RegressionScript {
   id: string;
-  testName: string;
   name: string;
   description: string;
   targetUrl: string;
-  steps: TestStep[];
+  yaml: string;
   enabled: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export type RunStatus = 'queued' | 'running' | 'passed' | 'failed' | 'aborted';
+export type ConditionStatus = 'pending' | 'passed' | 'failed';
 
-export type StepResultStatus = 'pending' | 'running' | 'passed' | 'failed' | 'skipped';
-
-export interface StepResult {
-  stepIndex: number;
-  kind: StepKind;
-  status: StepResultStatus;
-  error: string | null;
-  screenshotPath: string | null;
-  durationMs: number;
-  startedAt: string | null;
-  finishedAt: string | null;
-}
-
-export interface AiVerdict {
-  pass: boolean;
-  reasoning: string;
-  suggestions: string[];
-}
-
-export interface TestRun {
+export interface RegressionCondition {
   id: string;
-  testCaseId: string;
-  status: RunStatus;
-  stepResults: StepResult[];
-  aiVerdict: AiVerdict | null;
-  startedAt: string | null;
-  finishedAt: string | null;
-  error: string | null;
-  createdAt: string;
-}
-
-/** Serialized form of a TestRun for DB reads (stepResults/aiVerdict are JSON). */
-export interface TestRunRecord {
-  id: string;
-  testCaseId: string;
-  status: RunStatus;
-  stepResultsJson: string;
-  aiVerdict: string | null;
-  startedAt: string | null;
-  finishedAt: string | null;
-  error: string | null;
-  createdAt: string;
-}
-
-// ── Scraped page structure for AI step generation context ────────────
-
-export interface FormField {
-  tagName: string;
   name: string;
-  id: string;
-  type: string;
-  placeholder: string;
-  ariaLabel: string;
-  autocomplete: string;
-  required: boolean;
-  disabled: boolean;
+  severity: string;
+  status: ConditionStatus;
+  matchedUrl: string | null;
+  extracted: string[] | null;
 }
 
-export interface ButtonInfo {
-  text: string;
-  id: string;
-  className: string;
-  tagName: string;
-  type: string;
+export interface RegressionFinding {
+  templateId: string;
+  templateName: string;
+  severity: string;
+  matchedUrl: string;
+  matchedAt: string;
+  extractedResults: string[];
 }
 
-export interface LinkInfo {
-  text: string;
-  href: string;
-  id: string;
-  className: string;
-}
-
-export interface PageStructure {
-  title: string;
-  url: string;
-  finalUrl?: string;
-  statusCode?: number | null;
-  forms: FormField[];
-  buttons: ButtonInfo[];
-  links: LinkInfo[];
-  headings: string[];
-  textContent: string;
-}
-
-// ── Regression log entries for the Playwright log panel ──────────────
-
-export interface RegressionLogEntry {
-  id: string;
-  runId: string;
-  level: 'info' | 'warning' | 'error';
-  logType: string;
+export interface RunMessage {
+  level: 'info' | 'success' | 'error' | 'warning';
   message: string;
-  url?: string;
+  at: string;
+}
+
+export interface RunProgress {
+  completedRequests: number;
+  totalRequests: number;
+  rps: number;
+}
+
+export interface RegressionRun {
+  id: string;
+  scriptId: string;
+  status: string;
+  conditions: RegressionCondition[];
+  findings: RegressionFinding[];
+  messages: RunMessage[];
+  totalTemplates: number;
+  totalTargets: number;
+  passedConditions: number;
+  failedConditions: number;
+  elapsedMillis: number | null;
+  startedAt: string | null;
+  finishedAt: string | null;
+  error: string | null;
   createdAt: string;
 }
+
+export interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+  templates: { id: string; name: string; severity: string }[];
+}
+
+export interface ScriptDraft {
+  name: string;
+  description: string;
+  targetUrl: string;
+  yaml: string;
+}
+
+export type RegressionScriptInput = Omit<RegressionScript, 'createdAt' | 'updatedAt'>;

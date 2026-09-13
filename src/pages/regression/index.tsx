@@ -1,338 +1,152 @@
-import { Badge, TabsContent } from '@celestia-project/ui';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@celestia-project/ui';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { ReactFlowProvider } from '@xyflow/react';
 
-import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { useRegressionPage } from './hooks/use-regression-page';
-import { RegressionHeader } from './components/regression-header';
+import { RegressionSidebar } from './components/regression-sidebar';
 import { RegressionEmptyState } from './components/regression-empty-state';
-import { TestSuiteEditor } from './components/test-suite-editor';
-import { TestRunner } from './components/test-runner';
-import { TestResults } from './components/test-results';
-import { RegressionTree } from './components/regression-tree';
-import { RelationalDashboard } from './components/relational-dashboard';
+import { ScriptTab } from './components/script-tab';
+import { RunTab } from './components/run-tab';
 import { cn } from '@/lib/utils';
 
 export function RegressionPage() {
   const page = useRegressionPage();
 
   return (
-    <ReactFlowProvider>
-      <TabbedPageLayout
-        tabs={page.tabs}
-        activeTabId={page.activeTabId}
-        onTabChange={page.setActiveTabId}
-        onTabRename={page.handleRenameTab}
-        onTabClose={page.handleCloseTab}
-        onTabAdd={page.handleAddTab}
-        className={cn(
-          // Layout & Positioning
-          "flex flex-col min-h-0",
+    <div
+      className={cn(
+        // Layout & Positioning
+        'flex flex-col min-h-0',
 
-          // Sizing & Spacing
-          "h-full"
-        )}
-        contentClassName={cn(
-          // Layout & Positioning
-          "flex-1 min-h-0 overflow-hidden",
+        // Sizing & Spacing
+        'h-full',
 
-          // Sizing & Spacing
-          "m-2",
+        // Backgrounds & Borders
+        'bg-background'
+      )}
+    >
+      <ResizablePanelGroup orientation="horizontal" className="h-full min-h-0">
+        {/* Left: test case list */}
+        <ResizablePanel defaultSize={22} minSize={14} maxSize={40}>
+          <RegressionSidebar
+            scripts={page.scripts}
+            activeScriptId={page.activeScriptId}
+            activeRunScriptId={page.activeRun?.scriptId ?? null}
+            activeRunStatus={page.activeRun?.status ?? null}
+            onSelect={page.handleSelectScript}
+            onCreate={page.handleCreate}
+            onDelete={page.handleDelete}
+          />
+        </ResizablePanel>
 
-          // Backgrounds & Borders
-          "border rounded-md bg-background"
-        )}
-      >
-        <ResizablePanelGroup orientation="horizontal" className="h-full min-h-0">
-          {/* Left Panel */}
-          <ResizablePanel defaultSize={22} minSize={16} maxSize={40}>
-            <div
+        <ResizableHandle withHandle />
+
+        {/* Right: two-tab content */}
+        <ResizablePanel defaultSize={78} minSize={45}>
+          {page.activeScript ? (
+            <Tabs
+              value={page.activeTab}
+              onValueChange={(value) => page.setActiveTab(value as 'script' | 'run')}
               className={cn(
                 // Layout & Positioning
-                "flex flex-col min-h-0",
+                'flex flex-col min-h-0',
 
                 // Sizing & Spacing
-                "h-full",
-
-                // Backgrounds & Borders
-                "bg-card"
+                'h-full'
               )}
             >
-              {/* Sidebar Switcher */}
-              <div
+              <TabsList
                 className={cn(
                   // Layout & Positioning
-                  "flex text-center select-none shrink-0",
+                  'shrink-0',
 
                   // Sizing & Spacing
-                  "p-1",
-
-                  // Typography
-                  "text-[11px]",
-
-                  // Backgrounds & Borders
-                  "border-b bg-muted/30"
+                  'mx-4 mt-2 w-fit'
                 )}
               >
-                <button
-                  onClick={() => page.setSidebarMode('builder')}
-                  className={cn(
-                    // Layout & Positioning
-                    "flex-1",
-
-                    // Sizing & Spacing
-                    "py-1",
-
-                    // Typography
-                    "font-bold",
-
-                    // Backgrounds & Borders
-                    "rounded-sm",
-
-                    // Interactive & States
-                    "active:scale-[0.97] transition-all cursor-pointer",
-                    page.sidebarMode === 'builder'
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  Suites Tree
-                </button>
-                <button
-                  onClick={() => page.setSidebarMode('dashboard')}
-                  className={cn(
-                    // Layout & Positioning
-                    "flex-1",
-
-                    // Sizing & Spacing
-                    "py-1",
-
-                    // Typography
-                    "font-bold",
-
-                    // Backgrounds & Borders
-                    "rounded-sm",
-
-                    // Interactive & States
-                    "active:scale-[0.97] transition-all cursor-pointer",
-                    page.sidebarMode === 'dashboard'
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  Dashboard
-                </button>
-              </div>
-
-              {page.sidebarMode === 'builder' ? (
-                <RegressionTree
-                  testCases={page.testCases}
-                  activeTestCaseId={page.activeTabTestCase?.id ?? null}
-                  onSelectTestCase={page.openTestCase}
-                  onDeleteTestCase={page.handleDelete}
-                  onEditTestCase={page.handleEdit}
-                  onRunTestCase={page.handleRun}
-                  onRenameFolder={page.handleRenameFolder}
-                  onDeleteFolder={page.handleDeleteFolder}
-                  onSaveTestCase={page.handleSave}
-                  onRefresh={page.loadTestCases}
-                  onAbortTestCase={page.abortTest}
-                  isRunning={page.isRunning}
-                  onCreateTestCase={page.handleCreate}
-                />
-              ) : (
-                /* Dashboard Sidebar Info */
-                <div
-                  className={cn(
-                    // Layout & Positioning
-                    "flex-1 flex flex-col select-none",
-
-                    // Sizing & Spacing
-                    "p-4 space-y-4"
-                  )}
-                >
-                  <div>
-                    <h3
-                      className={cn(
-                        // Typography
-                        "text-xs font-bold text-foreground"
-                      )}
-                    >
-                      Relational Schema
-                    </h3>
-                    <p
-                      className={cn(
-                        // Sizing & Spacing
-                        "mt-1",
-
-                        // Typography
-                        "text-[10px] text-muted-foreground"
-                      )}
-                    >
-                      Playwright metrics are normalized across Projects, Environments, Runs, Suites, and Errors.
-                    </p>
-                  </div>
-                  <div
-                    className={cn(
-                      // Sizing & Spacing
-                      "p-3 space-y-2",
-
-                      // Typography
-                      "text-[10px] text-muted-foreground",
-
-                      // Backgrounds & Borders
-                      "border rounded bg-muted/10"
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        // Layout & Positioning
-                        "flex items-center justify-between"
-                      )}
-                    >
-                      <span>Projects</span>
-                      <Badge variant="outline" className="text-[8px] bg-background">Active</Badge>
-                    </div>
-                    <div
-                      className={cn(
-                        // Layout & Positioning
-                        "flex items-center justify-between"
-                      )}
-                    >
-                      <span>Execution Envs</span>
-                      <Badge variant="outline" className="text-[8px] bg-background">Multi-env</Badge>
-                    </div>
-                    <div
-                      className={cn(
-                        // Layout & Positioning
-                        "flex items-center justify-between"
-                      )}
-                    >
-                      <span>Error signatures</span>
-                      <Badge variant="outline" className="text-[8px] bg-background">Deduplicated</Badge>
-                    </div>
-                  </div>
-                  <div
-                    className={cn(
-                      // Typography
-                      "text-[10px] text-muted-foreground/60 leading-normal"
-                    )}
-                  >
+                <TabsTrigger value="script">Script</TabsTrigger>
+                <TabsTrigger value="run">
+                  Run
+                  {page.isRunning && (
                     <span
                       className={cn(
                         // Sizing & Spacing
-                        "mb-0.5",
+                        'ml-1.5 h-1.5 w-1.5 rounded-full',
 
-                        // Typography
-                        "font-semibold block text-foreground/80"
+                        // Backgrounds & Borders
+                        'bg-amber-500 animate-pulse'
                       )}
-                    >
-                      Optimization note:
-                    </span>
-                    The catalog utilizes composite indexes for sub-second database lookups.
-                  </div>
-                </div>
-              )}
-            </div>
-          </ResizablePanel>
+                    />
+                  )}
+                </TabsTrigger>
+              </TabsList>
 
-          <ResizableHandle withHandle />
+              <TabsContent
+                value="script"
+                className={cn(
+                  // Layout & Positioning
+                  'flex-1 min-h-0',
 
-          {/* Right: Main Content Panel */}
-          <ResizablePanel defaultSize={78} minSize={45}>
-            <div
-              className={cn(
-                // Layout & Positioning
-                "flex-1 flex flex-col min-w-0 min-h-0",
+                  // Sizing & Spacing
+                  'm-4 mt-2',
 
-                // Sizing & Spacing
-                "h-full"
-              )}
-            >
-              {page.sidebarMode === 'dashboard' ? (
-                <RelationalDashboard />
-              ) : page.internalTabs.length === 0 ? (
-                <RegressionEmptyState onCreate={page.handleCreate} />
-              ) : (
-                <>
-                  <RegressionHeader
-                    activeTestName={page.activeTestName}
-                    activeTabTestCase={page.activeTabTestCase}
-                    activeTestCases={page.activeTestCases}
-                    testCases={page.testCases}
-                    activeTestEnabledCount={page.activeTestEnabledCount}
-                    enabledCount={page.enabledCount}
-                    activeTabRunCount={page.activeTabRunCount}
-                    totalRuns={page.totalRuns}
-                    isRunning={page.isRunning}
-                    activeTab={page.activeTab}
-                    onRunAll={page.handleRunAllInActiveTest}
-                    onRun={() => page.activeTabTestCase && page.handleRun(page.activeTabTestCase.id)}
-                    onAbort={page.abortTest}
-                    queue={page.queue}
-                    onStopQueue={page.stopQueue}
-                  />
+                  // Backgrounds & Borders
+                  'border rounded-md overflow-hidden'
+                )}
+              >
+                <ScriptTab
+                  draft={page.draft!}
+                  validation={page.validation}
+                  conditionCount={page.conditionCount}
+                  isDirty={page.isDirty}
+                  isSaving={page.isSaving}
+                  isValidating={page.isValidating}
+                  onChange={page.handleDraftChange}
+                  onValidate={page.handleValidate}
+                  onSave={page.handleSave}
+                />
+              </TabsContent>
 
-                  <main
-                    className={cn(
-                      // Layout & Positioning
-                      "min-h-0 flex-1"
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        // Layout & Positioning
-                        "h-full min-h-0"
-                      )}
-                    >
-                      {page.enrichedInternalTabs.map((tab) => (
-                        <TabsContent key={tab.id} value={tab.id} className="h-full min-h-0">
-                          {tab.isEditing ? (
-                            <TestSuiteEditor
-                              testCase={tab.editingCase!}
-                              isNew={tab.isNew}
-                              onSave={page.handleSave}
-                              onDraftChange={page.handleDraftChange}
-                              onCancel={page.handleCancelEdit}
-                            />
-                          ) : (
-                            <ResizablePanelGroup orientation="vertical" className="h-full min-h-0">
-                              <ResizablePanel defaultSize={58} minSize={30}>
-                                <TestRunner
-                                  testCase={tab.tabTestCase}
-                                  activeRun={page.activeRun}
-                                  liveSteps={page.liveSteps}
-                                  latestRun={tab.latestRun}
-                                  onRun={page.handleRun}
-                                  onRunStep={page.handleRunStep}
-                                  isRunning={page.isRunning}
-                                  runningStepIndex={page.runningStepIndex}
-                                  singleStepResults={page.singleStepResults}
-                                />
-                              </ResizablePanel>
-                              <ResizableHandle withHandle />
-                              <ResizablePanel defaultSize={42} minSize={20}>
-                                <TestResults
-                                  runs={tab.tabRuns}
-                                  onRun={page.handleRun}
-                                  isRunning={page.isRunning}
-                                  logs={page.logs}
-                                  onClearLogs={page.clearLogs}
-                                />
-                              </ResizablePanel>
-                            </ResizablePanelGroup>
-                          )}
-                        </TabsContent>
-                      ))}
-                    </div>
-                  </main>
-                </>
-              )}
-            </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </TabbedPageLayout>
-    </ReactFlowProvider>
+              <TabsContent
+                value="run"
+                className={cn(
+                  // Layout & Positioning
+                  'flex-1 min-h-0',
+
+                  // Sizing & Spacing
+                  'm-4 mt-2',
+
+                  // Backgrounds & Borders
+                  'border rounded-md overflow-hidden'
+                )}
+              >
+                <RunTab
+                  targetUrl={page.activeScript.targetUrl}
+                  isRunning={page.isRunning}
+                  runStatus={page.activeRunForScript?.status ?? null}
+                  conditions={
+                    page.activeRunForScript ? page.liveConditions : page.scriptRuns[0]?.conditions ?? []
+                  }
+                  findings={
+                    page.activeRunForScript ? page.liveFindings : page.scriptRuns[0]?.findings ?? []
+                  }
+                  messages={
+                    page.activeRunForScript ? page.liveMessages : page.scriptRuns[0]?.messages ?? []
+                  }
+                  progress={page.progress}
+                  elapsedMillis={
+                    page.activeRunForScript ? null : page.scriptRuns[0]?.elapsedMillis ?? null
+                  }
+                  history={page.scriptRuns}
+                  onRun={page.handleRun}
+                  onAbort={page.handleAbort}
+                />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <RegressionEmptyState onCreate={page.handleCreate} />
+          )}
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
   );
 }
-

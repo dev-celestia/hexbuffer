@@ -1,14 +1,10 @@
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from '@celestia-project/ui';
+import { ContextMenu, ContextMenuTrigger } from '@celestia-project/ui';
 import * as React from 'react';
-import { FolderOpenIcon, TrashIcon, PencilSimpleIcon } from '@phosphor-icons/react';
+import { TrashIcon, PencilSimpleIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { getFileIconSrc, getFolderIconSrc } from '../lib/file-icons';
+import { formatBytes } from '../lib/format';
+import { FileContextMenuContent } from './file-context-menu';
 
 import type { FileItem } from './file-grid';
 
@@ -19,23 +15,15 @@ interface FileListRowProps<T extends FileItem> {
   renameValue?: string;
   onSelectItem: (item: T) => void;
   onDoubleClickItem: (item: T) => void;
-  onDeleteItem: (item: T) => void;
+  onRequestDelete: (item: T) => void;
   renderSyncStatus?: (item: T) => React.ReactNode;
   renderExtraContextMenuItems?: (item: T) => React.ReactNode;
-  onRenameStart?: (e: React.MouseEvent, item: T) => void;
+  onRenameStart?: (item: T) => void;
   onRenameChange?: (value: string) => void;
   onRenameCommit?: (item: T) => void;
   onRenameCancel?: () => void;
   renameInputRef?: React.RefObject<HTMLInputElement | null>;
   isDeleting?: boolean;
-}
-
-function formatBytes(bytes?: number): string {
-  if (bytes === undefined || bytes === 0) return '—';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
 
 export function FileListRow<T extends FileItem>({
@@ -45,7 +33,7 @@ export function FileListRow<T extends FileItem>({
   renameValue,
   onSelectItem,
   onDoubleClickItem,
-  onDeleteItem,
+  onRequestDelete,
   renderSyncStatus,
   renderExtraContextMenuItems,
   onRenameStart,
@@ -60,6 +48,7 @@ export function FileListRow<T extends FileItem>({
       <ContextMenuTrigger
         render={
           <tr
+            data-file-item
             onClick={() => onSelectItem(item)}
             onDoubleClick={() => onDoubleClickItem(item)}
             onContextMenu={() => onSelectItem(item)}
@@ -83,7 +72,7 @@ export function FileListRow<T extends FileItem>({
         <td
           className={cn(
             // Layout & Positioning
-            "flex items-center truncate",
+            "flex items-center truncate w-1/2",
 
             // Sizing & Spacing
             "px-3 py-1.5 gap-2",
@@ -114,15 +103,16 @@ export function FileListRow<T extends FileItem>({
           {isRenaming && onRenameChange && onRenameCommit && onRenameCancel ? (
             <input
               ref={(el) => {
-                if (renameInputRef) {
-                  (renameInputRef as any).current = el;
-                }
+                if (renameInputRef) renameInputRef.current = el;
               }}
               value={renameValue}
               onChange={(e) => onRenameChange(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') onRenameCommit(item);
-                if (e.key === 'Escape') onRenameCancel();
+                if (e.key === 'Escape') {
+                  e.stopPropagation();
+                  onRenameCancel();
+                }
               }}
               onClick={(e) => e.stopPropagation()}
               onBlur={() => onRenameCommit(item)}
@@ -168,7 +158,7 @@ export function FileListRow<T extends FileItem>({
         <td
           className={cn(
             // Layout & Positioning
-            "text-center uppercase",
+            "text-center uppercase w-16",
 
             // Sizing & Spacing
             "px-3 py-1.5",
@@ -184,7 +174,7 @@ export function FileListRow<T extends FileItem>({
         <td
           className={cn(
             // Layout & Positioning
-            "text-right",
+            "text-right w-24",
 
             // Sizing & Spacing
             "px-3 py-1.5",
@@ -200,7 +190,7 @@ export function FileListRow<T extends FileItem>({
         <td
           className={cn(
             // Layout & Positioning
-            "text-left",
+            "text-left w-36",
 
             // Sizing & Spacing
             "px-3 py-1.5",
@@ -224,7 +214,7 @@ export function FileListRow<T extends FileItem>({
           <td
             className={cn(
               // Layout & Positioning
-              "text-center",
+              "text-center w-20",
 
               // Sizing & Spacing
               "px-3 py-1.5"
@@ -238,7 +228,7 @@ export function FileListRow<T extends FileItem>({
         <td
           className={cn(
             // Layout & Positioning
-            "text-right",
+            "text-right w-16",
 
             // Sizing & Spacing
             "px-2 py-1.5"
@@ -259,7 +249,10 @@ export function FileListRow<T extends FileItem>({
             {onRenameStart && (
               <button
                 type="button"
-                onClick={(e) => onRenameStart(e, item)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRenameStart(item);
+                }}
                 className={cn(
                   // Sizing & Spacing
                   "p-1 rounded",
@@ -279,7 +272,7 @@ export function FileListRow<T extends FileItem>({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onDeleteItem(item);
+                onRequestDelete(item);
               }}
               className={cn(
                 // Sizing & Spacing
@@ -299,32 +292,13 @@ export function FileListRow<T extends FileItem>({
         </td>
       </ContextMenuTrigger>
 
-      <ContextMenuContent className="w-44 font-sans text-xs">
-        <ContextMenuItem onClick={() => onDoubleClickItem(item)}>
-          <FolderOpenIcon className="mr-2 size-3.5" />
-          <span>{item.type === 'folder' ? 'Open Folder' : 'Open'}</span>
-        </ContextMenuItem>
-
-        {onRenameStart && (
-          <ContextMenuItem onClick={(e) => onRenameStart(e as any, item)}>
-            <PencilSimpleIcon className="mr-2 size-3.5" />
-            <span>Rename</span>
-          </ContextMenuItem>
-        )}
-
-        {renderExtraContextMenuItems && renderExtraContextMenuItems(item)}
-
-        <ContextMenuSeparator />
-        <ContextMenuItem
-          variant="destructive"
-          onClick={() => {
-            onDeleteItem(item);
-          }}
-        >
-          <TrashIcon className="mr-2 size-3.5" />
-          <span>Delete</span>
-        </ContextMenuItem>
-      </ContextMenuContent>
+      <FileContextMenuContent
+        item={item}
+        onOpen={onDoubleClickItem}
+        onRequestDelete={onRequestDelete}
+        onStartRename={onRenameStart}
+        renderExtraItems={renderExtraContextMenuItems}
+      />
     </ContextMenu>
   );
 }

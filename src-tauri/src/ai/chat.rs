@@ -9,6 +9,7 @@ use super::types::{AiChatContext, AiChatCrawlContext, AiChatRequest, AiChatRespo
 
 pub async fn send_ai_chat_message_impl(
     app: AppHandle,
+    window_label: String,
     history: State<'_, crate::HistoryBridge>,
     request: AiChatRequest,
 ) -> Result<AiChatResponse, String> {
@@ -30,7 +31,8 @@ pub async fn send_ai_chat_message_impl(
         .clone()
         .unwrap_or_else(|| format!("chat-{}", chrono::Utc::now().timestamp_millis()));
 
-    let _ = app.emit(
+    let _ = app.emit_to(
+        &window_label,
         "ai-chat:started",
         json!({
             "requestId": request_id,
@@ -64,21 +66,25 @@ pub async fn send_ai_chat_message_impl(
 
     let policy = hexbuffer_ai::SecurityApprovalPolicy::default_policy();
 
-    let output = tool_loop::run_tool_loop(&app, &config, &policy, loop_history, prompt).await?;
+    let output =
+        tool_loop::run_tool_loop(&app, &window_label, &config, &policy, loop_history, prompt)
+            .await?;
 
     // Stream the final answer in small chunks so the interface renders it progressively.
     // (rig-core 0.7 has no streaming completion API, so this mirrors the text once ready.)
     let characters: Vec<char> = output.content.chars().collect();
     for chunk in characters.chunks(24) {
         let delta: String = chunk.iter().collect();
-        let _ = app.emit(
+        let _ = app.emit_to(
+            &window_label,
             "ai-chat:delta",
             json!({ "requestId": request_id, "delta": delta }),
         );
         tokio::time::sleep(std::time::Duration::from_millis(10)).await;
     }
 
-    let _ = app.emit(
+    let _ = app.emit_to(
+        &window_label,
         "ai-chat:finished",
         json!({
             "requestId": request_id,

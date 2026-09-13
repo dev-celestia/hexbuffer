@@ -18,6 +18,7 @@ import {
 } from '@phosphor-icons/react';
 
 import { PRESIGNED_URL_EXPIRATIONS } from '../constants';
+import { formatBytes } from '../lib/format';
 import type { R2Item } from '../types';
 import { cn } from '@/lib/utils';
 
@@ -27,14 +28,6 @@ interface ExplorerDetailsPaneProps {
   onOpenFile: (item: R2Item) => void;
   onCopyPublicUrl: (item: R2Item) => void;
   onCopyPresignedUrl: (item: R2Item, seconds: number) => void;
-}
-
-function formatBytes(bytes?: number): string {
-  if (bytes === undefined || bytes === 0) return '—';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
 export function ExplorerDetailsPane({

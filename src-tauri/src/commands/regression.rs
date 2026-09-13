@@ -1,29 +1,33 @@
+use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
+
+use nuclei_run::ui_bridge::{NucleiUiEngine, ScannerEvent, UiScanConfig, UiScannerAdapter};
 use parking_lot::Mutex;
-use std::{
-    collections::HashMap,
-    io::{BufRead, BufReader},
-    process::{Child, Command, Stdio},
-    sync::OnceLock,
-    thread,
-};
-
-#[cfg(unix)]
-use std::os::unix::process::CommandExt;
-
+use serde::Deserialize;
 use serde_json::Value;
-use tauri::{AppHandle, Emitter, Manager};
-use tauri_plugin_shell::ShellExt;
+use tauri::{AppHandle, Emitter, Manager, State};
 use uuid::Uuid;
 
 use crate::db::repository::Database;
 
-static RUNNING_PROCESSES: OnceLock<Mutex<HashMap<String, Child>>> = OnceLock::new();
-
-fn get_running_processes() -> &'static Mutex<HashMap<String, Child>> {
-    RUNNING_PROCESSES.get_or_init(|| Mutex::new(HashMap::new()))
+/// Per-run handle so the UI can cancel an in-flight scan.
+pub struct RegressionRunHandle {
+    engine: Arc<NucleiUiEngine>,
+    cancelled: Arc<std::sync::atomic::AtomicBool>,
 }
 
-/// Runs a blocking SQLite or process-waiting call off the async runtime.
+#[derive(Clone, Default)]
+pub struct RegressionEngineState {
+    runs: Arc<Mutex<HashMap<String, Arc<RegressionRunHandle>>>>,
+}
+
+impl RegressionEngineState {
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+/// Runs a blocking SQLite call off the async runtime.
 async fn run_blocking<T, F>(task: F) -> Result<T, String>
 where
     F: FnOnce() -> Result<T, String> + Send + 'static,
@@ -34,471 +38,131 @@ where
         .map_err(|e| format!("background task failed: {}", e))?
 }
 
-/// Spawn the AI engine sidecar in regression mode and relay its stdout events
-/// to the Tauri frontend in real time.
-#[tauri::command]
-pub async fn run_regression_test(
-    app: AppHandle,
-    state: tauri::State<'_, Database>,
-    test_case_id: String,
-) -> Result<Value, String> {
-    // Load test case from DB and create the run record off the async runtime.
-    let db = state.inner().clone();
-    let test_case_id_for_task = test_case_id.clone();
-    let record = run_blocking(move || {
-        let record = db
-            .get_regression_test_case(&test_case_id_for_task)
-            .map_err(|e| format!("Failed to load test case: {}", e))?
-            .ok_or_else(|| format!("Test case not found: {}", test_case_id_for_task))?;
+/// A single Nuclei template document inside a regression script. Each
+/// document is one regression condition; a matcher hit means the
+/// condition passed.
+#[derive(Debug, Clone)]
+struct TemplateMeta {
+    id: String,
+    name: String,
+    severity: String,
+}
 
-        let run_id = Uuid::new_v4().to_string();
-        db.create_regression_run(&run_id, &test_case_id_for_task, "queued")
-            .map_err(|e| format!("Failed to create run record: {}", e))?;
-        Ok((record, run_id))
-    })
-    .await?;
-    let (record, run_id) = record;
+/// Parse a multi-document YAML script into per-template metadata.
+fn parse_template_docs(yaml: &str) -> (Vec<TemplateMeta>, Vec<String>) {
+    let mut templates = Vec::new();
+    let mut errors = Vec::new();
 
-    // Build config for the sidecar
-    let test_case_value: Value = serde_json::json!({
-        "id": record.id,
-        "testName": record.test_name,
-        "name": record.name,
-        "description": record.description,
-        "targetUrl": record.target_url,
-        "steps": serde_json::from_str::<Value>(&record.steps_json).unwrap_or_default(),
-    });
-    let config_json = serde_json::to_string(&test_case_value)
-        .map_err(|e| format!("Failed to serialize test case: {}", e))?;
-
-    let artifact_dir = crate::paths::get_shared_app_dir().join("regression-artifacts");
-    std::fs::create_dir_all(&artifact_dir).map_err(|e| e.to_string())?;
-
-    // Read AI settings for provider/model
-    let settings = crate::ai::read_ai_settings(&app).unwrap_or_default();
-
-    let sidecar_command = app
-        .shell()
-        .sidecar("ai-engine")
-        .map_err(|e| format!("Failed to prepare sidecar: {}", e))?
-        .env("HEXBUFFER_AI_ENGINE_MODE", "regression")
-        .env("HEXBUFFER_REGRESSION_CONFIG_JSON", &config_json)
-        .env("HEXBUFFER_REGRESSION_SESSION_ID", &run_id)
-        .env(
-            "HEXBUFFER_PROXY_PORT",
-            crate::proxy::active_proxy_port()
-                .unwrap_or_else(crate::proxy::default_proxy_port)
-                .to_string(),
-        )
-        .env("XBUFFER_AI_PROVIDER", &settings.provider)
-        .env("HEXBUFFER_AI_MODEL", &settings.model)
-        .env("AI_SDK_LOG_WARNINGS", "false")
-        .env(
-            "HEXBUFFER_AI_ARTIFACT_DIR",
-            artifact_dir.to_string_lossy().to_string(),
-        );
-
-    let mut command: Command = sidecar_command.into();
-    command
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
-
-    // Inject API key if available
-    if let Ok(Some(api_key)) = crate::ai::read_optional_ai_api_key(&settings.provider) {
-        if !api_key.trim().is_empty() {
-            if let Ok(env_name) = crate::ai::api_key_env_name(&settings.provider) {
-                command.env(env_name, api_key.trim());
+    for (idx, doc) in serde_yaml::Deserializer::from_str(yaml).enumerate() {
+        let doc_num = idx + 1;
+        let value = match serde_yaml::Value::deserialize(doc) {
+            Ok(v) => v,
+            Err(e) => {
+                errors.push(format!("Document {}: {}", doc_num, e));
+                continue;
             }
+        };
+
+        let json: Value = match serde_json::to_value(&value) {
+            Ok(v) => v,
+            Err(e) => {
+                errors.push(format!("Document {}: {}", doc_num, e));
+                continue;
+            }
+        };
+
+        // Skip empty documents (stray "---" separators)
+        if json.is_null() {
+            continue;
+        }
+
+        let id = json
+            .get("id")
+            .and_then(Value::as_str)
+            .unwrap_or("")
+            .to_string();
+        let info = json.get("info");
+        let name = info
+            .and_then(|i| i.get("name"))
+            .and_then(Value::as_str)
+            .unwrap_or("")
+            .to_string();
+        let severity = info
+            .and_then(|i| i.get("severity"))
+            .and_then(Value::as_str)
+            .unwrap_or("info")
+            .to_lowercase();
+
+        if id.is_empty() {
+            errors.push(format!("Document {} is missing an `id` field", doc_num));
+            continue;
+        }
+        if name.is_empty() {
+            errors.push(format!("Document {} is missing `info.name`", doc_num));
+            continue;
+        }
+        if json.get("http").is_none() {
+            errors.push(format!(
+                "Document {} ({}) has no `http` block — only HTTP templates are supported",
+                doc_num, id
+            ));
+            continue;
+        }
+
+        templates.push(TemplateMeta {
+            id,
+            name,
+            severity,
+        });
+    }
+
+    // Nuclei template ids must be unique per scan for condition tracking
+    let mut seen = HashSet::new();
+    for t in &templates {
+        if !seen.insert(t.id.clone()) {
+            errors.push(format!("Duplicate template id `{}` — ids must be unique", t.id));
         }
     }
 
-    #[cfg(unix)]
-    command.process_group(0);
-
-    let mut child = command
-        .spawn()
-        .map_err(|e| format!("Failed to start regression sidecar: {}", e))?;
-
-    let stdout = child
-        .stdout
-        .take()
-        .ok_or_else(|| "Failed to capture sidecar stdout".to_string())?;
-
-    get_running_processes().lock().insert(run_id.clone(), child);
-
-    let app_clone = app.clone();
-    let run_id_clone = run_id.clone();
-
-    // Spawn a thread to read stdout events
-    thread::spawn(move || {
-        let reader = BufReader::new(stdout);
-        for line in reader.lines() {
-            let line: String = match line {
-                Ok(l) => l,
-                Err(_) => break,
-            };
-
-            let trimmed = line.trim();
-            if trimmed.is_empty() {
-                continue;
-            }
-
-            let message: Value = match serde_json::from_str(trimmed) {
-                Ok(m) => m,
-                Err(_) => continue,
-            };
-
-            let event_type = message.get("type").and_then(Value::as_str).unwrap_or("");
-
-            match event_type {
-                "regression:test_started" => {
-                    if let Some(db) = app_clone.try_state::<Database>() {
-                        let _ = db.create_regression_run(
-                            &run_id_clone,
-                            message
-                                .get("testCaseId")
-                                .and_then(Value::as_str)
-                                .unwrap_or(""),
-                            "running",
-                        );
-                    }
-                    let _ = app_clone.emit("regression:test-started", &message);
-                }
-                "regression:step_started"
-                | "regression:step_completed"
-                | "regression:step_failed"
-                | "regression:assertion_passed"
-                | "regression:assertion_failed" => {
-                    let tauri_event = event_type.replace(':', "-");
-                    let _ = app_clone.emit(&tauri_event, &message);
-                }
-                "regression:test_finished" => {
-                    let status = message
-                        .get("status")
-                        .and_then(Value::as_str)
-                        .unwrap_or("failed");
-
-                    let step_results = message
-                        .get("stepResults")
-                        .cloned()
-                        .unwrap_or_else(|| serde_json::json!([]));
-                    let ai_verdict = message
-                        .get("aiVerdict")
-                        .map(|v| serde_json::to_string(v).unwrap_or_default());
-
-                    if let Some(db) = app_clone.try_state::<Database>() {
-                        let _ = db.finish_regression_run(
-                            &run_id_clone,
-                            status,
-                            &serde_json::to_string(&step_results).unwrap_or_default(),
-                            ai_verdict.as_deref(),
-                            if status == "failed" {
-                                Some("Some steps failed")
-                            } else {
-                                None
-                            },
-                        );
-                    }
-
-                    let _ = app_clone.emit("regression:test-finished", &message);
-                }
-                "regression:test_failed" => {
-                    let error = message
-                        .get("error")
-                        .and_then(Value::as_str)
-                        .unwrap_or("Unknown error");
-
-                    if let Some(db) = app_clone.try_state::<Database>() {
-                        let _ = db.finish_regression_run(
-                            &run_id_clone,
-                            "failed",
-                            "[]",
-                            None,
-                            Some(error),
-                        );
-                    }
-
-                    let _ = app_clone.emit("regression:test-failed", &message);
-                }
-                "log_created" => {
-                    // Forward Playwright execution logs to the frontend
-                    // Namespaced as regression:log-created to avoid conflicts with crawl events
-                    let _ = app_clone.emit("regression:log-created", &message);
-                }
-                _ => {
-                    let tauri_event = event_type.replace(':', "-");
-                    let _ = app_clone.emit(&tauri_event, &message);
-                }
-            }
-        }
-        // Remove process from active map on completion
-        get_running_processes().lock().remove(&run_id_clone);
-    });
-
-    Ok(serde_json::json!({
-        "runId": run_id,
-        "testCaseId": test_case_id,
-        "status": "queued",
-    }))
+    (templates, errors)
 }
 
-/// Abort a running regression test sidecar process.
-#[tauri::command]
-pub async fn abort_regression_test(app: AppHandle, run_id: String) -> Result<(), String> {
-    // End the lock guard's lifetime before awaiting below.
-    let child_opt = get_running_processes().lock().remove(&run_id);
-    if let Some(mut child) = child_opt {
-        let _ = child.kill();
-
-        if let Some(db) = app.try_state::<Database>() {
-            let db = db.inner().clone();
-            let run_id_for_task = run_id.clone();
-            let _ = run_blocking(move || {
-                db.finish_regression_run(
-                    &run_id_for_task,
-                    "aborted",
-                    "[]",
-                    None,
-                    Some("Aborted by user"),
-                )
-                .map_err(|e| e.to_string())
-            })
-            .await;
-        }
-        let _ = app.emit(
-            "regression:test-finished",
+fn templates_to_conditions(templates: &[TemplateMeta]) -> Vec<Value> {
+    templates
+        .iter()
+        .map(|t| {
             serde_json::json!({
-                "runId": run_id,
-                "status": "aborted",
-                "stepResults": [],
-                "aiVerdict": null,
-                "error": "Aborted by user"
-            }),
-        );
-    }
-    Ok(())
+                "id": t.id,
+                "name": t.name,
+                "severity": t.severity,
+                "status": "pending",
+                "matchedUrl": null,
+                "extracted": [],
+            })
+        })
+        .collect()
 }
 
 #[tauri::command]
-pub async fn scrape_page_for_steps(app: AppHandle, target_url: String) -> Result<Value, String> {
-    let settings = crate::ai::read_ai_settings(&app).unwrap_or_default();
-
-    let sidecar_command = app
-        .shell()
-        .sidecar("ai-engine")
-        .map_err(|e| format!("Failed to prepare sidecar: {}", e))?
-        .env("HEXBUFFER_AI_ENGINE_MODE", "scrape-page")
-        .env("HEXBUFFER_SCRAPE_TARGET_URL", &target_url)
-        .env("XBUFFER_AI_PROVIDER", &settings.provider)
-        .env("AI_SDK_LOG_WARNINGS", "false");
-
-    let mut command: Command = sidecar_command.into();
-    command
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
-
-    // Inject API key if available
-    if let Ok(Some(api_key)) = crate::ai::read_optional_ai_api_key(&settings.provider) {
-        if !api_key.trim().is_empty() {
-            if let Ok(env_name) = crate::ai::api_key_env_name(&settings.provider) {
-                command.env(env_name, api_key.trim());
-            }
-        }
-    }
-
-    #[cfg(unix)]
-    command.process_group(0);
-
-    // The sidecar runs synchronously until it emits a result — potentially
-    // minutes — so the whole spawn/read/wait cycle stays off the async runtime.
-    run_blocking(move || {
-        let mut child = command
-            .spawn()
-            .map_err(|e| format!("Failed to start scrape sidecar: {}", e))?;
-
-        let stdout = child
-            .stdout
-            .take()
-            .ok_or_else(|| "Failed to capture sidecar stdout".to_string())?;
-
-        // Read all stdout lines and look for scrape result
-        let reader = BufReader::new(stdout);
-        let mut last_error: Option<String> = None;
-
-        for line in reader.lines() {
-            let line = match line {
-                Ok(l) => l,
-                Err(_) => break,
-            };
-
-            let trimmed = line.trim();
-            if trimmed.is_empty() {
-                continue;
-            }
-
-            let message: Value = match serde_json::from_str(trimmed) {
-                Ok(m) => m,
-                Err(_) => continue,
-            };
-
-            let event_type = message.get("type").and_then(Value::as_str).unwrap_or("");
-
-            match event_type {
-                "scrape:result" => {
-                    // Return the scraped data
-                    if let Some(data) = message.get("data") {
-                        return Ok(data.clone());
-                    }
-                    return Ok(message);
-                }
-                "scrape:failed" => {
-                    last_error = Some(
-                        message
-                            .get("error")
-                            .and_then(Value::as_str)
-                            .unwrap_or("Unknown scrape error")
-                            .to_string(),
-                    );
-                }
-                _ => {}
-            }
-        }
-
-        // Wait for process to finish
-        let _ = child.wait();
-
-        Err(last_error.unwrap_or_else(|| "No scrape result received from sidecar".to_string()))
-    })
-    .await
-}
-
-/// Spawn the AI engine sidecar to run a single regression step via Playwright.
-/// Returns the step result (passed/failed with error details and duration).
-#[tauri::command]
-pub async fn run_regression_step(
-    app: AppHandle,
-    step_json: Value,
-    target_url: String,
-) -> Result<Value, String> {
-    let settings = crate::ai::read_ai_settings(&app).unwrap_or_default();
-
-    let step_json_str = serde_json::to_string(&step_json)
-        .map_err(|e| format!("Failed to serialize step: {}", e))?;
-
-    let sidecar_command = app
-        .shell()
-        .sidecar("ai-engine")
-        .map_err(|e| format!("Failed to prepare sidecar: {}", e))?
-        .env("HEXBUFFER_AI_ENGINE_MODE", "regression-single-step")
-        .env("HEXBUFFER_REGRESSION_STEP_JSON", &step_json_str)
-        .env("HEXBUFFER_REGRESSION_TARGET_URL", &target_url)
-        .env("XBUFFER_AI_PROVIDER", &settings.provider)
-        .env("AI_SDK_LOG_WARNINGS", "false");
-
-    let mut command: Command = sidecar_command.into();
-    command
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
-
-    // Inject API key if available
-    if let Ok(Some(api_key)) = crate::ai::read_optional_ai_api_key(&settings.provider) {
-        if !api_key.trim().is_empty() {
-            if let Ok(env_name) = crate::ai::api_key_env_name(&settings.provider) {
-                command.env(env_name, api_key.trim());
-            }
-        }
-    }
-
-    #[cfg(unix)]
-    command.process_group(0);
-
-    // The sidecar runs synchronously until it emits a result — potentially
-    // minutes — so the whole spawn/read/wait cycle stays off the async runtime.
-    run_blocking(move || {
-        let mut child = command
-            .spawn()
-            .map_err(|e| format!("Failed to start single-step sidecar: {}", e))?;
-
-        let stdout = child
-            .stdout
-            .take()
-            .ok_or_else(|| "Failed to capture sidecar stdout".to_string())?;
-
-        // Read all stdout lines and look for step result
-        let reader = BufReader::new(stdout);
-        let mut last_error: Option<String> = None;
-
-        for line in reader.lines() {
-            let line = match line {
-                Ok(l) => l,
-                Err(_) => break,
-            };
-
-            let trimmed = line.trim();
-            if trimmed.is_empty() {
-                continue;
-            }
-
-            let message: Value = match serde_json::from_str(trimmed) {
-                Ok(m) => m,
-                Err(_) => continue,
-            };
-
-            let event_type = message.get("type").and_then(Value::as_str).unwrap_or("");
-
-            match event_type {
-                "step:result" => {
-                    // Return the step result data
-                    if let Some(data) = message.get("data") {
-                        return Ok(data.clone());
-                    }
-                    return Ok(message);
-                }
-                "step:failed" => {
-                    last_error = Some(
-                        message
-                            .get("error")
-                            .and_then(Value::as_str)
-                            .unwrap_or("Unknown step error")
-                            .to_string(),
-                    );
-                }
-                _ => {}
-            }
-        }
-
-        // Wait for process to finish
-        let _ = child.wait();
-
-        Err(last_error.unwrap_or_else(|| "No step result received from sidecar".to_string()))
-    })
-    .await
-}
-
-#[tauri::command]
-pub async fn list_regression_test_cases(
-    state: tauri::State<'_, Database>,
+pub async fn list_regression_scripts(
+    state: State<'_, Database>,
 ) -> Result<Vec<Value>, String> {
     let db = state.inner().clone();
     let records = run_blocking(move || {
-        db.list_regression_test_cases()
-            .map_err(|e| format!("Failed to list test cases: {}", e))
+        db.list_regression_scripts()
+            .map_err(|e| format!("Failed to list regression scripts: {}", e))
     })
     .await?;
 
-    let cases: Vec<Value> = records
+    let scripts: Vec<Value> = records
         .into_iter()
         .map(|r| {
             serde_json::json!({
                 "id": r.id,
-                "testName": r.test_name,
                 "name": r.name,
                 "description": r.description,
                 "targetUrl": r.target_url,
-                "steps": serde_json::from_str::<Value>(&r.steps_json).unwrap_or_default(),
+                "yaml": r.yaml,
                 "enabled": r.enabled,
                 "createdAt": r.created_at,
                 "updatedAt": r.updated_at,
@@ -506,49 +170,47 @@ pub async fn list_regression_test_cases(
         })
         .collect();
 
-    Ok(cases)
+    Ok(scripts)
 }
 
 #[tauri::command]
-pub async fn save_regression_test_case(
-    state: tauri::State<'_, Database>,
-    test_case: Value,
+pub async fn save_regression_script(
+    state: State<'_, Database>,
+    script: Value,
 ) -> Result<Value, String> {
-    let id = test_case
+    let id = script
         .get("id")
         .and_then(Value::as_str)
         .unwrap_or("")
         .to_string();
-    let name = test_case
+    let name = script
         .get("name")
         .and_then(Value::as_str)
         .unwrap_or("New Test Case")
         .to_string();
-    let test_name = test_case
-        .get("testName")
-        .and_then(Value::as_str)
-        .unwrap_or("Default Test")
-        .to_string();
-    let description = test_case
+    let description = script
         .get("description")
         .and_then(Value::as_str)
         .unwrap_or("")
         .to_string();
-    let target_url = test_case
+    let target_url = script
         .get("targetUrl")
         .and_then(Value::as_str)
         .unwrap_or("")
         .to_string();
-    let steps = test_case
-        .get("steps")
-        .cloned()
-        .unwrap_or(serde_json::json!([]));
-    let steps_json =
-        serde_json::to_string(&steps).map_err(|e| format!("Failed to serialize steps: {}", e))?;
-    let enabled = test_case
+    let yaml = script
+        .get("yaml")
+        .and_then(Value::as_str)
+        .unwrap_or("")
+        .to_string();
+    let enabled = script
         .get("enabled")
         .and_then(Value::as_bool)
         .unwrap_or(true);
+
+    if yaml.trim().is_empty() {
+        return Err("Script YAML cannot be empty".into());
+    }
 
     let actual_id = if id.is_empty() {
         Uuid::new_v4().to_string()
@@ -558,26 +220,24 @@ pub async fn save_regression_test_case(
 
     let db = state.inner().clone();
     let record = run_blocking(move || {
-        db.save_regression_test_case(
+        db.save_regression_script(
             &actual_id,
-            &test_name,
             &name,
             &description,
             &target_url,
-            &steps_json,
+            &yaml,
             enabled,
         )
-        .map_err(|e| format!("Failed to save test case: {}", e))
+        .map_err(|e| format!("Failed to save regression script: {}", e))
     })
     .await?;
 
     Ok(serde_json::json!({
         "id": record.id,
-        "testName": record.test_name,
         "name": record.name,
         "description": record.description,
         "targetUrl": record.target_url,
-        "steps": steps,
+        "yaml": record.yaml,
         "enabled": record.enabled,
         "createdAt": record.created_at,
         "updatedAt": record.updated_at,
@@ -585,27 +245,360 @@ pub async fn save_regression_test_case(
 }
 
 #[tauri::command]
-pub async fn delete_regression_test_case(
-    state: tauri::State<'_, Database>,
+pub async fn delete_regression_script(
+    state: State<'_, Database>,
     id: String,
 ) -> Result<(), String> {
     let db = state.inner().clone();
     run_blocking(move || {
-        db.delete_regression_test_case(&id)
-            .map_err(|e| format!("Failed to delete test case: {}", e))
+        db.delete_regression_script(&id)
+            .map_err(|e| format!("Failed to delete regression script: {}", e))
     })
     .await
 }
 
+/// Validate a script's YAML without saving or running it. Returns the
+/// parsed condition metadata plus any per-document errors.
 #[tauri::command]
-pub async fn list_regression_runs(
-    state: tauri::State<'_, Database>,
-    test_case_id: String,
+pub async fn validate_regression_script(yaml: String) -> Result<Value, String> {
+    let (templates, errors) = tokio::task::spawn_blocking(move || parse_template_docs(&yaml))
+        .await
+        .map_err(|e| format!("validation task failed: {}", e))?;
+
+    Ok(serde_json::json!({
+        "valid": errors.is_empty() && !templates.is_empty(),
+        "errors": errors,
+        "templates": templates.iter().map(|t| serde_json::json!({
+            "id": t.id,
+            "name": t.name,
+            "severity": t.severity,
+        })).collect::<Vec<_>>(),
+    }))
+}
+
+#[tauri::command]
+pub async fn run_regression_script(
+    app: AppHandle,
+    state: State<'_, Database>,
+    engine_state: State<'_, RegressionEngineState>,
+    script_id: String,
+    concurrency: Option<usize>,
+    rate_limit_rps: Option<u32>,
+) -> Result<Value, String> {
+    let db = state.inner().clone();
+    let script_id_for_task = script_id.clone();
+    let loaded = run_blocking(move || {
+        let record = db
+            .get_regression_script(&script_id_for_task)
+            .map_err(|e| format!("Failed to load script: {}", e))?
+            .ok_or_else(|| format!("Regression script not found: {}", script_id_for_task))?;
+        Ok(record)
+    })
+    .await?;
+    let record = loaded;
+
+    let (templates, parse_errors) = parse_template_docs(&record.yaml);
+    if templates.is_empty() {
+        return Err(format!(
+            "No valid Nuclei templates in script: {}",
+            if parse_errors.is_empty() {
+                "the YAML is empty".to_string()
+            } else {
+                parse_errors.join("; ")
+            }
+        ));
+    }
+
+    let run_id = Uuid::new_v4().to_string();
+    let conditions = templates_to_conditions(&templates);
+    let conditions_json = serde_json::to_string(&conditions)
+        .map_err(|e| format!("Failed to serialize conditions: {}", e))?;
+
+    let db2 = state.inner().clone();
+    let run_id_for_db = run_id.clone();
+    let total_templates = templates.len() as i64;
+    run_blocking(move || {
+        db2.create_regression_script_run(
+            &run_id_for_db,
+            &record.id,
+            "running",
+            &conditions_json,
+            total_templates,
+        )
+        .map_err(|e| format!("Failed to create run record: {}", e))
+    })
+    .await?;
+
+    let config = UiScanConfig {
+        targets: vec![record.target_url.clone()],
+        template_paths: vec![],
+        raw_templates: vec![record.yaml.clone()],
+        concurrency: concurrency.unwrap_or(25).max(1),
+        rate_limit_rps: rate_limit_rps.unwrap_or(150).max(1),
+        timeout_seconds: 10,
+    };
+
+    let engine = Arc::new(NucleiUiEngine::new());
+    let handle = Arc::new(RegressionRunHandle {
+        engine: Arc::clone(&engine),
+        cancelled: Arc::new(std::sync::atomic::AtomicBool::new(false)),
+    });
+    engine_state.runs.lock().insert(run_id.clone(), handle);
+
+    let (event_tx, mut event_rx) = tokio::sync::mpsc::channel::<ScannerEvent>(1000);
+
+    // Event bridge: engine events → Tauri events + run bookkeeping
+    let app_handle = app.clone();
+    let engines = engine_state.inner().clone();
+    let run_id_bridge = run_id.clone();
+    let script_id_bridge = script_id.clone();
+    let conditions_base = templates_to_conditions(&templates);
+    let cancelled_flag = Arc::clone(&engine_state.runs.lock().get(&run_id).unwrap().cancelled);
+    tokio::spawn(async move {
+        let mut findings: Vec<Value> = Vec::new();
+        let mut messages: Vec<Value> = Vec::new();
+        let mut matched: HashMap<String, Value> = HashMap::new();
+        let mut completed = false;
+        let mut elapsed_millis: Option<i64> = None;
+        let mut last_error: Option<String> = None;
+
+        while let Some(event) = event_rx.recv().await {
+            match event {
+                ScannerEvent::ScanStarted {
+                    total_templates,
+                    total_targets,
+                } => {
+                    messages.push(serde_json::json!({
+                        "level": "info",
+                        "message": format!(
+                            "Scan started: {} condition(s) against {} target(s)",
+                            total_templates, total_targets
+                        ),
+                        "at": chrono::Utc::now().to_rfc3339(),
+                    }));
+                    let _ = app_handle.emit(
+                        "regression://scan-started",
+                        serde_json::json!({
+                            "runId": run_id_bridge,
+                            "scriptId": script_id_bridge,
+                            "totalTemplates": total_templates,
+                            "totalTargets": total_targets,
+                        }),
+                    );
+                }
+                ScannerEvent::ProgressUpdate {
+                    completed_requests,
+                    total_requests,
+                    rps,
+                } => {
+                    let _ = app_handle.emit(
+                        "regression://progress",
+                        serde_json::json!({
+                            "runId": run_id_bridge,
+                            "completedRequests": completed_requests,
+                            "totalRequests": total_requests,
+                            "rps": rps,
+                        }),
+                    );
+                }
+                ScannerEvent::FindingDiscovered(finding) => {
+                    let value = match serde_json::to_value(&finding) {
+                        Ok(v) => v,
+                        Err(_) => continue,
+                    };
+                    matched.insert(finding.template_id.clone(), value.clone());
+                    findings.push(value.clone());
+                    messages.push(serde_json::json!({
+                        "level": "success",
+                        "message": format!(
+                            "[{}] {} matched {}",
+                            finding.severity, finding.template_name, finding.matched_url
+                        ),
+                        "at": chrono::Utc::now().to_rfc3339(),
+                    }));
+                    let _ = app_handle.emit(
+                        "regression://finding",
+                        serde_json::json!({
+                            "runId": run_id_bridge,
+                            "finding": value,
+                        }),
+                    );
+                }
+                ScannerEvent::ScanError { target, message } => {
+                    last_error = Some(message.clone());
+                    messages.push(serde_json::json!({
+                        "level": "error",
+                        "message": format!("{}: {}", target, message),
+                        "at": chrono::Utc::now().to_rfc3339(),
+                    }));
+                    let _ = app_handle.emit(
+                        "regression://scan-error",
+                        serde_json::json!({
+                            "runId": run_id_bridge,
+                            "target": target,
+                            "message": message,
+                        }),
+                    );
+                }
+                ScannerEvent::ScanCompleted {
+                    elapsed_millis: ms,
+                    total_findings,
+                } => {
+                    elapsed_millis = Some(ms.min(i64::MAX as u128) as i64);
+                    completed = true;
+                    messages.push(serde_json::json!({
+                        "level": "info",
+                        "message": format!(
+                            "Scan completed in {} ms with {} matched condition(s)",
+                            ms, total_findings
+                        ),
+                        "at": chrono::Utc::now().to_rfc3339(),
+                    }));
+                    break;
+                }
+            }
+        }
+
+        let cancelled = cancelled_flag.load(std::sync::atomic::Ordering::SeqCst);
+        let status = if !completed {
+            "failed"
+        } else if cancelled {
+            "aborted"
+        } else {
+            "completed"
+        };
+
+        let conditions: Vec<Value> = conditions_base
+            .iter()
+            .map(|c| {
+                let id = c.get("id").and_then(Value::as_str).unwrap_or("");
+                let hit = matched.get(id);
+                let mut condition = c.clone();
+                condition["status"] = if hit.is_some() {
+                    Value::String("passed".into())
+                } else {
+                    Value::String("failed".into())
+                };
+                if let Some(f) = hit {
+                    condition["matchedUrl"] = f.get("matchedUrl").cloned().unwrap_or(Value::Null);
+                    condition["extracted"] =
+                        f.get("extractedResults").cloned().unwrap_or(Value::Null);
+                }
+                condition
+            })
+            .collect();
+
+        let passed = conditions
+            .iter()
+            .filter(|c| c["status"] == "passed")
+            .count() as i64;
+        let failed = conditions.len() as i64 - passed;
+
+        let error = if completed {
+            None
+        } else {
+            Some(
+                last_error.unwrap_or_else(|| {
+                    "Scan ended without completing — check the script YAML".to_string()
+                }),
+            )
+        };
+
+        let findings_json = serde_json::to_string(&findings).unwrap_or_else(|_| "[]".into());
+        let logs_json = serde_json::to_string(&messages).unwrap_or_else(|_| "[]".into());
+        let conditions_json = serde_json::to_string(&conditions).unwrap_or_else(|_| "[]".into());
+
+        if let Some(db) = app_handle.try_state::<Database>() {
+            let db = db.inner().clone();
+            let run_id_db = run_id_bridge.clone();
+            let status_db = status.to_string();
+            let error_db = error.clone();
+            let _ = run_blocking(move || {
+                db.finish_regression_script_run(
+                    &run_id_db,
+                    &status_db,
+                    &conditions_json,
+                    &findings_json,
+                    &logs_json,
+                    passed,
+                    failed,
+                    elapsed_millis,
+                    error_db.as_deref(),
+                )
+                .map_err(|e| e.to_string())
+            })
+            .await;
+        }
+
+        let _ = app_handle.emit(
+            "regression://scan-completed",
+            serde_json::json!({
+                "runId": run_id_bridge,
+                "scriptId": script_id_bridge,
+                "status": status,
+                "conditions": conditions,
+                "findings": findings,
+                "messages": messages,
+                "passedConditions": passed,
+                "failedConditions": failed,
+                "totalTemplates": conditions.len(),
+                "elapsedMillis": elapsed_millis,
+                "error": error,
+            }),
+        );
+
+        engines.runs.lock().remove(&run_id_bridge);
+    });
+
+    // Start scanning
+    let engine_clone = Arc::clone(&engine);
+    tokio::spawn(async move {
+        if let Err(e) = engine_clone.start_scan(config, event_tx.clone()).await {
+            let _ = event_tx
+                .send(ScannerEvent::ScanError {
+                    target: "engine-initialization".into(),
+                    message: e,
+                })
+                .await;
+        }
+    });
+
+    Ok(serde_json::json!({
+        "runId": run_id,
+        "scriptId": script_id,
+        "status": "running",
+    }))
+}
+
+/// Cancel an in-flight regression run. The scan bridge persists the run
+/// as aborted once the engine reports completion.
+#[tauri::command]
+pub async fn abort_regression_run(
+    app: AppHandle,
+    engine_state: State<'_, RegressionEngineState>,
+    run_id: String,
+) -> Result<(), String> {
+    let handle = engine_state.runs.lock().get(&run_id).cloned();
+    if let Some(handle) = handle {
+        handle.cancelled.store(true, std::sync::atomic::Ordering::SeqCst);
+        let _ = handle.engine.cancel_scan().await;
+        let _ = app.emit(
+            "regression://scan-aborted",
+            serde_json::json!({ "runId": run_id }),
+        );
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn list_regression_script_runs(
+    state: State<'_, Database>,
+    script_id: String,
 ) -> Result<Vec<Value>, String> {
     let db = state.inner().clone();
     let records = run_blocking(move || {
-        db.list_regression_runs(&test_case_id)
-            .map_err(|e| format!("Failed to list runs: {}", e))
+        db.list_regression_script_runs(&script_id)
+            .map_err(|e| format!("Failed to list regression runs: {}", e))
     })
     .await?;
 
@@ -614,10 +607,16 @@ pub async fn list_regression_runs(
         .map(|r| {
             serde_json::json!({
                 "id": r.id,
-                "testCaseId": r.test_case_id,
+                "scriptId": r.script_id,
                 "status": r.status,
-                "stepResults": serde_json::from_str::<Value>(&r.step_results_json).unwrap_or_default(),
-                "aiVerdict": r.ai_verdict.and_then(|v| serde_json::from_str::<Value>(&v).ok()),
+                "conditions": serde_json::from_str::<Value>(&r.conditions_json).unwrap_or_default(),
+                "findings": serde_json::from_str::<Value>(&r.findings_json).unwrap_or_default(),
+                "messages": serde_json::from_str::<Value>(&r.logs_json).unwrap_or_default(),
+                "totalTemplates": r.total_templates,
+                "totalTargets": r.total_targets,
+                "passedConditions": r.passed_conditions,
+                "failedConditions": r.failed_conditions,
+                "elapsedMillis": r.elapsed_millis,
                 "startedAt": r.started_at,
                 "finishedAt": r.finished_at,
                 "error": r.error,
@@ -627,70 +626,4 @@ pub async fn list_regression_runs(
         .collect();
 
     Ok(runs)
-}
-
-#[tauri::command]
-pub async fn list_projects(state: tauri::State<'_, Database>) -> Result<serde_json::Value, String> {
-    let db = state.inner().clone();
-    let records = run_blocking(move || {
-        db.list_projects()
-            .map_err(|e| format!("Failed to list projects: {}", e))
-    })
-    .await?;
-    serde_json::to_value(records).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub async fn list_environments(
-    state: tauri::State<'_, Database>,
-) -> Result<serde_json::Value, String> {
-    let db = state.inner().clone();
-    let records = run_blocking(move || {
-        db.list_environments()
-            .map_err(|e| format!("Failed to list environments: {}", e))
-    })
-    .await?;
-    serde_json::to_value(records).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub async fn list_regression_runs_relational(
-    state: tauri::State<'_, Database>,
-    project_id: Option<String>,
-    environment_id: Option<String>,
-) -> Result<serde_json::Value, String> {
-    let db = state.inner().clone();
-    let records = run_blocking(move || {
-        db.list_regression_runs_relational(project_id.as_deref(), environment_id.as_deref())
-            .map_err(|e| format!("Failed to list relational runs: {}", e))
-    })
-    .await?;
-    serde_json::to_value(records).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub async fn list_test_run_results(
-    state: tauri::State<'_, Database>,
-    run_id: String,
-) -> Result<serde_json::Value, String> {
-    let db = state.inner().clone();
-    let records = run_blocking(move || {
-        db.list_test_run_results(&run_id)
-            .map_err(|e| format!("Failed to list test run results: {}", e))
-    })
-    .await?;
-    serde_json::to_value(records).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub async fn list_error_signatures(
-    state: tauri::State<'_, Database>,
-) -> Result<serde_json::Value, String> {
-    let db = state.inner().clone();
-    let records = run_blocking(move || {
-        db.list_error_signatures()
-            .map_err(|e| format!("Failed to list error signatures: {}", e))
-    })
-    .await?;
-    serde_json::to_value(records).map_err(|e| e.to_string())
 }

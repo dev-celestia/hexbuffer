@@ -28,7 +28,12 @@ interface FileGridProps<T extends FileItem> {
   loading: boolean;
   onSelectItem: (item: T) => void;
   onDoubleClickItem: (item: T) => void;
+  /** Confirmed delete (after the dialog) */
   onDeleteItem: (item: T) => void;
+  /** Pending delete target shown in the confirm dialog (controlled) */
+  deleteTarget: T | null;
+  onDeleteTargetChange: (item: T | null) => void;
+  onContainerKeyDown?: React.KeyboardEventHandler<HTMLElement>;
   viewMode: 'list' | 'grid';
   emptyMessage?: string;
   renderSyncStatus?: (item: T) => React.ReactNode;
@@ -36,13 +41,21 @@ interface FileGridProps<T extends FileItem> {
   renderGridStatusOverlay?: (item: T) => React.ReactNode;
   renamingId?: string | null;
   renameValue?: string;
-  onRenameStart?: (e: React.MouseEvent, item: T) => void;
+  onRenameStart?: (item: T) => void;
   onRenameChange?: (value: string) => void;
   onRenameCommit?: (item: T) => void;
   onRenameCancel?: () => void;
   renameInputRef?: React.RefObject<HTMLInputElement | null>;
   deletingId?: string | null;
 }
+
+const GRID_CONTAINER_CLASS = cn(
+  // Layout & Positioning
+  "flex-1 outline-none",
+
+  // Interactive & States
+  "focus-visible:ring-1 focus-visible:ring-ring/40"
+);
 
 export function FileGrid<T extends FileItem>({
   items,
@@ -51,6 +64,9 @@ export function FileGrid<T extends FileItem>({
   onSelectItem,
   onDoubleClickItem,
   onDeleteItem,
+  deleteTarget,
+  onDeleteTargetChange,
+  onContainerKeyDown,
   viewMode,
   emptyMessage = 'This folder contains no files or sub-directories.',
   renderSyncStatus,
@@ -65,8 +81,6 @@ export function FileGrid<T extends FileItem>({
   renameInputRef,
   deletingId,
 }: FileGridProps<T>) {
-  const [itemToDelete, setItemToDelete] = React.useState<T | null>(null);
-
   if (loading && items.length === 0) {
     return (
       <div
@@ -120,12 +134,17 @@ export function FileGrid<T extends FileItem>({
     >
       {viewMode === 'grid' ? (
         <div
+          tabIndex={0}
+          onKeyDown={onContainerKeyDown}
           className={cn(
             // Layout & Positioning
             "flex-1 overflow-auto select-none",
 
             // Sizing & Spacing
-            "p-3"
+            "p-3",
+
+            // Interactive & States
+            GRID_CONTAINER_CLASS
           )}
         >
           <div
@@ -146,7 +165,7 @@ export function FileGrid<T extends FileItem>({
                 renameValue={renameValue}
                 onSelectItem={onSelectItem}
                 onDoubleClickItem={onDoubleClickItem}
-                onDeleteItem={(item) => setItemToDelete(item)}
+                onRequestDelete={(item) => onDeleteTargetChange(item)}
                 renderExtraContextMenuItems={renderExtraContextMenuItems}
                 renderGridStatusOverlay={renderGridStatusOverlay}
                 onRenameStart={onRenameStart}
@@ -161,9 +180,14 @@ export function FileGrid<T extends FileItem>({
         </div>
       ) : (
         <div
+          tabIndex={0}
+          onKeyDown={onContainerKeyDown}
           className={cn(
             // Layout & Positioning
-            "flex-1 overflow-auto min-h-0 select-none"
+            "flex-1 overflow-auto min-h-0 select-none",
+
+            // Interactive & States
+            GRID_CONTAINER_CLASS
           )}
         >
           <table
@@ -208,7 +232,7 @@ export function FileGrid<T extends FileItem>({
                   renameValue={renameValue}
                   onSelectItem={onSelectItem}
                   onDoubleClickItem={onDoubleClickItem}
-                  onDeleteItem={(item) => setItemToDelete(item)}
+                  onRequestDelete={(item) => onDeleteTargetChange(item)}
                   renderSyncStatus={renderSyncStatus}
                   renderExtraContextMenuItems={renderExtraContextMenuItems}
                   onRenameStart={onRenameStart}
@@ -225,33 +249,40 @@ export function FileGrid<T extends FileItem>({
       )}
 
       {/* Confirmation Dialog */}
-      <AlertDialog open={itemToDelete !== null} onOpenChange={(open) => !open && setItemToDelete(null)}>
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => !open && onDeleteTargetChange(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete {itemToDelete?.type === 'folder' ? 'Folder' : 'File'}</AlertDialogTitle>
+            <AlertDialogTitle>
+              Delete {deleteTarget?.type === 'folder' ? 'Folder' : 'File'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the {itemToDelete?.type === 'folder' ? 'folder' : 'file'} "{itemToDelete?.name}"? This action cannot be undone.
+              Are you sure you want to delete the{' '}
+              {deleteTarget?.type === 'folder' ? 'folder' : 'file'} "{deleteTarget?.name}"? This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel size="xs" disabled={deletingId === itemToDelete?.id}>
+            <AlertDialogCancel size="xs" disabled={deletingId === deleteTarget?.id}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               size="xs"
               variant="destructive"
-              disabled={deletingId === itemToDelete?.id}
+              disabled={deletingId === deleteTarget?.id}
               onClick={() => {
-                if (itemToDelete) {
-                  onDeleteItem(itemToDelete);
-                  setItemToDelete(null);
+                if (deleteTarget) {
+                  onDeleteItem(deleteTarget);
+                  onDeleteTargetChange(null);
                 }
               }}
             >
-              {deletingId === itemToDelete?.id && (
+              {deletingId === deleteTarget?.id && (
                 <CircleNotchIcon className="mr-1.5 size-3.5 animate-spin" />
               )}
-              {deletingId === itemToDelete?.id ? 'Deleting…' : 'Delete'}
+              {deletingId === deleteTarget?.id ? 'Deleting…' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
