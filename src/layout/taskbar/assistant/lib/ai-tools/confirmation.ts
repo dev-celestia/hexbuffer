@@ -9,14 +9,18 @@ export interface PendingToolConfirmation {
   toolName: string;
   arguments: Record<string, any>;
   createdAt: number;
+  /** Backend stops waiting after this timestamp; approving later must NOT execute. */
+  expiresAt: number;
 }
+
+// Matches CONFIRMATION_TIMEOUT_SECS in src-tauri/src/ai/tool_loop.rs.
+const CONFIRMATION_TTL_MS = 600_000;
 
 const TOOL_LABELS: Record<string, string> = {
   trigger_scan: 'Launch a browser scan',
   start_invoker_attack: 'Launch an Invoker attack',
   start_intruder_attack: 'Launch an Intruder attack',
   toggle_intercept: 'Toggle proxy interception',
-  write_document: 'Write a document',
 };
 
 export function toolConfirmationLabel(toolName: string): string {
@@ -42,20 +46,29 @@ function notifyConfirmationListeners() {
   confirmationListeners.forEach((fn) => fn());
 }
 
+/**
+ * Two calls are the same confirmation only when they share a call id. Tool name + arguments
+ * are NOT sufficient: two concurrent chats can legitimately request the identical tool with
+ * the same arguments, producing distinct backend calls that each need their own resolution.
+ */
 function isSameConfirmation(a: PendingToolConfirmation, b: PendingToolConfirmation): boolean {
-  if (a.id === b.id) return true;
-  if (a.toolName === b.toolName) {
-    try {
-      return JSON.stringify(a.arguments) === JSON.stringify(b.arguments);
-    } catch {
-      return false;
-    }
+  return a.id === b.id;
+}
+
+function pruneExpiredConfirmations(): number {
+  const now = Date.now();
+  const expired = pendingConfirmations.filter((item) => item.expiresAt <= now);
+  if (expired.length > 0) {
+    pendingConfirmations = pendingConfirmations.filter((item) => item.expiresAt > now);
+    notifyConfirmationListeners();
   }
-  return false;
+  return expired.length;
 }
 
 export function addPendingToolConfirmation(confirmation: PendingToolConfirmation): void {
-  // Prevent duplicate approval cards for the same confirmation or identical tool invocation
+  // A confirmation that arrives already expired is useless: the backend is no longer
+  // waiting and approving it must not execute the tool.
+  if (confirmation.expiresAt <= Date.now()) return;
   if (pendingConfirmations.some((item) => isSameConfirmation(item, confirmation))) {
     return;
   }
@@ -77,8 +90,12 @@ export function usePendingToolConfirmations(): readonly PendingToolConfirmation[
     setConfirmations(pendingConfirmations);
     const update = () => setConfirmations([...pendingConfirmations]);
     confirmationListeners.add(update);
+    // Periodically drop confirmations whose backend wait has already timed out so stale
+    // cards cannot be approved later.
+    const interval = window.setInterval(pruneExpiredConfirmations, 30_000);
     return () => {
       confirmationListeners.delete(update);
+      window.clearInterval(interval);
     };
   }, []);
 
@@ -88,9 +105,23 @@ export function usePendingToolConfirmations(): readonly PendingToolConfirmation[
 /** User approved: execute the tool for real and report the outcome to the engine. */
 export async function approveToolConfirmation(id: string): Promise<void> {
   const confirmation = pendingConfirmations.find((item) => item.id === id);
-  removePendingToolConfirmation(id);
   if (!confirmation) return;
 
+  // Never execute a tool whose backend wait already timed out: the request may have ended
+  // (or moved on), and firing a scan/attack against a dead call would be both wrong and
+  // dangerous. Drop the card and resolve the call as a timeout so the backend unblocks.
+  if (Date.now() > confirmation.expiresAt) {
+    removePendingToolConfirmation(id);
+    await invoke('resolve_ai_tool_result', {
+      id,
+      token: confirmation.token,
+      success: false,
+      message: 'The confirmation expired before it was approved.',
+    }).catch(() => {});
+    return;
+  }
+
+  removePendingToolConfirmation(id);
   try {
     const result = await executeAiToolCall(confirmation.toolName, confirmation.arguments);
     await invoke('resolve_ai_tool_result', {

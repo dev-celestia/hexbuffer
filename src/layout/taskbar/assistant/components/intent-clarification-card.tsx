@@ -37,6 +37,8 @@ export function IntentClarificationCard({
           size="icon"
           className="h-5 w-5 shrink-0"
           onClick={onDismiss}
+          aria-label="Dismiss clarification"
+          title="Dismiss"
         >
           <XIcon className="h-3 w-3" />
         </Button>
@@ -44,13 +46,15 @@ export function IntentClarificationCard({
 
       <p className="mt-1.5">{request.question}</p>
 
-      <div className="mt-2 grid grid-cols-1 gap-1.5">
+      <div className="mt-2 grid grid-cols-1 gap-1.5" role="radiogroup" aria-label="Clarification tasks">
         {request.categories.map((category) => {
           const isSelected = selected === category.id;
           return (
             <button
               key={category.id}
               type="button"
+              role="radio"
+              aria-checked={isSelected}
               onClick={() => setSelected(category.id)}
               className={cn(
                 'flex w-full items-start gap-2 rounded-md border px-3 py-2 text-left transition-colors',

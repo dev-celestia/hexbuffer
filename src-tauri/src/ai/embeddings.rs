@@ -8,7 +8,10 @@ use super::providers::EMBEDDINGS_KEY_PROVIDER;
 use super::types::AiSettings;
 use crate::db::repository::types::ContextBankEntry;
 
-/// Minimum cosine similarity for a context bank entry to be considered relevant
+/// Upper bound for a single embeddings endpoint round-trip.
+const EMBEDDING_TIMEOUT_SECS: u64 = 60;
+
+/// Minimal cosine similarity for a context bank entry to be considered relevant
 /// (rig's `top_n` returns cosine similarity scores).
 pub const CONTEXT_BANK_SIMILARITY_THRESHOLD: f64 = 0.3;
 /// Maximum entries injected into a single chat request.
@@ -57,6 +60,13 @@ pub fn resolve_embeddings_config(
     }))
 }
 
+/// Returns true when the embeddings endpoint may be used for a given request: it is a local
+/// endpoint (loopback), or the user has enabled third-party AI sharing. Non-local endpoints
+/// require the sharing gate so prompts/notes are never sent off-box without consent.
+pub fn embeddings_sharing_allowed(settings: &AiSettings, base_url: &str) -> bool {
+    super::providers::is_local_ai_url(Some(base_url)) || settings.allow_third_party_ai_sharing
+}
+
 /// Builds a rig embedding model against the configured OpenAI-compatible endpoint.
 /// `Client::from_url` posts to `{base_url}/embeddings`, which Ollama, LM Studio,
 /// OpenAI, OpenRouter and friends all expose.
@@ -97,10 +107,13 @@ pub async fn embed_texts(
     model: &openai::EmbeddingModel,
     texts: Vec<String>,
 ) -> Result<Vec<Vec<f64>>, String> {
-    let embeddings = model
-        .embed_texts(texts)
-        .await
-        .map_err(|e| e.to_string())?;
+    let embeddings = tokio::time::timeout(
+        std::time::Duration::from_secs(EMBEDDING_TIMEOUT_SECS),
+        model.embed_texts(texts),
+    )
+    .await
+    .map_err(|_| "Embeddings request timed out.".to_string())?
+    .map_err(|e| e.to_string())?;
     Ok(embeddings.into_iter().map(|embedding| embedding.vec).collect())
 }
 
@@ -109,7 +122,13 @@ pub async fn embed_text(
     model: &openai::EmbeddingModel,
     text: &str,
 ) -> Result<Vec<f64>, String> {
-    let embedding = model.embed_text(text).await.map_err(|e| e.to_string())?;
+    let embedding = tokio::time::timeout(
+        std::time::Duration::from_secs(EMBEDDING_TIMEOUT_SECS),
+        model.embed_text(text),
+    )
+    .await
+    .map_err(|_| "Embeddings request timed out.".to_string())?
+    .map_err(|e| e.to_string())?;
     Ok(embedding.vec)
 }
 
@@ -141,10 +160,13 @@ pub async fn vector_search_context_bank(
     let store = InMemoryVectorStore::from_documents_with_ids(documents);
     let index = store.index(model.clone());
 
-    let results = index
-        .top_n::<String>(query, limit)
-        .await
-        .map_err(|e| e.to_string())?;
+    let results = tokio::time::timeout(
+        std::time::Duration::from_secs(EMBEDDING_TIMEOUT_SECS),
+        index.top_n::<String>(query, limit),
+    )
+    .await
+    .map_err(|_| "Embeddings vector search timed out.".to_string())?
+    .map_err(|e| e.to_string())?;
 
     Ok(results
         .into_iter()

@@ -75,13 +75,17 @@ pub async fn save_context_bank_entry(
     if embedding.is_none() {
         let settings = crate::ai::read_ai_settings(&app)?;
         if let Ok(Some(config)) = resolve_embeddings_config(&settings, &app) {
-            let model = build_embedding_model(&config);
-            let text = format!("{}\n{}", entry.title, entry.content);
-            match embed_text(&model, &text).await {
-                Ok(vector) => embedding = Some((vector, config.model)),
-                Err(error) => {
-                    eprintln!("[context-bank] embedding failed (entry stored without vector): {error}");
+            if crate::ai::embeddings::embeddings_sharing_allowed(&settings, &config.base_url) {
+                let model = build_embedding_model(&config);
+                let text = format!("{}\n{}", entry.title, entry.content);
+                match embed_text(&model, &text).await {
+                    Ok(vector) => embedding = Some((vector, config.model)),
+                    Err(error) => {
+                        eprintln!("[context-bank] embedding failed (entry stored without vector): {error}");
+                    }
                 }
+            } else {
+                eprintln!("[context-bank] embeddings sharing disabled; entry stored without vector");
             }
         }
     }
@@ -143,6 +147,12 @@ pub async fn reindex_context_bank_embeddings(
                 .to_string(),
         );
     };
+    if !crate::ai::embeddings::embeddings_sharing_allowed(&settings, &config.base_url) {
+        return Err(
+            "Third-party AI sharing is disabled. Enable it in Settings before re-embedding the context bank against the embeddings endpoint."
+                .to_string(),
+        );
+    }
     let model = build_embedding_model(&config);
 
     let pending = history.context_bank_entries_missing_embeddings(&config.model)?;

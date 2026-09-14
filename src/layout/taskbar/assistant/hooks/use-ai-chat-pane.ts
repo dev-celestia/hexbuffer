@@ -63,6 +63,29 @@ export function useAiChatPane() {
     }
   }, [status]);
 
+  // Session controls are disabled while a response is streaming: switching mid-stream would
+  // let the in-flight reply land in the wrong conversation and corrupt persistence.
+  const handleSwitchSession = useCallback(
+    async (sessionId: string) => {
+      if (isStreaming) return;
+      await switchSession(sessionId);
+    },
+    [isStreaming, switchSession],
+  );
+
+  const handleCreateSession = useCallback(() => {
+    if (isStreaming) return Promise.resolve(null);
+    return createSession();
+  }, [isStreaming, createSession]);
+
+  const handleDeleteSession = useCallback(
+    async (sessionId: string) => {
+      if (isStreaming) return;
+      await deleteSession(sessionId);
+    },
+    [isStreaming, deleteSession],
+  );
+
   const handleModelChange = useCallback((newModel: string) => {
     setModel(newModel);
   }, [setModel]);
@@ -93,9 +116,9 @@ export function useAiChatPane() {
     stop,
     sessions,
     activeSessionId,
-    createSession,
-    switchSession,
-    deleteSession,
+    handleCreateSession,
+    handleSwitchSession,
+    handleDeleteSession,
     saveMessages,
     sidebarCollapsed,
     setSidebarCollapsed,

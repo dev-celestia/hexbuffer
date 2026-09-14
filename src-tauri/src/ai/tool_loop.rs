@@ -31,6 +31,10 @@ language, including the real outcome from the tool result. Never reply with raw 
 or raw tool result strings.";
 
 const MAX_TOOL_ROUNDS: usize = 8;
+/// Upper bound for a single provider completion round-trip.
+const PROVIDER_COMPLETION_TIMEOUT_SECS: u64 = 180;
+/// Default output token cap when none is configured, bounding cost and memory.
+const DEFAULT_MAX_TOKENS: u64 = 8192;
 /// Auto-approved (low-risk) tools wait this long for the frontend executor result.
 const AUTO_TOOL_TIMEOUT_SECS: u64 = 120;
 /// Tools requiring explicit user confirmation wait longer — the user may be away.
@@ -59,12 +63,7 @@ const AUTO_APPROVED_TOOLS: &[&str] = &[
 /// Tier 2 — require explicit user confirmation in chat before executing: tools that
 /// change proxy/attack state or write content. start_invoker_attack lives here (it was
 /// previously hard-denied by the default policy, leaving the capability dead).
-const CONFIRMATION_TOOLS: &[&str] = &[
-    "trigger_scan",
-    "start_invoker_attack",
-    "toggle_intercept",
-    "write_document",
-];
+const CONFIRMATION_TOOLS: &[&str] = &["trigger_scan", "start_invoker_attack", "toggle_intercept"];
 
 enum ToolAuthorization {
     AutoApproved,
@@ -125,17 +124,30 @@ fn pending_map() -> &'static Mutex<PendingResultMap> {
 /// Completes a pending frontend tool execution. Called from the `resolve_ai_tool_result`
 /// Tauri command once the frontend executor finished (or failed) running the tool.
 /// Returns true when a waiting tool call was matched by id AND token.
+///
+/// The pending entry is only removed after its secret token authenticates, so a caller that
+/// guesses a call ID but submits a wrong token cannot cancel another window's legitimate call.
 pub fn resolve_tool_result(id: &str, token: &str, success: bool, message: String) -> bool {
     let pending = pending_map()
         .lock()
         .ok()
-        .and_then(|mut calls| calls.remove(id));
+        .and_then(|mut calls| {
+            let matched = calls
+                .get(id)
+                .map(|call| call.token == token)
+                .unwrap_or(false);
+            if matched {
+                calls.remove(id)
+            } else {
+                None
+            }
+        });
     match pending {
-        Some(call) if call.token == token => call
+        Some(call) => call
             .sender
             .send(ToolExecutionOutcome { success, message })
             .is_ok(),
-        _ => false,
+        None => false,
     }
 }
 
@@ -168,9 +180,6 @@ async fn frontend_tool_definitions() -> Vec<ToolDefinition> {
             .definition(String::new())
             .await,
         crate::tools::TriggerScanTool
-            .definition(String::new())
-            .await,
-        crate::tools::WriteDocumentTool
             .definition(String::new())
             .await,
     ]
@@ -322,22 +331,27 @@ async fn execute_context_bank_save(app: &AppHandle, args: &Value) -> String {
         updated_at: chrono::Utc::now().to_rfc3339(),
     };
 
-    // Embed for vector retrieval when an embeddings endpoint is configured.
+    // Embed for vector retrieval when an embeddings endpoint is configured and the user
+    // has authorized third-party AI sharing (the embeddings endpoint may be external).
     let settings = match crate::ai::read_ai_settings(app) {
         Ok(settings) => settings,
         Err(error) => return format!("Failed to save context note (settings unavailable): {error}"),
     };
     if let Ok(Some(config)) = super::embeddings::resolve_embeddings_config(&settings, app) {
-        let model = super::embeddings::build_embedding_model(&config);
-        let text = format!("{}\n{}", entry.title, entry.content);
-        match super::embeddings::embed_text(&model, &text).await {
-            Ok(vector) => {
-                entry.embedding = Some(vector);
-                entry.embedding_model = Some(config.model);
+        if super::embeddings::embeddings_sharing_allowed(&settings, &config.base_url) {
+            let model = super::embeddings::build_embedding_model(&config);
+            let text = format!("{}\n{}", entry.title, entry.content);
+            match super::embeddings::embed_text(&model, &text).await {
+                Ok(vector) => {
+                    entry.embedding = Some(vector);
+                    entry.embedding_model = Some(config.model);
+                }
+                Err(error) => {
+                    eprintln!("[context-bank] embedding failed on AI save (stored without vector): {error}");
+                }
             }
-            Err(error) => {
-                eprintln!("[context-bank] embedding failed on AI save (stored without vector): {error}");
-            }
+        } else {
+            eprintln!("[context-bank] embeddings sharing disabled; note stored without vector");
         }
     }
 
@@ -516,11 +530,21 @@ pub async fn run_tool_loop(
             documents: Vec::new(),
             tools: tools.clone(),
             temperature: config.temperature,
-            max_tokens: config.max_tokens,
+            max_tokens: config.max_tokens.or(Some(DEFAULT_MAX_TOKENS)),
             additional_params: None,
         };
 
-        let response = model.completion(request).await.map_err(|e| e.to_string())?;
+        let response = tokio::time::timeout(
+            Duration::from_secs(PROVIDER_COMPLETION_TIMEOUT_SECS),
+            model.completion(request),
+        )
+        .await
+        .map_err(|_| {
+            format!(
+                "The AI provider did not respond within {PROVIDER_COMPLETION_TIMEOUT_SECS} seconds. Check the configured provider/model and try again."
+            )
+        })?
+        .map_err(|e| e.to_string())?;
 
         match response.choice {
             ModelChoice::Message(text) => {

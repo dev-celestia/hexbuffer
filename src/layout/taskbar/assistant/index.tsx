@@ -174,9 +174,9 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
     stop,
     sessions,
     activeSessionId,
-    createSession,
-    switchSession,
-    deleteSession,
+    handleCreateSession,
+    handleSwitchSession,
+    handleDeleteSession,
     sidebarCollapsed,
     setSidebarCollapsed,
     trackedActions,
@@ -349,9 +349,10 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
             <ChatSessionList
               sessions={sessions}
               activeSessionId={activeSessionId}
-              onSelect={switchSession}
-              onDelete={deleteSession}
-              onCreate={createSession}
+              disabled={isStreaming}
+              onSelect={handleSwitchSession}
+              onDelete={handleDeleteSession}
+              onCreate={handleCreateSession}
             />
           </div>
         )}
@@ -519,6 +520,8 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                               size="icon"
                               className="h-5 w-5 shrink-0"
                               onClick={dismissCrawlInput}
+                              aria-label="Dismiss credential prompt"
+                              title="Dismiss"
                             >
                               <XIcon className="h-3 w-3" />
                             </Button>

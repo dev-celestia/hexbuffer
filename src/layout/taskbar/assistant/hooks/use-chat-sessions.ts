@@ -18,6 +18,8 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const activeSessionIdRef = useRef<string | null>(null);
+  // Monotonic guard so a slower, earlier `switchSession` load can never overwrite a later one.
+  const switchSeqRef = useRef(0);
 
   useEffect(() => {
     activeSessionIdRef.current = activeSessionId;
@@ -73,10 +75,14 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
     async (sessionId: string) => {
       if (sessionId === activeSessionIdRef.current) return;
 
+      const seq = ++switchSeqRef.current;
       try {
         const messages = await invoke<ChatMessageRecord[]>('get_chat_messages', {
           sessionId,
         });
+
+        // A newer switch happened while this load was in flight; drop this stale result.
+        if (seq !== switchSeqRef.current) return;
 
         // Convert DB records to UIMessage format
         const uiMessages = messages.map((m) => ({

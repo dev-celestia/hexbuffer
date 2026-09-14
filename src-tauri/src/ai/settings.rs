@@ -41,7 +41,12 @@ pub(crate) fn write_ai_settings(app: &AppHandle, settings: &AiSettings) -> Resul
     settings_to_write.api_key.clear();
     let content =
         serde_json::to_string_pretty(&settings_to_write).map_err(|error| error.to_string())?;
-    std::fs::write(path, content).map_err(|error| error.to_string())
+
+    // Write to a temp file in the same directory, then atomically rename, so concurrent
+    // readers never observe a partially written settings file and writers never corrupt it.
+    let temp_path = path.with_extension("json.tmp");
+    std::fs::write(&temp_path, content).map_err(|error| error.to_string())?;
+    std::fs::rename(&temp_path, path).map_err(|error| error.to_string())
 }
 
 fn ai_settings_path(_app: &AppHandle) -> Result<PathBuf, String> {

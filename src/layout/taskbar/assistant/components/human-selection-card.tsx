@@ -82,6 +82,8 @@ export function HumanSelectionCard({
           size="icon"
           className="h-5 w-5 shrink-0"
           onClick={onDismiss}
+          aria-label="Dismiss selection"
+          title="Dismiss"
         >
           <XIcon className="h-3 w-3" />
         </Button>
@@ -89,13 +91,19 @@ export function HumanSelectionCard({
 
       <p className="mt-1.5">{request.question}</p>
 
-      <div className="mt-2 space-y-1">
+      <div
+        className="mt-2 space-y-1"
+        role={request.multiSelect ? 'group' : 'radiogroup'}
+        aria-label="Options"
+      >
         {request.options.map((option) => {
           const isSelected = selected.has(option.value);
           return (
             <button
               key={option.value}
               type="button"
+              role={request.multiSelect ? 'checkbox' : 'radio'}
+              aria-checked={isSelected}
               onClick={() => toggleOption(option.value)}
               className={cn(
                 'flex w-full items-start gap-2 rounded-md border px-3 py-2 text-left transition-colors',
@@ -131,6 +139,8 @@ export function HumanSelectionCard({
         {/* ponytail: Custom typing option */}
         <button
           type="button"
+          role={request.multiSelect ? 'checkbox' : 'radio'}
+          aria-checked={selected.has('__custom__')}
           onClick={() => toggleOption('__custom__')}
           className={cn(
             'flex w-full items-start gap-2 rounded-md border px-3 py-2 text-left transition-colors',

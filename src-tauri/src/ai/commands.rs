@@ -49,18 +49,12 @@ pub(crate) fn save_ai_settings_impl(
         return Err("No model configured. Select or enter a model before saving.".to_string());
     }
     if super::providers::is_openai_compatible(&settings.provider) {
-        let base_url = settings
-            .custom_base_url
-            .as_deref()
-            .map(str::trim)
-            .unwrap_or_default();
-        if !(base_url.starts_with("http://") || base_url.starts_with("https://")) {
-            return Err(
-                "OpenAI-compatible base URL must start with http:// or https:// (e.g. https://api.openai.com/v1)"
-                    .to_string(),
-            );
-        }
-        settings.custom_base_url = Some(base_url.trim_end_matches('/').to_string());
+        let base_url = settings.custom_base_url.as_deref().unwrap_or_default();
+        settings.custom_base_url = if base_url.trim().is_empty() {
+            None
+        } else {
+            Some(super::providers::validate_http_base_url(base_url)?)
+        };
     } else {
         settings.custom_base_url = None;
     }

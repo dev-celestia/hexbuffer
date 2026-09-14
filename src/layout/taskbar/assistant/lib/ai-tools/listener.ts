@@ -5,6 +5,10 @@ import { addPendingToolConfirmation, describeToolResult } from './confirmation';
 import { executeAiToolCall } from './executor';
 import type { AppAiToolCallPayload } from './types';
 
+// Matches CONFIRMATION_TIMEOUT_SECS in src-tauri/src/ai/tool_loop.rs so the card stops
+// being executable at the same moment the backend stops waiting.
+const CONFIRMATION_TTL_MS = 600_000;
+
 /**
  * Listens for Tauri IPC events emitted by the Rust AI engine (`ai:execute-tool`).
  * The engine scopes these events to this window's label, and each call carries a
@@ -19,12 +23,14 @@ export async function setupAiToolEventListener(): Promise<UnlistenFn> {
       const { id, token, tool_name, arguments: args, requiresConfirmation } = event.payload;
 
       if (requiresConfirmation) {
+        const createdAt = Date.now();
         addPendingToolConfirmation({
           id,
           token,
           toolName: tool_name,
           arguments: args,
-          createdAt: Date.now(),
+          createdAt,
+          expiresAt: createdAt + CONFIRMATION_TTL_MS,
         });
         return;
       }

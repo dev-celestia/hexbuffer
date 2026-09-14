@@ -111,13 +111,45 @@ pub async fn get_ai_debug_snapshot_impl(
     })
 }
 
-fn is_local_ai_url(url: Option<&str>) -> bool {
-    if let Some(url) = url {
-        let lower = url.to_lowercase();
-        lower.contains("localhost") || lower.contains("127.0.0.1") || lower.contains("0.0.0.0")
-    } else {
-        false
+const MAX_CHAT_MESSAGES: usize = 100;
+const MAX_MESSAGE_CHARS: usize = 100_000;
+
+/// Normalizes the effective provider for chat and rejects providers that cannot be used
+/// for chat (notably the `embeddings` keyring pseudo-provider, whose credential must never
+/// be routed to the DeepSeek/OpenAI completion endpoint).
+fn resolve_chat_provider(settings: &AiSettings) -> Result<String, String> {
+    let provider = super::providers::normalize_ai_provider(&settings.provider)?;
+    if provider == super::providers::EMBEDDINGS_KEY_PROVIDER {
+        return Err(
+            "The 'embeddings' provider cannot be used for chat. Select DeepSeek or an OpenAI-compatible provider."
+                .to_string(),
+        );
     }
+    Ok(provider.to_string())
+}
+
+/// Rejects absurd chat payloads before they reach the provider or the context builder.
+fn validate_chat_request(request: &AiChatRequest) -> Result<(), String> {
+    if request.messages.is_empty() {
+        return Err("No chat messages provided.".to_string());
+    }
+    if request.messages.len() > MAX_CHAT_MESSAGES {
+        return Err(format!(
+            "Chat history exceeds the limit of {MAX_CHAT_MESSAGES} messages."
+        ));
+    }
+    if let Some(oversized) = request
+        .messages
+        .iter()
+        .find(|message| message.content.chars().count() > MAX_MESSAGE_CHARS)
+    {
+        return Err(format!(
+            "A message exceeds the {MAX_MESSAGE_CHARS}-character limit (role '{}', {} chars).",
+            oversized.role,
+            oversized.content.chars().count()
+        ));
+    }
+    Ok(())
 }
 
 pub async fn send_ai_chat_message_impl(
@@ -129,7 +161,14 @@ pub async fn send_ai_chat_message_impl(
     let mut settings = read_ai_settings(&app)?;
     if let Some(ref req_provider) = request.provider {
         if !req_provider.trim().is_empty() {
-            settings.provider = req_provider.clone();
+            let normalized = super::providers::normalize_ai_provider(req_provider)?;
+            if normalized == super::providers::EMBEDDINGS_KEY_PROVIDER {
+                return Err(
+                    "The 'embeddings' provider cannot be used for chat. Select DeepSeek or an OpenAI-compatible provider."
+                        .to_string(),
+                );
+            }
+            settings.provider = normalized.to_string();
         }
     }
     if let Some(ref req_model) = request.model {
@@ -137,9 +176,11 @@ pub async fn send_ai_chat_message_impl(
             settings.model = req_model.clone();
         }
     }
+    settings.provider = resolve_chat_provider(&settings)?;
+    validate_chat_request(&request)?;
 
     let is_openai = super::providers::is_openai_compatible(&settings.provider);
-    let is_local = is_openai && is_local_ai_url(settings.custom_base_url.as_deref());
+    let is_local = is_openai && super::providers::is_local_ai_url(settings.custom_base_url.as_deref());
 
     if !is_local {
         ensure_third_party_ai_sharing_allowed(&settings)?;
@@ -294,29 +335,36 @@ async fn retrieve_context_bank(
     // 1. Vector pass — semantic similarity via the configured embeddings endpoint.
     match resolve_embeddings_config(settings, app) {
         Ok(Some(config)) => {
-            let model = build_embedding_model(&config);
-            match history.context_bank_entries_with_embeddings(&config.model) {
-                Ok(entries) if !entries.is_empty() => {
-                    match vector_search_context_bank(&model, &entries, prompt, 5).await {
-                        Ok(results) => {
-                            for (id, score) in results {
-                                if score < CONTEXT_BANK_SIMILARITY_THRESHOLD {
-                                    continue;
-                                }
-                                if let Some(entry) = entries.iter().find(|entry| entry.id == id) {
-                                    if selected_ids.insert(entry.id.clone()) {
-                                        selected.push(entry.clone());
+            let is_local = super::providers::is_local_ai_url(Some(&config.base_url));
+            if !is_local && !settings.allow_third_party_ai_sharing {
+                eprintln!(
+                    "[context-bank] embeddings sharing disabled; falling back to keyword search"
+                );
+            } else {
+                let model = build_embedding_model(&config);
+                match history.context_bank_entries_with_embeddings(&config.model) {
+                    Ok(entries) if !entries.is_empty() => {
+                        match vector_search_context_bank(&model, &entries, prompt, 5).await {
+                            Ok(results) => {
+                                for (id, score) in results {
+                                    if score < CONTEXT_BANK_SIMILARITY_THRESHOLD {
+                                        continue;
+                                    }
+                                    if let Some(entry) = entries.iter().find(|entry| entry.id == id) {
+                                        if selected_ids.insert(entry.id.clone()) {
+                                            selected.push(entry.clone());
+                                        }
                                     }
                                 }
                             }
-                        }
-                        Err(error) => {
-                            eprintln!("[context-bank] vector search failed: {error}");
+                            Err(error) => {
+                                eprintln!("[context-bank] vector search failed: {error}");
+                            }
                         }
                     }
+                    Ok(_) => {}
+                    Err(error) => eprintln!("[context-bank] failed to load embeddings: {error}"),
                 }
-                Ok(_) => {}
-                Err(error) => eprintln!("[context-bank] failed to load embeddings: {error}"),
             }
         }
         Ok(None) => {}

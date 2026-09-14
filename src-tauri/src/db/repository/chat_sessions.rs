@@ -81,7 +81,8 @@ impl Database {
         conn.execute("BEGIN IMMEDIATE", [])?;
 
         let result = (|| -> SqlResult<()> {
-            // Ensure the session exists — auto-create if missing (e.g. DB reset or race)
+            // Ensure the session exists. We never auto-create here: a missing session means
+            // it was deleted or never created, and a stale save must not resurrect it.
             let session_exists: bool = conn
                 .query_row(
                     "SELECT COUNT(*) > 0 FROM ai_chat_sessions WHERE id = ?1",
@@ -91,11 +92,7 @@ impl Database {
                 .unwrap_or(false);
 
             if !session_exists {
-                let now = chrono::Utc::now().to_rfc3339();
-                conn.execute(
-                    "INSERT INTO ai_chat_sessions (id, title, created_at, updated_at) VALUES (?1, ?2, ?3, ?4)",
-                    params![session_id, "Recovered Chat", now, now],
-                )?;
+                return Err(rusqlite::Error::QueryReturnedNoRows);
             }
 
             // Delete all existing messages for this session
@@ -104,22 +101,19 @@ impl Database {
                 params![session_id],
             )?;
 
-            // Insert new messages
+            // Insert new messages, always bound to the authoritative session_id from the
+            // command so a malformed payload cannot write records into another session.
             for msg in messages {
                 conn.execute(
                     "INSERT INTO ai_chat_messages (id, session_id, role, content, created_at) VALUES (?1, ?2, ?3, ?4, ?5)",
-                    params![msg.id, msg.session_id, msg.role, msg.content, msg.created_at],
+                    params![msg.id, session_id, msg.role, msg.content, msg.created_at],
                 )?;
             }
 
             // Update session title to first user message if available
             let first_user = messages.iter().find(|m| m.role == "user");
             if let Some(msg) = first_user {
-                let title = if msg.content.len() > 50 {
-                    format!("{}…", &msg.content[..50])
-                } else {
-                    msg.content.clone()
-                };
+                let title = truncate_chars(&msg.content, 50);
                 let now = chrono::Utc::now().to_rfc3339();
                 conn.execute(
                     "UPDATE ai_chat_sessions SET title = ?1, updated_at = ?2 WHERE id = ?3",
@@ -140,5 +134,17 @@ impl Database {
                 Err(e)
             }
         }
+    }
+}
+
+/// Truncates a string to at most `max` characters at a UTF-8 boundary. Uses character
+/// (not byte) indexing so multibyte titles never panic.
+fn truncate_chars(value: &str, max: usize) -> String {
+    if value.chars().count() <= max {
+        value.to_string()
+    } else {
+        let mut truncated: String = value.chars().take(max).collect();
+        truncated.push('…');
+        truncated
     }
 }

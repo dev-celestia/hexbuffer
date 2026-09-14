@@ -147,8 +147,12 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
   const selectionRef = useRef<HumanSelectionRequest | null>(null);
   const clarificationRef = useRef<IntentClarificationRequest | null>(null);
   const processedSessionIdsRef = useRef(new Set<string>());
+  const pendingCrawlSummariesRef = useRef<CrawlCompletedEvent[]>([]);
   const promptController = usePromptInputController();
   const inputBeingConsumedRef = useRef(false);
+  // Synchronous guard against duplicate submits: render-time `status` lags behind a rapid
+  // double-submit (both can observe an idle status), so a ref must gate entry synchronously.
+  const submittingRef = useRef(false);
 
   useEffect(() => {
     aiSettingsRef.current = aiSettings;
@@ -170,16 +174,22 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
   // (`ai:execute-tool`) and report the real outcome back via `resolve_ai_tool_result`
   useEffect(() => {
     let unlisten: (() => void) | undefined;
+    let cancelled = false;
 
     setupAiToolEventListener()
       .then((fn) => {
-        unlisten = fn;
+        if (cancelled) {
+          fn();
+        } else {
+          unlisten = fn;
+        }
       })
       .catch((error) => {
         console.error('Failed to set up AI tool event listener:', error);
       });
 
     return () => {
+      cancelled = true;
       unlisten?.();
     };
   }, []);
@@ -187,14 +197,17 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
   // Listen for crawl human input requests from the backend
   useEffect(() => {
     let unlisten: (() => void) | undefined;
+    let cancelled = false;
 
     listen<CrawlHumanInputRequest>('ai-chat:crawl-human-input-required', (event) => {
       setPendingCrawlInput(event.payload);
     }).then((fn) => {
-      unlisten = fn;
+      if (cancelled) fn();
+      else unlisten = fn;
     });
 
     return () => {
+      cancelled = true;
       unlisten?.();
     };
   }, []);
@@ -202,14 +215,17 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
   // Listen for human selection requests from the AI chat engine
   useEffect(() => {
     let unlisten: (() => void) | undefined;
+    let cancelled = false;
 
     listen<HumanSelectionRequest>('ai-chat:human-selection-required', (event) => {
       setPendingSelection(event.payload);
     }).then((fn) => {
-      unlisten = fn;
+      if (cancelled) fn();
+      else unlisten = fn;
     });
 
     return () => {
+      cancelled = true;
       unlisten?.();
     };
   }, []);
@@ -217,14 +233,17 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
   // Listen for intent clarification requests from the AI chat engine
   useEffect(() => {
     let unlisten: (() => void) | undefined;
+    let cancelled = false;
 
     listen<IntentClarificationRequest>('ai-chat:intent-clarification-required', (event) => {
       setPendingClarification(event.payload);
     }).then((fn) => {
-      unlisten = fn;
+      if (cancelled) fn();
+      else unlisten = fn;
     });
 
     return () => {
+      cancelled = true;
       unlisten?.();
     };
   }, []);
@@ -285,20 +304,21 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
     };
   }, []);
 
-  // Listen for crawl completions and auto-send results to the AI for analysis
-  useEffect(() => {
-    let unlisten: (() => void) | undefined;
+  // Listen for crawl completions and auto-send results to the AI for analysis. If another
+  // response is streaming, the event is queued and drained once streaming finishes instead
+  // of being dropped permanently.
+  const drainPendingCrawlSummaries = useCallback(() => {
+    if (status === 'submitted' || status === 'streaming') return;
+    const queue = pendingCrawlSummariesRef.current;
+    if (queue.length === 0) return;
+    pendingCrawlSummariesRef.current = [];
 
-    listen<CrawlCompletedEvent>('ai-chat:crawl-completed', (event) => {
+    for (const payload of queue) {
+      if (processedSessionIdsRef.current.has(payload.sessionId)) continue;
+      processedSessionIdsRef.current.add(payload.sessionId);
+
       const { sessionId, targetUrl, pagesVisited, insightsFound, insightTitles, pageUrls } =
-        event.payload;
-
-      // Avoid processing the same session twice
-      if (processedSessionIdsRef.current.has(sessionId)) return;
-      processedSessionIdsRef.current.add(sessionId);
-
-      // Don't auto-send if the AI is already streaming a response
-      if (status === 'submitted' || status === 'streaming') return;
+        payload;
 
       const insightList =
         insightTitles.length > 0
@@ -336,14 +356,33 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
           },
         },
       );
+    }
+  }, [status, sendMessage]);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let cancelled = false;
+
+    listen<CrawlCompletedEvent>('ai-chat:crawl-completed', (event) => {
+      const { sessionId } = event.payload;
+      if (processedSessionIdsRef.current.has(sessionId)) return;
+      pendingCrawlSummariesRef.current.push(event.payload);
+      drainPendingCrawlSummaries();
     }).then((fn) => {
-      unlisten = fn;
+      if (cancelled) fn();
+      else unlisten = fn;
     });
 
     return () => {
+      cancelled = true;
       unlisten?.();
     };
-  }, [sendMessage, status]);
+  }, [drainPendingCrawlSummaries]);
+
+  // When streaming finishes, flush any crawl summaries that were queued during it.
+  useEffect(() => {
+    drainPendingCrawlSummaries();
+  }, [status, drainPendingCrawlSummaries]);
 
   // Track which session's messages are currently loaded in useChat to prevent
   // stale messages from being saved to a newly switched session ID.
@@ -397,9 +436,16 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
     if (!request) return false;
 
     const store = useBrowserAutomationStore.getState();
-    store.submitHumanInput(request, 'continue', fields);
-    setPendingCrawlInput(null);
-    return true;
+    // Await the resume so the assistant does not report success (and drop the credential
+    // prompt) before the backend crawl actually starts.
+    try {
+      await store.submitHumanInput(request, 'continue', fields);
+      setPendingCrawlInput(null);
+      return true;
+    } catch (error) {
+      console.error('Failed to submit crawl credentials:', error);
+      return false;
+    }
   }, []);
 
   const dismissCrawlInput = useCallback(() => {
@@ -461,69 +507,75 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
   }, []);
 
   const handleSubmit = useCallback(async ({ text, files, mentionedPages }: PromptInputMessage) => {
-    // Prevent overlapping requests while assistant is already processing in the background
-    if (status === 'submitted' || status === 'streaming') {
+    // Prevent overlapping requests while assistant is already processing in the background.
+    // The ref guards synchronously; render-time status alone is insufficient.
+    if (submittingRef.current || status === 'submitted' || status === 'streaming') {
       return;
     }
+    submittingRef.current = true;
 
-    const hasText = text.trim().length > 0;
-    const hasFiles = files && files.length > 0;
+    try {
+      const hasText = text.trim().length > 0;
+      const hasFiles = files && files.length > 0;
 
-    if (!hasText && !hasFiles) {
-      return;
-    }
-
-    // Process and format attached text or markdown files
-    const fileContextParts: string[] = [];
-    if (files && files.length > 0) {
-      for (const file of files) {
-        const formattedFile = await formatAttachedFileContent(file);
-        if (formattedFile) {
-          fileContextParts.push(formattedFile);
-        }
-      }
-    }
-
-    // Build context prefix from mentioned pages and attached files
-    const contextParts: string[] = [];
-    if (mentionedPages && mentionedPages.length > 0) {
-      contextParts.push(`[Referenced pages: ${mentionedPages.map((p) => p.label).join(', ')}]`);
-    }
-    if (fileContextParts.length > 0) {
-      contextParts.push(...fileContextParts);
-    }
-    const contextPrefix = contextParts.length > 0 ? contextParts.join('\n\n') + '\n\n' : '';
-
-    // If there's a pending credential request, try to parse credentials from the text
-    const pendingRequest = crawlInputRef.current;
-    if (pendingRequest && !inputBeingConsumedRef.current && hasText) {
-      const extracted = parseCredentialInput(text, pendingRequest.requestedFields);
-      if (extracted) {
-        inputBeingConsumedRef.current = true;
-        promptController.textInput.clear();
-        promptController.attachments.clear();
-
-        await submitCrawlCredentials(extracted);
-        inputBeingConsumedRef.current = false;
+      if (!hasText && !hasFiles) {
         return;
       }
-    }
 
-    // Clear the input immediately so the user sees feedback right away.
-    promptController.textInput.clear();
-    promptController.attachments.clear();
+      // Process and format attached text or markdown files
+      const fileContextParts: string[] = [];
+      if (files && files.length > 0) {
+        for (const file of files) {
+          const formattedFile = await formatAttachedFileContent(file);
+          if (formattedFile) {
+            fileContextParts.push(formattedFile);
+          }
+        }
+      }
 
-    clearError();
-    const finalPrompt = (contextPrefix + text).trim();
+      // Build context prefix from mentioned pages and attached files
+      const contextParts: string[] = [];
+      if (mentionedPages && mentionedPages.length > 0) {
+        contextParts.push(`[Referenced pages: ${mentionedPages.map((p) => p.label).join(', ')}]`);
+      }
+      if (fileContextParts.length > 0) {
+        contextParts.push(...fileContextParts);
+      }
+      const contextPrefix = contextParts.length > 0 ? contextParts.join('\n\n') + '\n\n' : '';
 
-    await sendMessage(
-      { text: finalPrompt, files },
-      {
-        body: {
-          aiSettings: aiSettingsRef.current,
+      // If there's a pending credential request, try to parse credentials from the text
+      const pendingRequest = crawlInputRef.current;
+      if (pendingRequest && !inputBeingConsumedRef.current && hasText) {
+        const extracted = parseCredentialInput(text, pendingRequest.requestedFields);
+        if (extracted) {
+          inputBeingConsumedRef.current = true;
+          promptController.textInput.clear();
+          promptController.attachments.clear();
+
+          await submitCrawlCredentials(extracted);
+          inputBeingConsumedRef.current = false;
+          return;
+        }
+      }
+
+      // Clear the input immediately so the user sees feedback right away.
+      promptController.textInput.clear();
+      promptController.attachments.clear();
+
+      clearError();
+      const finalPrompt = (contextPrefix + text).trim();
+
+      await sendMessage(
+        { text: finalPrompt, files },
+        {
+          body: {
+            aiSettings: aiSettingsRef.current,
+          },
         },
-      },
-    );
+      );
+    } finally {
+      submittingRef.current = false;
+    }
   }, [clearError, sendMessage, promptController, submitCrawlCredentials]);
 
   const setModel = useCallback((model: string) => {
