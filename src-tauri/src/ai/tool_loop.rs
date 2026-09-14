@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
@@ -10,7 +10,7 @@ use tauri::{AppHandle, Emitter, Manager};
 
 use super::types::AiChatAction;
 
-const PREAMBLE: &str = "You are HexBuffer Agent, an advanced security research & web penetration \
+pub const PREAMBLE: &str = "You are HexBuffer Agent, an advanced security research & web penetration \
 testing reasoning engine embedded in the HexBuffer desktop app. You can discuss security topics \
 conversationally and execute application capabilities through the provided tools (Repeater, \
 Invoker, proxy interception, browser scans, documents, crawl context). Call a tool whenever the \
@@ -506,6 +506,7 @@ pub async fn run_tool_loop(
 
     let mut chat_history = history;
     let mut actions: Vec<AiChatAction> = Vec::new();
+    let mut executed_tools: HashSet<String> = HashSet::new();
 
     for _round in 0..MAX_TOOL_ROUNDS {
         let request = CompletionRequest {
@@ -529,26 +530,36 @@ pub async fn run_tool_loop(
                 });
             }
             ModelChoice::ToolCall(name, _id, args) => {
-                let tool_result = match authorize_tool(policy, &name) {
-                    ToolAuthorization::Denied(denial) => {
-                        actions.push(AiChatAction {
-                            action: name.clone(),
-                            payload: args,
-                            result: Some(denial.clone()),
-                            created_at: chrono::Utc::now().to_rfc3339(),
-                        });
-                        denial
-                    }
-                    authz => {
-                        execute_tool_call(
-                            app,
-                            window_label,
-                            &name,
-                            args,
-                            matches!(authz, ToolAuthorization::RequiresConfirmation),
-                            &mut actions,
-                        )
-                        .await
+                let call_sig = format!("{}:{}", name, serde_json::to_string(&args).unwrap_or_default());
+                let tool_result = if executed_tools.contains(&call_sig) {
+                    format!(
+                        "Notice: The tool '{}' has already been executed with these exact parameters during this turn. \
+                        Do not call it again. Synthesize your final response and conclude your reasoning.",
+                        name
+                    )
+                } else {
+                    executed_tools.insert(call_sig);
+                    match authorize_tool(policy, &name) {
+                        ToolAuthorization::Denied(denial) => {
+                            actions.push(AiChatAction {
+                                action: name.clone(),
+                                payload: args,
+                                result: Some(denial.clone()),
+                                created_at: chrono::Utc::now().to_rfc3339(),
+                            });
+                            denial
+                        }
+                        authz => {
+                            execute_tool_call(
+                                app,
+                                window_label,
+                                &name,
+                                args,
+                                matches!(authz, ToolAuthorization::RequiresConfirmation),
+                                &mut actions,
+                            )
+                            .await
+                        }
                     }
                 };
 

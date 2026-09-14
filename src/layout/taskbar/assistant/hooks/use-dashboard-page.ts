@@ -130,7 +130,9 @@ function parseCredentialInput(
 
 interface UseDashboardPageOptions {
   sessionId: string | null;
-  setMessagesRef: React.MutableRefObject<((messages: UIMessage<unknown>[]) => void) | null>;
+  setMessagesRef: React.MutableRefObject<
+    ((messages: UIMessage<unknown>[], targetSessionId?: string) => void) | null
+  >;
   onSaveMessages?: (sessionId: string, messages: ChatMessageRecord[]) => void;
 }
 
@@ -243,7 +245,13 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
 
   // Populate the ref so the session hook can call setMessages when switching
   useEffect(() => {
-    setMessagesRef.current = setMessages as (msgs: UIMessage<unknown>[]) => void;
+    setMessagesRef.current = (msgs: UIMessage<unknown>[], targetSessionId?: string) => {
+      if (targetSessionId) {
+        loadedSessionIdRef.current = targetSessionId;
+        prevSavedCountRef.current = msgs.length;
+      }
+      setMessages(msgs as any);
+    };
   }, [setMessages, setMessagesRef]);
 
   useEffect(() => {
@@ -337,30 +345,42 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
     };
   }, [sendMessage, status]);
 
-  // Persist messages to DB whenever they change after streaming completes
-  const prevMessageCountRef = useRef(0);
-  const sessionIdRef = useRef(sessionId);
+  // Track which session's messages are currently loaded in useChat to prevent
+  // stale messages from being saved to a newly switched session ID.
+  const loadedSessionIdRef = useRef<string | null>(sessionId);
+  const prevSavedCountRef = useRef<number>(-1);
+
+  // When sessionId changes from parent, mark that we are switching sessions
   useEffect(() => {
-    if (sessionIdRef.current !== sessionId) {
-      prevMessageCountRef.current = 0;
+    if (loadedSessionIdRef.current !== sessionId) {
+      loadedSessionIdRef.current = null;
+      prevSavedCountRef.current = -1;
     }
-    sessionIdRef.current = sessionId;
   }, [sessionId]);
 
-  useEffect(() => {
-    const sid = sessionIdRef.current;
-    if (!sid || !onSaveMessages) return;
-    if (status === 'submitted' || status === 'streaming') return;
-    if (messages.length === 0) return;
-    if (messages.length === prevMessageCountRef.current) return;
+  // Once setMessages is called or new session is activated, update loadedSessionIdRef
+  const notifySessionLoaded = useCallback((sid: string, count: number) => {
+    loadedSessionIdRef.current = sid;
+    prevSavedCountRef.current = count;
+  }, []);
 
-    prevMessageCountRef.current = messages.length;
+  useEffect(() => {
+    const currentSessionId = sessionId;
+    if (!currentSessionId || !onSaveMessages) return;
+    if (status === 'submitted' || status === 'streaming') return;
+
+    // Only save if the currently active sessionId is confirmed loaded
+    if (loadedSessionIdRef.current !== currentSessionId) return;
+    if (messages.length === 0) return;
+    if (messages.length === prevSavedCountRef.current) return;
+
+    prevSavedCountRef.current = messages.length;
 
     const records: ChatMessageRecord[] = messages
       .filter((m) => m.role === 'user' || m.role === 'assistant')
       .map((m) => ({
         id: m.id,
-        sessionId: sid,
+        sessionId: currentSessionId,
         role: m.role,
         content: m.parts
           .filter((p) => p.type === 'text')
@@ -369,8 +389,8 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
         createdAt: new Date().toISOString(),
       }));
 
-    onSaveMessages(sid, records);
-  }, [messages, status, onSaveMessages]);
+    onSaveMessages(currentSessionId, records);
+  }, [messages, status, sessionId, onSaveMessages]);
 
   const submitCrawlCredentials = useCallback(async (fields: Record<string, string>) => {
     const request = crawlInputRef.current;
@@ -441,6 +461,11 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
   }, []);
 
   const handleSubmit = useCallback(async ({ text, files, mentionedPages }: PromptInputMessage) => {
+    // Prevent overlapping requests while assistant is already processing in the background
+    if (status === 'submitted' || status === 'streaming') {
+      return;
+    }
+
     const hasText = text.trim().length > 0;
     const hasFiles = files && files.length > 0;
 

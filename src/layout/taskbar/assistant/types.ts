@@ -82,3 +82,38 @@ export interface ChatMessageRecord {
   content: string;
   createdAt: string;
 }
+
+export interface AiToolDebugInfo {
+  name: string;
+  description: string;
+  tier: string;
+}
+
+export interface AiDebugContextBankEntry {
+  id: string;
+  title: string;
+  content: string;
+  sourceType: string;
+  tags: string[];
+  pinned: boolean;
+  createdAt: string;
+}
+
+export interface AiDebugMessage {
+  role: string;
+  content: string;
+}
+
+export interface AiDebugSnapshot {
+  systemPrompt: string;
+  appContextRaw: string | null;
+  appContextObject: Record<string, unknown> | null;
+  contextBankEntries: AiDebugContextBankEntry[];
+  tools: AiToolDebugInfo[];
+  lastRequestId: string | null;
+  lastPrompt: string | null;
+  lastMessages: AiDebugMessage[];
+  provider: string;
+  model: string;
+  timestamp: string;
+}

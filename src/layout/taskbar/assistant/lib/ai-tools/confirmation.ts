@@ -42,7 +42,23 @@ function notifyConfirmationListeners() {
   confirmationListeners.forEach((fn) => fn());
 }
 
+function isSameConfirmation(a: PendingToolConfirmation, b: PendingToolConfirmation): boolean {
+  if (a.id === b.id) return true;
+  if (a.toolName === b.toolName) {
+    try {
+      return JSON.stringify(a.arguments) === JSON.stringify(b.arguments);
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
 export function addPendingToolConfirmation(confirmation: PendingToolConfirmation): void {
+  // Prevent duplicate approval cards for the same confirmation or identical tool invocation
+  if (pendingConfirmations.some((item) => isSameConfirmation(item, confirmation))) {
+    return;
+  }
   pendingConfirmations = [...pendingConfirmations, confirmation];
   notifyConfirmationListeners();
 }

@@ -1,6 +1,20 @@
 import {
+  Agent,
+  AgentContent,
+  AgentHeader,
+  Attachments,
+  AttachmentItem,
+  AttachmentPreview,
+  AttachmentRemove,
   Badge,
+  Bubble,
+  BubbleContent,
   Button,
+  Context,
+  ContextContent,
+  ContextContentBody,
+  ContextContentHeader,
+  ContextTrigger,
   Conversation,
   ConversationContent,
   ConversationEmptyState,
@@ -24,15 +38,15 @@ import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
-  Separator,
   Shimmer,
-  Task,
-  TaskContent,
-  TaskTrigger,
+  Sources,
+  SourcesContent,
+  SourcesTrigger,
+  Source,
   usePromptInputAttachments,
 } from '@celestia-project/ui';
-import { CheckCircleIcon, CaretDownIcon, CircleIcon, SpinnerGapIcon, SidebarIcon, ShieldWarningIcon, TriangleIcon, XIcon, XCircleIcon, StarFourIcon, FileTextIcon, PaperclipIcon, GearSixIcon } from '@phosphor-icons/react';
-import { useCallback, useState } from 'react';
+import { CaretDownIcon, SidebarIcon, ShieldWarningIcon, XIcon, StarFourIcon, PaperclipIcon, GearSixIcon, SpinnerGapIcon, BugIcon } from '@phosphor-icons/react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FileUIPart } from 'ai';
 import { ChatSessionList } from './components/chat-session-list';
 import { HumanSelectionCard } from './components/human-selection-card';
@@ -42,14 +56,15 @@ import { SuggestionBar } from './components/suggestion-bar';
 import { PageMentionChip } from './components/page-mention-chip';
 import { PageMentionPopover } from './components/page-mention-popover';
 import { AiConfigDialog } from './components/ai-config-dialog';
+import { AiDebugDialog } from './components/ai-debug-dialog';
+import { MessageActionsBar } from './components/message-actions-bar';
+import { TrackedActionsList } from './components/tracked-actions-list';
 import { useAiChatPane } from './hooks/use-ai-chat-pane';
 import { usePageMentions } from './hooks/use-page-mentions';
 import { usePendingToolConfirmations } from './lib/ai-tools/confirmation';
 import { getFileParts, getMessageText, getReasoningParts, hasContent, providerLabel } from './lib/message-utils';
 import { parseAttachedFilesFromMessage, getUserPromptOnly } from './lib/file-utils';
 import { cn } from '@/lib/utils';
-
-import { TriangleLogo } from '@/layout/triangle-logo';
 
 function PromptInputAttachmentsBar() {
   const attachments = usePromptInputAttachments();
@@ -68,13 +83,13 @@ function PromptInputAttachmentsBar() {
         // Typography
         'text-xs text-foreground',
         // Backgrounds & Borders
-        'rounded-lg border border-blue-500/30 bg-blue-500/10 dark:bg-blue-950/30 shadow-2xs',
+        'rounded-lg border border-border/80 bg-muted/40 shadow-2xs',
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 font-medium text-xs text-blue-600 dark:text-blue-400">
-          <PaperclipIcon className="h-3.5 w-3.5 shrink-0" />
-          <span>File{attachments.files.length > 1 ? 's' : ''} added to prompt ({attachments.files.length})</span>
+        <div className="flex items-center gap-1.5 font-medium text-xs text-muted-foreground">
+          <PaperclipIcon className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+          <span>Attachments ({attachments.files.length})</span>
         </div>
         <Button
           type="button"
@@ -95,53 +110,20 @@ function PromptInputAttachmentsBar() {
           Clear all
         </Button>
       </div>
-      <div className="flex flex-wrap gap-2">
-        {attachments.files.map((file) => {
-          const ext = (file.filename || '').split('.').pop()?.toUpperCase() || 'TXT';
-          return (
-            <div
-              key={file.id}
-              className={cn(
-                // Layout & Positioning
-                'flex items-center gap-2 max-w-xs truncate relative group',
-                // Sizing & Spacing
-                'px-2.5 py-1.5',
-                // Typography
-                'text-xs font-medium text-foreground',
-                // Backgrounds & Borders
-                'rounded-md border border-border bg-background shadow-xs',
-              )}
-            >
-              <FileTextIcon className="h-4 w-4 shrink-0 text-blue-500" />
-              <div className="flex flex-col min-w-0 flex-1">
-                <span className="truncate text-xs font-semibold">{file.filename || 'Attachment'}</span>
-                <span className="text-[10px] text-muted-foreground font-mono">
-                  {ext} file attached
-                </span>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  // Layout & Positioning
-                  'flex items-center justify-center shrink-0',
-                  // Sizing & Spacing
-                  'h-5 w-5 p-0',
-                  // Typography
-                  'text-muted-foreground',
-                  // Interactive & States
-                  'hover:bg-destructive/20 hover:text-destructive transition-colors',
-                )}
-                onClick={() => attachments.remove(file.id)}
-                title="Remove file"
-              >
-                <XIcon className="h-3 w-3" />
-              </Button>
-            </div>
-          );
-        })}
-      </div>
+      <Attachments variant="inline" className="flex flex-wrap gap-2">
+        {attachments.files.map((file) => (
+          <AttachmentItem
+            key={file.id}
+            data={file}
+            onRemove={() => attachments.remove(file.id)}
+            className="rounded-md border border-border bg-background shadow-xs text-xs"
+          >
+            <AttachmentPreview />
+            <span className="truncate max-w-[140px] text-xs font-medium">{file.filename || 'Attachment'}</span>
+            <AttachmentRemove />
+          </AttachmentItem>
+        ))}
+      </Attachments>
     </div>
   );
 }
@@ -212,6 +194,7 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
   } = useAiChatPane();
 
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
+  const [debugDialogOpen, setDebugDialogOpen] = useState(false);
 
   const {
     mentionedPages,
@@ -229,16 +212,72 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
   const attachments = usePromptInputAttachments();
   const pendingToolConfirmations = usePendingToolConfirmations();
 
+  const lastMessage = messages[messages.length - 1];
+  const lastMessageIsAssistant = lastMessage?.role === 'assistant';
+  const lastAssistantText = lastMessageIsAssistant ? getMessageText(lastMessage).trim() : '';
+  const lastAssistantHasReasoning = lastMessageIsAssistant && getReasoningParts(lastMessage).length > 0;
+  const hasAssistantContent = lastAssistantText.length > 0 || lastAssistantHasReasoning;
+  const hasRunningAction = trackedActions.some((a) => a.status === 'in_progress');
+  const stickToBottomRef = useRef<{
+    scrollToBottom: (opts?: any) => any;
+    scrollRef?: { current: HTMLDivElement | null };
+    isAtBottom?: boolean;
+  } | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth', force = false) => {
+    if (stickToBottomRef.current) {
+      stickToBottomRef.current.scrollToBottom({ ignoreEscapes: force });
+      const scrollEl = stickToBottomRef.current.scrollRef?.current;
+      if (scrollEl) {
+        if (behavior === 'instant') {
+          scrollEl.scrollTop = scrollEl.scrollHeight;
+        } else {
+          scrollEl.scrollTo({ top: scrollEl.scrollHeight, behavior });
+        }
+      }
+    }
+    messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
+  }, []);
+
+  const lastRawText = lastMessage ? getMessageText(lastMessage) : '';
+
+  useEffect(() => {
+    scrollToBottom('smooth', true);
+  }, [messages.length, scrollToBottom]);
+
+  useEffect(() => {
+    if (isStreaming) {
+      scrollToBottom('smooth', false);
+    }
+  }, [isStreaming, lastRawText, trackedActions.length, hasRunningAction, scrollToBottom]);
+
   // Wrap handleSubmit to include mentioned pages and clear them after
   const wrappedHandleSubmit = useCallback(
-    async (message: { text: string; files: FileUIPart[] }) => {
-      await handleSubmit({
+    (message: { text: string; files: FileUIPart[] }) => {
+      // Auto-scroll to bottom immediately when message is submitted
+      scrollToBottom('smooth', true);
+
+      void handleSubmit({
         ...message,
         mentionedPages: mentionedPages.map((p) => ({ label: p.label, href: p.href })),
       });
       clearMentionedPages();
+
+      requestAnimationFrame(() => {
+        scrollToBottom('smooth', true);
+      });
+      setTimeout(() => {
+        scrollToBottom('smooth', true);
+      }, 50);
+      setTimeout(() => {
+        scrollToBottom('smooth', true);
+      }, 150);
+      setTimeout(() => {
+        scrollToBottom('smooth', true);
+      }, 300);
     },
-    [handleSubmit, mentionedPages, clearMentionedPages],
+    [handleSubmit, mentionedPages, clearMentionedPages, scrollToBottom],
   );
 
   return (
@@ -268,16 +307,26 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
             <GearSixIcon className="size-3 text-muted-foreground" />
           </Button>
         </div>
-        {onClose && (
+        <div className="flex items-center gap-0.5 pr-1">
           <Button
             variant="ghost"
             size="icon"
-            onClick={onClose}
-            title="Close assistant"
+            onClick={() => setDebugDialogOpen(true)}
+            title="AI Debug Inspector"
           >
-            <XIcon className="h-3.5 w-3.5" />
+            <BugIcon className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
-        )}
+          {onClose && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              title="Close assistant"
+            >
+              <XIcon className="h-3.5 w-3.5" />
+            </Button>
+          )}
+        </div>
       </div>
 
       <AiConfigDialog
@@ -285,6 +334,11 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
         onOpenChange={setConfigDialogOpen}
         aiSettings={aiSettings}
         updateAiSettings={updateAiSettings}
+      />
+
+      <AiDebugDialog
+        open={debugDialogOpen}
+        onOpenChange={setDebugDialogOpen}
       />
 
       {/* Body: session list + conversation */}
@@ -304,15 +358,34 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
 
         {/* Conversation */}
         <div className="flex flex-1 flex-col min-w-0">
-          <Conversation>
-            <ConversationContent className="flex-1 h-full max-w-xl mx-auto">
-              {messages.length === 0 && !pendingCrawlInput ? (
-                <div className="flex-1">
-                  <ConversationEmptyState
-                    icon={<TriangleLogo size="large" />}
-                    title="AI Assistant"
-                    description="Analyze traffic, extract URL data, write findings, and manage your recon scope."
-                  />
+          <Conversation contextRef={stickToBottomRef}>
+            <ConversationContent
+              className={cn(
+                // Layout & Positioning
+                'w-full mx-auto',
+                // Sizing & Spacing
+                'min-h-full max-w-xl gap-4 pb-24',
+              )}
+            >
+              {messages.length === 0 && !pendingCrawlInput && !isStreaming ? (
+                <div className="flex-1 flex flex-col justify-center">
+                  <ConversationEmptyState>
+                    <Agent className="max-w-md mx-auto text-left shadow-xs border-border/70 bg-card">
+                      <AgentHeader
+                        name="HexBuffer AI Assistant"
+                        model={model || 'Ready'}
+                      />
+                      <AgentContent className="text-xs text-muted-foreground space-y-2">
+                        <p>
+                          Autonomous security recon assistant. Inspect HTTP traffic, crawl endpoints, test vulnerabilities, manage scope, and dispatch actions across tools.
+                        </p>
+                        <div className="flex items-center gap-1.5 text-[11px] font-mono text-muted-foreground/80">
+                          <span>Provider:</span>
+                          <span className="font-semibold text-foreground">{providerDisplay}</span>
+                        </div>
+                      </AgentContent>
+                    </Agent>
+                  </ConversationEmptyState>
                 </div>
               ) : (
                 <>
@@ -330,7 +403,13 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
 
                     return (
                       <Message key={message.id} from={message.role}>
-                        <MessageContent>
+                        <MessageContent
+                          className={cn(
+                            message.role === 'assistant'
+                              ? 'w-full max-w-full group-[.is-assistant]:text-foreground'
+                              : 'group-[.is-user]:bg-transparent group-[.is-user]:p-0',
+                          )}
+                        >
                           {label ? (
                             <div className="flex items-center gap-2">
                               <StarFourIcon className="h-4 w-4 shrink-0" />
@@ -358,29 +437,21 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                                 <PaperclipIcon className="h-3.5 w-3.5 text-blue-500 shrink-0" />
                                 <span>Attached file{attachedFiles.length > 1 ? 's' : ''} sent with prompt</span>
                               </div>
-                              <div className="flex flex-wrap gap-2">
+                              <Attachments variant="inline" className="flex flex-wrap gap-2">
                                 {attachedFiles.map((file, idx) => (
-                                  <div
+                                  <AttachmentItem
                                     key={idx}
-                                    className={cn(
-                                      // Layout & Positioning
-                                      'flex items-center gap-2 max-w-[260px] truncate',
-                                      // Sizing & Spacing
-                                      'py-1 px-2.5',
-                                      // Typography
-                                      'text-xs font-medium text-foreground',
-                                      // Backgrounds & Borders
-                                      'rounded-md border border-border bg-background shadow-xs',
-                                    )}
+                                    data={{ id: `att-${idx}`, type: 'file', filename: file.filename, mediaType: 'text/plain' }}
+                                    className="rounded-md border border-border bg-background shadow-xs text-xs"
                                   >
-                                    <FileTextIcon className="h-4 w-4 shrink-0 text-blue-500" />
-                                    <span className="truncate flex-1">{file.filename}</span>
+                                    <AttachmentPreview />
+                                    <span className="truncate max-w-[160px] text-xs font-medium">{file.filename}</span>
                                     <Badge variant="outline" className="text-[10px] py-0 px-1 font-mono uppercase shrink-0">
                                       {file.ext}
                                     </Badge>
-                                  </div>
+                                  </AttachmentItem>
                                 ))}
-                              </div>
+                              </Attachments>
                             </div>
                           ) : null}
 
@@ -395,11 +466,36 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                             </Reasoning>
                           ))}
 
-                          {/* Text response */}
+                          {/* Text response in chat bubble */}
                           {displayText ? (
-                            <MessageResponse className="text-sm" isAnimating={isStreaming && message.role === 'assistant'}>
-                              {displayText}
-                            </MessageResponse>
+                            <Bubble
+                              variant={message.role === 'user' ? 'default' : 'outline'}
+                              align={message.role === 'user' ? 'end' : 'start'}
+                              className={cn(
+                                message.role === 'assistant'
+                                  ? 'max-w-full w-full border-0'
+                                  : 'max-w-[85%]',
+                              )}
+                            >
+                              <BubbleContent
+                                className={cn(
+                                  message.role === 'user'
+                                    ? 'bg-primary text-primary-foreground px-3.5 py-2.5 rounded-2xl'
+                                    : 'bg-card/70 border border-border/70 text-foreground px-4 py-3 rounded-2xl shadow-2xs',
+                                )}
+                              >
+                                <MessageResponse
+                                  className="text-sm"
+                                  isAnimating={isStreaming && message.role === 'assistant'}
+                                >
+                                  {displayText}
+                                </MessageResponse>
+                              </BubbleContent>
+                            </Bubble>
+                          ) : null}
+
+                          {message.role === 'assistant' ? (
+                            <MessageActionsBar text={displayText} />
                           ) : null}
                         </MessageContent>
                       </Message>
@@ -480,45 +576,23 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                     </Message>
                   ))}
 
-                  {/* Loading shimmer while waiting for assistant response */}
-                  {status === 'submitted' ? (
+                  {/* Tracked actions & thinking loading state */}
+                  {trackedActions.length > 0 || (isStreaming && !hasAssistantContent) ? (
                     <Message from="assistant">
                       <MessageContent>
                         <div className="space-y-3">
                           {trackedActions.length > 0 ? (
-                            <Task defaultOpen>
-                              <TaskTrigger title="">
-                                <div className="flex w-full cursor-pointer items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground">
-                                  <SpinnerGapIcon className="size-4 animate-spin text-blue-500" />
-                                  <p className="flex-1 text-sm">Running actions…</p>
-                                  <CaretDownIcon className="size-4 transition-transform group-data-[state=open]:rotate-180" />
-                                </div>
-                              </TaskTrigger>
-                              <TaskContent>
-                                {trackedActions.map((ta) => {
-                                  const Icon =
-                                    ta.status === 'completed' ? CheckCircleIcon :
-                                      ta.status === 'error' ? XCircleIcon :
-                                        ta.status === 'in_progress' ? SpinnerGapIcon :
-                                          CircleIcon;
-                                  const iconColor =
-                                    ta.status === 'completed' ? 'text-green-500' :
-                                      ta.status === 'error' ? 'text-red-500' :
-                                        ta.status === 'in_progress' ? 'text-blue-500' :
-                                          'text-muted-foreground';
-                                  return (
-                                    <div key={ta.id} className="flex items-start gap-2 text-sm text-muted-foreground">
-                                      <Icon className={cn('size-3.5 mt-0.5 shrink-0', iconColor, ta.status === 'in_progress' && 'animate-spin')} />
-                                      <span>{ta.label}</span>
-                                    </div>
-                                  );
-                                })}
-                              </TaskContent>
-                            </Task>
+                            <TrackedActionsList
+                              trackedActions={trackedActions}
+                              isStreaming={hasRunningAction}
+                            />
                           ) : null}
-                          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                            <Shimmer duration={1}>Thinking…</Shimmer>
-                          </div>
+                          {isStreaming && !hasAssistantContent && !hasRunningAction ? (
+                            <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 p-2.5 text-xs text-muted-foreground">
+                              <SpinnerGapIcon className="size-4 shrink-0 animate-spin text-blue-500" />
+                              <Shimmer duration={1}>Thinking and generating response…</Shimmer>
+                            </div>
+                          ) : null}
                         </div>
                       </MessageContent>
                     </Message>
@@ -533,70 +607,51 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                       </MessageContent>
                     </Message>
                   ) : null}
-
-                  {/* Completed task summary */}
-                  {status !== 'submitted' && trackedActions.length > 0 ? (
-                    <Message from="assistant">
-                      <MessageContent>
-                        <Task defaultOpen={false}>
-                          <TaskTrigger
-                            title={`${trackedActions.filter((a) => a.status === 'completed').length}/${trackedActions.length} actions completed`}
-                          />
-                          <TaskContent>
-                            {trackedActions.map((ta) => {
-                              const Icon =
-                                ta.status === 'completed' ? CheckCircleIcon :
-                                  ta.status === 'error' ? XCircleIcon :
-                                    CircleIcon;
-                              const iconColor =
-                                ta.status === 'completed' ? 'text-green-500' :
-                                  ta.status === 'error' ? 'text-red-500' :
-                                    'text-muted-foreground';
-                              return (
-                                <div key={ta.id} className="flex items-start gap-2 text-sm text-muted-foreground">
-                                  <Icon className={cn('size-3.5 mt-0.5 shrink-0', iconColor)} />
-                                  <span>{ta.label}</span>
-                                </div>
-                              );
-                            })}
-                          </TaskContent>
-                        </Task>
-                      </MessageContent>
-                    </Message>
-                  ) : null}
                 </>
               )}
+              <div ref={messagesEndRef} className="h-px w-full shrink-0" aria-hidden="true" />
             </ConversationContent>
             <ConversationScrollButton />
           </Conversation>
 
           {/* Suggestions (when empty and no pending input) */}
-          {messages.length === 0 && !pendingCrawlInput ? <SuggestionBar /> : null}
+          {messages.length === 0 && !pendingCrawlInput && !isStreaming ? <SuggestionBar /> : null}
 
           {/* Prompt input */}
           <div className="shrink-0 border-t p-2 bg-muted">
             <div className="relative max-w-xl mx-auto flex flex-col">
-              {/* ponytail: show active page mentions directly on top of the prompt input box, aligned and full-width */}
+              {/* Referenced page mentions displayed as rich Celestia Sources */}
               {mentionedPages.length > 0 && (
-                <div className="flex shrink-0 items-center gap-2 pb-1.5 text-xs text-muted-foreground w-full">
-                  <span className="font-medium shrink-0">Context:</span>
-                  <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
-                    {mentionedPages.map((page) => (
-                      <PageMentionChip
-                        key={page.href}
-                        item={page}
-                        onRemove={() => removeMentionedPage(page.href)}
-                      />
-                    ))}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearMentionedPages}
-                    className="h-6 px-1.5 text-xs text-muted-foreground hover:text-foreground shrink-0"
-                  >
-                    Clear
-                  </Button>
+                <div className="pb-2 w-full">
+                  <Sources defaultOpen className="rounded-lg border border-border/70 bg-card p-2.5 shadow-2xs">
+                    <SourcesTrigger count={mentionedPages.length} className="text-xs text-muted-foreground hover:text-foreground">
+                      <p className="font-medium text-xs">Context: {mentionedPages.length} active page{mentionedPages.length > 1 ? 's' : ''} attached</p>
+                    </SourcesTrigger>
+                    <SourcesContent className="mt-2 flex flex-wrap gap-2">
+                      {mentionedPages.map((page) => (
+                        <div key={page.href} className="flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2 py-1 text-xs">
+                          <Source href={page.href} title={page.label} className="text-xs hover:underline" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-4 p-0 text-muted-foreground hover:text-foreground"
+                            onClick={() => removeMentionedPage(page.href)}
+                            title="Remove page"
+                          >
+                            <XIcon className="size-2.5" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearMentionedPages}
+                        className="h-6 px-1.5 text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Clear all
+                      </Button>
+                    </SourcesContent>
+                  </Sources>
                 </div>
               )}
 
@@ -611,14 +666,17 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                   <PromptInputBody>
                     <PromptInputTextarea
                       className="min-h-12"
+                      disabled={isStreaming || !!pendingCrawlInput}
                       placeholder={
-                        pendingCrawlInput
-                          ? `Enter ${requestedFieldLabels} to resume crawl…`
-                          : pendingSelection
-                            ? 'Select an option above or type a message…'
-                            : pendingClarification
-                              ? 'Select a task above to clarify your intent…'
-                              : 'Message AI… (use @ to mention a page, or attach .txt/.md files)'
+                        isStreaming
+                          ? 'Assistant is processing in the background… please wait'
+                          : pendingCrawlInput
+                            ? `Enter ${requestedFieldLabels} to resume crawl…`
+                            : pendingSelection
+                              ? 'Select an option above or type a message…'
+                              : pendingClarification
+                                ? 'Select a task above to clarify your intent…'
+                                : 'Message AI… (use @ to mention a page, or attach .txt/.md files)'
                       }
                       onChange={onTextareaChange}
                       onSelect={onTextareaSelect}
@@ -650,6 +708,24 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                           ) : null}
                         </PromptInputSelectContent>
                       </PromptInputSelect>
+
+                      <Context
+                        usedTokens={Math.min(messages.length * 180 + (attachments.files.length * 500), 128000)}
+                        maxTokens={128000}
+                        modelId={model}
+                      >
+                        <ContextTrigger className="h-8 px-2 text-xs flex items-center gap-1.5" />
+                        <ContextContent>
+                          <ContextContentHeader />
+                          <ContextContentBody>
+                            <div className="text-xs space-y-1">
+                              <p className="font-medium text-foreground">Session Context Window</p>
+                              <p className="text-muted-foreground">Active model: {model}</p>
+                              <p className="text-muted-foreground">Estimated token footprint across messages &amp; attachments.</p>
+                            </div>
+                          </ContextContentBody>
+                        </ContextContent>
+                      </Context>
                     </PromptInputTools>
                     <PromptInputSubmit
                       onStop={stop}

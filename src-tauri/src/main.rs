@@ -135,6 +135,7 @@ fn main() {
             hexbuffer::ai::send_ai_chat_message,
             hexbuffer::ai::resolve_ai_tool_result,
             hexbuffer::ai::suggest_invoker_markers,
+            hexbuffer::ai::get_ai_debug_snapshot,
             hexbuffer::commands::context_bank::list_context_bank_entries,
             hexbuffer::commands::context_bank::save_context_bank_entry,
             hexbuffer::commands::context_bank::delete_context_bank_entry,

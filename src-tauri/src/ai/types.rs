@@ -203,3 +203,28 @@ impl AiConfig {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AiToolDebugInfo {
+    pub name: String,
+    pub description: String,
+    pub tier: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AiDebugSnapshot {
+    pub system_prompt: String,
+    pub app_context_raw: Option<String>,
+    pub app_context_object: Option<Value>,
+    pub context_bank_entries: Vec<crate::db::repository::types::ContextBankEntry>,
+    pub tools: Vec<AiToolDebugInfo>,
+    pub last_request_id: Option<String>,
+    pub last_prompt: Option<String>,
+    pub last_messages: Vec<AiChatMessage>,
+    pub provider: String,
+    pub model: String,
+    pub timestamp: String,
+}
+
+

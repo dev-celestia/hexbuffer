@@ -4,6 +4,7 @@ export interface TrackedAction {
   id: string;
   action: string;
   label: string;
+  detail?: string;
   status: 'in_progress' | 'completed' | 'error';
   timestamp: number;
 }
@@ -19,6 +20,32 @@ const actionLabels: Record<string, string> = {
   trigger_scan: 'Launching browser scan',
 };
 
+function formatActionLabel(action: string, args?: Record<string, any>): { label: string; detail?: string } {
+  const baseLabel = actionLabels[action] ?? action;
+  if (!args) {
+    return { label: baseLabel };
+  }
+
+  let detail: string | undefined;
+  if (action === 'send_to_repeater') {
+    const target = args.url || args.path || args.raw_request;
+    if (target) {
+      const displayTarget = String(target).split('\n')[0].trim();
+      detail = displayTarget.length > 50 ? `${displayTarget.slice(0, 47)}...` : displayTarget;
+    }
+  } else if (action === 'trigger_scan') {
+    if (args.url) {
+      detail = String(args.url);
+    }
+  } else if (action === 'create_collection' || action === 'create_folder' || action === 'create_endpoint') {
+    if (args.name) {
+      detail = `"${args.name}"`;
+    }
+  }
+
+  const label = detail ? `${baseLabel}: ${detail}` : baseLabel;
+  return { label, detail };
+}
 
 let trackedActions: TrackedAction[] = [];
 const actionListeners: Set<() => void> = new Set();
@@ -28,14 +55,16 @@ function notifyActionListeners() {
   actionListeners.forEach((fn) => fn());
 }
 
-export function addTrackedAction(action: string): string {
+export function addTrackedAction(action: string, args?: Record<string, any>): string {
   const id = `ta-${++actionCounter}`;
+  const { label, detail } = formatActionLabel(action, args);
   trackedActions = [
     ...trackedActions,
     {
       id,
       action,
-      label: actionLabels[action] ?? action,
+      label,
+      detail,
       status: 'in_progress' as const,
       timestamp: Date.now(),
     },

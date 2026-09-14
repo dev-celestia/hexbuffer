@@ -4,7 +4,112 @@ use tauri::{AppHandle, Emitter, State};
 
 use super::settings::read_ai_settings;
 use super::tool_loop;
-use super::types::{AiChatContext, AiChatCrawlContext, AiChatRequest, AiChatResponse, AiSettings};
+use super::types::{
+    AiChatContext, AiChatCrawlContext, AiChatMessage, AiChatRequest, AiChatResponse,
+    AiDebugSnapshot, AiSettings, AiToolDebugInfo,
+};
+
+static LATEST_DEBUG_SNAPSHOT: std::sync::OnceLock<std::sync::Mutex<Option<AiDebugSnapshot>>> =
+    std::sync::OnceLock::new();
+
+pub fn record_debug_snapshot(snapshot: AiDebugSnapshot) {
+    let mutex = LATEST_DEBUG_SNAPSHOT.get_or_init(|| std::sync::Mutex::new(None));
+    if let Ok(mut lock) = mutex.lock() {
+        *lock = Some(snapshot);
+    }
+}
+
+pub fn get_latest_debug_snapshot() -> Option<AiDebugSnapshot> {
+    LATEST_DEBUG_SNAPSHOT.get()?.lock().ok().and_then(|g| g.clone())
+}
+
+pub fn get_registered_tools_debug() -> Vec<AiToolDebugInfo> {
+    vec![
+        AiToolDebugInfo {
+            name: "send_to_repeater".to_string(),
+            description: "Normalize and send an HTTP request to Repeater tab with method, URL, headers, and body".to_string(),
+            tier: "auto_approved".to_string(),
+        },
+        AiToolDebugInfo {
+            name: "create_collection".to_string(),
+            description: "Create a request collection in the Repeater workspace".to_string(),
+            tier: "auto_approved".to_string(),
+        },
+        AiToolDebugInfo {
+            name: "create_folder".to_string(),
+            description: "Create a folder inside a collection in Repeater".to_string(),
+            tier: "auto_approved".to_string(),
+        },
+        AiToolDebugInfo {
+            name: "create_endpoint".to_string(),
+            description: "Add an endpoint to a Repeater collection or folder".to_string(),
+            tier: "auto_approved".to_string(),
+        },
+        AiToolDebugInfo {
+            name: "search_context_bank".to_string(),
+            description: "Search stored user knowledge bank notes using keywords or semantic embeddings".to_string(),
+            tier: "auto_approved".to_string(),
+        },
+        AiToolDebugInfo {
+            name: "save_context_note".to_string(),
+            description: "Save discoveries, findings, or notes into the user knowledge bank".to_string(),
+            tier: "auto_approved".to_string(),
+        },
+        AiToolDebugInfo {
+            name: "get_crawl_context".to_string(),
+            description: "Query crawled pages, insights, and browser logs directly from the database".to_string(),
+            tier: "auto_approved".to_string(),
+        },
+        AiToolDebugInfo {
+            name: "start_invoker_attack".to_string(),
+            description: "Launch automated Intruder fuzzing / payload injection attack".to_string(),
+            tier: "confirmation_required".to_string(),
+        },
+        AiToolDebugInfo {
+            name: "launch_browser_scan".to_string(),
+            description: "Launch headless automated browser crawler and scanner on target URL".to_string(),
+            tier: "confirmation_required".to_string(),
+        },
+        AiToolDebugInfo {
+            name: "execute_code".to_string(),
+            description: "Execute Python/JS security inspection code in sandboxed environment".to_string(),
+            tier: "confirmation_required".to_string(),
+        },
+        AiToolDebugInfo {
+            name: "dispatch_action".to_string(),
+            description: "Dispatch navigation or actions across the HexBuffer app interface".to_string(),
+            tier: "confirmation_required".to_string(),
+        },
+    ]
+}
+
+pub async fn get_ai_debug_snapshot_impl(
+    app: AppHandle,
+    history: State<'_, crate::HistoryBridge>,
+) -> Result<AiDebugSnapshot, String> {
+    if let Some(snapshot) = get_latest_debug_snapshot() {
+        return Ok(snapshot);
+    }
+
+    let settings = read_ai_settings(&app).unwrap_or_default();
+    let context = build_ai_chat_context(&history).ok();
+    let context_value = context.as_ref().and_then(|c| serde_json::to_value(c).ok());
+    let context_raw = context.as_ref().and_then(|c| serde_json::to_string_pretty(c).ok());
+
+    Ok(AiDebugSnapshot {
+        system_prompt: tool_loop::PREAMBLE.to_string(),
+        app_context_raw: context_raw,
+        app_context_object: context_value,
+        context_bank_entries: Vec::new(),
+        tools: get_registered_tools_debug(),
+        last_request_id: None,
+        last_prompt: None,
+        last_messages: Vec::new(),
+        provider: settings.provider,
+        model: settings.model,
+        timestamp: chrono::Utc::now().to_rfc3339(),
+    })
+}
 
 fn is_local_ai_url(url: Option<&str>) -> bool {
     if let Some(url) = url {
@@ -100,6 +205,32 @@ pub async fn send_ai_chat_message_impl(
         loop_history.push(RigMessage {
             role: message.role.clone(),
             content: message.content.clone(),
+        });
+    }
+
+    // Capture a debug snapshot of exactly what is being sent to the LLM this turn.
+    {
+        let context_value = serde_json::to_value(&context).ok();
+        let context_raw = serde_json::to_string_pretty(&context).ok();
+        let last_messages_snapshot: Vec<AiChatMessage> = loop_history
+            .iter()
+            .map(|m| AiChatMessage {
+                role: m.role.clone(),
+                content: m.content.clone(),
+            })
+            .collect();
+        record_debug_snapshot(AiDebugSnapshot {
+            system_prompt: tool_loop::PREAMBLE.to_string(),
+            app_context_raw: context_raw,
+            app_context_object: context_value,
+            context_bank_entries: bank_entries.clone(),
+            tools: get_registered_tools_debug(),
+            last_request_id: Some(request_id.clone()),
+            last_prompt: Some(prompt.clone()),
+            last_messages: last_messages_snapshot,
+            provider: settings.provider.clone(),
+            model: settings.model.clone(),
+            timestamp: chrono::Utc::now().to_rfc3339(),
         });
     }
 

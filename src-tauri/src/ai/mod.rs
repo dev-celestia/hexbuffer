@@ -91,3 +91,11 @@ pub async fn suggest_invoker_markers(
 ) -> Result<InvokerMarkerSuggestionResponse, String> {
     auto_mark::suggest_invoker_markers_impl(app, request).await
 }
+
+#[tauri::command]
+pub async fn get_ai_debug_snapshot(
+    app: AppHandle,
+    history: State<'_, crate::HistoryBridge>,
+) -> Result<types::AiDebugSnapshot, String> {
+    chat::get_ai_debug_snapshot_impl(app, history).await
+}

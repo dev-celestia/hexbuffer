@@ -2,10 +2,16 @@ import type { FileUIPart } from 'ai';
 import type { DashboardChatMessage } from '../types';
 
 export function getMessageText(message: DashboardChatMessage) {
-  return message.parts
-    .filter((part) => part.type === 'text')
-    .map((part) => part.text)
-    .join('\n');
+  if (Array.isArray(message.parts) && message.parts.length > 0) {
+    const textParts = message.parts
+      .filter((part) => part.type === 'text')
+      .map((part) => part.text)
+      .join('\n');
+    if (textParts.trim().length > 0) {
+      return textParts;
+    }
+  }
+  return typeof message.content === 'string' ? message.content : '';
 }
 
 export function getReasoningParts(message: DashboardChatMessage) {

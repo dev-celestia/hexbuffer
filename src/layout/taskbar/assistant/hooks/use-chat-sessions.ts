@@ -4,7 +4,7 @@ import type { ChatMessageRecord, ChatSession } from '../types';
 
 interface UseChatSessionsOptions {
   setMessagesRef: React.MutableRefObject<
-    ((messages: import('@ai-sdk/react').UIMessage[]) => void) | null
+    ((messages: import('@ai-sdk/react').UIMessage[], targetSessionId?: string) => void) | null
   >;
   /**
    * Called when messages are loaded from DB during a session switch,
@@ -32,7 +32,7 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
         const session = await invoke<ChatSession>('create_chat_session');
         setSessions([session]);
         setActiveSessionId(session.id);
-        setMessagesRef.current?.([]);
+        setMessagesRef.current?.([], session.id);
       } else {
         const firstId = list[0].id;
         setActiveSessionId(firstId);
@@ -47,7 +47,7 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
           content: m.content,
           parts: [{ type: 'text' as const, text: m.content }],
         }));
-        setMessagesRef.current?.(uiMessages);
+        setMessagesRef.current?.(uiMessages, firstId);
       }
     } catch (error) {
       console.error('Failed to load chat sessions:', error);
@@ -61,19 +61,17 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
       const session = await invoke<ChatSession>('create_chat_session');
       setSessions((prev) => [session, ...prev]);
       setActiveSessionId(session.id);
-      setMessagesRef.current?.([]);
+      setMessagesRef.current?.([], session.id);
       return session;
     } catch (error) {
       console.error('Failed to create chat session:', error);
       return null;
     }
-  }, []);
+  }, [setMessagesRef]);
 
   const switchSession = useCallback(
     async (sessionId: string) => {
       if (sessionId === activeSessionIdRef.current) return;
-
-      setActiveSessionId(sessionId);
 
       try {
         const messages = await invoke<ChatMessageRecord[]>('get_chat_messages', {
@@ -88,7 +86,8 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
           parts: [{ type: 'text' as const, text: m.content }],
         }));
 
-        setMessagesRef.current?.(uiMessages);
+        setActiveSessionId(sessionId);
+        setMessagesRef.current?.(uiMessages, sessionId);
       } catch (error) {
         console.error('Failed to load messages for session:', error);
       }

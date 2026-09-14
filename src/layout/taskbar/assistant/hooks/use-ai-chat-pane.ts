@@ -12,7 +12,7 @@ const PROVIDER_LABELS: Record<string, string> = {
 };
 
 export function useAiChatPane() {
-  const setMessagesRef = useRef<((messages: UIMessage<unknown>[]) => void) | null>(null);
+  const setMessagesRef = useRef<((messages: UIMessage<unknown>[], targetSessionId?: string) => void) | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   const {
