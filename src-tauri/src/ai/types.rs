@@ -56,7 +56,7 @@ pub struct WorkspaceInfo {
     pub name: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct AiChatRequest {
     pub messages: Vec<AiChatMessage>,

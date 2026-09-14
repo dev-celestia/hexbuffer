@@ -2,7 +2,6 @@ use rig::completion::Message as RigMessage;
 use serde_json::json;
 use tauri::{AppHandle, Emitter, State};
 
-use super::keyring::read_required_ai_api_key;
 use super::settings::read_ai_settings;
 use super::tool_loop;
 use super::types::{AiChatContext, AiChatCrawlContext, AiChatRequest, AiChatResponse, AiSettings};
