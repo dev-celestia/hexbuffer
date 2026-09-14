@@ -120,12 +120,24 @@ export const AI_PROVIDER_OPTIONS = [
   { id: OPENAI_COMPATIBLE_PROVIDER_ID, label: 'OpenAI Compatible' },
 ];
 
+export const DEFAULT_OPENAI_COMPATIBLE_MODELS = [
+  'gpt-4o',
+  'gpt-4o-mini',
+  'gpt-4-turbo',
+  'o1-mini',
+  'o3-mini',
+  'deepseek-chat',
+  'qwen2.5-coder-32b',
+  'llama3.3:70b',
+  'claude-3-5-sonnet',
+];
+
 export const AI_MODEL_OPTIONS_BY_PROVIDER: Record<string, string[]> = {
   deepseek: [
     'deepseek-v4-flash',
     'deepseek-v4-pro',
   ],
-  [OPENAI_COMPATIBLE_PROVIDER_ID]: [],
+  [OPENAI_COMPATIBLE_PROVIDER_ID]: DEFAULT_OPENAI_COMPATIBLE_MODELS,
 };
 
 export const AI_API_KEY_PLACEHOLDERS: Record<string, string> = {

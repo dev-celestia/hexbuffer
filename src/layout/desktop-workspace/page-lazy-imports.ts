@@ -19,7 +19,7 @@ const ListenerPage = React.lazy(() => import("@/pages/listener").then((m) => ({ 
 const InspectorPage = React.lazy(() => import("@/pages/inspector").then((m) => ({ default: m.InspectorPage })));
 const WorkflowPage = React.lazy(() => import("@/pages/workflow").then((m) => ({ default: m.AutomationPage })));
 const RegressionPage = React.lazy(() => import("@/pages/regression").then((m) => ({ default: m.RegressionPage })));
-const AssistantPage = React.lazy(() => import("@/layout/assistant").then((m) => ({ default: m.AssistantPage })));
+const AssistantPage = React.lazy(() => import("@/layout/taskbar/assistant").then((m) => ({ default: m.AssistantPage })));
 const ScratchpadPage = React.lazy(() => import("@/pages/notes").then((m) => ({ default: m.ScratchpadPage })));
 const MockApiPage = React.lazy(() => import("@/pages/api-mock").then((m) => ({ default: m.MockApiPage })));
 const ResponseOverridePage = React.lazy(() => import("@/pages/api-override").then((m) => ({ default: m.ResponseOverridePage })));

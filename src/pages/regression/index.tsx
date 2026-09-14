@@ -42,7 +42,7 @@ export function RegressionPage() {
 
         {/* Right: two-tab content */}
         <ResizablePanel defaultSize={78} minSize={45}>
-          {page.activeScript ? (
+          {page.activeScript && page.draft ? (
             <Tabs
               value={page.activeTab}
               onValueChange={(value) => page.setActiveTab(value as 'script' | 'run')}
@@ -94,7 +94,7 @@ export function RegressionPage() {
                 )}
               >
                 <ScriptTab
-                  draft={page.draft!}
+                  draft={page.draft}
                   validation={page.validation}
                   conditionCount={page.conditionCount}
                   isDirty={page.isDirty}

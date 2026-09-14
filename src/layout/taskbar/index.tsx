@@ -16,6 +16,7 @@ import { useTaskbar } from "./hooks/use-taskbar";
 import { AppLauncher } from "./app-launcher";
 import { OpenBrowserButton } from "../open-browser";
 import { ProxyButton } from "../proxy-button";
+import { AiAssistantButton } from "./components/ai-assistant-button";
 
 // Sub-components
 import { DockItem, SortableDockItem } from './components/dock-item';
@@ -55,6 +56,7 @@ export function AppSidebar() {
         <AppLauncher />
         <ProxyButton />
         <OpenBrowserButton />
+        <AiAssistantButton />
         <Separator orientation="vertical" className="h-5 my-auto mx-0.5 opacity-60" />
       </div>
 

@@ -7,6 +7,7 @@ import type { FileUIPart } from 'ai';
 import { usePromptInputController } from '@celestia-project/ui';
 import { useBrowserAutomationStore } from '@/stores/browser-automation';
 import { DASHBOARD_DEFAULT_AI_MODEL } from '../constants';
+import { AI_MODEL_OPTIONS_BY_PROVIDER } from '@/pages/settings/constants';
 import { DashboardSettingsChatTransport } from '../lib/dashboard-chat-transport';
 import { setupAiToolEventListener } from '../lib/ai-tools/listener';
 import { formatAttachedFileContent } from '../lib/file-utils';
@@ -252,8 +253,13 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
       try {
         setAiSettingsLoading(true);
         const settings = await invoke<DashboardAiSettings>('get_ai_settings');
+        let hasKey = settings.hasApiKey;
+        try {
+          const keyStatus = await invoke<Record<string, boolean>>('get_ai_key_status');
+          hasKey = !!keyStatus[settings.provider];
+        } catch {}
         if (active) {
-          setAiSettings(settings);
+          setAiSettings({ ...settings, hasApiKey: hasKey });
         }
       } catch (error) {
         console.error('Failed to load AI settings for chat:', error);
@@ -496,11 +502,65 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
   }, [clearError, sendMessage, promptController, submitCrawlCredentials]);
 
   const setModel = useCallback((model: string) => {
-    setAiSettings((prev) => ({ ...prev, model }));
+    setAiSettings((prev) => {
+      const next = { ...prev, model };
+      invoke('save_ai_settings', {
+        settings: {
+          provider: next.provider,
+          model: next.model,
+          allowThirdPartyAiSharing: next.allowThirdPartyAiSharing,
+          customBaseUrl: next.customBaseUrl,
+        },
+      }).catch((e) => console.error('Failed to save model change:', e));
+      return next;
+    });
   }, []);
 
-  const setProvider = useCallback((provider: DashboardAiSettings['provider']) => {
-    setAiSettings((prev) => ({ ...prev, provider }));
+  const setProvider = useCallback(async (provider: DashboardAiSettings['provider']) => {
+    let hasKey = false;
+    try {
+      const keyStatus = await invoke<Record<string, boolean>>('get_ai_key_status');
+      hasKey = !!keyStatus[provider];
+    } catch {}
+
+    const models = AI_MODEL_OPTIONS_BY_PROVIDER[provider] ?? [];
+    setAiSettings((prev) => {
+      const nextModel = models.includes(prev.model) ? prev.model : (models[0] ?? prev.model);
+      const next = { ...prev, provider, model: nextModel, hasApiKey: hasKey };
+      invoke('save_ai_settings', {
+        settings: {
+          provider: next.provider,
+          model: next.model,
+          allowThirdPartyAiSharing: next.allowThirdPartyAiSharing,
+          customBaseUrl: next.customBaseUrl,
+        },
+      }).catch((e) => console.error('Failed to save provider change:', e));
+      return next;
+    });
+  }, []);
+
+  const updateAiSettings = useCallback(async (updates: Partial<DashboardAiSettings> & { apiKey?: string }) => {
+    try {
+      const current = { ...aiSettingsRef.current, ...updates };
+      if (updates.apiKey && updates.apiKey.trim()) {
+        await invoke('set_ai_api_key', {
+          provider: current.provider,
+          apiKey: updates.apiKey.trim(),
+        });
+        current.hasApiKey = true;
+      }
+      await invoke('save_ai_settings', {
+        settings: {
+          provider: current.provider,
+          model: current.model,
+          allowThirdPartyAiSharing: current.allowThirdPartyAiSharing,
+          customBaseUrl: current.customBaseUrl,
+        },
+      });
+      setAiSettings(current);
+    } catch (e) {
+      console.error('Failed to save updated AI settings:', e);
+    }
   }, []);
 
   return {
@@ -514,6 +574,7 @@ export function useDashboardPage({ sessionId, setMessagesRef, onSaveMessages }: 
     provider: aiSettings.provider,
     setModel,
     setProvider,
+    updateAiSettings,
     status,
     stop,
     pendingCrawlInput,

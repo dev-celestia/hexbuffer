@@ -62,11 +62,18 @@ function toProviderMessages(messages: DashboardChatMessage[]) {
     .filter((message) => message.content.length > 0);
 }
 
+function isLocalEndpoint(url?: string | null): boolean {
+  if (!url) return false;
+  const lower = url.toLowerCase();
+  return lower.includes('localhost') || lower.includes('127.0.0.1') || lower.includes('0.0.0.0');
+}
+
 function fallbackContent(aiSettings: DashboardAiSettings | undefined, error?: unknown) {
-  if (!aiSettings?.hasApiKey) {
-    return 'Add an API key in Settings to start chatting with the configured AI provider.';
+  const isLocal = aiSettings?.provider === 'openai-compatible' && isLocalEndpoint(aiSettings?.customBaseUrl);
+  if (!aiSettings?.hasApiKey && !isLocal) {
+    return 'Add an API key in Settings or AI Config to start chatting with the configured AI provider.';
   }
-  if (!aiSettings.allowThirdPartyAiSharing) {
+  if (!aiSettings?.allowThirdPartyAiSharing && !isLocal) {
     return 'Enable third-party AI sharing in Settings before sending chat messages or app context to the configured AI provider.';
   }
 
@@ -91,7 +98,8 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
         let model = aiSettings?.model;
         const textId = `response-${Date.now()}`;
 
-        if (!aiSettings?.hasApiKey || !aiSettings.allowThirdPartyAiSharing) {
+        const isLocal = aiSettings?.provider === 'openai-compatible' && isLocalEndpoint(aiSettings?.customBaseUrl);
+        if ((!aiSettings?.hasApiKey && !isLocal) || (!aiSettings?.allowThirdPartyAiSharing && !isLocal)) {
           writeAssistantText(writer, textId, fallbackContent(aiSettings), provider, model);
           return;
         }
@@ -179,6 +187,8 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
               messages: toProviderMessages(messages),
               workspaces: repeaterStore.workspaces.map((w) => ({ id: w.id, name: w.name })),
               activeWorkspaceId: repeaterStore.activeWorkspaceId,
+              provider,
+              model,
             },
           });
           provider = response.provider;

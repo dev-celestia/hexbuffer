@@ -62,7 +62,7 @@ const RegressionPage = React.lazy(() =>
   import("@/pages/regression").then((m) => ({ default: m.RegressionPage }))
 );
 const AssistantPage = React.lazy(() =>
-  import("@/layout/assistant").then((m) => ({ default: m.AssistantPage }))
+  import("@/layout/taskbar/assistant").then((m) => ({ default: m.AssistantPage }))
 );
 const ScratchpadPage = React.lazy(() =>
   import("@/pages/notes").then((m) => ({ default: m.ScratchpadPage }))

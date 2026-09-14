@@ -39,6 +39,7 @@ export function useRegressionPage() {
   const [activeScriptId, setActiveScriptId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<RegressionTab>('script');
   const [draft, setDraft] = useState<ScriptDraft | null>(null);
+  const [draftScriptId, setDraftScriptId] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
@@ -53,6 +54,14 @@ export function useRegressionPage() {
     [scripts, activeScriptId],
   );
 
+  const effectiveDraft = useMemo(() => {
+    if (!activeScript) return null;
+    if (draft && draftScriptId === activeScript.id) {
+      return draft;
+    }
+    return draftFromScript(activeScript);
+  }, [activeScript, draft, draftScriptId]);
+
   const scriptRuns = activeScriptId ? runsByScript[activeScriptId] ?? [] : [];
 
   const isRunning = activeRun?.status === 'running';
@@ -66,22 +75,19 @@ export function useRegressionPage() {
     }
   }, [scripts, activeScriptId]);
 
-  // Sync draft + run history when the selected script changes
+  // Load run history when the selected script changes
   useEffect(() => {
-    if (activeScript) {
-      setDraft(draftFromScript(activeScript));
-      setIsDirty(false);
-      setValidation(null);
-      loadRuns(activeScript.id).catch(() => {});
-    } else {
-      setDraft(null);
-      setValidation(null);
+    if (activeScriptId) {
+      loadRuns(activeScriptId).catch(() => {});
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeScriptId]);
+  }, [activeScriptId, loadRuns]);
 
   const handleSelectScript = useCallback((id: string) => {
     setActiveScriptId(id);
+    setDraft(null);
+    setDraftScriptId(null);
+    setIsDirty(false);
+    setValidation(null);
   }, []);
 
   const handleCreate = useCallback(async () => {
@@ -99,6 +105,7 @@ export function useRegressionPage() {
       const saved = await saveScript(newScript);
       setActiveScriptId(saved.id);
       setDraft(draftFromScript(saved));
+      setDraftScriptId(saved.id);
       setIsDirty(false);
       setValidation(null);
       toast.success('Test case created');
@@ -108,16 +115,22 @@ export function useRegressionPage() {
   }, [activeScript, saveScript]);
 
   const handleDraftChange = useCallback((patch: Partial<ScriptDraft>) => {
-    setDraft((prev) => (prev ? { ...prev, ...patch } : prev));
+    setDraft((prev) => {
+      const base = (prev && draftScriptId === activeScriptId)
+        ? prev
+        : (activeScript ? draftFromScript(activeScript) : null);
+      return base ? { ...base, ...patch } : null;
+    });
+    setDraftScriptId(activeScriptId);
     setIsDirty(true);
-  }, []);
+  }, [activeScript, activeScriptId, draftScriptId]);
 
   const handleValidate = useCallback(async () => {
-    if (!draft) return;
+    if (!effectiveDraft) return;
     setIsValidating(true);
     try {
       const result = await invoke<ValidationResult>('validate_regression_script', {
-        yaml: draft.yaml,
+        yaml: effectiveDraft.yaml,
       });
       setValidation(result);
     } catch (error) {
@@ -125,14 +138,14 @@ export function useRegressionPage() {
     } finally {
       setIsValidating(false);
     }
-  }, [draft]);
+  }, [effectiveDraft]);
 
   const handleSave = useCallback(async () => {
-    if (!draft || !activeScriptId) return;
+    if (!effectiveDraft || !activeScriptId) return;
     setIsSaving(true);
     try {
       const result = await invoke<ValidationResult>('validate_regression_script', {
-        yaml: draft.yaml,
+        yaml: effectiveDraft.yaml,
       });
       setValidation(result);
       if (!result.valid) {
@@ -141,13 +154,14 @@ export function useRegressionPage() {
       }
       const saved = await saveScript({
         id: activeScriptId,
-        name: draft.name.trim() || 'Untitled Test Case',
-        description: draft.description,
-        targetUrl: draft.targetUrl.trim(),
-        yaml: draft.yaml,
+        name: effectiveDraft.name.trim() || 'Untitled Test Case',
+        description: effectiveDraft.description,
+        targetUrl: effectiveDraft.targetUrl.trim(),
+        yaml: effectiveDraft.yaml,
         enabled: true,
       });
       setDraft(draftFromScript(saved));
+      setDraftScriptId(saved.id);
       setIsDirty(false);
       toast.success('Test case saved');
     } catch (error) {
@@ -155,7 +169,7 @@ export function useRegressionPage() {
     } finally {
       setIsSaving(false);
     }
-  }, [draft, activeScriptId, saveScript]);
+  }, [effectiveDraft, activeScriptId, saveScript]);
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -164,6 +178,8 @@ export function useRegressionPage() {
         if (activeScriptId === id) {
           const remaining = scripts.filter((s) => s.id !== id);
           setActiveScriptId(remaining[0]?.id ?? null);
+          setDraft(null);
+          setDraftScriptId(null);
         }
         toast.success('Test case deleted');
       } catch (error) {
@@ -174,12 +190,12 @@ export function useRegressionPage() {
   );
 
   const handleRun = useCallback(async () => {
-    if (!activeScriptId || !draft) return;
+    if (!activeScriptId || !effectiveDraft) return;
     if (isDirty) {
       toast.error('Save your changes before running');
       return;
     }
-    if (!draft.targetUrl.trim()) {
+    if (!effectiveDraft.targetUrl.trim()) {
       toast.error('Set a target URL before running');
       return;
     }
@@ -189,7 +205,7 @@ export function useRegressionPage() {
     } catch (error) {
       toast.error(`Failed to start run: ${error}`);
     }
-  }, [activeScriptId, draft, isDirty, runScript]);
+  }, [activeScriptId, effectiveDraft, isDirty, runScript]);
 
   const handleAbort = useCallback(async () => {
     await abortRun();
@@ -203,7 +219,7 @@ export function useRegressionPage() {
     activeScript,
     activeScriptId,
     scriptRuns,
-    draft,
+    draft: effectiveDraft,
     isDirty,
     validation,
     conditionCount,

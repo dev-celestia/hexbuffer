@@ -64,6 +64,10 @@ pub struct AiChatRequest {
     pub active_workspace_id: Option<String>,
     #[serde(default)]
     pub request_id: Option<String>,
+    #[serde(default)]
+    pub provider: Option<String>,
+    #[serde(default)]
+    pub model: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]

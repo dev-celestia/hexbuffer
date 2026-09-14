@@ -7,19 +7,49 @@ use super::settings::read_ai_settings;
 use super::tool_loop;
 use super::types::{AiChatContext, AiChatCrawlContext, AiChatRequest, AiChatResponse, AiSettings};
 
+fn is_local_ai_url(url: Option<&str>) -> bool {
+    if let Some(url) = url {
+        let lower = url.to_lowercase();
+        lower.contains("localhost") || lower.contains("127.0.0.1") || lower.contains("0.0.0.0")
+    } else {
+        false
+    }
+}
+
 pub async fn send_ai_chat_message_impl(
     app: AppHandle,
     window_label: String,
     history: State<'_, crate::HistoryBridge>,
     request: AiChatRequest,
 ) -> Result<AiChatResponse, String> {
-    let settings = read_ai_settings(&app)?;
-    ensure_third_party_ai_sharing_allowed(&settings)?;
-    let api_key = read_required_ai_api_key(&settings.provider)?;
-
-    if api_key.trim().is_empty() {
-        return Err(format!("No {} API key provided", settings.provider));
+    let mut settings = read_ai_settings(&app)?;
+    if let Some(ref req_provider) = request.provider {
+        if !req_provider.trim().is_empty() {
+            settings.provider = req_provider.clone();
+        }
     }
+    if let Some(ref req_model) = request.model {
+        if !req_model.trim().is_empty() {
+            settings.model = req_model.clone();
+        }
+    }
+
+    let is_openai = super::providers::is_openai_compatible(&settings.provider);
+    let is_local = is_openai && is_local_ai_url(settings.custom_base_url.as_deref());
+
+    if !is_local {
+        ensure_third_party_ai_sharing_allowed(&settings)?;
+    }
+
+    let api_key = match super::keyring::read_optional_ai_api_key(&settings.provider)? {
+        Some(key) if !key.trim().is_empty() => key,
+        _ if is_openai => {
+            // Local or free OpenAI-compatible endpoints (Ollama, LM Studio, etc.) don't require
+            // an API key but rig-core expects a non-empty string. Provide a fallback placeholder.
+            "ollama".to_string()
+        }
+        _ => return Err(format!("No {} API key provided", settings.provider)),
+    };
 
     // The user's prompt drives context-bank retrieval, so split before building context.
     let (prompt, prior_messages) = split_conversation(&request.messages);

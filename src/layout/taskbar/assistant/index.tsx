@@ -31,8 +31,8 @@ import {
   TaskTrigger,
   usePromptInputAttachments,
 } from '@celestia-project/ui';
-import { CheckCircleIcon, CaretDownIcon, CircleIcon, SpinnerGapIcon, SidebarIcon, ShieldWarningIcon, TriangleIcon, XIcon, XCircleIcon, StarFourIcon, FileTextIcon, PaperclipIcon } from '@phosphor-icons/react';
-import { useCallback } from 'react';
+import { CheckCircleIcon, CaretDownIcon, CircleIcon, SpinnerGapIcon, SidebarIcon, ShieldWarningIcon, TriangleIcon, XIcon, XCircleIcon, StarFourIcon, FileTextIcon, PaperclipIcon, GearSixIcon } from '@phosphor-icons/react';
+import { useCallback, useState } from 'react';
 import type { FileUIPart } from 'ai';
 import { ChatSessionList } from './components/chat-session-list';
 import { HumanSelectionCard } from './components/human-selection-card';
@@ -41,6 +41,7 @@ import { ToolConfirmationCard } from './components/tool-confirmation-card';
 import { SuggestionBar } from './components/suggestion-bar';
 import { PageMentionChip } from './components/page-mention-chip';
 import { PageMentionPopover } from './components/page-mention-popover';
+import { AiConfigDialog } from './components/ai-config-dialog';
 import { useAiChatPane } from './hooks/use-ai-chat-pane';
 import { usePageMentions } from './hooks/use-page-mentions';
 import { usePendingToolConfirmations } from './lib/ai-tools/confirmation';
@@ -206,7 +207,11 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
     dismissClarification,
     submitClarification,
     requestedFieldLabels,
+    updateAiSettings,
+    handleProviderChange,
   } = useAiChatPane();
+
+  const [configDialogOpen, setConfigDialogOpen] = useState(false);
 
   const {
     mentionedPages,
@@ -240,29 +245,33 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
     <aside className="flex h-full min-h-0 flex-col overflow-hidden bg-background">
       {/* Header */}
       <div className="flex shrink-0 items-center justify-between border-b pr-3">
-        <div className="flex items-center gap-1 px-2">
+        <div className="flex items-center gap-1.5 px-2">
           <Button
             variant="ghost"
             size="icon"
-            className="relative h-7 w-7"
             onClick={() => setSidebarCollapsed((prev) => !prev)}
             title={sidebarCollapsed ? 'Show chats' : 'Hide chats'}
           >
-            {sidebarCollapsed ? (
-              <SidebarIcon className="h-3.5 w-3.5" />
-            ) : (
-              <SidebarIcon className="h-3.5 w-3.5" />
-            )}
+            <SidebarIcon className="h-3.5 w-3.5" />
             {sidebarCollapsed && sessions.length > 0 && (
               <span className="absolute right-0.5 top-0.5 h-2 w-2 rounded-full bg-green-500 ring-1 ring-background" />
             )}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setConfigDialogOpen(true)}
+            title="Configure AI Provider & Model"
+          >
+            <ModelSelectorLogo provider={provider === 'openai-compatible' ? 'openai' : provider} className="size-3.5" />
+            <span>{providerDisplay}: {model}</span>
+            <GearSixIcon className="size-3 text-muted-foreground" />
           </Button>
         </div>
         {onClose && (
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7"
             onClick={onClose}
             title="Close assistant"
           >
@@ -270,6 +279,13 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
           </Button>
         )}
       </div>
+
+      <AiConfigDialog
+        open={configDialogOpen}
+        onOpenChange={setConfigDialogOpen}
+        aiSettings={aiSettings}
+        updateAiSettings={updateAiSettings}
+      />
 
       {/* Body: session list + conversation */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
@@ -618,23 +634,20 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
                         value={model}
                       >
                         <PromptInputSelectTrigger className="border border-border">
-                          <ModelSelectorLogo provider={provider} className="size-4" />
+                          <ModelSelectorLogo provider={provider === 'openai-compatible' ? 'openai' : provider} className="size-4" />
                           <PromptInputSelectValue />
                         </PromptInputSelectTrigger>
                         <PromptInputSelectContent>
-                          {modelOptions.length > 0 ? (
-                            modelOptions.map((option) => (
-                              <PromptInputSelectItem key={option} value={option}>
-                                {option}
-                              </PromptInputSelectItem>
-                            ))
-                          ) : (
-                            // OpenAI-compatible models are free-text in Settings; show the
-                            // configured model as the only option so the value stays selectable.
-                            <PromptInputSelectItem value={model}>
-                              {model || 'Set model in Settings'}
+                          {modelOptions.map((option) => (
+                            <PromptInputSelectItem key={option} value={option}>
+                              {option}
                             </PromptInputSelectItem>
-                          )}
+                          ))}
+                          {!modelOptions.includes(model) && model ? (
+                            <PromptInputSelectItem value={model}>
+                              {model}
+                            </PromptInputSelectItem>
+                          ) : null}
                         </PromptInputSelectContent>
                       </PromptInputSelect>
                     </PromptInputTools>

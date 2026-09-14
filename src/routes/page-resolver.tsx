@@ -62,6 +62,21 @@ const SettingsPage = React.lazy(() =>
 const SplitViewPage = React.lazy(() =>
   import("@/pages/split-view").then((m) => ({ default: m.SplitViewPage }))
 );
+const AssistantPage = React.lazy(() =>
+  import("@/layout/taskbar/assistant").then((m) => ({ default: m.AssistantPage }))
+);
+const WebSocketHistoryPage = React.lazy(() =>
+  import("@/pages/live-traffic/websocket-history").then((m) => ({ default: m.WebSocketHistoryPage }))
+);
+const ListenerPage = React.lazy(() =>
+  import("@/pages/listener").then((m) => ({ default: m.ListenerPage }))
+);
+const InspectorPage = React.lazy(() =>
+  import("@/pages/inspector").then((m) => ({ default: m.InspectorPage }))
+);
+const WorkflowPage = React.lazy(() =>
+  import("@/pages/workflow").then((m) => ({ default: m.AutomationPage }))
+);
 
 function StandaloneHttpHistoryPage() {
   React.useEffect(() => {
@@ -221,6 +236,19 @@ export function StandaloneAppView({ target }: { readonly target: string }) {
       case "split-view":
       case "split":
         return <StandaloneLayout id="/split-view" title="Split View"><SplitViewPage /></StandaloneLayout>;
+      case "assistant":
+      case "ai-assistant":
+        return <StandaloneLayout id="/assistant" title="AI Assistant"><AssistantPage /></StandaloneLayout>;
+      case "websocket":
+      case "websocket-history":
+        return <StandaloneLayout id="/websocket-history" title="WebSocket"><WebSocketHistoryPage /></StandaloneLayout>;
+      case "listener":
+        return <StandaloneLayout id="/listener" title="Listener"><ListenerPage /></StandaloneLayout>;
+      case "inspector":
+        return <StandaloneLayout id="/inspector" title="Inspector"><InspectorPage /></StandaloneLayout>;
+      case "automation":
+      case "workflow":
+        return <StandaloneLayout id="/automation" title="Workflow"><WorkflowPage /></StandaloneLayout>;
       default:
         return null;
     }

@@ -34,6 +34,8 @@ export function useAiChatPane() {
     model,
     provider,
     setModel,
+    setProvider,
+    updateAiSettings,
     status,
     stop,
     pendingCrawlInput,
@@ -65,6 +67,10 @@ export function useAiChatPane() {
     setModel(newModel);
   }, [setModel]);
 
+  const handleProviderChange = useCallback((newProvider: string) => {
+    setProvider(newProvider as any);
+  }, [setProvider]);
+
   const requestedFieldLabels = pendingCrawlInput?.requestedFields?.length
     ? pendingCrawlInput.requestedFields.join(', ')
     : 'credentials';
@@ -75,6 +81,8 @@ export function useAiChatPane() {
     error,
     handleSubmit,
     handleModelChange,
+    handleProviderChange,
+    updateAiSettings,
     isStreaming,
     messages,
     model,
