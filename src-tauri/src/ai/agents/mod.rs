@@ -61,7 +61,7 @@ pub static ALL_AGENTS: &[AgentSpec] = &[
     AgentSpec {
         id: AgentId::Orchestrator,
         slug: "orchestrator",
-        name: "Orchestrator Agent",
+        name: "Celestia",
         role: "Master Coordinator",
         description: "Coordinates specialized security agents (HTTP Traffic, Repeater, Intruder, Notes, Port Scanner, JWT) and plans complex workflows.",
         preamble: "You are the Orchestrator Agent in HexBuffer, the lead security coordinator of a multi-agent cyber suite. \
