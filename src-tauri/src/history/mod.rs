@@ -699,6 +699,17 @@ impl HistoryBridge {
         self.db.upsert_context_bank_entry(entry).map_err(|e| e.to_string())
     }
 
+    pub fn update_context_bank_embedding(
+        &self,
+        entry_id: &str,
+        embedding: &[f64],
+        embedding_model: &str,
+    ) -> Result<(), String> {
+        self.db
+            .update_context_bank_embedding(entry_id, embedding, embedding_model)
+            .map_err(|e| e.to_string())
+    }
+
     pub fn get_context_bank_entry(
         &self,
         entry_id: &str,

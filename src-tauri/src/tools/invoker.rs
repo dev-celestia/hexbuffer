@@ -1,7 +1,7 @@
 use super::dispatch_tool_call;
 use super::repeater::AppToolError;
 use rig::completion::ToolDefinition;
-use rig::tool::Tool;
+use rig::tool::{Tool, ToolContext};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
@@ -12,28 +12,36 @@ pub struct StartInvokerAttackArgs {
 
 pub struct StartInvokerAttackTool;
 
+impl StartInvokerAttackTool {
+    pub fn definition(&self) -> ToolDefinition {
+        ToolDefinition {
+            name: <Self as Tool>::NAME.to_string(),
+            description: self.description(),
+            parameters: self.parameters(),
+        }
+    }
+}
+
 impl Tool for StartInvokerAttackTool {
     const NAME: &'static str = "start_invoker_attack";
     type Error = AppToolError;
     type Args = StartInvokerAttackArgs;
     type Output = String;
 
-    async fn definition(&self, _prompt: String) -> ToolDefinition {
-        ToolDefinition {
-            name: Self::NAME.to_string(),
-            description:
-                "Launch a brute-force or payload injection attack using the Invoker engine."
-                    .to_string(),
-            parameters: json!({
-                "type": "object",
-                "properties": {
-                    "attack_type": { "type": "string", "description": "Attack strategy (sniper, battering_ram, pitchfork, cluster_bomb)" }
-                }
-            }),
-        }
+    fn description(&self) -> String {
+        "Launch a brute-force or payload injection attack using the Invoker engine.".to_string()
     }
 
-    async fn call(&self, args: Self::Args) -> Result<Self::Output, Self::Error> {
+    fn parameters(&self) -> serde_json::Value {
+        json!({
+            "type": "object",
+            "properties": {
+                "attack_type": { "type": "string", "description": "Attack strategy (sniper, battering_ram, pitchfork, cluster_bomb)" }
+            }
+        })
+    }
+
+    async fn call(&self, _context: &mut ToolContext, args: Self::Args) -> Result<Self::Output, Self::Error> {
         dispatch_tool_call(Self::NAME, json!(args));
         let attack_type = args.attack_type.unwrap_or_else(|| "sniper".to_string());
         Ok(format!(
@@ -42,3 +50,4 @@ impl Tool for StartInvokerAttackTool {
         ))
     }
 }
+

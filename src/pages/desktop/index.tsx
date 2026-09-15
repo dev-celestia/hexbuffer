@@ -4,7 +4,6 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDesktopPage } from './hooks/use-desktop-page';
 import { RecentsWidget } from './components/recents-widget';
 import { ProxyWidget } from './components/proxy-widget';
-import { VpnWidget } from './components/vpn-widget';
 import { TargetWidget } from './components/target-widget';
 import { ScratchpadWidget } from './components/scratchpad-widget';
 import { CollectionsWidget } from './components/collections-widget';
@@ -25,8 +24,6 @@ function renderWidget(id: string) {
       return <ProxyWidget />;
     case 'collections':
       return <CollectionsWidget />;
-    case 'vpn':
-      return <VpnWidget />;
     case 'target':
       return <TargetWidget />;
     case 'scratchpad':

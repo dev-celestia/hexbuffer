@@ -64,3 +64,28 @@ pub(crate) fn save_ai_settings_impl(
     write_ai_settings(&app, &settings)?;
     read_ai_settings(&app)
 }
+
+pub(crate) fn abort_ai_chat_message_impl(
+    app: &AppHandle,
+    window_label: &str,
+    request_id: &str,
+) -> Result<bool, String> {
+    super::chat::abort_ai_chat_message_impl(app, window_label, request_id)
+}
+
+pub(crate) fn pause_ai_chat_message_impl(
+    app: &AppHandle,
+    window_label: &str,
+    request_id: &str,
+) -> Result<bool, String> {
+    super::chat::pause_ai_chat_message_impl(app, window_label, request_id)
+}
+
+pub(crate) fn resume_ai_chat_message_impl(
+    app: &AppHandle,
+    window_label: &str,
+    request_id: &str,
+) -> Result<bool, String> {
+    super::chat::resume_ai_chat_message_impl(app, window_label, request_id)
+}
+

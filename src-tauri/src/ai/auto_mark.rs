@@ -1,3 +1,4 @@
+use rig::client::AgentClientExt;
 use tauri::AppHandle;
 
 use super::chat::ensure_third_party_ai_sharing_allowed;

@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { addPendingToolConfirmation, describeToolResult } from './confirmation';
+import { addPendingToolConfirmation, clearPendingToolConfirmations, describeToolResult } from './confirmation';
 import { executeAiToolCall } from './executor';
 import type { AppAiToolCallPayload } from './types';
 
@@ -17,7 +17,9 @@ const CONFIRMATION_TTL_MS = 600_000;
  * the user to approve or deny; the rest execute immediately.
  */
 export async function setupAiToolEventListener(): Promise<UnlistenFn> {
-  return listen<AppAiToolCallPayload>(
+  const currentLabel = getCurrentWindow().label;
+
+  const unlistenExecute = await listen<AppAiToolCallPayload>(
     'ai:execute-tool',
     async (event) => {
       const { id, token, tool_name, arguments: args, requiresConfirmation } = event.payload;
@@ -51,6 +53,19 @@ export async function setupAiToolEventListener(): Promise<UnlistenFn> {
         );
       }
     },
-    { target: { kind: 'AnyLabel', label: getCurrentWindow().label } },
+    { target: { kind: 'AnyLabel', label: currentLabel } },
   );
+
+  const unlistenAborted = await listen<{ requestId?: string }>(
+    'ai-chat:aborted',
+    () => {
+      clearPendingToolConfirmations();
+    },
+    { target: { kind: 'AnyLabel', label: currentLabel } },
+  );
+
+  return () => {
+    unlistenExecute();
+    unlistenAborted();
+  };
 }

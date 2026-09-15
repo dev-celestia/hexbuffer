@@ -14,7 +14,19 @@ export const INTRUDER_AI_TOOL_DEFINITION = {
   },
 };
 
-export const INVOKER_AI_TOOL_DEFINITION = INTRUDER_AI_TOOL_DEFINITION;
+export const INVOKER_AI_TOOL_DEFINITION = {
+  name: 'start_invoker_attack',
+  description: 'Launch a brute-force or payload injection attack using the Invoker engine.',
+  parameters: {
+    type: 'object',
+    properties: {
+      attack_type: {
+        type: 'string',
+        description: 'Attack strategy (sniper, battering_ram, pitchfork, cluster_bomb)',
+      },
+    },
+  },
+};
 
 export async function executeStartIntruderAttackAiTool(args: Record<string, any>) {
   startIntruderAttack();

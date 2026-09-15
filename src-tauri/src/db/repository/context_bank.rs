@@ -85,6 +85,28 @@ impl Database {
         Ok(())
     }
 
+    pub fn update_context_bank_embedding(
+        &self,
+        entry_id: &str,
+        embedding: &[f64],
+        embedding_model: &str,
+    ) -> SqlResult<()> {
+        let conn = self.conn.lock();
+        let now = chrono::Utc::now().to_rfc3339();
+        conn.execute(
+            r#"UPDATE context_bank_entries
+               SET embedding = ?1, embedding_model = ?2, updated_at = ?3
+               WHERE id = ?4"#,
+            params![
+                vector_to_blob(embedding),
+                embedding_model,
+                now,
+                entry_id,
+            ],
+        )?;
+        Ok(())
+    }
+
     pub fn get_context_bank_entry(&self, entry_id: &str) -> SqlResult<Option<ContextBankEntry>> {
         let conn = self.conn.lock();
         conn.query_row(

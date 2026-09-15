@@ -15,4 +15,3 @@ pub mod r2;
 pub mod regression;
 pub mod repeater;
 pub mod storage;
-pub mod vpn;

@@ -3,7 +3,6 @@ use std::sync::OnceLock;
 
 pub mod browser;
 pub mod buffer;
-pub mod documents;
 pub mod intercept;
 pub mod invoker;
 pub mod proxy_tool;
@@ -11,7 +10,6 @@ pub mod repeater;
 
 pub use browser::{TriggerScanArgs, TriggerScanTool};
 pub use buffer::ProxyBufferState;
-pub use documents::{WriteDocumentArgs, WriteDocumentTool};
 pub use intercept::{ToggleInterceptArgs, ToggleInterceptTool};
 pub use invoker::{StartInvokerAttackArgs, StartInvokerAttackTool};
 pub use proxy_tool::{SendHexArgs, SendHexTool};

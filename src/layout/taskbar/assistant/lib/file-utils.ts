@@ -97,13 +97,15 @@ export function parseAttachedFilesFromMessage(
 }
 
 /**
- * Returns user message text stripped of embedded [Attached File: ...] blocks.
+ * Returns user message text stripped of embedded [Attached File: ...] and [Referenced pages: ...] blocks.
  */
 export function getUserPromptOnly(text: string): string {
-  if (!text.includes('[Attached File:')) {
-    return text;
+  let cleaned = text;
+  if (cleaned.includes('[Attached File:')) {
+    cleaned = cleaned.replace(/\[Attached File:\s*[^\]]+\]\s*```[\s\S]*?```/g, '');
   }
-
-  const cleaned = text.replace(/\[Attached File:\s*[^\]]+\]\s*```[\s\S]*?```/g, '').trim();
-  return cleaned;
+  if (cleaned.includes('[Referenced pages:')) {
+    cleaned = cleaned.replace(/\[Referenced pages:\s*[^\]]+\]/g, '');
+  }
+  return cleaned.trim();
 }

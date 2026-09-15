@@ -81,6 +81,13 @@ function removePendingToolConfirmation(id: string): void {
   notifyConfirmationListeners();
 }
 
+export function clearPendingToolConfirmations(): void {
+  if (pendingConfirmations.length > 0) {
+    pendingConfirmations = [];
+    notifyConfirmationListeners();
+  }
+}
+
 export function usePendingToolConfirmations(): readonly PendingToolConfirmation[] {
   const [confirmations, setConfirmations] = useState<readonly PendingToolConfirmation[]>(
     () => pendingConfirmations,

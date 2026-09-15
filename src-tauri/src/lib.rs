@@ -16,9 +16,10 @@ pub mod tools;
 pub use paths::{get_shared_app_dir, get_shared_db_path};
 
 pub use ai::{
-    clear_ai_api_key, get_ai_debug_snapshot, get_ai_key_status, get_ai_settings, save_ai_settings,
-    send_ai_chat_message, set_ai_api_key, suggest_invoker_markers, AiSettings, ChatMessageRecord,
-    ChatSessionRecord, InvokerMarkerSuggestionRequest, InvokerMarkerSuggestionResponse,
+    abort_ai_chat_message, clear_ai_api_key, get_ai_debug_snapshot, get_ai_key_status,
+    get_ai_settings, save_ai_settings, send_ai_chat_message, set_ai_api_key,
+    suggest_invoker_markers, AiSettings, ChatMessageRecord, ChatSessionRecord,
+    InvokerMarkerSuggestionRequest, InvokerMarkerSuggestionResponse,
 };
 pub use browser::{AIInsight, ActivityLog, AiBrowserState, CrawlConfig, CrawlPage, CrawlSession};
 pub use collaborator::{

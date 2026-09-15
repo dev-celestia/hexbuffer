@@ -1,11 +1,10 @@
 import type { UIMessage } from '@ai-sdk/react';
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useChatSessions } from './use-chat-sessions';
-import { useDashboardPage } from './use-dashboard-page';
+import { useAssistantChat } from './use-assistant-chat';
 import { useTrackedActions, clearTrackedActions } from '../lib/ai-tools';
 import { AI_MODEL_OPTIONS_BY_PROVIDER } from '@/pages/settings/constants';
 
-// ponytail: removed active page auto-detection to simplify system context and rely on explicit mentions
 const PROVIDER_LABELS: Record<string, string> = {
   deepseek: 'DeepSeek',
   'openai-compatible': 'OpenAI Compatible',
@@ -21,6 +20,7 @@ export function useAiChatPane() {
     createSession,
     switchSession,
     deleteSession,
+    renameSession,
     saveMessages,
   } = useChatSessions({ setMessagesRef });
 
@@ -30,6 +30,9 @@ export function useAiChatPane() {
     error,
     handleSubmit,
     isStreaming,
+    isPaused,
+    handlePause,
+    handleResume,
     messages,
     model,
     provider,
@@ -38,15 +41,7 @@ export function useAiChatPane() {
     updateAiSettings,
     status,
     stop,
-    pendingCrawlInput,
-    dismissCrawlInput,
-    pendingSelection,
-    dismissSelection,
-    submitSelection,
-    pendingClarification,
-    dismissClarification,
-    submitClarification,
-  } = useDashboardPage({
+  } = useAssistantChat({
     sessionId: activeSessionId,
     setMessagesRef,
     onSaveMessages: saveMessages,
@@ -63,8 +58,7 @@ export function useAiChatPane() {
     }
   }, [status]);
 
-  // Session controls are disabled while a response is streaming: switching mid-stream would
-  // let the in-flight reply land in the wrong conversation and corrupt persistence.
+  // Session controls are disabled while a response is streaming
   const handleSwitchSession = useCallback(
     async (sessionId: string) => {
       if (isStreaming) return;
@@ -86,6 +80,14 @@ export function useAiChatPane() {
     [isStreaming, deleteSession],
   );
 
+  const handleRenameSession = useCallback(
+    async (sessionId: string, title: string) => {
+      if (isStreaming) return;
+      await renameSession(sessionId, title);
+    },
+    [isStreaming, renameSession],
+  );
+
   const handleModelChange = useCallback((newModel: string) => {
     setModel(newModel);
   }, [setModel]);
@@ -93,10 +95,6 @@ export function useAiChatPane() {
   const handleProviderChange = useCallback((newProvider: string) => {
     setProvider(newProvider as any);
   }, [setProvider]);
-
-  const requestedFieldLabels = pendingCrawlInput?.requestedFields?.length
-    ? pendingCrawlInput.requestedFields.join(', ')
-    : 'credentials';
 
   return {
     aiSettings,
@@ -107,6 +105,9 @@ export function useAiChatPane() {
     handleProviderChange,
     updateAiSettings,
     isStreaming,
+    isPaused,
+    handlePause,
+    handleResume,
     messages,
     model,
     modelOptions,
@@ -119,18 +120,10 @@ export function useAiChatPane() {
     handleCreateSession,
     handleSwitchSession,
     handleDeleteSession,
+    handleRenameSession,
     saveMessages,
     sidebarCollapsed,
     setSidebarCollapsed,
     trackedActions,
-    pendingCrawlInput,
-    dismissCrawlInput,
-    pendingSelection,
-    dismissSelection,
-    submitSelection,
-    pendingClarification,
-    dismissClarification,
-    submitClarification,
-    requestedFieldLabels,
   };
 }

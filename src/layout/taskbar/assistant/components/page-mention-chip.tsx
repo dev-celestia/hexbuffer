@@ -17,7 +17,7 @@ export function PageMentionChip({ item, onRemove }: PageMentionChipProps) {
           e.preventDefault();
           onRemove();
         }}
-        className="ml-0.5 rounded-sm p-0.5 hover:bg-muted-foreground/20 transition-colors"
+        className="ms-0.5 rounded-sm p-0.5 hover:bg-muted-foreground/20 transition-colors"
       >
         <XIcon className="size-3" />
       </button>

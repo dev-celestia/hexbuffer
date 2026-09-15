@@ -53,13 +53,17 @@ function getMessageText(message: DashboardChatMessage) {
 }
 
 function toProviderMessages(messages: DashboardChatMessage[]) {
-  return messages
+  const filtered = messages
     .filter((message) => message.role === 'user' || message.role === 'assistant')
     .map((message) => ({
       role: message.role,
       content: getMessageText(message),
     }))
     .filter((message) => message.content.length > 0);
+
+  // Keep a sliding window within the backend limit (MAX_CHAT_MESSAGES = 100)
+  // Slicing to the most recent 60 messages avoids hard failures on long-running sessions
+  return filtered.length > 60 ? filtered.slice(-60) : filtered;
 }
 
 function isLocalEndpoint(url?: string | null): boolean {
@@ -96,6 +100,49 @@ function fallbackContent(aiSettings: DashboardAiSettings | undefined, error?: un
     }`;
 }
 
+let activeRequestId: string | null = null;
+
+export async function abortActiveAiChat(): Promise<boolean> {
+  if (activeRequestId) {
+    try {
+      const res = await invoke<boolean>('abort_ai_chat_message', { requestId: activeRequestId });
+      return res;
+    } catch (e) {
+      console.error('Failed to abort active AI chat:', e);
+    }
+  }
+  return false;
+}
+
+export async function pauseActiveAiChat(): Promise<boolean> {
+  if (activeRequestId) {
+    try {
+      const res = await invoke<boolean>('pause_ai_chat_message', { requestId: activeRequestId });
+      return res;
+    } catch (e) {
+      console.error('Failed to pause active AI chat:', e);
+    }
+  }
+  return false;
+}
+
+export async function resumeActiveAiChat(): Promise<boolean> {
+  if (activeRequestId) {
+    try {
+      const res = await invoke<boolean>('resume_ai_chat_message', { requestId: activeRequestId });
+      return res;
+    } catch (e) {
+      console.error('Failed to resume active AI chat:', e);
+    }
+  }
+  return false;
+}
+
+interface AiChatReasoningEvent {
+  requestId: string;
+  delta: string;
+}
+
 export class DashboardSettingsChatTransport implements ChatTransport<DashboardChatMessage> {
   async sendMessages({
     body,
@@ -121,11 +168,17 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
         // events while generating. Bridge them into the UI message stream so the reply
         // renders progressively instead of popping in all at once.
         const requestId = crypto.randomUUID();
+        activeRequestId = requestId;
         let started = false;
         let finished = false;
         let streamedLength = 0;
+        const reasoningId = `reasoning-${Date.now()}`;
+        let reasoningStarted = false;
         const unlisteners: UnlistenFn[] = [];
         const cleanup = () => {
+          if (activeRequestId === requestId) {
+            activeRequestId = null;
+          }
           while (unlisteners.length) {
             unlisteners.pop()?.();
           }
@@ -144,9 +197,21 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
           writer.write({ type: 'text-start', id: textId });
         };
 
+        const ensureReasoningStarted = () => {
+          if (reasoningStarted) return;
+          reasoningStarted = true;
+          writer.write({ type: 'reasoning-start', id: reasoningId });
+        };
+
+        const finishReasoning = () => {
+          if (!reasoningStarted) return;
+          writer.write({ type: 'reasoning-end', id: reasoningId });
+        };
+
         const finishStream = () => {
           if (finished) return;
           finished = true;
+          finishReasoning();
           writer.write({ type: 'text-end', id: textId });
           writer.write({ type: 'finish', finishReason: 'stop' });
         };
@@ -160,6 +225,23 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
                 provider = event.payload.provider as DashboardAiSettings['provider'];
                 model = event.payload.model;
                 ensureStarted();
+              },
+              { target: WINDOW_EVENT_TARGET },
+            ),
+          );
+
+          unlisteners.push(
+            await listen<AiChatReasoningEvent>(
+              'ai-chat:reasoning',
+              (event) => {
+                if (event.payload.requestId !== requestId) return;
+                ensureStarted();
+                ensureReasoningStarted();
+                writer.write({
+                  type: 'reasoning-delta',
+                  id: reasoningId,
+                  delta: event.payload.delta,
+                });
               },
               { target: WINDOW_EVENT_TARGET },
             ),

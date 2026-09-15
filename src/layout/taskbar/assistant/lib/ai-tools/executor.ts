@@ -27,13 +27,11 @@ async function dispatchToolExecution(toolName: string, args: Record<string, any>
     case 'start_invoker_attack':
       return executeStartIntruderAttackAiTool(args);
 
-
     case 'toggle_intercept':
       return executeToggleInterceptAiTool(args);
 
     case 'trigger_scan':
       return executeTriggerScanAiTool(args);
-
 
     default:
       throw new Error(`Unknown AI Tool capability: ${toolName}`);

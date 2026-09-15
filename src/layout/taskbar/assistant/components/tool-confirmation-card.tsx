@@ -7,6 +7,7 @@ import {
   toolConfirmationLabel,
   type PendingToolConfirmation,
 } from '../lib/ai-tools/confirmation';
+import { cn } from '@/lib/utils';
 
 interface ToolConfirmationCardProps {
   confirmation: PendingToolConfirmation;
@@ -29,18 +30,40 @@ export function ToolConfirmationCard({ confirmation }: ToolConfirmationCardProps
   };
 
   return (
-    <Tool defaultOpen className="border-amber-500/40 bg-amber-500/5 mb-3">
+    <Tool
+      defaultOpen
+      className={cn(
+        // Sizing & Spacing
+        'mb-3',
+        // Backgrounds & Borders
+        'rounded-xl border border-amber-500/40 bg-amber-500/5',
+      )}
+    >
       <ToolHeader
         type="dynamic-tool"
         toolName={toolConfirmationLabel(confirmation.toolName)}
         state="approval-requested"
       />
       <ToolContent>
-        <p className="text-xs text-muted-foreground">
+        <p
+          className={cn(
+            // Typography
+            'text-xs text-muted-foreground',
+          )}
+        >
           The assistant requested permission to run this action. Review parameters before approving:
         </p>
         <ToolInput input={confirmation.arguments} />
-        <div className="flex items-center gap-2 pt-2 border-t border-border/40">
+        <div
+          className={cn(
+            // Layout & Positioning
+            'flex items-center gap-2',
+            // Sizing & Spacing
+            'pt-2 mt-1',
+            // Backgrounds & Borders
+            'border-t border-border/40',
+          )}
+        >
           <Button
             size="sm"
             onClick={() => handleDecision(true)}
@@ -61,3 +84,4 @@ export function ToolConfirmationCard({ confirmation }: ToolConfirmationCardProps
     </Tool>
   );
 }
+

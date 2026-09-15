@@ -33,7 +33,11 @@ export function TrackedActionsList({ trackedActions, isStreaming }: TrackedActio
     <div className="space-y-2">
       <Task defaultOpen={isStreaming}>
         <TaskTrigger title="">
-          <div className="flex w-full cursor-pointer items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground">
+          <div
+            role={isStreaming ? 'status' : undefined}
+            aria-live={isStreaming ? 'polite' : undefined}
+            className="flex w-full cursor-pointer items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground"
+          >
             {isStreaming ? (
               <SpinnerGapIcon className="size-4 shrink-0 animate-spin text-blue-500" />
             ) : (

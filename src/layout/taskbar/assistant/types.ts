@@ -16,19 +16,9 @@ export interface DashboardChatMetadata {
   provider?: DashboardAiProvider;
 }
 
-export type DashboardChatMessage = UIMessage<DashboardChatMetadata>;
-
-export interface CrawlHumanInputRequest {
-  id: string;
-  sessionId: string;
-  pageId?: string;
-  url?: string;
-  reason: string;
-  requestedFields: string[];
-  safeActions: Array<'continue' | 'skip-branch' | 'stop-crawl'>;
-  aiUsedForAnalysis?: boolean;
-  createdAt: string;
-}
+export type DashboardChatMessage = UIMessage<DashboardChatMetadata> & {
+  content?: string;
+};
 
 export interface CrawlCompletedEvent {
   sessionId: string;
@@ -38,34 +28,6 @@ export interface CrawlCompletedEvent {
   insightsFound: number;
   insightTitles: string[];
   pageUrls: string[];
-}
-
-export interface HumanSelectionOption {
-  label: string;
-  value: string;
-  description?: string;
-}
-
-export interface HumanSelectionRequest {
-  id: string;
-  question: string;
-  options: HumanSelectionOption[];
-  multiSelect: boolean;
-  createdAt: string;
-}
-
-export interface IntentCategory {
-  id: string;
-  label: string;
-  description?: string;
-}
-
-export interface IntentClarificationRequest {
-  id: string;
-  question: string;
-  categories: IntentCategory[];
-  originalMessage: string;
-  createdAt: string;
 }
 
 export interface ChatSession {

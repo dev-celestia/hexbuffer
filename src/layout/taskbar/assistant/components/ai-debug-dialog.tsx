@@ -45,7 +45,7 @@ function CopyButton({ text }: { text: string }) {
         <span
           className={cn(
             // Layout & Positioning
-            'absolute top-full left-1/2 -translate-x-1/2',
+            'absolute top-full inset-inline-start-1/2 -translate-x-1/2',
             // Sizing & Spacing
             'mt-1 px-1.5 py-0.5',
             // Typography
@@ -243,7 +243,7 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
               <TabsTrigger value="context-bank">
                 Context Bank
                 {snapshot.contextBankEntries.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 text-[10px]">
+                  <Badge variant="secondary" className="ms-1 text-[10px]">
                     {snapshot.contextBankEntries.length}
                   </Badge>
                 )}
@@ -251,14 +251,14 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
               <TabsTrigger value="messages">
                 Messages
                 {snapshot.lastMessages.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 text-[10px]">
+                  <Badge variant="secondary" className="ms-1 text-[10px]">
                     {snapshot.lastMessages.length}
                   </Badge>
                 )}
               </TabsTrigger>
               <TabsTrigger value="tools">
                 Tools
-                <Badge variant="secondary" className="ml-1 text-[10px]">
+                <Badge variant="secondary" className="ms-1 text-[10px]">
                   {snapshot.tools.length}
                 </Badge>
               </TabsTrigger>

@@ -77,24 +77,30 @@ pub fn validate_http_base_url(raw: &str) -> Result<String, String> {
 
 pub fn create_openai_client(
     config: &super::types::AiConfig,
-) -> Result<rig::providers::openai::Client, String> {
+) -> Result<rig::providers::openai::CompletionsClient, String> {
     let api_key = config
         .api_key
         .clone()
         .or_else(|| std::env::var(api_key_env_name(&config.provider).unwrap_or("")).ok())
         .ok_or_else(|| format!("Missing API key for provider {}", config.provider))?;
 
-    if config.provider.to_lowercase() == "deepseek" {
-        let base_url = config
+    let base_url = if config.provider.to_lowercase() == "deepseek" {
+        config
             .base_url
             .clone()
-            .unwrap_or_else(|| "https://api.deepseek.com/v1".to_string());
-        Ok(rig::providers::openai::Client::from_url(&api_key, &base_url))
-    } else if let Some(ref base_url) = config.base_url {
-        Ok(rig::providers::openai::Client::from_url(&api_key, base_url))
+            .unwrap_or_else(|| "https://api.deepseek.com/v1".to_string())
+    } else if let Some(ref url) = config.base_url {
+        url.clone()
     } else {
-        Ok(rig::providers::openai::Client::new(&api_key))
-    }
+        "https://api.openai.com/v1".to_string()
+    };
+
+    rig::providers::openai::Client::builder()
+        .api_key(&api_key)
+        .base_url(&base_url)
+        .build()
+        .map(|client| client.completions_api())
+        .map_err(|e| e.to_string())
 }
 
 

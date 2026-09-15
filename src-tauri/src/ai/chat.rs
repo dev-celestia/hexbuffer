@@ -9,18 +9,109 @@ use super::types::{
     AiDebugSnapshot, AiSettings, AiToolDebugInfo,
 };
 
-static LATEST_DEBUG_SNAPSHOT: std::sync::OnceLock<std::sync::Mutex<Option<AiDebugSnapshot>>> =
-    std::sync::OnceLock::new();
+use std::collections::HashMap;
+use std::sync::{Mutex, OnceLock};
+use tokio::sync::watch;
 
-pub fn record_debug_snapshot(snapshot: AiDebugSnapshot) {
-    let mutex = LATEST_DEBUG_SNAPSHOT.get_or_init(|| std::sync::Mutex::new(None));
-    if let Ok(mut lock) = mutex.lock() {
-        *lock = Some(snapshot);
+static LATEST_DEBUG_SNAPSHOTS: OnceLock<Mutex<HashMap<String, AiDebugSnapshot>>> =
+    OnceLock::new();
+
+struct ActiveChatState {
+    window_label: String,
+    cancel_tx: watch::Sender<bool>,
+    pause_tx: watch::Sender<bool>,
+}
+
+static ACTIVE_CHATS: OnceLock<Mutex<HashMap<String, ActiveChatState>>> =
+    OnceLock::new();
+
+fn active_chats() -> &'static Mutex<HashMap<String, ActiveChatState>> {
+    ACTIVE_CHATS.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+pub fn pause_ai_chat_message_impl(
+    app: &AppHandle,
+    window_label: &str,
+    request_id: &str,
+) -> Result<bool, String> {
+    if let Ok(map) = active_chats().lock() {
+        if let Some(entry) = map.get(request_id) {
+            if entry.window_label != window_label {
+                return Err("Unauthorized: cannot pause a chat started by another window".to_string());
+            }
+            let _ = entry.pause_tx.send(true);
+            let _ = app.emit_to(
+                window_label,
+                "ai-chat:paused",
+                json!({ "requestId": request_id }),
+            );
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+pub fn resume_ai_chat_message_impl(
+    app: &AppHandle,
+    window_label: &str,
+    request_id: &str,
+) -> Result<bool, String> {
+    if let Ok(map) = active_chats().lock() {
+        if let Some(entry) = map.get(request_id) {
+            if entry.window_label != window_label {
+                return Err("Unauthorized: cannot resume a chat started by another window".to_string());
+            }
+            let _ = entry.pause_tx.send(false);
+            let _ = app.emit_to(
+                window_label,
+                "ai-chat:resumed",
+                json!({ "requestId": request_id }),
+            );
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+pub fn abort_ai_chat_message_impl(
+    app: &AppHandle,
+    window_label: &str,
+    request_id: &str,
+) -> Result<bool, String> {
+    if let Ok(mut map) = active_chats().lock() {
+        if let Some(entry) = map.get(request_id) {
+            if entry.window_label != window_label {
+                return Err("Unauthorized: cannot abort a chat started by another window".to_string());
+            }
+            if let Some(entry) = map.remove(request_id) {
+                let _ = entry.cancel_tx.send(true);
+                let _ = app.emit_to(
+                    window_label,
+                    "ai-chat:aborted",
+                    json!({ "requestId": request_id }),
+                );
+                return Ok(true);
+            }
+        }
+    }
+    Ok(false)
+}
+
+fn debug_snapshots() -> &'static Mutex<HashMap<String, AiDebugSnapshot>> {
+    LATEST_DEBUG_SNAPSHOTS.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+pub fn record_debug_snapshot(window_label: &str, snapshot: AiDebugSnapshot) {
+    if let Ok(mut lock) = debug_snapshots().lock() {
+        lock.insert(window_label.to_string(), snapshot);
     }
 }
 
-pub fn get_latest_debug_snapshot() -> Option<AiDebugSnapshot> {
-    LATEST_DEBUG_SNAPSHOT.get()?.lock().ok().and_then(|g| g.clone())
+pub fn get_latest_debug_snapshot(window_label: &str) -> Option<AiDebugSnapshot> {
+    debug_snapshots()
+        .lock()
+        .ok()
+        .and_then(|map| map.get(window_label).cloned())
 }
 
 pub fn get_registered_tools_debug() -> Vec<AiToolDebugInfo> {
@@ -61,23 +152,18 @@ pub fn get_registered_tools_debug() -> Vec<AiToolDebugInfo> {
             tier: "auto_approved".to_string(),
         },
         AiToolDebugInfo {
+            name: "toggle_intercept".to_string(),
+            description: "Enable or disable proxy HTTP traffic interception".to_string(),
+            tier: "confirmation_required".to_string(),
+        },
+        AiToolDebugInfo {
             name: "start_invoker_attack".to_string(),
             description: "Launch automated Intruder fuzzing / payload injection attack".to_string(),
             tier: "confirmation_required".to_string(),
         },
         AiToolDebugInfo {
-            name: "launch_browser_scan".to_string(),
+            name: "trigger_scan".to_string(),
             description: "Launch headless automated browser crawler and scanner on target URL".to_string(),
-            tier: "confirmation_required".to_string(),
-        },
-        AiToolDebugInfo {
-            name: "execute_code".to_string(),
-            description: "Execute Python/JS security inspection code in sandboxed environment".to_string(),
-            tier: "confirmation_required".to_string(),
-        },
-        AiToolDebugInfo {
-            name: "dispatch_action".to_string(),
-            description: "Dispatch navigation or actions across the HexBuffer app interface".to_string(),
             tier: "confirmation_required".to_string(),
         },
     ]
@@ -85,9 +171,10 @@ pub fn get_registered_tools_debug() -> Vec<AiToolDebugInfo> {
 
 pub async fn get_ai_debug_snapshot_impl(
     app: AppHandle,
+    window_label: String,
     history: State<'_, crate::HistoryBridge>,
 ) -> Result<AiDebugSnapshot, String> {
-    if let Some(snapshot) = get_latest_debug_snapshot() {
+    if let Some(snapshot) = get_latest_debug_snapshot(&window_label) {
         return Ok(snapshot);
     }
 
@@ -209,6 +296,29 @@ pub async fn send_ai_chat_message_impl(
         .clone()
         .unwrap_or_else(|| format!("chat-{}", chrono::Utc::now().timestamp_millis()));
 
+    let (cancel_tx, cancel_rx) = watch::channel(false);
+    let (pause_tx, pause_rx) = watch::channel(false);
+    if let Ok(mut map) = active_chats().lock() {
+        map.insert(
+            request_id.clone(),
+            ActiveChatState {
+                window_label: window_label.clone(),
+                cancel_tx,
+                pause_tx,
+            },
+        );
+    }
+
+    struct ChatCleanup(String);
+    impl Drop for ChatCleanup {
+        fn drop(&mut self) {
+            if let Ok(mut map) = active_chats().lock() {
+                map.remove(&self.0);
+            }
+        }
+    }
+    let _chat_guard = ChatCleanup(request_id.clone());
+
     let _ = app.emit_to(
         &window_label,
         "ai-chat:started",
@@ -237,16 +347,16 @@ pub async fn send_ai_chat_message_impl(
         context_parts.push(bank_block);
     }
     if !context_parts.is_empty() {
-        loop_history.push(RigMessage {
-            role: "user".to_string(),
-            content: context_parts.join("\n\n"),
-        });
+        loop_history.push(RigMessage::user(context_parts.join("\n\n")));
     }
     for message in prior_messages {
-        loop_history.push(RigMessage {
-            role: message.role.clone(),
-            content: message.content.clone(),
-        });
+        if message.role.eq_ignore_ascii_case("assistant") {
+            loop_history.push(RigMessage::assistant(message.content.clone()));
+        } else if message.role.eq_ignore_ascii_case("system") {
+            loop_history.push(RigMessage::system(message.content.clone()));
+        } else {
+            loop_history.push(RigMessage::user(message.content.clone()));
+        }
     }
 
     // Capture a debug snapshot of exactly what is being sent to the LLM this turn.
@@ -255,12 +365,44 @@ pub async fn send_ai_chat_message_impl(
         let context_raw = serde_json::to_string_pretty(&context).ok();
         let last_messages_snapshot: Vec<AiChatMessage> = loop_history
             .iter()
-            .map(|m| AiChatMessage {
-                role: m.role.clone(),
-                content: m.content.clone(),
+            .map(|m| match m {
+                RigMessage::User { content } => {
+                    let text = content
+                        .iter()
+                        .filter_map(|c| match c {
+                            rig::completion::message::UserContent::Text(t) => Some(t.text.clone()),
+                            _ => None,
+                        })
+                        .collect::<Vec<_>>()
+                        .join("\n");
+                    AiChatMessage {
+                        role: "user".to_string(),
+                        content: text,
+                    }
+                }
+                RigMessage::Assistant { content, .. } => {
+                    let text = content
+                        .iter()
+                        .filter_map(|c| match c {
+                            rig::completion::AssistantContent::Text(t) => Some(t.text.clone()),
+                            _ => None,
+                        })
+                        .collect::<Vec<_>>()
+                        .join("\n");
+                    AiChatMessage {
+                        role: "assistant".to_string(),
+                        content: text,
+                    }
+                }
+                RigMessage::System { content } => AiChatMessage {
+                    role: "system".to_string(),
+                    content: content.clone(),
+                },
             })
             .collect();
-        record_debug_snapshot(AiDebugSnapshot {
+        record_debug_snapshot(
+            &window_label,
+            AiDebugSnapshot {
             system_prompt: tool_loop::PREAMBLE.to_string(),
             app_context_raw: context_raw,
             app_context_object: context_value,
@@ -278,21 +420,18 @@ pub async fn send_ai_chat_message_impl(
     let policy = super::policy::SecurityApprovalPolicy::default_policy();
 
     let output =
-        tool_loop::run_tool_loop(&app, &window_label, &config, &policy, loop_history, prompt)
-            .await?;
-
-    // Stream the final answer in small chunks so the interface renders it progressively.
-    // (rig-core 0.7 has no streaming completion API, so this mirrors the text once ready.)
-    let characters: Vec<char> = output.content.chars().collect();
-    for chunk in characters.chunks(24) {
-        let delta: String = chunk.iter().collect();
-        let _ = app.emit_to(
+        tool_loop::run_tool_loop(
+            &app,
             &window_label,
-            "ai-chat:delta",
-            json!({ "requestId": request_id, "delta": delta }),
-        );
-        tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-    }
+            &request_id,
+            &config,
+            &policy,
+            loop_history,
+            prompt,
+            cancel_rx,
+            pause_rx,
+        )
+        .await?;
 
     let _ = app.emit_to(
         &window_label,
@@ -476,12 +615,21 @@ pub fn ensure_third_party_ai_sharing_allowed(settings: &AiSettings) -> Result<()
 fn build_ai_chat_context(history: &crate::HistoryBridge) -> Result<AiChatContext, String> {
     let (crawl_sessions, latest_crawl) = build_crawl_context(history)?;
 
-    let proxy_tree = history.get_tree(None).unwrap_or_default();
+    // Limit proxy tree to top 25 nodes to preserve tokens
+    let mut proxy_tree = history.get_tree(None).unwrap_or_default();
+    if proxy_tree.len() > 25 {
+        proxy_tree.truncate(25);
+    }
+
+    // Limit recent proxy log summaries to 15 items
     let proxy_summary = history
-        .get_recent(30, None, Some("DESC".to_string()))
+        .get_recent(15, None, Some("DESC".to_string()))
         .unwrap_or_default();
 
-    let stashes = history.get_stashes().unwrap_or_default();
+    let mut stashes = history.get_stashes().unwrap_or_default();
+    if stashes.len() > 10 {
+        stashes.truncate(10);
+    }
 
     Ok(AiChatContext {
         crawl_sessions,
@@ -501,20 +649,32 @@ fn build_crawl_context(
     ),
     String,
 > {
-    let crawl_sessions = history
-        .list_recent_ai_browser_sessions(5)
+    let mut crawl_sessions = history
+        .list_recent_ai_browser_sessions(3)
         .map_err(|e| e.to_string())?;
+    if crawl_sessions.len() > 3 {
+        crawl_sessions.truncate(3);
+    }
     let latest_crawl = match crawl_sessions.first() {
         Some(session) => {
-            let pages = history
+            let mut pages = history
                 .list_ai_browser_pages(&session.id)
                 .map_err(|e| e.to_string())?;
-            let insights = history
+            if pages.len() > 10 {
+                pages.truncate(10);
+            }
+            let mut insights = history
                 .list_ai_browser_insights(&session.id)
                 .map_err(|e| e.to_string())?;
-            let logs = history
+            if insights.len() > 10 {
+                insights.truncate(10);
+            }
+            let mut logs = history
                 .list_ai_browser_logs(&session.id)
                 .map_err(|e| e.to_string())?;
+            if logs.len() > 10 {
+                logs.truncate(10);
+            }
             Some(AiChatCrawlContext {
                 session: session.clone(),
                 pages,
@@ -537,3 +697,114 @@ pub(crate) fn build_crawl_context_value(
         "latestCrawl": latest_crawl,
     }))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_validate_chat_request_empty() {
+        let req = AiChatRequest {
+            messages: vec![],
+            ..Default::default()
+        };
+        assert!(validate_chat_request(&req).is_err());
+    }
+
+    #[test]
+    fn test_validate_chat_request_limit_100() {
+        let msgs = (0..101)
+            .map(|i| AiChatMessage {
+                role: "user".to_string(),
+                content: format!("msg {i}"),
+            })
+            .collect();
+        let req = AiChatRequest {
+            messages: msgs,
+            ..Default::default()
+        };
+        assert!(validate_chat_request(&req).is_err());
+    }
+
+    #[test]
+    fn test_validate_chat_request_oversized_chars() {
+        let req = AiChatRequest {
+            messages: vec![AiChatMessage {
+                role: "user".to_string(),
+                content: "a".repeat(100_001),
+            }],
+            ..Default::default()
+        };
+        assert!(validate_chat_request(&req).is_err());
+    }
+
+    #[test]
+    fn test_debug_snapshot_window_isolation() {
+        let snap1 = AiDebugSnapshot {
+            system_prompt: "p1".to_string(),
+            app_context_raw: None,
+            app_context_object: None,
+            context_bank_entries: vec![],
+            tools: vec![],
+            last_request_id: Some("req-1".to_string()),
+            last_prompt: Some("prompt 1".to_string()),
+            last_messages: vec![],
+            provider: "deepseek".to_string(),
+            model: "deepseek-chat".to_string(),
+            timestamp: "2026-01-01".to_string(),
+        };
+        let snap2 = AiDebugSnapshot {
+            system_prompt: "p2".to_string(),
+            app_context_raw: None,
+            app_context_object: None,
+            context_bank_entries: vec![],
+            tools: vec![],
+            last_request_id: Some("req-2".to_string()),
+            last_prompt: Some("prompt 2".to_string()),
+            last_messages: vec![],
+            provider: "openai".to_string(),
+            model: "gpt-4o".to_string(),
+            timestamp: "2026-01-02".to_string(),
+        };
+
+        record_debug_snapshot("window-A", snap1);
+        record_debug_snapshot("window-B", snap2);
+
+        let retrieved_a = get_latest_debug_snapshot("window-A").unwrap();
+        let retrieved_b = get_latest_debug_snapshot("window-B").unwrap();
+
+        assert_eq!(retrieved_a.last_prompt.as_deref(), Some("prompt 1"));
+        assert_eq!(retrieved_b.last_prompt.as_deref(), Some("prompt 2"));
+        assert!(get_latest_debug_snapshot("window-nonexistent").is_none());
+    }
+
+    #[test]
+    fn test_cancellation_ownership_enforcement() {
+        let (tx, _rx) = watch::channel(false);
+        let (pause_tx, _pause_rx) = watch::channel(false);
+        let req_id = "test-req-ownership-1";
+        if let Ok(mut map) = active_chats().lock() {
+            map.insert(
+                req_id.to_string(),
+                ActiveChatState {
+                    window_label: "owner-window".to_string(),
+                    cancel_tx: tx,
+                    pause_tx,
+                },
+            );
+        }
+
+        // Window 'other-window' attempting abort should be rejected
+        if let Ok(map) = active_chats().lock() {
+            let entry = map.get(req_id).unwrap();
+            assert_ne!(entry.window_label, "other-window");
+            assert_eq!(entry.window_label, "owner-window");
+        }
+
+        // Clean up
+        if let Ok(mut map) = active_chats().lock() {
+            map.remove(req_id);
+        }
+    }
+}
+

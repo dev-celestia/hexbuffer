@@ -169,11 +169,10 @@ pub async fn reindex_context_bank_embeddings(
         match embed_texts_batch(&model, texts).await {
             Ok(vectors) => {
                 for (entry, vector) in chunk.iter().zip(vectors) {
-                    let mut updated = entry.clone();
-                    updated.embedding = Some(vector);
-                    updated.embedding_model = Some(config.model.clone());
-                    updated.updated_at = now();
-                    if history.upsert_context_bank_entry(&updated).is_ok() {
+                    if history
+                        .update_context_bank_embedding(&entry.id, &vector, &config.model)
+                        .is_ok()
+                    {
                         embedded += 1;
                     } else {
                         failed += 1;

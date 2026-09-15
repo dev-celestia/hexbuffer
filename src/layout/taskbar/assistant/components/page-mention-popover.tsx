@@ -18,7 +18,7 @@ export function PageMentionPopover({
   if (!isOpen) return null;
 
   return (
-    <div className="absolute bottom-full left-0 mb-1 w-64 z-50 rounded-md border bg-popover shadow-md max-h-48 overflow-y-auto">
+    <div className="absolute bottom-full inset-inline-start-0 mb-1 w-64 z-50 rounded-md border bg-popover shadow-md max-h-48 overflow-y-auto">
       <Command shouldFilter={false}>
         <CommandList>
           {filteredPages.length > 0 ? (

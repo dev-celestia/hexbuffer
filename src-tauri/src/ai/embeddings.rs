@@ -1,7 +1,8 @@
+use rig::client::EmbeddingsClient;
 use rig::embeddings::EmbeddingModel as RigEmbeddingModel;
 use rig::providers::openai;
 use rig::vector_store::in_memory_store::InMemoryVectorStore;
-use rig::vector_store::VectorStoreIndex;
+use rig::vector_store::{VectorSearchRequest, VectorStoreIndex};
 
 use super::keyring::read_optional_ai_api_key;
 use super::providers::EMBEDDINGS_KEY_PROVIDER;
@@ -72,14 +73,17 @@ pub fn embeddings_sharing_allowed(settings: &AiSettings, base_url: &str) -> bool
 /// OpenAI, OpenRouter and friends all expose.
 pub fn build_embedding_model(config: &EmbeddingsConfig) -> openai::EmbeddingModel {
     let key = config.api_key.as_deref().unwrap_or("");
-    let openai_client = openai::Client::from_url(key, &config.base_url);
+    let openai_client = openai::Client::builder()
+        .api_key(key)
+        .base_url(&config.base_url)
+        .build()
+        .expect("build embedding client");
     let model = if config.model.trim().is_empty() {
         "text-embedding-3-small"
     } else {
         config.model.as_str()
     };
-    let embed_model = openai_client.embedding_model(model);
-    embed_model
+    openai_client.embedding_model(model)
 }
 
 pub fn vector_to_bytes(vector: &[f64]) -> Vec<u8> {
@@ -133,7 +137,7 @@ pub async fn embed_text(
 }
 
 /// Vector search over the context bank using rig's `InMemoryVectorStore` +
-/// `VectorStoreIndex::top_n`: stored vectors are loaded into an in-memory store,
+/// `VectorStoreIndex::top_n_ids`: stored vectors are loaded into an in-memory store,
 /// the prompt is embedded, and the top cosine-similar entry ids come back.
 pub async fn vector_search_context_bank(
     model: &openai::EmbeddingModel,
@@ -150,19 +154,24 @@ pub async fn vector_search_context_bank(
         Some((
             entry.id.clone(),
             entry.id.clone(),
-            rig::one_or_many::OneOrMany::one(rig::embeddings::Embedding {
+            vec![rig::embeddings::Embedding {
                 document: format!("{}\n{}", entry.title, entry.content),
                 vec,
-            }),
+            }],
         ))
     });
 
     let store = InMemoryVectorStore::from_documents_with_ids(documents);
     let index = store.index(model.clone());
 
+    let search_req = VectorSearchRequest::builder()
+        .query(query)
+        .samples(limit as u64)
+        .build();
+
     let results = tokio::time::timeout(
         std::time::Duration::from_secs(EMBEDDING_TIMEOUT_SECS),
-        index.top_n::<String>(query, limit),
+        index.top_n_ids(search_req),
     )
     .await
     .map_err(|_| "Embeddings vector search timed out.".to_string())?
@@ -170,6 +179,6 @@ pub async fn vector_search_context_bank(
 
     Ok(results
         .into_iter()
-        .map(|(score, id, _)| (id, score))
+        .map(|(score, id)| (id, score))
         .collect())
 }

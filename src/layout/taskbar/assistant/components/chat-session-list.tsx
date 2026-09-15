@@ -1,5 +1,6 @@
 import { Button } from '@celestia-project/ui';
-import { ChatCircleDotsIcon, TrashIcon } from '@phosphor-icons/react';
+import { ChatCircleDotsIcon, PencilSimpleIcon, TrashIcon, CheckIcon, XIcon } from '@phosphor-icons/react';
+import { useState, useRef, useEffect } from 'react';
 
 import { cn } from '@/lib/utils';
 import type { ChatSession } from '../types';
@@ -11,6 +12,7 @@ interface ChatSessionListProps {
   onSelect: (sessionId: string) => void;
   onDelete: (sessionId: string) => void;
   onCreate: () => void;
+  onRename?: (sessionId: string, title: string) => void;
 }
 
 export function ChatSessionList({
@@ -20,78 +22,260 @@ export function ChatSessionList({
   onSelect,
   onDelete,
   onCreate,
+  onRename,
 }: ChatSessionListProps) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingId && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingId]);
+
+  const handleStartRename = (session: ChatSession) => {
+    if (disabled || !onRename) return;
+    setEditingId(session.id);
+    setEditTitle(session.title);
+  };
+
+  const handleCommitRename = (sessionId: string) => {
+    if (editTitle.trim() && onRename) {
+      onRename(sessionId, editTitle.trim());
+    }
+    setEditingId(null);
+  };
+
+  const handleCancelRename = () => {
+    setEditingId(null);
+  };
+
   return (
-    <div className="flex h-full flex-col border-r bg-muted/30">
+    <div
+      className={cn(
+        // Layout & Positioning
+        'flex h-full flex-col',
+        // Backgrounds & Borders
+        'border-inline-end border-border/60 bg-muted/20',
+      )}
+    >
       {/* Header */}
-      <div className="flex shrink-0 items-center justify-between border-b px-2 py-1.5">
-        <span className="text-xs font-medium text-muted-foreground">Chats</span>
+      <div
+        className={cn(
+          // Layout & Positioning
+          'flex shrink-0 items-center justify-between',
+          // Sizing & Spacing
+          'px-3 py-2',
+          // Backgrounds & Borders
+          'border-b border-border/60',
+        )}
+      >
+        <span
+          className={cn(
+            // Typography
+            'text-xs font-semibold text-muted-foreground uppercase tracking-wider',
+          )}
+        >
+          Chats
+        </span>
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6"
           onClick={onCreate}
           disabled={disabled}
           title={disabled ? 'Waiting for the assistant to finish…' : 'New chat'}
           aria-label="New chat"
+          className={cn(
+            // Sizing & Spacing
+            'size-6',
+          )}
         >
-          <ChatCircleDotsIcon className="h-3.5 w-3.5" />
+          <ChatCircleDotsIcon className="size-3.5" />
         </Button>
       </div>
 
       {/* Session list */}
-      <div className="flex-1 overflow-y-auto" role="listbox" aria-label="Chat sessions">
+      <div
+        className={cn(
+          // Layout & Positioning
+          'flex-1 overflow-y-auto',
+          // Sizing & Spacing
+          'p-1.5',
+        )}
+        role="listbox"
+        aria-label="Chat sessions"
+      >
         {sessions.length === 0 ? (
-          <div className="p-3 text-center text-xs text-muted-foreground">
+          <div
+            className={cn(
+              // Sizing & Spacing
+              'p-4',
+              // Typography
+              'text-center text-xs text-muted-foreground',
+            )}
+          >
             No chats yet
           </div>
         ) : (
-          <div className="flex flex-col gap-0.5 p-1">
+          <div
+            role="list"
+            aria-label="Chat sessions"
+            className={cn(
+              // Layout & Positioning
+              'flex flex-col gap-1',
+            )}
+          >
             {sessions.map((session) => {
               const isActive = session.id === activeSessionId;
+              const isEditing = session.id === editingId;
+
+              if (isEditing) {
+                return (
+                  <div
+                    key={session.id}
+                    className={cn(
+                      // Layout & Positioning
+                      'flex items-center gap-1',
+                      // Sizing & Spacing
+                      'px-2 py-1',
+                      // Backgrounds & Borders
+                      'rounded-md bg-accent/60 border border-primary/40',
+                    )}
+                  >
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleCommitRename(session.id);
+                        } else if (e.key === 'Escape') {
+                          e.preventDefault();
+                          handleCancelRename();
+                        }
+                      }}
+                      className={cn(
+                        // Sizing & Spacing
+                        'w-full min-w-0 px-1 py-0.5',
+                        // Typography
+                        'text-xs bg-background text-foreground',
+                        // Backgrounds & Borders
+                        'rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary',
+                      )}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-5 shrink-0 text-green-500 hover:text-green-600"
+                      onClick={() => handleCommitRename(session.id)}
+                      title="Save name"
+                    >
+                      <CheckIcon className="size-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-5 shrink-0 text-muted-foreground hover:text-foreground"
+                      onClick={handleCancelRename}
+                      title="Cancel"
+                    >
+                      <XIcon className="size-3" />
+                    </Button>
+                  </div>
+                );
+              }
+
               return (
                 <div
                   key={session.id}
-                  role="option"
-                  aria-selected={isActive}
-                  aria-disabled={disabled || undefined}
-                  tabIndex={disabled ? -1 : 0}
-                  onKeyDown={(e) => {
-                    if (disabled) return;
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onSelect(session.id);
-                    }
-                  }}
+                  role="listitem"
                   className={cn(
-                    'group flex cursor-pointer items-center rounded-md px-2 py-1.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    // Layout & Positioning
+                    'group relative flex items-center justify-between',
+                    // Sizing & Spacing
+                    'px-2.5 py-1.5',
+                    // Typography
+                    'text-xs',
+                    // Backgrounds & Borders
+                    'rounded-lg transition-all duration-150',
                     isActive
-                      ? 'bg-accent text-accent-foreground'
-                      : 'hover:bg-accent/50 text-muted-foreground',
-                    disabled && 'cursor-not-allowed opacity-60',
+                      ? 'bg-accent font-medium text-accent-foreground shadow-2xs'
+                      : 'hover:bg-accent/40 text-muted-foreground hover:text-foreground',
+                    disabled && 'opacity-60',
                   )}
-                  onClick={() => {
-                    if (!disabled) onSelect(session.id);
-                  }}
                 >
-                  <span className="flex-1 truncate">{session.title}</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
+                  <button
+                    type="button"
                     disabled={disabled}
+                    aria-current={isActive ? 'true' : undefined}
+                    onDoubleClick={() => handleStartRename(session)}
+                    onClick={() => {
+                      if (!disabled) onSelect(session.id);
+                    }}
                     className={cn(
-                      'h-5 w-5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100',
+                      // Layout & Positioning
+                      'flex-1 truncate pe-2 text-start cursor-pointer bg-transparent border-0 p-0',
+                      // Interactive & States
+                      'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-sm',
+                      disabled && 'cursor-not-allowed',
+                    )}
+                  >
+                    {session.title}
+                  </button>
+                  <div
+                    className={cn(
+                      // Layout & Positioning
+                      'flex items-center gap-1 shrink-0',
+                      // Interactive & States
+                      'opacity-0 group-hover:opacity-100 transition-opacity',
                       isActive && 'opacity-100',
                     )}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (!disabled) onDelete(session.id);
-                    }}
-                    title={disabled ? 'Waiting for the assistant to finish…' : 'Delete chat'}
-                    aria-label={`Delete chat ${session.title}`}
                   >
-                    <TrashIcon className="h-3 w-3" />
-                  </Button>
+                    {onRename && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={disabled}
+                        className={cn(
+                          // Sizing & Spacing
+                          'size-5 shrink-0 p-0',
+                          // Typography
+                          'text-muted-foreground hover:text-foreground',
+                        )}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStartRename(session);
+                        }}
+                        title="Rename chat"
+                        aria-label={`Rename chat ${session.title}`}
+                      >
+                        <PencilSimpleIcon className="size-3" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={disabled}
+                      className={cn(
+                        // Sizing & Spacing
+                        'size-5 shrink-0 p-0',
+                        // Typography
+                        'text-muted-foreground hover:text-destructive',
+                      )}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!disabled) onDelete(session.id);
+                      }}
+                      title={disabled ? 'Waiting for the assistant to finish…' : 'Delete chat'}
+                      aria-label={`Delete chat ${session.title}`}
+                    >
+                      <TrashIcon className="size-3" />
+                    </Button>
+                  </div>
                 </div>
               );
             })}

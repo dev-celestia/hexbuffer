@@ -199,7 +199,7 @@ export function AiConfigDialog({
                 </div>
               </div>
             ) : (
-              <Select value={model} onValueChange={setModel}>
+              <Select value={model} onValueChange={(val) => { if (val) setModel(val); }}>
                 <SelectTrigger id="ai-model-input">
                   <SelectValue placeholder="Select DeepSeek Model" />
                 </SelectTrigger>
@@ -279,7 +279,7 @@ export function AiConfigDialog({
             <div
               className={cn(
                 // Layout & Positioning
-                'flex flex-col gap-0.5 pr-2',
+                'flex flex-col gap-0.5 pe-2',
               )}
             >
               <Label

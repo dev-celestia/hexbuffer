@@ -5,8 +5,9 @@ use celestia_spider::{
     CrawlControl, CrawlResult, CrawlerEvent, Options as SpiderOptions, Runner, Strategy,
 };
 use parking_lot::Mutex;
-use rig::completion::{CompletionModel as CompletionModelTrait, CompletionRequest, ModelChoice};
-use rig::providers::openai::CompletionModel as PageAnalysisModel;
+use rig::client::CompletionClient;
+use rig::completion::{AssistantContent, CompletionModel as CompletionModelTrait};
+use rig::providers::openai::completion::CompletionModel as PageAnalysisModel;
 use std::collections::HashMap;
 use std::sync::{
     atomic::{AtomicBool, AtomicUsize, Ordering},
@@ -172,16 +173,14 @@ async fn run_page_analysis(
 ) {
     let _permit = analyzer.semaphore.acquire().await;
 
-    let request = CompletionRequest {
-        prompt: format!("URL: {url}\nTitle: {title}\n\nCrawled page content:\n{content}"),
-        preamble: Some(PAGE_ANALYSIS_PREAMBLE.to_string()),
-        chat_history: Vec::new(),
-        documents: Vec::new(),
-        tools: Vec::new(),
-        temperature: analyzer.temperature,
-        max_tokens: analyzer.max_tokens,
-        additional_params: None,
-    };
+    let prompt = format!("URL: {url}\nTitle: {title}\n\nCrawled page content:\n{content}");
+    let request = analyzer
+        .model
+        .completion_request(prompt)
+        .preamble(PAGE_ANALYSIS_PREAMBLE.to_string())
+        .temperature_opt(analyzer.temperature)
+        .max_tokens_opt(analyzer.max_tokens)
+        .build();
 
     let log_failure = |message: String| {
         if !analyzer.failure_logged.swap(true, Ordering::SeqCst) {
@@ -227,8 +226,21 @@ async fn run_page_analysis(
             ));
             return;
         }
-        Ok(Ok(response)) => match response.choice {
-            ModelChoice::Message(text) => match parse_ai_findings(&text) {
+        Ok(Ok(response)) => {
+            let mut text = String::new();
+            for item in response.choice {
+                match item {
+                    AssistantContent::Text(t) => text.push_str(&t.text),
+                    AssistantContent::ToolCall(..) => {
+                        log_failure(
+                            "AI page analysis model returned an unexpected tool call.".to_string(),
+                        );
+                        return;
+                    }
+                    _ => {}
+                }
+            }
+            match parse_ai_findings(&text) {
                 Ok(findings) => findings,
                 Err(error) => {
                     log_failure(format!(
@@ -236,14 +248,8 @@ async fn run_page_analysis(
                     ));
                     return;
                 }
-            },
-            ModelChoice::ToolCall(..) => {
-                log_failure(
-                    "AI page analysis model returned an unexpected tool call.".to_string(),
-                );
-                return;
             }
-        },
+        }
     };
 
     for finding in findings {

@@ -11,7 +11,7 @@ pub mod tool_loop;
 pub mod types;
 
 use std::collections::BTreeMap;
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, State, WebviewWindow};
 
 // Type re-exports
 pub use policy::SecurityApprovalPolicy;
@@ -72,6 +72,33 @@ pub async fn send_ai_chat_message(
     chat::send_ai_chat_message_impl(app, window.label().to_string(), history, request).await
 }
 
+#[tauri::command]
+pub fn abort_ai_chat_message(
+    app: AppHandle,
+    window: WebviewWindow,
+    request_id: String,
+) -> Result<bool, String> {
+    commands::abort_ai_chat_message_impl(&app, window.label(), &request_id)
+}
+
+#[tauri::command]
+pub fn pause_ai_chat_message(
+    app: AppHandle,
+    window: WebviewWindow,
+    request_id: String,
+) -> Result<bool, String> {
+    commands::pause_ai_chat_message_impl(&app, window.label(), &request_id)
+}
+
+#[tauri::command]
+pub fn resume_ai_chat_message(
+    app: AppHandle,
+    window: WebviewWindow,
+    request_id: String,
+) -> Result<bool, String> {
+    commands::resume_ai_chat_message_impl(&app, window.label(), &request_id)
+}
+
 /// Completes a pending AI tool execution dispatched to the frontend via `ai:execute-tool`.
 /// The caller must echo back the per-call secret token delivered with the event.
 #[tauri::command]
@@ -95,7 +122,8 @@ pub async fn suggest_invoker_markers(
 #[tauri::command]
 pub async fn get_ai_debug_snapshot(
     app: AppHandle,
+    window: WebviewWindow,
     history: State<'_, crate::HistoryBridge>,
 ) -> Result<types::AiDebugSnapshot, String> {
-    chat::get_ai_debug_snapshot_impl(app, history).await
+    chat::get_ai_debug_snapshot_impl(app, window.label().to_string(), history).await
 }
