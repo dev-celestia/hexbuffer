@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {
+  Badge,
   Button,
   Dialog,
   DialogContent,
@@ -88,6 +89,19 @@ export function AiConfigDialog({
           >
             <GearSixIcon className="size-4 text-violet-500" />
             <DialogTitle>AI Assistant Configuration</DialogTitle>
+            <Badge
+              variant="secondary"
+              className={cn(
+                // Sizing & Spacing
+                'h-4 px-1.5 py-0',
+                // Typography
+                'text-[9px] font-mono font-semibold uppercase tracking-wider',
+                // Backgrounds & Borders
+                'text-amber-500 bg-amber-500/10 border border-amber-500/20',
+              )}
+            >
+              Alpha
+            </Badge>
           </div>
           <DialogDescription>
             Configure your AI provider, model, and OpenAI-compatible endpoint.

@@ -135,9 +135,9 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
       <DialogContent
         className={cn(
           // Layout & Positioning
-          'flex flex-col',
+          'flex flex-col overflow-hidden',
           // Sizing & Spacing
-          'max-w-5xl w-full max-h-[85vh]',
+          'w-full max-w-[calc(100%-2rem)] sm:max-w-3xl h-[85vh] max-h-[85vh]',
         )}
       >
         <DialogHeader>
@@ -155,6 +155,19 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
             >
               <BugIcon className="h-4 w-4 text-muted-foreground" />
               <DialogTitle>AI Debug Inspector</DialogTitle>
+              <Badge
+                variant="secondary"
+                className={cn(
+                  // Sizing & Spacing
+                  'h-4 px-1.5 py-0',
+                  // Typography
+                  'text-[9px] font-mono font-semibold uppercase tracking-wider',
+                  // Backgrounds & Borders
+                  'text-amber-500 bg-amber-500/10 border border-amber-500/20',
+                )}
+              >
+                Alpha
+              </Badge>
             </div>
             <div
               className={cn(
@@ -231,7 +244,7 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
         )}
 
         {snapshot && (
-          <Tabs defaultValue="system-prompt" className="flex flex-col flex-1 min-h-0">
+          <Tabs defaultValue="system-prompt" className="flex flex-col flex-1 min-h-0 overflow-hidden">
             <TabsList
               className={cn(
                 // Layout & Positioning
@@ -265,16 +278,46 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
             </TabsList>
 
             {/* System Prompt */}
-            <TabsContent value="system-prompt" className="flex-1 min-h-0 mt-3">
-              <ScrollArea className="h-full max-h-[52vh]">
+            <TabsContent
+              value="system-prompt"
+              className={cn(
+                // Layout & Positioning
+                'flex flex-col flex-1 min-h-0 overflow-hidden',
+                // Sizing & Spacing
+                'mt-3',
+              )}
+            >
+              <ScrollArea
+                className={cn(
+                  // Layout & Positioning
+                  'flex-1 min-h-0',
+                  // Sizing & Spacing
+                  'w-full pe-3',
+                )}
+              >
                 <SectionHeader label="PREAMBLE" copyText={snapshot.systemPrompt} />
                 <MonoBlock>{snapshot.systemPrompt}</MonoBlock>
               </ScrollArea>
             </TabsContent>
 
             {/* App Context */}
-            <TabsContent value="app-context" className="flex-1 min-h-0 mt-3">
-              <ScrollArea className="h-full max-h-[52vh]">
+            <TabsContent
+              value="app-context"
+              className={cn(
+                // Layout & Positioning
+                'flex flex-col flex-1 min-h-0 overflow-hidden',
+                // Sizing & Spacing
+                'mt-3',
+              )}
+            >
+              <ScrollArea
+                className={cn(
+                  // Layout & Positioning
+                  'flex-1 min-h-0',
+                  // Sizing & Spacing
+                  'w-full pe-3',
+                )}
+              >
                 {snapshot.appContextRaw ? (
                   <>
                     <SectionHeader label="RAW JSON" copyText={snapshot.appContextRaw} />
@@ -294,8 +337,23 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
             </TabsContent>
 
             {/* Memory */}
-            <TabsContent value="memory" className="flex-1 min-h-0 mt-3">
-              <ScrollArea className="h-full max-h-[52vh]">
+            <TabsContent
+              value="memory"
+              className={cn(
+                // Layout & Positioning
+                'flex flex-col flex-1 min-h-0 overflow-hidden',
+                // Sizing & Spacing
+                'mt-3',
+              )}
+            >
+              <ScrollArea
+                className={cn(
+                  // Layout & Positioning
+                  'flex-1 min-h-0',
+                  // Sizing & Spacing
+                  'w-full pe-3',
+                )}
+              >
                 {snapshot.memoryEntries.length === 0 ? (
                   <p
                     className={cn(
@@ -357,7 +415,7 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
                         <p
                           className={cn(
                             // Typography
-                            'text-[11px] font-mono text-muted-foreground whitespace-pre-wrap',
+                            'text-[11px] font-mono text-muted-foreground whitespace-pre-wrap break-words',
                           )}
                         >
                           {entry.content.slice(0, 600)}
@@ -371,8 +429,23 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
             </TabsContent>
 
             {/* Messages */}
-            <TabsContent value="messages" className="flex-1 min-h-0 mt-3">
-              <ScrollArea className="h-full max-h-[52vh]">
+            <TabsContent
+              value="messages"
+              className={cn(
+                // Layout & Positioning
+                'flex flex-col flex-1 min-h-0 overflow-hidden',
+                // Sizing & Spacing
+                'mt-3',
+              )}
+            >
+              <ScrollArea
+                className={cn(
+                  // Layout & Positioning
+                  'flex-1 min-h-0',
+                  // Sizing & Spacing
+                  'w-full pe-3',
+                )}
+              >
                 {snapshot.lastPrompt && (
                   <div
                     className={cn(
@@ -411,7 +484,7 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
                         key={idx}
                         className={cn(
                           // Sizing & Spacing
-                          'p-2',
+                          'p-2.5',
                           // Backgrounds & Borders
                           'rounded-md border',
                           msg.role === 'user'
@@ -454,8 +527,23 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
             </TabsContent>
 
             {/* Tools */}
-            <TabsContent value="tools" className="flex-1 min-h-0 mt-3">
-              <ScrollArea className="h-full max-h-[52vh]">
+            <TabsContent
+              value="tools"
+              className={cn(
+                // Layout & Positioning
+                'flex flex-col flex-1 min-h-0 overflow-hidden',
+                // Sizing & Spacing
+                'mt-3',
+              )}
+            >
+              <ScrollArea
+                className={cn(
+                  // Layout & Positioning
+                  'flex-1 min-h-0',
+                  // Sizing & Spacing
+                  'w-full pe-3',
+                )}
+              >
                 <div
                   className={cn(
                     // Layout & Positioning
@@ -479,7 +567,7 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
                       <div
                         className={cn(
                           // Layout & Positioning
-                          'flex flex-col flex-1',
+                          'flex flex-col flex-1 min-w-0',
                           // Sizing & Spacing
                           'gap-0.5',
                         )}
@@ -495,7 +583,7 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
                         <span
                           className={cn(
                             // Typography
-                            'text-[11px] text-muted-foreground',
+                            'text-[11px] text-muted-foreground break-words',
                           )}
                         >
                           {tool.description}

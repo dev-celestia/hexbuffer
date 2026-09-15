@@ -1,4 +1,5 @@
 import {
+  Badge,
   Button,
   DropdownMenu,
   DropdownMenuContent,
@@ -89,6 +90,34 @@ export function AssistantHeader({
             />
           )}
         </Button>
+        <div
+          className={cn(
+            // Layout & Positioning
+            'flex items-center gap-1.5',
+          )}
+        >
+          <span
+            className={cn(
+              // Typography
+              'text-xs font-semibold text-foreground',
+            )}
+          >
+            AI Assistant
+          </span>
+          <Badge
+            variant="secondary"
+            className={cn(
+              // Sizing & Spacing
+              'h-4 px-1.5 py-0',
+              // Typography
+              'text-[9px] font-mono font-semibold uppercase tracking-wider',
+              // Backgrounds & Borders
+              'text-amber-500 bg-amber-500/10 border border-amber-500/20',
+            )}
+          >
+            Alpha
+          </Badge>
+        </div>
       </div>
 
       <div
