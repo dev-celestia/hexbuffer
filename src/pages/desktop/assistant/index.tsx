@@ -14,7 +14,13 @@ import { usePendingToolConfirmations } from './lib/ai-tools/confirmation';
 import { getMessageText } from './lib/message-utils';
 import { cn } from '@/lib/utils';
 
-function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
+interface AIAssistantPaneProps {
+  onClose?: () => void;
+  compact?: boolean;
+  className?: string;
+}
+
+function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssistantPaneProps) {
   const {
     aiSettings,
     error,
@@ -41,6 +47,8 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
     setSidebarCollapsed,
     trackedActions,
     updateAiSettings,
+    selectedAgent,
+    setSelectedAgent,
   } = useAiChatPane();
 
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
@@ -120,6 +128,7 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
         'flex h-full min-h-0 flex-col overflow-hidden',
         // Backgrounds & Borders
         'bg-background',
+        className,
       )}
     >
       <AssistantHeader
@@ -133,6 +142,8 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
         onOpenDebug={() => setDebugDialogOpen(true)}
         onClose={onClose}
         trailing={<SessionTokenUsageBadge />}
+        selectedAgent={selectedAgent}
+        onSelectAgent={setSelectedAgent}
       />
 
       <AiConfigDialog
@@ -155,24 +166,65 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
         )}
       >
         {!sidebarCollapsed && (
-          <div
-            className={cn(
-              // Layout & Positioning
-              'shrink-0 z-20',
-              // Sizing & Spacing
-              'w-64 max-w-[70vw]',
-            )}
-          >
-            <ChatSessionList
-              sessions={sessions}
-              activeSessionId={activeSessionId}
-              disabled={isStreaming}
-              onSelect={handleSwitchSession}
-              onDelete={handleDeleteSession}
-              onCreate={handleCreateSession}
-              onRename={handleRenameSession}
-            />
-          </div>
+          compact ? (
+            <>
+              {/* Overlay Backdrop */}
+              <div
+                onClick={() => setSidebarCollapsed(true)}
+                className={cn(
+                  // Layout & Positioning
+                  'absolute inset-0 z-20',
+                  // Backgrounds & Borders
+                  'bg-background/60 backdrop-blur-xs cursor-pointer',
+                )}
+              />
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  'absolute inset-y-0 left-0 z-30',
+                  // Sizing & Spacing
+                  'w-64 max-w-[85vw]',
+                  // Backgrounds & Borders
+                  'bg-background/95 backdrop-blur-md border-r border-border shadow-xl',
+                )}
+              >
+                <ChatSessionList
+                  sessions={sessions}
+                  activeSessionId={activeSessionId}
+                  disabled={isStreaming}
+                  onSelect={(id) => {
+                    handleSwitchSession(id);
+                    setSidebarCollapsed(true);
+                  }}
+                  onDelete={handleDeleteSession}
+                  onCreate={() => {
+                    handleCreateSession();
+                    setSidebarCollapsed(true);
+                  }}
+                  onRename={handleRenameSession}
+                />
+              </div>
+            </>
+          ) : (
+            <div
+              className={cn(
+                // Layout & Positioning
+                'shrink-0 z-20',
+                // Sizing & Spacing
+                'w-64 max-w-[70vw]',
+              )}
+            >
+              <ChatSessionList
+                sessions={sessions}
+                activeSessionId={activeSessionId}
+                disabled={isStreaming}
+                onSelect={handleSwitchSession}
+                onDelete={handleDeleteSession}
+                onCreate={handleCreateSession}
+                onRename={handleRenameSession}
+              />
+            </div>
+          )
         )}
 
         <div
@@ -181,6 +233,11 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
             'flex flex-1 flex-col min-w-0 overflow-hidden relative',
           )}
         >
+          <AgentSelectorBar
+            selectedAgentId={selectedAgent}
+            onSelectAgent={setSelectedAgent}
+          />
+
           <AssistantConversation
             messages={messages}
             isStreaming={isStreaming}
@@ -224,10 +281,10 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
   );
 }
 
-export function AIAssistantPane({ onClose }: { onClose?: () => void }) {
+export function AIAssistantPane({ onClose, compact, className }: AIAssistantPaneProps = {}) {
   return (
     <PromptInputProvider>
-      <AIAssistantPaneContent onClose={onClose} />
+      <AIAssistantPaneContent onClose={onClose} compact={compact} className={className} />
     </PromptInputProvider>
   );
 }

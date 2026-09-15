@@ -18,6 +18,7 @@ import { setupAiToolEventListener } from '../lib/ai-tools/listener';
 import { clearPendingToolConfirmations } from '../lib/ai-tools/confirmation';
 import { formatAttachedFileContent } from '../lib/file-utils';
 import { useTokenUsageStore } from '@/stores/token-usage';
+import type { AgentId } from '../constants/agents';
 import type { ChatMessageRecord, CrawlCompletedEvent, DashboardAiSettings, DashboardChatMessage } from '../types';
 
 const DEFAULT_AI_SETTINGS: DashboardAiSettings = {
@@ -49,6 +50,7 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
   const pendingCrawlSummariesRef = useRef<CrawlCompletedEvent[]>([]);
   const promptController = usePromptInputController();
   const submittingRef = useRef(false);
+  const [selectedAgent, setSelectedAgent] = useState<AgentId | 'all'>('all');
 
   useEffect(() => {
     aiSettingsRef.current = aiSettings;
@@ -377,6 +379,7 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
           body: {
             aiSettings: aiSettingsRef.current,
             sessionId,
+            targetAgent: selectedAgent !== 'all' ? selectedAgent : undefined,
           },
         },
       );
@@ -386,7 +389,7 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
     } finally {
       submittingRef.current = false;
     }
-  }, [clearError, sendMessage, promptController, sessionId]);
+  }, [clearError, sendMessage, promptController, sessionId, selectedAgent]);
 
   const setModel = useCallback((model: string) => {
     setAiSettings((prev) => {
@@ -463,6 +466,8 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
     updateAiSettings,
     status,
     stop: handleStop,
+    selectedAgent,
+    setSelectedAgent,
   };
 }
 

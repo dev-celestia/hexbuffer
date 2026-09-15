@@ -264,14 +264,6 @@ export const ALPHA_NAV_ITEMS: NavItem[] = import.meta.env.PROD
         flag: 'alpha',
       },
       {
-        label: 'AI Assistant',
-        icon: StarFourIcon,
-        href: '/assistant',
-        description: 'Interact with AI to analyze web traffic and write exploits.',
-        colors: { bg: 'bg-violet-500 dark:bg-violet-500', hoverBg: 'group-hover:bg-violet-500 dark:group-hover:bg-violet-500', border: 'border-violet-500 dark:border-violet-500' },
-        flag: 'alpha',
-      },
-      {
         label: 'Kanban',
         icon: SquaresFourIcon,
         href: '/kanban',

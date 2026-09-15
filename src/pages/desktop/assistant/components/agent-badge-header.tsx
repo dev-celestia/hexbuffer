@@ -42,16 +42,26 @@ export function AgentBadgeHeader({
         <div
           className={cn(
             // Layout & Positioning
-            'flex items-center justify-center shrink-0',
+            'relative flex items-center justify-center shrink-0 overflow-hidden',
             // Sizing & Spacing
-            'size-5 rounded-md',
+            'size-6 rounded-md',
             // Backgrounds & Borders
-            'border',
+            'border shadow-2xs bg-card',
             agent.borderClass,
-            agent.badgeClass,
           )}
         >
-          <IconComponent className={cn('size-3.5', agent.textClass)} />
+          {agent.avatarUrl ? (
+            <img
+              src={agent.avatarUrl}
+              alt={displayName}
+              className={cn(
+                // Sizing & Spacing
+                'size-full object-contain p-0.5 rounded-[5px]',
+              )}
+            />
+          ) : (
+            <IconComponent className={cn('size-3.5', agent.textClass)} />
+          )}
         </div>
         <span
           className={cn(

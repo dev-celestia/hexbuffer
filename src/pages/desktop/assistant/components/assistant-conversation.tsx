@@ -17,7 +17,7 @@ import {
   ReasoningTrigger,
   Shimmer,
 } from '@celestia-project/ui';
-import { PaperclipIcon, PauseIcon, SpinnerGapIcon, StarFourIcon } from '@phosphor-icons/react';
+import { PaperclipIcon, PauseIcon, SpinnerGapIcon } from '@phosphor-icons/react';
 import type { DashboardChatMessage } from '../types';
 import { AssistantEmptyState } from './assistant-empty-state';
 import { MessageActionsBar } from './message-actions-bar';
@@ -91,6 +91,7 @@ export function AssistantConversation({
                 const rawText = getMessageText(message);
                 const attachedFiles = parseAttachedFilesFromMessage(fileParts, rawText);
                 const displayText = message.role === 'user' ? getUserPromptOnly(rawText) : rawText;
+                const agentInfo = getAgentInfo(message.metadata?.agentId);
 
                 if (!hasContent(message) && message.role !== 'user' && attachedFiles.length === 0) {
                   return null;
@@ -105,35 +106,15 @@ export function AssistantConversation({
                           : 'group-[.is-user]:bg-transparent group-[.is-user]:p-0',
                       )}
                     >
-                      {label ? (
-                        <div
-                          className={cn(
-                            // Layout & Positioning
-                            'flex items-center gap-1.5',
-                            // Sizing & Spacing
-                            'mb-1.5',
-                          )}
-                        >
-                          <StarFourIcon className="size-3.5 text-violet-500 shrink-0" />
-                          <Badge variant="outline" className="text-[11px] py-0 px-1.5">
-                            {label}
-                          </Badge>
-                          {isStreaming && isPaused && message.id === lastMessage?.id ? (
-                            <Badge
-                              variant="outline"
-                              className={cn(
-                                // Sizing & Spacing
-                                'py-0 px-1.5',
-                                // Typography
-                                'text-[10px] text-amber-500 border-amber-500/40',
-                                // Backgrounds & Borders
-                                'bg-amber-500/10',
-                              )}
-                            >
-                              Paused
-                            </Badge>
-                          ) : null}
-                        </div>
+                      {message.role === 'assistant' ? (
+                        <AgentBadgeHeader
+                          agentId={message.metadata?.agentId}
+                          agentName={message.metadata?.agentName}
+                          providerDisplay={label ?? providerDisplay}
+                          model={message.metadata?.model ?? model}
+                          isStreaming={isStreaming && message.id === lastMessage?.id}
+                          isPaused={isPaused}
+                        />
                       ) : null}
 
                       {/* Attached files card list */}
@@ -205,7 +186,13 @@ export function AssistantConversation({
                             className={cn(
                               message.role === 'user'
                                 ? 'bg-primary text-primary-foreground px-4 py-2.5 rounded-2xl'
-                                : 'bg-card/70 border border-border/70 text-foreground px-4 py-3 rounded-2xl shadow-2xs',
+                                : cn(
+                                    // Sizing & Spacing
+                                    'px-4 py-3 rounded-2xl',
+                                    // Backgrounds & Borders
+                                    'bg-card/70 border text-foreground shadow-2xs',
+                                    agentInfo.borderClass,
+                                  ),
                             )}
                           >
                             <MessageResponse

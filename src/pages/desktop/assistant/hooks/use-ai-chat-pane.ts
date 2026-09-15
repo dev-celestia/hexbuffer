@@ -41,6 +41,8 @@ export function useAiChatPane() {
     updateAiSettings,
     status,
     stop,
+    selectedAgent,
+    setSelectedAgent,
   } = useAssistantChat({
     sessionId: activeSessionId,
     setMessagesRef,
@@ -125,5 +127,7 @@ export function useAiChatPane() {
     sidebarCollapsed,
     setSidebarCollapsed,
     trackedActions,
+    selectedAgent,
+    setSelectedAgent,
   };
 }

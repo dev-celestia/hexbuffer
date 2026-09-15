@@ -61,9 +61,6 @@ const WorkflowPage = React.lazy(() =>
 const RegressionPage = React.lazy(() =>
   import("@/pages/regression").then((m) => ({ default: m.RegressionPage }))
 );
-const AssistantPage = React.lazy(() =>
-  import("@/layout/taskbar/assistant").then((m) => ({ default: m.AssistantPage }))
-);
 const ScratchpadPage = React.lazy(() =>
   import("@/pages/notes").then((m) => ({ default: m.ScratchpadPage }))
 );
@@ -129,7 +126,6 @@ function AppRoutes() {
           <Route path="/automation" element={<WorkflowPage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/regression" element={<RegressionPage />} />
-          <Route path="/assistant" element={<AssistantPage />} />
           <Route path="/scratchpad" element={<ScratchpadPage />} />
           <Route path="/mock-api" element={<MockApiPage />} />
           <Route path="/mock-forge" element={<MockApiPage />} />

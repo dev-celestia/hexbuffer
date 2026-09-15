@@ -25,6 +25,12 @@ export function useDesktopPage() {
   const hiddenWidgets = useAppSettingsStore((s) => s.hiddenWidgets ?? DEFAULT_HIDDEN_WIDGETS);
   const widgetOrder = useAppSettingsStore((s) => s.widgetOrder ?? DEFAULT_WIDGET_ORDER);
   const reorderWidgets = useAppSettingsStore((s) => s.reorderWidgets);
+  const isAssistantOpen = useNavStore((s) => s.isDesktopAssistantOpen);
+  const setDesktopAssistantOpen = useNavStore((s) => s.setDesktopAssistantOpen);
+
+  const handleCloseAssistant = React.useCallback(() => {
+    setDesktopAssistantOpen(false);
+  }, [setDesktopAssistantOpen]);
 
   // Get all unique navigation items, filter out 'Desktop', apply environment check and query matching
   const displayItems = React.useMemo(() => {
@@ -110,5 +116,7 @@ export function useDesktopPage() {
     handleWidgetDragEnd,
     handleItemClick,
     handleClearSearch,
+    isAssistantOpen,
+    handleCloseAssistant,
   };
 }

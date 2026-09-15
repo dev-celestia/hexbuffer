@@ -13,6 +13,7 @@ import { SortableWidget } from './components/sortable-widget';
 
 import { ShieldWarningIcon, GearSixIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
 import { ShortcutManager } from './components/shortcut-manager';
+import { AIAssistantPane } from '@/pages/desktop/assistant';
 
 import { cn } from '@/lib/utils';
 
@@ -46,6 +47,8 @@ export function DesktopPage() {
     handleWidgetDragEnd,
     handleItemClick,
     handleClearSearch,
+    isAssistantOpen,
+    handleCloseAssistant,
   } = useDesktopPage();
 
   const ROOT_BG = 'bg-transparent';
@@ -57,7 +60,7 @@ export function DesktopPage() {
         "flex flex-col min-h-0 overflow-y-auto scrollbar-thin",
 
         // Sizing & Spacing
-        "h-full",
+        "h-full w-full",
 
         // Backgrounds & Borders
         ROOT_BG
@@ -66,23 +69,54 @@ export function DesktopPage() {
       <div
         className={cn(
           // Layout & Positioning
-          "flex flex-col md:flex-row items-start mx-auto",
+          "flex flex-col xl:flex-row items-start justify-center mx-auto",
 
           // Sizing & Spacing
-          "w-full p-6 gap-6"
+          "w-full min-h-full p-4 md:p-6 gap-6"
         )}
       >
+        {/* Left: AI Assistant Widget (docked on desktop, same z-index level as icons) */}
+        {isAssistantOpen && (
+          <aside
+            data-desktop-widget
+            aria-label="AI Assistant"
+            className={cn(
+              // Layout & Positioning
+              "flex flex-col shrink-0 overflow-hidden relative z-0",
+
+              // Sizing & Spacing
+              "w-full xl:w-[380px] 2xl:w-[410px] h-[calc(100vh-theme(spacing.24))] min-h-[520px] max-h-[840px]",
+
+              // Backgrounds & Borders
+              "rounded-2xl border border-border/60 bg-card/75 backdrop-blur-xl shadow-lg",
+
+              // Interactive & States
+              "transition-all duration-300 ease-out"
+            )}
+          >
+            <AIAssistantPane
+              compact
+              onClose={handleCloseAssistant}
+              className="bg-transparent"
+            />
+          </aside>
+        )}
+
+        {/* Center: Search & Desktop Icons */}
         <div
           className={cn(
             // Layout & Positioning
-            "flex-1 min-w-0"
+            "flex-1 min-w-0 flex flex-col items-center",
+
+            // Sizing & Spacing
+            "w-full"
           )}
         >
             {/* Search and Action Toolbar */}
             <div
               className={cn(
                 // Layout & Positioning
-                "flex items-center max-w-[800px]",
+                "flex items-center justify-between w-full max-w-[800px]",
 
                 // Sizing & Spacing
                 "gap-4 mb-4 pb-2",
@@ -212,7 +246,7 @@ export function DesktopPage() {
             <div
               className={cn(
                 // Layout & Positioning
-                "flex flex-wrap justify-items-center max-w-[800px]",
+                "flex flex-wrap justify-center w-full max-w-[800px]",
 
                 // Sizing & Spacing
                 "gap-3"
@@ -232,7 +266,7 @@ export function DesktopPage() {
             <div
               className={cn(
                 // Layout & Positioning
-                "flex flex-col items-center justify-center",
+                "flex flex-col items-center justify-center w-full max-w-[800px]",
 
                 // Sizing & Spacing
                 "py-16 px-4",

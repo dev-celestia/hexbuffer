@@ -17,6 +17,9 @@ interface NavState {
   triggerNavBlink: (href: string) => void;
   desktopSearchQuery: string;
   setDesktopSearchQuery: (query: string) => void;
+  isDesktopAssistantOpen: boolean;
+  setDesktopAssistantOpen: (open: boolean) => void;
+  toggleDesktopAssistant: () => void;
 
   // Window Manager
   windows: WindowState[];
@@ -39,6 +42,9 @@ export const useNavStore = create<NavState>()((set, get) => ({
   blinkingItems: new Set(),
   desktopSearchQuery: '',
   setDesktopSearchQuery: (desktopSearchQuery) => set({ desktopSearchQuery }),
+  isDesktopAssistantOpen: false,
+  setDesktopAssistantOpen: (isDesktopAssistantOpen) => set({ isDesktopAssistantOpen }),
+  toggleDesktopAssistant: () => set((state) => ({ isDesktopAssistantOpen: !state.isDesktopAssistantOpen })),
   triggerNavBlink: (href: string) => {
     const current = get().blinkingItems;
     const next = new Set(current);
@@ -106,9 +112,7 @@ export const useNavStore = create<NavState>()((set, get) => ({
       let width = Math.min(1000, window.innerWidth - 160);
       let height = Math.min(700, window.innerHeight - 200);
 
-      if (id === '/assistant') {
-        width = width / 2;
-      } else if (id === '/split-view') {
+      if (id === '/split-view') {
         width = Math.min(1280, Math.max(900, window.innerWidth - 80));
         height = Math.min(820, Math.max(600, window.innerHeight - 120));
       }

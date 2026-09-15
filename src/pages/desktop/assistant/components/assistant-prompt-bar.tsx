@@ -284,9 +284,9 @@ export function AssistantPromptBar({
                   onValueChange={onModelChange}
                   value={model}
                 >
-                  <PromptInputSelectTrigger className="border border-border">
-                    <ModelSelectorLogo provider={provider === 'openai-compatible' ? 'openai' : provider} className="size-4" />
-                    <PromptInputSelectValue />
+                  <PromptInputSelectTrigger className="border border-border max-w-[105px] xs:max-w-[130px] sm:max-w-[160px] text-xs h-8 px-2">
+                    <ModelSelectorLogo provider={provider === 'openai-compatible' ? 'openai' : provider} className="size-3.5 shrink-0" />
+                    <PromptInputSelectValue className="truncate" />
                   </PromptInputSelectTrigger>
                   <PromptInputSelectContent>
                     {modelOptions.map((option) => (
@@ -307,7 +307,7 @@ export function AssistantPromptBar({
                   maxTokens={128000}
                   modelId={model}
                 >
-                  <ContextTrigger className="h-8 px-2 text-xs flex items-center gap-1.5" />
+                  <ContextTrigger className="h-8 px-1.5 text-xs flex items-center gap-1 shrink-0" />
                   <ContextContent>
                     <ContextContentHeader />
                     <ContextContentBody>

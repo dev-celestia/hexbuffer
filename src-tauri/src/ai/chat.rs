@@ -13,8 +13,7 @@ use std::collections::HashMap;
 use std::sync::{Mutex, OnceLock};
 use tokio::sync::watch;
 
-static LATEST_DEBUG_SNAPSHOTS: OnceLock<Mutex<HashMap<String, AiDebugSnapshot>>> =
-    OnceLock::new();
+static LATEST_DEBUG_SNAPSHOTS: OnceLock<Mutex<HashMap<String, AiDebugSnapshot>>> = OnceLock::new();
 
 struct ActiveChatState {
     window_label: String,
@@ -22,8 +21,7 @@ struct ActiveChatState {
     pause_tx: watch::Sender<bool>,
 }
 
-static ACTIVE_CHATS: OnceLock<Mutex<HashMap<String, ActiveChatState>>> =
-    OnceLock::new();
+static ACTIVE_CHATS: OnceLock<Mutex<HashMap<String, ActiveChatState>>> = OnceLock::new();
 
 fn active_chats() -> &'static Mutex<HashMap<String, ActiveChatState>> {
     ACTIVE_CHATS.get_or_init(|| Mutex::new(HashMap::new()))
@@ -37,7 +35,9 @@ pub fn pause_ai_chat_message_impl(
     if let Ok(map) = active_chats().lock() {
         if let Some(entry) = map.get(request_id) {
             if entry.window_label != window_label {
-                return Err("Unauthorized: cannot pause a chat started by another window".to_string());
+                return Err(
+                    "Unauthorized: cannot pause a chat started by another window".to_string(),
+                );
             }
             let _ = entry.pause_tx.send(true);
             let _ = app.emit_to(
@@ -59,7 +59,9 @@ pub fn resume_ai_chat_message_impl(
     if let Ok(map) = active_chats().lock() {
         if let Some(entry) = map.get(request_id) {
             if entry.window_label != window_label {
-                return Err("Unauthorized: cannot resume a chat started by another window".to_string());
+                return Err(
+                    "Unauthorized: cannot resume a chat started by another window".to_string(),
+                );
             }
             let _ = entry.pause_tx.send(false);
             let _ = app.emit_to(
@@ -81,7 +83,9 @@ pub fn abort_ai_chat_message_impl(
     if let Ok(mut map) = active_chats().lock() {
         if let Some(entry) = map.get(request_id) {
             if entry.window_label != window_label {
-                return Err("Unauthorized: cannot abort a chat started by another window".to_string());
+                return Err(
+                    "Unauthorized: cannot abort a chat started by another window".to_string(),
+                );
             }
             if let Some(entry) = map.remove(request_id) {
                 let _ = entry.cancel_tx.send(true);
@@ -181,7 +185,9 @@ pub async fn get_ai_debug_snapshot_impl(
     let settings = read_ai_settings(&app).unwrap_or_default();
     let context = build_ai_chat_context(&history).ok();
     let context_value = context.as_ref().and_then(|c| serde_json::to_value(c).ok());
-    let context_raw = context.as_ref().and_then(|c| serde_json::to_string_pretty(c).ok());
+    let context_raw = context
+        .as_ref()
+        .and_then(|c| serde_json::to_string_pretty(c).ok());
 
     Ok(AiDebugSnapshot {
         system_prompt: tool_loop::PREAMBLE.to_string(),
@@ -267,7 +273,8 @@ pub async fn send_ai_chat_message_impl(
     validate_chat_request(&request)?;
 
     let is_openai = super::providers::is_openai_compatible(&settings.provider);
-    let is_local = is_openai && super::providers::is_local_ai_url(settings.custom_base_url.as_deref());
+    let is_local =
+        is_openai && super::providers::is_local_ai_url(settings.custom_base_url.as_deref());
 
     if !is_local {
         ensure_third_party_ai_sharing_allowed(&settings)?;
@@ -420,36 +427,36 @@ pub async fn send_ai_chat_message_impl(
         record_debug_snapshot(
             &window_label,
             AiDebugSnapshot {
-            system_prompt: tool_loop::PREAMBLE.to_string(),
-            app_context_raw: context_raw,
-            app_context_object: context_value,
-            memory_entries: bank_entries.clone(),
-            tools: get_registered_tools_debug(),
-            last_request_id: Some(request_id.clone()),
-            last_prompt: Some(prompt.clone()),
-            last_messages: last_messages_snapshot,
-            provider: settings.provider.clone(),
-            model: settings.model.clone(),
-            timestamp: chrono::Utc::now().to_rfc3339(),
-        });
+                system_prompt: tool_loop::PREAMBLE.to_string(),
+                app_context_raw: context_raw,
+                app_context_object: context_value,
+                memory_entries: bank_entries.clone(),
+                tools: get_registered_tools_debug(),
+                last_request_id: Some(request_id.clone()),
+                last_prompt: Some(prompt.clone()),
+                last_messages: last_messages_snapshot,
+                provider: settings.provider.clone(),
+                model: settings.model.clone(),
+                timestamp: chrono::Utc::now().to_rfc3339(),
+            },
+        );
     }
 
     let policy = super::policy::SecurityApprovalPolicy::default_policy();
 
-    let output =
-        tool_loop::run_tool_loop(
-            &app,
-            &window_label,
-            &request_id,
-            &config,
-            &policy,
-            selected_agent,
-            loop_history,
-            prompt,
-            cancel_rx,
-            pause_rx,
-        )
-        .await?;
+    let output = tool_loop::run_tool_loop(
+        &app,
+        &window_label,
+        &request_id,
+        &config,
+        &policy,
+        selected_agent,
+        loop_history,
+        prompt,
+        cancel_rx,
+        pause_rx,
+    )
+    .await?;
 
     let _ = app.emit_to(
         &window_label,
@@ -524,9 +531,7 @@ async fn retrieve_memory_entries(
         Ok(Some(config)) => {
             let is_local = super::providers::is_local_ai_url(Some(&config.base_url));
             if !is_local && !settings.allow_third_party_ai_sharing {
-                eprintln!(
-                    "[memory] embeddings sharing disabled; falling back to keyword search"
-                );
+                eprintln!("[memory] embeddings sharing disabled; falling back to keyword search");
             } else {
                 let model = build_embedding_model(&config);
                 match history.memory_entries_with_embeddings(&config.model) {
@@ -537,7 +542,8 @@ async fn retrieve_memory_entries(
                                     if score < CONTEXT_BANK_SIMILARITY_THRESHOLD {
                                         continue;
                                     }
-                                    if let Some(entry) = entries.iter().find(|entry| entry.id == id) {
+                                    if let Some(entry) = entries.iter().find(|entry| entry.id == id)
+                                    {
                                         if selected_ids.insert(entry.id.clone()) {
                                             selected.push(entry.clone());
                                         }
@@ -584,9 +590,7 @@ async fn retrieve_memory_entries(
 
 /// Renders retrieved memory entries as a chat context block. Returns None when
 /// there is nothing to include.
-fn format_memory_block(
-    entries: &[crate::db::repository::types::MemoryEntry],
-) -> Option<String> {
+fn format_memory_block(entries: &[crate::db::repository::types::MemoryEntry]) -> Option<String> {
     if entries.is_empty() {
         return None;
     }
@@ -859,4 +863,3 @@ mod tests {
         }
     }
 }
-

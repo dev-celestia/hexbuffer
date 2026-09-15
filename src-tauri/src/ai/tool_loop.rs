@@ -585,6 +585,10 @@ pub async fn run_tool_loop(
     let mut executed_tools: HashSet<String> = HashSet::new();
     let mut accumulated_full_response = String::new();
     let mut accumulated_usage = super::token_usage::TokenUsage::new();
+    // Raw results from the most recent tool round, used as a fallback if the
+    // model's follow-up round streams nothing (otherwise the user sees only a
+    // dangling "Let me pull the crawl context…" with no findings).
+    let mut last_round_tool_results: Vec<String> = Vec::new();
 
     for _round in 0..MAX_TOOL_ROUNDS {
         if *cancel_rx.borrow() {
@@ -709,6 +713,25 @@ pub async fn run_tool_loop(
             .collect();
 
         if tool_calls.is_empty() {
+            // The model ended this turn with no tool call. If it only streamed a
+            // lead-in ("Let me pull the crawl context…") and we actually executed
+            // tools on a previous round whose follow-up produced no text, surface
+            // those raw results so the user isn't left with a dangling promise.
+            if round_streamed_text.trim().is_empty() && !last_round_tool_results.is_empty() {
+                let mut fallback = String::from(
+                    "I fetched the requested data but did not produce a final summary. Here are the raw results:\n\n",
+                );
+                fallback.push_str(&last_round_tool_results.join("\n\n---\n\n"));
+                accumulated_full_response.push_str(&fallback);
+            }
+
+            // Never hand back an empty answer: a provider that returned no text
+            // and no tool call should still produce an explicit, honest message.
+            if accumulated_full_response.trim().is_empty() {
+                accumulated_full_response =
+                    "The AI provider returned an empty response. Please try again.".to_string();
+            }
+
             return Ok(ToolLoopOutput {
                 content: accumulated_full_response,
                 actions,
@@ -721,6 +744,9 @@ pub async fn run_tool_loop(
         if !round_streamed_text.is_empty() {
             chat_history.push(Message::assistant(round_streamed_text));
         }
+
+        // Reset the per-round tool-result buffer before collecting this round's results.
+        last_round_tool_results.clear();
 
         for tool_call in tool_calls {
             let name = tool_call.function.name;
@@ -760,6 +786,13 @@ pub async fn run_tool_loop(
                     }
                 }
             };
+
+            // Keep a bounded copy for the empty-follow-up fallback. The full
+            // (possibly huge) result still goes to the model via chat_history.
+            last_round_tool_results.push(format!(
+                "[Tool: {name}]\n{}",
+                truncate_chars(&tool_result, TOOL_RESULT_MAX_CHARS)
+            ));
 
             if *cancel_rx.borrow() {
                 return Err("AI chat cancelled by user.".to_string());

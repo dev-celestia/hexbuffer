@@ -62,9 +62,6 @@ const SettingsPage = React.lazy(() =>
 const SplitViewPage = React.lazy(() =>
   import("@/pages/split-view").then((m) => ({ default: m.SplitViewPage }))
 );
-const AssistantPage = React.lazy(() =>
-  import("@/layout/taskbar/assistant").then((m) => ({ default: m.AssistantPage }))
-);
 const WebSocketHistoryPage = React.lazy(() =>
   import("@/pages/live-traffic/websocket-history").then((m) => ({ default: m.WebSocketHistoryPage }))
 );
@@ -236,9 +233,6 @@ export function StandaloneAppView({ target }: { readonly target: string }) {
       case "split-view":
       case "split":
         return <StandaloneLayout id="/split-view" title="Split View"><SplitViewPage /></StandaloneLayout>;
-      case "assistant":
-      case "ai-assistant":
-        return <StandaloneLayout id="/assistant" title="AI Assistant"><AssistantPage /></StandaloneLayout>;
       case "websocket":
       case "websocket-history":
         return <StandaloneLayout id="/websocket-history" title="WebSocket"><WebSocketHistoryPage /></StandaloneLayout>;

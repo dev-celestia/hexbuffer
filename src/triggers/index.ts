@@ -97,7 +97,7 @@ export {
   APP_AI_TOOL_DEFINITIONS,
   executeAiToolCall,
   setupAiToolEventListener,
-} from '@/layout/taskbar/assistant/lib/ai-tools';
-export type { AppAiToolDefinition, AppAiToolCallPayload } from '@/layout/taskbar/assistant/lib/ai-tools';
+} from '@/pages/desktop/assistant/lib/ai-tools';
+export type { AppAiToolDefinition, AppAiToolCallPayload } from '@/pages/desktop/assistant/lib/ai-tools';
 
 

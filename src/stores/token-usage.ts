@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { GlobalTokenUsage, TokenUsageTotals } from '@/layout/taskbar/assistant/types';
+import type { GlobalTokenUsage, TokenUsageTotals } from '@/pages/desktop/assistant/types';
 
 interface TokenUsageState {
   /** Totals for the currently active chat session, refreshed on completion/switch. */
