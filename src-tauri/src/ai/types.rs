@@ -67,6 +67,8 @@ pub struct AiChatRequest {
     pub workspaces: Option<Vec<WorkspaceInfo>>,
     pub active_workspace_id: Option<String>,
     #[serde(default)]
+    pub session_id: Option<String>,
+    #[serde(default)]
     pub request_id: Option<String>,
     #[serde(default)]
     pub provider: Option<String>,
@@ -88,6 +90,9 @@ pub struct AiChatResponse {
     pub agent_name: Option<String>,
     #[serde(default)]
     pub actions: Vec<AiChatAction>,
+    /// Token usage for this request (all-zero when the provider reported none).
+    #[serde(default)]
+    pub usage: crate::ai::token_usage::TokenUsage,
 }
 
 #[derive(Debug, Clone, Deserialize)]

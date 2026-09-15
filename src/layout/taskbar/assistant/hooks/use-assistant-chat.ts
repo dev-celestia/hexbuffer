@@ -17,6 +17,7 @@ import {
 import { setupAiToolEventListener } from '../lib/ai-tools/listener';
 import { clearPendingToolConfirmations } from '../lib/ai-tools/confirmation';
 import { formatAttachedFileContent } from '../lib/file-utils';
+import { useTokenUsageStore } from '@/stores/token-usage';
 import type { ChatMessageRecord, CrawlCompletedEvent, DashboardAiSettings, DashboardChatMessage } from '../types';
 
 const DEFAULT_AI_SETTINGS: DashboardAiSettings = {
@@ -92,6 +93,28 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
   } = useChat<DashboardChatMessage>({
     transport,
   });
+
+  // Refresh the token-usage badge whenever the active session changes and whenever a
+  // response finishes streaming (usage is persisted server-side on ai-chat:finished).
+  useEffect(() => {
+    const refresh = () => {
+      void useTokenUsageStore.getState().refreshSession(sessionId);
+    };
+    refresh();
+    if (!sessionId) return;
+    let unlisten: (() => void) | undefined;
+    let cancelled = false;
+    listen<{ requestId: string }>('ai-chat:finished', () => {
+      if (!cancelled) refresh();
+    }).then((fn) => {
+      if (cancelled) fn();
+      else unlisten = fn;
+    });
+    return () => {
+      cancelled = true;
+      unlisten?.();
+    };
+  }, [sessionId, status]);
 
   useEffect(() => {
     if (status !== 'submitted' && status !== 'streaming') {
@@ -233,11 +256,12 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
         {
           body: {
             aiSettings: aiSettingsRef.current,
+            sessionId,
           },
         },
       );
     }
-  }, [status, sendMessage]);
+  }, [status, sendMessage, sessionId]);
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -352,6 +376,7 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
         {
           body: {
             aiSettings: aiSettingsRef.current,
+            sessionId,
           },
         },
       );
@@ -361,7 +386,7 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
     } finally {
       submittingRef.current = false;
     }
-  }, [clearError, sendMessage, promptController]);
+  }, [clearError, sendMessage, promptController, sessionId]);
 
   const setModel = useCallback((model: string) => {
     setAiSettings((prev) => {

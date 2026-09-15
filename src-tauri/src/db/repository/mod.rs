@@ -8,6 +8,7 @@ pub mod http_sessions;
 pub mod mock_forge;
 pub mod proxy_logs;
 pub mod regression;
+pub mod token_usage;
 pub mod types;
 pub mod websocket;
 
@@ -185,7 +186,8 @@ impl Database {
         conn.execute_batch(crate::db::schema::CREATE_AI_BROWSER_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_CONTEXT_BANK_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_COLLABORATOR_TABLES)?;
-        conn.execute_batch(crate::db::schema::CREATE_AI_CHAT_TABLES)?;
+            conn.execute_batch(crate::db::schema::CREATE_AI_CHAT_TABLES)?;
+            conn.execute_batch(crate::db::schema::CREATE_TOKEN_USAGE_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_REGRESSION_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_STASHES_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_CONTEXTS_TABLES)?;

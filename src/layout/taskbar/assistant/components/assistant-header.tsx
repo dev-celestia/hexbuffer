@@ -12,6 +12,8 @@ interface AssistantHeaderProps {
   onOpenConfig: () => void;
   onOpenDebug: () => void;
   onClose?: () => void;
+  /** Optional slot rendered right before the action icons (e.g. token usage). */
+  trailing?: React.ReactNode;
 }
 
 export function AssistantHeader({
@@ -24,6 +26,7 @@ export function AssistantHeader({
   onOpenConfig,
   onOpenDebug,
   onClose,
+  trailing,
 }: AssistantHeaderProps) {
   return (
     <div
@@ -101,6 +104,7 @@ export function AssistantHeader({
           'flex items-center gap-1.5',
         )}
       >
+        {trailing}
         <Button
           variant="ghost"
           size="icon"

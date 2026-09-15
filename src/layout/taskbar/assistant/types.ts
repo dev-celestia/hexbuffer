@@ -22,6 +22,47 @@ export type DashboardChatMessage = UIMessage<DashboardChatMetadata> & {
   content?: string;
 };
 
+/** Provider token usage for a single completed request (all-zero when unreported). */
+export interface TokenUsage {
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  cachedInputTokens: number;
+  cacheCreationInputTokens: number;
+  toolUsePromptTokens: number;
+  reasoningTokens: number;
+}
+
+export interface TokenUsageRecord {
+  requestId: string;
+  sessionId: string;
+  messageId: string;
+  model: string;
+  provider: string;
+  usage: TokenUsage;
+  createdAt: string;
+}
+
+export interface TokenUsageTotals {
+  totalRequests: number;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  cachedInputTokens: number;
+  reasoningTokens: number;
+}
+
+export interface TokenUsageByModel {
+  model: string;
+  provider: string;
+  totals: TokenUsageTotals;
+}
+
+export interface GlobalTokenUsage {
+  totals: TokenUsageTotals;
+  byModel: TokenUsageByModel[];
+}
+
 export interface CrawlCompletedEvent {
   sessionId: string;
   targetUrl: string;

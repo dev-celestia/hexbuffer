@@ -554,6 +554,8 @@ pub struct ToolLoopOutput {
     pub actions: Vec<AiChatAction>,
     pub agent_id: String,
     pub agent_name: String,
+    /// Accumulated provider token usage across all tool rounds for this request.
+    pub usage: super::token_usage::TokenUsage,
 }
 
 /// Multi-turn streaming tool loop built directly on Rig 0.42.
@@ -582,6 +584,7 @@ pub async fn run_tool_loop(
     let mut actions: Vec<AiChatAction> = Vec::new();
     let mut executed_tools: HashSet<String> = HashSet::new();
     let mut accumulated_full_response = String::new();
+    let mut accumulated_usage = super::token_usage::TokenUsage::new();
 
     for _round in 0..MAX_TOOL_ROUNDS {
         if *cancel_rx.borrow() {
@@ -692,6 +695,10 @@ pub async fn run_tool_loop(
 
         accumulated_full_response.push_str(&round_streamed_text);
 
+        // Capture provider-reported usage for this round and accumulate it. All-zero
+        // usage is the sentinel for providers that don't report metrics — harmless to add.
+        accumulated_usage += super::token_usage::TokenUsage::from_rig(stream.usage());
+
         let tool_calls: Vec<ToolCall> = stream
             .choice
             .into_iter()
@@ -707,6 +714,7 @@ pub async fn run_tool_loop(
                 actions,
                 agent_id: agent.slug.to_string(),
                 agent_name: agent.name.to_string(),
+                usage: accumulated_usage,
             });
         }
 

@@ -10,6 +10,7 @@ const WINDOW_EVENT_TARGET = { kind: 'AnyLabel' as const, label: getCurrentWindow
 interface DashboardChatBody {
   aiSettings?: DashboardAiSettings;
   targetAgent?: string;
+  sessionId?: string;
 }
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -47,6 +48,15 @@ interface AiChatDeltaEvent {
 
 interface AiChatFinishedEvent {
   requestId: string;
+  usage?: {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    cachedInputTokens: number;
+    cacheCreationInputTokens: number;
+    toolUsePromptTokens: number;
+    reasoningTokens: number;
+  };
 }
 
 function getMessageText(message: DashboardChatMessage) {
@@ -149,6 +159,14 @@ interface AiChatReasoningEvent {
 }
 
 export class DashboardSettingsChatTransport implements ChatTransport<DashboardChatMessage> {
+  private onUsageCallback: ((requestId: string, usage: NonNullable<AiChatFinishedEvent['usage']>) => void) | null =
+    null;
+
+  /** Register a callback invoked when a completed request reports token usage. */
+  setOnUsage(callback: (requestId: string, usage: NonNullable<AiChatFinishedEvent['usage']>) => void) {
+    this.onUsageCallback = callback;
+  }
+
   async sendMessages({
     body,
     messages,
@@ -280,6 +298,9 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
               'ai-chat:finished',
               (event) => {
                 if (event.payload.requestId !== requestId) return;
+                if (event.payload.usage) {
+                  this.onUsageCallback?.(requestId, event.payload.usage);
+                }
                 finishStream();
               },
               { target: WINDOW_EVENT_TARGET },
@@ -290,6 +311,7 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
           const response = await invoke<AiChatResponse>('send_ai_chat_message', {
             request: {
               requestId,
+              sessionId: requestBody?.sessionId ?? null,
               messages: toProviderMessages(messages),
               workspaces: repeaterStore.workspaces.map((w) => ({ id: w.id, name: w.name })),
               activeWorkspaceId: repeaterStore.activeWorkspaceId,

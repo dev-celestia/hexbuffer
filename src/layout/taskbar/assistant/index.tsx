@@ -7,6 +7,7 @@ import { AssistantPromptBar } from './components/assistant-prompt-bar';
 import { ChatSessionList } from './components/chat-session-list';
 import { AiConfigDialog } from './components/ai-config-dialog';
 import { AiDebugDialog } from './components/ai-debug-dialog';
+import { SessionTokenUsageBadge } from './components/session-token-usage-badge';
 import { useAiChatPane } from './hooks/use-ai-chat-pane';
 import { usePageMentions } from './hooks/use-page-mentions';
 import { usePendingToolConfirmations } from './lib/ai-tools/confirmation';
@@ -131,6 +132,7 @@ function AIAssistantPaneContent({ onClose }: { onClose?: () => void }) {
         onOpenConfig={() => setConfigDialogOpen(true)}
         onOpenDebug={() => setDebugDialogOpen(true)}
         onClose={onClose}
+        trailing={<SessionTokenUsageBadge />}
       />
 
       <AiConfigDialog

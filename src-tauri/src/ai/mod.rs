@@ -8,6 +8,7 @@ pub mod keyring;
 pub mod policy;
 pub mod providers;
 pub mod settings;
+pub mod token_usage;
 pub mod tool_loop;
 pub mod types;
 
@@ -127,4 +128,48 @@ pub async fn get_ai_debug_snapshot(
     history: State<'_, crate::HistoryBridge>,
 ) -> Result<types::AiDebugSnapshot, String> {
     chat::get_ai_debug_snapshot_impl(app, window.label().to_string(), history).await
+}
+
+/// Aggregated token usage for one chat session (requests + tokens).
+#[tauri::command]
+pub async fn get_token_usage_summary(
+    history: State<'_, crate::HistoryBridge>,
+    session_id: String,
+) -> Result<token_usage::TokenUsageTotals, String> {
+    let history = history.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || history.sum_token_usage_by_session(&session_id))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+/// Global token usage across all sessions, including a per-model breakdown.
+#[tauri::command]
+pub async fn get_global_token_usage(
+    history: State<'_, crate::HistoryBridge>,
+) -> Result<token_usage::GlobalTokenUsage, String> {
+    let history = history.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || history.global_token_usage())
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+/// Recent usage records for a session, newest first.
+#[tauri::command]
+pub async fn get_token_usage_history(
+    history: State<'_, crate::HistoryBridge>,
+    session_id: String,
+    limit: Option<usize>,
+) -> Result<Vec<token_usage::TokenUsageRecord>, String> {
+    let history = history.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || history.list_token_usage_by_session(&session_id))
+        .await
+        .map_err(|e| e.to_string())?
+        .map(|records| {
+            let mut records = records;
+            records.reverse();
+            if let Some(limit) = limit.filter(|l| *l > 0) {
+                records.truncate(limit);
+            }
+            records
+        })
 }

@@ -583,6 +583,7 @@ async fn execute_ai_analyze(
         }],
         workspaces: None,
         active_workspace_id: None,
+        session_id: None,
         request_id: None,
         provider: None,
         model: None,

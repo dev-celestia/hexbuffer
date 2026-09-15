@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use crate::{
+    ai::token_usage::{GlobalTokenUsage, TokenUsageRecord, TokenUsageTotals},
     ai::types::{ChatMessageRecord, ChatSessionRecord},
     collaborator::{
         CollaboratorDashboardStats, CollaboratorInteraction, CollaboratorPayload,
@@ -687,6 +688,37 @@ impl HistoryBridge {
     ) -> Result<(), String> {
         self.db
             .replace_chat_messages(session_id, messages)
+            .map_err(|e| e.to_string())
+    }
+
+    // ── Token Usage ────────────────────────────────────────────────
+
+    pub fn insert_token_usage(&self, record: &TokenUsageRecord) -> Result<(), String> {
+        self.db.insert_token_usage(record).map_err(|e| e.to_string())
+    }
+
+    pub fn list_token_usage_by_session(
+        &self,
+        session_id: &str,
+    ) -> Result<Vec<TokenUsageRecord>, String> {
+        self.db
+            .list_token_usage_by_session(session_id)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn sum_token_usage_by_session(&self, session_id: &str) -> Result<TokenUsageTotals, String> {
+        self.db
+            .sum_token_usage_by_session(session_id)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn global_token_usage(&self) -> Result<GlobalTokenUsage, String> {
+        self.db.global_token_usage().map_err(|e| e.to_string())
+    }
+
+    pub fn delete_token_usage_for_session(&self, session_id: &str) -> Result<usize, String> {
+        self.db
+            .delete_token_usage_for_session(session_id)
             .map_err(|e| e.to_string())
     }
 

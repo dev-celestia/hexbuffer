@@ -462,9 +462,34 @@ pub async fn send_ai_chat_message_impl(
             "agentName": output.agent_name,
             "contentLength": output.content.len(),
             "actionCount": output.actions.len(),
+            "usage": {
+                "inputTokens": output.usage.input_tokens,
+                "outputTokens": output.usage.output_tokens,
+                "totalTokens": output.usage.total_tokens,
+                "cachedInputTokens": output.usage.cached_input_tokens,
+                "cacheCreationInputTokens": output.usage.cache_creation_input_tokens,
+                "toolUsePromptTokens": output.usage.tool_use_prompt_tokens,
+                "reasoningTokens": output.usage.reasoning_tokens,
+            },
             "createdAt": chrono::Utc::now().to_rfc3339(),
         }),
     );
+
+    // Persist token usage for the completed request when the provider reported metrics.
+    if output.usage.has_values() {
+        let record = super::token_usage::TokenUsageRecord {
+            request_id: request_id.clone(),
+            session_id: request.session_id.clone().unwrap_or_default(),
+            message_id: String::new(),
+            model: settings.model.clone(),
+            provider: settings.provider.clone(),
+            usage: output.usage,
+            created_at: chrono::Utc::now().to_rfc3339(),
+        };
+        if let Err(error) = history.insert_token_usage(&record) {
+            eprintln!("[token-usage] failed to persist usage: {error}");
+        }
+    }
 
     Ok(AiChatResponse {
         provider: settings.provider,
@@ -473,6 +498,7 @@ pub async fn send_ai_chat_message_impl(
         agent_id: Some(output.agent_id),
         agent_name: Some(output.agent_name),
         actions: output.actions,
+        usage: output.usage,
     })
 }
 
@@ -739,6 +765,8 @@ mod tests {
             .map(|i| AiChatMessage {
                 role: "user".to_string(),
                 content: format!("msg {i}"),
+                agent_id: None,
+                agent_name: None,
             })
             .collect();
         let req = AiChatRequest {
@@ -754,6 +782,8 @@ mod tests {
             messages: vec![AiChatMessage {
                 role: "user".to_string(),
                 content: "a".repeat(100_001),
+                agent_id: None,
+                agent_name: None,
             }],
             ..Default::default()
         };
