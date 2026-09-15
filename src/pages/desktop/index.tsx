@@ -85,7 +85,7 @@ export function DesktopPage() {
               "flex flex-col shrink-0 overflow-hidden relative z-0",
 
               // Sizing & Spacing
-              "w-full xl:w-[380px] 2xl:w-[410px] h-[calc(100vh-theme(spacing.24))] min-h-[520px] max-h-[840px]",
+              "w-full xl:w-[480px] h-[calc(100vh-theme(spacing.24))] min-h-[420px] max-h-[calc(100vh-120px))]",
 
               // Backgrounds & Borders
               "rounded-2xl border border-border/60 bg-card/75 backdrop-blur-xl shadow-lg",
@@ -246,10 +246,10 @@ export function DesktopPage() {
             <div
               className={cn(
                 // Layout & Positioning
-                "flex flex-wrap justify-center w-full max-w-[800px]",
+                "flex flex-wrap justify-start w-full",
 
                 // Sizing & Spacing
-                "gap-3"
+                "gap-2"
               )}
             >
               {displayItems.map((item) => (

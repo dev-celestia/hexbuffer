@@ -4,23 +4,22 @@ import {
   AttachmentRemove,
   Attachments,
   Badge,
-  Bubble,
-  BubbleContent,
   Conversation,
   ConversationContent,
   ConversationScrollButton,
   Message,
   MessageContent,
-  MessageResponse,
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
   Shimmer,
 } from '@celestia-project/ui';
 import { PaperclipIcon, PauseIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { Fragment, useMemo } from 'react';
 import type { DashboardChatMessage } from '../types';
 import { AssistantEmptyState } from './assistant-empty-state';
-import { MessageActionsBar } from './message-actions-bar';
+import { ChatDateSeparator } from './chat-date-separator';
+import { FoldableChatBubble } from './foldable-chat-bubble';
 import { SuggestionBar } from './suggestion-bar';
 import { ToolConfirmationCard } from './tool-confirmation-card';
 import { TrackedActionsList } from './tracked-actions-list';
@@ -30,6 +29,7 @@ import { getFileParts, getMessageText, getReasoningParts, hasContent, providerLa
 import { getUserPromptOnly, parseAttachedFilesFromMessage } from '../lib/file-utils';
 import { AgentBadgeHeader } from './agent-badge-header';
 import { getAgentInfo } from '../constants/agents';
+import { formatMessageTime, getMessageDate, isDifferentDay } from '../lib/date-utils';
 import { cn } from '@/lib/utils';
 
 interface AssistantConversationProps {
@@ -64,6 +64,16 @@ export function AssistantConversation({
   const hasAssistantContent = lastAssistantText.length > 0 || lastAssistantHasReasoning;
   const hasRunningAction = trackedActions.some((a) => a.status === 'in_progress');
 
+  const displayableMessages = useMemo(() => {
+    return messages.filter((message) => {
+      if (message.role === 'user') return true;
+      const fileParts = getFileParts(message);
+      const rawText = getMessageText(message);
+      const attachedFiles = parseAttachedFilesFromMessage(fileParts, rawText);
+      return hasContent(message) || attachedFiles.length > 0;
+    });
+  }, [messages]);
+
   return (
     <div
       className={cn(
@@ -80,11 +90,11 @@ export function AssistantConversation({
             'min-h-full max-w-2xl px-4 py-4 gap-5 pb-28',
           )}
         >
-          {messages.length === 0 && !isStreaming ? (
+          {displayableMessages.length === 0 && !isStreaming ? (
             <AssistantEmptyState model={model} providerDisplay={providerDisplay} />
           ) : (
             <>
-              {messages.map((message) => {
+              {displayableMessages.map((message, idx) => {
                 const label = providerLabel(message);
                 const reasoningParts = getReasoningParts(message);
                 const fileParts = getFileParts(message);
@@ -92,124 +102,101 @@ export function AssistantConversation({
                 const attachedFiles = parseAttachedFilesFromMessage(fileParts, rawText);
                 const displayText = message.role === 'user' ? getUserPromptOnly(rawText) : rawText;
                 const agentInfo = getAgentInfo(message.metadata?.agentId);
-
-                if (!hasContent(message) && message.role !== 'user' && attachedFiles.length === 0) {
-                  return null;
-                }
+                const messageDate = getMessageDate(message);
+                const prevMessage = idx > 0 ? displayableMessages[idx - 1] : null;
+                const showDateSeparator = !prevMessage || isDifferentDay(getMessageDate(prevMessage), messageDate);
+                const timeString = formatMessageTime(messageDate);
 
                 return (
-                  <Message key={message.id} from={message.role}>
-                    <MessageContent
-                      className={cn(
-                        message.role === 'assistant'
-                          ? 'w-full max-w-full group-[.is-assistant]:text-foreground'
-                          : 'group-[.is-user]:bg-transparent group-[.is-user]:p-0',
-                      )}
-                    >
-                      {message.role === 'assistant' ? (
-                        <AgentBadgeHeader
-                          agentId={message.metadata?.agentId}
-                          agentName={message.metadata?.agentName}
-                          providerDisplay={label ?? providerDisplay}
-                          model={message.metadata?.model ?? model}
-                          isStreaming={isStreaming && message.id === lastMessage?.id}
-                          isPaused={isPaused}
-                        />
-                      ) : null}
+                  <Fragment key={message.id}>
+                    {showDateSeparator ? <ChatDateSeparator date={messageDate} /> : null}
+                    <Message from={message.role}>
+                      <MessageContent
+                        className={cn(
+                          message.role === 'assistant'
+                            ? 'w-full max-w-full group-[.is-assistant]:text-foreground'
+                            : 'group-[.is-user]:bg-transparent group-[.is-user]:p-0',
+                        )}
+                      >
+                        {message.role === 'assistant' ? (
+                          <AgentBadgeHeader
+                            agentId={message.metadata?.agentId}
+                            agentName={message.metadata?.agentName}
+                            providerDisplay={label ?? providerDisplay}
+                            model={message.metadata?.model ?? model}
+                            isStreaming={isStreaming && message.id === lastMessage?.id}
+                            isPaused={isPaused}
+                            timestamp={timeString}
+                          />
+                        ) : null}
 
-                      {/* Attached files card list */}
-                      {attachedFiles.length > 0 ? (
-                        <div
-                          className={cn(
-                            // Layout & Positioning
-                            'flex flex-col gap-1.5 w-full shrink-0',
-                            // Sizing & Spacing
-                            'mb-2 p-2.5',
-                            // Typography
-                            'text-xs',
-                            // Backgrounds & Borders
-                            'rounded-lg border border-border/80 bg-muted/40',
-                          )}
-                        >
+                        {/* Attached files card list */}
+                        {attachedFiles.length > 0 ? (
                           <div
                             className={cn(
                               // Layout & Positioning
-                              'flex items-center gap-1.5',
+                              'flex flex-col gap-1.5 w-full shrink-0',
+                              // Sizing & Spacing
+                              'mb-2 p-2.5',
                               // Typography
-                              'font-medium text-xs text-muted-foreground',
+                              'text-xs',
+                              // Backgrounds & Borders
+                              'rounded-lg border border-border/80 bg-muted/40',
                             )}
                           >
-                            <PaperclipIcon className="size-3.5 text-blue-500 shrink-0" />
-                            <span>Attached file{attachedFiles.length > 1 ? 's' : ''} sent with prompt</span>
-                          </div>
-                          <Attachments variant="inline" className="flex flex-wrap gap-2">
-                            {attachedFiles.map((file, idx) => (
-                              <AttachmentItem
-                                key={idx}
-                                data={{ id: `att-${idx}`, type: 'file', filename: file.filename, mediaType: 'text/plain', url: '' }}
-                                className="rounded-md border border-border bg-background shadow-2xs text-xs"
-                              >
-                                <AttachmentPreview />
-                                <span className="truncate max-w-[160px] text-xs font-medium">{file.filename}</span>
-                                <Badge variant="outline" className="text-[10px] py-0 px-1 font-mono uppercase shrink-0">
-                                  {file.ext}
-                                </Badge>
-                              </AttachmentItem>
-                            ))}
-                          </Attachments>
-                        </div>
-                      ) : null}
-
-                      {/* Reasoning / thinking blocks */}
-                      {reasoningParts.map((part, i) => (
-                        <Reasoning
-                          key={i}
-                          isStreaming={isStreaming && message.role === 'assistant'}
-                        >
-                          <ReasoningTrigger />
-                          <ReasoningContent>{part.text}</ReasoningContent>
-                        </Reasoning>
-                      ))}
-
-                      {/* Text response in chat bubble */}
-                      {displayText ? (
-                        <Bubble
-                          variant={message.role === 'user' ? 'default' : 'outline'}
-                          align={message.role === 'user' ? 'end' : 'start'}
-                          className={cn(
-                            message.role === 'assistant'
-                              ? 'max-w-full w-full border-0'
-                              : 'max-w-[85%]',
-                          )}
-                        >
-                          <BubbleContent
-                            className={cn(
-                              message.role === 'user'
-                                ? 'bg-primary text-primary-foreground px-4 py-2.5 rounded-2xl'
-                                : cn(
-                                    // Sizing & Spacing
-                                    'px-4 py-3 rounded-2xl',
-                                    // Backgrounds & Borders
-                                    'bg-card/70 border text-foreground shadow-2xs',
-                                    agentInfo.borderClass,
-                                  ),
-                            )}
-                          >
-                            <MessageResponse
-                              className="text-sm"
-                              isAnimating={isStreaming && message.role === 'assistant'}
+                            <div
+                              className={cn(
+                                // Layout & Positioning
+                                'flex items-center gap-1.5',
+                                // Typography
+                                'font-medium text-xs text-muted-foreground',
+                              )}
                             >
-                              {displayText}
-                            </MessageResponse>
-                          </BubbleContent>
-                        </Bubble>
-                      ) : null}
+                              <PaperclipIcon className="size-3.5 text-blue-500 shrink-0" />
+                              <span>Attached file{attachedFiles.length > 1 ? 's' : ''} sent with prompt</span>
+                            </div>
+                            <Attachments variant="inline" className="flex flex-wrap gap-2">
+                              {attachedFiles.map((file, fIdx) => (
+                                <AttachmentItem
+                                  key={fIdx}
+                                  data={{ id: `att-${fIdx}`, type: 'file', filename: file.filename, mediaType: 'text/plain', url: '' }}
+                                  className="rounded-md border border-border bg-background shadow-2xs text-xs"
+                                >
+                                  <AttachmentPreview />
+                                  <span className="truncate max-w-[160px] text-xs font-medium">{file.filename}</span>
+                                  <Badge variant="outline" className="text-[10px] py-0 px-1 font-mono uppercase shrink-0">
+                                    {file.ext}
+                                  </Badge>
+                                </AttachmentItem>
+                              ))}
+                            </Attachments>
+                          </div>
+                        ) : null}
 
-                      {message.role === 'assistant' ? (
-                        <MessageActionsBar text={displayText} />
-                      ) : null}
-                    </MessageContent>
-                  </Message>
+                        {/* Reasoning / thinking blocks */}
+                        {reasoningParts.map((part, i) => (
+                          <Reasoning
+                            key={i}
+                            isStreaming={isStreaming && message.role === 'assistant'}
+                          >
+                            <ReasoningTrigger />
+                            <ReasoningContent>{part.text}</ReasoningContent>
+                          </Reasoning>
+                        ))}
+
+                        {/* Foldable text response in chat bubble with side copy icon */}
+                        {displayText ? (
+                          <FoldableChatBubble
+                            role={message.role}
+                            text={displayText}
+                            timestamp={timeString}
+                            borderClass={agentInfo.borderClass}
+                            isStreaming={isStreaming && message.role === 'assistant'}
+                          />
+                        ) : null}
+                      </MessageContent>
+                    </Message>
+                  </Fragment>
                 );
               })}
 
@@ -225,8 +212,8 @@ export function AssistantConversation({
               {/* Tracked actions & thinking loading state */}
               {trackedActions.length > 0 || (isStreaming && !hasAssistantContent) ? (
                 <Message from="assistant">
-                  <MessageContent>
-                    <div className="space-y-3">
+                  <MessageContent className="w-full max-w-full overflow-hidden">
+                    <div className="space-y-3 w-full min-w-0 max-w-full overflow-hidden">
                       {trackedActions.length > 0 ? (
                         <TrackedActionsList
                           trackedActions={trackedActions}

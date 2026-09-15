@@ -9,6 +9,12 @@ import {
   ContextContentBody,
   ContextContentHeader,
   ContextTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
   ModelSelectorLogo,
   PromptInput,
   PromptInputBody,
@@ -21,15 +27,19 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
-  Source,
-  Sources,
-  SourcesContent,
-  SourcesTrigger,
   usePromptInputAttachments,
 } from '@celestia-project/ui';
-import { PaperclipIcon, PauseIcon, PlayIcon, XIcon } from '@phosphor-icons/react';
+import {
+  CaretDownIcon,
+  CheckIcon,
+  CrownIcon,
+  PaperclipIcon,
+  PauseIcon,
+  PlayIcon,
+} from '@phosphor-icons/react';
 import type { FileUIPart } from 'ai';
-import { PageMentionPopover } from './page-mention-popover';
+import { useCallback, useRef, useState } from 'react';
+import { ALL_AGENTS_LIST, AGENTS_REGISTRY, type AgentId } from '../constants/agents';
 import { cn } from '@/lib/utils';
 
 function PromptInputAttachmentsBar() {
@@ -106,35 +116,6 @@ function PromptInputAttachmentsBar() {
   );
 }
 
-function PromptInputUploadButton({ disabled }: { disabled?: boolean }) {
-  const attachments = usePromptInputAttachments();
-
-  return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon"
-      onClick={attachments.openFileDialog}
-      disabled={disabled}
-      title="Upload .txt or .md file"
-      className={cn(
-        // Layout & Positioning
-        'relative flex items-center justify-center shrink-0',
-        // Sizing & Spacing
-        'size-8 p-0',
-        // Typography
-        'text-muted-foreground',
-        // Backgrounds & Borders
-        'rounded-md border border-border bg-background',
-        // Interactive & States
-        'hover:bg-accent hover:text-foreground transition-colors disabled:opacity-50',
-      )}
-    >
-      <PaperclipIcon className="size-4" />
-    </Button>
-  );
-}
-
 interface AssistantPromptBarProps {
   isStreaming: boolean;
   isPaused?: boolean;
@@ -144,20 +125,15 @@ interface AssistantPromptBarProps {
   provider: string;
   modelOptions: string[];
   messagesCount: number;
-  mentionedPages: { label: string; href: string }[];
-  mentionState: { isOpen: boolean };
-  filteredPages: any[];
-  highlightedIndex: number;
   status: any;
   onStop: () => void;
   onSubmit: (message: { text: string; files: FileUIPart[] }) => void;
   onModelChange: (model: string) => void;
-  onTextareaChange: (e: any) => void;
-  onTextareaSelect: (e: any) => void;
-  onTextareaKeyDown: (e: any) => void;
-  selectPage: (page: any) => void;
-  removeMentionedPage: (href: string) => void;
-  clearMentionedPages: () => void;
+  onTextareaChange?: (e: any) => void;
+  onTextareaSelect?: (e: any) => void;
+  onTextareaKeyDown?: (e: any) => void;
+  selectedAgent?: AgentId | 'all';
+  onSelectAgent?: (agentId: AgentId | 'all') => void;
 }
 
 export function AssistantPromptBar({
@@ -169,10 +145,6 @@ export function AssistantPromptBar({
   provider,
   modelOptions,
   messagesCount,
-  mentionedPages,
-  mentionState,
-  filteredPages,
-  highlightedIndex,
   status,
   onStop,
   onSubmit,
@@ -180,11 +152,96 @@ export function AssistantPromptBar({
   onTextareaChange,
   onTextareaSelect,
   onTextareaKeyDown,
-  selectPage,
-  removeMentionedPage,
-  clearMentionedPages,
+  selectedAgent = 'all',
+  onSelectAgent,
 }: AssistantPromptBarProps) {
   const attachments = usePromptInputAttachments();
+  const [customHeight, setCustomHeight] = useState<number | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const isDraggingRef = useRef(false);
+  const startYRef = useRef(0);
+  const startHeightRef = useRef(0);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const currentAgent = selectedAgent !== 'all' && selectedAgent ? AGENTS_REGISTRY[selectedAgent] : null;
+  const CurrentAgentIcon = currentAgent?.icon ?? CrownIcon;
+  const currentAgentLabel = currentAgent ? currentAgent.name.replace(' Agent', '') : 'Auto';
+  const currentAgentTextClass = currentAgent ? currentAgent.textClass : 'text-violet-400';
+
+  const toggleExpand = useCallback(() => {
+    setIsExpanded((prev) => {
+      const next = !prev;
+      setCustomHeight(next ? 280 : null);
+      return next;
+    });
+  }, []);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isDraggingRef.current = true;
+    startYRef.current = e.clientY;
+
+    const textarea = textareaRef.current || (e.currentTarget.parentElement?.querySelector('textarea') as HTMLTextAreaElement | null);
+    startHeightRef.current = textarea ? textarea.getBoundingClientRect().height : 48;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (!isDraggingRef.current) return;
+      // Moving mouse up (negative delta) increases height since prompt is docked at bottom
+      const deltaY = startYRef.current - moveEvent.clientY;
+      const maxHeight = Math.max(window.innerHeight * 0.65, 300);
+      const nextHeight = Math.min(Math.max(startHeightRef.current + deltaY, 48), maxHeight);
+      setCustomHeight(nextHeight);
+      setIsExpanded(nextHeight > 140);
+    };
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false;
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  }, []);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      // 1. Text editor Select All: Ctrl+A / Cmd+A
+      const isSelectAll = (e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A' || e.code === 'KeyA');
+      if (isSelectAll) {
+        e.preventDefault();
+        e.currentTarget.select();
+        return;
+      }
+
+      // 2. Expand/Collapse shortcut: Ctrl+Shift+E / Cmd+Shift+E
+      const isToggleExpand = (e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'e' || e.key === 'E' || e.code === 'KeyE');
+      if (isToggleExpand) {
+        e.preventDefault();
+        toggleExpand();
+        return;
+      }
+
+      // 3. Tab key indentation (2 spaces)
+      if (e.key === 'Tab' && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        const ta = e.currentTarget;
+        const start = ta.selectionStart;
+        const end = ta.selectionEnd;
+        const val = ta.value;
+        const updated = val.substring(0, start) + '  ' + val.substring(end);
+        ta.value = updated;
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
+        requestAnimationFrame(() => {
+          ta.selectionStart = ta.selectionEnd = start + 2;
+        });
+        return;
+      }
+
+      onTextareaKeyDown?.(e);
+    },
+    [onTextareaKeyDown, toggleExpand],
+  );
 
   return (
     <div
@@ -202,55 +259,31 @@ export function AssistantPromptBar({
           // Layout & Positioning
           'relative flex flex-col',
           // Sizing & Spacing
-          'max-w-2xl mx-auto w-full',
+          isExpanded ? 'max-w-3xl' : 'max-w-2xl',
+          'mx-auto w-full transition-all duration-200',
         )}
       >
-        {/* Referenced page mentions displayed as rich Celestia Sources */}
-        {mentionedPages.length > 0 && (
-          <div className="pb-2 w-full">
-            <Sources defaultOpen className="rounded-xl border border-border/70 bg-card/90 p-2.5 shadow-2xs">
-              <SourcesTrigger count={mentionedPages.length} className="text-xs text-muted-foreground hover:text-foreground">
-                <p className="font-medium text-xs">Context: {mentionedPages.length} active page{mentionedPages.length > 1 ? 's' : ''} attached</p>
-              </SourcesTrigger>
-              <SourcesContent className="mt-2 flex flex-wrap gap-1.5">
-                {mentionedPages.map((page) => (
-                  <div
-                    key={page.href}
-                    className={cn(
-                      // Layout & Positioning
-                      'flex items-center gap-1.5',
-                      // Sizing & Spacing
-                      'px-2 py-0.5',
-                      // Typography
-                      'text-xs',
-                      // Backgrounds & Borders
-                      'rounded-md border border-border bg-muted/40',
-                    )}
-                  >
-                    <Source href={page.href} title={page.label} className="text-xs hover:underline" />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-4 p-0 text-muted-foreground hover:text-foreground"
-                      onClick={() => removeMentionedPage(page.href)}
-                      title="Remove page"
-                    >
-                      <XIcon className="size-2.5" />
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearMentionedPages}
-                  className="h-6 px-1.5 text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Clear all
-                </Button>
-              </SourcesContent>
-            </Sources>
-          </div>
-        )}
+        {/* Drag handle to resize prompt height upwards */}
+        <div
+          onMouseDown={handleMouseDown}
+          onDoubleClick={toggleExpand}
+          title="Drag to resize height • Double-click to toggle expand (Ctrl+Shift+E)"
+          className={cn(
+            // Layout & Positioning
+            'group flex items-center justify-center cursor-row-resize touch-none w-full select-none',
+            // Sizing & Spacing
+            'py-1 -mt-1 mb-0.5',
+          )}
+        >
+          <div
+            className={cn(
+              // Sizing & Spacing
+              'h-1 w-12',
+              // Backgrounds & Borders
+              'rounded-full bg-border/60 group-hover:bg-muted-foreground/60 transition-colors',
+            )}
+          />
+        </div>
 
         <div className="relative w-full">
           <PromptInput
@@ -262,23 +295,103 @@ export function AssistantPromptBar({
             <PromptInputAttachmentsBar />
             <PromptInputBody>
               <PromptInputTextarea
-                className="min-h-12 text-sm"
+                ref={textareaRef}
+                style={customHeight ? { height: `${customHeight}px` } : undefined}
+                className={cn(
+                  // Layout & Positioning
+                  'resize-y overflow-y-auto',
+                  // Sizing & Spacing
+                  isExpanded ? 'min-h-[240px]' : 'min-h-12',
+                  'max-h-[65vh]',
+                  // Typography
+                  'text-sm leading-relaxed',
+                )}
                 disabled={isStreaming}
                 placeholder={
                   isStreaming
                     ? isPaused
                       ? 'Stream paused — click Resume or Stop'
                       : 'Assistant is streaming response…'
-                    : 'Message AI… (use @ to mention a page, or attach .txt/.md files)'
+                    : 'Message AI… (attach .txt/.md files, Shift+Enter for new line)'
                 }
                 onChange={onTextareaChange}
-                onSelect={onTextareaSelect}
-                onKeyDown={onTextareaKeyDown}
+                onSelect={(e) => {
+                  textareaRef.current = e.currentTarget;
+                  onTextareaSelect?.(e);
+                }}
+                onKeyDown={handleKeyDown}
               />
             </PromptInputBody>
             <PromptInputFooter>
               <PromptInputTools>
-                <PromptInputUploadButton disabled={isStreaming} />
+                {/* Specialist Agent Selector Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={isStreaming}
+                      title="Select Specialist Agent"
+                      className={cn(
+                        // Layout & Positioning
+                        'flex items-center gap-1.5 shrink-0',
+                        // Sizing & Spacing
+                        'h-8 px-2 max-w-[125px] xs:max-w-[145px] sm:max-w-[170px]',
+                        // Typography
+                        'text-xs font-normal',
+                        // Backgrounds & Borders
+                        'rounded-md border border-border bg-background',
+                        // Interactive & States
+                        'hover:bg-accent hover:text-foreground transition-colors',
+                      )}
+                    >
+                      <CurrentAgentIcon className={cn('size-3.5 shrink-0', currentAgentTextClass)} />
+                      <span className="truncate">{currentAgentLabel}</span>
+                      <CaretDownIcon className="size-3 shrink-0 opacity-50 ml-0.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" side="top" className="w-56 p-1">
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel className="px-2 py-1 text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">
+                        Specialist Agents
+                      </DropdownMenuLabel>
+                      <DropdownMenuItem
+                        onClick={() => onSelectAgent?.('all')}
+                        className="flex items-center justify-between px-2 py-1.5 text-xs cursor-pointer rounded-md"
+                      >
+                        <div className="flex items-center gap-2">
+                          <CrownIcon className="size-3.5 text-violet-400" />
+                          <span>Auto (Orchestrator)</span>
+                        </div>
+                        {selectedAgent === 'all' && (
+                          <CheckIcon className="size-3.5 text-primary" weight="bold" />
+                        )}
+                      </DropdownMenuItem>
+
+                      {ALL_AGENTS_LIST.filter((a) => a.id !== 'orchestrator').map((agent) => {
+                        const isSelected = selectedAgent === agent.id;
+                        const IconComponent = agent.icon;
+                        return (
+                          <DropdownMenuItem
+                            key={agent.id}
+                            onClick={() => onSelectAgent?.(agent.id)}
+                            className="flex items-center justify-between px-2 py-1.5 text-xs cursor-pointer rounded-md"
+                          >
+                            <div className="flex items-center gap-2">
+                              <IconComponent className={cn('size-3.5', agent.textClass)} />
+                              <span>{agent.name.replace(' Agent', '')}</span>
+                            </div>
+                            {isSelected && (
+                              <CheckIcon className="size-3.5 text-primary" weight="bold" />
+                            )}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
                 <PromptInputSelect
                   disabled={isStreaming}
                   onValueChange={onModelChange}
@@ -356,12 +469,6 @@ export function AssistantPromptBar({
               </div>
             </PromptInputFooter>
           </PromptInput>
-          <PageMentionPopover
-            isOpen={mentionState.isOpen}
-            filteredPages={filteredPages}
-            highlightedIndex={highlightedIndex}
-            onSelect={selectPage}
-          />
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ interface AgentBadgeHeaderProps {
   model?: string;
   isStreaming?: boolean;
   isPaused?: boolean;
+  timestamp?: string;
 }
 
 export function AgentBadgeHeader({
@@ -18,6 +19,7 @@ export function AgentBadgeHeader({
   model,
   isStreaming,
   isPaused,
+  timestamp,
 }: AgentBadgeHeaderProps) {
   const agent = getAgentInfo(agentId);
   const IconComponent = agent.icon;
@@ -114,6 +116,20 @@ export function AgentBadgeHeader({
         >
           Paused
         </Badge>
+      ) : null}
+
+      {/* Timestamp */}
+      {timestamp ? (
+        <span
+          className={cn(
+            // Layout & Positioning
+            'ml-auto',
+            // Typography
+            'text-[10px] text-muted-foreground/60 font-mono select-none',
+          )}
+        >
+          {timestamp}
+        </span>
       ) : null}
     </div>
   );

@@ -1,4 +1,4 @@
-import { Button, Tool, ToolHeader, ToolContent, ToolInput } from '@celestia-project/ui';
+import { Button, Tool, ToolHeader, ToolContent, ToolInput, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
 import { useState } from 'react';
 
 import {
@@ -29,6 +29,8 @@ export function ToolConfirmationCard({ confirmation }: ToolConfirmationCardProps
     }
   };
 
+  const label = toolConfirmationLabel(confirmation.toolName);
+
   return (
     <Tool
       defaultOpen
@@ -41,7 +43,18 @@ export function ToolConfirmationCard({ confirmation }: ToolConfirmationCardProps
     >
       <ToolHeader
         type="dynamic-tool"
-        toolName={toolConfirmationLabel(confirmation.toolName)}
+        title={
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="truncate max-w-[170px] xs:max-w-[220px] sm:max-w-[280px] block cursor-default">
+                {label}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-sm text-xs break-words">
+              {label}
+            </TooltipContent>
+          </Tooltip>
+        }
         state="approval-requested"
       />
       <ToolContent>

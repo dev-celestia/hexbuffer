@@ -9,7 +9,6 @@ import { AiConfigDialog } from './components/ai-config-dialog';
 import { AiDebugDialog } from './components/ai-debug-dialog';
 import { SessionTokenUsageBadge } from './components/session-token-usage-badge';
 import { useAiChatPane } from './hooks/use-ai-chat-pane';
-import { usePageMentions } from './hooks/use-page-mentions';
 import { usePendingToolConfirmations } from './lib/ai-tools/confirmation';
 import { getMessageText } from './lib/message-utils';
 import { cn } from '@/lib/utils';
@@ -54,19 +53,6 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [debugDialogOpen, setDebugDialogOpen] = useState(false);
 
-  const {
-    mentionedPages,
-    mentionState,
-    filteredPages,
-    highlightedIndex,
-    onTextareaChange,
-    onTextareaSelect,
-    onTextareaKeyDown,
-    selectPage,
-    removeMentionedPage,
-    clearMentionedPages,
-  } = usePageMentions();
-
   const pendingToolConfirmations = usePendingToolConfirmations();
 
   const stickToBottomRef = useRef<{
@@ -108,17 +94,13 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
     (message: { text: string; files: FileUIPart[] }) => {
       scrollToBottom('smooth', true);
 
-      void handleSubmit({
-        ...message,
-        mentionedPages: mentionedPages.map((p) => ({ label: p.label, href: p.href })),
-      });
-      clearMentionedPages();
+      void handleSubmit(message);
 
       requestAnimationFrame(() => {
         scrollToBottom('smooth', true);
       });
     },
-    [handleSubmit, mentionedPages, clearMentionedPages, scrollToBottom],
+    [handleSubmit, scrollToBottom],
   );
 
   return (
@@ -233,11 +215,6 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
             'flex flex-1 flex-col min-w-0 overflow-hidden relative',
           )}
         >
-          <AgentSelectorBar
-            selectedAgentId={selectedAgent}
-            onSelectAgent={setSelectedAgent}
-          />
-
           <AssistantConversation
             messages={messages}
             isStreaming={isStreaming}
@@ -260,20 +237,12 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
             provider={provider}
             modelOptions={modelOptions}
             messagesCount={messages.length}
-            mentionedPages={mentionedPages}
-            mentionState={mentionState}
-            filteredPages={filteredPages}
-            highlightedIndex={highlightedIndex}
             status={status}
             onStop={stop}
             onSubmit={wrappedHandleSubmit}
             onModelChange={handleModelChange}
-            onTextareaChange={onTextareaChange}
-            onTextareaSelect={onTextareaSelect}
-            onTextareaKeyDown={onTextareaKeyDown}
-            selectPage={selectPage}
-            removeMentionedPage={removeMentionedPage}
-            clearMentionedPages={clearMentionedPages}
+            selectedAgent={selectedAgent}
+            onSelectAgent={setSelectedAgent}
           />
         </div>
       </div>

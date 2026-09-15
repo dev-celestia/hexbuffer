@@ -1,15 +1,3 @@
-import type { ComponentType } from 'react';
-import {
-  ArrowClockwiseIcon,
-  BroadcastIcon,
-  CrownIcon,
-  FileTextIcon,
-  GlobeIcon,
-  KeyIcon,
-  SparkleIcon,
-  TargetIcon,
-} from '@phosphor-icons/react';
-
 import orchestratorAvatar from '@/assets/app-icon/orchestrator.png';
 import httpAvatar from '@/assets/app-icon/http.png';
 import repeaterAvatar from '@/assets/app-icon/repeater.png';
@@ -32,7 +20,6 @@ export interface AgentInfo {
   name: string;
   role: string;
   description: string;
-  icon: ComponentType<{ className?: string }>;
   avatarUrl: string;
   color: string;
   badgeClass: string;
@@ -48,7 +35,6 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
     name: 'Orchestrator Agent',
     role: 'Master Coordinator',
     description: 'Coordinates specialized cyber agents and plans multi-step workflows.',
-    icon: CrownIcon,
     avatarUrl: orchestratorAvatar,
     color: '#8B5CF6',
     badgeClass: 'bg-violet-500/10 text-violet-400 border-violet-500/30',
@@ -62,7 +48,6 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
     name: 'HTTP Traffic Agent',
     role: 'Traffic & Intercept',
     description: 'Inspects proxy flows, manages live interception, and audits HTTP logs.',
-    icon: GlobeIcon,
     avatarUrl: httpAvatar,
     color: '#3B82F6',
     badgeClass: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
@@ -76,7 +61,6 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
     name: 'Repeater Agent',
     role: 'Request Replay',
     description: 'Crafts, normalizes, replays, and organizes requests into collections.',
-    icon: ArrowClockwiseIcon,
     avatarUrl: repeaterAvatar,
     color: '#10B981',
     badgeClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
@@ -90,7 +74,6 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
     name: 'Intruder Agent',
     role: 'Fuzzing & Injection',
     description: 'Detects injection points, suggests $target$ markers, and runs attacks.',
-    icon: TargetIcon,
     avatarUrl: intruderAvatar,
     color: '#F59E0B',
     badgeClass: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
@@ -104,7 +87,6 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
     name: 'Notes Agent',
     role: 'Knowledge & Memory',
     description: 'Stores research findings, credential formats, and persistent notes.',
-    icon: FileTextIcon,
     avatarUrl: notesAvatar,
     color: '#A855F7',
     badgeClass: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
@@ -118,7 +100,6 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
     name: 'Port Scanner Agent',
     role: 'Network Recon',
     description: 'Discovers open ports, identifies services and banners across targets.',
-    icon: BroadcastIcon,
     avatarUrl: portScannerAvatar,
     color: '#06B6D4',
     badgeClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
@@ -132,7 +113,6 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
     name: 'JWT Agent',
     role: 'JWT Security',
     description: 'Decodes tokens, tests algorithm vulnerabilities, and generates tampered tokens.',
-    icon: KeyIcon,
     avatarUrl: jwtAvatar,
     color: '#F43F5E',
     badgeClass: 'bg-rose-500/10 text-rose-400 border-rose-500/30',

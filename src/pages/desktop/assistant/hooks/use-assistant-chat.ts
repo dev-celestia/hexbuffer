@@ -31,7 +31,6 @@ const DEFAULT_AI_SETTINGS: DashboardAiSettings = {
 interface PromptInputMessage {
   text: string;
   files: FileUIPart[];
-  mentionedPages?: { label: string; href: string }[];
 }
 
 interface UseAssistantChatOptions {
@@ -332,7 +331,7 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
       });
   }, [messages, status, sessionId, onSaveMessages]);
 
-  const handleSubmit = useCallback(async ({ text, files, mentionedPages }: PromptInputMessage) => {
+  const handleSubmit = useCallback(async ({ text, files }: PromptInputMessage) => {
     if (submittingRef.current || status === 'submitted' || status === 'streaming') {
       return;
     }
@@ -356,14 +355,7 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
         }
       }
 
-      const contextParts: string[] = [];
-      if (mentionedPages && mentionedPages.length > 0) {
-        contextParts.push(`[Referenced pages: ${mentionedPages.map((p) => p.label).join(', ')}]`);
-      }
-      if (fileContextParts.length > 0) {
-        contextParts.push(...fileContextParts);
-      }
-      const contextPrefix = contextParts.length > 0 ? contextParts.join('\n\n') + '\n\n' : '';
+      const contextPrefix = fileContextParts.length > 0 ? fileContextParts.join('\n\n') + '\n\n' : '';
       const finalPrompt = (contextPrefix + text).trim();
 
       if (finalPrompt.length > 100_000) {

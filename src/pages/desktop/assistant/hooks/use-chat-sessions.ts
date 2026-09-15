@@ -49,6 +49,11 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
           role: m.role as 'user' | 'assistant' | 'system',
           content: m.content,
           parts: [{ type: 'text' as const, text: m.content }],
+          createdAt: m.createdAt ? new Date(m.createdAt) : new Date(),
+          metadata: {
+            agentId: m.agentId,
+            agentName: m.agentName,
+          },
         }));
         setMessagesRef.current?.(uiMessages, firstId);
       }
@@ -91,6 +96,11 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
           role: m.role as 'user' | 'assistant' | 'system',
           content: m.content,
           parts: [{ type: 'text' as const, text: m.content }],
+          createdAt: m.createdAt ? new Date(m.createdAt) : new Date(),
+          metadata: {
+            agentId: m.agentId,
+            agentName: m.agentName,
+          },
         }));
 
         setActiveSessionId(sessionId);
