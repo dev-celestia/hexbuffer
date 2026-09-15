@@ -1,16 +1,17 @@
 import { PromptInputProvider } from '@celestia-project/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FileUIPart } from 'ai';
+import { useNavigate } from 'react-router-dom';
 import { AssistantConversation } from './components/assistant-conversation';
 import { AssistantHeader } from './components/assistant-header';
 import { AssistantPromptBar } from './components/assistant-prompt-bar';
 import { ChatSessionList } from './components/chat-session-list';
-import { AiConfigDialog } from './components/ai-config-dialog';
 import { AiDebugDialog } from './components/ai-debug-dialog';
 import { SessionTokenUsageBadge } from './components/session-token-usage-badge';
 import { useAiChatPane } from './hooks/use-ai-chat-pane';
 import { usePendingToolConfirmations } from './lib/ai-tools/confirmation';
 import { getMessageText } from './lib/message-utils';
+import { useNavStore } from '@/stores/nav';
 import { cn } from '@/lib/utils';
 
 interface AIAssistantPaneProps {
@@ -20,8 +21,8 @@ interface AIAssistantPaneProps {
 }
 
 function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssistantPaneProps) {
+  const navigate = useNavigate();
   const {
-    aiSettings,
     error,
     handleSubmit,
     handleModelChange,
@@ -45,13 +46,17 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
     sidebarCollapsed,
     setSidebarCollapsed,
     trackedActions,
-    updateAiSettings,
     selectedAgent,
     setSelectedAgent,
   } = useAiChatPane();
 
-  const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [debugDialogOpen, setDebugDialogOpen] = useState(false);
+
+  const handleOpenConfig = useCallback(() => {
+    useNavStore.getState().openWindow('/settings', 'Settings');
+    useNavStore.getState().focusWindow('/settings', () => navigate('/settings?tab=ai'));
+    navigate('/settings?tab=ai');
+  }, [navigate]);
 
   const pendingToolConfirmations = usePendingToolConfirmations();
 
@@ -103,6 +108,18 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
     [handleSubmit, scrollToBottom],
   );
 
+  const handleSelectOption = useCallback(
+    (promptText: string) => {
+      wrappedHandleSubmit({ text: promptText, files: [] });
+    },
+    [wrappedHandleSubmit],
+  );
+
+  const handleFocusPromptInput = useCallback(() => {
+    const textarea = document.querySelector('textarea') as HTMLTextAreaElement | null;
+    textarea?.focus();
+  }, []);
+
   return (
     <aside
       className={cn(
@@ -120,19 +137,12 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
         sidebarCollapsed={sidebarCollapsed}
         sessionsCount={sessions.length}
         onToggleSidebar={() => setSidebarCollapsed((prev) => !prev)}
-        onOpenConfig={() => setConfigDialogOpen(true)}
+        onOpenConfig={handleOpenConfig}
         onOpenDebug={() => setDebugDialogOpen(true)}
         onClose={onClose}
         trailing={<SessionTokenUsageBadge />}
         selectedAgent={selectedAgent}
         onSelectAgent={setSelectedAgent}
-      />
-
-      <AiConfigDialog
-        open={configDialogOpen}
-        onOpenChange={setConfigDialogOpen}
-        aiSettings={aiSettings}
-        updateAiSettings={updateAiSettings}
       />
 
       <AiDebugDialog
@@ -226,6 +236,8 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
             error={error}
             stickToBottomRef={stickToBottomRef}
             messagesEndRef={messagesEndRef}
+            onSelectOption={handleSelectOption}
+            onFocusInput={handleFocusPromptInput}
           />
 
           <AssistantPromptBar

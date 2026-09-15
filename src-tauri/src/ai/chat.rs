@@ -505,6 +505,7 @@ pub async fn send_ai_chat_message_impl(
         agent_id: Some(output.agent_id),
         agent_name: Some(output.agent_name),
         actions: output.actions,
+        agent_messages: output.agent_messages,
         usage: output.usage,
     })
 }
