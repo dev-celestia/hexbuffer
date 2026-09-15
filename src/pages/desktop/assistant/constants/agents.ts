@@ -1,4 +1,4 @@
-import orchestratorAvatar from '@/assets/app-icon/orchestrator.png';
+import celestiaAvatar from '@/assets/celestia.png';
 import httpAvatar from '@/assets/app-icon/http.png';
 import repeaterAvatar from '@/assets/app-icon/repeater.png';
 import intruderAvatar from '@/assets/app-icon/intruder.png';
@@ -32,16 +32,16 @@ export interface AgentInfo {
 export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
   orchestrator: {
     id: 'orchestrator',
-    name: 'Orchestrator Agent',
+    name: 'Celestia',
     role: 'Master Coordinator',
     description: 'Coordinates specialized cyber agents and plans multi-step workflows.',
-    avatarUrl: orchestratorAvatar,
+    avatarUrl: celestiaAvatar,
     color: '#8B5CF6',
     badgeClass: 'bg-violet-500/10 text-violet-400 border-violet-500/30',
     borderClass: 'border-violet-500/30',
     textClass: 'text-violet-400',
     dotClass: 'bg-violet-500',
-    mentionTag: '@orchestrator',
+    mentionTag: '@celestia',
   },
   http_traffic: {
     id: 'http_traffic',
@@ -132,6 +132,7 @@ export function getAgentInfo(agentId?: string | null): AgentInfo {
     return AGENTS_REGISTRY[normalized as AgentId];
   }
   // Loose matching for aliases
+  if (normalized.includes('celestia') || normalized.includes('orchestrat')) return AGENTS_REGISTRY.orchestrator;
   if (normalized.includes('traffic') || normalized.includes('http')) return AGENTS_REGISTRY.http_traffic;
   if (normalized.includes('repeat')) return AGENTS_REGISTRY.repeater;
   if (normalized.includes('intrud') || normalized.includes('fuzz')) return AGENTS_REGISTRY.intruder;

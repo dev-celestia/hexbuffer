@@ -368,7 +368,7 @@ export function AssistantPromptBar({
                             alt="Auto"
                             className="size-3.5 object-contain shrink-0 rounded-xs"
                           />
-                          <span>Auto (Orchestrator)</span>
+                          <span>Auto (Celestia)</span>
                         </div>
                         {selectedAgent === 'all' && (
                           <CheckIcon className="size-3.5 text-primary" weight="bold" />

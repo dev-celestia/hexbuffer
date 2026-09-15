@@ -33,7 +33,7 @@ export function AgentSelectorBar({
         Agents:
       </span>
 
-      {/* Auto / Orchestrator Pill */}
+      {/* Auto / Celestia Pill */}
       <button
         type="button"
         onClick={() => onSelectAgent('all')}

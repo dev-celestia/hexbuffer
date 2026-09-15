@@ -27,7 +27,7 @@ export function AssistantEmptyState({ model, providerDisplay }: AssistantEmptySt
             'rounded-xl border border-border/70 bg-card shadow-xs',
           )}
         >
-          <AgentHeader name="HexBuffer AI Assistant (Alpha)" model={model || 'Ready'} />
+          <AgentHeader name="Celestia" model={model || 'Ready'} />
           <AgentContent
             className={cn(
               // Sizing & Spacing
