@@ -121,7 +121,7 @@ pub struct ChronicleLogRecord {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ContextBankEntry {
+pub struct MemoryEntry {
     pub id: String,
     pub title: String,
     pub content: String,

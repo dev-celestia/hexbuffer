@@ -7,12 +7,12 @@ use rig::vector_store::{VectorSearchRequest, VectorStoreIndex};
 use super::keyring::read_optional_ai_api_key;
 use super::providers::EMBEDDINGS_KEY_PROVIDER;
 use super::types::AiSettings;
-use crate::db::repository::types::ContextBankEntry;
+use crate::db::repository::types::MemoryEntry;
 
 /// Upper bound for a single embeddings endpoint round-trip.
 const EMBEDDING_TIMEOUT_SECS: u64 = 60;
 
-/// Minimal cosine similarity for a context bank entry to be considered relevant
+/// Minimal cosine similarity for a memory entry to be considered relevant
 /// (rig's `top_n` returns cosine similarity scores).
 pub const CONTEXT_BANK_SIMILARITY_THRESHOLD: f64 = 0.3;
 /// Maximum entries injected into a single chat request.
@@ -136,12 +136,12 @@ pub async fn embed_text(
     Ok(embedding.vec)
 }
 
-/// Vector search over the context bank using rig's `InMemoryVectorStore` +
+/// Vector search over memory using rig's `InMemoryVectorStore` +
 /// `VectorStoreIndex::top_n_ids`: stored vectors are loaded into an in-memory store,
 /// the prompt is embedded, and the top cosine-similar entry ids come back.
-pub async fn vector_search_context_bank(
+pub async fn vector_search_memory(
     model: &openai::EmbeddingModel,
-    entries: &[ContextBankEntry],
+    entries: &[MemoryEntry],
     query: &str,
     limit: usize,
 ) -> Result<Vec<(String, f64)>, String> {

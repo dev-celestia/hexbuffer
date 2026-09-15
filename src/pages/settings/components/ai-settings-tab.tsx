@@ -359,8 +359,8 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
       </SettingsGroup>
 
       <SettingsGroup
-        label="Embeddings (Context Bank RAG)"
-        description="Optional OpenAI-compatible embeddings endpoint used by the Context Bank for semantic vector search. Leave blank to use SQLite FTS5 keyword search."
+        label="Embeddings (Memory RAG)"
+        description="Optional OpenAI-compatible embeddings endpoint used by Memory for semantic vector search. Leave blank to use SQLite FTS5 keyword search."
       >
         <SettingsRow
           label="Embeddings Base URL"

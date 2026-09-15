@@ -240,11 +240,11 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
             >
               <TabsTrigger value="system-prompt">System Prompt</TabsTrigger>
               <TabsTrigger value="app-context">App Context</TabsTrigger>
-              <TabsTrigger value="context-bank">
-                Context Bank
-                {snapshot.contextBankEntries.length > 0 && (
+              <TabsTrigger value="memory">
+                Memory
+                {snapshot.memoryEntries.length > 0 && (
                   <Badge variant="secondary" className="ms-1 text-[10px]">
-                    {snapshot.contextBankEntries.length}
+                    {snapshot.memoryEntries.length}
                   </Badge>
                 )}
               </TabsTrigger>
@@ -293,17 +293,17 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
               </ScrollArea>
             </TabsContent>
 
-            {/* Context Bank */}
-            <TabsContent value="context-bank" className="flex-1 min-h-0 mt-3">
+            {/* Memory */}
+            <TabsContent value="memory" className="flex-1 min-h-0 mt-3">
               <ScrollArea className="h-full max-h-[52vh]">
-                {snapshot.contextBankEntries.length === 0 ? (
+                {snapshot.memoryEntries.length === 0 ? (
                   <p
                     className={cn(
                       // Typography
                       'text-xs text-muted-foreground',
                     )}
                   >
-                    No context bank entries were retrieved for the last prompt.
+                    No memory entries were retrieved for the last prompt.
                   </p>
                 ) : (
                   <div
@@ -314,7 +314,7 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
                       'gap-3',
                     )}
                   >
-                    {snapshot.contextBankEntries.map((entry) => (
+                    {snapshot.memoryEntries.map((entry) => (
                       <div
                         key={entry.id}
                         className={cn(

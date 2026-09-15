@@ -1,21 +1,21 @@
 import * as React from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
-import type { ContextBankEntry, ReindexResult } from '../types';
+import type { MemoryEntry, ReindexResult } from '../types';
 
 interface AiSettingsResponse {
   embeddingsBaseUrl?: string | null;
   embeddingsModel?: string | null;
 }
 
-export function useContextBank() {
-  const [entries, setEntries] = React.useState<ContextBankEntry[]>([]);
+export function useMemory() {
+  const [entries, setEntries] = React.useState<MemoryEntry[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [editingEntry, setEditingEntry] = React.useState<ContextBankEntry | null>(null);
-  const [deletingEntry, setDeletingEntry] = React.useState<ContextBankEntry | null>(null);
+  const [editingEntry, setEditingEntry] = React.useState<MemoryEntry | null>(null);
+  const [deletingEntry, setDeletingEntry] = React.useState<MemoryEntry | null>(null);
   const [reindexing, setReindexing] = React.useState(false);
   const [embeddingsActive, setEmbeddingsActive] = React.useState(false);
   const [embeddingsModel, setEmbeddingsModel] = React.useState<string | null>(null);
@@ -35,7 +35,7 @@ export function useContextBank() {
   const loadEntries = React.useCallback(async (query?: string) => {
     try {
       setLoading(true);
-      const data = await invoke<ContextBankEntry[]>('list_context_bank_entries', {
+      const data = await invoke<MemoryEntry[]>('list_memory_entries', {
         query: query?.trim() ? query.trim() : null,
       });
       setEntries(data);
@@ -43,8 +43,8 @@ export function useContextBank() {
         setSelectedId(null);
       }
     } catch (error) {
-      console.error('Failed to load context bank entries:', error);
-      toast.error(`Failed to load context bank: ${error}`);
+      console.error('Failed to load memory entries:', error);
+      toast.error(`Failed to load memory: ${error}`);
     } finally {
       setLoading(false);
     }
@@ -81,19 +81,19 @@ export function useContextBank() {
     setDialogOpen(true);
   }, []);
 
-  const handleOpenEdit = React.useCallback((entry: ContextBankEntry) => {
+  const handleOpenEdit = React.useCallback((entry: MemoryEntry) => {
     setEditingEntry(entry);
     setDialogOpen(true);
   }, []);
 
   const handleTogglePin = React.useCallback(
-    async (entry: ContextBankEntry, event?: React.MouseEvent) => {
+    async (entry: MemoryEntry, event?: React.MouseEvent) => {
       if (event) {
         event.stopPropagation();
       }
       const nextPinned = !entry.pinned;
       try {
-        await invoke('set_context_bank_entry_pinned', {
+        await invoke('set_memory_entry_pinned', {
           entryId: entry.id,
           pinned: nextPinned,
         });
@@ -119,7 +119,7 @@ export function useContextBank() {
       url?: string;
     }) => {
       try {
-        const payload: ContextBankEntry = {
+        const payload: MemoryEntry = {
           id: editingEntry?.id ?? '',
           title: draft.title.trim(),
           content: draft.content.trim(),
@@ -132,7 +132,7 @@ export function useContextBank() {
           updatedAt: '',
         };
 
-        const saved = await invoke<ContextBankEntry>('save_context_bank_entry', {
+        const saved = await invoke<MemoryEntry>('save_memory_entry', {
           entry: payload,
         });
 
@@ -142,7 +142,7 @@ export function useContextBank() {
         await loadEntries(searchQuery);
         toast.success(editingEntry ? 'Entry updated' : 'Entry created');
       } catch (error) {
-        console.error('Failed to save context bank entry:', error);
+        console.error('Failed to save memory entry:', error);
         toast.error(`Failed to save entry: ${error}`);
         throw error;
       }
@@ -153,7 +153,7 @@ export function useContextBank() {
   const handleDeleteEntry = React.useCallback(
     async (id: string) => {
       try {
-        await invoke('delete_context_bank_entry', { entryId: id });
+        await invoke('delete_memory_entry', { entryId: id });
         if (selectedId === id) {
           setSelectedId(null);
         }
@@ -161,7 +161,7 @@ export function useContextBank() {
         setEntries((current) => current.filter((item) => item.id !== id));
         toast.success('Entry deleted');
       } catch (error) {
-        console.error('Failed to delete context bank entry:', error);
+        console.error('Failed to delete memory entry:', error);
         toast.error(`Failed to delete entry: ${error}`);
       }
     },
@@ -171,7 +171,7 @@ export function useContextBank() {
   const handleReindex = React.useCallback(async () => {
     try {
       setReindexing(true);
-      const result = await invoke<ReindexResult>('reindex_context_bank_embeddings');
+      const result = await invoke<ReindexResult>('reindex_memory_embeddings');
       toast.success(
         `Reindexed embeddings: ${result.embedded} updated, ${result.failed} failed (${result.total} total)`
       );
@@ -217,4 +217,4 @@ export function useContextBank() {
   };
 }
 
-export type ContextBankState = ReturnType<typeof useContextBank>;
+export type MemoryState = ReturnType<typeof useMemory>;

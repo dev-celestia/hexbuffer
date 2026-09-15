@@ -690,84 +690,84 @@ impl HistoryBridge {
             .map_err(|e| e.to_string())
     }
 
-    // ── Context Bank ──────────────────────────────────────────────
+    // ── Memory ───────────────────────────────────────────────────
 
-    pub fn upsert_context_bank_entry(
+    pub fn upsert_memory_entry(
         &self,
-        entry: &crate::db::repository::types::ContextBankEntry,
+        entry: &crate::db::repository::types::MemoryEntry,
     ) -> Result<(), String> {
-        self.db.upsert_context_bank_entry(entry).map_err(|e| e.to_string())
+        self.db.upsert_memory_entry(entry).map_err(|e| e.to_string())
     }
 
-    pub fn update_context_bank_embedding(
+    pub fn update_memory_embedding(
         &self,
         entry_id: &str,
         embedding: &[f64],
         embedding_model: &str,
     ) -> Result<(), String> {
         self.db
-            .update_context_bank_embedding(entry_id, embedding, embedding_model)
+            .update_memory_embedding(entry_id, embedding, embedding_model)
             .map_err(|e| e.to_string())
     }
 
-    pub fn get_context_bank_entry(
+    pub fn get_memory_entry(
         &self,
         entry_id: &str,
-    ) -> Result<Option<crate::db::repository::types::ContextBankEntry>, String> {
-        self.db.get_context_bank_entry(entry_id).map_err(|e| e.to_string())
+    ) -> Result<Option<crate::db::repository::types::MemoryEntry>, String> {
+        self.db.get_memory_entry(entry_id).map_err(|e| e.to_string())
     }
 
-    pub fn delete_context_bank_entry(&self, entry_id: &str) -> Result<usize, String> {
-        self.db.delete_context_bank_entry(entry_id).map_err(|e| e.to_string())
+    pub fn delete_memory_entry(&self, entry_id: &str) -> Result<usize, String> {
+        self.db.delete_memory_entry(entry_id).map_err(|e| e.to_string())
     }
 
-    pub fn set_context_bank_entry_pinned(
+    pub fn set_memory_entry_pinned(
         &self,
         entry_id: &str,
         pinned: bool,
     ) -> Result<(), String> {
         self.db
-            .set_context_bank_entry_pinned(entry_id, pinned)
+            .set_memory_entry_pinned(entry_id, pinned)
             .map_err(|e| e.to_string())
     }
 
-    pub fn list_context_bank_entries(
+    pub fn list_memory_entries(
         &self,
         query: Option<String>,
-    ) -> Result<Vec<crate::db::repository::types::ContextBankEntry>, String> {
-        self.db.list_context_bank_entries(query).map_err(|e| e.to_string())
+    ) -> Result<Vec<crate::db::repository::types::MemoryEntry>, String> {
+        self.db.list_memory_entries(query).map_err(|e| e.to_string())
     }
 
-    pub fn search_context_bank_keyword(
+    pub fn search_memory_keyword(
         &self,
         query: &str,
         limit: i64,
-    ) -> Result<Vec<crate::db::repository::types::ContextBankEntry>, String> {
+    ) -> Result<Vec<crate::db::repository::types::MemoryEntry>, String> {
         self.db
-            .search_context_bank_keyword(query, limit)
+            .search_memory_keyword(query, limit)
             .map_err(|e| e.to_string())
     }
 
-    pub fn context_bank_entries_with_embeddings(
+    pub fn memory_entries_with_embeddings(
         &self,
         embedding_model: &str,
-    ) -> Result<Vec<crate::db::repository::types::ContextBankEntry>, String> {
+    ) -> Result<Vec<crate::db::repository::types::MemoryEntry>, String> {
         self.db
-            .context_bank_entries_with_embeddings(embedding_model)
+            .memory_entries_with_embeddings(embedding_model)
             .map_err(|e| e.to_string())
     }
 
-    pub fn context_bank_entries_missing_embeddings(
+    pub fn memory_entries_missing_embeddings(
         &self,
         embedding_model: &str,
-    ) -> Result<Vec<crate::db::repository::types::ContextBankEntry>, String> {
+    ) -> Result<Vec<crate::db::repository::types::MemoryEntry>, String> {
         self.db
-            .context_bank_entries_missing_embeddings(embedding_model)
+            .memory_entries_missing_embeddings(embedding_model)
             .map_err(|e| e.to_string())
     }
 
-    pub fn count_context_bank_entries(&self) -> Result<i64, String> {
-        self.db.count_context_bank_entries().map_err(|e| e.to_string())
+    pub fn count_memory_entries(&self) -> Result<i64, String> {
+        self.db.count_memory_entries().map_err(|e| e.to_string())
     }
 }
 

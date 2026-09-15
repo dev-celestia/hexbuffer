@@ -578,12 +578,15 @@ async fn execute_ai_analyze(
         messages: vec![crate::ai::types::AiChatMessage {
             role: "user".to_string(),
             content,
+            agent_id: None,
+            agent_name: None,
         }],
         workspaces: None,
         active_workspace_id: None,
         request_id: None,
         provider: None,
         model: None,
+        target_agent: None,
     };
     // Automation-driven analysis has no originating chat window; target the main
     // window. If the model requests tools, events go there and simply time out

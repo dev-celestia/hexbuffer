@@ -9,13 +9,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@celestia-project/ui';
-import type { ContextBankState } from '../hooks/use-context-bank';
+import type { MemoryState } from '../hooks/use-memory';
 
-interface ContextBankDeleteDialogProps {
-  state: ContextBankState;
+interface MemoryDeleteDialogProps {
+  state: MemoryState;
 }
 
-export function ContextBankDeleteDialog({ state }: Readonly<ContextBankDeleteDialogProps>) {
+export function MemoryDeleteDialog({ state }: Readonly<MemoryDeleteDialogProps>) {
   const { deletingEntry, setDeletingEntry, handleDeleteEntry } = state;
 
   return (
@@ -25,10 +25,10 @@ export function ContextBankDeleteDialog({ state }: Readonly<ContextBankDeleteDia
     >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Context Bank Entry?</AlertDialogTitle>
+          <AlertDialogTitle>Delete Memory Entry?</AlertDialogTitle>
           <AlertDialogDescription>
             Are you sure you want to delete &ldquo;{deletingEntry?.title}&rdquo;? This will
-            remove it and its vector index from the Context Bank. This action cannot be
+            remove it and its vector index from Memory. This action cannot be
             undone.
           </AlertDialogDescription>
         </AlertDialogHeader>

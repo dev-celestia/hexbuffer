@@ -405,7 +405,7 @@ export function useSettingsPage() {
         setProviderKeyStatus(nextKeyStatus);
       }
 
-      // Context-bank embeddings key: keyring-only pseudo provider.
+      // Memory embeddings key: keyring-only pseudo provider.
       if (aiSettings.embeddingsApiKey?.trim()) {
         nextKeyStatus = await invoke<AiKeyStatus>('set_ai_api_key', {
           provider: 'embeddings',

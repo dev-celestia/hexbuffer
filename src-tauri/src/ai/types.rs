@@ -18,7 +18,7 @@ pub struct AiSettings {
     /// Base URL for the `openai-compatible` provider (e.g. `https://api.openai.com/v1`).
     #[serde(default)]
     pub custom_base_url: Option<String>,
-    /// Optional embeddings endpoint used by the context bank vector search
+    /// Optional embeddings endpoint used by the memory vector search
     /// (OpenAI-compatible `/embeddings`). Empty = keyword fallback only.
     #[serde(default)]
     pub embeddings_base_url: Option<String>,
@@ -47,6 +47,10 @@ impl Default for AiSettings {
 pub struct AiChatMessage {
     pub role: String,
     pub content: String,
+    #[serde(default)]
+    pub agent_id: Option<String>,
+    #[serde(default)]
+    pub agent_name: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -68,6 +72,8 @@ pub struct AiChatRequest {
     pub provider: Option<String>,
     #[serde(default)]
     pub model: Option<String>,
+    #[serde(default)]
+    pub target_agent: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -76,6 +82,10 @@ pub struct AiChatResponse {
     pub provider: String,
     pub model: String,
     pub content: String,
+    #[serde(default)]
+    pub agent_id: Option<String>,
+    #[serde(default)]
+    pub agent_name: Option<String>,
     #[serde(default)]
     pub actions: Vec<AiChatAction>,
 }
@@ -153,6 +163,10 @@ pub struct ChatMessageRecord {
     pub session_id: String,
     pub role: String,
     pub content: String,
+    #[serde(default)]
+    pub agent_id: Option<String>,
+    #[serde(default)]
+    pub agent_name: Option<String>,
     pub created_at: String,
 }
 
@@ -217,7 +231,7 @@ pub struct AiDebugSnapshot {
     pub system_prompt: String,
     pub app_context_raw: Option<String>,
     pub app_context_object: Option<Value>,
-    pub context_bank_entries: Vec<crate::db::repository::types::ContextBankEntry>,
+    pub memory_entries: Vec<crate::db::repository::types::MemoryEntry>,
     pub tools: Vec<AiToolDebugInfo>,
     pub last_request_id: Option<String>,
     pub last_prompt: Option<String>,

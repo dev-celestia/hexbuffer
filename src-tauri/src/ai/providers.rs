@@ -1,7 +1,7 @@
 pub(crate) const AI_PROVIDERS: [&str; 3] = ["deepseek", "openai-compatible", "embeddings"];
 
 pub const OPENAI_COMPATIBLE_PROVIDER: &str = "openai-compatible";
-/// Keyring-only pseudo provider holding the optional context-bank embeddings key.
+/// Keyring-only pseudo provider holding the optional memory embeddings key.
 /// Not exposed in the frontend provider selector.
 pub const EMBEDDINGS_KEY_PROVIDER: &str = "embeddings";
 

@@ -65,6 +65,8 @@ impl Database {
                 session_id: row.get(1)?,
                 role: row.get(2)?,
                 content: row.get(3)?,
+                agent_id: None,
+                agent_name: None,
                 created_at: row.get(4)?,
             })
         })?;

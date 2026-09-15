@@ -3,7 +3,7 @@ pub mod browser;
 pub mod cert;
 pub mod chat_sessions;
 pub mod collaborator;
-pub mod context_bank;
+pub mod memory;
 pub mod hash;
 pub mod history;
 pub mod intercept;

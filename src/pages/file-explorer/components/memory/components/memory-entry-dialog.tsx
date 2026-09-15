@@ -11,13 +11,13 @@ import {
   Textarea,
 } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
-import type { ContextBankState } from '../hooks/use-context-bank';
+import type { MemoryState } from '../hooks/use-memory';
 
-interface ContextBankEntryDialogProps {
-  state: ContextBankState;
+interface MemoryEntryDialogProps {
+  state: MemoryState;
 }
 
-export function ContextBankEntryDialog({ state }: Readonly<ContextBankEntryDialogProps>) {
+export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
   const { dialogOpen, setDialogOpen, editingEntry, handleSaveEntry } = state;
 
   const [title, setTitle] = React.useState('');
@@ -83,7 +83,7 @@ export function ContextBankEntryDialog({ state }: Readonly<ContextBankEntryDialo
               "text-sm font-semibold"
             )}
           >
-            {editingEntry ? 'Edit Context Bank Note' : 'Add Context Bank Note'}
+            {editingEntry ? 'Edit Memory Note' : 'Add Memory Note'}
           </DialogTitle>
         </DialogHeader>
 

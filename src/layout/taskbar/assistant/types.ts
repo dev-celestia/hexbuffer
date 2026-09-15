@@ -14,6 +14,8 @@ export interface DashboardAiSettings {
 export interface DashboardChatMetadata {
   model?: string;
   provider?: DashboardAiProvider;
+  agentId?: string;
+  agentName?: string;
 }
 
 export type DashboardChatMessage = UIMessage<DashboardChatMetadata> & {
@@ -42,6 +44,8 @@ export interface ChatMessageRecord {
   sessionId: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
+  agentId?: string;
+  agentName?: string;
   createdAt: string;
 }
 
@@ -51,7 +55,7 @@ export interface AiToolDebugInfo {
   tier: string;
 }
 
-export interface AiDebugContextBankEntry {
+export interface AiDebugMemoryEntry {
   id: string;
   title: string;
   content: string;
@@ -70,7 +74,7 @@ export interface AiDebugSnapshot {
   systemPrompt: string;
   appContextRaw: string | null;
   appContextObject: Record<string, unknown> | null;
-  contextBankEntries: AiDebugContextBankEntry[];
+  memoryEntries: AiDebugMemoryEntry[];
   tools: AiToolDebugInfo[];
   lastRequestId: string | null;
   lastPrompt: string | null;

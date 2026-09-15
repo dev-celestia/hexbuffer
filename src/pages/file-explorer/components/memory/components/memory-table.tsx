@@ -22,11 +22,11 @@ import {
   TableRow,
 } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
-import type { ContextBankEntry } from '../types';
-import type { ContextBankState } from '../hooks/use-context-bank';
+import type { MemoryEntry } from '../types';
+import type { MemoryState } from '../hooks/use-memory';
 
-interface ContextBankTableProps {
-  state: ContextBankState;
+interface MemoryTableProps {
+  state: MemoryState;
 }
 
 function formatRelativeTime(isoString: string): string {
@@ -59,7 +59,7 @@ function getSourceVariant(source: string): 'default' | 'secondary' | 'outline' {
   }
 }
 
-export function ContextBankTable({ state }: Readonly<ContextBankTableProps>) {
+export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
   const {
     entries,
     loading,
@@ -83,7 +83,7 @@ export function ContextBankTable({ state }: Readonly<ContextBankTableProps>) {
       >
         <Empty>
           <EmptyHeader>
-            <EmptyTitle>No Context Bank Entries</EmptyTitle>
+            <EmptyTitle>No Memory Entries</EmptyTitle>
             <EmptyDescription>
               Store reusable security findings, scope notes, and AI insights. Entries are
               retrieved into AI chat per prompt via vector RAG or keyword search.

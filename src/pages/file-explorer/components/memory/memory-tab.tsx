@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { cn } from '@/lib/utils';
-import { useContextBank } from './hooks/use-context-bank';
-import { ContextBankToolbar } from './components/context-bank-toolbar';
-import { ContextBankTable } from './components/context-bank-table';
-import { ContextBankDetailPane } from './components/context-bank-detail-pane';
-import { ContextBankEntryDialog } from './components/context-bank-entry-dialog';
-import { ContextBankDeleteDialog } from './components/context-bank-delete-dialog';
+import { useMemory } from './hooks/use-memory';
+import { MemoryToolbar } from './components/memory-toolbar';
+import { MemoryTable } from './components/memory-table';
+import { MemoryDetailPane } from './components/memory-detail-pane';
+import { MemoryEntryDialog } from './components/memory-entry-dialog';
+import { MemoryDeleteDialog } from './components/memory-delete-dialog';
 
-export function ContextBankTab() {
-  const state = useContextBank();
+export function MemoryTab() {
+  const state = useMemory();
 
   return (
     <div
@@ -21,7 +21,7 @@ export function ContextBankTab() {
         "h-full"
       )}
     >
-      <ContextBankToolbar state={state} />
+      <MemoryToolbar state={state} />
 
       <div
         className={cn(
@@ -31,22 +31,22 @@ export function ContextBankTab() {
       >
         <ResizablePanelGroup orientation="horizontal" className="h-full min-h-0">
           <ResizablePanel defaultSize="65" minSize="40">
-            <ContextBankTable state={state} />
+            <MemoryTable state={state} />
           </ResizablePanel>
 
           {state.selectedEntry && (
             <>
               <ResizableHandle withHandle />
               <ResizablePanel defaultSize="35" minSize="25" maxSize="55">
-                <ContextBankDetailPane state={state} />
+                <MemoryDetailPane state={state} />
               </ResizablePanel>
             </>
           )}
         </ResizablePanelGroup>
       </div>
 
-      <ContextBankEntryDialog state={state} />
-      <ContextBankDeleteDialog state={state} />
+      <MemoryEntryDialog state={state} />
+      <MemoryDeleteDialog state={state} />
     </div>
   );
 }

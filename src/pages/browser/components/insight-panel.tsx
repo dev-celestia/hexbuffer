@@ -74,9 +74,9 @@ function AiInsightsPanelComponent({
     severityOrder,
   } = useAiInsightsPanel(insights);
 
-  const handleSaveInsightToContextBank = async (insight: AIInsight) => {
+  const handleSaveInsightToMemory = async (insight: AIInsight) => {
     try {
-      await invoke('save_context_bank_entry', {
+      await invoke('save_memory_entry', {
         entry: {
           id: '',
           title: insight.title,
@@ -88,10 +88,10 @@ function AiInsightsPanelComponent({
           pinned: false,
         },
       });
-      toast.success('Saved insight to Context Bank');
+      toast.success('Saved insight to Memory');
     } catch (error) {
-      console.error('Failed to save to Context Bank:', error);
-      toast.error(`Failed to save to Context Bank: ${error}`);
+      console.error('Failed to save to Memory:', error);
+      toast.error(`Failed to save to Memory: ${error}`);
     }
   };
 
@@ -538,12 +538,12 @@ function AiInsightsPanelComponent({
                           onKeyDown={(event) => event.stopPropagation()}
                           onClick={(event) => {
                             event.stopPropagation();
-                            void handleSaveInsightToContextBank(insight);
+                            void handleSaveInsightToMemory(insight);
                           }}
-                          title="Save this finding into the Context Bank"
+                          title="Save this finding into Memory"
                         >
                           <BookmarkSimpleIcon className="h-3.5 w-3.5" />
-                          Context Bank
+Memory
                         </Button>
                       </div>
                     </div>
@@ -670,10 +670,10 @@ function AiInsightsPanelComponent({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => void handleSaveInsightToContextBank(detailItem.insight)}
+                onClick={() => void handleSaveInsightToMemory(detailItem.insight)}
               >
                 <BookmarkSimpleIcon className="size-3.5 mr-1" />
-                Save to Context Bank
+                Save to Memory
               </Button>
             )}
             <Button size="sm" variant="outline" onClick={handleDetailOpenPage} disabled={!detailPage}>

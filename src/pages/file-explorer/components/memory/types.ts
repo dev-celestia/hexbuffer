@@ -1,4 +1,4 @@
-export interface ContextBankEntry {
+export interface MemoryEntry {
   id: string;
   title: string;
   content: string;

@@ -9,13 +9,13 @@ import {
 } from '@phosphor-icons/react';
 import { Badge, Button, Input } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
-import type { ContextBankState } from '../hooks/use-context-bank';
+import type { MemoryState } from '../hooks/use-memory';
 
-interface ContextBankToolbarProps {
-  state: ContextBankState;
+interface MemoryToolbarProps {
+  state: MemoryState;
 }
 
-export function ContextBankToolbar({ state }: Readonly<ContextBankToolbarProps>) {
+export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
   const {
     searchQuery,
     setSearchQuery,
@@ -65,7 +65,7 @@ export function ContextBankToolbar({ state }: Readonly<ContextBankToolbarProps>)
         <Input
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search context bank (title, content, tags)…"
+          placeholder="Search memory (title, content, tags)…"
           className={cn(
             // Sizing & Spacing
             "h-7 w-full ps-8 pe-7",
@@ -125,7 +125,7 @@ export function ContextBankToolbar({ state }: Readonly<ContextBankToolbarProps>)
           title={
             embeddingsActive
               ? `Vector search enabled with ${embeddingsModel}. ${embeddedCount}/${entries.length} entries have vectors.`
-              : 'Vector search is disabled. Context Bank falls back to SQLite FTS5 keyword matching.'
+              : 'Vector search is disabled. Memory falls back to SQLite FTS5 keyword matching.'
           }
         >
           <LightningIcon

@@ -28,6 +28,8 @@ import type { PendingToolConfirmation } from '../lib/ai-tools/confirmation';
 import type { TrackedAction } from '../lib/ai-tools/tracker';
 import { getFileParts, getMessageText, getReasoningParts, hasContent, providerLabel } from '../lib/message-utils';
 import { getUserPromptOnly, parseAttachedFilesFromMessage } from '../lib/file-utils';
+import { AgentBadgeHeader } from './agent-badge-header';
+import { getAgentInfo } from '../constants/agents';
 import { cn } from '@/lib/utils';
 
 interface AssistantConversationProps {

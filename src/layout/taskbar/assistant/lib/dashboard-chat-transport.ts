@@ -9,6 +9,7 @@ const WINDOW_EVENT_TARGET = { kind: 'AnyLabel' as const, label: getCurrentWindow
 
 interface DashboardChatBody {
   aiSettings?: DashboardAiSettings;
+  targetAgent?: string;
 }
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -26,6 +27,8 @@ interface AiChatResponse {
   provider: DashboardAiSettings['provider'];
   model: string;
   content: string;
+  agentId?: string;
+  agentName?: string;
   actions?: AiChatAction[];
 }
 
@@ -33,6 +36,8 @@ interface AiChatStartedEvent {
   requestId: string;
   provider: string;
   model: string;
+  agentId?: string;
+  agentName?: string;
 }
 
 interface AiChatDeltaEvent {
@@ -156,6 +161,8 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
       execute: async ({ writer }) => {
         let provider = aiSettings?.provider;
         let model = aiSettings?.model;
+        let agentId: string | undefined = requestBody?.targetAgent;
+        let agentName: string | undefined;
         const textId = `response-${Date.now()}`;
 
         const isLocal = aiSettings?.provider === 'openai-compatible' && isLocalEndpoint(aiSettings?.customBaseUrl);
@@ -192,6 +199,8 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
             messageMetadata: {
               model,
               provider,
+              agentId,
+              agentName,
             },
           });
           writer.write({ type: 'text-start', id: textId });
@@ -224,6 +233,8 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
                 if (event.payload.requestId !== requestId) return;
                 provider = event.payload.provider as DashboardAiSettings['provider'];
                 model = event.payload.model;
+                if (event.payload.agentId) agentId = event.payload.agentId;
+                if (event.payload.agentName) agentName = event.payload.agentName;
                 ensureStarted();
               },
               { target: WINDOW_EVENT_TARGET },
@@ -284,10 +295,13 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
               activeWorkspaceId: repeaterStore.activeWorkspaceId,
               provider,
               model,
+              targetAgent: agentId,
             },
           });
           provider = response.provider;
           model = response.model;
+          if (response.agentId) agentId = response.agentId;
+          if (response.agentName) agentName = response.agentName;
 
           ensureStarted();
 

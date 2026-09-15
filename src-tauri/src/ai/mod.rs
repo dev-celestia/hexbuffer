@@ -1,3 +1,4 @@
+pub mod agents;
 pub mod auto_mark;
 pub mod chat;
 pub mod commands;

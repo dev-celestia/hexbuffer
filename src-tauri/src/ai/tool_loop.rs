@@ -47,10 +47,10 @@ const TOOL_RESULT_MAX_CHARS: usize = 4000;
 
 /// Native read-only tool: returns crawl session data straight from the app database.
 const CRAWL_CONTEXT_TOOL: &str = "get_crawl_context";
-/// Native context-bank tools: keyword search over, and saving notes into, the
-/// user-curated knowledge bank.
-const CONTEXT_BANK_SEARCH_TOOL: &str = "search_context_bank";
-const CONTEXT_BANK_SAVE_TOOL: &str = "save_context_note";
+/// Native memory tools: keyword search over, and saving notes into, the
+/// user's persistent memory.
+const MEMORY_SEARCH_TOOL: &str = "search_memory";
+const MEMORY_SAVE_TOOL: &str = "save_memory_note";
 
 /// Tier 1 — execute immediately: landing/local tools with no external side effects.
 const AUTO_APPROVED_TOOLS: &[&str] = &[
@@ -58,8 +58,12 @@ const AUTO_APPROVED_TOOLS: &[&str] = &[
     "create_collection",
     "create_folder",
     "create_endpoint",
-    CONTEXT_BANK_SEARCH_TOOL,
-    CONTEXT_BANK_SAVE_TOOL,
+    MEMORY_SEARCH_TOOL,
+    MEMORY_SAVE_TOOL,
+    super::agents::jwt_tools::DECODE_JWT_TOOL,
+    super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL,
+    super::agents::jwt_tools::TAMPER_JWT_TOOL,
+    super::agents::port_scanner_tools::TRIGGER_PORT_SCAN_TOOL,
 ];
 
 /// Tier 2 — require explicit user confirmation in chat before executing: tools that
@@ -191,15 +195,17 @@ fn crawl_context_definition() -> ToolDefinition {
 fn tool_definitions() -> Vec<ToolDefinition> {
     let mut definitions = frontend_tool_definitions();
     definitions.push(crawl_context_definition());
-    definitions.extend(context_bank_tool_definitions());
+    definitions.extend(memory_tool_definitions());
+    definitions.extend(super::agents::jwt_tools::jwt_tool_definitions());
+    definitions.extend(super::agents::port_scanner_tools::port_scanner_tool_definitions());
     definitions
 }
 
-fn context_bank_tool_definitions() -> Vec<ToolDefinition> {
+fn memory_tool_definitions() -> Vec<ToolDefinition> {
     vec![
         ToolDefinition {
-            name: CONTEXT_BANK_SEARCH_TOOL.to_string(),
-            description: "Search the user's context bank: a curated knowledge base of notes \
+            name: MEMORY_SEARCH_TOOL.to_string(),
+            description: "Search the user's memory: a curated knowledge base of notes \
             and saved findings about their targets (endpoints, auth quirks, prior results). \
             Returns the most relevant entries for a keyword query."
                 .to_string(),
@@ -212,10 +218,10 @@ fn context_bank_tool_definitions() -> Vec<ToolDefinition> {
             }),
         },
         ToolDefinition {
-            name: CONTEXT_BANK_SAVE_TOOL.to_string(),
-            description: "Save a note into the user's context bank for future sessions — e.g. \
+            name: MEMORY_SAVE_TOOL.to_string(),
+            description: "Save a note into the user's memory for future sessions — e.g. \
             a finding about a target, an endpoint quirk, or credentials format. The user can \
-            review and delete saved notes in File Explorer → Context Bank."
+            review and delete saved notes in File Explorer → Memory."
                 .to_string(),
             parameters: json!({
                 "type": "object",
@@ -239,7 +245,7 @@ fn execute_crawl_context(app: &AppHandle) -> String {
     }
 }
 
-fn execute_context_bank_search(app: &AppHandle, args: &Value) -> String {
+fn execute_memory_search(app: &AppHandle, args: &Value) -> String {
     let query = args
         .get("query")
         .and_then(|value| value.as_str())
@@ -250,9 +256,9 @@ fn execute_context_bank_search(app: &AppHandle, args: &Value) -> String {
     }
 
     let state = app.state::<crate::HistoryBridge>();
-    match state.search_context_bank_keyword(query, 8) {
+    match state.search_memory_keyword(query, 8) {
         Ok(entries) if entries.is_empty() => {
-            format!("No context bank entries match '{query}'.")
+            format!("No memory entries match '{query}'.")
         }
         Ok(entries) => {
             let payload: Vec<Value> = entries
@@ -270,11 +276,11 @@ fn execute_context_bank_search(app: &AppHandle, args: &Value) -> String {
             serde_json::to_string(&payload)
                 .unwrap_or_else(|error| format!("Failed to serialize results: {error}"))
         }
-        Err(error) => format!("Context bank search failed: {error}"),
+        Err(error) => format!("Memory search failed: {error}"),
     }
 }
 
-async fn execute_context_bank_save(app: &AppHandle, args: &Value) -> String {
+async fn execute_memory_save(app: &AppHandle, args: &Value) -> String {
     let title = args
         .get("title")
         .and_then(|value| value.as_str())
@@ -286,7 +292,7 @@ async fn execute_context_bank_save(app: &AppHandle, args: &Value) -> String {
         .unwrap_or("")
         .trim();
     if title.is_empty() || content.is_empty() {
-        return "Failed: both 'title' and 'content' are required to save a context note."
+        return "Failed: both 'title' and 'content' are required to save a memory note."
             .to_string();
     }
 
@@ -304,7 +310,7 @@ async fn execute_context_bank_save(app: &AppHandle, args: &Value) -> String {
         })
         .unwrap_or_default();
 
-    let mut entry = crate::db::repository::types::ContextBankEntry {
+    let mut entry = crate::db::repository::types::MemoryEntry {
         id: uuid::Uuid::new_v4().to_string(),
         title: title.to_string(),
         content: content.to_string(),
@@ -323,7 +329,7 @@ async fn execute_context_bank_save(app: &AppHandle, args: &Value) -> String {
     // has authorized third-party AI sharing (the embeddings endpoint may be external).
     let settings = match crate::ai::read_ai_settings(app) {
         Ok(settings) => settings,
-        Err(error) => return format!("Failed to save context note (settings unavailable): {error}"),
+        Err(error) => return format!("Failed to save memory note (settings unavailable): {error}"),
     };
     if let Ok(Some(config)) = super::embeddings::resolve_embeddings_config(&settings, app) {
         if super::embeddings::embeddings_sharing_allowed(&settings, &config.base_url) {
@@ -335,23 +341,23 @@ async fn execute_context_bank_save(app: &AppHandle, args: &Value) -> String {
                     entry.embedding_model = Some(config.model);
                 }
                 Err(error) => {
-                    eprintln!("[context-bank] embedding failed on AI save (stored without vector): {error}");
+                    eprintln!("[memory] embedding failed on AI save (stored without vector): {error}");
                 }
             }
         } else {
-            eprintln!("[context-bank] embeddings sharing disabled; note stored without vector");
+            eprintln!("[memory] embeddings sharing disabled; note stored without vector");
         }
     }
 
     let state = app.state::<crate::HistoryBridge>();
-    match state.upsert_context_bank_entry(&entry) {
+    match state.upsert_memory_entry(&entry) {
         Ok(()) => format!(
-            "Saved to the context bank: \"{}\" ({} tag(s)). The user can review it in \
-            File Explorer → Context Bank.",
+            "Saved to memory: \"{}\" ({} tag(s)). The user can review it in \
+            File Explorer → Memory.",
             entry.title,
             entry.tags.len()
         ),
-        Err(error) => format!("Failed to save the context note: {error}"),
+        Err(error) => format!("Failed to save the memory note: {error}"),
     }
 }
 
@@ -377,8 +383,8 @@ async fn execute_tool_call(
         return result;
     }
 
-    if tool_name == CONTEXT_BANK_SEARCH_TOOL {
-        let result = execute_context_bank_search(app, &args);
+    if tool_name == MEMORY_SEARCH_TOOL {
+        let result = execute_memory_search(app, &args);
         actions.push(AiChatAction {
             action: tool_name.to_string(),
             payload: args,
@@ -388,8 +394,52 @@ async fn execute_tool_call(
         return result;
     }
 
-    if tool_name == CONTEXT_BANK_SAVE_TOOL {
-        let result = execute_context_bank_save(app, &args).await;
+    if tool_name == MEMORY_SAVE_TOOL {
+        let result = execute_memory_save(app, &args).await;
+        actions.push(AiChatAction {
+            action: tool_name.to_string(),
+            payload: args,
+            result: Some(result.clone()),
+            created_at,
+        });
+        return result;
+    }
+
+    if tool_name == super::agents::jwt_tools::DECODE_JWT_TOOL {
+        let result = super::agents::jwt_tools::execute_decode_jwt(&args);
+        actions.push(AiChatAction {
+            action: tool_name.to_string(),
+            payload: args,
+            result: Some(result.clone()),
+            created_at,
+        });
+        return result;
+    }
+
+    if tool_name == super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL {
+        let result = super::agents::jwt_tools::execute_check_jwt_vulns(&args);
+        actions.push(AiChatAction {
+            action: tool_name.to_string(),
+            payload: args,
+            result: Some(result.clone()),
+            created_at,
+        });
+        return result;
+    }
+
+    if tool_name == super::agents::jwt_tools::TAMPER_JWT_TOOL {
+        let result = super::agents::jwt_tools::execute_tamper_jwt(&args);
+        actions.push(AiChatAction {
+            action: tool_name.to_string(),
+            payload: args,
+            result: Some(result.clone()),
+            created_at,
+        });
+        return result;
+    }
+
+    if tool_name == super::agents::port_scanner_tools::TRIGGER_PORT_SCAN_TOOL {
+        let result = super::agents::port_scanner_tools::execute_port_scan(&args).await;
         actions.push(AiChatAction {
             action: tool_name.to_string(),
             payload: args,
@@ -502,6 +552,8 @@ async fn execute_tool_call(
 pub struct ToolLoopOutput {
     pub content: String,
     pub actions: Vec<AiChatAction>,
+    pub agent_id: String,
+    pub agent_name: String,
 }
 
 /// Multi-turn streaming tool loop built directly on Rig 0.42.
@@ -514,6 +566,7 @@ pub async fn run_tool_loop(
     request_id: &str,
     config: &super::types::AiConfig,
     policy: &super::policy::SecurityApprovalPolicy,
+    agent: &super::agents::AgentSpec,
     history: Vec<Message>,
     prompt: String,
     mut cancel_rx: tokio::sync::watch::Receiver<bool>,
@@ -522,7 +575,8 @@ pub async fn run_tool_loop(
     let client =
         super::providers::create_openai_client(config).map_err(|e| e.to_string())?;
     let model = client.completion_model(&config.model);
-    let tools = tool_definitions();
+    let all_tools = tool_definitions();
+    let tools = super::agents::filter_tools_for_agent(agent, &all_tools);
 
     let mut chat_history = history;
     let mut actions: Vec<AiChatAction> = Vec::new();
@@ -536,7 +590,7 @@ pub async fn run_tool_loop(
 
         let mut req_builder = model
             .completion_request(prompt.clone())
-            .preamble(PREAMBLE.to_string())
+            .preamble(agent.preamble.to_string())
             .messages(chat_history.clone())
             .tools(tools.clone());
 
@@ -651,6 +705,8 @@ pub async fn run_tool_loop(
             return Ok(ToolLoopOutput {
                 content: accumulated_full_response,
                 actions,
+                agent_id: agent.slug.to_string(),
+                agent_name: agent.name.to_string(),
             });
         }
 

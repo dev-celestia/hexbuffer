@@ -10,13 +10,13 @@ import {
 } from '@phosphor-icons/react';
 import { Badge, Button, ScrollArea } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
-import type { ContextBankState } from '../hooks/use-context-bank';
+import type { MemoryState } from '../hooks/use-memory';
 
-interface ContextBankDetailPaneProps {
-  state: ContextBankState;
+interface MemoryDetailPaneProps {
+  state: MemoryState;
 }
 
-export function ContextBankDetailPane({ state }: Readonly<ContextBankDetailPaneProps>) {
+export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
   const {
     selectedEntry,
     setSelectedId,
@@ -43,7 +43,7 @@ export function ContextBankDetailPane({ state }: Readonly<ContextBankDetailPaneP
           "bg-card/30"
         )}
       >
-        <p>Select a context bank entry to inspect its contents and metadata.</p>
+        <p>Select a memory entry to inspect its contents and metadata.</p>
       </div>
     );
   }

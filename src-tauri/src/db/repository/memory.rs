@@ -1,6 +1,6 @@
 use rusqlite::{params, OptionalExtension, Result as SqlResult};
 
-use super::types::ContextBankEntry;
+use super::types::MemoryEntry;
 use super::Database;
 
 fn vector_to_blob(vector: &[f64]) -> Vec<u8> {
@@ -25,8 +25,8 @@ fn blob_to_vector(blob: &[u8]) -> Option<Vec<f64>> {
 const ENTRY_COLUMNS: &str = "id, title, content, tags, source_type, source_ref, url, pinned, \
      embedding, embedding_model, created_at, updated_at";
 
-fn row_to_entry(row: &rusqlite::Row<'_>) -> SqlResult<ContextBankEntry> {
-    Ok(ContextBankEntry {
+fn row_to_entry(row: &rusqlite::Row<'_>) -> SqlResult<MemoryEntry> {
+    Ok(MemoryEntry {
         id: row.get(0)?,
         title: row.get(1)?,
         content: row.get(2)?,
@@ -45,7 +45,7 @@ fn row_to_entry(row: &rusqlite::Row<'_>) -> SqlResult<ContextBankEntry> {
 }
 
 impl Database {
-    pub fn upsert_context_bank_entry(&self, entry: &ContextBankEntry) -> SqlResult<()> {
+    pub fn upsert_memory_entry(&self, entry: &MemoryEntry) -> SqlResult<()> {
         let conn = self.conn.lock();
         let tags_json = serde_json::to_string(&entry.tags)
             .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
@@ -85,7 +85,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn update_context_bank_embedding(
+    pub fn update_memory_embedding(
         &self,
         entry_id: &str,
         embedding: &[f64],
@@ -107,7 +107,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn get_context_bank_entry(&self, entry_id: &str) -> SqlResult<Option<ContextBankEntry>> {
+    pub fn get_memory_entry(&self, entry_id: &str) -> SqlResult<Option<MemoryEntry>> {
         let conn = self.conn.lock();
         conn.query_row(
             &format!(
@@ -119,7 +119,7 @@ impl Database {
         .optional()
     }
 
-    pub fn delete_context_bank_entry(&self, entry_id: &str) -> SqlResult<usize> {
+    pub fn delete_memory_entry(&self, entry_id: &str) -> SqlResult<usize> {
         let conn = self.conn.lock();
         conn.execute(
             "DELETE FROM context_bank_entries WHERE id = ?1",
@@ -127,7 +127,7 @@ impl Database {
         )
     }
 
-    pub fn set_context_bank_entry_pinned(
+    pub fn set_memory_entry_pinned(
         &self,
         entry_id: &str,
         pinned: bool,
@@ -146,10 +146,10 @@ impl Database {
 
     /// Lists entries for the management UI, optionally filtered by a LIKE query over
     /// title/content/tags. Pinned entries float to the top.
-    pub fn list_context_bank_entries(
+    pub fn list_memory_entries(
         &self,
         query: Option<String>,
-    ) -> SqlResult<Vec<ContextBankEntry>> {
+    ) -> SqlResult<Vec<MemoryEntry>> {
         let conn = self.conn.lock();
 
         match query.as_deref().map(str::trim).filter(|q| !q.is_empty()) {
@@ -180,11 +180,11 @@ impl Database {
 
     /// Full-text keyword search (FTS5, BM25-ranked). `query` is a free-form user/model
     /// string; it is converted into a tolerant OR-of-quoted-terms MATCH expression.
-    pub fn search_context_bank_keyword(
+    pub fn search_memory_keyword(
         &self,
         query: &str,
         limit: i64,
-    ) -> SqlResult<Vec<ContextBankEntry>> {
+    ) -> SqlResult<Vec<MemoryEntry>> {
         let fts_query = build_fts_query(query);
         if fts_query.is_empty() {
             return Ok(Vec::new());
@@ -207,10 +207,10 @@ impl Database {
 
     /// All entries carrying a vector produced by `embedding_model`, for the
     /// in-memory vector store used at retrieval time.
-    pub fn context_bank_entries_with_embeddings(
+    pub fn memory_entries_with_embeddings(
         &self,
         embedding_model: &str,
-    ) -> SqlResult<Vec<ContextBankEntry>> {
+    ) -> SqlResult<Vec<MemoryEntry>> {
         let conn = self.conn.lock();
         let mut stmt = conn.prepare(&format!(
             r#"SELECT {ENTRY_COLUMNS} FROM context_bank_entries
@@ -223,10 +223,10 @@ impl Database {
     }
 
     /// Entries without a vector for the current model (used by reindexing).
-    pub fn context_bank_entries_missing_embeddings(
+    pub fn memory_entries_missing_embeddings(
         &self,
         embedding_model: &str,
-    ) -> SqlResult<Vec<ContextBankEntry>> {
+    ) -> SqlResult<Vec<MemoryEntry>> {
         let conn = self.conn.lock();
         let mut stmt = conn.prepare(&format!(
             r#"SELECT {ENTRY_COLUMNS} FROM context_bank_entries
@@ -238,7 +238,7 @@ impl Database {
         Ok(rows)
     }
 
-    pub fn count_context_bank_entries(&self) -> SqlResult<i64> {
+    pub fn count_memory_entries(&self) -> SqlResult<i64> {
         let conn = self.conn.lock();
         conn.query_row(
             "SELECT COUNT(*) FROM context_bank_entries",
