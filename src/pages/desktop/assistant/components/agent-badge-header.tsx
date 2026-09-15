@@ -22,7 +22,6 @@ export function AgentBadgeHeader({
   timestamp,
 }: AgentBadgeHeaderProps) {
   const agent = getAgentInfo(agentId);
-  const IconComponent = agent.icon;
   const displayName = agentName || agent.name;
 
   return (
@@ -52,18 +51,14 @@ export function AgentBadgeHeader({
             agent.borderClass,
           )}
         >
-          {agent.avatarUrl ? (
-            <img
-              src={agent.avatarUrl}
-              alt={displayName}
-              className={cn(
-                // Sizing & Spacing
-                'size-full object-contain p-0.5 rounded-[5px]',
-              )}
-            />
-          ) : (
-            <IconComponent className={cn('size-3.5', agent.textClass)} />
-          )}
+          <img
+            src={agent.avatarUrl}
+            alt={displayName}
+            className={cn(
+              // Sizing & Spacing
+              'size-full object-contain p-0.5 rounded-[5px]',
+            )}
+          />
         </div>
         <span
           className={cn(

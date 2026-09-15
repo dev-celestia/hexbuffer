@@ -32,7 +32,6 @@ import {
 import {
   CaretDownIcon,
   CheckIcon,
-  CrownIcon,
   PaperclipIcon,
   PauseIcon,
   PlayIcon,
@@ -164,9 +163,8 @@ export function AssistantPromptBar({
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const currentAgent = selectedAgent !== 'all' && selectedAgent ? AGENTS_REGISTRY[selectedAgent] : null;
-  const CurrentAgentIcon = currentAgent?.icon ?? CrownIcon;
+  const currentAgentAvatar = currentAgent?.avatarUrl ?? AGENTS_REGISTRY.orchestrator.avatarUrl;
   const currentAgentLabel = currentAgent ? currentAgent.name.replace(' Agent', '') : 'Auto';
-  const currentAgentTextClass = currentAgent ? currentAgent.textClass : 'text-violet-400';
 
   const toggleExpand = useCallback(() => {
     setIsExpanded((prev) => {
@@ -346,7 +344,11 @@ export function AssistantPromptBar({
                         'hover:bg-accent hover:text-foreground transition-colors',
                       )}
                     >
-                      <CurrentAgentIcon className={cn('size-3.5 shrink-0', currentAgentTextClass)} />
+                      <img
+                        src={currentAgentAvatar}
+                        alt={currentAgentLabel}
+                        className="size-3.5 object-contain shrink-0 rounded-xs"
+                      />
                       <span className="truncate">{currentAgentLabel}</span>
                       <CaretDownIcon className="size-3 shrink-0 opacity-50 ml-0.5" />
                     </Button>
@@ -361,7 +363,11 @@ export function AssistantPromptBar({
                         className="flex items-center justify-between px-2 py-1.5 text-xs cursor-pointer rounded-md"
                       >
                         <div className="flex items-center gap-2">
-                          <CrownIcon className="size-3.5 text-violet-400" />
+                          <img
+                            src={AGENTS_REGISTRY.orchestrator.avatarUrl}
+                            alt="Auto"
+                            className="size-3.5 object-contain shrink-0 rounded-xs"
+                          />
                           <span>Auto (Orchestrator)</span>
                         </div>
                         {selectedAgent === 'all' && (
@@ -371,7 +377,6 @@ export function AssistantPromptBar({
 
                       {ALL_AGENTS_LIST.filter((a) => a.id !== 'orchestrator').map((agent) => {
                         const isSelected = selectedAgent === agent.id;
-                        const IconComponent = agent.icon;
                         return (
                           <DropdownMenuItem
                             key={agent.id}
@@ -379,7 +384,11 @@ export function AssistantPromptBar({
                             className="flex items-center justify-between px-2 py-1.5 text-xs cursor-pointer rounded-md"
                           >
                             <div className="flex items-center gap-2">
-                              <IconComponent className={cn('size-3.5', agent.textClass)} />
+                              <img
+                                src={agent.avatarUrl}
+                                alt={agent.name}
+                                className="size-3.5 object-contain shrink-0 rounded-xs"
+                              />
                               <span>{agent.name.replace(' Agent', '')}</span>
                             </div>
                             {isSelected && (
