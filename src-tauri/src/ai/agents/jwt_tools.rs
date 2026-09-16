@@ -78,6 +78,35 @@ fn encode_b64url(bytes: &[u8]) -> String {
     general_purpose::URL_SAFE_NO_PAD.encode(bytes)
 }
 
+/// Cheap structural check: exactly three dot-separated segments whose header decodes to a
+/// JSON object carrying an `alg` field. High-signal for "this is a JWT" without needing the
+/// signing key (we cannot verify the signature, only its presence).
+pub fn looks_like_jwt(token: &str) -> bool {
+    let parts: Vec<&str> = token.split('.').collect();
+    if parts.len() != 3 || parts[0].len() < 4 || parts[1].len() < 4 {
+        return false;
+    }
+    match decode_b64url(parts[0]) {
+        Ok(bytes) => serde_json::from_str::<Value>(&String::from_utf8_lossy(&bytes))
+            .map(|value| value.get("alg").is_some())
+            .unwrap_or(false),
+        Err(_) => false,
+    }
+}
+
+/// True when any whitespace-delimited token in `text` looks like a JWT. Used to route a
+/// pasted token to the JWT Agent deterministically, instead of trusting the model to
+/// notice it and call the decoder.
+pub fn text_contains_jwt(text: &str) -> bool {
+    text.split_whitespace().any(|word| {
+        // A pasted token is often wrapped in quotes, backticks, or trailing punctuation.
+        let cleaned = word.trim_matches(|c: char| {
+            !(c.is_ascii_alphanumeric() || c == '.' || c == '-' || c == '_')
+        });
+        looks_like_jwt(cleaned)
+    })
+}
+
 pub fn execute_decode_jwt(args: &Value) -> String {
     let token = args.get("token").and_then(|v| v.as_str()).unwrap_or("").trim();
     if token.is_empty() {

@@ -775,6 +775,7 @@ pub fn is_terminal_action_tool(tool_name: &str) -> bool {
         tool_name,
         "save_memory_note"
             | "write_note"
+            | "decode_jwt"
             | "send_to_repeater"
             | "create_collection"
             | "create_folder"
@@ -1131,7 +1132,13 @@ pub async fn run_tool_loop(
 
             // If a specialist agent is mapped to this tool, emit a separate agent message bubble!
             if let Some(spec_agent) = get_agent_for_tool(&name) {
-                if agent.slug == "orchestrator" || agent.slug != spec_agent.slug {
+                // Emit a specialist bubble for coordinating agents, and always for a
+                // terminal action tool so the deterministic result is shown in chat even
+                // when the active agent is the tool's own specialist.
+                if agent.slug == "orchestrator"
+                    || agent.slug != spec_agent.slug
+                    || is_terminal_action_tool(&name)
+                {
                     let formatted = format_specialist_message(spec_agent, &name, &args, &tool_result);
                     let agent_msg = super::types::AiChatAgentMessage {
                         id: format!("msg-agent-{}", uuid::Uuid::new_v4()),

@@ -312,6 +312,10 @@ pub async fn send_ai_chat_message_impl(
             .unwrap_or_else(|| &super::agents::ALL_AGENTS[0])
     } else if let Some(mentioned) = super::agents::resolve_agent_by_mention_or_slug(&prompt) {
         mentioned
+    } else if super::agents::jwt_tools::text_contains_jwt(&prompt) {
+        // A pasted JWT is unambiguous: route it to the JWT Agent so the deterministic
+        // decoder runs, instead of leaving the model to hand-decode base64 in its head.
+        super::agents::get_agent_spec(super::agents::AgentId::Jwt)
     } else {
         &super::agents::ALL_AGENTS[0]
     };
