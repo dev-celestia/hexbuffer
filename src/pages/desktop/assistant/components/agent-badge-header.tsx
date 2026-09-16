@@ -45,7 +45,7 @@ export function AgentBadgeHeader({
             // Layout & Positioning
             'relative flex items-center justify-center shrink-0 overflow-hidden',
             // Sizing & Spacing
-            'size-6 rounded-md',
+            'size-6 rounded-full',
             // Backgrounds & Borders
             'border shadow-2xs bg-card',
             agent.borderClass,
@@ -56,7 +56,7 @@ export function AgentBadgeHeader({
             alt={displayName}
             className={cn(
               // Sizing & Spacing
-              'size-full object-contain p-0.5 rounded-[5px]',
+              'size-full object-contain p-0.5 rounded-full',
             )}
           />
         </div>

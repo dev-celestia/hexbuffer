@@ -80,9 +80,9 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
   },
   notes: {
     id: 'notes',
-    name: 'Notes Agent',
-    role: 'Knowledge & Memory',
-    description: 'Stores research findings, credential formats, and persistent notes.',
+    name: 'Memory Agent',
+    role: 'Retrieval & Knowledge',
+    description: 'Stores research findings, credential formats, and retrieves them as context.',
     avatarUrl: notesAvatar,
     token: 'agent-notes',
     badgeClass: 'bg-agent-notes/10 text-agent-notes border-agent-notes/30',
@@ -129,7 +129,7 @@ export function getAgentInfo(agentId?: string | null): AgentInfo {
   if (normalized.includes('traffic') || normalized.includes('http')) return AGENTS_REGISTRY.http_traffic;
   if (normalized.includes('repeat')) return AGENTS_REGISTRY.repeater;
   if (normalized.includes('intrud') || normalized.includes('fuzz')) return AGENTS_REGISTRY.intruder;
-  if (normalized.includes('note') || normalized.includes('memo')) return AGENTS_REGISTRY.notes;
+  if (normalized.includes('note') || normalized.includes('memo') || normalized.includes('memory')) return AGENTS_REGISTRY.notes;
   if (normalized.includes('port') || normalized.includes('scan')) return AGENTS_REGISTRY.port_scanner;
   if (normalized.includes('jwt') || normalized.includes('token')) return AGENTS_REGISTRY.jwt;
   return AGENTS_REGISTRY.orchestrator;

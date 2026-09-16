@@ -4,6 +4,7 @@ pub mod cert;
 pub mod chat_sessions;
 pub mod collaborator;
 pub mod memory;
+pub mod notes;
 pub mod hash;
 pub mod history;
 pub mod intercept;

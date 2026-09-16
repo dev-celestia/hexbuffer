@@ -25,6 +25,12 @@ fn blob_to_vector(blob: &[u8]) -> Option<Vec<f64>> {
 const ENTRY_COLUMNS: &str = "id, title, content, tags, source_type, source_ref, url, pinned, \
      embedding, embedding_model, created_at, updated_at";
 
+/// Same columns as [`ENTRY_COLUMNS`], qualified with the `e` alias. Required when
+/// `context_bank_entries` is joined against the FTS table, which also exposes
+/// `title`, `content`, and `tags`.
+const ENTRY_COLUMNS_QUALIFIED: &str = "e.id, e.title, e.content, e.tags, e.source_type, \
+     e.source_ref, e.url, e.pinned, e.embedding, e.embedding_model, e.created_at, e.updated_at";
+
 fn row_to_entry(row: &rusqlite::Row<'_>) -> SqlResult<MemoryEntry> {
     Ok(MemoryEntry {
         id: row.get(0)?,
@@ -192,9 +198,9 @@ impl Database {
 
         let conn = self.conn.lock();
         let mut stmt = conn.prepare(&format!(
-            r#"SELECT {ENTRY_COLUMNS}
+            r#"SELECT {ENTRY_COLUMNS_QUALIFIED}
                FROM context_bank_entries e
-               JOIN context_bank_fts f ON f.rowid = e.rowid
+               JOIN context_bank_fts ON context_bank_fts.rowid = e.rowid
                WHERE context_bank_fts MATCH ?1
                ORDER BY bm25(context_bank_fts), e.pinned DESC
                LIMIT ?2"#
@@ -257,4 +263,68 @@ fn build_fts_query(query: &str) -> String {
         .map(|term| format!("\"{}\"", term.replace('"', "")))
         .collect();
     terms.join(" OR ")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::db::repository::types::MemoryEntry;
+
+    fn entry(id: &str, title: &str, content: &str, tags: &[&str]) -> MemoryEntry {
+        MemoryEntry {
+            id: id.to_string(),
+            title: title.to_string(),
+            content: content.to_string(),
+            tags: tags.iter().map(|t| t.to_string()).collect(),
+            source_type: "user".to_string(),
+            source_ref: None,
+            url: None,
+            pinned: false,
+            embedding: None,
+            embedding_model: None,
+            created_at: "2026-01-01T00:00:00Z".to_string(),
+            updated_at: "2026-01-01T00:00:00Z".to_string(),
+        }
+    }
+
+    #[test]
+    fn test_search_memory_keyword_resolves_joined_columns() {
+        let db = Database::new(std::path::PathBuf::from(":memory:"))
+            .expect("failed to create in-memory db");
+        db.init().expect("db init failed");
+
+        db.upsert_memory_entry(&entry(
+            "mem-1",
+            "Repeater request target",
+            "The repeater sends a request to the target host.",
+            &["repeater"],
+        ))
+        .expect("insert mem-1 failed");
+
+        db.upsert_memory_entry(&entry(
+            "mem-2",
+            "Proxy logging",
+            "Proxy logs are stored on disk.",
+            &["proxy"],
+        ))
+        .expect("insert mem-2 failed");
+
+        let results = db
+            .search_memory_keyword("repeater", 10)
+            .expect("keyword search failed");
+
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].id, "mem-1");
+        assert_eq!(results[0].title, "Repeater request target");
+    }
+
+    #[test]
+    fn test_search_memory_keyword_returns_empty_for_blank_query() {
+        let db = Database::new(std::path::PathBuf::from(":memory:"))
+            .expect("failed to create in-memory db");
+        db.init().expect("db init failed");
+
+        let results = db.search_memory_keyword("   ", 10).expect("search failed");
+        assert!(results.is_empty());
+    }
 }

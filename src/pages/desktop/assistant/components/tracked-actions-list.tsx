@@ -99,7 +99,7 @@ export function TrackedActionsList({ trackedActions, isStreaming }: TrackedActio
                     // Layout & Positioning
                     'group w-full min-w-0 overflow-hidden',
                     // Backgrounds & Borders
-                    'rounded-lg border border-border/50 bg-muted/20',
+                    'rounded-md border border-border/50 bg-muted/20',
                   )}
                 >
                   <CollapsibleTrigger

@@ -12,6 +12,7 @@ import {
   CopyIcon,
   DownloadSimpleIcon,
   SelectionAllIcon,
+  BrainIcon,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import type { Scratchpad } from '@/stores/scratchpad';
@@ -28,6 +29,7 @@ export interface NotesEditorToolbarProps {
   onSelectAll: () => void;
   onCopyNote: () => void;
   onExportNote: () => void;
+  onPromoteNote: () => void;
 }
 
 export function NotesEditorToolbar({
@@ -42,6 +44,7 @@ export function NotesEditorToolbar({
   onSelectAll,
   onCopyNote,
   onExportNote,
+  onPromoteNote,
 }: NotesEditorToolbarProps) {
   const isMac = typeof window !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 
@@ -255,6 +258,26 @@ export function NotesEditorToolbar({
             title="Export Note as Markdown (.md)"
           >
             <DownloadSimpleIcon className="size-3.5" />
+          </Button>
+
+          {/* Promote to Memory */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onPromoteNote}
+            className={cn(
+              // Sizing & Spacing
+              "size-7 p-0",
+
+              // Typography
+              "text-xs text-muted-foreground hover:text-foreground",
+
+              // Interactive & States
+              "cursor-pointer"
+            )}
+            title="Promote to Memory (makes this note available to the AI as context)"
+          >
+            <BrainIcon className="size-3.5" />
           </Button>
         </div>
 

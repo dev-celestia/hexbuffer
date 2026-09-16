@@ -142,6 +142,7 @@ export function NotesPage() {
       </div>
 
       {/* Tabs Layout */}
+      {hook.notesLoaded ? (
       <TabbedPageLayout
         tabs={hook.tabs}
         activeTabId={hook.activeId}
@@ -168,6 +169,19 @@ export function NotesPage() {
       >
         <NotesEditorPane hook={hook} />
       </TabbedPageLayout>
+      ) : (
+        <div
+          className={cn(
+            // Layout & Positioning
+            "flex flex-1 items-center justify-center min-h-0 w-full",
+
+            // Typography
+            "text-xs text-muted-foreground"
+          )}
+        >
+          Loading notes...
+        </div>
+      )}
 
       <SavedNotesDialog
         isOpen={hook.isSavedNotesOpen}

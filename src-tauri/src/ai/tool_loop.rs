@@ -784,13 +784,13 @@ pub fn format_specialist_message(
             let title = args
                 .get("title")
                 .and_then(|v| v.as_str())
-                .unwrap_or("Untitled Note");
+                .unwrap_or("Untitled Memory Entry");
             let content = args
                 .get("content")
                 .and_then(|v| v.as_str())
                 .unwrap_or("");
             format!(
-                "📝 **Note Saved to Persistent Memory**\n\n- **Title:** {title}\n- **Content:** {content}\n\n*Stored in your persistent memory knowledge base.*"
+                "📝 **Saved to Memory**\n\n- **Title:** {title}\n- **Content:** {content}\n\n*Stored in your persistent memory knowledge base and retrievable as context in future sessions.*"
             )
         }
         "search_memory" => {

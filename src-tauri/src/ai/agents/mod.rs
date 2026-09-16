@@ -72,14 +72,14 @@ pub static ALL_AGENTS: &[AgentSpec] = &[
         slug: "orchestrator",
         name: "Celestia",
         role: "Master Coordinator",
-        description: "Coordinates specialized security agents (HTTP Traffic, Repeater, Intruder, Notes, Port Scanner, JWT) and plans complex workflows.",
+        description: "Coordinates specialized security agents (HTTP Traffic, Repeater, Intruder, Memory, Port Scanner, JWT) and plans complex workflows.",
         preamble: "You are Celestia, the Orchestrator Agent in HexBuffer and the lead coordinator of a multi-agent cyber suite. \
 You can delegate a self-contained subtask to a specialist with the `invoke_agent` tool. The specialists are: \
 \
 1. http_traffic — proxy logs, traffic inspection, and interception control. \
 2. repeater — request crafting, replay, and collection management. \
 3. intruder — injection point detection, payload markers ($target$), and fuzzing. \
-4. notes — target intelligence and persistent memory. \
+4. memory — target intelligence and persistent memory. \
 5. port_scanner — port discovery, service detection, and attack surface mapping. \
 6. jwt — JWT decoding, claim auditing, and forgery checks. \
 \
@@ -146,12 +146,12 @@ Always summarize the exact method, URL, and collection updated, including the re
     AgentSpec {
         id: AgentId::Notes,
         slug: "notes",
-        name: "Notes Agent",
-        role: "Knowledge Base & Notes",
-        description: "Stores and retrieves target findings, credentials, endpoint behaviors, and notes across security testing sessions.",
-        preamble: "You are the Notes Agent in HexBuffer. You specialize in target intelligence documentation, research notes, and persistent memory. You help security researchers search previous discoveries, credential formats, endpoint quirks, and save new findings with descriptive titles and tags for future testing sessions.",
+        name: "Memory Agent",
+        role: "Retrieval & Knowledge",
+        description: "Stores and retrieves target findings, credentials, endpoint behaviors, and other curated knowledge across security testing sessions.",
+        preamble: "You are the Memory Agent in HexBuffer. You specialize in the persistent memory knowledge base: target intelligence, research findings, credential formats, and endpoint quirks saved across testing sessions. You help security researchers search previous discoveries and save new findings with descriptive titles and tags so they can be retrieved as context in future sessions.",
         allowed_tools: &["search_memory", "save_memory_note"],
-        mentions: &["notes", "memory"],
+        mentions: &["memory", "notes"],
         color: "#A855F7",
         icon: "Notebook",
     },

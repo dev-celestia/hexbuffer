@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
+import { useScratchpadStore } from '@/stores/scratchpad';
 import type { MemoryEntry, ReindexResult } from '../types';
 
 interface AiSettingsResponse {
@@ -189,6 +190,25 @@ export function useMemory() {
     toast.success('Content copied to clipboard');
   }, []);
 
+  /**
+   * Copies a memory entry into the scratchpad as a new note. Memory and notes are
+   * separate stores by design; this is the explicit, user-initiated transfer back.
+   */
+  const handleSaveAsNote = React.useCallback((entry: MemoryEntry) => {
+    const newId = useScratchpadStore
+      .getState()
+      .addScratchpad(entry.title, entry.content);
+    if (newId) {
+      toast.success('Saved as note', {
+        description: `"${entry.title}" is now open in the Notes tab.`,
+      });
+    } else {
+      toast.error('Could not create note', {
+        description: 'The note limit (100) has been reached.',
+      });
+    }
+  }, []);
+
   return {
     entries,
     loading,
@@ -214,6 +234,7 @@ export function useMemory() {
     handleDeleteEntry,
     handleReindex,
     handleCopyContent,
+    handleSaveAsNote,
   };
 }
 

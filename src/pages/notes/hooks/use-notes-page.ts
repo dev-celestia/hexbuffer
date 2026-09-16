@@ -5,6 +5,7 @@ import type { PageTabItem } from '@/layout/tabs-layout/types';
 import type { TextEditorInstance, MonacoInstance } from '@celestia-project/ui';
 import { downloadAsMarkdown, copyNoteToClipboard } from '../lib/helpers';
 import { saveBase64ToLocalExplorer } from '../lib/image-helpers';
+import { promoteNoteToMemory } from '../lib/memory-bridge';
 import { formatMarkdownImage } from '@celestia-project/ui';
 
 
@@ -25,6 +26,7 @@ export function useNotesPage() {
     closeScratchpadsToLeft,
     closeScratchpadsToRight,
     closeAllTabs,
+    notesLoaded,
   } = useScratchpadStore();
 
   const [editingId, setEditingId] = React.useState<string | null>(null);
@@ -197,6 +199,22 @@ export function useNotesPage() {
     }
   }, [activeNote]);
 
+  const handlePromoteActiveNote = React.useCallback(async () => {
+    if (!activeNote) return;
+    if (!activeNote.note.trim()) {
+      toast.error('Cannot promote an empty note');
+      return;
+    }
+    try {
+      await promoteNoteToMemory(activeNote);
+      toast.success('Promoted to Memory', {
+        description: `"${activeNote.name}" is now available to the AI as context.`,
+      });
+    } catch (error) {
+      toast.error(`Failed to promote note: ${error}`);
+    }
+  }, [activeNote]);
+
   // Handle Cmd+S on window
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -218,6 +236,7 @@ export function useNotesPage() {
   return {
     tabs,
     notes,
+    notesLoaded,
     openTabIds,
     activeId,
     activeNote,
@@ -238,6 +257,7 @@ export function useNotesPage() {
     handleSelectAll,
     handleExportActiveNote,
     handleCopyActiveNote,
+    handlePromoteActiveNote,
     handleInsertDrawing,
     handleStartRename,
     handleRenameSubmit,

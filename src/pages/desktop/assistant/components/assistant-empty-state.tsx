@@ -24,7 +24,7 @@ export function AssistantEmptyState({ model, providerDisplay }: AssistantEmptySt
             // Sizing & Spacing
             'max-w-md w-full',
             // Backgrounds & Borders
-            'rounded-xl border border-border/70 bg-card shadow-xs',
+            'rounded-lg border border-border/70 bg-card shadow-xs',
           )}
         >
           <AgentHeader name="Celestia" model={model || 'Ready'} />

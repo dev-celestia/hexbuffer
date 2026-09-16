@@ -52,6 +52,7 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: SavedNotesDialogProps
     handleRenameCancel,
     handleExport,
     handleCopy,
+    handlePromoteToMemory,
   } = manager;
 
   return (
@@ -198,6 +199,7 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: SavedNotesDialogProps
                   onDuplicate={() => handleDuplicate(note.id)}
                   onExport={() => handleExport(note)}
                   onCopy={() => handleCopy(note)}
+                  onPromote={() => void handlePromoteToMemory(note.id)}
                   onStartDelete={() => setDeleteConfirmId(note.id)}
                   onCancelDelete={() => setDeleteConfirmId(null)}
                   onConfirmDelete={() => handleDeletePermanently(note.id)}

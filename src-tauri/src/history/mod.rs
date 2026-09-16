@@ -801,6 +801,28 @@ impl HistoryBridge {
     pub fn count_memory_entries(&self) -> Result<i64, String> {
         self.db.count_memory_entries().map_err(|e| e.to_string())
     }
+
+    // ── Notes ────────────────────────────────────────────────────
+
+    pub fn list_notes(&self) -> Result<Vec<crate::NoteRecord>, String> {
+        self.db.list_notes().map_err(|e| e.to_string())
+    }
+
+    pub fn upsert_note(&self, record: &crate::NoteRecord) -> Result<crate::NoteRecord, String> {
+        self.db.upsert_note(record).map_err(|e| e.to_string())
+    }
+
+    pub fn import_notes(&self, records: &[crate::NoteRecord]) -> Result<usize, String> {
+        self.db.import_notes(records).map_err(|e| e.to_string())
+    }
+
+    pub fn delete_note(&self, id: &str) -> Result<usize, String> {
+        self.db.delete_note(id).map_err(|e| e.to_string())
+    }
+
+    pub fn delete_notes(&self, ids: &[String]) -> Result<usize, String> {
+        self.db.delete_notes(ids).map_err(|e| e.to_string())
+    }
 }
 
 fn normalize_optional_string(value: Option<String>) -> Option<String> {

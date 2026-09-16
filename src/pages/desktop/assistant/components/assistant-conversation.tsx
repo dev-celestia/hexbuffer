@@ -259,7 +259,7 @@ export function AssistantConversation({
                             // Typography
                             'text-xs text-muted-foreground',
                             // Backgrounds & Borders
-                            'rounded-xl border border-border/60 bg-muted/30',
+                            'rounded-lg border border-border/60 bg-muted/30',
                           )}
                         >
                           {isPaused ? (

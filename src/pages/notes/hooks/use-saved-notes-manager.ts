@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { useScratchpadStore, type Scratchpad } from '@/stores/scratchpad';
 import type { NoteFilterTab, NoteSortOption } from '../types';
 import { downloadAsMarkdown, copyNoteToClipboard } from '../lib/helpers';
+import { promoteNoteToMemory } from '../lib/memory-bridge';
 
 export function useSavedNotesManager(onCloseModal?: () => void) {
   const {
@@ -138,6 +139,26 @@ export function useSavedNotesManager(onCloseModal?: () => void) {
     setEditingNoteName('');
   }, []);
 
+  const handlePromoteToMemory = React.useCallback(
+    async (id: string) => {
+      const note = notes.find((n) => n.id === id);
+      if (!note) return;
+      if (!note.note.trim()) {
+        toast.error('Cannot promote an empty note');
+        return;
+      }
+      try {
+        await promoteNoteToMemory(note);
+        toast.success('Promoted to Memory', {
+          description: `"${note.name}" is now available to the AI as context.`,
+        });
+      } catch (error) {
+        toast.error(`Failed to promote note: ${error}`);
+      }
+    },
+    [notes]
+  );
+
   return {
     notes,
     openTabIds,
@@ -163,6 +184,7 @@ export function useSavedNotesManager(onCloseModal?: () => void) {
     handleStartRename,
     handleRenameSubmit,
     handleRenameCancel,
+    handlePromoteToMemory,
     handleExport: (note: Scratchpad) => downloadAsMarkdown(note.name, note.note),
     handleCopy: (note: Scratchpad) => copyNoteToClipboard(note.note, note.name),
   };

@@ -203,7 +203,8 @@ registerStoreSync('mock-forge', {
   },
 });
 
-// Raw localStorage stores (no persist middleware) with custom reloaders.
+// Notes live in SQLite; only the per-window tab layout is local. Receivers re-read the
+// database, so the extra debounce lets the 300ms save delay land before they query.
 registerStoreSync('scratchpad', {
   store: useScratchpadStore as unknown as AnyStore,
   pick: (s) => ({
@@ -211,9 +212,8 @@ registerStoreSync('scratchpad', {
     openTabIds: s.openTabIds,
     activeId: s.activeId,
   }),
-  onRemote: () =>
-    (useScratchpadStore.getState() as unknown as { reloadFromStorage: () => void })
-      .reloadFromStorage(),
+  onRemote: () => useScratchpadStore.getState().reloadFromDb(),
+  delayMs: 400,
 });
 
 registerStoreSync('nuclei-groups', {

@@ -34,6 +34,7 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
     handleSelectAll,
     handleExportActiveNote,
     handleCopyActiveNote,
+    handlePromoteActiveNote,
     handleInsertDrawing,
     handleStartRename,
     handleRenameSubmit,
@@ -110,6 +111,7 @@ export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
         onSelectAll={handleSelectAll}
         onCopyNote={handleCopyActiveNote}
         onExportNote={handleExportActiveNote}
+        onPromoteNote={handlePromoteActiveNote}
       />
 
       {/* Code Editor Viewport (Raw Markdown Source) */}

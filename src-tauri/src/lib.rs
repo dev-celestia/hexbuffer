@@ -39,7 +39,7 @@ pub use commands::hash::HashEngineState;
 pub use db::payload_store::PayloadStore;
 pub use db::promotion::promote_session;
 pub use db::repository::{
-    ChronicleLogRecord, ContextRecord, Database, DocumentRecord, PaginatedResponse,
+    ChronicleLogRecord, ContextRecord, Database, DocumentRecord, NoteRecord, PaginatedResponse,
     StashEndpointRecord, StashRecord, TreeNode, TreePath,
 };
 pub use history::{

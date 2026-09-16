@@ -59,7 +59,7 @@ function PromptInputAttachmentsBar() {
         // Typography
         'text-xs text-foreground',
         // Backgrounds & Borders
-        'rounded-lg border border-border/80 bg-muted/40 shadow-2xs',
+        'rounded-md border border-border/80 bg-muted/40 shadow-2xs',
       )}
     >
       <div
@@ -290,7 +290,7 @@ export function AssistantPromptBar({
             onSubmit={onSubmit}
             accept=".txt,.md,.markdown,.text,text/plain,text/markdown"
             maxFileSize={5 * 1024 * 1024}
-            className="shadow-2xs rounded-xl"
+            className="shadow-2xs rounded-lg"
           >
             <PromptInputAttachmentsBar />
             <PromptInputBody>
@@ -349,7 +349,7 @@ export function AssistantPromptBar({
                       <img
                         src={currentAgentAvatar}
                         alt={currentAgentLabel}
-                        className="size-3.5 object-contain shrink-0 rounded-xs"
+                        className="size-3.5 object-contain shrink-0 rounded-full"
                       />
                       <span className="truncate">{currentAgentLabel}</span>
                       <CaretDownIcon className="size-3 shrink-0 opacity-50 ml-0.5" />
@@ -368,7 +368,7 @@ export function AssistantPromptBar({
                           <img
                             src={AGENTS_REGISTRY.orchestrator.avatarUrl}
                             alt="Auto"
-                            className="size-3.5 object-contain shrink-0 rounded-xs"
+                            className="size-3.5 object-contain shrink-0 rounded-full"
                           />
                           <span>Auto (Celestia)</span>
                         </div>
@@ -389,7 +389,7 @@ export function AssistantPromptBar({
                               <img
                                 src={agent.avatarUrl}
                                 alt={agent.name}
-                                className="size-3.5 object-contain shrink-0 rounded-xs"
+                                className="size-3.5 object-contain shrink-0 rounded-full"
                               />
                               <span>{agent.name.replace(' Agent', '')}</span>
                             </div>

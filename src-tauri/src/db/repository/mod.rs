@@ -3,6 +3,7 @@ pub mod api_collection;
 pub mod chat_sessions;
 pub mod collaborator;
 pub mod memory;
+pub mod notes;
 pub mod documents;
 pub mod http_sessions;
 pub mod mock_forge;
@@ -193,6 +194,7 @@ impl Database {
         conn.execute_batch(crate::db::schema::CREATE_CONTEXTS_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_CHRONICLE_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_MOCK_FORGE_TABLES)?;
+        conn.execute_batch(crate::db::schema::CREATE_NOTES_TABLES)?;
         Ok(())
     }
 

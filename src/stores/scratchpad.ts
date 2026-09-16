@@ -1,4 +1,13 @@
 import { create } from 'zustand';
+import { toast } from 'sonner';
+import {
+  deleteNote,
+  deleteNotes,
+  importNotes,
+  isTauriAvailable,
+  listNotes,
+  saveNote,
+} from '@/pages/notes/lib/notes-api';
 
 export interface Scratchpad {
   id: string;
@@ -6,8 +15,6 @@ export interface Scratchpad {
   note: string;
   createdAt?: number;
   updatedAt?: number;
-  isPinned?: boolean;
-  tags?: string[];
 }
 
 export type NoteItem = Scratchpad;
@@ -17,6 +24,8 @@ interface ScratchpadState {
   openTabIds: string[];
   activeId: string;
   note: string; // for backward compatibility
+  /** False until the first database load settles; the notes page waits on it. */
+  notesLoaded: boolean;
   setNote: (note: string) => void;
   addScratchpad: (name?: string, initialContent?: string) => string;
   openNote: (id: string) => void;
@@ -30,71 +39,201 @@ interface ScratchpadState {
   closeScratchpadsToLeft: (id: string) => void;
   closeScratchpadsToRight: (id: string) => void;
   closeAllTabs: () => void;
-  /** Re-read localStorage into state; used by cross-window sync. */
-  reloadFromStorage: () => void;
+  /** Starts the first database load. Safe to call repeatedly; the work runs once. */
+  hydrateNotes: () => Promise<void>;
+  /** Re-reads notes from SQLite; used by cross-window sync. */
+  reloadFromDb: () => Promise<void>;
 }
 
-// ponytail: keep initial state loading simple and self-contained
-const getInitialState = () => {
-  const savedScratchpads = localStorage.getItem('desktop-scratchpads');
-  const savedActiveId = localStorage.getItem('desktop-scratchpad-active-id');
-  const savedOpenTabIds = localStorage.getItem('desktop-scratchpads-open-tabs');
-  const legacyNote = localStorage.getItem('desktop-scratchpad') ?? '';
+// Note rows live in SQLite. Which tabs are open, and which one is active, are per-window
+// UI state and stay in localStorage so every window keeps its own layout.
+const OPEN_TABS_KEY = 'desktop-scratchpads-open-tabs';
+const ACTIVE_ID_KEY = 'desktop-scratchpad-active-id';
 
-  let scratchpads: Scratchpad[] = [];
-  if (savedScratchpads) {
-    try {
-      scratchpads = JSON.parse(savedScratchpads);
-    } catch {
-      // Ignore parsing errors and fallback
-    }
-  }
+// Pre-SQLite storage. Read once during the migration below, then removed.
+const LEGACY_NOTES_KEY = 'desktop-scratchpads';
+const LEGACY_BODY_KEY = 'desktop-scratchpad';
 
-  const now = Date.now();
-  if (!scratchpads || scratchpads.length === 0) {
-    scratchpads = [{ id: '1', name: 'Note 1', note: legacyNote, createdAt: now, updatedAt: now }];
-  } else {
-    // Fill in timestamps if missing
-    scratchpads = scratchpads.map((s, idx) => ({
-      ...s,
-      createdAt: s.createdAt || now - (scratchpads.length - idx) * 1000,
-      updatedAt: s.updatedAt || now,
-    }));
-  }
+const MAX_NOTES = 100;
+
+function persistTabState(openTabIds: string[], activeId: string) {
+  localStorage.setItem(OPEN_TABS_KEY, JSON.stringify(openTabIds));
+  localStorage.setItem(ACTIVE_ID_KEY, activeId);
+}
+
+function readStoredTabState(): { openTabIds: string[]; activeId: string } {
+  const savedOpenTabIds = localStorage.getItem(OPEN_TABS_KEY);
 
   let openTabIds: string[] = [];
   if (savedOpenTabIds) {
     try {
       const parsed = JSON.parse(savedOpenTabIds);
       if (Array.isArray(parsed)) {
-        openTabIds = parsed.filter((id) => scratchpads.some((s) => s.id === id));
+        openTabIds = parsed.filter((id): id is string => typeof id === 'string');
       }
     } catch {
       // fallback
     }
   }
 
-  // If no open tabs stored, default to opening all existing notes or the first one
+  return { openTabIds, activeId: localStorage.getItem(ACTIVE_ID_KEY) ?? '' };
+}
+
+const getInitialState = () => ({
+  scratchpads: [] as Scratchpad[],
+  ...readStoredTabState(),
+  note: '',
+  notesLoaded: false,
+});
+
+const initialState = getInitialState();
+
+/** Reconciles the stored per-window tab layout against the notes that actually exist. */
+function reconcileTabs(notes: Scratchpad[]) {
+  const { openTabIds: storedTabs, activeId: storedActiveId } = readStoredTabState();
+  const ids = notes.map((s) => s.id);
+
+  let openTabIds = storedTabs.filter((id) => ids.includes(id));
+  // Preserve the pre-SQLite behaviour: with no stored tabs, open every note.
   if (openTabIds.length === 0) {
-    openTabIds = scratchpads.map((s) => s.id);
+    openTabIds = ids;
   }
 
-  const activeId =
-    savedActiveId && openTabIds.includes(savedActiveId)
-      ? savedActiveId
-      : openTabIds[0] || scratchpads[0]?.id || '';
+  const activeId = ids.includes(storedActiveId) ? storedActiveId : openTabIds[0] ?? '';
+  return { openTabIds, activeId };
+}
 
-  const activePad = scratchpads.find((s) => s.id === activeId) || scratchpads[0];
+function readLegacyNotes(): Scratchpad[] {
+  const raw = localStorage.getItem(LEGACY_NOTES_KEY);
 
-  return {
-    scratchpads,
+  let parsed: Scratchpad[] = [];
+  if (raw) {
+    try {
+      const value = JSON.parse(raw);
+      if (Array.isArray(value)) {
+        parsed = value;
+      }
+    } catch {
+      // Ignore parsing errors and fallback
+    }
+  }
+
+  const now = Date.now();
+  if (parsed.length === 0) {
+    const legacyBody = localStorage.getItem(LEGACY_BODY_KEY) ?? '';
+    if (!legacyBody) return [];
+    return [{ id: '1', name: 'Note 1', note: legacyBody, createdAt: now, updatedAt: now }];
+  }
+
+  // Fill in timestamps if missing
+  return parsed.map((pad, idx) => ({
+    ...pad,
+    createdAt: pad.createdAt || now - (parsed.length - idx) * 1000,
+    updatedAt: pad.updatedAt || now,
+  }));
+}
+
+function clearLegacyKeys() {
+  localStorage.removeItem(LEGACY_NOTES_KEY);
+  localStorage.removeItem(LEGACY_BODY_KEY);
+}
+
+/** Loads notes from SQLite, importing the pre-SQLite localStorage store on first run. */
+async function loadNotes(): Promise<Scratchpad[]> {
+  const stored = await listNotes();
+  if (stored.length > 0) return stored;
+
+  const legacy = readLegacyNotes();
+  if (legacy.length > 0) {
+    await importNotes(legacy);
+  }
+  // The import either succeeded or there was nothing to import; either way the old
+  // keys must not survive, or they would be re-imported on the next launch.
+  clearLegacyKeys();
+
+  return listNotes();
+}
+
+/** Trailing-window delay for persisting note edits. Keeps the per-keystroke editor
+ *  path off a synchronous write without losing data on teardown. */
+const NOTES_AUTOSAVE_DELAY_MS = 300;
+
+let noteSaveTimer: ReturnType<typeof setTimeout> | null = null;
+let hydrationPromise: Promise<void> | null = null;
+
+function reportNoteError(action: string, error: unknown) {
+  console.error(`[notes] failed to ${action}:`, error);
+  toast.error('Failed to save note', {
+    description: 'Your last change may not have been saved.',
+  });
+}
+
+function persistNote(pad: Scratchpad) {
+  void saveNote(pad).catch((error) => reportNoteError('save note', error));
+}
+
+/** Flushes the pending edit immediately. Reads from the store at call time so a
+ *  debounced write can never resurrect an older snapshot over a newer one. */
+export function persistNotesNow() {
+  if (noteSaveTimer !== null) {
+    clearTimeout(noteSaveTimer);
+    noteSaveTimer = null;
+  }
+  const { scratchpads, activeId } = useScratchpadStore.getState();
+  const activePad = scratchpads.find((s) => s.id === activeId);
+  if (activePad) persistNote(activePad);
+}
+
+function scheduleNotePersist() {
+  if (noteSaveTimer !== null) clearTimeout(noteSaveTimer);
+  noteSaveTimer = setTimeout(() => {
+    noteSaveTimer = null;
+    const { scratchpads, activeId } = useScratchpadStore.getState();
+    const activePad = scratchpads.find((s) => s.id === activeId);
+    if (activePad) persistNote(activePad);
+  }, NOTES_AUTOSAVE_DELAY_MS);
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('pagehide', persistNotesNow);
+  window.addEventListener('beforeunload', persistNotesNow);
+}
+
+function applyNotes(notes: Scratchpad[]) {
+  const { openTabIds, activeId } = reconcileTabs(notes);
+  const activePad = notes.find((s) => s.id === activeId) ?? notes[0];
+  useScratchpadStore.setState({
+    scratchpads: notes,
     openTabIds,
     activeId,
     note: activePad ? activePad.note : '',
-  };
-};
+    notesLoaded: true,
+  });
+}
 
-const initialState = getInitialState();
+async function runHydration() {
+  try {
+    let notes = await loadNotes();
+    if (notes.length === 0) {
+      // Seed through the idempotent import path so two windows starting together
+      // converge on one row instead of each creating its own first note.
+      const now = Date.now();
+      await importNotes([{ id: '1', name: 'Note 1', note: '', createdAt: now, updatedAt: now }]);
+      notes = await listNotes();
+    }
+    applyNotes(notes);
+  } catch (error) {
+    console.error('[notes] failed to load notes from the database:', error);
+    useScratchpadStore.setState({ notesLoaded: true });
+  }
+}
+
+export function hydrateNotes(): Promise<void> {
+  if (!hydrationPromise) {
+    hydrationPromise = runHydration();
+  }
+  return hydrationPromise;
+}
 
 export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
   ...initialState,
@@ -105,14 +244,13 @@ export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
     const updated = scratchpads.map((s) =>
       s.id === activeId ? { ...s, note, updatedAt: now } : s
     );
-    localStorage.setItem('desktop-scratchpads', JSON.stringify(updated));
-    localStorage.setItem('desktop-scratchpad', note);
     set({ scratchpads: updated, note });
+    scheduleNotePersist();
   },
 
   addScratchpad: (name?: string, initialContent?: string) => {
     const { scratchpads, openTabIds } = get();
-    if (scratchpads.length >= 100) return '';
+    if (scratchpads.length >= MAX_NOTES) return '';
 
     let noteName = name?.trim();
     if (!noteName) {
@@ -125,7 +263,7 @@ export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
 
     const now = Date.now();
     const newPad: Scratchpad = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       name: noteName,
       note: initialContent ?? '',
       createdAt: now,
@@ -135,17 +273,14 @@ export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
     const updatedNotes = [...scratchpads, newPad];
     const updatedTabs = [...openTabIds.filter((id) => id !== newPad.id), newPad.id];
 
-    localStorage.setItem('desktop-scratchpads', JSON.stringify(updatedNotes));
-    localStorage.setItem('desktop-scratchpads-open-tabs', JSON.stringify(updatedTabs));
-    localStorage.setItem('desktop-scratchpad-active-id', newPad.id);
-    localStorage.setItem('desktop-scratchpad', newPad.note);
-
+    persistTabState(updatedTabs, newPad.id);
     set({
       scratchpads: updatedNotes,
       openTabIds: updatedTabs,
       activeId: newPad.id,
       note: newPad.note,
     });
+    persistNote(newPad);
 
     return newPad.id;
   },
@@ -157,10 +292,7 @@ export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
 
     const updatedTabs = openTabIds.includes(id) ? openTabIds : [...openTabIds, id];
 
-    localStorage.setItem('desktop-scratchpads-open-tabs', JSON.stringify(updatedTabs));
-    localStorage.setItem('desktop-scratchpad-active-id', id);
-    localStorage.setItem('desktop-scratchpad', target.note);
-
+    persistTabState(updatedTabs, id);
     set({
       openTabIds: updatedTabs,
       activeId: id,
@@ -181,10 +313,7 @@ export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
 
     const activePad = scratchpads.find((s) => s.id === nextActiveId);
 
-    localStorage.setItem('desktop-scratchpads-open-tabs', JSON.stringify(updatedTabs));
-    localStorage.setItem('desktop-scratchpad-active-id', nextActiveId);
-    localStorage.setItem('desktop-scratchpad', activePad ? activePad.note : '');
-
+    persistTabState(updatedTabs, nextActiveId);
     set({
       openTabIds: updatedTabs,
       activeId: nextActiveId,
@@ -211,17 +340,15 @@ export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
 
     const activePad = updatedNotes.find((s) => s.id === nextActiveId);
 
-    localStorage.setItem('desktop-scratchpads', JSON.stringify(updatedNotes));
-    localStorage.setItem('desktop-scratchpads-open-tabs', JSON.stringify(updatedTabs));
-    localStorage.setItem('desktop-scratchpad-active-id', nextActiveId);
-    localStorage.setItem('desktop-scratchpad', activePad ? activePad.note : '');
-
+    persistTabState(updatedTabs, nextActiveId);
     set({
       scratchpads: updatedNotes,
       openTabIds: updatedTabs,
       activeId: nextActiveId,
       note: activePad ? activePad.note : '',
     });
+
+    void deleteNote(id).catch((error) => reportNoteError('delete note', error));
   },
 
   deleteMultipleNotes: (ids) => {
@@ -237,26 +364,23 @@ export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
 
     const activePad = updatedNotes.find((s) => s.id === nextActiveId);
 
-    localStorage.setItem('desktop-scratchpads', JSON.stringify(updatedNotes));
-    localStorage.setItem('desktop-scratchpads-open-tabs', JSON.stringify(updatedTabs));
-    localStorage.setItem('desktop-scratchpad-active-id', nextActiveId);
-    localStorage.setItem('desktop-scratchpad', activePad ? activePad.note : '');
-
+    persistTabState(updatedTabs, nextActiveId);
     set({
       scratchpads: updatedNotes,
       openTabIds: updatedTabs,
       activeId: nextActiveId,
       note: activePad ? activePad.note : '',
     });
+
+    void deleteNotes(ids).catch((error) => reportNoteError('delete notes', error));
   },
 
   setActiveId: (id) => {
-    const { scratchpads } = get();
+    const { scratchpads, openTabIds } = get();
     const activePad = scratchpads.find((s) => s.id === id);
     if (!activePad) return;
 
-    localStorage.setItem('desktop-scratchpad-active-id', id);
-    localStorage.setItem('desktop-scratchpad', activePad.note);
+    persistTabState(openTabIds, id);
     set({ activeId: id, note: activePad.note });
   },
 
@@ -269,10 +393,12 @@ export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
     const updated = scratchpads.map((s) =>
       s.id === id ? { ...s, name: trimmed, updatedAt: now } : s
     );
-    localStorage.setItem('desktop-scratchpads', JSON.stringify(updated));
 
     const activePad = updated.find((s) => s.id === activeId);
     set({ scratchpads: updated, note: activePad ? activePad.note : get().note });
+
+    const renamed = updated.find((s) => s.id === id);
+    if (renamed) persistNote(renamed);
   },
 
   duplicateNote: (id) => {
@@ -282,7 +408,7 @@ export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
 
     const now = Date.now();
     const newPad: Scratchpad = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       name: `${source.name} (Copy)`,
       note: source.note,
       createdAt: now,
@@ -292,17 +418,14 @@ export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
     const updatedNotes = [...scratchpads, newPad];
     const updatedTabs = [...openTabIds, newPad.id];
 
-    localStorage.setItem('desktop-scratchpads', JSON.stringify(updatedNotes));
-    localStorage.setItem('desktop-scratchpads-open-tabs', JSON.stringify(updatedTabs));
-    localStorage.setItem('desktop-scratchpad-active-id', newPad.id);
-    localStorage.setItem('desktop-scratchpad', newPad.note);
-
+    persistTabState(updatedTabs, newPad.id);
     set({
       scratchpads: updatedNotes,
       openTabIds: updatedTabs,
       activeId: newPad.id,
       note: newPad.note,
     });
+    persistNote(newPad);
 
     return newPad.id;
   },
@@ -319,9 +442,7 @@ export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
     }
     const activePad = scratchpads.find((s) => s.id === nextActiveId);
 
-    localStorage.setItem('desktop-scratchpads-open-tabs', JSON.stringify(updatedTabs));
-    localStorage.setItem('desktop-scratchpad-active-id', nextActiveId);
-    localStorage.setItem('desktop-scratchpad', activePad ? activePad.note : '');
+    persistTabState(updatedTabs, nextActiveId);
     set({ openTabIds: updatedTabs, activeId: nextActiveId, note: activePad ? activePad.note : '' });
   },
 
@@ -337,21 +458,29 @@ export const useScratchpadStore = create<ScratchpadState>()((set, get) => ({
     }
     const activePad = scratchpads.find((s) => s.id === nextActiveId);
 
-    localStorage.setItem('desktop-scratchpads-open-tabs', JSON.stringify(updatedTabs));
-    localStorage.setItem('desktop-scratchpad-active-id', nextActiveId);
-    localStorage.setItem('desktop-scratchpad', activePad ? activePad.note : '');
+    persistTabState(updatedTabs, nextActiveId);
     set({ openTabIds: updatedTabs, activeId: nextActiveId, note: activePad ? activePad.note : '' });
   },
 
   closeAllTabs: () => {
-    localStorage.setItem('desktop-scratchpads-open-tabs', JSON.stringify([]));
-    localStorage.setItem('desktop-scratchpad-active-id', '');
-    localStorage.setItem('desktop-scratchpad', '');
+    persistTabState([], '');
     set({ openTabIds: [], activeId: '', note: '' });
   },
 
-  reloadFromStorage: () => {
-    set(getInitialState());
+  hydrateNotes,
+
+  reloadFromDb: async () => {
+    try {
+      const notes = await listNotes();
+      applyNotes(notes);
+    } catch (error) {
+      console.error('[notes] failed to reload notes from the database:', error);
+    }
   },
 }));
 
+// Hydrate as soon as the store is first imported so any window showing a notes surface
+// (the page or the desktop widget) has data without each one wiring up its own load.
+if (typeof window !== 'undefined' && isTauriAvailable()) {
+  void hydrateNotes();
+}

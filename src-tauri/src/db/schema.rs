@@ -455,3 +455,16 @@ CREATE INDEX IF NOT EXISTS idx_ai_token_usage_session ON ai_token_usage(session_
 CREATE INDEX IF NOT EXISTS idx_ai_token_usage_model ON ai_token_usage(model);
 CREATE INDEX IF NOT EXISTS idx_ai_token_usage_created ON ai_token_usage(created_at);
 "#;
+
+pub const CREATE_NOTES_TABLES: &str = r#"
+CREATE TABLE IF NOT EXISTS notes (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    note TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_notes_updated_at ON notes(updated_at);
+CREATE INDEX IF NOT EXISTS idx_notes_created_at ON notes(created_at);
+"#;

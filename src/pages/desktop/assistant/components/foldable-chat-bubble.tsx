@@ -152,7 +152,7 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
               // Layout & Positioning
               'inline-flex items-center gap-1.5 max-w-[80%]',
               // Sizing & Spacing
-              'px-3 py-1.5 rounded-2xl',
+              'px-3 py-1.5 rounded-lg',
               // Typography
               'text-xs text-foreground',
               // Backgrounds & Borders
@@ -197,7 +197,7 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
                 // Layout & Positioning
                 'flex flex-col min-w-0 max-w-full overflow-hidden break-words',
                 // Sizing & Spacing
-                'px-4 py-2.5 rounded-2xl gap-1',
+                'px-4 py-2.5 rounded-lg gap-1',
                 // Typography
                 'text-sm text-foreground',
                 // Backgrounds & Borders
@@ -246,7 +246,7 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
           // Layout & Positioning
           'group flex items-center justify-between gap-2 w-full min-w-0 max-w-full overflow-hidden',
           // Sizing & Spacing
-          'px-3.5 py-2 rounded-xl',
+            'px-3.5 py-2 rounded-lg',
           // Backgrounds & Borders
           'bg-card/70 border border-border/70 shadow-2xs',
           // Interactive & States
@@ -375,7 +375,7 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
             // Layout & Positioning
             'relative flex flex-col w-full min-w-0 max-w-full overflow-hidden',
             // Sizing & Spacing
-            'px-4 py-3 rounded-2xl',
+            'px-4 py-3 rounded-lg',
             // Typography
             'text-foreground',
             // Backgrounds & Borders

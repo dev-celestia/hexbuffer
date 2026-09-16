@@ -15,6 +15,7 @@ import {
   ArrowSquareOutIcon,
   XCircleIcon,
   PlusIcon,
+  BrainIcon,
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { extractSnippet, formatRelativeTime } from '../../lib/helpers';
@@ -36,6 +37,7 @@ export interface NoteListItemProps {
   onDuplicate: () => void;
   onExport: () => void;
   onCopy: () => void;
+  onPromote: () => void;
   onStartDelete: () => void;
   onCancelDelete: () => void;
   onConfirmDelete: () => void;
@@ -57,6 +59,7 @@ export function NoteListItem({
   onDuplicate,
   onExport,
   onCopy,
+  onPromote,
   onStartDelete,
   onCancelDelete,
   onConfirmDelete,
@@ -439,6 +442,24 @@ export function NoteListItem({
               title="Duplicate note"
             >
               <PlusIcon className="size-3.5" />
+            </button>
+
+            <button
+              type="button"
+              onClick={onPromote}
+              className={cn(
+                // Sizing & Spacing
+                "p-1 rounded",
+
+                // Typography
+                "text-muted-foreground hover:text-foreground hover:bg-muted",
+
+                // Interactive & States
+                "transition-colors cursor-pointer"
+              )}
+              title="Promote to Memory (makes this note available to the AI as context)"
+            >
+              <BrainIcon className="size-3.5" />
             </button>
 
             <button

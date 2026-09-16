@@ -3,6 +3,7 @@ import {
   CopyIcon,
   GlobeIcon,
   LightningIcon,
+  NotePencilIcon,
   PencilSimpleIcon,
   StarIcon,
   TrashIcon,
@@ -24,6 +25,7 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
     handleOpenEdit,
     setDeletingEntry,
     handleCopyContent,
+    handleSaveAsNote,
   } = state;
 
   if (!selectedEntry) {
@@ -123,6 +125,23 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
             "flex items-center gap-1 shrink-0"
           )}
         >
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => handleSaveAsNote(selectedEntry)}
+            className={cn(
+              // Sizing & Spacing
+              "h-6 w-6 p-0"
+            )}
+            title="Save as note"
+          >
+            <NotePencilIcon
+              className={cn(
+                // Sizing & Spacing
+                "size-3.5"
+              )}
+            />
+          </Button>
           <Button
             size="sm"
             variant="ghost"

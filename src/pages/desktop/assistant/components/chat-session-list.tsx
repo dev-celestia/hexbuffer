@@ -201,7 +201,7 @@ export function ChatSessionList({
                     // Typography
                     'text-xs',
                     // Backgrounds & Borders
-                    'rounded-lg transition-colors duration-150',
+                    'rounded-md transition-colors duration-150',
                     isActive
                       ? 'bg-accent font-medium text-accent-foreground shadow-2xs'
                       : 'hover:bg-accent/40 text-muted-foreground hover:text-foreground',

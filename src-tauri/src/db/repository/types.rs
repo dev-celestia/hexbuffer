@@ -149,3 +149,13 @@ pub struct MemoryEntry {
 fn default_context_source_type() -> String {
     "user".to_string()
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NoteRecord {
+    pub id: String,
+    pub name: String,
+    pub note: String,
+    pub created_at: String,
+    pub updated_at: String,
+}

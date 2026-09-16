@@ -75,20 +75,38 @@ This repository now prefers â€œpage entry + page hook + presentational sectionsâ
 
 ## AI Agent Tools & Triggers Integration
 
-When adding new app capabilities that AI agents can execute (or modifying existing tools), follow this standard two-step pattern across `hexbuffer-ai` and `hexbuffer`:
+When adding new app capabilities that AI agents can execute (or modifying existing tools), follow this standard two-step pattern.
 
-### 1. Rust LLM Tool Definition (`hexbuffer-ai`)
-- Create a dedicated file under `/Users/arham/Desktop/project/hexbuffer-ai/src/tools/<feature>.rs` implementing Rig's `Tool` trait.
-- Export args, output, and tool struct in `src/tools/mod.rs`.
-- Attach the tool struct to the `AgentBuilder` in `src/chat.rs`.
-- If high-risk, configure security policy in `src/policy.rs` (`SecurityApprovalPolicy`).
+There are two kinds of tool, and which one you need changes where the work lands:
 
-### 2. Frontend App Trigger Integration (`hexbuffer`)
-- Define the frontend tool definition (`*_AI_TOOL_DEFINITION`) and execution handler (`execute*AiTool`) under `src/layout/assistant/lib/ai-tools/<feature>.ts`.
-- Register the tool schema in `src/layout/assistant/lib/ai-tools/definitions.ts`.
-- Register the tool execution case in `src/layout/assistant/lib/ai-tools/executor.ts`.
-- Re-export the feature tool from `src/layout/assistant/lib/ai-tools/index.ts` and `src/triggers/<feature>/index.ts`.
-- Store state manipulation or IPC calls inside `src/triggers/<feature>/` to keep UI components decoupled.
+- **Native tools** run entirely in Rust and never cross IPC. This is the common case for
+  analysis, memory, and delegation tools.
+- **Frontend tools** execute in the webview and round-trip through the `ai:execute-tool`
+  event. This is the case when the tool must mutate frontend state (repeater, intruder,
+  intercept, browser).
+
+### 1. Rust LLM Tool Definition (`src-tauri/src/ai/`)
+- Add the tool definition to `tool_definitions()` in `src-tauri/src/ai/tool_loop.rs`, or a
+  dedicated module under `src-tauri/src/ai/agents/<feature>_tools.rs` following the pattern
+  of `jwt_tools.rs` and `port_scanner_tools.rs`.
+- Add the tool name to the owning agent's `allowed_tools` in `src-tauri/src/ai/agents/mod.rs`.
+- Tier the tool in `authorize_tool` in `src-tauri/src/ai/tool_loop.rs`:
+  `AUTO_APPROVED_TOOLS`, `CONFIRMATION_TOOLS`, or neither (then `SecurityApprovalPolicy` in
+  `src-tauri/src/ai/policy.rs` decides).
+- For a native tool, add its handler to the early-return chain in `execute_tool_call`, and
+  map it in `get_agent_for_tool` so its result is attributed to the right specialist.
+
+### 2. Frontend App Trigger Integration (frontend tools only)
+- Define the frontend tool definition (`*_AI_TOOL_DEFINITION`) and execution handler
+  (`execute*AiTool`) under `src/triggers/<feature>/ai-tool.ts`.
+- Re-export it from a thin shim at `src/pages/desktop/assistant/lib/ai-tools/<feature>.ts`
+  (see `repeater.ts` for the pattern).
+- Register the tool schema in `src/pages/desktop/assistant/lib/ai-tools/definitions.ts`.
+- Register the tool execution case in `src/pages/desktop/assistant/lib/ai-tools/executor.ts`.
+- Re-export the feature tool from `src/pages/desktop/assistant/lib/ai-tools/index.ts` and
+  `src/triggers/<feature>/index.ts`.
+- Store state manipulation or IPC calls inside `src/triggers/<feature>/` to keep UI
+  components decoupled.
 
 
 ## Testing Guidelines
