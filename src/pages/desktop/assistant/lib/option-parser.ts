@@ -54,10 +54,19 @@ export function parseMessageOptions(text: string): ParsedOptionItem[] {
   const items: { num: string; content: string }[] = [];
 
   let currentItem: { num: string; content: string } | null = null;
+  let inCodeBlock = false;
 
   for (const line of lines) {
     const trimmed = line.trim();
-    if (!trimmed) continue;
+    if (trimmed.startsWith('```')) {
+      inCodeBlock = !inCodeBlock;
+      if (inCodeBlock && currentItem) {
+        items.push(currentItem);
+        currentItem = null;
+      }
+      continue;
+    }
+    if (inCodeBlock || !trimmed) continue;
 
     const match = matchOptionLine(trimmed);
     if (match) {
@@ -99,6 +108,29 @@ export function parseMessageOptions(text: string): ParsedOptionItem[] {
   );
 
   if (!isSequentialNumbers && !isSequentialLetters) {
+    return [];
+  }
+
+  // Reject false positives: network scan outputs (e.g. 80/tcp open) or command lines
+  const isCommandOrNetworkOutput = items.some((item) => {
+    const lower = item.content.toLowerCase().trim();
+    return (
+      lower.includes('/tcp') ||
+      lower.includes('/udp') ||
+      lower.startsWith('`npm ') ||
+      lower.startsWith('`pnpm ') ||
+      lower.startsWith('`cargo ') ||
+      lower.startsWith('`curl ') ||
+      lower.startsWith('npm ') ||
+      lower.startsWith('pnpm ') ||
+      lower.startsWith('cargo ') ||
+      lower.startsWith('curl ') ||
+      lower.startsWith('git ') ||
+      lower.startsWith('sudo ')
+    );
+  });
+
+  if (isCommandOrNetworkOutput) {
     return [];
   }
 

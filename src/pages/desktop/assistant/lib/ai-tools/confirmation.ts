@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { executeAiToolCall } from './executor';
 
 export interface PendingToolConfirmation {
@@ -87,25 +87,25 @@ export function clearPendingToolConfirmations(): void {
   }
 }
 
+function subscribePendingConfirmations(listener: () => void) {
+  confirmationListeners.add(listener);
+  const interval = window.setInterval(pruneExpiredConfirmations, 30_000);
+  return () => {
+    confirmationListeners.delete(listener);
+    window.clearInterval(interval);
+  };
+}
+
+function getPendingConfirmationsSnapshot(): readonly PendingToolConfirmation[] {
+  return pendingConfirmations;
+}
+
 export function usePendingToolConfirmations(): readonly PendingToolConfirmation[] {
-  const [confirmations, setConfirmations] = useState<readonly PendingToolConfirmation[]>(
-    () => pendingConfirmations,
+  return useSyncExternalStore(
+    subscribePendingConfirmations,
+    getPendingConfirmationsSnapshot,
+    getPendingConfirmationsSnapshot,
   );
-
-  useEffect(() => {
-    setConfirmations(pendingConfirmations);
-    const update = () => setConfirmations([...pendingConfirmations]);
-    confirmationListeners.add(update);
-    // Periodically drop confirmations whose backend wait has already timed out so stale
-    // cards cannot be approved later.
-    const interval = window.setInterval(pruneExpiredConfirmations, 30_000);
-    return () => {
-      confirmationListeners.delete(update);
-      window.clearInterval(interval);
-    };
-  }, []);
-
-  return confirmations;
 }
 
 /** User approved: execute the tool for real and report the outcome to the engine. */

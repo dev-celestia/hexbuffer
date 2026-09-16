@@ -167,7 +167,7 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
       cancelled = true;
       unlisten?.();
     };
-  }, [sessionId, status]);
+  }, [sessionId]);
 
   useEffect(() => {
     if (status !== 'submitted' && status !== 'streaming') {
@@ -273,8 +273,14 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
       if (processedSessionIdsRef.current.has(payload.sessionId)) continue;
       processedSessionIdsRef.current.add(payload.sessionId);
 
-      const { sessionId, targetUrl, pagesVisited, insightsFound, insightTitles, pageUrls } =
-        payload;
+      const {
+        sessionId: crawlSessionId,
+        targetUrl,
+        pagesVisited,
+        insightsFound,
+        insightTitles,
+        pageUrls,
+      } = payload;
 
       const insightList =
         insightTitles.length > 0
@@ -289,7 +295,7 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
         `The browser crawl has just completed.`,
         ``,
         `Target: ${targetUrl}`,
-        `Session: ${sessionId}`,
+        `Crawl Session: ${crawlSessionId}`,
         `Pages visited: ${pagesVisited}`,
         `Insights found: ${insightsFound}`,
         ``,
@@ -354,7 +360,8 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
   useEffect(() => {
     const currentSessionId = sessionId;
     if (!currentSessionId || !onSaveMessages) return;
-    if (status === 'submitted' || status === 'streaming') return;
+    // Allow saving when submitted so user prompt is preserved even if stream fails or is cancelled
+    if (status === 'streaming') return;
 
     if (loadedSessionIdRef.current !== currentSessionId) return;
     if (messages.length === 0) return;
@@ -363,27 +370,32 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
     const targetCount = messages.length;
     const records: ChatMessageRecord[] = messages
       .filter((m) => m.role === 'user' || m.role === 'assistant')
-      .map((m) => ({
-        id: m.id,
-        sessionId: currentSessionId,
-        role: m.role,
-        content: m.parts
+      .map((m) => {
+        const textParts = m.parts
           .filter((p) => p.type === 'text')
           .map((p) => p.text)
-          .join('\n'),
-        agentId: m.metadata?.agentId,
-        agentName: m.metadata?.agentName,
-        // Chain-of-thought is a debug aid: send it to the backend only in a dev build.
-        // The backend independently refuses to persist it outside debug builds, so a
-        // production install never retains reasoning even if this runs.
-        reasoning: import.meta.env.DEV
-          ? m.parts
-              .filter((p) => p.type === 'reasoning')
-              .map((p) => p.text)
-              .join('\n') || undefined
-          : undefined,
-        createdAt: new Date().toISOString(),
-      }));
+          .join('\n');
+        const content = textParts || (typeof m.content === 'string' ? m.content : '');
+
+        return {
+          id: m.id,
+          sessionId: currentSessionId,
+          role: m.role,
+          content,
+          agentId: m.metadata?.agentId,
+          agentName: m.metadata?.agentName,
+          // Chain-of-thought is a debug aid: send it to the backend only in a dev build.
+          // The backend independently refuses to persist it outside debug builds, so a
+          // production install never retains reasoning even if this runs.
+          reasoning: import.meta.env.DEV
+            ? m.parts
+                .filter((p) => p.type === 'reasoning')
+                .map((p) => p.text)
+                .join('\n') || undefined
+            : undefined,
+          createdAt: new Date().toISOString(),
+        };
+      });
 
     Promise.resolve(onSaveMessages(currentSessionId, records))
       .then(() => {

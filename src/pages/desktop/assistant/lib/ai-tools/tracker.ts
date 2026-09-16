@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 export interface TrackedAction {
   id: string;
@@ -46,7 +46,7 @@ function formatActionLabel(action: string, args?: Record<string, any>): { label:
   return { label, detail };
 }
 
-let trackedActions: TrackedAction[] = [];
+let trackedActions: readonly TrackedAction[] = [];
 const actionListeners: Set<() => void> = new Set();
 let actionCounter = 0;
 
@@ -88,19 +88,17 @@ export function clearTrackedActions() {
   notifyActionListeners();
 }
 
-export function useTrackedActions() {
-  const [actions, setActions] = useState<TrackedAction[]>(() => trackedActions);
+function subscribeTrackedActions(listener: () => void) {
+  actionListeners.add(listener);
+  return () => {
+    actionListeners.delete(listener);
+  };
+}
 
-  useEffect(() => {
-    // Sync in case state changed between render and effect
-    setActions(trackedActions);
+function getTrackedActionsSnapshot(): readonly TrackedAction[] {
+  return trackedActions;
+}
 
-    const update = () => setActions([...trackedActions]);
-    actionListeners.add(update);
-    return () => {
-      actionListeners.delete(update);
-    };
-  }, []);
-
-  return actions;
+export function useTrackedActions(): readonly TrackedAction[] {
+  return useSyncExternalStore(subscribeTrackedActions, getTrackedActionsSnapshot, getTrackedActionsSnapshot);
 }

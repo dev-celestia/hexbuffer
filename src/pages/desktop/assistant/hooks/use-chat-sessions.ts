@@ -27,12 +27,15 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
   }, [activeSessionId]);
 
   const loadSessions = useCallback(async () => {
+    const seq = ++switchSeqRef.current;
     try {
       const list = await invoke<ChatSession[]>('list_chat_sessions');
+      if (seq !== switchSeqRef.current) return;
       setSessions(list);
 
       if (list.length === 0) {
         const session = await invoke<ChatSession>('create_chat_session');
+        if (seq !== switchSeqRef.current) return;
         setSessions([session]);
         setActiveSessionId(session.id);
         setMessagesRef.current?.([], session.id);
@@ -44,6 +47,7 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
         const msgs = await invoke<ChatMessageRecord[]>('get_chat_messages', {
           sessionId: firstId,
         });
+        if (seq !== switchSeqRef.current) return;
         const uiMessages = msgs.map((m) => ({
           id: m.id,
           role: m.role as 'user' | 'assistant' | 'system',
@@ -67,7 +71,9 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
     } catch (error) {
       console.error('Failed to load chat sessions:', error);
     } finally {
-      setLoading(false);
+      if (seq === switchSeqRef.current) {
+        setLoading(false);
+      }
     }
   }, [setMessagesRef]);
 
@@ -137,8 +143,7 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
           // If we deleted the active session, switch to another or clear
           if (sessionId === activeSessionIdRef.current) {
             if (next.length > 0) {
-              // Switch asynchronously
-              setTimeout(() => switchSession(next[0].id), 0);
+              void switchSession(next[0].id);
             } else {
               // No sessions left — clear the view
               setActiveSessionId(null);
@@ -173,7 +178,7 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
       try {
         await invoke('save_chat_messages', { sessionId, messages });
 
-        // Update local session title to match user query without technical prefix tags
+        // Update session title to match user query if session is still at default name
         const firstUser = messages.find((m) => m.role === 'user');
         if (firstUser) {
           const cleanPrompt = getUserPromptOnly(firstUser.content);
@@ -182,9 +187,26 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
               cleanPrompt.length > 40
                 ? `${cleanPrompt.slice(0, 40)}…`
                 : cleanPrompt;
-            setSessions((prev) =>
-              prev.map((s) => (s.id === sessionId ? { ...s, title } : s)),
-            );
+
+            setSessions((prev) => {
+              const current = prev.find((s) => s.id === sessionId);
+              const isDefaultTitle =
+                !current ||
+                !current.title ||
+                current.title.toLowerCase() === 'new chat' ||
+                current.title.startsWith('New Chat');
+
+              if (!isDefaultTitle) {
+                return prev;
+              }
+
+              // Persist the title change to SQLite
+              invoke('rename_chat_session', { id: sessionId, title }).catch((err) => {
+                console.error('Failed to persist auto session title:', err);
+              });
+
+              return prev.map((s) => (s.id === sessionId ? { ...s, title } : s));
+            });
           }
         }
       } catch (error) {

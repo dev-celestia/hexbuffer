@@ -14,13 +14,9 @@ import {
   SidebarIcon,
   XIcon,
 } from '@phosphor-icons/react';
-import type { AgentId } from '../constants/agents';
 import { cn } from '@/lib/utils';
 
 interface AssistantHeaderProps {
-  provider: string;
-  providerDisplay: string;
-  model: string;
   sidebarCollapsed: boolean;
   sessionsCount: number;
   onToggleSidebar: () => void;
@@ -29,14 +25,9 @@ interface AssistantHeaderProps {
   onClose?: () => void;
   /** Optional slot rendered right before the action icons (e.g. token usage). */
   trailing?: React.ReactNode;
-  selectedAgent?: AgentId | 'all';
-  onSelectAgent?: (agentId: AgentId | 'all') => void;
 }
 
 export function AssistantHeader({
-  provider,
-  providerDisplay,
-  model,
   sidebarCollapsed,
   sessionsCount,
   onToggleSidebar,
@@ -44,8 +35,6 @@ export function AssistantHeader({
   onOpenDebug,
   onClose,
   trailing,
-  selectedAgent = 'all',
-  onSelectAgent,
 }: AssistantHeaderProps) {
   return (
     <div
