@@ -305,3 +305,47 @@ pub fn execute_tamper_jwt(args: &Value) -> String {
         "signature_stripped": set_none
     }).to_string()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A real RS256 token: three segments, header carries `alg`.
+    const REAL_JWT: &str = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.\
+eyJhdWQiOiI5N2IzMzE5My00M2ZmLTRlNTgtOTEyNC1iM2E5YjlmNzJjMzQiLCJleHAiOjE3ODk1NDUzNDQsImlhdCI6MTc4OTU0MzQyNCwiaXNzIjoidGVsa29tZGV2IiwianRpIjoiZDY0YzEwMDUtMDQzYy00ZmY0LWE1ZjQtNjBlNjEwNGQ3N2ZmIiwic3ViIjoiZEdWc2EyOXRkR1J6WTNWemRHOXRaWEk9In0.\
+sig";
+
+    #[test]
+    fn detects_real_jwt() {
+        assert!(looks_like_jwt(REAL_JWT));
+    }
+
+    #[test]
+    fn detects_jwt_inside_prose_and_punctuation() {
+        let prompt = format!("please decode this: \"{REAL_JWT}\" thanks");
+        assert!(text_contains_jwt(&prompt));
+    }
+
+    #[test]
+    fn rejects_non_jwt_shapes() {
+        assert!(!looks_like_jwt(""));
+        assert!(!looks_like_jwt("not-a-token"));
+        assert!(!looks_like_jwt("a.b"));
+        // Three segments but the header is not base64 JSON with an alg field.
+        assert!(!looks_like_jwt("aaa.bbb.ccc"));
+        assert!(!text_contains_jwt("plain sentence with no token"));
+    }
+
+    #[test]
+    fn decode_extracts_sub() {
+        let result = execute_decode_jwt(&json!({ "token": REAL_JWT }));
+        let value: Value = serde_json::from_str(&result).expect("valid json");
+        assert_eq!(value["status"], "success");
+        assert_eq!(
+            value["payload"]["sub"],
+            "dGVsa29tdGRzY3VzdG9tZXI="
+        );
+        assert_eq!(value["payload"]["iss"], "telkomdev");
+        assert_eq!(value["header"]["alg"], "RS256");
+    }
+}
