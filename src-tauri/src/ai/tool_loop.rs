@@ -4,7 +4,6 @@ use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
 
 use futures::StreamExt;
-use rig::client::CompletionClient;
 use rig::completion::{message::ToolCall, CompletionModel, Message, ToolDefinition};
 use rig::streaming::StreamedAssistantContent;
 use serde_json::{json, Value};
@@ -38,9 +37,15 @@ const NOTES_WRITE_TOOL: &str = "write_note";
 /// Tier 1 — execute immediately: landing/local tools with no external side effects.
 const AUTO_APPROVED_TOOLS: &[&str] = &[
     "send_to_repeater",
+    "send_repeater_request",
     "create_collection",
     "create_folder",
     "create_endpoint",
+    "forward_paused_request",
+    "send_to_intruder",
+    "navigate_to_app",
+    "add_scope_target",
+    "toggle_browser_crawl",
     MEMORY_SEARCH_TOOL,
     MEMORY_SAVE_TOOL,
     NOTES_GET_TOOL,
@@ -48,13 +53,20 @@ const AUTO_APPROVED_TOOLS: &[&str] = &[
     super::agents::jwt_tools::DECODE_JWT_TOOL,
     super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL,
     super::agents::jwt_tools::TAMPER_JWT_TOOL,
-    super::agents::port_scanner_tools::TRIGGER_PORT_SCAN_TOOL,
 ];
 
 /// Tier 2 — require explicit user confirmation in chat before executing: tools that
-/// change proxy/attack state or write content. start_invoker_attack lives here (it was
-/// previously hard-denied by the default policy, leaving the capability dead).
-const CONFIRMATION_TOOLS: &[&str] = &["trigger_scan", "start_invoker_attack", "toggle_intercept"];
+/// change proxy/attack state or write content. start_invoker_attack lives here.
+const CONFIRMATION_TOOLS: &[&str] = &[
+    "trigger_scan",
+    super::agents::port_scanner_tools::TRIGGER_PORT_SCAN_TOOL,
+    "start_invoker_attack",
+    "stop_invoker_attack",
+    "toggle_intercept",
+    "drop_paused_request",
+    "remove_scope_target",
+    "stop_browser_crawl",
+];
 
 enum ToolAuthorization {
     AutoApproved,
@@ -153,12 +165,119 @@ fn next_call_id() -> String {
 fn frontend_tool_definitions() -> Vec<ToolDefinition> {
     vec![
         crate::tools::SendToRepeaterTool.definition(),
+        ToolDefinition {
+            name: "send_repeater_request".to_string(),
+            description: "Execute the active HTTP request in Repeater Forge and view the live response."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {},
+                "required": []
+            }),
+        },
         crate::tools::CreateCollectionTool.definition(),
         crate::tools::CreateFolderTool.definition(),
         crate::tools::CreateEndpointTool.definition(),
         crate::tools::StartInvokerAttackTool.definition(),
+        ToolDefinition {
+            name: "stop_invoker_attack".to_string(),
+            description: "Stop the active Intruder / Invoker fuzzing attack.".to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {},
+                "required": []
+            }),
+        },
+        ToolDefinition {
+            name: "send_to_intruder".to_string(),
+            description: "Load an HTTP request into Intruder for parameter fuzzing and payload injection."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "logId": { "type": "string", "description": "Proxy history log ID" },
+                    "rawRequest": { "type": "string", "description": "Raw HTTP request string" },
+                    "payloadValues": { "type": "array", "items": { "type": "string" }, "description": "Optional payload values" }
+                }
+            }),
+        },
         crate::tools::ToggleInterceptTool.definition(),
+        ToolDefinition {
+            name: "forward_paused_request".to_string(),
+            description: "Forward the currently paused/intercepted HTTP request in the proxy queue."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {},
+                "required": []
+            }),
+        },
+        ToolDefinition {
+            name: "drop_paused_request".to_string(),
+            description: "Drop and discard the currently paused/intercepted HTTP request in the proxy queue."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {},
+                "required": []
+            }),
+        },
         crate::tools::TriggerScanTool.definition(),
+        ToolDefinition {
+            name: "toggle_browser_crawl".to_string(),
+            description: "Pause or resume the active browser crawl session.".to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {},
+                "required": []
+            }),
+        },
+        ToolDefinition {
+            name: "stop_browser_crawl".to_string(),
+            description: "Stop and terminate the active browser crawl session.".to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {},
+                "required": []
+            }),
+        },
+        ToolDefinition {
+            name: "navigate_to_app".to_string(),
+            description: "Navigate to, open, and focus a HexBuffer application window (e.g. repeater, http-history, intercept, intruder, notes, port-scanner, jwt, browser, settings, api-mock, api-override)."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "app": { "type": "string", "description": "Target window/app name" }
+                },
+                "required": ["app"]
+            }),
+        },
+        ToolDefinition {
+            name: "add_scope_target".to_string(),
+            description: "Add a target host or domain to the authorized in-scope target list."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "host": { "type": "string", "description": "Target host (e.g. example.com)" },
+                    "name": { "type": "string", "description": "Optional friendly label" }
+                },
+                "required": ["host"]
+            }),
+        },
+        ToolDefinition {
+            name: "remove_scope_target".to_string(),
+            description: "Remove a target host or domain from the in-scope target list."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "target": { "type": "string", "description": "Target hostname or ID" }
+                },
+                "required": ["target"]
+            }),
+        },
     ]
 }
 
@@ -350,6 +469,11 @@ async fn execute_write_note(app: &AppHandle, args: &Value) -> String {
         return "Failed: both 'name' and 'note' are required to write a note.".to_string();
     }
 
+    const MAX_NOTE_NAME_CHARS: usize = 200;
+    const MAX_NOTE_BODY_CHARS: usize = 25_000;
+    let name_bounded: String = name.chars().take(MAX_NOTE_NAME_CHARS).collect();
+    let note_body_bounded: String = note_body.chars().take(MAX_NOTE_BODY_CHARS).collect();
+
     let existing_id = args
         .get("id")
         .and_then(|value| value.as_str())
@@ -374,8 +498,8 @@ async fn execute_write_note(app: &AppHandle, args: &Value) -> String {
 
     let record = crate::NoteRecord {
         id: existing_id.clone().unwrap_or_default(),
-        name: name.to_string(),
-        note: note_body.to_string(),
+        name: name_bounded,
+        note: note_body_bounded,
         created_at,
         updated_at: chrono::Utc::now().to_rfc3339(),
     };
@@ -453,6 +577,14 @@ async fn execute_memory_save(app: &AppHandle, args: &Value) -> String {
             .to_string();
     }
 
+    const MAX_MEMORY_TITLE_CHARS: usize = 200;
+    const MAX_MEMORY_CONTENT_CHARS: usize = 25_000;
+    const MAX_TAGS_COUNT: usize = 10;
+    const MAX_TAG_CHARS: usize = 50;
+
+    let title_bounded: String = title.chars().take(MAX_MEMORY_TITLE_CHARS).collect();
+    let content_bounded: String = content.chars().take(MAX_MEMORY_CONTENT_CHARS).collect();
+
     let tags: Vec<String> = args
         .get("tags")
         .and_then(|value| value.as_array())
@@ -462,15 +594,16 @@ async fn execute_memory_save(app: &AppHandle, args: &Value) -> String {
                 .filter_map(|item| item.as_str())
                 .map(str::trim)
                 .filter(|tag| !tag.is_empty())
-                .map(str::to_lowercase)
+                .map(|tag| tag.chars().take(MAX_TAG_CHARS).collect::<String>().to_lowercase())
+                .take(MAX_TAGS_COUNT)
                 .collect()
         })
         .unwrap_or_default();
 
     let mut entry = crate::db::repository::types::MemoryEntry {
         id: uuid::Uuid::new_v4().to_string(),
-        title: title.to_string(),
-        content: content.to_string(),
+        title: title_bounded,
+        content: content_bounded,
         tags,
         source_type: "ai".to_string(),
         source_ref: None,
@@ -743,22 +876,34 @@ pub struct ToolLoopOutput {
 
 pub fn get_agent_for_tool(tool_name: &str) -> Option<&'static super::agents::AgentSpec> {
     match tool_name {
-        "save_memory_note" | "search_memory" => {
+        "save_memory_note" | "search_memory" | "navigate_to_app" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::Orchestrator))
         }
         "write_note" | "get_notes" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::Notes))
         }
-        "send_to_repeater" | "create_collection" | "create_folder" | "create_endpoint" => {
+        "send_to_repeater"
+        | "send_repeater_request"
+        | "create_collection"
+        | "create_folder"
+        | "create_endpoint" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::Repeater))
         }
-        "start_invoker_attack" => {
+        "start_invoker_attack" | "stop_invoker_attack" | "send_to_intruder" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::Intruder))
         }
-        "toggle_intercept" | "get_crawl_context" => {
+        "toggle_intercept"
+        | "forward_paused_request"
+        | "drop_paused_request"
+        | "add_scope_target"
+        | "remove_scope_target"
+        | "get_crawl_context"
+        | "trigger_scan"
+        | "toggle_browser_crawl"
+        | "stop_browser_crawl" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::HttpTraffic))
         }
-        "trigger_port_scan" | "trigger_scan" => {
+        "trigger_port_scan" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::PortScanner))
         }
         super::agents::jwt_tools::DECODE_JWT_TOOL
@@ -776,11 +921,26 @@ pub fn is_terminal_action_tool(tool_name: &str) -> bool {
         "save_memory_note"
             | "write_note"
             | "decode_jwt"
+            | super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL
+            | super::agents::jwt_tools::TAMPER_JWT_TOOL
             | "send_to_repeater"
+            | "send_repeater_request"
             | "create_collection"
             | "create_folder"
             | "create_endpoint"
             | "toggle_intercept"
+            | "forward_paused_request"
+            | "drop_paused_request"
+            | "start_invoker_attack"
+            | "stop_invoker_attack"
+            | "send_to_intruder"
+            | "trigger_port_scan"
+            | "trigger_scan"
+            | "toggle_browser_crawl"
+            | "stop_browser_crawl"
+            | "navigate_to_app"
+            | "add_scope_target"
+            | "remove_scope_target"
     )
 }
 
@@ -875,6 +1035,56 @@ pub fn format_specialist_message(
         "decode_jwt" => {
             format!("🔑 **JWT Decoded**\n\n{result}")
         }
+        "send_repeater_request" => {
+            format!("🚀 **Executed Active Repeater Request**\n\n{result}")
+        }
+        "stop_invoker_attack" => {
+            format!("🛑 **Intruder Attack Stopped**\n\n{result}")
+        }
+        "send_to_intruder" => {
+            let target = args
+                .get("url")
+                .or_else(|| args.get("path"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("request");
+            format!("🎯 **Dispatched to Intruder**\n\nDispatched `{target}` to Intruder for security fuzzing.")
+        }
+        "forward_paused_request" => {
+            format!("▶️ **Forwarded Intercepted Request**\n\n{result}")
+        }
+        "drop_paused_request" => {
+            format!("🗑️ **Dropped Intercepted Request**\n\n{result}")
+        }
+        "toggle_browser_crawl" => {
+            format!("🌐 **Browser Crawl State Changed**\n\n{result}")
+        }
+        "stop_browser_crawl" => {
+            format!("🛑 **Browser Crawl Stopped**\n\n{result}")
+        }
+        "navigate_to_app" => {
+            let path = args
+                .get("app")
+                .or_else(|| args.get("path"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("window");
+            format!("🧭 **Navigated to Window**\n\nSwitched view to `{path}`.\n\n{result}")
+        }
+        "add_scope_target" => {
+            let host = args
+                .get("host")
+                .or_else(|| args.get("target"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("target");
+            format!("🎯 **Added Target to Scope**\n\nAdded `{host}` to active interception/proxy scope.\n\n{result}")
+        }
+        "remove_scope_target" => {
+            let target = args
+                .get("target")
+                .or_else(|| args.get("host"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("target");
+            format!("❌ **Removed Target from Scope**\n\nRemoved `{target}` from active scope.\n\n{result}")
+        }
         super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL => {
             format!("🔐 **JWT Vulnerability Audit**\n\n{result}")
         }
@@ -901,9 +1111,8 @@ pub async fn run_tool_loop(
     mut cancel_rx: tokio::sync::watch::Receiver<bool>,
     mut pause_rx: tokio::sync::watch::Receiver<bool>,
 ) -> Result<ToolLoopOutput, String> {
-    let client =
-        super::providers::create_openai_client(config).map_err(|e| e.to_string())?;
-    let model = client.completion_model(&config.model);
+    let model =
+        super::providers::create_completion_model(config).map_err(|e| e.to_string())?;
     let all_tools = tool_definitions();
     let tools = super::agents::filter_tools_for_agent(agent, &all_tools);
 
@@ -1061,14 +1270,24 @@ pub async fn run_tool_loop(
                     "I fetched the requested data but did not produce a final summary. Here are the raw results:\n\n",
                 );
                 fallback.push_str(&last_round_tool_results.join("\n\n---\n\n"));
+                let _ = app.emit_to(
+                    window_label,
+                    "ai-chat:delta",
+                    json!({ "requestId": request_id, "delta": &fallback }),
+                );
                 accumulated_full_response.push_str(&fallback);
             }
 
             // Never hand back an empty answer: a provider that returned no text
             // and no tool call should still produce an explicit, honest message.
             if accumulated_full_response.trim().is_empty() {
-                accumulated_full_response =
-                    "The AI provider returned an empty response. Please try again.".to_string();
+                let empty_msg = "The AI provider returned an empty response. Please try again.";
+                accumulated_full_response = empty_msg.to_string();
+                let _ = app.emit_to(
+                    window_label,
+                    "ai-chat:delta",
+                    json!({ "requestId": request_id, "delta": empty_msg }),
+                );
             }
 
             return Ok(ToolLoopOutput {
@@ -1180,9 +1399,15 @@ pub async fn run_tool_loop(
             ));
         }
 
-        if executed_terminal_action && !agent_messages.is_empty() {
+        if executed_terminal_action {
             if accumulated_full_response.trim().is_empty() {
-                accumulated_full_response = "I've coordinated with the specialist team to fulfill your request.".to_string();
+                let success_msg = "The requested tool action has executed successfully.";
+                accumulated_full_response = success_msg.to_string();
+                let _ = app.emit_to(
+                    window_label,
+                    "ai-chat:delta",
+                    json!({ "requestId": request_id, "delta": success_msg }),
+                );
             }
             return Ok(ToolLoopOutput {
                 content: accumulated_full_response,

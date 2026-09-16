@@ -6,7 +6,19 @@ export function toggleInterceptEnabled(): void {
   void store.toggleIntercept(newEnabled);
 }
 
-export function forwardPaused(): void {
+export async function forwardPaused(): Promise<boolean> {
   const store = useInterceptStore.getState();
-  void store.forwardSelectedRequest();
+  if (store.requests.length === 0) return false;
+  await store.forwardSelectedRequest();
+  return true;
+}
+
+export async function dropPaused(): Promise<boolean> {
+  const store = useInterceptStore.getState();
+  const request =
+    store.requests.find((r) => r.id === store.selectedRequestId) ||
+    store.requests[0];
+  if (!request) return false;
+  await store.dropRequest(request);
+  return true;
 }

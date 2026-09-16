@@ -8,4 +8,6 @@ export * from './repeater';
 export * from './intruder';
 export * from './intercept';
 export * from './browser';
+export * from './navigation';
+export * from './live-traffic';
 

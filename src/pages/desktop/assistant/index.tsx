@@ -1,8 +1,5 @@
 import { PromptInputProvider } from '@celestia-project/ui';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, MotionConfig, motion } from 'motion/react';
-import type { FileUIPart } from 'ai';
-import { useNavigate } from 'react-router-dom';
 import { AssistantConversation } from './components/assistant-conversation';
 import { AssistantHeader } from './components/assistant-header';
 import { AssistantPromptBar } from './components/assistant-prompt-bar';
@@ -10,12 +7,7 @@ import { ChatSessionList } from './components/chat-session-list';
 import { AiDebugDialog } from './components/ai-debug-dialog';
 import { SessionTokenUsageBadge } from './components/session-token-usage-badge';
 import { useAiChatPane } from './hooks/use-ai-chat-pane';
-import { usePendingToolConfirmations } from './lib/ai-tools/confirmation';
-import { getMessageText } from './lib/message-utils';
-import { getContextWindow } from './constants';
 import { DURATION, EASE_OUT } from './lib/motion';
-import { useTokenUsageStore } from '@/stores/token-usage';
-import { useNavStore } from '@/stores/nav';
 import { cn } from '@/lib/utils';
 
 interface AIAssistantPaneProps {
@@ -25,7 +17,6 @@ interface AIAssistantPaneProps {
 }
 
 function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssistantPaneProps) {
-  const navigate = useNavigate();
   const {
     clearError,
     error,
@@ -44,6 +35,7 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
     stop,
     sessions,
     activeSessionId,
+    activeSession,
     handleCreateSession,
     handleSwitchSession,
     handleDeleteSession,
@@ -51,82 +43,19 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
     sidebarCollapsed,
     setSidebarCollapsed,
     trackedActions,
+    pendingToolConfirmations,
+    sessionTotals,
+    contextWindow,
     selectedAgent,
     setSelectedAgent,
+    debugDialogOpen,
+    setDebugDialogOpen,
+    handleOpenConfig,
+    handleSelectOption,
+    handleFocusPromptInput,
+    stickToBottomRef,
+    messagesEndRef,
   } = useAiChatPane();
-
-  const activeSession = sessions.find((s) => s.id === activeSessionId);
-  const [debugDialogOpen, setDebugDialogOpen] = useState(false);
-
-  const handleOpenConfig = useCallback(() => {
-    useNavStore.getState().openWindow('/settings', 'Settings');
-    useNavStore.getState().focusWindow('/settings', () => navigate('/settings?tab=ai'));
-    navigate('/settings?tab=ai');
-  }, [navigate]);
-
-  const pendingToolConfirmations = usePendingToolConfirmations();
-  const sessionTotals = useTokenUsageStore((state) => state.sessionTotals);
-  const contextWindow = getContextWindow(model);
-
-  const stickToBottomRef = useRef<{
-    scrollToBottom: (opts?: any) => any;
-    scrollRef?: { current: HTMLDivElement | null };
-    isAtBottom?: boolean;
-  } | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth', force = false) => {
-    if (stickToBottomRef.current) {
-      stickToBottomRef.current.scrollToBottom({ ignoreEscapes: force });
-      const scrollEl = stickToBottomRef.current.scrollRef?.current;
-      if (scrollEl) {
-        if (behavior === 'instant') {
-          scrollEl.scrollTop = scrollEl.scrollHeight;
-        } else {
-          scrollEl.scrollTo({ top: scrollEl.scrollHeight, behavior });
-        }
-      }
-    }
-    messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
-  }, []);
-
-  const lastMessage = messages[messages.length - 1];
-  const lastRawText = lastMessage ? getMessageText(lastMessage) : '';
-
-  useEffect(() => {
-    scrollToBottom('smooth', true);
-  }, [messages.length, scrollToBottom]);
-
-  useEffect(() => {
-    if (isStreaming) {
-      scrollToBottom('smooth', false);
-    }
-  }, [isStreaming, lastRawText, trackedActions.length, scrollToBottom]);
-
-  const wrappedHandleSubmit = useCallback(
-    (message: { text: string; files: FileUIPart[] }) => {
-      scrollToBottom('smooth', true);
-
-      void handleSubmit(message);
-
-      requestAnimationFrame(() => {
-        scrollToBottom('smooth', true);
-      });
-    },
-    [handleSubmit, scrollToBottom],
-  );
-
-  const handleSelectOption = useCallback(
-    (promptText: string) => {
-      wrappedHandleSubmit({ text: promptText, files: [] });
-    },
-    [wrappedHandleSubmit],
-  );
-
-  const handleFocusPromptInput = useCallback(() => {
-    const textarea = document.querySelector('textarea') as HTMLTextAreaElement | null;
-    textarea?.focus();
-  }, []);
 
   return (
     <aside
@@ -139,9 +68,6 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
       )}
     >
       <AssistantHeader
-        provider={provider}
-        providerDisplay={providerDisplay}
-        model={model}
         sidebarCollapsed={sidebarCollapsed}
         sessionsCount={sessions.length}
         onToggleSidebar={() => setSidebarCollapsed((prev) => !prev)}
@@ -149,8 +75,6 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
         onOpenDebug={() => setDebugDialogOpen(true)}
         onClose={onClose}
         trailing={<SessionTokenUsageBadge />}
-        selectedAgent={selectedAgent}
-        onSelectAgent={setSelectedAgent}
       />
 
       <AiDebugDialog

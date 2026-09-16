@@ -58,7 +58,7 @@ export async function formatAttachedFileContent(file: FileUIPart): Promise<strin
   const isMd = filename.toLowerCase().endsWith('.md') || filename.toLowerCase().endsWith('.markdown');
   const lang = isMd ? 'markdown' : 'text';
 
-  return `[Attached File: ${filename}]\n\`\`\`${lang}\n${content}\n\`\`\``;
+  return `[Attached File: ${filename}]\n\`\`\`\`${lang}\n${content}\n\`\`\`\``;
 }
 
 /**
@@ -102,6 +102,7 @@ export function parseAttachedFilesFromMessage(
 export function getUserPromptOnly(text: string): string {
   let cleaned = text;
   if (cleaned.includes('[Attached File:')) {
+    cleaned = cleaned.replace(/\[Attached File:\s*[^\]]+\]\s*````[\s\S]*?````/g, '');
     cleaned = cleaned.replace(/\[Attached File:\s*[^\]]+\]\s*```[\s\S]*?```/g, '');
   }
   if (cleaned.includes('[Referenced pages:')) {

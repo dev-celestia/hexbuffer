@@ -73,7 +73,12 @@ pub static ALL_AGENTS: &[AgentSpec] = &[
 Handle general security questions and cross-domain reasoning yourself, and coordinate the specialized capabilities available to you. \
 You also own the persistent memory knowledge base: target intelligence, research findings, credential formats, and endpoint quirks saved across testing sessions. Search previous discoveries and save new findings with descriptive titles and tags so they can be retrieved as context in future sessions. Memory is distinct from the user's Notes scratchpad — memory is curated AI-retrieved knowledge, while notes belong to the Notes Agent. \
 After any tool call, summarize the action taken and its real outcome in natural language; never reply with raw JSON objects or raw tool result strings.",
-        allowed_tools: &["get_crawl_context", "search_memory", "save_memory_note"],
+        allowed_tools: &[
+            "get_crawl_context",
+            "search_memory",
+            "save_memory_note",
+            "navigate_to_app",
+        ],
         mentions: &["celestia", "orchestrator", "auto", "memory"],
         color: "#8B5CF6",
         icon: "Crown",
@@ -85,7 +90,17 @@ After any tool call, summarize the action taken and its real outcome in natural 
         role: "Traffic & Intercept",
         description: "Monitors proxy traffic, analyzes HTTP request/response flows, inspects security headers, and controls live interception.",
         preamble: "You are the HTTP Traffic Agent in HexBuffer. You specialize in live proxy traffic monitoring, HTTP request/response inspection, traffic filtering, and intercept control. You help the user audit captured HTTP flows, inspect security headers, find sensitive parameters in proxy history, and toggle proxy interception. Always provide concise, technical security observations on HTTP flows.",
-        allowed_tools: &["toggle_intercept", "get_crawl_context"],
+        allowed_tools: &[
+            "toggle_intercept",
+            "forward_paused_request",
+            "drop_paused_request",
+            "add_scope_target",
+            "remove_scope_target",
+            "get_crawl_context",
+            "trigger_scan",
+            "toggle_browser_crawl",
+            "stop_browser_crawl",
+        ],
         mentions: &["traffic", "http", "http_traffic", "proxy"],
         color: "#3B82F6",
         icon: "Globe",
@@ -101,6 +116,7 @@ NORMALIZING UNFINISHED API REQUESTS: When the user pastes a URL, a bare path, or
 Always summarize the exact method, URL, and collection updated, including the real outcome from the tool result. Never reply with raw JSON objects or raw tool result strings.",
         allowed_tools: &[
             "send_to_repeater",
+            "send_repeater_request",
             "create_collection",
             "create_folder",
             "create_endpoint",
@@ -116,7 +132,11 @@ Always summarize the exact method, URL, and collection updated, including the re
         role: "Fuzzing & Injection",
         description: "Analyzes injection points in HTTP requests and initiates automated Intruder fuzzing attacks.",
         preamble: "You are the Intruder Agent in HexBuffer. You specialize in web application parameter fuzzing, automated payload injection, brute force testing, and insertion point detection. You configure Intruder attacks (Sniper, Battering Ram, Pitchfork). Never execute high-risk attacks without clear confirmation.",
-        allowed_tools: &["start_invoker_attack"],
+        allowed_tools: &[
+            "start_invoker_attack",
+            "stop_invoker_attack",
+            "send_to_intruder",
+        ],
         mentions: &["intruder", "fuzzer", "invoker"],
         color: "#F59E0B",
         icon: "Crosshair",

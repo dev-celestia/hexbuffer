@@ -1,7 +1,11 @@
 import type { UIMessage } from '@ai-sdk/react';
 
 
-export type DashboardAiProvider = 'deepseek' | 'openai-compatible';
+export type DashboardAiProvider =
+  | 'deepseek'
+  | 'openai-compatible'
+  | 'anthropic-compatible'
+  | 'anthropic';
 
 export interface DashboardAiSettings {
   provider: DashboardAiProvider;

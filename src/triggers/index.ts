@@ -25,6 +25,7 @@ export {
   trustCA as trustInterceptCA,
   toggleInterceptEnabled,
   forwardPaused,
+  dropPaused,
 } from './intercept';
 
 export {
@@ -49,7 +50,6 @@ export {
 
 export type { SendToIntruderOptions, SendToInvokerOptions } from './intruder';
 
-
 export {
   triggerScan,
   pauseScan as pauseBrowserScan,
@@ -69,8 +69,6 @@ export {
   sendRequest as sendRepeaterRequest,
   sendCraftRequest,
   saveActiveEndpoint as saveCraftEndpoint,
-  convertRepeaterToCraft,
-  convertCraftToRepeater,
   CollectionPickerSubmenu,
   useCollectionPicker,
   createWorkspace,
@@ -91,7 +89,7 @@ export {
 } from './repeater';
 export type { SendToRepeaterOptions, SendToCollectionOptions, CollectionNode } from './repeater';
 
-export { openApp } from './navigation';
+export { openApp, normalizeAppPath } from './navigation';
 
 export {
   APP_AI_TOOL_DEFINITIONS,
@@ -99,5 +97,3 @@ export {
   setupAiToolEventListener,
 } from '@/pages/desktop/assistant/lib/ai-tools';
 export type { AppAiToolDefinition, AppAiToolCallPayload } from '@/pages/desktop/assistant/lib/ai-tools';
-
-

@@ -1,5 +1,6 @@
 import type { DashboardChatMessage } from '../types';
 
+const MAX_DATE_CACHE_SIZE = 300;
 const messageDateCache = new Map<string, Date>();
 
 /**
@@ -19,6 +20,13 @@ export function getMessageDate(message: DashboardChatMessage): Date {
   const cached = messageDateCache.get(message.id);
   if (cached) {
     return cached;
+  }
+
+  if (messageDateCache.size >= MAX_DATE_CACHE_SIZE) {
+    const oldestKey = messageDateCache.keys().next().value;
+    if (oldestKey) {
+      messageDateCache.delete(oldestKey);
+    }
   }
 
   const now = new Date();

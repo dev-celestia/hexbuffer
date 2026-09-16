@@ -7,6 +7,9 @@ import {
   AI_API_KEY_PLACEHOLDERS,
   AI_MODEL_OPTIONS_BY_PROVIDER,
   AI_PROVIDER_OPTIONS,
+  ANTHROPIC_COMPATIBLE_BASE_URL_EXAMPLES,
+  ANTHROPIC_COMPATIBLE_BASE_URL_PLACEHOLDER,
+  ANTHROPIC_COMPATIBLE_PROVIDER_ID,
   OPENAI_COMPATIBLE_BASE_URL_EXAMPLES,
   OPENAI_COMPATIBLE_BASE_URL_PLACEHOLDER,
   OPENAI_COMPATIBLE_PROVIDER_ID,
@@ -34,6 +37,10 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
   const selectedProvider = AI_PROVIDER_OPTIONS.find((provider) => provider.id === aiSettings.provider);
   const selectedProviderLabel = selectedProvider?.label ?? 'AI';
   const isOpenAiCompatible = aiSettings.provider === OPENAI_COMPATIBLE_PROVIDER_ID;
+  const isAnthropicCompatible =
+    aiSettings.provider === ANTHROPIC_COMPATIBLE_PROVIDER_ID ||
+    aiSettings.provider === 'anthropic';
+  const isCustomCompatible = isOpenAiCompatible || isAnthropicCompatible;
   const modelOptions = AI_MODEL_OPTIONS_BY_PROVIDER[aiSettings.provider] ?? [];
   const [showApiKey, setShowApiKey] = React.useState(false);
   const [apiKeyInput, setApiKeyInput] = React.useState(aiSettings.apiKey);
@@ -46,9 +53,9 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
   const hasEmbeddingsKey = !!providerKeyStatus?.embeddings;
   const isSavingNewApiKey = apiKeyInput.trim().length > 0;
   const canSaveAiSettings = !isSavingNewApiKey || aiSettings.allowThirdPartyAiSharing;
-  const canSaveOpenAiCompatible =
-    !isOpenAiCompatible ||
-    (!!aiSettings.model.trim() && !!aiSettings.customBaseUrl?.trim());
+  const canSaveCustomCompatible =
+    !isCustomCompatible ||
+    (!!aiSettings.model.trim() && (isAnthropicCompatible || !!aiSettings.customBaseUrl?.trim()));
 
   React.useEffect(() => {
     setApiKeyInput(aiSettings.apiKey);
@@ -96,7 +103,7 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
             id="ai-provider"
             className={cn(
               // Sizing & Spacing
-              "w-40"
+              "w-72"
             )}
           >
             <SelectValue placeholder="Select provider" />
@@ -110,16 +117,38 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
           </SelectContent>
         </Select>
       </SettingsRow>
-      {isOpenAiCompatible ? (
+      {isCustomCompatible ? (
+        <SettingsRow
+          label="Wire Format"
+          description={
+            isOpenAiCompatible
+              ? 'OpenAI Chat Completions protocol (POST /v1/chat/completions) with Bearer token authentication.'
+              : 'Anthropic Messages protocol (POST /v1/messages) with x-api-key authentication.'
+          }
+        >
+          <Badge variant="secondary">
+            {isOpenAiCompatible ? 'OpenAI Chat Completions' : 'Anthropic Messages'}
+          </Badge>
+        </SettingsRow>
+      ) : null}
+      {isCustomCompatible ? (
         <SettingsRow
           label="Base URL"
-          description={`OpenAI-compatible chat completions endpoint. Examples: ${OPENAI_COMPATIBLE_BASE_URL_EXAMPLES.join(', ')}`}
+          description={
+            isOpenAiCompatible
+              ? `OpenAI-compatible chat completions endpoint. Examples: ${OPENAI_COMPATIBLE_BASE_URL_EXAMPLES.join(', ')}`
+              : `Anthropic-compatible messages endpoint. Optional (defaults to https://api.anthropic.com). Examples: ${ANTHROPIC_COMPATIBLE_BASE_URL_EXAMPLES.join(', ')}`
+          }
         >
           <Input
             value={aiSettings.customBaseUrl ?? ''}
             onChange={(event) => updateAiSettings({ customBaseUrl: event.target.value })}
             onKeyDown={handleInputKeyDown}
-            placeholder={OPENAI_COMPATIBLE_BASE_URL_PLACEHOLDER}
+            placeholder={
+              isOpenAiCompatible
+                ? OPENAI_COMPATIBLE_BASE_URL_PLACEHOLDER
+                : ANTHROPIC_COMPATIBLE_BASE_URL_PLACEHOLDER
+            }
             disabled={aiSettingsLoading}
             autoComplete="off"
             autoCorrect="off"
@@ -132,13 +161,24 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
           />
         </SettingsRow>
       ) : null}
-      <SettingsRow label="Model">
-        {isOpenAiCompatible ? (
+      <SettingsRow
+        label="Model"
+        description={
+          isCustomCompatible
+            ? 'Model identifier. Supports vendor/model syntax (e.g. openai/gpt-5.6-sol, anthropic/claude-3-7-sonnet).'
+            : undefined
+        }
+      >
+        {isCustomCompatible ? (
           <Input
             value={aiSettings.model}
             onChange={(event) => updateAiSettings({ model: event.target.value })}
             onKeyDown={handleInputKeyDown}
-            placeholder="e.g. gpt-4o-mini, llama3.1:8b"
+            placeholder={
+              isOpenAiCompatible
+                ? 'e.g. gpt-4o, openai/gpt-5.6-sol, llama3.1'
+                : 'e.g. claude-3-7-sonnet-latest, anthropic/claude-3-5-sonnet'
+            }
             disabled={aiSettingsLoading}
             autoComplete="off"
             autoCorrect="off"
@@ -146,7 +186,7 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
             spellCheck={false}
             className={cn(
               // Sizing & Spacing
-              "w-40"
+              "w-72"
             )}
           />
         ) : (
@@ -163,7 +203,7 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
               id="ai-model"
               className={cn(
                 // Sizing & Spacing
-                "w-40"
+                "w-48"
               )}
             >
               <SelectValue placeholder="Select model" />
@@ -330,7 +370,7 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
           <Button
             size="sm"
             onClick={handleSaveAiSettings}
-            disabled={aiSettingsLoading || aiSettingsSaving || !canSaveAiSettings || !canSaveOpenAiCompatible}
+            disabled={aiSettingsLoading || aiSettingsSaving || !canSaveAiSettings || !canSaveCustomCompatible}
           >
             <FloppyDiskIcon
               className={cn(
@@ -369,7 +409,7 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
         </div>
       )}
 
-      {isOpenAiCompatible && !canSaveOpenAiCompatible && (
+      {isOpenAiCompatible && !canSaveCustomCompatible && (
         <div
           className={cn(
             // Sizing & Spacing
@@ -383,6 +423,24 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
             )}
           >
             Enter a base URL and model name for the OpenAI-compatible provider.
+          </p>
+        </div>
+      )}
+
+      {isAnthropicCompatible && !canSaveCustomCompatible && (
+        <div
+          className={cn(
+            // Sizing & Spacing
+            "px-4 py-2"
+          )}
+        >
+          <p
+            className={cn(
+              // Typography
+              "text-xs text-amber-700 dark:text-amber-300"
+            )}
+          >
+            Enter a model name for the Anthropic-compatible provider.
           </p>
         </div>
       )}

@@ -31,7 +31,7 @@ export async function triggerScan(options: TriggerScanOptions): Promise<void> {
     maxPages: maxPages ?? 100,
   });
   store.startCrawl(headless ?? true);
-  useNavStore.getState().triggerNavBlink('/browser-automation');
+  useNavStore.getState().triggerNavBlink('/browser');
 }
 
 export async function pauseScan(): Promise<void> {

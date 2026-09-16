@@ -159,7 +159,7 @@ export function AssistantPromptBar({
 }: AssistantPromptBarProps) {
   const [customHeight, setCustomHeight] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const isDraggingRef = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
   const startYRef = useRef(0);
   const startHeightRef = useRef(0);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -176,16 +176,10 @@ export function AssistantPromptBar({
     });
   }, []);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    isDraggingRef.current = true;
-    startYRef.current = e.clientY;
-
-    const textarea = textareaRef.current || (e.currentTarget.parentElement?.querySelector('textarea') as HTMLTextAreaElement | null);
-    startHeightRef.current = textarea ? textarea.getBoundingClientRect().height : 48;
+  useEffect(() => {
+    if (!isDragging) return;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      if (!isDraggingRef.current) return;
       // Moving mouse up (negative delta) increases height since prompt is docked at bottom
       const deltaY = startYRef.current - moveEvent.clientY;
       const maxHeight = Math.max(window.innerHeight * 0.65, 300);
@@ -195,13 +189,25 @@ export function AssistantPromptBar({
     };
 
     const handleMouseUp = () => {
-      isDraggingRef.current = false;
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      setIsDragging(false);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    startYRef.current = e.clientY;
+
+    const textarea = textareaRef.current;
+    startHeightRef.current = textarea ? textarea.getBoundingClientRect().height : 48;
+    setIsDragging(true);
   }, []);
 
   const handleKeyDown = useCallback(
@@ -230,7 +236,15 @@ export function AssistantPromptBar({
         const end = ta.selectionEnd;
         const val = ta.value;
         const updated = val.substring(0, start) + '  ' + val.substring(end);
-        ta.value = updated;
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLTextAreaElement.prototype,
+          'value',
+        )?.set;
+        if (nativeSetter) {
+          nativeSetter.call(ta, updated);
+        } else {
+          ta.value = updated;
+        }
         ta.dispatchEvent(new Event('input', { bubbles: true }));
         requestAnimationFrame(() => {
           ta.selectionStart = ta.selectionEnd = start + 2;
@@ -409,7 +423,16 @@ export function AssistantPromptBar({
                   value={model}
                 >
                   <PromptInputSelectTrigger className="border border-border max-w-[105px] xs:max-w-[130px] sm:max-w-[160px] text-xs h-8 px-2">
-                    <ModelSelectorLogo provider={provider === 'openai-compatible' ? 'openai' : provider} className="size-3.5 shrink-0" />
+                    <ModelSelectorLogo
+                      provider={
+                        provider === 'openai-compatible'
+                          ? 'openai'
+                          : provider === 'anthropic-compatible' || provider === 'anthropic'
+                          ? 'anthropic'
+                          : provider
+                      }
+                      className="size-3.5 shrink-0"
+                    />
                     <PromptInputSelectValue className="truncate" />
                   </PromptInputSelectTrigger>
                   <PromptInputSelectContent>

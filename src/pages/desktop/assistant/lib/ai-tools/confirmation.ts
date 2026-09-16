@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { executeAiToolCall } from './executor';
 
 export interface PendingToolConfirmation {
@@ -18,8 +18,14 @@ const CONFIRMATION_TTL_MS = 600_000;
 
 const TOOL_LABELS: Record<string, string> = {
   trigger_scan: 'Launch a browser scan',
+  trigger_port_scan: 'Run TCP port reconnaissance scan',
   start_invoker_attack: 'Launch an Invoker attack',
+  stop_invoker_attack: 'Stop active Intruder attack',
   toggle_intercept: 'Toggle proxy interception',
+  forward_paused_request: 'Forward paused HTTP request',
+  drop_paused_request: 'Drop paused HTTP request',
+  remove_scope_target: 'Remove host from proxy target scope',
+  stop_browser_crawl: 'Stop active browser crawl',
 };
 
 export function toolConfirmationLabel(toolName: string): string {
@@ -87,25 +93,25 @@ export function clearPendingToolConfirmations(): void {
   }
 }
 
+function subscribePendingConfirmations(listener: () => void) {
+  confirmationListeners.add(listener);
+  const interval = window.setInterval(pruneExpiredConfirmations, 30_000);
+  return () => {
+    confirmationListeners.delete(listener);
+    window.clearInterval(interval);
+  };
+}
+
+function getPendingConfirmationsSnapshot(): readonly PendingToolConfirmation[] {
+  return pendingConfirmations;
+}
+
 export function usePendingToolConfirmations(): readonly PendingToolConfirmation[] {
-  const [confirmations, setConfirmations] = useState<readonly PendingToolConfirmation[]>(
-    () => pendingConfirmations,
+  return useSyncExternalStore(
+    subscribePendingConfirmations,
+    getPendingConfirmationsSnapshot,
+    getPendingConfirmationsSnapshot,
   );
-
-  useEffect(() => {
-    setConfirmations(pendingConfirmations);
-    const update = () => setConfirmations([...pendingConfirmations]);
-    confirmationListeners.add(update);
-    // Periodically drop confirmations whose backend wait has already timed out so stale
-    // cards cannot be approved later.
-    const interval = window.setInterval(pruneExpiredConfirmations, 30_000);
-    return () => {
-      confirmationListeners.delete(update);
-      window.clearInterval(interval);
-    };
-  }, []);
-
-  return confirmations;
 }
 
 /** User approved: execute the tool for real and report the outcome to the engine. */

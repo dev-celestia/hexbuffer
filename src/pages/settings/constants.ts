@@ -114,10 +114,12 @@ export const TROUBLESHOOTING_GUIDES = [
 export const SECURITY_NOTICE_ICON = WarningCircleIcon;
 
 export const OPENAI_COMPATIBLE_PROVIDER_ID = 'openai-compatible';
+export const ANTHROPIC_COMPATIBLE_PROVIDER_ID = 'anthropic-compatible';
 
 export const AI_PROVIDER_OPTIONS = [
   { id: 'deepseek', label: 'DeepSeek' },
-  { id: OPENAI_COMPATIBLE_PROVIDER_ID, label: 'OpenAI Compatible' },
+  { id: OPENAI_COMPATIBLE_PROVIDER_ID, label: 'OpenAI Compatible (Chat Completions)' },
+  { id: ANTHROPIC_COMPATIBLE_PROVIDER_ID, label: 'Anthropic Compatible (Messages)' },
 ];
 
 export const DEFAULT_OPENAI_COMPATIBLE_MODELS = [
@@ -126,10 +128,20 @@ export const DEFAULT_OPENAI_COMPATIBLE_MODELS = [
   'gpt-4-turbo',
   'o1-mini',
   'o3-mini',
+  'openai/gpt-5.6-sol',
   'deepseek-chat',
   'qwen2.5-coder-32b',
   'llama3.3:70b',
   'claude-3-5-sonnet',
+];
+
+export const DEFAULT_ANTHROPIC_COMPATIBLE_MODELS = [
+  'claude-3-7-sonnet-latest',
+  'claude-3-5-sonnet-latest',
+  'claude-3-5-haiku-latest',
+  'claude-3-opus-latest',
+  'anthropic/claude-3-7-sonnet',
+  'anthropic/claude-3-5-sonnet',
 ];
 
 export const AI_MODEL_OPTIONS_BY_PROVIDER: Record<string, string[]> = {
@@ -138,18 +150,29 @@ export const AI_MODEL_OPTIONS_BY_PROVIDER: Record<string, string[]> = {
     'deepseek-v4-pro',
   ],
   [OPENAI_COMPATIBLE_PROVIDER_ID]: DEFAULT_OPENAI_COMPATIBLE_MODELS,
+  [ANTHROPIC_COMPATIBLE_PROVIDER_ID]: DEFAULT_ANTHROPIC_COMPATIBLE_MODELS,
 };
 
 export const AI_API_KEY_PLACEHOLDERS: Record<string, string> = {
   deepseek: 'sk-...',
-  [OPENAI_COMPATIBLE_PROVIDER_ID]: 'sk-... (any OpenAI-compatible key)',
+  [OPENAI_COMPATIBLE_PROVIDER_ID]: 'sk-... (OpenAI or gateway key)',
+  [ANTHROPIC_COMPATIBLE_PROVIDER_ID]: 'sk-ant-... (Anthropic or gateway key)',
 };
 
 export const OPENAI_COMPATIBLE_BASE_URL_PLACEHOLDER = 'https://api.openai.com/v1';
 
 export const OPENAI_COMPATIBLE_BASE_URL_EXAMPLES = [
   'https://api.openai.com/v1',
+  'https://api.xkiro.com/v1',
   'https://openrouter.ai/api/v1',
   'http://localhost:11434/v1 (Ollama)',
   'http://localhost:1234/v1 (LM Studio)',
+];
+
+export const ANTHROPIC_COMPATIBLE_BASE_URL_PLACEHOLDER = 'https://api.anthropic.com';
+
+export const ANTHROPIC_COMPATIBLE_BASE_URL_EXAMPLES = [
+  'https://api.anthropic.com',
+  'https://api.xkiro.com/v1',
+  'https://openrouter.ai/api/v1',
 ];

@@ -78,8 +78,17 @@ export function deleteTarget(params: DeleteTargetParams): void {
   if (!targetId) return;
 
   const store = useTargetStore.getState();
+  const needle = targetId.trim().toLowerCase();
   const resolved = store.targets.find(
-    (t) => t.name === targetId || t.id === targetId,
+    (t) =>
+      t.name.toLowerCase() === needle ||
+      t.id === targetId ||
+      t.scope.some(
+        (s) =>
+          s.toLowerCase() === needle ||
+          s.toLowerCase().includes(needle) ||
+          needle.includes(s.toLowerCase()),
+      ),
   );
   if (resolved) {
     store.removeTarget(resolved.id);
