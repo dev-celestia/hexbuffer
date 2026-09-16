@@ -19,7 +19,7 @@ const ASSIGNEE_OPTIONS = [
   { value: 'JS', label: 'JS (John)', color: '#f472b6' },
 ];
 
-export function KanbanAddModal({ isOpen, onClose, defaultColumnId, onAdd }: Props) {
+export function KanbanAddModal({ isOpen, onClose, defaultColumnId, onAdd }: Readonly<Props>) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [columnId, setColumnId] = useState(defaultColumnId);

@@ -5,7 +5,7 @@ interface HighlightedTextProps {
   query: string;
 }
 
-export function HighlightedText({ text, query }: HighlightedTextProps) {
+export function HighlightedText({ text, query }: Readonly<HighlightedTextProps>) {
   const normalizedQuery = (query ?? '').trim().toLowerCase();
 
   if (!normalizedQuery) {

@@ -15,7 +15,7 @@ interface ToolConfirmationCardProps {
   confirmation: PendingToolConfirmation;
 }
 
-export function ToolConfirmationCard({ confirmation }: ToolConfirmationCardProps) {
+export function ToolConfirmationCard({ confirmation }: Readonly<ToolConfirmationCardProps>) {
   const [busy, setBusy] = useState(false);
 
   const handleDecision = async (approve: boolean) => {

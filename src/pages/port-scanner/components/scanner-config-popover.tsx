@@ -41,7 +41,7 @@ export function ScannerConfigPopover({
   onJitterMsChange,
   randomizePorts,
   onRandomizePortsChange,
-}: ScannerConfigPopoverProps) {
+}: Readonly<ScannerConfigPopoverProps>) {
   return (
     <Popover>
       <PopoverTrigger

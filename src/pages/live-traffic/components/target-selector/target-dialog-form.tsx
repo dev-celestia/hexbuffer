@@ -52,7 +52,7 @@ function createTargetId() {
   return `target-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export function TargetDialogForm({ target, onCancel, onSaved }: TargetDialogFormProps) {
+export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetDialogFormProps>) {
   const addTarget = useTargetStore((state) => state.addTarget);
   const removeTarget = useTargetStore((state) => state.removeTarget);
   const updateTarget = useTargetStore((state) => state.updateTarget);

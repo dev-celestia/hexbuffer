@@ -20,7 +20,7 @@ interface RunConsoleProps {
   messages: RunMessage[];
 }
 
-export function RunConsole({ messages }: RunConsoleProps) {
+export function RunConsole({ messages }: Readonly<RunConsoleProps>) {
   return (
     <ScrollArea className="h-full min-h-0">
       <div

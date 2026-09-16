@@ -48,7 +48,7 @@ export function NucleiRunFindingsTable({
   onSendToRepeater,
   onCopyCurl,
   isRunning,
-}: NucleiRunFindingsTableProps) {
+}: Readonly<NucleiRunFindingsTableProps>) {
   const protocols: ProtocolType[] = ['http', 'dns', 'ssl', 'websocket', 'tcp', 'headless'];
 
   return (

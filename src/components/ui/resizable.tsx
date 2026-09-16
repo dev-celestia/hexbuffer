@@ -45,7 +45,7 @@ function ResizableHandle({
   withHandle,
   className,
   ...props
-}: ResizableHandleProps) {
+}: Readonly<ResizableHandleProps>) {
   return (
     <ResizablePrimitiveSeparator
       data-slot="resizable-handle"

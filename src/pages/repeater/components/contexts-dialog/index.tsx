@@ -15,7 +15,7 @@ import type { ContextsDialogProps } from './types';
 export type { ContextsDialogProps } from './types';
 export { useContextsDialog } from './use-contexts-dialog';
 
-export function ContextsDialog({ open, onOpenChange }: ContextsDialogProps) {
+export function ContextsDialog({ open, onOpenChange }: Readonly<ContextsDialogProps>) {
   const {
     editingContext,
     name,

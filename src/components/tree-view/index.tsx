@@ -21,7 +21,7 @@ export function TreeView<TMeta = unknown>({
   emptyDescription = 'Items will appear here once data is available.',
   errorTitle = 'Failed to load tree',
   searchQuery = '',
-}: TreeViewProps<TMeta>) {
+}: Readonly<TreeViewProps<TMeta>>) {
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">

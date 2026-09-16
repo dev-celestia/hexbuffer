@@ -52,7 +52,7 @@ export function CreateSessionDialog({
   onOpenChange,
   onSubmit,
   isSubmitting = false,
-}: CreateSessionDialogProps) {
+}: Readonly<CreateSessionDialogProps>) {
   const {
     name,
     setName,
@@ -346,7 +346,7 @@ export function EditSessionDialog({
   session,
   onSubmit,
   onDelete,
-}: EditSessionDialogProps) {
+}: Readonly<EditSessionDialogProps>) {
   const {
     name,
     setName,
@@ -544,7 +544,7 @@ export function ClearSessionDataDialog({
   session,
   onConfirm,
   isClearing = false,
-}: ClearSessionDataDialogProps) {
+}: Readonly<ClearSessionDataDialogProps>) {
   const { handleClear, isClearing: localClearing } = useClearSessionDataDialog({
     open,
     onOpenChange,
@@ -632,7 +632,7 @@ export function DeleteSessionDialog({
   session,
   onConfirm,
   isDeleting = false,
-}: DeleteSessionDialogProps) {
+}: Readonly<DeleteSessionDialogProps>) {
   const { handleDelete, isDeleting: localDeleting } = useDeleteSessionDialog({
     open,
     onOpenChange,

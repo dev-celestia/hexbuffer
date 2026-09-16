@@ -30,7 +30,7 @@ export function NucleiRunConfigDialog({
   config,
   onSaveConfig,
   onResetDefaults,
-}: NucleiRunConfigDialogProps) {
+}: Readonly<NucleiRunConfigDialogProps>) {
   const [concurrency, setConcurrency] = useState(config.concurrency.toString());
   const [rateLimit, setRateLimit] = useState(config.rate_limit_rps.toString());
   const [timeout, setTimeoutVal] = useState(config.timeout_seconds.toString());

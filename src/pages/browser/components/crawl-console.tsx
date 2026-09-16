@@ -43,7 +43,7 @@ export function CrawlConsole({
   insightsCount = 0,
   searchQuery = '',
   onClearLogs,
-}: CrawlConsoleProps) {
+}: Readonly<CrawlConsoleProps>) {
   const {
     filterQuery,
     setFilterQuery,

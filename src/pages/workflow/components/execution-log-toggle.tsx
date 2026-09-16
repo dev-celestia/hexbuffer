@@ -8,7 +8,7 @@ interface ExecutionLogToggleProps {
   onToggle: (show: boolean) => void;
 }
 
-export function ExecutionLogToggle({ showExecutionLog, onToggle }: ExecutionLogToggleProps) {
+export function ExecutionLogToggle({ showExecutionLog, onToggle }: Readonly<ExecutionLogToggleProps>) {
   return (
     <Button
       variant="ghost"

@@ -26,7 +26,7 @@ export function ServerToolbar({
   onStartServer,
   onStopServer,
   onConfigChange,
-}: ServerToolbarProps) {
+}: Readonly<ServerToolbarProps>) {
   const [portInput, setPortInput] = useState(String(serverConfig.port || 4000));
   const [copiedUrl, setCopiedUrl] = useState(false);
 

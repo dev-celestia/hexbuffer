@@ -44,7 +44,7 @@ export function ListenerInteractions({
   isEnabled,
   search,
   setSearch,
-}: Props) {
+}: Readonly<Props>) {
   const [localSearch, setLocalSearch] = useState(search);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

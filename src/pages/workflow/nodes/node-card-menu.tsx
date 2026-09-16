@@ -31,7 +31,7 @@ export function addOpenNodeContextMenuListener(
   return () => window.removeEventListener(OPEN_NODE_CONTEXT_MENU_EVENT, listener);
 }
 
-export function NodeCardMenu({ nodeId, nodeLabel }: { nodeId: string; nodeLabel: string }) {
+export function NodeCardMenu({ nodeId, nodeLabel }: Readonly<{ nodeId: string; nodeLabel: string }>) {
   const handleOpenMenu = React.useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();

@@ -32,7 +32,7 @@ export function ThemeProvider({
   children,
   defaultTheme = 'dark',
   defaultPrimaryColor = 'purple',
-}: ThemeProviderProps) {
+}: Readonly<ThemeProviderProps>) {
   // ponytail: read initial value from persisted store; fall back to prop
   const storedTheme = useAppSettingsStore((s) => s.theme);
   const setStoredTheme = useAppSettingsStore((s) => s.setTheme);

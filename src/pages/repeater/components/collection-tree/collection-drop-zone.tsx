@@ -9,7 +9,7 @@ interface CollectionDropZoneProps {
   onAddChild: (parentId: string) => void;
 }
 
-export function CollectionDropZone({ stashId, isActive, isDragging, onAddChild }: CollectionDropZoneProps) {
+export function CollectionDropZone({ stashId, isActive, isDragging, onAddChild }: Readonly<CollectionDropZoneProps>) {
   const droppableId = `dropzone-${stashId}`;
   const { setNodeRef, isOver } = useDroppable({
     id: droppableId,

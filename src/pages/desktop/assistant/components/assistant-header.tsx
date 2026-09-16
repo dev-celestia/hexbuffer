@@ -35,7 +35,7 @@ export function AssistantHeader({
   onOpenDebug,
   onClose,
   trailing,
-}: AssistantHeaderProps) {
+}: Readonly<AssistantHeaderProps>) {
   return (
     <div
       className={cn(

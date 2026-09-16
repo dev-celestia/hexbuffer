@@ -5,7 +5,7 @@ import { ForgePanel } from './ForgePanel';
 import { FolderStarIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
-export function WorkspacePanel({ workspaceId }: { workspaceId: string }) {
+export function WorkspacePanel({ workspaceId }: Readonly<{ workspaceId: string }>) {
   const selectedNodeId = useCollectionsStore((s) => s.selectedNodeId);
   const hasEndpoint = selectedNodeId?.startsWith('ep-');
 

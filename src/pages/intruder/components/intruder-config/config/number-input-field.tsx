@@ -12,7 +12,7 @@ export function NumberInputField({
   value,
   onChange,
   placeholder,
-}: NumberInputFieldProps) {
+}: Readonly<NumberInputFieldProps>) {
   return (
     <div className="grid gap-2">
       <Label>{label}</Label>

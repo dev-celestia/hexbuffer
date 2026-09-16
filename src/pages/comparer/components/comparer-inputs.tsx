@@ -20,7 +20,7 @@ export function ComparerInputs({
   setValueB,
   handlePasteA,
   handlePasteB,
-}: ComparerInputsProps) {
+}: Readonly<ComparerInputsProps>) {
   const { handleClearA, handleClearB } = useComparerInputs({ setValueA, setValueB });
 
   return (

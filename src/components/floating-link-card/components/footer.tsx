@@ -15,7 +15,7 @@ export function Footer({
   isFront = true,
   dismissLabel = 'Dismiss',
   children,
-}: FooterProps) {
+}: Readonly<FooterProps>) {
   const handleDismiss = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();

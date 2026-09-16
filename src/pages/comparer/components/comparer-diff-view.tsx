@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 // ── Inline Renderer ─────────────────────────────────
 
-function InlineRenderer({ parts }: { parts: InlinePart[] }) {
+function InlineRenderer({ parts }: Readonly<{ parts: InlinePart[] }>) {
   return (
     <>
       {parts.map((p, i) => (
@@ -35,7 +35,7 @@ interface ComparerDiffViewProps {
   diffMode: DiffMode;
 }
 
-export function ComparerDiffView({ diffResult, diffMode }: ComparerDiffViewProps) {
+export function ComparerDiffView({ diffResult, diffMode }: Readonly<ComparerDiffViewProps>) {
   const { lines, isEmpty } = useComparerDiffView(diffResult, diffMode);
 
   if (isEmpty) {

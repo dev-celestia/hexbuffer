@@ -26,7 +26,7 @@ export function FileContextMenuContent<T extends FileItem>({
   onRequestDelete,
   onStartRename,
   renderExtraItems,
-}: FileContextMenuContentProps<T>) {
+}: Readonly<FileContextMenuContentProps<T>>) {
   return (
     <ContextMenuContent className="w-44 font-sans text-xs">
       <ContextMenuItem onClick={() => onOpen(item)}>

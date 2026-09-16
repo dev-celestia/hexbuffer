@@ -10,7 +10,7 @@ interface TokenUsageBadgeProps {
 }
 
 /** Compact session token-usage pill shown in the assistant header. */
-export function TokenUsageBadge({ totals, loading, onClick }: TokenUsageBadgeProps) {
+export function TokenUsageBadge({ totals, loading, onClick }: Readonly<TokenUsageBadgeProps>) {
   const hasData = totals && totals.totalRequests > 0;
   const label = hasData
     ? `${formatTokenCount(totals!.totalTokens)} tokens · ${formatTokenCount(totals!.totalRequests)} req`

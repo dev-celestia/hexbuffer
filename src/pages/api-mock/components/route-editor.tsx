@@ -58,7 +58,7 @@ export function RouteEditor({
   onUpdate,
   onDelete,
   onAdd,
-}: RouteEditorProps) {
+}: Readonly<RouteEditorProps>) {
   const { theme } = useTheme();
   const {
     body,

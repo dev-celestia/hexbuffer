@@ -22,7 +22,7 @@ export function RegressionSidebar({
   onSelect,
   onCreate,
   onDelete,
-}: RegressionSidebarProps) {
+}: Readonly<RegressionSidebarProps>) {
   return (
     <div
       className={cn(

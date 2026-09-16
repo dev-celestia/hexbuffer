@@ -64,7 +64,7 @@ export function AssistantConversation({
   messagesEndRef,
   onSelectOption,
   onFocusInput,
-}: AssistantConversationProps) {
+}: Readonly<AssistantConversationProps>) {
   const lastMessage = messages[messages.length - 1];
   const lastMessageIsAssistant = lastMessage?.role === 'assistant';
   const lastAssistantText = lastMessageIsAssistant ? getMessageText(lastMessage).trim() : '';

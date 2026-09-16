@@ -30,7 +30,7 @@ export function EncoderTransformColumn({
   onSwap,
   onCopy,
   onClear,
-}: EncoderTransformColumnProps) {
+}: Readonly<EncoderTransformColumnProps>) {
   return (
     <div
       className={cn(

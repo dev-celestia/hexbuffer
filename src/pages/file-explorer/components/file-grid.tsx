@@ -80,7 +80,7 @@ export function FileGrid<T extends FileItem>({
   onRenameCancel,
   renameInputRef,
   deletingId,
-}: FileGridProps<T>) {
+}: Readonly<FileGridProps<T>>) {
   if (loading && items.length === 0) {
     return (
       <div

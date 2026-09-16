@@ -18,7 +18,7 @@ export function AgentBadgeHeader({
   isStreaming,
   isPaused,
   timestamp,
-}: AgentBadgeHeaderProps) {
+}: Readonly<AgentBadgeHeaderProps>) {
   const agent = getAgentInfo(agentId);
   const displayName = agentName || agent.name;
 

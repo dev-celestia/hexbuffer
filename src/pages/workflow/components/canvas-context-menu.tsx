@@ -89,7 +89,7 @@ interface CanvasContextMenuProps {
   onRemoveTrigger?: () => void;
 }
 
-export function CanvasContextMenu({ state, onClose, onAddNode, hasTriggerNode, onRemoveTrigger }: CanvasContextMenuProps) {
+export function CanvasContextMenu({ state, onClose, onAddNode, hasTriggerNode, onRemoveTrigger }: Readonly<CanvasContextMenuProps>) {
   const menuRef = React.useRef<HTMLDivElement>(null);
   const searchRef = React.useRef<HTMLInputElement>(null);
   const [search, setSearch] = React.useState('');

@@ -8,7 +8,7 @@ export interface NotesEmptyStateProps {
   onCreateNewNote: () => void;
 }
 
-export function NotesEmptyState({ onOpenSavedNotes, onCreateNewNote }: NotesEmptyStateProps) {
+export function NotesEmptyState({ onOpenSavedNotes, onCreateNewNote }: Readonly<NotesEmptyStateProps>) {
   const { scratchpads: notes } = useScratchpadStore();
 
   return (

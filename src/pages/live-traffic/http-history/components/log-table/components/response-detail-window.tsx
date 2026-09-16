@@ -8,7 +8,7 @@ interface ResponseDetailWindowProps {
   callId: string;
 }
 
-export function ResponseDetailWindow({ callId }: ResponseDetailWindowProps) {
+export function ResponseDetailWindow({ callId }: Readonly<ResponseDetailWindowProps>) {
   const {
     call,
     isLoading,

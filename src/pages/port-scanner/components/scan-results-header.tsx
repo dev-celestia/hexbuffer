@@ -22,7 +22,7 @@ export function ScanResultsHeader({
   onClear,
   onExportJson,
   onExportCsv,
-}: ScanResultsHeaderProps) {
+}: Readonly<ScanResultsHeaderProps>) {
   return (
     <div
       className={cn(

@@ -45,7 +45,7 @@ function formatTime(iso: string): string {
   return `${h}:${m}:${s}.${ms}`;
 }
 
-function JsonLogData({ data }: { data: unknown }) {
+function JsonLogData({ data }: Readonly<{ data: unknown }>) {
   const json = React.useMemo(() => JSON.stringify(data, null, 2), [data]);
   return <>{json}</>;
 }
@@ -54,7 +54,7 @@ function dedupeById<T extends { id: string }>(items: T[]): T[] {
   return Array.from(new Map(items.map((item) => [item.id, item])).values());
 }
 
-export function ExecutionLogPanel({ workflowId }: ExecutionLogPanelProps) {
+export function ExecutionLogPanel({ workflowId }: Readonly<ExecutionLogPanelProps>) {
   const logs = useAutomationStore((s) =>
     workflowId ? s.executionLogsByWorkflowId[workflowId] ?? EMPTY_EXECUTION_LOGS : EMPTY_EXECUTION_LOGS
   );

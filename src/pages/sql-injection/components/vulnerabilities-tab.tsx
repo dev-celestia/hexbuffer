@@ -20,7 +20,7 @@ export function VulnerabilitiesTab({
   selectedVuln,
   selectedVulnData,
   onSelectVuln,
-}: VulnerabilitiesTabProps) {
+}: Readonly<VulnerabilitiesTabProps>) {
   const [copied, setCopied] = useState(false);
 
   const handleCopyPoC = () => {

@@ -113,7 +113,7 @@ function AutomationNumberRow({
   description,
   value,
   onChange,
-}: AutomationNumberRowProps) {
+}: Readonly<AutomationNumberRowProps>) {
   const limits = AUTOMATION_SETTINGS_LIMITS[id];
 
   return (

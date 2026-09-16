@@ -18,7 +18,7 @@ export function CollectionPickerSubmenu({
   variant,
   onSelect,
   disabled,
-}: CollectionPickerSubmenuProps) {
+}: Readonly<CollectionPickerSubmenuProps>) {
   const workspaces = useRepeaterStore((s) => s.workspaces);
   const stashes = useCollectionsStore((s) => s.stashes);
   const isHydrated = useCollectionsStore((s) => s.isHydrated);

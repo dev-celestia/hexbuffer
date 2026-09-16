@@ -37,7 +37,7 @@ function formatTime(ts: string) {
   return d.toLocaleTimeString(undefined, { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
-export function LogsPanel({ logs, domains, routes, selectedLogId, onSelect }: LogsProps) {
+export function LogsPanel({ logs, domains, routes, selectedLogId, onSelect }: Readonly<LogsProps>) {
   const { searchQuery, setSearchQuery, filteredLogs } = useLogsPanel(logs, domains);
   const selectedLog = logs.find((l) => l.id === selectedLogId) ?? null;
 
@@ -121,7 +121,7 @@ export function LogsPanel({ logs, domains, routes, selectedLogId, onSelect }: Lo
   );
 }
 
-function LogDetailView({ log, domains, routes }: { log: RequestLog; domains: MockDomain[]; routes: MockRoute[] }) {
+function LogDetailView({ log, domains, routes }: Readonly<{ log: RequestLog; domains: MockDomain[]; routes: MockRoute[] }>) {
   const { theme } = useTheme();
   const route = routes.find((r) => r.id === log.routeId);
   const { reqBodyStr, respBodyStr, handleSendToRepeater } = useLogDetail(log, domains, routes);

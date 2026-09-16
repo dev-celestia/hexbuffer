@@ -14,7 +14,7 @@ interface ContextsEmptyStateProps {
   onClose: () => void;
 }
 
-export function ContextsEmptyState({ onStartCreate, onClose }: ContextsEmptyStateProps) {
+export function ContextsEmptyState({ onStartCreate, onClose }: Readonly<ContextsEmptyStateProps>) {
   return (
     <motion.div
       key="empty"

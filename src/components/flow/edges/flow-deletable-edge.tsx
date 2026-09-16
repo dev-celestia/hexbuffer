@@ -27,7 +27,7 @@ export function FlowDeletableEdge({
   onDeleteEdge,
   label,
   badgeClassName,
-}: FlowDeletableEdgeProps) {
+}: Readonly<FlowDeletableEdgeProps>) {
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
     sourceY,

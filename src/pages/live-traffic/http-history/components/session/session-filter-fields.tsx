@@ -52,7 +52,7 @@ export function SessionFilterFields({
   showAdvancedExclude = true,
   onToggleAdvancedExclude,
   isCollapsibleExclude = false,
-}: SessionFilterFieldsProps) {
+}: Readonly<SessionFilterFieldsProps>) {
   return (
     <div
       className={cn(

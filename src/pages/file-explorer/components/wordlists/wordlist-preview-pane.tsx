@@ -36,7 +36,7 @@ export function WordlistPreviewPane({
   onDownload,
   onDelete,
   onOpen,
-}: WordlistPreviewPaneProps) {
+}: Readonly<WordlistPreviewPaneProps>) {
   const handleCopyUrl = async () => {
     if (!item) return;
     const url = `${WORDLISTS_RAW_BASE_URL}${item.href}`;

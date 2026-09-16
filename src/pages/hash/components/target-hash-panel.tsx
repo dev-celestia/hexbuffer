@@ -28,7 +28,7 @@ export function TargetHashPanel({
   defaultAlgorithm,
   onTargetsChange,
   disabled,
-}: TargetHashPanelProps) {
+}: Readonly<TargetHashPanelProps>) {
   const [inputHash, setInputHash] = useState('');
   const [inputAlgorithm, setInputAlgorithm] = useState<HashType>(defaultAlgorithm);
   const [bulkMode, setBulkMode] = useState(false);

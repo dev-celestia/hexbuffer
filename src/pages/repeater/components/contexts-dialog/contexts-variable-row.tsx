@@ -17,7 +17,7 @@ export function ContextsVariableRow({
   index,
   onVarChange,
   onRemoveVar,
-}: ContextsVariableRowProps) {
+}: Readonly<ContextsVariableRowProps>) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 2 }}

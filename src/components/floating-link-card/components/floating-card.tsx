@@ -39,7 +39,7 @@ export function FloatingCard({
   showDownloadCert = false,
   onCycle,
   onDismiss,
-}: FloatingCardProps) {
+}: Readonly<FloatingCardProps>) {
   const { imageSrc = '', imageAlt = '', title, description, href = '#' } = card;
   const isFront = depth === 0;
   const [downloading, setDownloading] = React.useState(false);

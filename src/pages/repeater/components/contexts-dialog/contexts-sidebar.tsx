@@ -37,7 +37,7 @@ export function ContextsSidebar({
   onConfirmDelete,
   onCancelDelete,
   getVariablesSummary,
-}: ContextsSidebarProps) {
+}: Readonly<ContextsSidebarProps>) {
   return (
     <div
       className={cn(

@@ -5,7 +5,7 @@ interface ChatDateSeparatorProps {
   date: Date;
 }
 
-export function ChatDateSeparator({ date }: ChatDateSeparatorProps) {
+export function ChatDateSeparator({ date }: Readonly<ChatDateSeparatorProps>) {
   const label = formatChatDateSeparator(date);
 
   return (

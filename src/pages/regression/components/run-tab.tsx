@@ -39,7 +39,7 @@ export function RunTab({
   history,
   onRun,
   onAbort,
-}: RunTabProps) {
+}: Readonly<RunTabProps>) {
   const statusMeta = runStatus ? RUN_STATUS_META[runStatus] ?? null : null;
   const passed = conditions.filter((c) => c.status === 'passed').length;
   const failed = conditions.filter((c) => c.status === 'failed').length;

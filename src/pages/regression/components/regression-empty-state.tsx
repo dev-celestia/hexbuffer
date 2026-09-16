@@ -6,7 +6,7 @@ interface RegressionEmptyStateProps {
   onCreate: () => void;
 }
 
-export function RegressionEmptyState({ onCreate }: RegressionEmptyStateProps) {
+export function RegressionEmptyState({ onCreate }: Readonly<RegressionEmptyStateProps>) {
   return (
     <div
       className={cn(

@@ -8,7 +8,7 @@ interface ImportDialogProps {
   onCancel: () => void;
 }
 
-export function ImportDialog({ open, onOpenChange, onConfirm, onCancel }: ImportDialogProps) {
+export function ImportDialog({ open, onOpenChange, onConfirm, onCancel }: Readonly<ImportDialogProps>) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>

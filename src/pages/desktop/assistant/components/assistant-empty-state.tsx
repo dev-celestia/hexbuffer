@@ -8,7 +8,7 @@ interface AssistantEmptyStateProps {
   providerDisplay: string;
 }
 
-export function AssistantEmptyState({ model, providerDisplay }: AssistantEmptyStateProps) {
+export function AssistantEmptyState({ model, providerDisplay }: Readonly<AssistantEmptyStateProps>) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}

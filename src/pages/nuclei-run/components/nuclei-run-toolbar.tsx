@@ -30,7 +30,7 @@ export function NucleiRunToolbar({
   onActiveTabChange,
   onStart,
   onStop,
-}: NucleiRunToolbarProps) {
+}: Readonly<NucleiRunToolbarProps>) {
   const isScanning = status === 'running';
 
   return (

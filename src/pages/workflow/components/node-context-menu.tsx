@@ -16,7 +16,7 @@ interface NodeContextMenuProps {
   onProperties: (nodeId: string) => void;
 }
 
-export function NodeContextMenu({ state, onClose, onDelete, onProperties }: NodeContextMenuProps) {
+export function NodeContextMenu({ state, onClose, onDelete, onProperties }: Readonly<NodeContextMenuProps>) {
   const menuRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {

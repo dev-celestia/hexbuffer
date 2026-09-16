@@ -34,7 +34,7 @@ export function StorageAuditor({
   deleteStorageItem,
   clearStorage,
   targetUrl,
-}: StorageAuditorProps) {
+}: Readonly<StorageAuditorProps>) {
   const [selectedSection, setSelectedSection] = useState<StorageSection>('cookies');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<{ key: string; value: string } | null>(null);

@@ -40,7 +40,7 @@ export function NewRouteDialog({
   dialogTitle = 'New Mock Endpoint',
   buttonLabel = 'New Endpoint',
   onAdd,
-}: NewRouteDialogProps) {
+}: Readonly<NewRouteDialogProps>) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [method, setMethod] = useState<MockRoute['method']>('GET');

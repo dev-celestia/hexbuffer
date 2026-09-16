@@ -18,7 +18,7 @@ interface WorkflowCanvasProps {
   bridgeRef?: React.MutableRefObject<WorkflowCanvasBridge | null>;
 }
 
-export function WorkflowCanvas({ addNodeRef, persistRef, onSelectedNodeChange, bridgeRef }: WorkflowCanvasProps) {
+export function WorkflowCanvas({ addNodeRef, persistRef, onSelectedNodeChange, bridgeRef }: Readonly<WorkflowCanvasProps>) {
   const canvas = useWorkflowCanvas(addNodeRef, persistRef, onSelectedNodeChange, bridgeRef);
 
   if (!canvas.activeWorkflowId) {

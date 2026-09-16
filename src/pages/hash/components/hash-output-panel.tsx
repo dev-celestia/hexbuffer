@@ -7,7 +7,7 @@ interface HashOutputPanelProps {
   onCopy: () => void;
 }
 
-export function HashOutputPanel({ output, onCopy }: HashOutputPanelProps) {
+export function HashOutputPanel({ output, onCopy }: Readonly<HashOutputPanelProps>) {
   return (
     <div
       className={cn(

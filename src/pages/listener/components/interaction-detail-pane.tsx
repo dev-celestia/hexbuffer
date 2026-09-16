@@ -18,7 +18,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'raw', label: 'Raw' },
 ];
 
-export function InteractionDetailPane({ interaction, onClose }: Props) {
+export function InteractionDetailPane({ interaction, onClose }: Readonly<Props>) {
   const { activeTab, setActiveTab, parsedHeaders, parsedQuery } = useInteractionDetail({
     interaction,
   });
@@ -146,7 +146,7 @@ export function InteractionDetailPane({ interaction, onClose }: Props) {
   );
 }
 
-function InfoBlock({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+function InfoBlock({ label, value, mono }: Readonly<{ label: string; value: string; mono?: boolean }>) {
   return (
     <div className="flex items-start gap-2">
       <span className="w-24 shrink-0 text-right font-medium text-muted-foreground">{label}</span>
@@ -155,7 +155,7 @@ function InfoBlock({ label, value, mono }: { label: string; value: string; mono?
   );
 }
 
-function RawBlock({ content }: { content: string }) {
+function RawBlock({ content }: Readonly<{ content: string }>) {
   return (
     <pre className="max-h-80 overflow-auto rounded-md border border-border bg-muted/50 p-2.5 font-mono text-[10px] leading-relaxed text-foreground select-text">
       {content}

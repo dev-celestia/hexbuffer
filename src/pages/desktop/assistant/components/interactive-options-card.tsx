@@ -18,7 +18,7 @@ export function InteractiveOptionsCard({
   onFocusInput,
   disabled = false,
   className,
-}: InteractiveOptionsCardProps) {
+}: Readonly<InteractiveOptionsCardProps>) {
   if (!options || options.length === 0) return null;
 
   return (

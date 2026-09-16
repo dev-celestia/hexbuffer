@@ -14,7 +14,7 @@ export function SplashScreen({
   autoPlay = true,
   intervalMs = 1400,
   onComplete,
-}: SplashScreenProps) {
+}: Readonly<SplashScreenProps>) {
   const {
     currentIndex,
     currentSlide,

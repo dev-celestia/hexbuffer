@@ -10,7 +10,7 @@ export function ColorizedJwtInput({
   value,
   onChange,
   placeholder,
-}: ColorizedJwtInputProps) {
+}: Readonly<ColorizedJwtInputProps>) {
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const highlightRef = React.useRef<HTMLDivElement>(null);
 

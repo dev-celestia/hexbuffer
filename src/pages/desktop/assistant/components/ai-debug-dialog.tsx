@@ -24,7 +24,7 @@ interface AiDebugDialogProps {
   sessionTitle?: string | null;
 }
 
-function CopyButton({ text }: { text: string }) {
+function CopyButton({ text }: Readonly<{ text: string }>) {
   const [copied, setCopied] = React.useState(false);
 
   const handleCopy = () => {
@@ -63,7 +63,7 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-function MonoBlock({ children, className }: { children: string; className?: string }) {
+function MonoBlock({ children, className }: Readonly<{ children: string; className?: string }>) {
   return (
     <pre
       className={cn(
@@ -83,7 +83,7 @@ function MonoBlock({ children, className }: { children: string; className?: stri
   );
 }
 
-function SectionHeader({ label, copyText }: { label: string; copyText?: string }) {
+function SectionHeader({ label, copyText }: Readonly<{ label: string; copyText?: string }>) {
   return (
     <div
       className={cn(
@@ -111,7 +111,7 @@ export function AiDebugDialog({
   onOpenChange,
   sessionId,
   sessionTitle,
-}: AiDebugDialogProps) {
+}: Readonly<AiDebugDialogProps>) {
   const [snapshot, setSnapshot] = React.useState<AiDebugSnapshot | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);

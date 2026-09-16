@@ -63,7 +63,7 @@ export function NoteListItem({
   onStartDelete,
   onCancelDelete,
   onConfirmDelete,
-}: NoteListItemProps) {
+}: Readonly<NoteListItemProps>) {
   const snippet = extractSnippet(note.note);
   const relativeUpdated = formatRelativeTime(note.updatedAt);
 

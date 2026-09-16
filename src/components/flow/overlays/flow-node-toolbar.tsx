@@ -16,7 +16,7 @@ export function FlowNodeToolbar({
   children,
   className,
   offset = 8,
-}: FlowNodeToolbarProps) {
+}: Readonly<FlowNodeToolbarProps>) {
   return (
     <NodeToolbar
       isVisible={isVisible}

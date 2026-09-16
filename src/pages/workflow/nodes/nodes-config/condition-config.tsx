@@ -70,7 +70,7 @@ interface ConditionConfigFormProps {
   inputData?: unknown;
 }
 
-export function ConditionConfigForm({ config, onChange, inputData }: ConditionConfigFormProps) {
+export function ConditionConfigForm({ config, onChange, inputData }: Readonly<ConditionConfigFormProps>) {
   const showValue = config.conditionType !== 'condition:header-exists';
   const dataPath = config.dataPath ?? defaultDataPathForCondition(config.conditionType);
   const dataPathOptions = getSuggestedDataPaths(config.conditionType, inputData);

@@ -28,7 +28,7 @@ interface SettingsSidebarProps {
   categories?: SettingsCategory[];
 }
 
-export function SettingsSidebar({ active, onSelect, categories }: SettingsSidebarProps) {
+export function SettingsSidebar({ active, onSelect, categories }: Readonly<SettingsSidebarProps>) {
   const visibleNavItems = categories
     ? NAV_ITEMS.filter((item) => categories.includes(item.id))
     : NAV_ITEMS;

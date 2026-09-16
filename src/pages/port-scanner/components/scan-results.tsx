@@ -35,7 +35,7 @@ export function ScanResults({
   onCopy,
   onExportJson,
   onExportCsv,
-}: ScanResultsProps) {
+}: Readonly<ScanResultsProps>) {
   const { copied, handleCopy, getLatencyColor } = useScanResults({ onCopy });
 
   // Welcome / Onboarding State

@@ -40,7 +40,7 @@ export function SessionItemRow({
   onClearData,
   onDelete,
   onPromote,
-}: SessionItemRowProps) {
+}: Readonly<SessionItemRowProps>) {
   const mode = session.capture_mode ?? 'all';
   const isEphemeral = session.storage_mode === 'ephemeral';
   let customHostsList: string[] = [];

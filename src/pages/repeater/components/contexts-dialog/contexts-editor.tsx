@@ -29,7 +29,7 @@ export function ContextsEditor({
   onVarChange,
   onCancel,
   onSave,
-}: ContextsEditorProps) {
+}: Readonly<ContextsEditorProps>) {
   return (
     <motion.div
       key={editingContext?.id || 'create'}

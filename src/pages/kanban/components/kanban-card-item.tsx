@@ -17,7 +17,7 @@ interface Props {
   onClick: (id: string) => void;
 }
 
-export function KanbanCardItem({ card, isDragging, isOverlay = false, onToggleSubtask, onClick }: Props) {
+export function KanbanCardItem({ card, isDragging, isOverlay = false, onToggleSubtask, onClick }: Readonly<Props>) {
   const { attributes, listeners, setNodeRef } = useDraggable({
     id: card.id,
     disabled: isOverlay,

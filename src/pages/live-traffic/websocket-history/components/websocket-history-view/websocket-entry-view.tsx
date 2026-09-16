@@ -50,7 +50,7 @@ function stateClassName(state: string) {
   }
 }
 
-export function WebSocketEntryView({ selectedConnectionId }: WebSocketEntryViewProps) {
+export function WebSocketEntryView({ selectedConnectionId }: Readonly<WebSocketEntryViewProps>) {
   const {
     connection,
     messages,

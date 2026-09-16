@@ -26,7 +26,7 @@ export function DockItem({
   onClose,
   onClick,
   children,
-}: DockItemProps) {
+}: Readonly<DockItemProps>) {
   const seenNewApps = useAppSettingsStore((s) => s.seenNewApps);
   const isNew = Boolean(item.isNew && !seenNewApps?.includes(item.href));
   const imageSrc = getAppIconImage(item.href, item.label);
@@ -145,14 +145,14 @@ export function SortableDockItem({
   isOpened,
   onClose,
   onClick,
-}: {
+}: Readonly<{
   item: NavItem;
   active: boolean;
   dragActive: React.RefObject<boolean>;
   isOpened: boolean;
   onClose?: () => void;
   onClick?: (e: React.MouseEvent) => void;
-}) {
+}>) {
   const {
     attributes,
     listeners,

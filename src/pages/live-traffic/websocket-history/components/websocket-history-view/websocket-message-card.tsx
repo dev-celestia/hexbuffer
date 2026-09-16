@@ -17,7 +17,7 @@ interface WebSocketMessageCardProps {
   formatDateTime: (value: string) => string;
 }
 
-export function WebSocketMessageCard({ message, formatDateTime }: WebSocketMessageCardProps) {
+export function WebSocketMessageCard({ message, formatDateTime }: Readonly<WebSocketMessageCardProps>) {
   const [copied, setCopied] = React.useState(false);
 
   // Check if payload is valid JSON and pretty print it

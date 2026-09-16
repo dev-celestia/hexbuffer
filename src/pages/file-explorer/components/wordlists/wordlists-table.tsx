@@ -26,7 +26,7 @@ interface WordlistsTableProps {
   loading: boolean;
 }
 
-function WordlistStatus({ item }: { item: WordlistItemWithStatus }) {
+function WordlistStatus({ item }: Readonly<{ item: WordlistItemWithStatus }>) {
   switch (item.status) {
     case 'bundled':
       return (
@@ -80,7 +80,7 @@ export function WordlistsTable({
   onOpen,
   onPreview,
   loading,
-}: WordlistsTableProps) {
+}: Readonly<WordlistsTableProps>) {
   if (loading) {
     return (
       <div

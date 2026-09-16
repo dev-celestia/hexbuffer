@@ -222,7 +222,7 @@ export function EnvSuggestionDropdown({
   highlightedIndex,
   activeContextName,
   onSelect,
-}: EnvSuggestionDropdownProps) {
+}: Readonly<EnvSuggestionDropdownProps>) {
   const listRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -365,7 +365,7 @@ export function ColorizedUrlInput({
   containerClassName,
   onKeyDown: propOnKeyDown,
   ...props
-}: ColorizedUrlInputProps) {
+}: Readonly<ColorizedUrlInputProps>) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const backdropRef = React.useRef<HTMLDivElement>(null);

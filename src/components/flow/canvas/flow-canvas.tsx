@@ -49,7 +49,7 @@ export function FlowCanvas<NodeType extends Node = Node, EdgeType extends Edge =
   panOnScroll = true,
   deleteKeyCode = ['Backspace', 'Delete'],
   ...reactFlowProps
-}: FlowCanvasProps<NodeType, EdgeType>) {
+}: Readonly<FlowCanvasProps<NodeType, EdgeType>>) {
   const localWrapperRef = React.useRef<HTMLDivElement>(null);
   const targetRef = containerRef ?? localWrapperRef;
   const { spacePressed } = useFlowKeyboard({ enableSpacePan });

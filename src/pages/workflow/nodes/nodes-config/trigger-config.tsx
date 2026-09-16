@@ -52,7 +52,7 @@ function formatTime(iso: string): string {
   return `${h}:${m}:${s}`;
 }
 
-export function TriggerConfigForm({ config, onChange, onRun }: TriggerConfigFormProps) {
+export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerConfigFormProps>) {
   const tt = config.triggerType;
   const isScheduled = tt === 'trigger:scheduled';
   const isManual = tt === 'trigger:manual';
@@ -365,7 +365,7 @@ function LiveTrafficHostList({
   clearTitle,
   onClear,
   stats,
-}: LiveTrafficHostListProps) {
+}: Readonly<LiveTrafficHostListProps>) {
   const noun = title === 'Captured hosts' ? 'captured request' : 'matched request';
 
   return (
@@ -441,7 +441,7 @@ function LiveTrafficHostList({
   );
 }
 
-export function LiveTrafficQueuePanel({ nodeId }: { nodeId: string }) {
+export function LiveTrafficQueuePanel({ nodeId }: Readonly<{ nodeId: string }>) {
   const queuedPreview = useAutomationStore(
     (s) => s.liveTrafficPreviewByTriggerId[nodeId] ?? EMPTY_LIVE_TRAFFIC_INSIGHTS
   );
@@ -461,7 +461,7 @@ export function LiveTrafficQueuePanel({ nodeId }: { nodeId: string }) {
   );
 }
 
-export function LiveTrafficCapturedHostsPanel({ nodeId }: { nodeId: string }) {
+export function LiveTrafficCapturedHostsPanel({ nodeId }: Readonly<{ nodeId: string }>) {
   const capturedPreview = useAutomationStore(
     (s) => s.liveTrafficCapturedPreviewByTriggerId[nodeId] ?? EMPTY_LIVE_TRAFFIC_INSIGHTS
   );
@@ -479,7 +479,7 @@ export function LiveTrafficCapturedHostsPanel({ nodeId }: { nodeId: string }) {
   );
 }
 
-export function LiveTrafficPanel({ nodeId }: { nodeId: string }) {
+export function LiveTrafficPanel({ nodeId }: Readonly<{ nodeId: string }>) {
   return (
     <div className="space-y-5">
       <LiveTrafficQueuePanel nodeId={nodeId} />

@@ -37,7 +37,7 @@ export function EndpointList({
   onSearchChange,
   onSelectRoute,
   onAddRoute,
-}: EndpointListProps) {
+}: Readonly<EndpointListProps>) {
   return (
     <div
       className={cn(

@@ -20,10 +20,10 @@ export const DIRECTION_OPTIONS: { value: string; label: string }[] = [
 export function HttpMethodFilter({
   value,
   onChange,
-}: {
+}: Readonly<{
   value: string | undefined;
   onChange: (v: string | undefined) => void;
-}) {
+}>) {
   return (
     <div className="space-y-1.5">
       <Label className="text-[11px]">Method</Label>
@@ -46,10 +46,10 @@ export function HttpMethodFilter({
 export function HostWhitelistFilter({
   value,
   onChange,
-}: {
+}: Readonly<{
   value: string | undefined;
   onChange: (v: string) => void;
-}) {
+}>) {
   return (
     <div className="space-y-1.5">
       <Label className="text-[11px]">
@@ -74,12 +74,12 @@ export function UrlPatternFilter({
   value,
   onOperatorChange,
   onValueChange,
-}: {
+}: Readonly<{
   operator: string | undefined;
   value: string | undefined;
   onOperatorChange: (v: string) => void;
   onValueChange: (v: string) => void;
-}) {
+}>) {
   return (
     <>
       <div className="space-y-1.5">
@@ -113,10 +113,10 @@ export function UrlPatternFilter({
 export function TriggerInfoPanel({
   icon: Icon,
   description,
-}: {
+}: Readonly<{
   icon: React.ComponentType<{ className?: string }>;
   description: string;
-}) {
+}>) {
   return (
     <div className="flex items-start gap-2 rounded-md border bg-muted/30 px-3 py-2.5">
       <Info className="size-3.5 shrink-0 mt-0.5 text-muted-foreground" />

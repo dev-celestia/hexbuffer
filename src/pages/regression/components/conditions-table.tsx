@@ -9,7 +9,7 @@ interface ConditionsTableProps {
   conditions: RegressionCondition[];
 }
 
-export function ConditionsTable({ conditions }: ConditionsTableProps) {
+export function ConditionsTable({ conditions }: Readonly<ConditionsTableProps>) {
   if (conditions.length === 0) {
     return (
       <div

@@ -156,7 +156,7 @@ export function AssistantPromptBar({
   onTextareaKeyDown,
   selectedAgent = 'all',
   onSelectAgent,
-}: AssistantPromptBarProps) {
+}: Readonly<AssistantPromptBarProps>) {
   const [customHeight, setCustomHeight] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDragging, setIsDragging] = useState(false);

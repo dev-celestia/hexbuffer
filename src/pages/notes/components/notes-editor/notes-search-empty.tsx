@@ -18,7 +18,7 @@ export function NotesSearchEmpty({
   totalNotesCount,
   onClearSearch,
   onOpenSavedNotes,
-}: NotesSearchEmptyProps) {
+}: Readonly<NotesSearchEmptyProps>) {
   return (
     <div
       className={cn(

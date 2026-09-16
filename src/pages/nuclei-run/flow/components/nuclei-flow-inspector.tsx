@@ -30,7 +30,7 @@ interface NucleiFlowInspectorProps {
 export function NucleiFlowInspector({
   node,
   onClose,
-}: NucleiFlowInspectorProps) {
+}: Readonly<NucleiFlowInspectorProps>) {
   if (!node) return null;
 
   const { type, data } = node;

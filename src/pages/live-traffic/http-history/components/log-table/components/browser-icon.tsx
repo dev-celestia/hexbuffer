@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export { detectBrowser, type BrowserKind } from "./hooks/use-browser-icon";
 
-export function BrowserIcon({ userAgent }: { userAgent: string | null }) {
+export function BrowserIcon({ userAgent }: Readonly<{ userAgent: string | null }>) {
   const { browser, iconSrc, title } = useBrowserIcon({ userAgent });
 
   if (!browser || !iconSrc) return null;

@@ -21,7 +21,7 @@ export function CrawlSetupScreen({
   disabled,
   onSetupChange,
   onSave,
-}: CrawlSetupScreenProps) {
+}: Readonly<CrawlSetupScreenProps>) {
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const { open, setOpen, form, onSubmit } = useSetupScreen({ setup, onSetupChange, onSave });
 

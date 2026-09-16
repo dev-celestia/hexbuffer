@@ -11,7 +11,7 @@ interface Props {
   onAddCardClick: () => void;
 }
 
-export function KanbanToolbar({ groupBy, onGroupByChange, totalCards, doneCards, onAddCardClick }: Props) {
+export function KanbanToolbar({ groupBy, onGroupByChange, totalCards, doneCards, onAddCardClick }: Readonly<Props>) {
   return (
     <div className="flex h-10 shrink-0 items-center justify-between border-b bg-muted/40 px-3">
       {/* Left: Stats */}

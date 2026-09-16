@@ -44,7 +44,7 @@ export function NucleiRunExportDialog({
   findings,
   stats,
   target,
-}: NucleiRunExportDialogProps) {
+}: Readonly<NucleiRunExportDialogProps>) {
   const { theme } = useTheme();
   const [format, setFormat] = useState<ExportFormat>('sarif');
   const [copied, setCopied] = useState(false);

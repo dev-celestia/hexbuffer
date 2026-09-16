@@ -12,7 +12,7 @@ interface ManualUpdateCommandProps {
   message?: string;
 }
 
-export function ManualUpdateCommand({ className, message }: ManualUpdateCommandProps) {
+export function ManualUpdateCommand({ className, message }: Readonly<ManualUpdateCommandProps>) {
   const handleOpenDownloads = React.useCallback(async () => {
     try {
       await openUrl(MANUAL_DOWNLOADS_URL);

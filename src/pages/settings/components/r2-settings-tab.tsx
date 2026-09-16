@@ -9,7 +9,7 @@ interface R2SettingsTabProps {
   settings: SettingsPageState;
 }
 
-export function R2SettingsTab({ settings }: R2SettingsTabProps) {
+export function R2SettingsTab({ settings }: Readonly<R2SettingsTabProps>) {
   const {
     r2AccountId,
     setR2AccountId,

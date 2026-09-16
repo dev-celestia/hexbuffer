@@ -10,7 +10,7 @@ export function HistoryLoadingState({
   label = 'Loading traffic history...',
   columns = 7,
   rows = 6,
-}: HistoryLoadingStateProps) {
+}: Readonly<HistoryLoadingStateProps>) {
   const colWidths = ['80px', '120px', '100px', '220px', '70px', '80px', '120px', '40px'];
 
   return (

@@ -23,7 +23,7 @@ export function ScanResultsTable({
   hasResults,
   isRunning,
   getLatencyColor,
-}: ScanResultsTableProps) {
+}: Readonly<ScanResultsTableProps>) {
   if (!hasResults) {
     return (
       <div

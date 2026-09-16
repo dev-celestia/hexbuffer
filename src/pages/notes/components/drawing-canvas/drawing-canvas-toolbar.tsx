@@ -63,7 +63,7 @@ interface DrawingCanvasToolbarProps {
   hook: DrawingCanvasHookType;
 }
 
-export function DrawingCanvasToolbar({ hook }: DrawingCanvasToolbarProps) {
+export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProps>) {
   const {
     activeTool,
     setActiveTool,

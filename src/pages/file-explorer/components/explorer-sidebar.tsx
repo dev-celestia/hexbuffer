@@ -30,7 +30,7 @@ export function ExplorerSidebar({
   onAddCustomBucket,
   onRemoveBucket,
   loading,
-}: ExplorerSidebarProps) {
+}: Readonly<ExplorerSidebarProps>) {
   const [newBucketName, setNewBucketName] = React.useState('');
   const [confirmRemove, setConfirmRemove] = React.useState<string | null>(null);
 

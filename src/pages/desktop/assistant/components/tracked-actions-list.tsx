@@ -26,7 +26,7 @@ interface TrackedActionsListProps {
   isStreaming?: boolean;
 }
 
-export function TrackedActionsList({ trackedActions, isStreaming }: TrackedActionsListProps) {
+export function TrackedActionsList({ trackedActions, isStreaming }: Readonly<TrackedActionsListProps>) {
   if (trackedActions.length === 0) {
     return null;
   }

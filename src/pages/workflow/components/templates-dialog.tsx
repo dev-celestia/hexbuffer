@@ -62,7 +62,7 @@ interface TemplatesDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function TemplatesDialog({ open, onOpenChange }: TemplatesDialogProps) {
+export function TemplatesDialog({ open, onOpenChange }: Readonly<TemplatesDialogProps>) {
   const createWorkflow = useAutomationStore((s) => s.createWorkflow);
   const createWorkflowFromTemplate = useAutomationStore((s) => s.createWorkflowFromTemplate);
 

@@ -14,7 +14,7 @@ export interface NotesEditorPaneProps {
   hook: NotesPageHookType;
 }
 
-export function NotesEditorPane({ hook }: NotesEditorPaneProps) {
+export function NotesEditorPane({ hook }: Readonly<NotesEditorPaneProps>) {
   const { theme } = useTheme();
   const {
     tabs,

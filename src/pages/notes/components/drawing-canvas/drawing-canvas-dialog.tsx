@@ -31,7 +31,7 @@ export function DrawingCanvasDialog({
   isOpen,
   onOpenChange,
   onInsertIntoNote,
-}: DrawingCanvasDialogProps) {
+}: Readonly<DrawingCanvasDialogProps>) {
   const { theme } = useTheme();
   const isDarkTheme = theme === 'dark';
 

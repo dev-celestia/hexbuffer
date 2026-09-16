@@ -16,7 +16,7 @@ interface AIAssistantPaneProps {
   className?: string;
 }
 
-function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssistantPaneProps) {
+function AIAssistantPaneContent({ onClose, compact = false, className }: Readonly<AIAssistantPaneProps>) {
   const {
     clearError,
     error,
@@ -213,7 +213,7 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
   );
 }
 
-export function AIAssistantPane({ onClose, compact, className }: AIAssistantPaneProps = {}) {
+export function AIAssistantPane({ onClose, compact, className }: Readonly<AIAssistantPaneProps> = {}) {
   return (
     <MotionConfig reducedMotion="user">
       <PromptInputProvider>

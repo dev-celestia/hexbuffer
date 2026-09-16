@@ -20,7 +20,7 @@ export function HttpHistoryView({
   isPinnedTabActive = false,
   isGroupTabActive = false,
   activeGroupId = null,
-}: HttpHistoryViewProps) {
+}: Readonly<HttpHistoryViewProps>) {
   const selectedCallId = useHttpHistoryQueryStore((state) => state.selectedCallId);
   const [isDragging, setIsDragging] = useState(false);
   const isDraggingRef = useRef(false);

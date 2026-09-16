@@ -47,7 +47,7 @@ export function ScanToolbar({
   onClear,
   onExportJson,
   onExportCsv,
-}: ScanToolbarProps) {
+}: Readonly<ScanToolbarProps>) {
   // ponytail: Keep implementation simple, reuse existing state & actions.
   return (
     <div className="flex flex-col border-b bg-card shrink-0">

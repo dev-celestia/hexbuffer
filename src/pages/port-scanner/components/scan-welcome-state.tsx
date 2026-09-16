@@ -5,7 +5,7 @@ interface ScanWelcomeStateProps {
   onQuickStart: (preset: PortPreset) => void;
 }
 
-export function ScanWelcomeState({ onQuickStart }: ScanWelcomeStateProps) {
+export function ScanWelcomeState({ onQuickStart }: Readonly<ScanWelcomeStateProps>) {
   return (
     <div
       className={cn(

@@ -52,7 +52,7 @@ function formatPayloadPreview(data: unknown): string {
   return value.length > 36 ? `${value.slice(0, 33)}...` : value;
 }
 
-export function NodeRuntimeStatus({ runtime, accentClassName }: NodeRuntimeStatusProps) {
+export function NodeRuntimeStatus({ runtime, accentClassName }: Readonly<NodeRuntimeStatusProps>) {
   if (!runtime) return null;
 
   const item = statusStyles[runtime.status];

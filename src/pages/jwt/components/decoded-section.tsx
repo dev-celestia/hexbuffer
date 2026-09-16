@@ -22,7 +22,7 @@ const TYPE_COLORS: Record<string, string> = {
   object: 'text-cyan-400 dark:text-cyan-300',
 };
 
-function ColorizedValue({ value }: { value: unknown }) {
+function ColorizedValue({ value }: Readonly<{ value: unknown }>) {
   const type = valueType(value);
 
   if (type === 'object') {
@@ -84,7 +84,7 @@ interface DecodedSectionProps {
   data: Record<string, unknown>;
 }
 
-export function DecodedSection({ title, data }: DecodedSectionProps) {
+export function DecodedSection({ title, data }: Readonly<DecodedSectionProps>) {
   return (
     <div>
       <Label

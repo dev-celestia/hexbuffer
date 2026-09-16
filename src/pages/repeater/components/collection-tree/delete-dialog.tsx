@@ -9,7 +9,7 @@ interface DeleteDialogProps {
   onConfirm: () => void;
 }
 
-export function DeleteDialog({ deleteTarget, onClose, onConfirm }: DeleteDialogProps) {
+export function DeleteDialog({ deleteTarget, onClose, onConfirm }: Readonly<DeleteDialogProps>) {
   return (
     <AlertDialog open={deleteTarget !== null} onOpenChange={(open) => { if (!open) onClose(); }}>
       <AlertDialogContent>

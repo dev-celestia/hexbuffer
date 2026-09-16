@@ -24,7 +24,7 @@ function typeLabel(type: DataSchemaField['type']): string {
   }
 }
 
-function FieldRow({ field }: { field: DataSchemaField }) {
+function FieldRow({ field }: Readonly<{ field: DataSchemaField }>) {
   return (
     <div className="flex items-start gap-2 py-1.5 border-b  last:border-b-0">
       <span className={`shrink-0 rounded px-1 py-px text-[9px] font-mono font-medium ${typeColor(field.type)} bg-muted/60`}>
@@ -57,7 +57,7 @@ interface NodeDataFlowProps {
   runtime: NodeRuntimeState | null;
 }
 
-function RuntimeDataBlock({ title, data }: { title: string; data: unknown }) {
+function RuntimeDataBlock({ title, data }: Readonly<{ title: string; data: unknown }>) {
   const [expanded, setExpanded] = React.useState(false);
   const json = React.useMemo(
     () => (expanded ? JSON.stringify(data, null, 2) : ''),
@@ -94,7 +94,7 @@ function RuntimeDataBlock({ title, data }: { title: string; data: unknown }) {
   );
 }
 
-export function NodeDataFlow({ nodeType, runtime }: NodeDataFlowProps) {
+export function NodeDataFlow({ nodeType, runtime }: Readonly<NodeDataFlowProps>) {
   const schema = getNodeDataSchema(nodeType);
   if (!schema) return null;
 

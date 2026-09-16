@@ -45,7 +45,7 @@ export function NotesEditorToolbar({
   onCopyNote,
   onExportNote,
   onPromoteNote,
-}: NotesEditorToolbarProps) {
+}: Readonly<NotesEditorToolbarProps>) {
   const isMac = typeof window !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 
   return (

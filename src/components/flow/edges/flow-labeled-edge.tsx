@@ -23,7 +23,7 @@ export function FlowLabeledEdge({
   style,
   label,
   badgeClassName,
-}: FlowLabeledEdgeProps) {
+}: Readonly<FlowLabeledEdgeProps>) {
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
     sourceY,

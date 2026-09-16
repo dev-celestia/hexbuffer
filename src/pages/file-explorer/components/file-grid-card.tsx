@@ -40,7 +40,7 @@ export function FileGridCard<T extends FileItem>({
   onRenameCancel,
   renameInputRef,
   isDeleting,
-}: FileGridCardProps<T>) {
+}: Readonly<FileGridCardProps<T>>) {
   const cardContent = (
     <ContextMenuTrigger>
       <div

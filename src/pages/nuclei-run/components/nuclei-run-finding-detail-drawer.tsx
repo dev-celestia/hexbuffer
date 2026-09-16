@@ -31,7 +31,7 @@ export function NucleiRunFindingDetailDrawer({
   onSendToRepeater,
   onSendToComparer,
   onCopyCurl,
-}: NucleiRunFindingDetailDrawerProps) {
+}: Readonly<NucleiRunFindingDetailDrawerProps>) {
   if (!finding) return null;
 
   const sevConfig = SEVERITY_CONFIG[finding.severity] || SEVERITY_CONFIG.info;

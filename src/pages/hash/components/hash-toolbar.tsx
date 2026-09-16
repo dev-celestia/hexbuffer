@@ -20,7 +20,7 @@ export function HashToolbar({
   isEmpty,
   onCopy,
   onClear,
-}: HashToolbarProps) {
+}: Readonly<HashToolbarProps>) {
   return (
     <div
       className={cn(

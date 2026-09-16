@@ -34,7 +34,7 @@ export function WebSocketContextMenu({
   connectionPath,
   children,
   onDelete,
-}: WebSocketContextMenuProps) {
+}: Readonly<WebSocketContextMenuProps>) {
   const navigate = useNavigate();
 
   const handleCopyUrl = React.useCallback(() => {

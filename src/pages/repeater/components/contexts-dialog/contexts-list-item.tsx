@@ -32,7 +32,7 @@ export function ContextsListItem({
   onStartDelete,
   onConfirmDelete,
   onCancelDelete,
-}: ContextsListItemProps) {
+}: Readonly<ContextsListItemProps>) {
   return (
     <div
       onClick={() => {

@@ -22,7 +22,7 @@ export function NotesPreviewPane({
   onUpdateContent,
   onOpenDrawingStudio,
   className,
-}: NotesPreviewPaneProps) {
+}: Readonly<NotesPreviewPaneProps>) {
   const sectionTemplates = React.useMemo<SectionTemplateItem[]>(() => {
     if (!onOpenDrawingStudio) return DEFAULT_SECTION_TEMPLATES;
     return [

@@ -10,7 +10,7 @@ interface FileDropOverlayProps {
  * Visual affordance shown while files are dragged over a drop zone.
  * Pointer events stay disabled so the native drop handler is unaffected.
  */
-export function FileDropOverlay({ show, title }: FileDropOverlayProps) {
+export function FileDropOverlay({ show, title }: Readonly<FileDropOverlayProps>) {
   if (!show) return null;
 
   return (

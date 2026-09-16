@@ -8,7 +8,7 @@ interface TelemetryPanelProps {
   status: AttackStatus;
 }
 
-export function TelemetryPanel({ telemetry, status }: TelemetryPanelProps) {
+export function TelemetryPanel({ telemetry, status }: Readonly<TelemetryPanelProps>) {
   const formatHashRate = (rate: number): string => {
     if (rate >= 1_000_000_000) return `${(rate / 1_000_000_000).toFixed(2)} GH/s`;
     if (rate >= 1_000_000) return `${(rate / 1_000_000).toFixed(2)} MH/s`;
@@ -255,7 +255,7 @@ interface MetricCardProps {
   bgColor: string;
 }
 
-function MetricCard({ icon, label, value, color, bgColor }: MetricCardProps) {
+function MetricCard({ icon, label, value, color, bgColor }: Readonly<MetricCardProps>) {
   return (
     <div
       className={cn(
@@ -309,7 +309,7 @@ interface StatItemProps {
   value: string;
 }
 
-function StatItem({ icon, label, value }: StatItemProps) {
+function StatItem({ icon, label, value }: Readonly<StatItemProps>) {
   return (
     <div
       className={cn(

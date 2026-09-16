@@ -36,7 +36,7 @@ function formatTime(value: string) {
   });
 }
 
-function StatusIndicator({ state }: { state: string }) {
+function StatusIndicator({ state }: Readonly<{ state: string }>) {
   const normalized = state.toLowerCase();
   const isOpen = normalized === 'open';
   const isError = normalized === 'error';
@@ -76,7 +76,7 @@ function StatusIndicator({ state }: { state: string }) {
   );
 }
 
-export function WebSocketTable({ selectedConnectionId, onSelectConnection }: WebSocketTableProps) {
+export function WebSocketTable({ selectedConnectionId, onSelectConnection }: Readonly<WebSocketTableProps>) {
   const {
     connections,
     pagination,

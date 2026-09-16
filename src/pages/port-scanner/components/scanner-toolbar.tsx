@@ -83,7 +83,7 @@ export function ScannerToolbar({
   progress,
   onStart,
   onStop,
-}: ScannerToolbarProps) {
+}: Readonly<ScannerToolbarProps>) {
   const {
     showAdvanced,
     toggleAdvanced,

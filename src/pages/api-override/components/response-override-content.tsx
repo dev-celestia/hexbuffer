@@ -5,7 +5,7 @@ interface ResponseOverrideContentProps {
   page: ReturnType<typeof useResponseOverridePage>;
 }
 
-export function ResponseOverrideContent({ page }: ResponseOverrideContentProps) {
+export function ResponseOverrideContent({ page }: Readonly<ResponseOverrideContentProps>) {
   return (
     <RulesPanel
       domains={page.domains}

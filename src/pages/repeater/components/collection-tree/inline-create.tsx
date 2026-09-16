@@ -10,7 +10,7 @@ export interface InlineCreateProps {
   onCancel: () => void;
 }
 
-export function InlineCreate({ depth, type, onSubmit, onCancel }: InlineCreateProps) {
+export function InlineCreate({ depth, type, onSubmit, onCancel }: Readonly<InlineCreateProps>) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {

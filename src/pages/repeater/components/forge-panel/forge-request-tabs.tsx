@@ -27,7 +27,7 @@ function KeyValueEditor({
   onRemove,
   noun,
   emptyMessage,
-}: KeyValueEditorProps) {
+}: Readonly<KeyValueEditorProps>) {
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center px-1">
@@ -126,7 +126,7 @@ export function ForgeRequestTabs({
   onBodyChange,
   onPreScriptChange,
   onTestScriptChange,
-}: ForgeRequestTabsProps) {
+}: Readonly<ForgeRequestTabsProps>) {
   const { theme } = useTheme();
   const [activeScriptTab, setActiveScriptTab] = useState<'pre' | 'test'>('pre');
   const [isImageMode, setIsImageMode] = useState(() => {

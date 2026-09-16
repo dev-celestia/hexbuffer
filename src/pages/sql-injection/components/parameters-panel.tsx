@@ -29,7 +29,7 @@ export function ParametersPanel({
   onRemoveParameter,
   onToggleParamInject,
   onParamValueChange,
-}: ParametersPanelProps) {
+}: Readonly<ParametersPanelProps>) {
   // ponytail: Keep location logic and mapping simple and native.
   const getLocationBadgeStyle = (location: string) => {
     switch (location) {

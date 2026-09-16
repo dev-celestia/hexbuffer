@@ -23,7 +23,7 @@ export function ChatSessionList({
   onDelete,
   onCreate,
   onRename,
-}: ChatSessionListProps) {
+}: Readonly<ChatSessionListProps>) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);

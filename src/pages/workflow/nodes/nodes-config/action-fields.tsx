@@ -25,13 +25,13 @@ export function Field({
   onChange,
   placeholder,
   type = 'text',
-}: {
+}: Readonly<{
   label: string;
   value: string | undefined;
   onChange: (value: string) => void;
   placeholder?: string;
   type?: React.HTMLInputTypeAttribute;
-}) {
+}>) {
   return (
     <div className="space-y-1.5">
       <Label className="text-[11px]">{label}</Label>
@@ -51,12 +51,12 @@ export function TextField({
   value,
   onChange,
   placeholder,
-}: {
+}: Readonly<{
   label: string;
   value: string | undefined;
   onChange: (value: string) => void;
   placeholder?: string;
-}) {
+}>) {
   return (
     <div className="space-y-1.5">
       <Label className="text-[11px]">{label}</Label>
@@ -76,13 +76,13 @@ export function SelectField({
   fallback,
   options,
   onChange,
-}: {
+}: Readonly<{
   label: string;
   value: string | undefined;
   fallback: string;
   options: Array<{ value: string; label: string }>;
   onChange: (value: string) => void;
-}) {
+}>) {
   return (
     <div className="space-y-1.5">
       <Label className="text-[11px]">{label}</Label>
@@ -107,12 +107,12 @@ export function BooleanField({
   value,
   fallback,
   onChange,
-}: {
+}: Readonly<{
   label: string;
   value: string | undefined;
   fallback: string;
   onChange: (value: string) => void;
-}) {
+}>) {
   return (
     <SelectField
       label={label}

@@ -17,10 +17,10 @@ import { useTargetSelectorDialog } from './hooks';
 export function TargetSelectorDialog({
   externalOpen,
   onExternalOpenChange,
-}: {
+}: Readonly<{
   externalOpen?: boolean;
   onExternalOpenChange?: (open: boolean) => void;
-} = {}) {
+}> = {}) {
   const isExternallyControlled = externalOpen !== undefined && onExternalOpenChange !== undefined;
 
   const {

@@ -44,7 +44,7 @@ export function JwtGenerateView({
   onGenerateKey,
   onCopy,
   onClear,
-}: JwtGenerateViewProps) {
+}: Readonly<JwtGenerateViewProps>) {
   const { theme } = useTheme();
   const [showSecret, setShowSecret] = React.useState(false);
 

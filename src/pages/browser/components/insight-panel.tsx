@@ -20,7 +20,7 @@ function getInsightSourceLabel(insight: AIInsight) {
   return null;
 }
 
-function InsightSourceBadge({ insight }: { insight: AIInsight }) {
+function InsightSourceBadge({ insight }: Readonly<{ insight: AIInsight }>) {
   const label = getInsightSourceLabel(insight);
   if (!label) return null;
 
@@ -60,7 +60,7 @@ function AiInsightsPanelComponent({
   insights,
   interestingPages,
   searchQuery = '',
-}: AiInsightsPanelProps) {
+}: Readonly<AiInsightsPanelProps>) {
   const {
     severityFilter,
     setSeverityFilter,

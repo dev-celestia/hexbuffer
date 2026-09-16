@@ -11,7 +11,7 @@ interface ResultsPanelProps {
   onExport: () => void;
 }
 
-export function ResultsPanel({ results, onExport }: ResultsPanelProps) {
+export function ResultsPanel({ results, onExport }: Readonly<ResultsPanelProps>) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredResults = useMemo(() => {
@@ -288,7 +288,7 @@ interface ResultCardProps {
   onCopy: () => void;
 }
 
-function ResultCard({ result, onCopy }: ResultCardProps) {
+function ResultCard({ result, onCopy }: Readonly<ResultCardProps>) {
   const algorithmLabel =
     HASH_OPTIONS.find((h) => h.value === result.algorithm)?.label ||
     result.algorithm.toUpperCase();

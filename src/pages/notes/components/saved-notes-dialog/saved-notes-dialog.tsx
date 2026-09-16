@@ -23,7 +23,7 @@ export interface SavedNotesDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function SavedNotesDialog({ isOpen, onOpenChange }: SavedNotesDialogProps) {
+export function SavedNotesDialog({ isOpen, onOpenChange }: Readonly<SavedNotesDialogProps>) {
   const manager = useSavedNotesManager(() => onOpenChange(false));
 
   const {

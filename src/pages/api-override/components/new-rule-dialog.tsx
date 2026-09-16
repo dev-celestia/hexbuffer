@@ -21,7 +21,7 @@ export function NewRouteDialog({
   dialogTitle,
   buttonLabel,
   onAdd,
-}: NewRouteDialogProps) {
+}: Readonly<NewRouteDialogProps>) {
   const [open, setOpen] = useState(false);
   const [domainId, setDomainId] = useState(fixedDomainId ?? domains[0]?.id ?? '');
   const [method, setMethod] = useState<string>('GET');

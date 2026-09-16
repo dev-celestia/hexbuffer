@@ -6,7 +6,7 @@ export interface SettingsProps {
   categories?: SettingsCategory[];
 }
 
-export function Settings({ categories }: SettingsProps) {
+export function Settings({ categories }: Readonly<SettingsProps>) {
   const settings = useSettingsPage();
 
   return <SettingsLayout settings={settings} categories={categories} />;

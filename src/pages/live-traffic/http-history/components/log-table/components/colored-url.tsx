@@ -1,7 +1,7 @@
 import { HighlightedText } from "@/components/highlighted-text";
 import { useColoredUrl } from "./hooks/use-colored-url";
 
-export function ColoredUrl({ url, searchQuery }: { url: string; searchQuery: string }) {
+export function ColoredUrl({ url, searchQuery }: Readonly<{ url: string; searchQuery: string }>) {
   const { hasQueryParams, base, pairs, paramColors } = useColoredUrl({ url });
 
   if (!hasQueryParams) {

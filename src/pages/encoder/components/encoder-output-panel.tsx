@@ -13,7 +13,7 @@ export function EncoderOutputPanel({
   codecLabel,
   output,
   error,
-}: EncoderOutputPanelProps) {
+}: Readonly<EncoderOutputPanelProps>) {
   return (
     <div
       className={cn(

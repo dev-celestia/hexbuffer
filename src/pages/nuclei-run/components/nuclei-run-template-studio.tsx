@@ -50,7 +50,7 @@ export function NucleiRunTemplateStudio({
   onInsertPlaceholder,
   selectedExampleId,
   onLoadExample,
-}: NucleiRunTemplateStudioProps) {
+}: Readonly<NucleiRunTemplateStudioProps>) {
   const { theme } = useTheme();
   const hasErrors = diagnostics.some((d) => d.type === 'error');
 

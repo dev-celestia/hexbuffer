@@ -5,7 +5,7 @@ interface MockApiContentProps {
   page: ReturnType<typeof useMockApiPage>;
 }
 
-export function MockApiContent({ page }: MockApiContentProps) {
+export function MockApiContent({ page }: Readonly<MockApiContentProps>) {
   return (
     <MockServerPanel
       domains={page.domains}

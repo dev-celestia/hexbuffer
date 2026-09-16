@@ -32,7 +32,7 @@ export function CustomPortsDialog({
   onOpenChange,
   ports,
   onSavePorts,
-}: CustomPortsDialogProps) {
+}: Readonly<CustomPortsDialogProps>) {
   const [draft, setDraft] = useState(ports);
 
   // Sync draft when opened

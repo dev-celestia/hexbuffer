@@ -21,7 +21,7 @@ export function NucleiRunConsoleStream({
   onClearLogs,
   autoScroll,
   onAutoScrollChange,
-}: NucleiRunConsoleStreamProps) {
+}: Readonly<NucleiRunConsoleStreamProps>) {
   const [filterQuery, setFilterQuery] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 

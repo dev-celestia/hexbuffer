@@ -44,7 +44,7 @@ export function ForgeRequestBar({
   activeEndpoint,
   onMethodChange,
   onUrlChange,
-}: ForgeRequestBarProps) {
+}: Readonly<ForgeRequestBarProps>) {
   const activeContextId = useCollectionsStore((s) => s.activeContextId);
   const contexts = useCollectionsStore((s) => s.contexts);
   const [contextsDialogOpen, setContextsDialogOpen] = React.useState(false);

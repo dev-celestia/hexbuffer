@@ -20,7 +20,7 @@ interface NucleiFlowCanvasProps {
 function NucleiFlowCanvasInner({
   yamlContent,
   hideToolbar = false,
-}: NucleiFlowCanvasProps) {
+}: Readonly<NucleiFlowCanvasProps>) {
   const { fitView } = useReactFlow();
   const flow = useNucleiFlow({ initialYaml: yamlContent });
 
@@ -107,7 +107,7 @@ function NucleiFlowCanvasInner({
 }
 
 // ponytail: Flow canvas wrapper with ReactFlowProvider
-export function NucleiFlowCanvas(props: NucleiFlowCanvasProps) {
+export function NucleiFlowCanvas(props: Readonly<NucleiFlowCanvasProps>) {
   return (
     <ReactFlowProvider>
       <NucleiFlowCanvasInner {...props} />

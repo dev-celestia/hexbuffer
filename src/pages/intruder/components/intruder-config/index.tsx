@@ -11,11 +11,11 @@ export function IntruderConfigDialog({
   isRunning,
   progress,
   startBlockedReason,
-}: {
+}: Readonly<{
   isRunning: boolean;
   progress: { current: number; total: number } | null;
   startBlockedReason: string | null;
-}) {
+}>) {
 
   return (
    <div className="min-h-0 overflow-auto">

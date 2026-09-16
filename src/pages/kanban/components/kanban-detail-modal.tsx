@@ -20,7 +20,7 @@ const ASSIGNEE_OPTIONS = [
   { value: 'JS', label: 'JS (John)', color: '#f472b6' },
 ];
 
-export function KanbanDetailModal({ card, isOpen, onClose, onSave, onDelete }: Props) {
+export function KanbanDetailModal({ card, isOpen, onClose, onSave, onDelete }: Readonly<Props>) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [columnId, setColumnId] = useState('');

@@ -7,7 +7,7 @@ interface ContextsVariablesEmptyProps {
   onAddVar: () => void;
 }
 
-export function ContextsVariablesEmpty({ onAddVar }: ContextsVariablesEmptyProps) {
+export function ContextsVariablesEmpty({ onAddVar }: Readonly<ContextsVariablesEmptyProps>) {
   return (
     <div
       className={cn(

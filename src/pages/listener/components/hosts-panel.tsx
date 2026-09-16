@@ -40,7 +40,7 @@ export function ListenerHosts({
   onCheckHealth,
   onCreatePayload,
   onDeletePayload,
-}: Props) {
+}: Readonly<Props>) {
   const {
     dialogOpen,
     checking,
@@ -387,7 +387,7 @@ const STEPS = [
   },
 ];
 
-function SetupGuide({ onAddHost }: { onAddHost: () => void }) {
+function SetupGuide({ onAddHost }: Readonly<{ onAddHost: () => void }>) {
   return (
     <div className="flex h-full items-start justify-center overflow-auto p-6">
       <div

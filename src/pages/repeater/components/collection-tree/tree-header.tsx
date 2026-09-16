@@ -13,7 +13,7 @@ export function TreeHeader({
   onExport,
   onImportClick,
   onCreateCollection,
-}: TreeHeaderProps) {
+}: Readonly<TreeHeaderProps>) {
   return (
     <div className="shrink-0 p-2 border-b space-y-1.5">
       <div className="flex items-center justify-between">

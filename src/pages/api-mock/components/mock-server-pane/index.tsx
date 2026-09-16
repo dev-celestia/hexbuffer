@@ -22,7 +22,7 @@ export function MockServerPanel({
   onStartServer,
   onStopServer,
   onConfigChange,
-}: MockServerPanelProps) {
+}: Readonly<MockServerPanelProps>) {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Local Mock API routes only

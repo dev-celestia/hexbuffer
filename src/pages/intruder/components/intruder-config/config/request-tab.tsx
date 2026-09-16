@@ -24,10 +24,10 @@ import {
 function HighlightedRequestPreview({
   text,
   suggestions,
-}: {
+}: Readonly<{
   text: string;
   suggestions: InvokerMarkerSuggestion[];
-}) {
+}>) {
   const sortedSuggestions = [...suggestions].sort((a, b) => a.start - b.start);
   const parts: React.ReactNode[] = [];
   let cursor = 0;

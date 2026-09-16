@@ -28,7 +28,7 @@ export function JwtDecodeView({
   decodeError,
   onCopy,
   onClear,
-}: JwtDecodeViewProps) {
+}: Readonly<JwtDecodeViewProps>) {
   const { theme } = useTheme();
   const monacoRef = React.useRef<MonacoInstance | null>(null);
 

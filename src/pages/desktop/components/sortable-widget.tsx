@@ -9,7 +9,7 @@ export interface SortableWidgetProps {
   children: React.ReactNode;
 }
 
-export function SortableWidget({ id, children }: SortableWidgetProps) {
+export function SortableWidget({ id, children }: Readonly<SortableWidgetProps>) {
   const {
     attributes,
     listeners,

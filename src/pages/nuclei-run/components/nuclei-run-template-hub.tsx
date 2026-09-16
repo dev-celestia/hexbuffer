@@ -42,7 +42,7 @@ export function NucleiRunTemplateHub({
   onSearchChange,
   onOpenInStudio,
   onNavigateTab,
-}: NucleiRunTemplateHubProps) {
+}: Readonly<NucleiRunTemplateHubProps>) {
   const selectedCount = selectedTemplateIds.length;
 
   return (

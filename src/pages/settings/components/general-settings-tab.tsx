@@ -43,7 +43,7 @@ interface StorageRowDeleteProps {
   onDelete: (artifact: string) => Promise<void> | void;
 }
 
-function StorageRowDelete({ artifact, label, description, deletingArtifact, onDelete }: StorageRowDeleteProps) {
+function StorageRowDelete({ artifact, label, description, deletingArtifact, onDelete }: Readonly<StorageRowDeleteProps>) {
   const [open, setOpen] = React.useState(false);
   const isDeleting = deletingArtifact === artifact;
 
@@ -98,7 +98,7 @@ function StorageRowDelete({ artifact, label, description, deletingArtifact, onDe
   );
 }
 
-export function GeneralSettingsTab({ settings }: GeneralSettingsTabProps) {
+export function GeneralSettingsTab({ settings }: Readonly<GeneralSettingsTabProps>) {
   const {
     currentVersion,
     handleCheckForUpdates,

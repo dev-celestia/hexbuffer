@@ -38,7 +38,7 @@ export function WindowProvider({
   id,
   isStandalone = false,
   children,
-}: WindowProviderProps) {
+}: Readonly<WindowProviderProps>) {
   const [headerSlotNode, setHeaderSlotNode] = React.useState<HTMLDivElement | null>(null);
   const [hasHeaderSlotContent, setHasHeaderSlotContent] = React.useState(false);
 
@@ -72,7 +72,7 @@ export interface WindowHeaderSlotProps {
  * Declaratively injects custom buttons, badges, or controls into the window header
  * directly beside the split-screen (Tile Left / Tile Right) controls or window controls.
  */
-export function WindowHeaderSlot({ children, className }: WindowHeaderSlotProps) {
+export function WindowHeaderSlot({ children, className }: Readonly<WindowHeaderSlotProps>) {
   const { headerSlotNode, setHasHeaderSlotContent } = useWindowContext();
 
   React.useEffect(() => {

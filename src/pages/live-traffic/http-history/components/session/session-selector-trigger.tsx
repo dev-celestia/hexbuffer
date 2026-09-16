@@ -20,7 +20,7 @@ export interface SessionSelectorTriggerProps
 
 export const SessionSelectorTrigger = React.forwardRef<
   HTMLButtonElement,
-  SessionSelectorTriggerProps
+  Readonly<SessionSelectorTriggerProps>
 >(function SessionSelectorTrigger(
   {
     currentLabel,

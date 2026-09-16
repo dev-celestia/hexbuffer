@@ -43,7 +43,7 @@ export function NetworkMonitor({
   setNetworkThrottling,
   searchQuery,
   setSearchQuery,
-}: NetworkMonitorProps) {
+}: Readonly<NetworkMonitorProps>) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [responseTab, setResponseTab] = useState<'headers' | 'payload' | 'response' | 'websocket'>('headers');
 

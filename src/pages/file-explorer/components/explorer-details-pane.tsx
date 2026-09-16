@@ -36,7 +36,7 @@ export function ExplorerDetailsPane({
   onOpenFile,
   onCopyPublicUrl,
   onCopyPresignedUrl,
-}: ExplorerDetailsPaneProps) {
+}: Readonly<ExplorerDetailsPaneProps>) {
   const [expiration, setExpiration] = React.useState('3600');
 
   if (!item) {

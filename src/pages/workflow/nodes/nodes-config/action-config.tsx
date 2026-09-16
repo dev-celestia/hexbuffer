@@ -13,7 +13,7 @@ import {
   type ActionParams,
 } from './action-fields';
 
-function SendToRepeaterForm({ params, updateParam }: ActionParams) {
+function SendToRepeaterForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <Field label="Tab name" value={params.tabName} onChange={(v) => updateParam('tabName', v)} placeholder="Automation replay" />
@@ -23,7 +23,7 @@ function SendToRepeaterForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function AiAnalyzeForm({ params, updateParam }: ActionParams) {
+function AiAnalyzeForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <TextField label="Prompt / template" value={params.prompt} onChange={(v) => updateParam('prompt', v)} placeholder="Analyze this request and response for security issues." />
@@ -45,7 +45,7 @@ function AiAnalyzeForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function CreateFindingForm({ params, updateParam }: ActionParams) {
+function CreateFindingForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <Field label="Title" value={params.title} onChange={(v) => updateParam('title', v)} placeholder="Potential vulnerability" />
@@ -62,7 +62,7 @@ function CreateFindingForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function SendWebhookForm({ params, updateParam }: ActionParams) {
+function SendWebhookForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <SelectField
@@ -79,7 +79,7 @@ function SendWebhookForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function ShowNotificationForm({ params, updateParam }: ActionParams) {
+function ShowNotificationForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <Field label="Title" value={params.title} onChange={(v) => updateParam('title', v)} placeholder="FlowArrow Alert" />
@@ -95,7 +95,7 @@ function ShowNotificationForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function RunScriptForm({ params, updateParam }: ActionParams) {
+function RunScriptForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <TextField label="Command" value={params.command} onChange={(v) => updateParam('command', v)} placeholder="./scripts/scan.sh {{url}}" />
@@ -105,7 +105,7 @@ function RunScriptForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function StartCrawlForm({ params, updateParam }: ActionParams) {
+function StartCrawlForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <Field label="Target URL" value={params.url} onChange={(v) => updateParam('url', v)} placeholder="https://target.example.com" />
@@ -125,7 +125,7 @@ function StartCrawlForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function StopCrawlForm({ params, updateParam }: ActionParams) {
+function StopCrawlForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <Field label="Crawl ID" value={params.crawlId} onChange={(v) => updateParam('crawlId', v)} placeholder="{{crawlId}}" />
@@ -144,7 +144,7 @@ function StopCrawlForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function SendToInterceptForm({ params, updateParam }: ActionParams) {
+function SendToInterceptForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <SelectField label="Request source" value={params.source} fallback="request" onChange={(v) => updateParam('source', v)} options={REQUEST_SOURCE_OPTIONS} />
@@ -164,7 +164,7 @@ function SendToInterceptForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function StartInvokerForm({ params, updateParam }: ActionParams) {
+function StartInvokerForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <SelectField
@@ -180,7 +180,7 @@ function StartInvokerForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function PortScanForm({ params, updateParam }: ActionParams) {
+function PortScanForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <Field label="Target host" value={params.target} onChange={(v) => updateParam('target', v)} placeholder="example.com or 192.168.1.1" />
@@ -196,7 +196,7 @@ function PortScanForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function EncodeDecodeForm({ params, updateParam }: ActionParams) {
+function EncodeDecodeForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <SelectField label="Mode" value={params.mode} fallback="encode" onChange={(v) => updateParam('mode', v)} options={['encode', 'decode'].map((value) => ({ value, label: value }))} />
@@ -206,7 +206,7 @@ function EncodeDecodeForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function HashDataForm({ params, updateParam }: ActionParams) {
+function HashDataForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <SelectField
@@ -221,7 +221,7 @@ function HashDataForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function ExportJsonForm({ params, updateParam }: ActionParams) {
+function ExportJsonForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <Field label="Filename" value={params.filename} onChange={(v) => updateParam('filename', v)} placeholder="export.json" />
@@ -232,7 +232,7 @@ function ExportJsonForm({ params, updateParam }: ActionParams) {
 }
 
 
-function AddToReportForm({ params, updateParam }: ActionParams) {
+function AddToReportForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <Field label="Document ID" value={params.documentId} onChange={(v) => updateParam('documentId', v)} placeholder="Leave blank to use active document" />
@@ -244,7 +244,7 @@ function AddToReportForm({ params, updateParam }: ActionParams) {
   );
 }
 
-function ConnectCdpForm({ params, updateParam }: ActionParams) {
+function ConnectCdpForm({ params, updateParam }: Readonly<ActionParams>) {
   return (
     <>
       <Field label="Target URL" value={params.targetUrl} onChange={(v) => updateParam('targetUrl', v)} placeholder="{{url}}" />
@@ -289,7 +289,7 @@ interface ActionConfigFormProps {
   onChange: (patch: Partial<ActionConfig>) => void;
 }
 
-export function ActionConfigForm({ config, type, onChange }: ActionConfigFormProps) {
+export function ActionConfigForm({ config, type, onChange }: Readonly<ActionConfigFormProps>) {
   const { params, updateParam } = useActionParams(config, onChange);
   const ConfigComponent = ACTION_CONFIG_MAP[type];
 

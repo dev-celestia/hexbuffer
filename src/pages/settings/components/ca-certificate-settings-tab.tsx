@@ -14,7 +14,7 @@ interface CaCertificateSettingsTabProps {
   settings: SettingsPageState;
 }
 
-export function CaCertificateSettingsTab({ settings }: CaCertificateSettingsTabProps) {
+export function CaCertificateSettingsTab({ settings }: Readonly<CaCertificateSettingsTabProps>) {
   const {
     downloading,
     handleDownloadCert,

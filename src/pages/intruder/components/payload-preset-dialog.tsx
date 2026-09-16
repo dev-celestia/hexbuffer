@@ -18,7 +18,7 @@ export function IntruderPayloadPresetDialog({
   open,
   onOpenChange,
   onUsePayload,
-}: IntruderPayloadPresetDialogProps) {
+}: Readonly<IntruderPayloadPresetDialogProps>) {
   const {
     categories,
     selectedCategory,

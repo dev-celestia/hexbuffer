@@ -24,7 +24,7 @@ export function IntruderResultInspector({
   selectedResult,
   config,
   onClose,
-}: IntruderResultInspectorProps) {
+}: Readonly<IntruderResultInspectorProps>) {
   const {
     theme,
     isStacked,

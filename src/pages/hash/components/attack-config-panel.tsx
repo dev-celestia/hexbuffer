@@ -34,7 +34,7 @@ export function AttackConfigPanel({
   onConfigChange,
   onAlgorithmChange,
   disabled,
-}: AttackConfigPanelProps) {
+}: Readonly<AttackConfigPanelProps>) {
   const [activeMode, setActiveMode] = useState<AttackMode>(config?.mode || 'straight');
   const [selectedRules, setSelectedRules] = useState<string[]>(
     config?.mode === 'straight' ? config.rules : []
@@ -475,7 +475,7 @@ interface WordlistPathPickerProps {
   disabled: boolean;
 }
 
-function WordlistPathPicker({ label, path, onPathChange, disabled }: WordlistPathPickerProps) {
+function WordlistPathPicker({ label, path, onPathChange, disabled }: Readonly<WordlistPathPickerProps>) {
   const handleBrowseFile = async () => {
     try {
       const selected = await open({

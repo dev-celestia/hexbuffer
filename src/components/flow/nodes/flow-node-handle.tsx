@@ -25,7 +25,7 @@ export function FlowNodeHandle({
   style,
   className,
   ...props
-}: FlowNodeHandleProps) {
+}: Readonly<FlowNodeHandleProps>) {
   return (
     <>
       {label && (

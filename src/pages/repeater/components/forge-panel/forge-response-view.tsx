@@ -38,7 +38,7 @@ export function ForgeResponseView({
   requestHeaders,
   requestBody,
   requestBodyType,
-}: ForgeResponseViewProps) {
+}: Readonly<ForgeResponseViewProps>) {
   const activeContextId = useCollectionsStore((s) => s.activeContextId);
   const { isCopied, copy } = useCopyToClipboard();
   const { theme } = useTheme();

@@ -10,7 +10,7 @@ interface CreateGroupDialogProps {
   initialCall?: ApiCall;
 }
 
-export function CreateGroupDialog({ open, onOpenChange, initialCall }: CreateGroupDialogProps) {
+export function CreateGroupDialog({ open, onOpenChange, initialCall }: Readonly<CreateGroupDialogProps>) {
   const [name, setName] = useState('');
   const groups = useGroupsStore((s) => s.groups);
   const createGroup = useGroupsStore((s) => s.createGroup);

@@ -16,7 +16,7 @@ export function FilterChips({
   onRemoveBlacklistRule,
   highlightedHosts,
   onRemoveHighlight,
-}: FilterChipsProps) {
+}: Readonly<FilterChipsProps>) {
   const activeSession = useHttpSessionStore((state) => state.activeSession);
   const captureMode = activeSession?.capture_mode ?? 'all';
   let customHostsCount = 0;

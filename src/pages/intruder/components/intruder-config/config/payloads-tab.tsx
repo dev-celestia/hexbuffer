@@ -153,12 +153,12 @@ function NumberRangePayloadEditor({
   preview,
   payloadCount,
   onChange,
-}: {
+}: Readonly<{
   payload: PayloadConfig;
   preview: string[];
   payloadCount: number;
   onChange: (updates: Partial<PayloadConfig>) => void;
-}) {
+}>) {
   const {
     paddingWidth,
     validationErrors,
@@ -245,7 +245,7 @@ function NumberRangePayloadEditor({
   );
 }
 
-function PayloadFileButton({ positionName }: { positionName: string }) {
+function PayloadFileButton({ positionName }: Readonly<{ positionName: string }>) {
   const { inputRef, triggerFileSelect, handleLoadPayloads } =
     usePayloadFileButton(positionName);
 

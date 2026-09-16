@@ -27,7 +27,7 @@ interface NodeConfigPanelProps {
   onRun?: () => void;
 }
 
-export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onRun }: NodeConfigPanelProps) {
+export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onRun }: Readonly<NodeConfigPanelProps>) {
   const runtime = useAutomationStore((s) => (node ? s.nodeRuntimeById[node.id] ?? null : null));
 
   if (!node) return null;

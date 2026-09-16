@@ -42,7 +42,7 @@ export function ComparerToolbar({
   valueA,
   valueB,
   copyPanel,
-}: ComparerToolbarProps) {
+}: Readonly<ComparerToolbarProps>) {
   const { toggleShowInputs, handleCopyA, handleCopyB } = useComparerToolbar({
     showInputs,
     setShowInputs,

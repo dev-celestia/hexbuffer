@@ -32,7 +32,7 @@ export function SavedNotesToolbar({
   sortOption,
   onSortOptionChange,
   counts,
-}: SavedNotesToolbarProps) {
+}: Readonly<SavedNotesToolbarProps>) {
   return (
     <div
       className={cn(

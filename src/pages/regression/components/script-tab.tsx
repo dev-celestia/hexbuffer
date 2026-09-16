@@ -35,7 +35,7 @@ export function ScriptTab({
   onChange,
   onValidate,
   onSave,
-}: ScriptTabProps) {
+}: Readonly<ScriptTabProps>) {
   const { theme } = useTheme();
   const hasErrors = (validation?.errors.length ?? 0) > 0;
 

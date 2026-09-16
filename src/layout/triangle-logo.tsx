@@ -25,7 +25,7 @@ type PulseTriangleProps = {
   className?: string;
 };
 
-export function TriangleLogo({ size = "medium", className }: PulseTriangleProps) {
+export function TriangleLogo({ size = "medium", className }: Readonly<PulseTriangleProps>) {
   const sizeClass = TRIANGLE_LOGO_SIZES[size];
   const { isConnected } = useTriangleLogo();
 

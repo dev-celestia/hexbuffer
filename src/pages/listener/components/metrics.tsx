@@ -6,7 +6,7 @@ interface ListenerMetricsProps {
   isEnabled: boolean;
 }
 
-export function ListenerMetrics({ stats, isEnabled }: ListenerMetricsProps) {
+export function ListenerMetrics({ stats, isEnabled }: Readonly<ListenerMetricsProps>) {
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-b bg-muted/30 px-3 py-1.5 text-xs text-muted-foreground font-mono shrink-0">
       {/* Connected Servers */}

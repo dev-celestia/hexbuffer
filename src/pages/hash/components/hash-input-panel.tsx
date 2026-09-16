@@ -9,7 +9,7 @@ interface HashInputPanelProps {
   onClear: () => void;
 }
 
-export function HashInputPanel({ input, isEmpty, onInputChange, onClear }: HashInputPanelProps) {
+export function HashInputPanel({ input, isEmpty, onInputChange, onClear }: Readonly<HashInputPanelProps>) {
   return (
     <div
       className={cn(

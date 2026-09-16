@@ -1,7 +1,7 @@
 import { ScrollArea } from '@celestia-project/ui';
 import { useMemo, useCallback } from 'react';
 
-export function JsonViewer({ data, onCopyRef }: { data: unknown; onCopyRef?: (fn: () => void) => void }) {
+export function JsonViewer({ data, onCopyRef }: Readonly<{ data: unknown; onCopyRef?: (fn: () => void) => void }>) {
   const text = useMemo(() => {
     try {
       return JSON.stringify(data, null, 2);

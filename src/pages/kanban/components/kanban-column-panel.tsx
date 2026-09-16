@@ -14,7 +14,7 @@ interface Props {
 
 export function KanbanColumnPanel({
   column, cards, draggingId, onToggleSubtask, onAddCardClick, onCardClick,
-}: Props) {
+}: Readonly<Props>) {
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
   });

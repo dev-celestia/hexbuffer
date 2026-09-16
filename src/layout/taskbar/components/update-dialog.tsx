@@ -33,7 +33,7 @@ export function UpdateDialog({
   updateVersion,
   updateConfirmReady,
   onInstall,
-}: UpdateDialogProps) {
+}: Readonly<UpdateDialogProps>) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent

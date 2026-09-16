@@ -29,7 +29,7 @@ const CATEGORY_LABELS: Record<SettingsCategory, string> = {
   appearance: 'Appearance',
 };
 
-function CategoryContent({ settings, active }: CategoryContentProps) {
+function CategoryContent({ settings, active }: Readonly<CategoryContentProps>) {
   const title = CATEGORY_LABELS[active];
 
   return (
@@ -84,7 +84,7 @@ function CategoryContent({ settings, active }: CategoryContentProps) {
 
 const DEFAULT_TABS: SettingsCategory[] = ['general', 'ca-cert', 'ai', 'appearance'];
 
-export function SettingsLayout({ settings, categories }: SettingsLayoutProps) {
+export function SettingsLayout({ settings, categories }: Readonly<SettingsLayoutProps>) {
   const [searchParams, setSearchParams] = useSearchParams();
   const validTabs = categories || DEFAULT_TABS;
   const tabParam = searchParams.get('tab') as SettingsCategory | null;

@@ -12,7 +12,7 @@ interface SettingsGroupProps {
  * Renders a macOS-style settings group: a bordered container
  * with label + description header area and children below.
  */
-export function SettingsGroup({ label, description, children, className }: SettingsGroupProps) {
+export function SettingsGroup({ label, description, children, className }: Readonly<SettingsGroupProps>) {
   return (
     <section className={cn('space-y-2', className)}>
       {(label || description) && (
@@ -45,7 +45,7 @@ interface SettingsRowProps {
  * A single row within a SettingsGroup.
  * Label + optional description on the left, control on the right.
  */
-export function SettingsRow({ label, description, children, className }: SettingsRowProps) {
+export function SettingsRow({ label, description, children, className }: Readonly<SettingsRowProps>) {
   return (
     <div
       className={cn(
@@ -68,6 +68,6 @@ interface SettingsRowSeparatorProps {
   className?: string;
 }
 
-export function SettingsRowSeparator({ className }: SettingsRowSeparatorProps) {
+export function SettingsRowSeparator({ className }: Readonly<SettingsRowSeparatorProps>) {
   return <div className={cn('mx-4 border-t', className)} />;
 }

@@ -26,7 +26,7 @@ export function WordlistsSidebar({
   bundleDownloading,
   bundleProgress,
   className,
-}: WordlistsSidebarProps) {
+}: Readonly<WordlistsSidebarProps>) {
   return (
     <div
       className={cn(

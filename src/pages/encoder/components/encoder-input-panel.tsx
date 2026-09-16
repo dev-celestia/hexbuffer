@@ -11,7 +11,7 @@ export function EncoderInputPanel({
   headerLabel,
   input,
   onInputChange,
-}: EncoderInputPanelProps) {
+}: Readonly<EncoderInputPanelProps>) {
   return (
     <div
       className={cn(

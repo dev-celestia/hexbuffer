@@ -107,7 +107,7 @@ export function StandaloneOnly({
   children,
   fallback = null,
   target,
-}: StandaloneOnlyProps) {
+}: Readonly<StandaloneOnlyProps>) {
   const { isStandalone, isTarget } = useStandalone();
 
   if (!isStandalone) {
@@ -141,7 +141,7 @@ export interface DesktopOnlyProps {
 export function DesktopOnly({
   children,
   fallback = null,
-}: DesktopOnlyProps) {
+}: Readonly<DesktopOnlyProps>) {
   const { isStandalone } = useStandalone();
 
   if (isStandalone) {

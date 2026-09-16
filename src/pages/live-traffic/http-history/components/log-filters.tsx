@@ -32,7 +32,7 @@ import { WindowHeaderSlot } from '@/providers/window-provider';
 
 export type LogFiltersProps = UseLogFiltersProps;
 
-export function LogFilters(props: LogFiltersProps) {
+export function LogFilters(props: Readonly<LogFiltersProps>) {
   const {
     filter,
     localSearch,

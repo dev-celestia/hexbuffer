@@ -26,7 +26,7 @@ export function NucleiRunStatsBanner({
   stats,
   severityFilter,
   onToggleSeverityFilter,
-}: NucleiRunStatsBannerProps) {
+}: Readonly<NucleiRunStatsBannerProps>) {
   const isRunning = status === 'running';
   const isPaused = status === 'paused';
   const isCompleted = status === 'completed';

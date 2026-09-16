@@ -35,7 +35,7 @@ export function TargetSearchList({
   onSelectTarget,
   onEditTarget,
   listHeight = 'h-[260px]',
-}: TargetSearchListProps) {
+}: Readonly<TargetSearchListProps>) {
   const showSearch = targetCount >= 5 || searchQuery.length > 0;
 
   return (

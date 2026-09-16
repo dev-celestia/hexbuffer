@@ -49,7 +49,7 @@ export function TreeNode<TMeta = unknown>({
   onSelectEndpoint,
   onSelectHost,
   searchQuery = '',
-}: TreeNodeProps<TMeta>) {
+}: Readonly<TreeNodeProps<TMeta>>) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const hasChildren = node.children.length > 0;
   const isEndpoint = node.type === 'endpoint';

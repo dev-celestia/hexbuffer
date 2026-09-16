@@ -27,7 +27,7 @@ export function TrafficTablePagination({
   itemLabel = 'item',
   onPreviousPage,
   onNextPage,
-}: TrafficTablePaginationProps) {
+}: Readonly<TrafficTablePaginationProps>) {
   return (
     <div className="flex items-center justify-between px-3 py-1.5 border-t bg-muted/20 text-xs shrink-0 select-none">
       <div className="flex items-center gap-2 text-muted-foreground">

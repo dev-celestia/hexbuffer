@@ -24,7 +24,7 @@ export function ExtractionTab({
   tableData,
   onSelectDb,
   onSelectTable,
-}: ExtractionTabProps) {
+}: Readonly<ExtractionTabProps>) {
   // ponytail: Keep empty state minimal and reuse standard icon imports.
   if (databases.length === 0 && !isRunning) {
     return (

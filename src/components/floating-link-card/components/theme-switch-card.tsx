@@ -18,7 +18,7 @@ export function ThemeSwitchCard({
   canCycle,
   onCycle,
   onDismiss,
-}: FloatingCardCustomProps) {
+}: Readonly<FloatingCardCustomProps>) {
   const {
     theme,
     handleSetLight,

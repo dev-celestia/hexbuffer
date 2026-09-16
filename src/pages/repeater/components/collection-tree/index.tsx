@@ -19,7 +19,7 @@ import { DragOverlayContent } from './drag-overlay-content';
 import { DeleteDialog } from './delete-dialog';
 import { ImportDialog } from './import-dialog';
 
-export function CollectionsTree({ workspaceId }: { workspaceId: string }) {
+export function CollectionsTree({ workspaceId }: Readonly<{ workspaceId: string }>) {
   const selectedNodeId = useCollectionsStore((s) => s.selectedNodeId);
   const {
     expandedIds,

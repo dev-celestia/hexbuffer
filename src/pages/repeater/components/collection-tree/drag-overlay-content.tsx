@@ -6,7 +6,7 @@ interface DragOverlayContentProps {
   node: FlatNode | null;
 }
 
-export function DragOverlayContent({ node }: DragOverlayContentProps) {
+export function DragOverlayContent({ node }: Readonly<DragOverlayContentProps>) {
   if (!node) return null;
 
   return (

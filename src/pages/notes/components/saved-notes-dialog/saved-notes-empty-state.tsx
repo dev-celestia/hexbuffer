@@ -12,7 +12,7 @@ export function SavedNotesEmptyState({
   searchQuery,
   activeFilterTab,
   onCreateNewNote,
-}: SavedNotesEmptyStateProps) {
+}: Readonly<SavedNotesEmptyStateProps>) {
   return (
     <div
       className={cn(

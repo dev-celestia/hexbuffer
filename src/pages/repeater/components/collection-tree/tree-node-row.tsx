@@ -49,7 +49,7 @@ export function TreeNodeRow({
   onAddChild,
   onRename,
   onDelete,
-}: TreeNodeRowProps) {
+}: Readonly<TreeNodeRowProps>) {
   const {
     attributes,
     listeners,

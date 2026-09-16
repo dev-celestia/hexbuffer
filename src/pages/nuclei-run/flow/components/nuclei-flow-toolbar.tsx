@@ -23,7 +23,7 @@ export function NucleiFlowToolbar({
   diagnostics,
   onAutoLayout,
   onFitView,
-}: NucleiFlowToolbarProps) {
+}: Readonly<NucleiFlowToolbarProps>) {
   const errors = diagnostics.filter((d) => d.type === 'error');
   const warnings = diagnostics.filter((d) => d.type === 'warning');
 
