@@ -13,7 +13,8 @@ import {
   CheckIcon,
   CopyIcon,
 } from '@phosphor-icons/react';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 interface FoldableChatBubbleProps {
@@ -33,6 +34,15 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
 }: FoldableChatBubbleProps) {
   const [isFolded, setIsFolded] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const prefersReducedMotion = useReducedMotion();
+  // Toggling fold swaps the returned element, so a naive `initial` replays on every
+  // fold. Only the message's first mount should animate in.
+  const hasEnteredRef = useRef(false);
+  useEffect(() => {
+    hasEnteredRef.current = true;
+  }, []);
+  const enterFrom = hasEnteredRef.current || prefersReducedMotion ? false : { opacity: 0, y: 8 };
 
   const handleCopy = useCallback(
     async (e?: React.MouseEvent) => {
@@ -60,7 +70,10 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
   // --- USER BUBBLE RENDERING ---
   if (isUser) {
     return (
-      <div
+      <motion.div
+        initial={enterFrom}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
         className={cn(
           // Layout & Positioning
           'group/user-msg flex items-end justify-end gap-1.5 w-full min-w-0 max-w-full',
@@ -225,14 +238,14 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
             </BubbleContent>
           </Bubble>
         )}
-      </div>
+      </motion.div>
     );
   }
 
   // --- ASSISTANT BUBBLE RENDERING ---
   if (isFolded) {
     return (
-      <div
+      <motion.div
         role="button"
         tabIndex={0}
         onClick={handleToggleFold}
@@ -242,6 +255,9 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
             handleToggleFold();
           }
         }}
+        initial={enterFrom}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
         className={cn(
           // Layout & Positioning
           'group flex items-center justify-between gap-2 w-full min-w-0 max-w-full overflow-hidden',
@@ -350,13 +366,16 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
             </TooltipContent>
           </Tooltip>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   // Expanded Assistant Bubble
   return (
-    <div
+    <motion.div
+      initial={enterFrom}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
       className={cn(
         // Layout & Positioning
         'group/assistant-msg relative w-full min-w-0 max-w-full overflow-hidden',
@@ -502,6 +521,6 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
           ) : null}
         </BubbleContent>
       </Bubble>
-    </div>
+    </motion.div>
   );
 });
