@@ -1,4 +1,3 @@
-use rig::client::AgentClientExt;
 use tauri::AppHandle;
 
 use super::chat::ensure_third_party_ai_sharing_allowed;
@@ -19,8 +18,9 @@ pub async fn suggest_invoker_markers_impl(
 
     let settings = read_ai_settings(&app)?;
     // Mirror the chat path: a loopback endpoint stays on-box, so it needs neither the
-    // third-party sharing gate nor a key.
-    let is_local = is_openai_compatible(&settings.provider)
+    let is_compat = is_openai_compatible(&settings.provider)
+        || super::providers::is_anthropic(&settings.provider);
+    let is_local = is_compat
         && super::providers::is_local_ai_url(settings.custom_base_url.as_deref());
     if !is_local {
         ensure_third_party_ai_sharing_allowed(&settings)?;
@@ -32,33 +32,38 @@ pub async fn suggest_invoker_markers_impl(
     };
 
     let config = super::chat::build_ai_config(&settings, &api_key);
-    let client = super::providers::create_openai_client(&config)?;
-
-    let mut builder = client
-        .agent(&config.model)
-        .preamble(
-            "You are an expert web security payload marker insertion tool for security scanners. Analyze the raw HTTP request and insert marker symbols ($target$) around injection points for security testing.",
-        );
-
-    if let Some(temp) = config.temperature {
-        builder = builder.temperature(temp);
-    }
-    if let Some(tokens) = config.max_tokens {
-        builder = builder.max_tokens(tokens);
-    }
-
-    let agent = builder.build();
+    let model = super::providers::create_completion_model(&config)?;
 
     let prompt = format!(
         "Analyze this raw HTTP request and identify high-value parameter injection points for fuzzing or vulnerability testing.\n\nRAW REQUEST:\n{}\n\nReturn JSON output matching exact format:\n{{\n  \"marked_request\": \"...\",\n  \"parameters\": [\"...\"],\n  \"explanation\": \"...\"\n}}",
         request.raw_request
     );
 
-    use rig::completion::Prompt;
-    let response = agent
-        .prompt(&prompt)
+    let mut req_builder = model
+        .completion_request(prompt)
+        .preamble(
+            "You are an expert web security payload marker insertion tool for security scanners. Analyze the raw HTTP request and insert marker symbols ($target$) around injection points for security testing.".to_string(),
+        );
+
+    if let Some(temp) = config.temperature {
+        req_builder = req_builder.temperature(temp);
+    }
+    if let Some(tokens) = config.max_tokens {
+        req_builder = req_builder.max_tokens(tokens);
+    }
+
+    use rig::completion::CompletionModel as _;
+    let completion = model
+        .completion(req_builder.build())
         .await
         .map_err(|error| format!("Completion error: {error}"))?;
+
+    let mut response = String::new();
+    for item in completion.choice {
+        if let rig::completion::AssistantContent::Text(t) = item {
+            response.push_str(&t.text);
+        }
+    }
 
     let clean_json = if response.contains("```json") {
         response

@@ -56,15 +56,23 @@ export async function executeSendToIntruderAiTool(args: {
   logId?: string;
   rawRequest?: string;
   payloadValues?: string[];
+  log_id?: string;
+  raw_request?: string;
+  payload_values?: string[];
+  [key: string]: any;
 }): Promise<string> {
-  if (!args.logId && !args.rawRequest) {
+  const logId = args.logId ?? args.log_id;
+  const rawRequest = args.rawRequest ?? args.raw_request;
+  const payloadValues = args.payloadValues ?? args.payload_values;
+
+  if (!logId && !rawRequest) {
     throw new Error('Either logId or rawRequest is required to send to Intruder.');
   }
 
   await sendToIntruder({
-    logId: args.logId || '',
-    rawRequest: args.rawRequest,
-    payloadValues: args.payloadValues,
+    logId: logId || '',
+    rawRequest,
+    payloadValues,
   });
 
   return 'Sent request to Intruder. Switched to the Intruder window with attack positions ready.';

@@ -2,7 +2,6 @@ use super::agents::{
     get_agent_spec, resolve_agent_by_mention_or_slug, AgentId, AgentSpec,
 };
 use super::types::AiConfig;
-use rig::client::CompletionClient;
 use rig::completion::{AssistantContent, CompletionModel as CompletionModelTrait};
 use serde::Deserialize;
 use std::time::Duration;
@@ -144,8 +143,7 @@ fn fast_path_route(prompt: &str, explicit_target: Option<&str>) -> Option<Routin
 
 /// Classifies intent using the lightweight AI classifier.
 async fn classify_with_ai(prompt: &str, config: &AiConfig) -> Result<RoutingDecision, String> {
-    let client = super::providers::create_openai_client(config).map_err(|e| e.to_string())?;
-    let model = client.completion_model(&config.model);
+    let model = super::providers::create_completion_model(config).map_err(|e| e.to_string())?;
 
     let request = model
         .completion_request(prompt.to_string())
@@ -225,33 +223,61 @@ fn fallback_heuristic_route(prompt: &str) -> RoutingDecision {
             requires_proxy_context: false,
         };
     }
-    if lower.contains("repeater") || lower.contains("collection") || lower.contains("endpoint") {
+    if lower.contains("repeater")
+        || lower.contains("replay")
+        || lower.contains("collection")
+        || lower.contains("endpoint")
+        || lower.contains("craft")
+        || lower.contains("resend")
+    {
         return RoutingDecision::ExecuteAction {
             agent: get_agent_spec(AgentId::Repeater),
             requires_proxy_context: true,
         };
     }
-    if lower.contains("intercept") || lower.contains("traffic") {
+    if lower.contains("intercept")
+        || lower.contains("traffic")
+        || lower.contains("forward")
+        || lower.contains("drop")
+        || lower.contains("scope")
+        || lower.contains("target")
+        || lower.contains("crawl")
+    {
         return RoutingDecision::ExecuteAction {
             agent: get_agent_spec(AgentId::HttpTraffic),
             requires_proxy_context: true,
         };
     }
-    if lower.contains("port") || lower.contains("scan") {
+    if lower.contains("port") || lower.contains("scanner") || lower.contains("open ports") {
         return RoutingDecision::ExecuteAction {
             agent: get_agent_spec(AgentId::PortScanner),
             requires_proxy_context: false,
         };
     }
-    if lower.contains("fuzz") || lower.contains("intruder") || lower.contains("invoker") {
+    if lower.contains("fuzz")
+        || lower.contains("intruder")
+        || lower.contains("invoker")
+        || lower.contains("brute force")
+        || lower.contains("attack")
+    {
         return RoutingDecision::ExecuteAction {
             agent: get_agent_spec(AgentId::Intruder),
             requires_proxy_context: false,
         };
     }
-    if lower.contains("note") {
+    if lower.contains("note") || lower.contains("scratchpad") {
         return RoutingDecision::ExecuteAction {
             agent: get_agent_spec(AgentId::Notes),
+            requires_proxy_context: false,
+        };
+    }
+    if lower.contains("navigate")
+        || lower.contains("open window")
+        || lower.contains("switch to")
+        || lower.contains("go to")
+    {
+        return RoutingDecision::ExecuteAction {
+            agent: get_agent_spec(AgentId::Orchestrator),
             requires_proxy_context: false,
         };
     }

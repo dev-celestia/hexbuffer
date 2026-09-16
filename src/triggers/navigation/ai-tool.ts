@@ -15,8 +15,12 @@ export const NAVIGATE_TO_APP_AI_TOOL_DEFINITION = {
   },
 };
 
-export async function executeNavigateToAppAiTool(args: { app?: string }): Promise<string> {
-  const app = args.app?.trim();
+export async function executeNavigateToAppAiTool(args: {
+  app?: string;
+  path?: string;
+  target?: string;
+}): Promise<string> {
+  const app = (args.app ?? args.path ?? args.target)?.trim();
   if (!app) {
     throw new Error('Target application name is required.');
   }

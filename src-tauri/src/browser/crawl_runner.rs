@@ -5,9 +5,8 @@ use celestia_spider::{
     CrawlControl, CrawlResult, CrawlerEvent, Options as SpiderOptions, Runner, Strategy,
 };
 use parking_lot::Mutex;
-use rig::client::CompletionClient;
+use crate::ai::providers::AnyCompletionModel as PageAnalysisModel;
 use rig::completion::{AssistantContent, CompletionModel as CompletionModelTrait};
-use rig::providers::openai::completion::CompletionModel as PageAnalysisModel;
 use std::collections::HashMap;
 use std::sync::{
     atomic::{AtomicBool, AtomicUsize, Ordering},
@@ -382,9 +381,9 @@ pub(crate) async fn run_browser_crawler_crawl(
     // configuration is available (no key, no consent, or provider init failure).
     let analyzer: Option<PageAnalyzer> = if config.enable_ai_insights {
         analysis.and_then(|ai_config| {
-            match crate::ai::providers::create_openai_client(&ai_config) {
-                Ok(client) => Some(PageAnalyzer {
-                    model: Arc::new(client.completion_model(&ai_config.model)),
+            match crate::ai::providers::create_completion_model(&ai_config) {
+                Ok(model) => Some(PageAnalyzer {
+                    model: Arc::new(model),
                     semaphore: Arc::new(tokio::sync::Semaphore::new(ANALYSIS_CONCURRENCY)),
                     analyzed: Arc::new(AtomicUsize::new(0)),
                     pending: Arc::new(AtomicUsize::new(0)),

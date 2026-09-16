@@ -4,7 +4,6 @@ use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
 
 use futures::StreamExt;
-use rig::client::CompletionClient;
 use rig::completion::{message::ToolCall, CompletionModel, Message, ToolDefinition};
 use rig::streaming::StreamedAssistantContent;
 use serde_json::{json, Value};
@@ -54,13 +53,13 @@ const AUTO_APPROVED_TOOLS: &[&str] = &[
     super::agents::jwt_tools::DECODE_JWT_TOOL,
     super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL,
     super::agents::jwt_tools::TAMPER_JWT_TOOL,
-    super::agents::port_scanner_tools::TRIGGER_PORT_SCAN_TOOL,
 ];
 
 /// Tier 2 — require explicit user confirmation in chat before executing: tools that
 /// change proxy/attack state or write content. start_invoker_attack lives here.
 const CONFIRMATION_TOOLS: &[&str] = &[
     "trigger_scan",
+    super::agents::port_scanner_tools::TRIGGER_PORT_SCAN_TOOL,
     "start_invoker_attack",
     "stop_invoker_attack",
     "toggle_intercept",
@@ -470,6 +469,11 @@ async fn execute_write_note(app: &AppHandle, args: &Value) -> String {
         return "Failed: both 'name' and 'note' are required to write a note.".to_string();
     }
 
+    const MAX_NOTE_NAME_CHARS: usize = 200;
+    const MAX_NOTE_BODY_CHARS: usize = 25_000;
+    let name_bounded: String = name.chars().take(MAX_NOTE_NAME_CHARS).collect();
+    let note_body_bounded: String = note_body.chars().take(MAX_NOTE_BODY_CHARS).collect();
+
     let existing_id = args
         .get("id")
         .and_then(|value| value.as_str())
@@ -494,8 +498,8 @@ async fn execute_write_note(app: &AppHandle, args: &Value) -> String {
 
     let record = crate::NoteRecord {
         id: existing_id.clone().unwrap_or_default(),
-        name: name.to_string(),
-        note: note_body.to_string(),
+        name: name_bounded,
+        note: note_body_bounded,
         created_at,
         updated_at: chrono::Utc::now().to_rfc3339(),
     };
@@ -573,6 +577,14 @@ async fn execute_memory_save(app: &AppHandle, args: &Value) -> String {
             .to_string();
     }
 
+    const MAX_MEMORY_TITLE_CHARS: usize = 200;
+    const MAX_MEMORY_CONTENT_CHARS: usize = 25_000;
+    const MAX_TAGS_COUNT: usize = 10;
+    const MAX_TAG_CHARS: usize = 50;
+
+    let title_bounded: String = title.chars().take(MAX_MEMORY_TITLE_CHARS).collect();
+    let content_bounded: String = content.chars().take(MAX_MEMORY_CONTENT_CHARS).collect();
+
     let tags: Vec<String> = args
         .get("tags")
         .and_then(|value| value.as_array())
@@ -582,15 +594,16 @@ async fn execute_memory_save(app: &AppHandle, args: &Value) -> String {
                 .filter_map(|item| item.as_str())
                 .map(str::trim)
                 .filter(|tag| !tag.is_empty())
-                .map(str::to_lowercase)
+                .map(|tag| tag.chars().take(MAX_TAG_CHARS).collect::<String>().to_lowercase())
+                .take(MAX_TAGS_COUNT)
                 .collect()
         })
         .unwrap_or_default();
 
     let mut entry = crate::db::repository::types::MemoryEntry {
         id: uuid::Uuid::new_v4().to_string(),
-        title: title.to_string(),
-        content: content.to_string(),
+        title: title_bounded,
+        content: content_bounded,
         tags,
         source_type: "ai".to_string(),
         source_ref: None,
@@ -1023,9 +1036,7 @@ pub fn format_specialist_message(
             format!("🔑 **JWT Decoded**\n\n{result}")
         }
         "send_repeater_request" => {
-            let method = args.get("method").and_then(|v| v.as_str()).unwrap_or("GET");
-            let url = args.get("url").and_then(|v| v.as_str()).unwrap_or("request");
-            format!("🚀 **Executed Repeater Request**\n\nSent `{method} {url}`.\n\n{result}")
+            format!("🚀 **Executed Active Repeater Request**\n\n{result}")
         }
         "stop_invoker_attack" => {
             format!("🛑 **Intruder Attack Stopped**\n\n{result}")
@@ -1051,16 +1062,28 @@ pub fn format_specialist_message(
             format!("🛑 **Browser Crawl Stopped**\n\n{result}")
         }
         "navigate_to_app" => {
-            let path = args.get("path").and_then(|v| v.as_str()).unwrap_or("window");
+            let path = args
+                .get("app")
+                .or_else(|| args.get("path"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("window");
             format!("🧭 **Navigated to Window**\n\nSwitched view to `{path}`.\n\n{result}")
         }
         "add_scope_target" => {
-            let host = args.get("host").and_then(|v| v.as_str()).unwrap_or("target");
+            let host = args
+                .get("host")
+                .or_else(|| args.get("target"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("target");
             format!("🎯 **Added Target to Scope**\n\nAdded `{host}` to active interception/proxy scope.\n\n{result}")
         }
         "remove_scope_target" => {
-            let host = args.get("host").and_then(|v| v.as_str()).unwrap_or("target");
-            format!("❌ **Removed Target from Scope**\n\nRemoved `{host}` from active scope.\n\n{result}")
+            let target = args
+                .get("target")
+                .or_else(|| args.get("host"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("target");
+            format!("❌ **Removed Target from Scope**\n\nRemoved `{target}` from active scope.\n\n{result}")
         }
         super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL => {
             format!("🔐 **JWT Vulnerability Audit**\n\n{result}")
@@ -1088,9 +1111,8 @@ pub async fn run_tool_loop(
     mut cancel_rx: tokio::sync::watch::Receiver<bool>,
     mut pause_rx: tokio::sync::watch::Receiver<bool>,
 ) -> Result<ToolLoopOutput, String> {
-    let client =
-        super::providers::create_openai_client(config).map_err(|e| e.to_string())?;
-    let model = client.completion_model(&config.model);
+    let model =
+        super::providers::create_completion_model(config).map_err(|e| e.to_string())?;
     let all_tools = tool_definitions();
     let tools = super::agents::filter_tools_for_agent(agent, &all_tools);
 
@@ -1248,14 +1270,24 @@ pub async fn run_tool_loop(
                     "I fetched the requested data but did not produce a final summary. Here are the raw results:\n\n",
                 );
                 fallback.push_str(&last_round_tool_results.join("\n\n---\n\n"));
+                let _ = app.emit_to(
+                    window_label,
+                    "ai-chat:delta",
+                    json!({ "requestId": request_id, "delta": &fallback }),
+                );
                 accumulated_full_response.push_str(&fallback);
             }
 
             // Never hand back an empty answer: a provider that returned no text
             // and no tool call should still produce an explicit, honest message.
             if accumulated_full_response.trim().is_empty() {
-                accumulated_full_response =
-                    "The AI provider returned an empty response. Please try again.".to_string();
+                let empty_msg = "The AI provider returned an empty response. Please try again.";
+                accumulated_full_response = empty_msg.to_string();
+                let _ = app.emit_to(
+                    window_label,
+                    "ai-chat:delta",
+                    json!({ "requestId": request_id, "delta": empty_msg }),
+                );
             }
 
             return Ok(ToolLoopOutput {
@@ -1369,7 +1401,13 @@ pub async fn run_tool_loop(
 
         if executed_terminal_action {
             if accumulated_full_response.trim().is_empty() {
-                accumulated_full_response = "The requested tool action has executed successfully.".to_string();
+                let success_msg = "The requested tool action has executed successfully.";
+                accumulated_full_response = success_msg.to_string();
+                let _ = app.emit_to(
+                    window_label,
+                    "ai-chat:delta",
+                    json!({ "requestId": request_id, "delta": success_msg }),
+                );
             }
             return Ok(ToolLoopOutput {
                 content: accumulated_full_response,

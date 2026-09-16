@@ -1,5 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { useNavStore } from '@/stores/nav';
+import { useRepeaterStore } from '@/stores/repeater';
+import { useCollectionsStore } from '@/stores/collections';
 import { createCollection, createFolder, createEndpoint, selectEndpoint } from './management';
 import { sendRawToRepeater } from './send-to';
 import { sendRequest } from './ui';
@@ -235,18 +237,40 @@ export async function executeSendToRepeaterAiTool(args: Record<string, any>) {
 }
 
 export async function executeCreateCollectionAiTool(args: Record<string, any>) {
-  const id = await createCollection(args.workspace_id, args.name);
+  const repeaterStore = useRepeaterStore.getState();
+  const workspaceId =
+    args.workspace_id ??
+    args.workspaceId ??
+    repeaterStore.activeWorkspaceId ??
+    repeaterStore.workspaces[0]?.id ??
+    'default';
+  const name = String(args.name ?? 'New Collection').trim();
+  const id = await createCollection(workspaceId, name);
   useNavStore.getState().triggerNavBlink('/repeater');
-  return `Collection "${args.name}" created in Repeater (id: ${id}).`;
+  return `Collection "${name}" created in Repeater (id: ${id}).`;
 }
 
 export async function executeCreateFolderAiTool(args: Record<string, any>) {
-  const id = await createFolder(args.parent_id, args.name);
-  return `Folder "${args.name}" created (id: ${id}).`;
+  const collectionsStore = useCollectionsStore.getState();
+  const parentId =
+    args.parent_id ??
+    args.parentId ??
+    collectionsStore.stashes[0]?.id ??
+    'root';
+  const name = String(args.name ?? 'New Folder').trim();
+  const id = await createFolder(parentId, name);
+  return `Folder "${name}" created (id: ${id}).`;
 }
 
 export async function executeCreateEndpointAiTool(args: Record<string, any>) {
-  const id = await createEndpoint(args.collection_id, args.name, {
+  const collectionsStore = useCollectionsStore.getState();
+  const collectionId =
+    args.collection_id ??
+    args.collectionId ??
+    collectionsStore.stashes[0]?.id ??
+    'root';
+  const name = String(args.name ?? 'New Endpoint').trim();
+  const id = await createEndpoint(collectionId, name, {
     method: args.method,
     url: args.url,
     headers: args.headers,
@@ -254,7 +278,7 @@ export async function executeCreateEndpointAiTool(args: Record<string, any>) {
   });
   selectEndpoint(id);
   useNavStore.getState().triggerNavBlink('/repeater');
-  return `Endpoint "${args.name}" added to the Repeater collection (id: ${id}).`;
+  return `Endpoint "${name}" added to the Repeater collection (id: ${id}).`;
 }
 
 export const SEND_REPEATER_REQUEST_AI_TOOL_DEFINITION = {

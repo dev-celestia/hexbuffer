@@ -423,7 +423,16 @@ export function AssistantPromptBar({
                   value={model}
                 >
                   <PromptInputSelectTrigger className="border border-border max-w-[105px] xs:max-w-[130px] sm:max-w-[160px] text-xs h-8 px-2">
-                    <ModelSelectorLogo provider={provider === 'openai-compatible' ? 'openai' : provider} className="size-3.5 shrink-0" />
+                    <ModelSelectorLogo
+                      provider={
+                        provider === 'openai-compatible'
+                          ? 'openai'
+                          : provider === 'anthropic-compatible' || provider === 'anthropic'
+                          ? 'anthropic'
+                          : provider
+                      }
+                      className="size-3.5 shrink-0"
+                    />
                     <PromptInputSelectValue className="truncate" />
                   </PromptInputSelectTrigger>
                   <PromptInputSelectContent>

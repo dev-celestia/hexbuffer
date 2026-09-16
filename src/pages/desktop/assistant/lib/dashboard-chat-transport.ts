@@ -16,6 +16,8 @@ interface DashboardChatBody {
 const PROVIDER_LABELS: Record<string, string> = {
   deepseek: 'DeepSeek',
   'openai-compatible': 'OpenAI Compatible',
+  'anthropic-compatible': 'Anthropic Compatible',
+  anthropic: 'Anthropic',
 };
 
 interface AiChatAction {
@@ -102,7 +104,11 @@ function isLocalEndpoint(url?: string | null): boolean {
 }
 
 function fallbackContent(aiSettings: DashboardAiSettings | undefined, error?: unknown) {
-  const isLocal = aiSettings?.provider === 'openai-compatible' && isLocalEndpoint(aiSettings?.customBaseUrl);
+  const isCompat =
+    aiSettings?.provider === 'openai-compatible' ||
+    aiSettings?.provider === 'anthropic-compatible' ||
+    aiSettings?.provider === 'anthropic';
+  const isLocal = isCompat && isLocalEndpoint(aiSettings?.customBaseUrl);
   if (!aiSettings?.hasApiKey && !isLocal) {
     return 'Add an API key in Settings or AI Config to start chatting with the configured AI provider.';
   }
@@ -190,7 +196,11 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
         let agentName: string | undefined;
         const textId = `response-${Date.now()}`;
 
-        const isLocal = aiSettings?.provider === 'openai-compatible' && isLocalEndpoint(aiSettings?.customBaseUrl);
+        const isCompat =
+          aiSettings?.provider === 'openai-compatible' ||
+          aiSettings?.provider === 'anthropic-compatible' ||
+          aiSettings?.provider === 'anthropic';
+        const isLocal = isCompat && isLocalEndpoint(aiSettings?.customBaseUrl);
         if ((!aiSettings?.hasApiKey && !isLocal) || (!aiSettings?.allowThirdPartyAiSharing && !isLocal)) {
           writeAssistantText(writer, textId, fallbackContent(aiSettings), provider, model);
           return;

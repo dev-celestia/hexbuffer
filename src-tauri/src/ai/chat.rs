@@ -311,12 +311,8 @@ pub async fn send_ai_chat_message_impl(
         .clone()
         .unwrap_or_else(|| format!("chat-{}", chrono::Utc::now().timestamp_millis()));
 
-    let route_decision = super::router::route_prompt(
-        &prompt,
-        request.target_agent.as_deref(),
-        &config,
-    )
-    .await;
+    let route_decision =
+        super::router::route_prompt(&prompt, request.target_agent.as_deref(), &config).await;
 
     if let super::router::RoutingDecision::UnsupportedAction {
         action_name,
@@ -389,9 +385,7 @@ pub async fn send_ai_chat_message_impl(
     } else {
         None
     };
-    let context_json = context
-        .as_ref()
-        .and_then(|c| serde_json::to_string(c).ok());
+    let context_json = context.as_ref().and_then(|c| serde_json::to_string(c).ok());
 
     let (cancel_tx, cancel_rx) = watch::channel(false);
     let (pause_tx, pause_rx) = watch::channel(false);
@@ -454,11 +448,23 @@ pub async fn send_ai_chat_message_impl(
     if !context_parts.is_empty() {
         loop_history.push(RigMessage::user(context_parts.join("\n\n")));
     }
-    for message in prior_messages {
-        let content = if message.content.chars().count() > 2500 {
+    const MAX_PRIOR_MESSAGES_WINDOW: usize = 14;
+    const MAX_PRIOR_MESSAGE_CHARS: usize = 2000;
+    let windowed_prior = if prior_messages.len() > MAX_PRIOR_MESSAGES_WINDOW {
+        &prior_messages[prior_messages.len() - MAX_PRIOR_MESSAGES_WINDOW..]
+    } else {
+        &prior_messages[..]
+    };
+
+    for message in windowed_prior {
+        let content = if message.content.chars().count() > MAX_PRIOR_MESSAGE_CHARS {
             format!(
                 "{}... [prior message content truncated to bound context]",
-                message.content.chars().take(2500).collect::<String>()
+                message
+                    .content
+                    .chars()
+                    .take(MAX_PRIOR_MESSAGE_CHARS)
+                    .collect::<String>()
             )
         } else {
             message.content.clone()
@@ -765,9 +771,14 @@ fn split_conversation(
 }
 
 /// Builds the engine config for the configured provider. The `openai-compatible` provider
-/// points the OpenAI-compatible client at the user's custom base URL.
+/// Builds the engine config for the configured provider. Custom base URLs are passed
+/// through for OpenAI-compatible and Anthropic-compatible endpoints.
 pub(crate) fn build_ai_config(settings: &AiSettings, api_key: &str) -> super::types::AiConfig {
-    if super::providers::is_openai_compatible(&settings.provider) {
+    if super::providers::is_anthropic(&settings.provider) {
+        let mut config = super::types::AiConfig::new(&settings.provider, &settings.model, api_key);
+        config.base_url = settings.custom_base_url.clone();
+        config
+    } else if super::providers::is_openai_compatible(&settings.provider) {
         let mut config = super::types::AiConfig::new(&settings.provider, &settings.model, api_key);
         config.base_url = settings.custom_base_url.clone();
         config

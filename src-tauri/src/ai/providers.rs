@@ -1,14 +1,24 @@
-pub(crate) const AI_PROVIDERS: [&str; 3] = ["deepseek", "openai-compatible", "embeddings"];
+use rig::client::CompletionClient;
+
+pub(crate) const AI_PROVIDERS: [&str; 4] = [
+    "deepseek",
+    "openai-compatible",
+    "anthropic-compatible",
+    "embeddings",
+];
 
 pub const OPENAI_COMPATIBLE_PROVIDER: &str = "openai-compatible";
+pub const ANTHROPIC_COMPATIBLE_PROVIDER: &str = "anthropic-compatible";
+pub const ANTHROPIC_PROVIDER: &str = "anthropic";
 /// Keyring-only pseudo provider holding the optional memory embeddings key.
 /// Not exposed in the frontend provider selector.
 pub const EMBEDDINGS_KEY_PROVIDER: &str = "embeddings";
 
 pub fn api_key_env_name(provider: &str) -> Result<&'static str, String> {
-    match provider {
+    match provider.trim().to_lowercase().as_str() {
         "deepseek" => Ok("DEEPSEEK_API_KEY"),
         "openai-compatible" => Ok("OPENAI_COMPATIBLE_API_KEY"),
+        "anthropic" | "anthropic-compatible" => Ok("ANTHROPIC_API_KEY"),
         "embeddings" => Ok("EMBEDDINGS_API_KEY"),
         _ => Err(format!("Unsupported AI provider: {}", provider)),
     }
@@ -16,11 +26,18 @@ pub fn api_key_env_name(provider: &str) -> Result<&'static str, String> {
 
 pub(crate) fn normalize_ai_provider(provider: &str) -> Result<&str, String> {
     let provider = provider.trim();
-    match provider {
-        "deepseek" => Ok(provider),
-        OPENAI_COMPATIBLE_PROVIDER => Ok(provider),
-        EMBEDDINGS_KEY_PROVIDER => Ok(provider),
-        _ => Err(format!("Unsupported AI provider: {}", provider)),
+    if provider.eq_ignore_ascii_case("deepseek") {
+        Ok("deepseek")
+    } else if provider.eq_ignore_ascii_case(OPENAI_COMPATIBLE_PROVIDER) {
+        Ok(OPENAI_COMPATIBLE_PROVIDER)
+    } else if provider.eq_ignore_ascii_case(ANTHROPIC_COMPATIBLE_PROVIDER) {
+        Ok(ANTHROPIC_COMPATIBLE_PROVIDER)
+    } else if provider.eq_ignore_ascii_case(ANTHROPIC_PROVIDER) {
+        Ok(ANTHROPIC_COMPATIBLE_PROVIDER)
+    } else if provider == EMBEDDINGS_KEY_PROVIDER {
+        Ok(EMBEDDINGS_KEY_PROVIDER)
+    } else {
+        Err(format!("Unsupported AI provider: {}", provider))
     }
 }
 
@@ -28,6 +45,12 @@ pub(crate) fn is_openai_compatible(provider: &str) -> bool {
     provider
         .trim()
         .eq_ignore_ascii_case(OPENAI_COMPATIBLE_PROVIDER)
+}
+
+pub(crate) fn is_anthropic(provider: &str) -> bool {
+    let trimmed = provider.trim();
+    trimmed.eq_ignore_ascii_case(ANTHROPIC_COMPATIBLE_PROVIDER)
+        || trimmed.eq_ignore_ascii_case(ANTHROPIC_PROVIDER)
 }
 
 /// True only when `url` resolves to a loopback/unspecified host (localhost, 127.0.0.0/8,
@@ -103,6 +126,84 @@ pub fn create_openai_client(
         .map_err(|e| e.to_string())
 }
 
+pub fn create_anthropic_client(
+    config: &super::types::AiConfig,
+) -> Result<rig::providers::anthropic::Client, String> {
+    let api_key = config
+        .api_key
+        .clone()
+        .or_else(|| std::env::var(api_key_env_name(&config.provider).unwrap_or("")).ok())
+        .ok_or_else(|| format!("Missing API key for provider {}", config.provider))?;
+
+    let base_url = if let Some(ref url) = config.base_url {
+        let trimmed = url.trim();
+        if trimmed.is_empty() {
+            "https://api.anthropic.com".to_string()
+        } else {
+            trimmed.to_string()
+        }
+    } else {
+        "https://api.anthropic.com".to_string()
+    };
+
+    rig::providers::anthropic::Client::builder()
+        .api_key(&api_key)
+        .base_url(&base_url)
+        .build()
+        .map_err(|e| e.to_string())
+}
+
+#[derive(Clone)]
+pub enum AnyCompletionModel {
+    OpenAi(rig::providers::openai::completion::CompletionModel),
+    Anthropic(rig::providers::anthropic::completion::CompletionModel),
+}
+
+impl rig::completion::CompletionModel for AnyCompletionModel {
+    async fn completion(
+        &self,
+        request: rig::completion::CompletionRequest,
+    ) -> Result<rig::completion::CompletionResponse, rig::completion::CompletionError> {
+        match self {
+            AnyCompletionModel::OpenAi(m) => m.completion(request).await,
+            AnyCompletionModel::Anthropic(m) => m.completion(request).await,
+        }
+    }
+
+    async fn stream(
+        &self,
+        request: rig::completion::CompletionRequest,
+    ) -> Result<rig::streaming::StreamingCompletionResponse, rig::completion::CompletionError> {
+        match self {
+            AnyCompletionModel::OpenAi(m) => m.stream(request).await,
+            AnyCompletionModel::Anthropic(m) => m.stream(request).await,
+        }
+    }
+
+    fn capabilities(&self) -> rig::completion::ProviderCapabilities {
+        match self {
+            AnyCompletionModel::OpenAi(m) => m.capabilities(),
+            AnyCompletionModel::Anthropic(m) => m.capabilities(),
+        }
+    }
+}
+
+pub fn create_completion_model(
+    config: &super::types::AiConfig,
+) -> Result<AnyCompletionModel, String> {
+    if is_anthropic(&config.provider) {
+        let client = create_anthropic_client(config)?;
+        Ok(AnyCompletionModel::Anthropic(
+            client.completion_model(&config.model),
+        ))
+    } else {
+        let client = create_openai_client(config)?;
+        Ok(AnyCompletionModel::OpenAi(
+            client.completion_model(&config.model),
+        ))
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -122,6 +223,18 @@ mod tests {
     }
 
     #[test]
+    fn test_api_key_env_name_anthropic() {
+        assert_eq!(
+            api_key_env_name("anthropic").unwrap(),
+            "ANTHROPIC_API_KEY"
+        );
+        assert_eq!(
+            api_key_env_name("anthropic-compatible").unwrap(),
+            "ANTHROPIC_API_KEY"
+        );
+    }
+
+    #[test]
     fn test_api_key_env_name_rejects_unknown_providers() {
         let err = api_key_env_name("not-a-provider").unwrap_err();
         assert!(err.contains("not-a-provider"));
@@ -134,6 +247,14 @@ mod tests {
         assert_eq!(
             normalize_ai_provider(" openai-compatible ").unwrap(),
             "openai-compatible"
+        );
+        assert_eq!(
+            normalize_ai_provider(" anthropic-compatible ").unwrap(),
+            "anthropic-compatible"
+        );
+        assert_eq!(
+            normalize_ai_provider(" anthropic ").unwrap(),
+            "anthropic-compatible"
         );
         assert!(normalize_ai_provider("").is_err());
         assert!(normalize_ai_provider("gpt").is_err());

@@ -34,22 +34,30 @@ export const REMOVE_SCOPE_TARGET_AI_TOOL_DEFINITION = {
   },
 };
 
-export async function executeAddScopeTargetAiTool(args: { host?: string; name?: string }): Promise<string> {
-  const host = args.host?.trim();
+export async function executeAddScopeTargetAiTool(args: {
+  host?: string;
+  name?: string;
+  target?: string;
+  label?: string;
+}): Promise<string> {
+  const host = (args.host ?? args.target)?.trim();
   if (!host) {
     throw new Error('Target host is required.');
   }
 
   addTarget({
     host,
-    name: args.name?.trim() || null,
+    name: (args.name ?? args.label)?.trim() || null,
   });
 
   return `Added "${host}" to the target scope.`;
 }
 
-export async function executeRemoveScopeTargetAiTool(args: { target?: string }): Promise<string> {
-  const target = args.target?.trim();
+export async function executeRemoveScopeTargetAiTool(args: {
+  target?: string;
+  host?: string;
+}): Promise<string> {
+  const target = (args.target ?? args.host)?.trim();
   if (!target) {
     throw new Error('Target identifier is required.');
   }

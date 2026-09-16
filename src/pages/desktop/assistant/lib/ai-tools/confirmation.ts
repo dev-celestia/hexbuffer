@@ -18,8 +18,14 @@ const CONFIRMATION_TTL_MS = 600_000;
 
 const TOOL_LABELS: Record<string, string> = {
   trigger_scan: 'Launch a browser scan',
+  trigger_port_scan: 'Run TCP port reconnaissance scan',
   start_invoker_attack: 'Launch an Invoker attack',
+  stop_invoker_attack: 'Stop active Intruder attack',
   toggle_intercept: 'Toggle proxy interception',
+  forward_paused_request: 'Forward paused HTTP request',
+  drop_paused_request: 'Drop paused HTTP request',
+  remove_scope_target: 'Remove host from proxy target scope',
+  stop_browser_crawl: 'Stop active browser crawl',
 };
 
 export function toolConfirmationLabel(toolName: string): string {

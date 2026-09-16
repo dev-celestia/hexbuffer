@@ -84,14 +84,17 @@ pub async fn execute_port_scan(args: &Value) -> String {
         .next()
         .unwrap_or(target);
 
+    const MAX_PORTS_PER_SCAN: usize = 128;
     let ports: Vec<u16> = match args.get("ports").and_then(|v| v.as_array()) {
         Some(arr) => {
             // `try_from` rather than `as`: an out-of-range value like 70000 must be
             // dropped, not silently wrapped into a different port.
+            // Bounded to MAX_PORTS_PER_SCAN to prevent resource/file-descriptor exhaustion.
             let parsed: Vec<u16> = arr
                 .iter()
                 .filter_map(|v| v.as_u64().and_then(|p| u16::try_from(p).ok()))
                 .filter(|&p| p > 0)
+                .take(MAX_PORTS_PER_SCAN)
                 .collect();
             if parsed.is_empty() {
                 DEFAULT_PORTS.to_vec()

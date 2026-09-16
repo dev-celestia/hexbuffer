@@ -18,6 +18,8 @@ import { useNavStore } from '@/stores/nav';
 const PROVIDER_LABELS: Record<string, string> = {
   deepseek: 'DeepSeek',
   'openai-compatible': 'OpenAI Compatible',
+  'anthropic-compatible': 'Anthropic Compatible',
+  anthropic: 'Anthropic',
 };
 
 export function useAiChatPane() {
