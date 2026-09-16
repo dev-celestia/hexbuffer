@@ -9,6 +9,7 @@ import {
   EmptyTitle,
 } from '@celestia-project/ui';
 import * as React from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { HighlightedText } from '@/components/highlighted-text';
 import { useWebSocketTable } from '../../hooks/use-websocket-table';
 import { HistoryLoadingState } from '@/pages/live-traffic/components/history-loading-state';

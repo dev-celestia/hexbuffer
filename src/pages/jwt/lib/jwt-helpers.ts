@@ -297,7 +297,7 @@ export function pemToDer(pem: string): ArrayBuffer {
       .replace(/-----END RSA PRIVATE KEY-----/g, '')
       .replace(/\s+/g, '');
     const pkcs1Der = base64ToUint8Array(b64);
-    return wrapPkcs1InPkcs8(pkcs1Der).buffer;
+    return wrapPkcs1InPkcs8(pkcs1Der).buffer as ArrayBuffer;
   }
 
   // Labels only contain uppercase letters and spaces; keeping dashes out of
@@ -307,7 +307,7 @@ export function pemToDer(pem: string): ArrayBuffer {
     .replace(/-----END [A-Z ]+-----/g, '')
     .replace(/\s+/g, '');
 
-  return base64ToUint8Array(b64).buffer;
+  return base64ToUint8Array(b64).buffer as ArrayBuffer;
 }
 
 export async function signJwt(

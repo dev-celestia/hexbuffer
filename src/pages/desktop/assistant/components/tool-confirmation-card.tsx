@@ -51,12 +51,18 @@ export function ToolConfirmationCard({ confirmation }: ToolConfirmationCardProps
     >
       <ToolHeader
         type="dynamic-tool"
+        // `ToolHeaderProps.title` is declared `string`, but `ToolHeader` renders it as a
+        // React child (`<span>{title ?? derivedName}</span>`), so passing an element works
+        // at runtime. Drop this suppression once the upstream prop widens to `ReactNode`.
+        // @ts-expect-error -- third-party prop type is narrower than its implementation
         title={
           <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="truncate max-w-[170px] xs:max-w-[220px] sm:max-w-[280px] block cursor-default">
-                {label}
-              </span>
+            <TooltipTrigger
+              render={
+                <span className="truncate max-w-[170px] xs:max-w-[220px] sm:max-w-[280px] block cursor-default" />
+              }
+            >
+              {label}
             </TooltipTrigger>
             <TooltipContent side="top" className="max-w-sm text-xs break-words">
               {label}

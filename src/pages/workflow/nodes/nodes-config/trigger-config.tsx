@@ -133,7 +133,7 @@ export function TriggerConfigForm({ config, onChange, onRun }: TriggerConfigForm
               <Label className="text-[11px]">Method</Label>
               <Select
                 value={config.method?.trim() ? config.method.toUpperCase() : 'ANY'}
-                onValueChange={(v) => onChange({ method: v === 'ANY' ? undefined : v })}
+                onValueChange={(v) => onChange({ method: v === 'ANY' ? undefined : (v ?? undefined) })}
               >
                 <SelectTrigger className="h-7 text-xs">
                   <SelectValue />

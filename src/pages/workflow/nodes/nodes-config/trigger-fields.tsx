@@ -27,7 +27,7 @@ export function HttpMethodFilter({
   return (
     <div className="space-y-1.5">
       <Label className="text-[11px]">Method</Label>
-      <Select value={value?.trim() ? value.toUpperCase() : 'ANY'} onValueChange={(v) => onChange(v === 'ANY' ? undefined : v)}>
+      <Select value={value?.trim() ? value.toUpperCase() : 'ANY'} onValueChange={(v) => onChange(v === 'ANY' ? undefined : (v ?? undefined))}>
         <SelectTrigger className="h-7 text-xs">
           <SelectValue />
         </SelectTrigger>

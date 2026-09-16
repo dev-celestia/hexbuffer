@@ -82,7 +82,7 @@ describe('useTargetStore', () => {
     useTargetStore.getState().addTarget(makeTarget({ tabActive: true }));
     useTargetStore.getState().addTarget(makeTarget({ id: 't2', tabActive: false }));
 
-    expect(useTargetStore.getState().getActiveTab().map((t) => t.id)).toEqual(['t1']);
+    expect(useTargetStore.getState().getActiveTab()?.map((t) => t.id)).toEqual(['t1']);
 
     useTargetStore.getState().removeActiveTab('t1');
     expect(useTargetStore.getState().getActiveTab()).toEqual([]);

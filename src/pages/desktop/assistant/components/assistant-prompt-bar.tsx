@@ -37,7 +37,7 @@ import {
   PlayIcon,
 } from '@phosphor-icons/react';
 import type { FileUIPart } from 'ai';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ALL_AGENTS_LIST, AGENTS_REGISTRY, type AgentId } from '../constants/agents';
 import { DEFAULT_CONTEXT_WINDOW } from '../constants';
 import { cn } from '@/lib/utils';

@@ -178,7 +178,7 @@ export function CanvasContextMenu({ state, onClose, onAddNode, hasTriggerNode, o
           </div>
         ) : (
           <Accordion
-            type="multiple"
+            multiple
             defaultValue={query ? openItems : undefined}
             key={query ? 'search' : 'default'}
             className="w-full"
@@ -208,42 +208,44 @@ export function CanvasContextMenu({ state, onClose, onAddNode, hasTriggerNode, o
                       const isTrigger = def.category === 'trigger';
                       const disabled = isTrigger && hasTriggerNode;
                       return (
-                        <Tooltip key={def.type} delayDuration={400}>
-                          <TooltipTrigger asChild>
-                            <button
-                              type="button"
-                              className={cn(
-                                'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs',
-                                disabled
-                                  ? 'opacity-40 cursor-not-allowed'
-                                  : 'hover:bg-accent'
-                              )}
-                              onClick={() => {
-                                if (disabled) {
-                                  toast.error('Trigger already exists', {
-                                    description: 'A workflow can only have one trigger. Remove the existing one first.',
-                                    action: {
-                                      label: 'Remove',
-                                      onClick: () => onRemoveTrigger?.(),
-                                    },
-                                  });
-                                  return;
-                                }
-                                onAddNode(def.type, state.flowX, state.flowY);
-                              }}
-                            >
-                              <div
+                        <Tooltip key={def.type}>
+                          <TooltipTrigger
+                            render={
+                              <button
+                                type="button"
                                 className={cn(
-                                  'flex size-5 shrink-0 items-center justify-center rounded',
-                                  CATEGORY_ICON_BG[def.category],
+                                  'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs',
+                                  disabled
+                                    ? 'opacity-40 cursor-not-allowed'
+                                    : 'hover:bg-accent'
                                 )}
-                              >
-                                <Icon className={cn('size-3', CATEGORY_ICON_TEXT[def.category])} />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <span className="truncate block">{def.label}</span>
-                              </div>
-                            </button>
+                                onClick={() => {
+                                  if (disabled) {
+                                    toast.error('Trigger already exists', {
+                                      description: 'A workflow can only have one trigger. Remove the existing one first.',
+                                      action: {
+                                        label: 'Remove',
+                                        onClick: () => onRemoveTrigger?.(),
+                                      },
+                                    });
+                                    return;
+                                  }
+                                  onAddNode(def.type, state.flowX, state.flowY);
+                                }}
+                              />
+                            }
+                          >
+                            <div
+                              className={cn(
+                                'flex size-5 shrink-0 items-center justify-center rounded',
+                                CATEGORY_ICON_BG[def.category],
+                              )}
+                            >
+                              <Icon className={cn('size-3', CATEGORY_ICON_TEXT[def.category])} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <span className="truncate block">{def.label}</span>
+                            </div>
                           </TooltipTrigger>
                           <TooltipContent side="right" sideOffset={8} className="max-w-48">
                             <p className="font-medium">{def.label}</p>

@@ -44,145 +44,147 @@ export function DesktopIconItem({ href, label, icon: IconComp, onClick }: Readon
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>
-        <button
-          type="button"
-          data-desktop-icon
-          onClick={handleClick}
+      <ContextMenuTrigger
+        render={
+          <button
+            type="button"
+            data-desktop-icon
+            onClick={handleClick}
+            className={cn(
+              // Layout & Positioning
+              "group relative flex flex-col items-center justify-center cursor-pointer select-none",
+
+              // Sizing & Spacing
+              CONTAINER_SIZE,
+              "p-0",
+
+              // Typography
+              "text-center",
+
+              // Backgrounds & Borders
+              "rounded-sm border-0 bg-transparent",
+
+              // Interactive & States
+              "transition-all duration-200 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+            )}
+            title={description}
+            aria-label={label}
+          />
+        }
+      >
+        <div
           className={cn(
             // Layout & Positioning
-            "group relative flex flex-col items-center justify-center cursor-pointer select-none",
-
-            // Sizing & Spacing
-            CONTAINER_SIZE,
-            "p-0",
-
-            // Typography
-            "text-center",
-
-            // Backgrounds & Borders
-            "rounded-sm border-0 bg-transparent",
-
-            // Interactive & States
-            "transition-all duration-200 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+            "relative"
           )}
-          title={description}
-          aria-label={label}
         >
           <div
             className={cn(
               // Layout & Positioning
-              "relative"
-            )}
-          >
-            <div
-              className={cn(
-                // Layout & Positioning
-                "flex items-center justify-center overflow-hidden",
-
-                // Sizing & Spacing
-                INNER_SIZE,
-
-                // Backgrounds & Borders
-                "rounded-3xl shadow-sm border",
-
-                // Interactive & States
-                "transition-all duration-200",
-                colors.hoverBg
-              )}
-            >
-              {imageSrc ? (
-                <img
-                  src={imageSrc}
-                  alt={label}
-                  draggable={false}
-                  className={cn(
-                    // Layout & Positioning
-                    "object-cover",
-
-                    // Sizing & Spacing
-                    "size-full",
-
-                    // Interactive & States
-                    "select-none"
-                  )}
-                />
-              ) : (
-                <CustomIcon
-                  className={cn(
-                    // Sizing & Spacing
-                    ICON_SIZE,
-
-                    // Typography
-                    "text-white",
-
-                    // Interactive & States
-                    "transition-colors duration-200"
-                  )}
-                />
-              )}
-            </div>
-            {isNew && (
-              <span
-                className={cn(
-                  // Layout & Positioning
-                  "absolute -top-1.5 -left-1.5 pointer-events-none select-none",
-
-                  // Sizing & Spacing
-                  "px-1 scale-90",
-
-                  // Typography
-                  "text-[8px] font-extrabold uppercase tracking-wider",
-
-                  // Backgrounds & Borders
-                  "rounded-sm bg-purple-600 text-white dark:bg-purple-700"
-                )}
-              >
-                NEW
-              </span>
-            )}
-            {item?.flag && item.flag !== 'release' && (
-              <span
-                className={cn(
-                  // Layout & Positioning
-                  "absolute -top-1.5 -right-1.5 pointer-events-none select-none",
-
-                  // Sizing & Spacing
-                  "px-1 scale-90",
-
-                  // Typography
-                  "text-[8px] font-extrabold uppercase tracking-wider",
-
-                  // Backgrounds & Borders
-                  "rounded-sm",
-                  item.flag === 'alpha'
-                    ? 'bg-rose-600 text-white dark:bg-rose-700'
-                    : 'bg-amber-500 text-black dark:bg-amber-600 dark:text-white'
-                )}
-              >
-                {item.flag}
-              </span>
-            )}
-          </div>
-
-          <span
-            className={cn(
-              // Layout & Positioning
-              "break-all",
+              "flex items-center justify-center overflow-hidden",
 
               // Sizing & Spacing
-              "mt-2 px-2",
-
-              // Typography
-              `${TEXT_SIZE} font-medium text-muted-foreground group-hover:text-foreground leading-tight`,
+              INNER_SIZE,
 
               // Backgrounds & Borders
-              "bg-muted rounded-xs"
+              "rounded-3xl shadow-sm border",
+
+              // Interactive & States
+              "transition-all duration-200",
+              colors.hoverBg
             )}
           >
-            {label}
-          </span>
-        </button>
+            {imageSrc ? (
+              <img
+                src={imageSrc}
+                alt={label}
+                draggable={false}
+                className={cn(
+                  // Layout & Positioning
+                  "object-cover",
+
+                  // Sizing & Spacing
+                  "size-full",
+
+                  // Interactive & States
+                  "select-none"
+                )}
+              />
+            ) : (
+              <CustomIcon
+                className={cn(
+                  // Sizing & Spacing
+                  ICON_SIZE,
+
+                  // Typography
+                  "text-white",
+
+                  // Interactive & States
+                  "transition-colors duration-200"
+                )}
+              />
+            )}
+          </div>
+          {isNew && (
+            <span
+              className={cn(
+                // Layout & Positioning
+                "absolute -top-1.5 -left-1.5 pointer-events-none select-none",
+
+                // Sizing & Spacing
+                "px-1 scale-90",
+
+                // Typography
+                "text-[8px] font-extrabold uppercase tracking-wider",
+
+                // Backgrounds & Borders
+                "rounded-sm bg-purple-600 text-white dark:bg-purple-700"
+              )}
+            >
+              NEW
+            </span>
+          )}
+          {item?.flag && item.flag !== 'release' && (
+            <span
+              className={cn(
+                // Layout & Positioning
+                "absolute -top-1.5 -right-1.5 pointer-events-none select-none",
+
+                // Sizing & Spacing
+                "px-1 scale-90",
+
+                // Typography
+                "text-[8px] font-extrabold uppercase tracking-wider",
+
+                // Backgrounds & Borders
+                "rounded-sm",
+                item.flag === 'alpha'
+                  ? 'bg-rose-600 text-white dark:bg-rose-700'
+                  : 'bg-amber-500 text-black dark:bg-amber-600 dark:text-white'
+              )}
+            >
+              {item.flag}
+            </span>
+          )}
+        </div>
+
+        <span
+          className={cn(
+            // Layout & Positioning
+            "break-all",
+
+            // Sizing & Spacing
+            "mt-2 px-2",
+
+            // Typography
+            `${TEXT_SIZE} font-medium text-muted-foreground group-hover:text-foreground leading-tight`,
+
+            // Backgrounds & Borders
+            "bg-muted rounded-xs"
+          )}
+        >
+          {label}
+        </span>
       </ContextMenuTrigger>
 
       <ContextMenuContent>

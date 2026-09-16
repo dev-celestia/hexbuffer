@@ -156,7 +156,12 @@ export function KanbanDetailModal({ card, isOpen, onClose, onSave, onDelete }: P
             {/* Status / Column */}
             <div className="space-y-2">
               <Label>Status</Label>
-              <Select value={columnId} onValueChange={setColumnId}>
+              <Select
+                value={columnId}
+                onValueChange={(value) => {
+                  if (value !== null) setColumnId(value);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
@@ -190,7 +195,12 @@ export function KanbanDetailModal({ card, isOpen, onClose, onSave, onDelete }: P
             {/* Assignee */}
             <div className="space-y-2">
               <Label>Assignee</Label>
-              <Select value={assignee} onValueChange={setAssignee}>
+              <Select
+                value={assignee}
+                onValueChange={(value) => {
+                  if (value !== null) setAssignee(value);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>

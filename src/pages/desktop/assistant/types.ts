@@ -32,6 +32,12 @@ export interface AiChatAgentMessageEvent {
 
 export type DashboardChatMessage = UIMessage<DashboardChatMetadata> & {
   content?: string;
+  /**
+   * Timestamp used for the chat date separators. Set when a session is hydrated
+   * from the DB and for agent messages; absent on messages created in-session,
+   * where `getMessageDate` falls back to a cached "now".
+   */
+  createdAt?: Date | string;
 };
 
 /** Provider token usage for a single completed request (all-zero when unreported). */

@@ -7,8 +7,8 @@ import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
-  Message,
-  MessageContent,
+  AiMessage,
+  AiMessageContent,
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
@@ -118,8 +118,8 @@ export function AssistantConversation({
                 return (
                   <Fragment key={message.id}>
                     {showDateSeparator ? <ChatDateSeparator date={messageDate} /> : null}
-                    <Message from={message.role}>
-                      <MessageContent
+                    <AiMessage from={message.role}>
+                      <AiMessageContent
                         className={cn(
                           message.role === 'assistant'
                             ? 'w-full max-w-full group-[.is-assistant]:text-foreground'
@@ -220,25 +220,25 @@ export function AssistantConversation({
                             );
                           })()
                         ) : null}
-                      </MessageContent>
-                    </Message>
+                      </AiMessageContent>
+                    </AiMessage>
                   </Fragment>
                 );
               })}
 
               {/* Tool confirmation cards */}
               {pendingToolConfirmations.map((confirmation) => (
-                <Message key={confirmation.id} from="assistant">
-                  <MessageContent>
+                <AiMessage key={confirmation.id} from="assistant">
+                  <AiMessageContent>
                     <ToolConfirmationCard confirmation={confirmation} />
-                  </MessageContent>
-                </Message>
+                  </AiMessageContent>
+                </AiMessage>
               ))}
 
               {/* Tracked actions & thinking loading state */}
               {trackedActions.length > 0 || (isStreaming && !hasAssistantContent) ? (
-                <Message from="assistant">
-                  <MessageContent className="w-full max-w-full overflow-hidden">
+                <AiMessage from="assistant">
+                  <AiMessageContent className="w-full max-w-full overflow-hidden">
                     <div className="space-y-3 w-full min-w-0 max-w-full overflow-hidden">
                       {trackedActions.length > 0 ? (
                         <TrackedActionsList
@@ -275,13 +275,13 @@ export function AssistantConversation({
                         </div>
                       ) : null}
                     </div>
-                  </MessageContent>
-                </Message>
+                  </AiMessageContent>
+                </AiMessage>
               ) : null}
 
               {error ? (
-                <Message from="assistant">
-                  <MessageContent>
+                <AiMessage from="assistant">
+                  <AiMessageContent>
                     <div
                       role="alert"
                       aria-live="assertive"
@@ -318,8 +318,8 @@ export function AssistantConversation({
                         </button>
                       ) : null}
                     </div>
-                  </MessageContent>
-                </Message>
+                  </AiMessageContent>
+                </AiMessage>
               ) : null}
             </>
           )}

@@ -82,10 +82,8 @@ export function NodeConfigPanel({ node, onClose, onUpdate, onDelete, onRun }: No
         <div className="flex items-center gap-1.5">
           <p className="text-sm font-medium">{def.label}</p>
           {def.description && (
-            <Tooltip delayDuration={300}>
-              <TooltipTrigger asChild>
-                <Info className="size-3.5 text-muted-foreground/60 cursor-help" />
-              </TooltipTrigger>
+            <Tooltip>
+              <TooltipTrigger render={<Info className="size-3.5 text-muted-foreground/60 cursor-help" />} />
               <TooltipContent side="bottom" sideOffset={6} className="max-w-52">
                 <p className="text-[11px]">{def.description}</p>
               </TooltipContent>

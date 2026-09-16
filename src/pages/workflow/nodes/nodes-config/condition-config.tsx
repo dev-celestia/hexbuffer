@@ -88,7 +88,7 @@ export function ConditionConfigForm({ config, onChange, inputData }: ConditionCo
         <Label className="text-[11px]">Data key</Label>
         <Select
           value={dataPathOptions.some((option) => option.value === dataPath) ? dataPath : undefined}
-          onValueChange={(v) => onChange({ dataPath: v })}
+          onValueChange={(v) => onChange({ dataPath: v ?? undefined })}
         >
           <SelectTrigger className="h-7 text-xs">
             <SelectValue placeholder="Select JSON key" />

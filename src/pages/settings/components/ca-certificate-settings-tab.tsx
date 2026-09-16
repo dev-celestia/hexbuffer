@@ -64,7 +64,7 @@ export function CaCertificateSettingsTab({ settings }: CaCertificateSettingsTabP
 
       <SettingsGroup label="Installation Guides" description="Follow the steps for your browser or device.">
         <div className="px-4 py-2">
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion className="w-full">
             {INSTALLATION_GUIDES.map((guide) => (
               <AccordionItem key={guide.id} value={guide.id}>
                 <AccordionTrigger>{guide.title}</AccordionTrigger>
@@ -101,7 +101,7 @@ export function CaCertificateSettingsTab({ settings }: CaCertificateSettingsTabP
 
       <SettingsGroup label="Troubleshooting" description="Common issues and solutions.">
         <div className="px-4 py-2">
-          <Accordion type="single" collapsible className="w-full">
+          <Accordion className="w-full">
             {TROUBLESHOOTING_GUIDES.map((guide) => (
               <AccordionItem key={guide.id} value={guide.id}>
                 <AccordionTrigger>{guide.title}</AccordionTrigger>

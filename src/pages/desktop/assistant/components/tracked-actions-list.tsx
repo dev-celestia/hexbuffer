@@ -41,7 +41,7 @@ export function TrackedActionsList({ trackedActions, isStreaming }: TrackedActio
       : `${completedCount}/${trackedActions.length} action${trackedActions.length > 1 ? 's' : ''} completed`;
 
   return (
-    <TooltipProvider delayDuration={150}>
+    <TooltipProvider delay={150}>
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -71,17 +71,19 @@ export function TrackedActionsList({ trackedActions, isStreaming }: TrackedActio
                 <CheckCircleIcon className="size-4 shrink-0 text-success" weight="fill" />
               )}
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <p
-                    className={cn(
-                      // Layout & Positioning
-                      'flex-1 min-w-0 truncate cursor-default',
-                      // Typography
-                      'text-xs sm:text-sm font-medium',
-                    )}
-                  >
-                    {title}
-                  </p>
+                <TooltipTrigger
+                  render={
+                    <p
+                      className={cn(
+                        // Layout & Positioning
+                        'flex-1 min-w-0 truncate cursor-default',
+                        // Typography
+                        'text-xs sm:text-sm font-medium',
+                      )}
+                    />
+                  }
+                >
+                  {title}
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-sm text-xs break-words">
                   {title}
@@ -128,16 +130,18 @@ export function TrackedActionsList({ trackedActions, isStreaming }: TrackedActio
                     >
                       {/* Icon only for status per user request */}
                       <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="shrink-0 cursor-default flex items-center justify-center">
-                            {ta.status === 'completed' ? (
-                              <CheckCircleIcon className="size-4 text-success" weight="fill" />
-                            ) : ta.status === 'error' ? (
-                              <XCircleIcon className="size-4 text-destructive" weight="fill" />
-                            ) : (
-                              <SpinnerGapIcon className="size-4 animate-spin motion-reduce:animate-none text-info" />
-                            )}
-                          </span>
+                        <TooltipTrigger
+                          render={
+                            <span className="shrink-0 cursor-default flex items-center justify-center" />
+                          }
+                        >
+                          {ta.status === 'completed' ? (
+                            <CheckCircleIcon className="size-4 text-success" weight="fill" />
+                          ) : ta.status === 'error' ? (
+                            <XCircleIcon className="size-4 text-destructive" weight="fill" />
+                          ) : (
+                            <SpinnerGapIcon className="size-4 animate-spin motion-reduce:animate-none text-info" />
+                          )}
                         </TooltipTrigger>
                         <TooltipContent side="top" className="text-xs capitalize">
                           {ta.status === 'in_progress' ? 'Running' : ta.status}
@@ -146,17 +150,19 @@ export function TrackedActionsList({ trackedActions, isStreaming }: TrackedActio
 
                       {/* Tool action name truncated to 1 line with full tooltip */}
                       <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span
-                            className={cn(
-                              // Layout & Positioning
-                              'flex-1 min-w-0 truncate block cursor-default',
-                              // Typography
-                              'text-xs font-medium text-foreground',
-                            )}
-                          >
-                            {ta.label}
-                          </span>
+                        <TooltipTrigger
+                          render={
+                            <span
+                              className={cn(
+                                // Layout & Positioning
+                                'flex-1 min-w-0 truncate block cursor-default',
+                                // Typography
+                                'text-xs font-medium text-foreground',
+                              )}
+                            />
+                          }
+                        >
+                          {ta.label}
                         </TooltipTrigger>
                         <TooltipContent side="top" className="max-w-sm text-xs break-words">
                           {ta.label}
@@ -226,21 +232,23 @@ export function TrackedActionsList({ trackedActions, isStreaming }: TrackedActio
                       </div>
                       {ta.detail && (
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <p
-                              className={cn(
-                                // Layout & Positioning
-                                'w-full min-w-0 truncate cursor-default',
-                                // Sizing & Spacing
-                                'p-1.5',
-                                // Typography
-                                'font-mono text-[11px] text-foreground',
-                                // Backgrounds & Borders
-                                'rounded bg-background/80 border border-border/50',
-                              )}
-                            >
-                              {ta.detail}
-                            </p>
+                          <TooltipTrigger
+                            render={
+                              <p
+                                className={cn(
+                                  // Layout & Positioning
+                                  'w-full min-w-0 truncate cursor-default',
+                                  // Sizing & Spacing
+                                  'p-1.5',
+                                  // Typography
+                                  'font-mono text-[11px] text-foreground',
+                                  // Backgrounds & Borders
+                                  'rounded bg-background/80 border border-border/50',
+                                )}
+                              />
+                            }
+                          >
+                            {ta.detail}
                           </TooltipTrigger>
                           <TooltipContent side="top" className="max-w-md text-xs break-all font-mono">
                             {ta.detail}

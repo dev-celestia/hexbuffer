@@ -39,11 +39,13 @@ export function CrawlSetupScreen({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" variant="outline" disabled={disabled}>
-          <GearSixIcon className="size-3.5" />
-          Config
-        </Button>
+      <DialogTrigger
+        render={
+          <Button size="sm" variant="outline" disabled={disabled} />
+        }
+      >
+        <GearSixIcon className="size-3.5" />
+        Config
       </DialogTrigger>
       <DialogContent className="sm:max-w-[720px]">
         <DialogHeader>

@@ -7,6 +7,7 @@ import { PlugsConnected, Bug, Terminal, WifiHigh, HardDrive, Browser, ArrowClock
 import { useInspectExternal } from './hooks/use-inspect-external';
 import { NetworkMonitor } from './components/network-monitor';
 import { StorageAuditor } from './components/storage-auditor';
+import { cn } from '@/lib/utils';
 
 export function InspectorPage() {
   const cdp = useInspectExternal();
@@ -123,7 +124,7 @@ export function InspectorPage() {
                   </>
                 ) : cdp.connectionStatus === 'connecting' ? (
                   <>
-                    <Badge variant="yellow" className="gap-1 animate-pulse">
+                    <Badge variant="outline" className="gap-1 animate-pulse border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/5">
                       Connecting...
                     </Badge>
                     <Badge variant="outline" className="gap-1 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5">

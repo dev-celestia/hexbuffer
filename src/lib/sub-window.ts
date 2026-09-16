@@ -1,4 +1,5 @@
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { LogicalPosition } from "@tauri-apps/api/dpi";
 
 /**
  * Normalizes a route or tool name into a safe Tauri window label and query target.
@@ -40,10 +41,7 @@ export async function openSubAppWindow(targetOrHref: string, title?: string): Pr
       titleBarStyle: "overlay",
       hiddenTitle: true,
       transparent: true,
-      trafficLightPosition: {
-        x: 20,
-        y: 20,
-      },
+      trafficLightPosition: new LogicalPosition(20, 20),
     });
 
     subWindow.once("tauri://created", () => {
