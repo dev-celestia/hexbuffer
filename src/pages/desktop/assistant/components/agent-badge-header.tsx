@@ -6,7 +6,6 @@ interface AgentBadgeHeaderProps {
   agentId?: string;
   agentName?: string;
   providerDisplay?: string;
-  model?: string;
   isStreaming?: boolean;
   isPaused?: boolean;
   timestamp?: string;
@@ -16,7 +15,6 @@ export function AgentBadgeHeader({
   agentId,
   agentName,
   providerDisplay,
-  model,
   isStreaming,
   isPaused,
   timestamp,
@@ -86,7 +84,7 @@ export function AgentBadgeHeader({
         </Badge>
       ) : null}
 
-      {/* Provider / Model Pill (subtle) */}
+      {/* Provider Pill (subtle) */}
       {providerDisplay ? (
         <span
           className={cn(
@@ -94,7 +92,7 @@ export function AgentBadgeHeader({
             'text-[11px] text-muted-foreground/70 font-mono',
           )}
         >
-          • {providerDisplay} {model ? `(${model})` : ''}
+          • {providerDisplay}
         </span>
       ) : null}
 

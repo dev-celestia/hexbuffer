@@ -116,6 +116,7 @@ mod tests {
                 content: "hello".to_string(),
                 agent_id: None,
                 agent_name: None,
+                reasoning: None,
                 created_at: "2026-01-01T00:00:00Z".to_string(),
             },
             ChatMessageRecord {
@@ -125,6 +126,7 @@ mod tests {
                 content: "world".to_string(),
                 agent_id: None,
                 agent_name: None,
+                reasoning: None,
                 created_at: "2026-01-01T00:00:01Z".to_string(),
             },
         ];
@@ -147,6 +149,7 @@ mod tests {
             content: "payload".to_string(),
             agent_id: None,
             agent_name: None,
+            reasoning: None,
             created_at: "2026-01-01T00:00:00Z".to_string(),
         }];
         let err = validate_saved_messages("sess-1", &msgs).unwrap_err();
@@ -162,6 +165,7 @@ mod tests {
             content: "payload".to_string(),
             agent_id: None,
             agent_name: None,
+            reasoning: None,
             created_at: "2026-01-01T00:00:00Z".to_string(),
         }];
         let err = validate_saved_messages("sess-1", &msgs).unwrap_err();
@@ -177,6 +181,7 @@ mod tests {
             content: "x".repeat(MAX_SAVED_MESSAGE_CHARS + 1),
             agent_id: None,
             agent_name: None,
+            reasoning: None,
             created_at: "2026-01-01T00:00:00Z".to_string(),
         }];
         let err = validate_saved_messages("sess-1", &msgs).unwrap_err();

@@ -254,6 +254,8 @@ CREATE TABLE IF NOT EXISTS ai_chat_messages (
     role TEXT NOT NULL,
     content TEXT NOT NULL,
     created_at TEXT NOT NULL,
+    -- Chain-of-thought, written only in debug builds (see reasoning_persistence_enabled).
+    reasoning TEXT,
     FOREIGN KEY(session_id) REFERENCES ai_chat_sessions(id) ON DELETE CASCADE
 );
 

@@ -316,6 +316,14 @@ export function AiDebugDialog({
                   </Badge>
                 )}
               </TabsTrigger>
+              <TabsTrigger value="reasoning">
+                Thinking
+                {snapshot.lastReasoning && (
+                  <Badge variant="secondary" className="ms-1 text-[10px]">
+                    {snapshot.lastReasoning.length}
+                  </Badge>
+                )}
+              </TabsTrigger>
               <TabsTrigger value="tools">
                 Tools
                 <Badge variant="secondary" className="ms-1 text-[10px]">
@@ -569,6 +577,46 @@ export function AiDebugDialog({
                       </div>
                     ))}
                   </div>
+                )}
+              </ScrollArea>
+            </TabsContent>
+
+            {/* Reasoning / Thinking */}
+            <TabsContent
+              value="reasoning"
+              className={cn(
+                // Layout & Positioning
+                'flex flex-col flex-1 min-h-0 overflow-hidden',
+                // Sizing & Spacing
+                'mt-3',
+              )}
+            >
+              <ScrollArea
+                className={cn(
+                  // Layout & Positioning
+                  'flex-1 min-h-0',
+                  // Sizing & Spacing
+                  'w-full pe-3',
+                )}
+              >
+                {snapshot.lastReasoning ? (
+                  <>
+                    <SectionHeader
+                      label="CHAIN OF THOUGHT (DEBUG ONLY)"
+                      copyText={snapshot.lastReasoning}
+                    />
+                    <MonoBlock>{snapshot.lastReasoning}</MonoBlock>
+                  </>
+                ) : (
+                  <p
+                    className={cn(
+                      // Typography
+                      'text-xs text-muted-foreground',
+                    )}
+                  >
+                    No reasoning captured for the last request. The provider may not emit
+                    reasoning, or the response is still streaming.
+                  </p>
                 )}
               </ScrollArea>
             </TabsContent>

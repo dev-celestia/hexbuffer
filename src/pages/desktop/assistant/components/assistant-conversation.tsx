@@ -131,7 +131,6 @@ export function AssistantConversation({
                             agentId={message.metadata?.agentId}
                             agentName={message.metadata?.agentName}
                             providerDisplay={label ?? providerDisplay}
-                            model={message.metadata?.model ?? model}
                             isStreaming={isStreaming && message.id === lastMessage?.id}
                             isPaused={isPaused}
                             timestamp={timeString}

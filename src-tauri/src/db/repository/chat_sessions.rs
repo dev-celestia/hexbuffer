@@ -57,7 +57,7 @@ impl Database {
     pub fn get_chat_messages(&self, session_id: &str) -> SqlResult<Vec<ChatMessageRecord>> {
         let conn = self.conn.lock();
         let mut stmt = conn.prepare(
-            "SELECT id, session_id, role, content, created_at FROM ai_chat_messages WHERE session_id = ?1 ORDER BY created_at ASC",
+            "SELECT id, session_id, role, content, created_at, reasoning FROM ai_chat_messages WHERE session_id = ?1 ORDER BY created_at ASC",
         )?;
         let rows = stmt.query_map(params![session_id], |row| {
             Ok(ChatMessageRecord {
@@ -68,6 +68,7 @@ impl Database {
                 agent_id: None,
                 agent_name: None,
                 created_at: row.get(4)?,
+                reasoning: row.get(5)?,
             })
         })?;
         rows.collect()
@@ -106,9 +107,17 @@ impl Database {
             // Insert new messages, always bound to the authoritative session_id from the
             // command so a malformed payload cannot write records into another session.
             for msg in messages {
+                // Reasoning is an ephemeral debugging aid: keep it on disk only when
+                // persistence is enabled, so a shipped production install never retains
+                // chain-of-thought even if the client sends it.
+                let reasoning: Option<&str> = if reasoning_persistence_enabled() {
+                    msg.reasoning.as_deref()
+                } else {
+                    None
+                };
                 conn.execute(
-                    "INSERT INTO ai_chat_messages (id, session_id, role, content, created_at) VALUES (?1, ?2, ?3, ?4, ?5)",
-                    params![msg.id, session_id, msg.role, msg.content, msg.created_at],
+                    "INSERT INTO ai_chat_messages (id, session_id, role, content, created_at, reasoning) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                    params![msg.id, session_id, msg.role, msg.content, msg.created_at, reasoning],
                 )?;
             }
 
@@ -137,6 +146,14 @@ impl Database {
             }
         }
     }
+}
+
+/// Whether chain-of-thought reasoning may be written to disk. Reasoning is a debugging
+/// aid, not part of the durable transcript: it is persisted only in debug builds, so a
+/// production binary always drops it and the ephemeral in-memory reasoning stays that way.
+/// The env override exists so a QA/release-candidate build can opt in without a rebuild.
+fn reasoning_persistence_enabled() -> bool {
+    cfg!(debug_assertions) || std::env::var_os("HEXBUFFER_PERSIST_REASONING").is_some()
 }
 
 /// Truncates a string to at most `max` characters at a UTF-8 boundary. Uses character

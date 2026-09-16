@@ -154,6 +154,7 @@ impl Database {
                 "matcher_enabled",
                 "INTEGER NOT NULL DEFAULT 1",
             )?;
+            Self::ensure_column(&conn, "ai_chat_messages", "reasoning", "TEXT")?;
         }
 
         // Initialize in-memory ephemeral database

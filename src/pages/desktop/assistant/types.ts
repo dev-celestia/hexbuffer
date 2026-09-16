@@ -95,6 +95,11 @@ export interface ChatMessageRecord {
   content: string;
   agentId?: string;
   agentName?: string;
+  /**
+   * Chain-of-thought for this message. Only populated in debug builds — the backend
+   * drops it in production, so this is always undefined in a shipped install.
+   */
+  reasoning?: string;
   createdAt: string;
 }
 
@@ -128,6 +133,8 @@ export interface AiDebugSnapshot {
   tools: AiToolDebugInfo[];
   lastRequestId: string | null;
   lastPrompt: string | null;
+  /** Chain-of-thought streamed by the provider for the last request; debug-only. */
+  lastReasoning?: string | null;
   lastMessages: AiDebugMessage[];
   provider: string;
   model: string;

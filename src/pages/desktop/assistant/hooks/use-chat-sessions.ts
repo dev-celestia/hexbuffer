@@ -48,7 +48,14 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
           id: m.id,
           role: m.role as 'user' | 'assistant' | 'system',
           content: m.content,
-          parts: [{ type: 'text' as const, text: m.content }],
+          // Reasoning is stored only by debug builds; the backend omits it in production,
+          // so this part is present only when running against a dev backend.
+          parts: [
+            ...(m.reasoning
+              ? [{ type: 'reasoning' as const, text: m.reasoning }]
+              : []),
+            { type: 'text' as const, text: m.content },
+          ],
           createdAt: m.createdAt ? new Date(m.createdAt) : new Date(),
           metadata: {
             agentId: m.agentId,
@@ -95,7 +102,14 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
           id: m.id,
           role: m.role as 'user' | 'assistant' | 'system',
           content: m.content,
-          parts: [{ type: 'text' as const, text: m.content }],
+          // Reasoning is stored only by debug builds; the backend omits it in production,
+          // so this part is present only when running against a dev backend.
+          parts: [
+            ...(m.reasoning
+              ? [{ type: 'reasoning' as const, text: m.reasoning }]
+              : []),
+            { type: 'text' as const, text: m.content },
+          ],
           createdAt: m.createdAt ? new Date(m.createdAt) : new Date(),
           metadata: {
             agentId: m.agentId,

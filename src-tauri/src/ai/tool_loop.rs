@@ -10,7 +10,7 @@ use rig::streaming::StreamedAssistantContent;
 use serde_json::{json, Value};
 use tauri::{AppHandle, Emitter, Manager};
 
-use super::types::{AiChatAction, AiConfig};
+use super::types::AiChatAction;
 
 const MAX_TOOL_ROUNDS: usize = 8;
 /// Upper bound for a single provider completion round-trip.
@@ -31,6 +31,9 @@ const CRAWL_CONTEXT_TOOL: &str = "get_crawl_context";
 /// user's persistent memory.
 const MEMORY_SEARCH_TOOL: &str = "search_memory";
 const MEMORY_SAVE_TOOL: &str = "save_memory_note";
+/// Native notes tools: read/search and write the user's Notes-page scratchpads.
+const NOTES_GET_TOOL: &str = "get_notes";
+const NOTES_WRITE_TOOL: &str = "write_note";
 
 /// Tier 1 — execute immediately: landing/local tools with no external side effects.
 const AUTO_APPROVED_TOOLS: &[&str] = &[
@@ -40,6 +43,8 @@ const AUTO_APPROVED_TOOLS: &[&str] = &[
     "create_endpoint",
     MEMORY_SEARCH_TOOL,
     MEMORY_SAVE_TOOL,
+    NOTES_GET_TOOL,
+    NOTES_WRITE_TOOL,
     super::agents::jwt_tools::DECODE_JWT_TOOL,
     super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL,
     super::agents::jwt_tools::TAMPER_JWT_TOOL,
@@ -176,6 +181,7 @@ fn tool_definitions() -> Vec<ToolDefinition> {
     let mut definitions = frontend_tool_definitions();
     definitions.push(crawl_context_definition());
     definitions.extend(memory_tool_definitions());
+    definitions.extend(notes_tool_definitions());
     definitions.extend(super::agents::jwt_tools::jwt_tool_definitions());
     definitions.extend(super::agents::port_scanner_tools::port_scanner_tool_definitions());
     definitions
@@ -239,6 +245,152 @@ fn memory_tool_definitions() -> Vec<ToolDefinition> {
             }),
         },
     ]
+}
+
+fn notes_tool_definitions() -> Vec<ToolDefinition> {
+    vec![
+        ToolDefinition {
+            name: NOTES_GET_TOOL.to_string(),
+            description: "Read the user's notes from the Notes page. Returns the most recent \
+            notes, or filters by a keyword over note names and bodies. Use this to review the \
+            user's working scratchpad before writing or editing notes."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "query": { "type": "string", "description": "Optional keyword to filter notes by name or body. Omit to list the most recent notes." },
+                    "limit": { "type": "integer", "description": "Maximum number of notes to return (default 10)." }
+                },
+                "required": []
+            }),
+        },
+        ToolDefinition {
+            name: NOTES_WRITE_TOOL.to_string(),
+            description: "Create or update a note on the user's Notes page. Pass an existing \
+            note id to update it, or omit the id to create a new note. This writes to the user's \
+            own notes — it is not the persistent memory knowledge base."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string", "description": "Short note title, e.g. \"Login flow observations\"" },
+                    "note": { "type": "string", "description": "The note body to save." },
+                    "id": { "type": "string", "description": "Optional existing note id to update. Omit to create a new note." }
+                },
+                "required": ["name", "note"]
+            }),
+        },
+    ]
+}
+
+fn execute_get_notes(app: &AppHandle, args: &Value) -> String {
+    let query = args
+        .get("query")
+        .and_then(|value| value.as_str())
+        .unwrap_or("")
+        .trim()
+        .to_lowercase();
+    let limit = args
+        .get("limit")
+        .and_then(|value| value.as_u64())
+        .unwrap_or(10)
+        .clamp(1, 50) as usize;
+
+    let state = app.state::<crate::HistoryBridge>();
+    match state.list_notes() {
+        Ok(notes) => {
+            let matched: Vec<&crate::NoteRecord> = notes
+                .iter()
+                .filter(|note| {
+                    query.is_empty()
+                        || note.name.to_lowercase().contains(&query)
+                        || note.note.to_lowercase().contains(&query)
+                })
+                .collect();
+
+            if matched.is_empty() {
+                return if query.is_empty() {
+                    "The user has no notes yet.".to_string()
+                } else {
+                    format!("No notes match '{query}'.")
+                };
+            }
+
+            let payload: Vec<Value> = matched
+                .iter()
+                .take(limit)
+                .map(|note| {
+                    json!({
+                        "id": note.id,
+                        "name": note.name,
+                        "note": note.note,
+                        "updatedAt": note.updated_at,
+                    })
+                })
+                .collect();
+            serde_json::to_string(&payload)
+                .unwrap_or_else(|error| format!("Failed to serialize notes: {error}"))
+        }
+        Err(error) => format!("Failed to read notes: {error}"),
+    }
+}
+
+async fn execute_write_note(app: &AppHandle, args: &Value) -> String {
+    let name = args
+        .get("name")
+        .and_then(|value| value.as_str())
+        .unwrap_or("")
+        .trim();
+    let note_body = args
+        .get("note")
+        .and_then(|value| value.as_str())
+        .unwrap_or("")
+        .trim();
+    if name.is_empty() || note_body.is_empty() {
+        return "Failed: both 'name' and 'note' are required to write a note.".to_string();
+    }
+
+    let existing_id = args
+        .get("id")
+        .and_then(|value| value.as_str())
+        .map(str::trim)
+        .filter(|id| !id.is_empty())
+        .map(str::to_string);
+
+    let state = app.state::<crate::HistoryBridge>();
+
+    // Preserve `created_at` on an update so the note keeps its original timestamp.
+    let created_at = match &existing_id {
+        Some(id) => match state.list_notes() {
+            Ok(notes) => notes
+                .into_iter()
+                .find(|entry| &entry.id == id)
+                .map(|entry| entry.created_at)
+                .unwrap_or_else(|| chrono::Utc::now().to_rfc3339()),
+            Err(_) => chrono::Utc::now().to_rfc3339(),
+        },
+        None => chrono::Utc::now().to_rfc3339(),
+    };
+
+    let record = crate::NoteRecord {
+        id: existing_id.clone().unwrap_or_default(),
+        name: name.to_string(),
+        note: note_body.to_string(),
+        created_at,
+        updated_at: chrono::Utc::now().to_rfc3339(),
+    };
+
+    match state.upsert_note(&record) {
+        Ok(saved) => {
+            let verb = if existing_id.is_some() {
+                "Updated note"
+            } else {
+                "Created note"
+            };
+            format!("{verb} \"{}\" (id {}).", saved.name, saved.id)
+        }
+        Err(error) => format!("Failed to write the note: {error}"),
+    }
 }
 
 fn execute_crawl_context(app: &AppHandle) -> String {
@@ -369,15 +521,11 @@ async fn execute_memory_save(app: &AppHandle, args: &Value) -> String {
 async fn execute_tool_call(
     app: &AppHandle,
     window_label: &str,
-    request_id: &str,
-    config: &AiConfig,
-    policy: &super::policy::SecurityApprovalPolicy,
     tool_name: &str,
     args: Value,
     requires_confirmation: bool,
     actions: &mut Vec<AiChatAction>,
     cancel_rx: &mut tokio::sync::watch::Receiver<bool>,
-    pause_rx: &tokio::sync::watch::Receiver<bool>,
 ) -> String {
     let created_at = chrono::Utc::now().to_rfc3339();
 
@@ -405,6 +553,28 @@ async fn execute_tool_call(
 
     if tool_name == MEMORY_SAVE_TOOL {
         let result = execute_memory_save(app, &args).await;
+        actions.push(AiChatAction {
+            action: tool_name.to_string(),
+            payload: args,
+            result: Some(result.clone()),
+            created_at,
+        });
+        return result;
+    }
+
+    if tool_name == NOTES_GET_TOOL {
+        let result = execute_get_notes(app, &args);
+        actions.push(AiChatAction {
+            action: tool_name.to_string(),
+            payload: args,
+            result: Some(result.clone()),
+            created_at,
+        });
+        return result;
+    }
+
+    if tool_name == NOTES_WRITE_TOOL {
+        let result = execute_write_note(app, &args).await;
         actions.push(AiChatAction {
             action: tool_name.to_string(),
             payload: args,
@@ -566,11 +736,17 @@ pub struct ToolLoopOutput {
     pub agent_messages: Vec<super::types::AiChatAgentMessage>,
     /// Accumulated provider token usage across all tool rounds for this request.
     pub usage: super::token_usage::TokenUsage,
+    /// Accumulated chain-of-thought streamed by the provider across all rounds. This is
+    /// surfaced only to the debug inspector; it is never fed back into the model context.
+    pub reasoning: String,
 }
 
 pub fn get_agent_for_tool(tool_name: &str) -> Option<&'static super::agents::AgentSpec> {
     match tool_name {
         "save_memory_note" | "search_memory" => {
+            Some(super::agents::get_agent_spec(super::agents::AgentId::Orchestrator))
+        }
+        "write_note" | "get_notes" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::Notes))
         }
         "send_to_repeater" | "create_collection" | "create_folder" | "create_endpoint" => {
@@ -598,6 +774,7 @@ pub fn is_terminal_action_tool(tool_name: &str) -> bool {
     matches!(
         tool_name,
         "save_memory_note"
+            | "write_note"
             | "send_to_repeater"
             | "create_collection"
             | "create_folder"
@@ -632,6 +809,16 @@ pub fn format_specialist_message(
                 .and_then(|v| v.as_str())
                 .unwrap_or("");
             format!("🔍 **Search Memory Results for \"{query}\"**\n\n{result}")
+        }
+        NOTES_GET_TOOL => {
+            format!("📓 **Notes Retrieved**\n\n{result}")
+        }
+        NOTES_WRITE_TOOL => {
+            let name = args
+                .get("name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("note");
+            format!("📝 **Note Saved: {name}**\n\n{result}")
         }
         "send_to_repeater" => {
             let target = args
@@ -724,6 +911,7 @@ pub async fn run_tool_loop(
     let mut agent_messages: Vec<super::types::AiChatAgentMessage> = Vec::new();
     let mut executed_tools: HashSet<String> = HashSet::new();
     let mut accumulated_full_response = String::new();
+    let mut accumulated_reasoning = String::new();
     let mut accumulated_usage = super::token_usage::TokenUsage::new();
     // Raw results from the most recent tool round, used as a fallback if the
     // model's follow-up round streams nothing (otherwise the user sees only a
@@ -825,6 +1013,7 @@ pub async fn run_tool_loop(
                                 }
                                 StreamedAssistantContent::ReasoningDelta { reasoning, .. } => {
                                     if !reasoning.is_empty() {
+                                        accumulated_reasoning.push_str(&reasoning);
                                         let _ = app.emit_to(
                                             window_label,
                                             "ai-chat:reasoning",
@@ -888,6 +1077,7 @@ pub async fn run_tool_loop(
                 agent_name: agent.name.to_string(),
                 agent_messages,
                 usage: accumulated_usage,
+                reasoning: accumulated_reasoning,
             });
         }
 
@@ -928,15 +1118,11 @@ pub async fn run_tool_loop(
                         execute_tool_call(
                             app,
                             window_label,
-                            request_id,
-                            config,
-                            policy,
                             &name,
                             args.clone(),
                             matches!(authz, ToolAuthorization::RequiresConfirmation),
                             &mut actions,
                             &mut cancel_rx,
-                            &pause_rx,
                         )
                         .await
                     }
@@ -998,6 +1184,7 @@ pub async fn run_tool_loop(
                 agent_name: agent.name.to_string(),
                 agent_messages,
                 usage: accumulated_usage,
+                reasoning: accumulated_reasoning,
             });
         }
     }

@@ -155,6 +155,14 @@ pub async fn get_ai_debug_snapshot_impl(
             .rev()
             .find(|m| m.role.eq_ignore_ascii_case("user"))
             .map(|m| m.content.clone());
+        // Reasoning is persisted only by debug builds, so this is None in production and
+        // a real string only when the last assistant turn's thinking was stored.
+        let last_reasoning = db_messages
+            .iter()
+            .rev()
+            .find(|m| m.role.eq_ignore_ascii_case("assistant"))
+            .and_then(|m| m.reasoning.clone())
+            .filter(|text| !text.is_empty());
         let last_messages: Vec<AiChatMessage> = db_messages
             .into_iter()
             .map(|m| AiChatMessage {
@@ -174,6 +182,7 @@ pub async fn get_ai_debug_snapshot_impl(
             tools: get_registered_tools_debug(),
             last_request_id: None,
             last_prompt,
+            last_reasoning,
             last_messages,
             provider: settings.provider,
             model: settings.model,
@@ -201,6 +210,7 @@ pub async fn get_ai_debug_snapshot_impl(
         tools: get_registered_tools_debug(),
         last_request_id: None,
         last_prompt: None,
+        last_reasoning: None,
         last_messages: Vec::new(),
         provider: settings.provider,
         model: settings.model,
@@ -437,6 +447,7 @@ pub async fn send_ai_chat_message_impl(
             tools: get_registered_tools_debug(),
             last_request_id: Some(request_id.clone()),
             last_prompt: Some(prompt.clone()),
+            last_reasoning: None,
             last_messages: last_messages_snapshot,
             provider: settings.provider.clone(),
             model: settings.model.clone(),
@@ -466,6 +477,25 @@ pub async fn send_ai_chat_message_impl(
         pause_rx,
     )
     .await?;
+
+    // Attach the reasoning streamed during this request to the recorded snapshot so the
+    // debug inspector can show the model's thinking for the turn. This is a debug artifact
+    // only — it is never inserted into the loop history or sent back to the provider.
+    if !output.reasoning.is_empty() {
+        let mut labels: Vec<String> = Vec::new();
+        if let Some(ref sid) = request.session_id {
+            if !sid.trim().is_empty() {
+                labels.push(sid.clone());
+            }
+        }
+        labels.push(window_label.clone());
+        for label in labels {
+            if let Some(mut snap) = get_latest_debug_snapshot(&label) {
+                snap.last_reasoning = Some(output.reasoning.clone());
+                record_debug_snapshot(&label, snap);
+            }
+        }
+    }
 
     let _ = app.emit_to(
         &window_label,
@@ -815,6 +845,7 @@ mod tests {
             tools: vec![],
             last_request_id: Some("req-1".to_string()),
             last_prompt: Some("prompt 1".to_string()),
+            last_reasoning: None,
             last_messages: vec![],
             provider: "deepseek".to_string(),
             model: "deepseek-chat".to_string(),
@@ -829,6 +860,7 @@ mod tests {
             tools: vec![],
             last_request_id: Some("req-2".to_string()),
             last_prompt: Some("prompt 2".to_string()),
+            last_reasoning: None,
             last_messages: vec![],
             provider: "openai".to_string(),
             model: "gpt-4o".to_string(),
@@ -852,6 +884,44 @@ mod tests {
         assert_eq!(retrieved_a.last_prompt.as_deref(), Some("prompt 1"));
         assert_eq!(retrieved_b.last_prompt.as_deref(), Some("prompt 2"));
         assert!(get_latest_debug_snapshot("window-nonexistent").is_none());
+    }
+
+    #[test]
+    fn test_debug_snapshot_reasoning_is_carried() {
+        let mut snap = AiDebugSnapshot {
+            session_id: Some("session-r".to_string()),
+            system_prompt: "p".to_string(),
+            app_context_raw: None,
+            app_context_object: None,
+            memory_entries: vec![],
+            tools: vec![],
+            last_request_id: Some("req-r".to_string()),
+            last_prompt: Some("prompt".to_string()),
+            last_reasoning: None,
+            last_messages: vec![],
+            provider: "deepseek".to_string(),
+            model: "deepseek-reasoner".to_string(),
+            timestamp: "2026-01-01".to_string(),
+        };
+
+        // A fresh snapshot carries no reasoning until one is attached.
+        record_debug_snapshot("session-r", snap.clone());
+        assert!(get_latest_debug_snapshot("session-r")
+            .unwrap()
+            .last_reasoning
+            .is_none());
+
+        // Attaching reasoning round-trips through the in-memory snapshot map.
+        snap.last_reasoning = Some("considered endpoints A and B".to_string());
+        record_debug_snapshot("session-r", snap);
+
+        let retrieved = get_latest_debug_snapshot("session-r").unwrap();
+        assert_eq!(
+            retrieved.last_reasoning.as_deref(),
+            Some("considered endpoints A and B")
+        );
+        // Reasoning must never leak into the replayed message list.
+        assert!(retrieved.last_messages.is_empty());
     }
 
     #[test]

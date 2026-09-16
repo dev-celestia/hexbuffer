@@ -184,6 +184,10 @@ pub struct ChatMessageRecord {
     pub agent_id: Option<String>,
     #[serde(default)]
     pub agent_name: Option<String>,
+    /// Chain-of-thought for this message. Persisted only when reasoning persistence is
+    /// enabled (debug builds); always None in a production install.
+    #[serde(default)]
+    pub reasoning: Option<String>,
     pub created_at: String,
 }
 
@@ -253,6 +257,10 @@ pub struct AiDebugSnapshot {
     pub tools: Vec<AiToolDebugInfo>,
     pub last_request_id: Option<String>,
     pub last_prompt: Option<String>,
+    /// Chain-of-thought streamed by the provider for the last completed request. Captured
+    /// for the debug inspector only; never replayed into the model context.
+    #[serde(default)]
+    pub last_reasoning: Option<String>,
     pub last_messages: Vec<AiChatMessage>,
     pub provider: String,
     pub model: String,

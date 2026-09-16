@@ -373,6 +373,15 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
           .join('\n'),
         agentId: m.metadata?.agentId,
         agentName: m.metadata?.agentName,
+        // Chain-of-thought is a debug aid: send it to the backend only in a dev build.
+        // The backend independently refuses to persist it outside debug builds, so a
+        // production install never retains reasoning even if this runs.
+        reasoning: import.meta.env.DEV
+          ? m.parts
+              .filter((p) => p.type === 'reasoning')
+              .map((p) => p.text)
+              .join('\n') || undefined
+          : undefined,
         createdAt: new Date().toISOString(),
       }));
 
