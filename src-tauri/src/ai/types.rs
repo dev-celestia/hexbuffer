@@ -78,6 +78,16 @@ pub struct AiChatRequest {
     pub target_agent: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AiChatAgentMessage {
+    pub id: String,
+    pub agent_id: String,
+    pub agent_name: String,
+    pub content: String,
+    pub created_at: String,
+}
+
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AiChatResponse {
@@ -90,6 +100,8 @@ pub struct AiChatResponse {
     pub agent_name: Option<String>,
     #[serde(default)]
     pub actions: Vec<AiChatAction>,
+    #[serde(default)]
+    pub agent_messages: Vec<AiChatAgentMessage>,
     /// Token usage for this request (all-zero when the provider reported none).
     #[serde(default)]
     pub usage: crate::ai::token_usage::TokenUsage,
@@ -233,6 +245,7 @@ pub struct AiToolDebugInfo {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AiDebugSnapshot {
+    pub session_id: Option<String>,
     pub system_prompt: String,
     pub app_context_raw: Option<String>,
     pub app_context_object: Option<Value>,

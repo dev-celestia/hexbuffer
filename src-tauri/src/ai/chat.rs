@@ -176,8 +176,55 @@ pub fn get_registered_tools_debug() -> Vec<AiToolDebugInfo> {
 pub async fn get_ai_debug_snapshot_impl(
     app: AppHandle,
     window_label: String,
+    session_id: Option<String>,
     history: State<'_, crate::HistoryBridge>,
 ) -> Result<AiDebugSnapshot, String> {
+    if let Some(ref sid) = session_id.filter(|s| !s.trim().is_empty()) {
+        if let Some(snapshot) = get_latest_debug_snapshot(sid) {
+            return Ok(snapshot);
+        }
+
+        // No in-memory snapshot yet for this session (e.g. freshly switched or loaded from DB).
+        // Build a snapshot aligned with this session's real state from DB if available.
+        let settings = read_ai_settings(&app).unwrap_or_default();
+        let context = build_ai_chat_context(&history).ok();
+        let context_value = context.as_ref().and_then(|c| serde_json::to_value(c).ok());
+        let context_raw = context
+            .as_ref()
+            .and_then(|c| serde_json::to_string_pretty(c).ok());
+
+        let db_messages = history.get_chat_messages(sid).unwrap_or_default();
+        let last_prompt = db_messages
+            .iter()
+            .rev()
+            .find(|m| m.role.eq_ignore_ascii_case("user"))
+            .map(|m| m.content.clone());
+        let last_messages: Vec<AiChatMessage> = db_messages
+            .into_iter()
+            .map(|m| AiChatMessage {
+                role: m.role,
+                content: m.content,
+                agent_id: m.agent_id,
+                agent_name: m.agent_name,
+            })
+            .collect();
+
+        return Ok(AiDebugSnapshot {
+            session_id: Some(sid.clone()),
+            system_prompt: super::agents::ALL_AGENTS[0].preamble.to_string(),
+            app_context_raw: context_raw,
+            app_context_object: context_value,
+            memory_entries: Vec::new(),
+            tools: get_registered_tools_debug(),
+            last_request_id: None,
+            last_prompt,
+            last_messages,
+            provider: settings.provider,
+            model: settings.model,
+            timestamp: chrono::Utc::now().to_rfc3339(),
+        });
+    }
+
     if let Some(snapshot) = get_latest_debug_snapshot(&window_label) {
         return Ok(snapshot);
     }
@@ -190,6 +237,7 @@ pub async fn get_ai_debug_snapshot_impl(
         .and_then(|c| serde_json::to_string_pretty(c).ok());
 
     Ok(AiDebugSnapshot {
+        session_id: None,
         system_prompt: super::agents::ALL_AGENTS[0].preamble.to_string(),
         app_context_raw: context_raw,
         app_context_object: context_value,
@@ -424,22 +472,27 @@ pub async fn send_ai_chat_message_impl(
                 },
             })
             .collect();
-        record_debug_snapshot(
-            &window_label,
-            AiDebugSnapshot {
-                system_prompt: selected_agent.preamble.to_string(),
-                app_context_raw: context_raw,
-                app_context_object: context_value,
-                memory_entries: bank_entries.clone(),
-                tools: get_registered_tools_debug(),
-                last_request_id: Some(request_id.clone()),
-                last_prompt: Some(prompt.clone()),
-                last_messages: last_messages_snapshot,
-                provider: settings.provider.clone(),
-                model: settings.model.clone(),
-                timestamp: chrono::Utc::now().to_rfc3339(),
-            },
-        );
+        let snapshot = AiDebugSnapshot {
+            session_id: request.session_id.clone(),
+            system_prompt: selected_agent.preamble.to_string(),
+            app_context_raw: context_raw,
+            app_context_object: context_value,
+            memory_entries: bank_entries.clone(),
+            tools: get_registered_tools_debug(),
+            last_request_id: Some(request_id.clone()),
+            last_prompt: Some(prompt.clone()),
+            last_messages: last_messages_snapshot,
+            provider: settings.provider.clone(),
+            model: settings.model.clone(),
+            timestamp: chrono::Utc::now().to_rfc3339(),
+        };
+
+        if let Some(ref sid) = request.session_id {
+            if !sid.trim().is_empty() {
+                record_debug_snapshot(sid, snapshot.clone());
+            }
+        }
+        record_debug_snapshot(&window_label, snapshot);
     }
 
     let policy = super::policy::SecurityApprovalPolicy::default_policy();
@@ -506,6 +559,7 @@ pub async fn send_ai_chat_message_impl(
         agent_id: Some(output.agent_id),
         agent_name: Some(output.agent_name),
         actions: output.actions,
+        agent_messages: output.agent_messages,
         usage: output.usage,
     })
 }
@@ -798,6 +852,7 @@ mod tests {
     #[test]
     fn test_debug_snapshot_window_isolation() {
         let snap1 = AiDebugSnapshot {
+            session_id: Some("session-1".to_string()),
             system_prompt: "p1".to_string(),
             app_context_raw: None,
             app_context_object: None,
@@ -811,6 +866,7 @@ mod tests {
             timestamp: "2026-01-01".to_string(),
         };
         let snap2 = AiDebugSnapshot {
+            session_id: Some("session-2".to_string()),
             system_prompt: "p2".to_string(),
             app_context_raw: None,
             app_context_object: None,
@@ -824,12 +880,20 @@ mod tests {
             timestamp: "2026-01-02".to_string(),
         };
 
+        record_debug_snapshot("session-1", snap1.clone());
+        record_debug_snapshot("session-2", snap2.clone());
         record_debug_snapshot("window-A", snap1);
         record_debug_snapshot("window-B", snap2);
 
+        let retrieved_s1 = get_latest_debug_snapshot("session-1").unwrap();
+        let retrieved_s2 = get_latest_debug_snapshot("session-2").unwrap();
+        assert_eq!(retrieved_s1.session_id.as_deref(), Some("session-1"));
+        assert_eq!(retrieved_s2.session_id.as_deref(), Some("session-2"));
+        assert_eq!(retrieved_s1.last_prompt.as_deref(), Some("prompt 1"));
+        assert_eq!(retrieved_s2.last_prompt.as_deref(), Some("prompt 2"));
+
         let retrieved_a = get_latest_debug_snapshot("window-A").unwrap();
         let retrieved_b = get_latest_debug_snapshot("window-B").unwrap();
-
         assert_eq!(retrieved_a.last_prompt.as_deref(), Some("prompt 1"));
         assert_eq!(retrieved_b.last_prompt.as_deref(), Some("prompt 2"));
         assert!(get_latest_debug_snapshot("window-nonexistent").is_none());

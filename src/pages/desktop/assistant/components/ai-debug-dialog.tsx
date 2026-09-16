@@ -20,6 +20,8 @@ import type { AiDebugSnapshot } from '../types';
 interface AiDebugDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  sessionId?: string | null;
+  sessionTitle?: string | null;
 }
 
 function CopyButton({ text }: { text: string }) {
@@ -104,7 +106,12 @@ function SectionHeader({ label, copyText }: { label: string; copyText?: string }
   );
 }
 
-export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
+export function AiDebugDialog({
+  open,
+  onOpenChange,
+  sessionId,
+  sessionTitle,
+}: AiDebugDialogProps) {
   const [snapshot, setSnapshot] = React.useState<AiDebugSnapshot | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -113,19 +120,45 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
     setLoading(true);
     setError(null);
     try {
-      const result = await invoke<AiDebugSnapshot>('get_ai_debug_snapshot');
+      const result = await invoke<AiDebugSnapshot>('get_ai_debug_snapshot', {
+        sessionId: sessionId ?? null,
+      });
       setSnapshot(result);
     } catch (err) {
       setError(String(err));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [sessionId]);
 
   React.useEffect(() => {
     if (open) {
       void fetchSnapshot();
     }
+  }, [open, fetchSnapshot]);
+
+  // Keep snapshot updated in real-time when an AI response finishes while dialog is open
+  React.useEffect(() => {
+    if (!open) return;
+    let unlisten: (() => void) | undefined;
+    let cancelled = false;
+
+    void import('@tauri-apps/api/event').then(({ listen }) => {
+      if (cancelled) return;
+      return listen('ai-chat:finished', () => {
+        if (!cancelled) {
+          void fetchSnapshot();
+        }
+      });
+    }).then((fn) => {
+      if (cancelled) fn?.();
+      else unlisten = fn;
+    });
+
+    return () => {
+      cancelled = true;
+      unlisten?.();
+    };
   }, [open, fetchSnapshot]);
 
   const snapshotJson = snapshot ? JSON.stringify(snapshot, null, 2) : '';
@@ -201,6 +234,20 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
               <Badge variant="outline">
                 {snapshot.provider} / {snapshot.model}
               </Badge>
+              {(sessionTitle || snapshot.sessionId || sessionId) && (
+                <Badge
+                  variant="secondary"
+                  className={cn(
+                    // Sizing & Spacing
+                    'max-w-[200px] truncate',
+                    // Typography
+                    'font-mono text-[10px]',
+                  )}
+                  title={sessionTitle || snapshot.sessionId || sessionId || undefined}
+                >
+                  session: {sessionTitle || snapshot.sessionId || sessionId}
+                </Badge>
+              )}
               {snapshot.lastRequestId && (
                 <Badge variant="secondary" className="font-mono text-[10px]">
                   req: {snapshot.lastRequestId}

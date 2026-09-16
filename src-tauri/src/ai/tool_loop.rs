@@ -732,8 +732,139 @@ pub struct ToolLoopOutput {
     pub actions: Vec<AiChatAction>,
     pub agent_id: String,
     pub agent_name: String,
+    pub agent_messages: Vec<super::types::AiChatAgentMessage>,
     /// Accumulated provider token usage across all tool rounds for this request.
     pub usage: super::token_usage::TokenUsage,
+}
+
+pub fn get_agent_for_tool(tool_name: &str) -> Option<&'static super::agents::AgentSpec> {
+    match tool_name {
+        "save_memory_note" | "search_memory" => {
+            Some(super::agents::get_agent_spec(super::agents::AgentId::Notes))
+        }
+        "send_to_repeater" | "create_collection" | "create_folder" | "create_endpoint" => {
+            Some(super::agents::get_agent_spec(super::agents::AgentId::Repeater))
+        }
+        "suggest_invoker_markers" | "start_invoker_attack" | "start_intruder_attack" => {
+            Some(super::agents::get_agent_spec(super::agents::AgentId::Intruder))
+        }
+        "toggle_intercept" | "get_crawl_context" => {
+            Some(super::agents::get_agent_spec(super::agents::AgentId::HttpTraffic))
+        }
+        "trigger_port_scan" | "trigger_scan" | "list_port_scans" | "get_scan_results" => {
+            Some(super::agents::get_agent_spec(super::agents::AgentId::PortScanner))
+        }
+        "decode_jwt" | "check_jwt_vulns" | "tamper_jwt" => {
+            Some(super::agents::get_agent_spec(super::agents::AgentId::Jwt))
+        }
+        _ => None,
+    }
+}
+
+pub fn is_terminal_action_tool(tool_name: &str) -> bool {
+    matches!(
+        tool_name,
+        "save_memory_note"
+            | "send_to_repeater"
+            | "create_collection"
+            | "create_folder"
+            | "create_endpoint"
+            | "toggle_intercept"
+    )
+}
+
+pub fn format_specialist_message(
+    _agent: &super::agents::AgentSpec,
+    tool_name: &str,
+    args: &Value,
+    result: &str,
+) -> String {
+    match tool_name {
+        "save_memory_note" => {
+            let title = args
+                .get("title")
+                .and_then(|v| v.as_str())
+                .unwrap_or("Untitled Note");
+            let content = args
+                .get("content")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+            format!(
+                "📝 **Note Saved to Persistent Memory**\n\n- **Title:** {title}\n- **Content:** {content}\n\n*Stored in your persistent memory knowledge base.*"
+            )
+        }
+        "search_memory" => {
+            let query = args
+                .get("query")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+            format!("🔍 **Search Memory Results for \"{query}\"**\n\n{result}")
+        }
+        "send_to_repeater" => {
+            let target = args
+                .get("url")
+                .or_else(|| args.get("path"))
+                .or_else(|| args.get("raw_request"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("request");
+            let display_target = if target.len() > 60 {
+                format!("{}...", &target[..57])
+            } else {
+                target.to_string()
+            };
+            format!("🔁 **Dispatched to Repeater**\n\nAdded `{display_target}` to Repeater for replay and security inspection.")
+        }
+        "create_collection" => {
+            let name = args
+                .get("name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("New Collection");
+            format!("📁 **Created Repeater Collection**\n\nCollection `{name}` is now ready.")
+        }
+        "create_folder" => {
+            let name = args
+                .get("name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("New Folder");
+            format!("📂 **Created Folder**\n\nFolder `{name}` created.")
+        }
+        "create_endpoint" => {
+            let name = args
+                .get("name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("Endpoint");
+            format!("📌 **Saved Endpoint**\n\nSaved `{name}` to Repeater.")
+        }
+        "start_invoker_attack" | "start_intruder_attack" => {
+            format!("⚡ **Fuzzing Attack Launched**\n\n{result}")
+        }
+        "suggest_invoker_markers" => {
+            format!("🎯 **Target Markers Suggested**\n\n{result}")
+        }
+        "toggle_intercept" => {
+            format!("🛡️ **Proxy Interception**\n\n{result}")
+        }
+        "get_crawl_context" => {
+            format!("🌐 **Browser Crawl Context Retrieved**\n\n{result}")
+        }
+        "trigger_port_scan" => {
+            let target = args
+                .get("target")
+                .and_then(|v| v.as_str())
+                .unwrap_or("target");
+            format!("📡 **Port Reconnaissance Scan**\n\nInitiated port scan for `{target}`.\n\n{result}")
+        }
+        "decode_jwt" => {
+            format!("🔑 **JWT Decoded**\n\n{result}")
+        }
+        "check_jwt_vulns" => {
+            format!("🔐 **JWT Vulnerability Audit**\n\n{result}")
+        }
+        "tamper_jwt" => {
+            format!("🛠️ **JWT Tamper Analysis**\n\n{result}")
+        }
+        _ => result.to_string(),
+    }
 }
 
 /// Multi-turn streaming tool loop built directly on Rig 0.42.
@@ -761,6 +892,7 @@ pub async fn run_tool_loop(
 
     let mut chat_history = history;
     let mut actions: Vec<AiChatAction> = Vec::new();
+    let mut agent_messages: Vec<super::types::AiChatAgentMessage> = Vec::new();
     let mut executed_tools: HashSet<String> = HashSet::new();
     let mut accumulated_full_response = String::new();
     let mut accumulated_usage = super::token_usage::TokenUsage::new();
@@ -774,8 +906,17 @@ pub async fn run_tool_loop(
             return Err("AI chat cancelled by user.".to_string());
         }
 
+        let round_prompt = if _round == 0 {
+            prompt.clone()
+        } else {
+            "The requested tool has completed execution and results are delivered. \
+            Conclude your response or provide any necessary follow-up coordination. \
+            Do not repeat previous statements or call the same tool again."
+                .to_string()
+        };
+
         let mut req_builder = model
-            .completion_request(prompt.clone())
+            .completion_request(round_prompt)
             .preamble(agent.preamble.to_string())
             .messages(chat_history.clone())
             .tools(tools.clone());
@@ -922,6 +1063,7 @@ pub async fn run_tool_loop(
                 actions,
                 agent_id: agent.slug.to_string(),
                 agent_name: agent.name.to_string(),
+                agent_messages,
                 usage: accumulated_usage,
             });
         }
@@ -932,6 +1074,8 @@ pub async fn run_tool_loop(
 
         // Reset the per-round tool-result buffer before collecting this round's results.
         last_round_tool_results.clear();
+
+        let mut executed_terminal_action = false;
 
         for tool_call in tool_calls {
             let name = tool_call.function.name;
@@ -951,7 +1095,7 @@ pub async fn run_tool_loop(
                     ToolAuthorization::Denied(denial) => {
                         actions.push(AiChatAction {
                             action: name.clone(),
-                            payload: args,
+                            payload: args.clone(),
                             result: Some(denial.clone()),
                             created_at: chrono::Utc::now().to_rfc3339(),
                         });
@@ -965,7 +1109,7 @@ pub async fn run_tool_loop(
                             config,
                             policy,
                             &name,
-                            args,
+                            args.clone(),
                             matches!(authz, ToolAuthorization::RequiresConfirmation),
                             depth,
                             &mut actions,
@@ -976,6 +1120,26 @@ pub async fn run_tool_loop(
                     }
                 }
             };
+
+            // If a specialist agent is mapped to this tool, emit a separate agent message bubble!
+            if let Some(spec_agent) = get_agent_for_tool(&name) {
+                if agent.slug == "orchestrator" || agent.slug != spec_agent.slug {
+                    let formatted = format_specialist_message(spec_agent, &name, &args, &tool_result);
+                    let agent_msg = super::types::AiChatAgentMessage {
+                        id: format!("msg-agent-{}", uuid::Uuid::new_v4()),
+                        agent_id: spec_agent.slug.to_string(),
+                        agent_name: spec_agent.name.to_string(),
+                        content: formatted,
+                        created_at: chrono::Utc::now().to_rfc3339(),
+                    };
+                    let _ = app.emit_to(window_label, "ai-chat:agent-message", &agent_msg);
+                    agent_messages.push(agent_msg);
+                }
+            }
+
+            if is_terminal_action_tool(&name) {
+                executed_terminal_action = true;
+            }
 
             // Keep a bounded copy for the empty-follow-up fallback. The full
             // (possibly huge) result still goes to the model via chat_history.
@@ -999,6 +1163,20 @@ pub async fn run_tool_loop(
                     truncate_chars(&tool_result, TOOL_RESULT_MAX_CHARS)
                 ),
             ));
+        }
+
+        if executed_terminal_action && !agent_messages.is_empty() {
+            if accumulated_full_response.trim().is_empty() {
+                accumulated_full_response = "I've coordinated with the specialist team to fulfill your request.".to_string();
+            }
+            return Ok(ToolLoopOutput {
+                content: accumulated_full_response,
+                actions,
+                agent_id: agent.slug.to_string(),
+                agent_name: agent.name.to_string(),
+                agent_messages,
+                usage: accumulated_usage,
+            });
         }
     }
 

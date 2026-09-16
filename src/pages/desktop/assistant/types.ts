@@ -18,6 +18,14 @@ export interface DashboardChatMetadata {
   agentName?: string;
 }
 
+export interface AiChatAgentMessageEvent {
+  id: string;
+  agentId: string;
+  agentName: string;
+  content: string;
+  createdAt: string;
+}
+
 export type DashboardChatMessage = UIMessage<DashboardChatMetadata> & {
   content?: string;
 };
@@ -112,6 +120,7 @@ export interface AiDebugMessage {
 }
 
 export interface AiDebugSnapshot {
+  sessionId?: string | null;
   systemPrompt: string;
   appContextRaw: string | null;
   appContextObject: Record<string, unknown> | null;

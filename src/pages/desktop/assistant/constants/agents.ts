@@ -33,7 +33,7 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
   orchestrator: {
     id: 'orchestrator',
     name: 'Celestia',
-    role: 'Master Coordinator',
+    role: '',
     description: 'Coordinates specialized cyber agents and plans multi-step workflows.',
     avatarUrl: celestiaAvatar,
     token: 'agent-orchestrator',

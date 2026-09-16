@@ -71,18 +71,20 @@ export function AgentBadgeHeader({
       </div>
 
       {/* Role Pill */}
-      <Badge
-        variant="outline"
-        className={cn(
-          // Sizing & Spacing
-          'py-0 px-1.5',
-          // Typography
-          'text-[10px] font-medium uppercase tracking-wider',
-          agent.badgeClass,
-        )}
-      >
-        {agent.role}
-      </Badge>
+      {agent.id !== 'orchestrator' && agent.role && agent.role !== 'Master Coordinator' ? (
+        <Badge
+          variant="outline"
+          className={cn(
+            // Sizing & Spacing
+            'py-0 px-1.5',
+            // Typography
+            'text-[10px] font-medium uppercase tracking-wider',
+            agent.badgeClass,
+          )}
+        >
+          {agent.role}
+        </Badge>
+      ) : null}
 
       {/* Provider / Model Pill (subtle) */}
       {providerDisplay ? (

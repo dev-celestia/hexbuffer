@@ -30,6 +30,8 @@ import { getUserPromptOnly, parseAttachedFilesFromMessage } from '../lib/file-ut
 import { AgentBadgeHeader } from './agent-badge-header';
 import { getAgentInfo } from '../constants/agents';
 import { formatMessageTime, getMessageDate, isDifferentDay } from '../lib/date-utils';
+import { parseMessageOptions } from '../lib/option-parser';
+import { InteractiveOptionsCard } from './interactive-options-card';
 import { cn } from '@/lib/utils';
 
 interface AssistantConversationProps {
@@ -44,6 +46,8 @@ interface AssistantConversationProps {
   onDismissError?: () => void;
   stickToBottomRef: React.RefObject<any>;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  onSelectOption?: (prompt: string) => void;
+  onFocusInput?: () => void;
 }
 
 export function AssistantConversation({
@@ -58,6 +62,8 @@ export function AssistantConversation({
   onDismissError,
   stickToBottomRef,
   messagesEndRef,
+  onSelectOption,
+  onFocusInput,
 }: AssistantConversationProps) {
   const lastMessage = messages[messages.length - 1];
   const lastMessageIsAssistant = lastMessage?.role === 'assistant';
@@ -196,6 +202,24 @@ export function AssistantConversation({
                             borderClass={agentInfo.borderClass}
                             isStreaming={isStreaming && message.role === 'assistant'}
                           />
+                        ) : null}
+
+                        {/* Interactive Choice Options (Option A, Option B, Option 3) */}
+                        {message.role === 'assistant' &&
+                        idx === displayableMessages.length - 1 &&
+                        !isStreaming &&
+                        onSelectOption ? (
+                          (() => {
+                            const options = parseMessageOptions(displayText);
+                            if (options.length === 0) return null;
+                            return (
+                              <InteractiveOptionsCard
+                                options={options}
+                                onSelectOption={onSelectOption}
+                                onFocusInput={onFocusInput}
+                              />
+                            );
+                          })()
                         ) : null}
                       </MessageContent>
                     </Message>

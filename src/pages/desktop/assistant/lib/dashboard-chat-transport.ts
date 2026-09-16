@@ -3,7 +3,7 @@ import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createUIMessageStream, type ChatTransport, type UIMessageStreamWriter } from 'ai';
 import { useRepeaterStore } from '@/stores/repeater';
-import type { DashboardAiSettings, DashboardChatMessage } from '../types';
+import type { DashboardAiSettings, DashboardChatMessage, AiChatAgentMessageEvent } from '../types';
 
 const WINDOW_EVENT_TARGET = { kind: 'AnyLabel' as const, label: getCurrentWindow().label };
 
@@ -31,6 +31,7 @@ interface AiChatResponse {
   agentId?: string;
   agentName?: string;
   actions?: AiChatAction[];
+  agentMessages?: AiChatAgentMessageEvent[];
 }
 
 interface AiChatStartedEvent {
@@ -161,10 +162,16 @@ interface AiChatReasoningEvent {
 export class DashboardSettingsChatTransport implements ChatTransport<DashboardChatMessage> {
   private onUsageCallback: ((requestId: string, usage: NonNullable<AiChatFinishedEvent['usage']>) => void) | null =
     null;
+  private onAgentMessageCallback: ((agentMessage: AiChatAgentMessageEvent) => void) | null = null;
 
   /** Register a callback invoked when a completed request reports token usage. */
   setOnUsage(callback: (requestId: string, usage: NonNullable<AiChatFinishedEvent['usage']>) => void) {
     this.onUsageCallback = callback;
+  }
+
+  /** Register a callback invoked when a specialist agent sends a message. */
+  setOnAgentMessage(callback: (agentMessage: AiChatAgentMessageEvent) => void) {
+    this.onAgentMessageCallback = callback;
   }
 
   async sendMessages({
@@ -307,6 +314,16 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
             ),
           );
 
+          unlisteners.push(
+            await listen<AiChatAgentMessageEvent>(
+              'ai-chat:agent-message',
+              (event) => {
+                this.onAgentMessageCallback?.(event.payload);
+              },
+              { target: WINDOW_EVENT_TARGET },
+            ),
+          );
+
           const repeaterStore = useRepeaterStore.getState();
           const response = await invoke<AiChatResponse>('send_ai_chat_message', {
             request: {
@@ -324,6 +341,12 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
           model = response.model;
           if (response.agentId) agentId = response.agentId;
           if (response.agentName) agentName = response.agentName;
+
+          if (response.agentMessages && response.agentMessages.length > 0) {
+            for (const agentMsg of response.agentMessages) {
+              this.onAgentMessageCallback?.(agentMsg);
+            }
+          }
 
           ensureStarted();
 

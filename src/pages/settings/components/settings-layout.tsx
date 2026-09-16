@@ -85,7 +85,7 @@ function CategoryContent({ settings, active }: CategoryContentProps) {
 const DEFAULT_TABS: SettingsCategory[] = ['general', 'ca-cert', 'ai', 'appearance'];
 
 export function SettingsLayout({ settings, categories }: SettingsLayoutProps) {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const validTabs = categories || DEFAULT_TABS;
   const tabParam = searchParams.get('tab') as SettingsCategory | null;
   const initialTab: SettingsCategory =
@@ -97,6 +97,13 @@ export function SettingsLayout({ settings, categories }: SettingsLayoutProps) {
   const [contentKey, setContentKey] = React.useState(0);
 
   React.useEffect(() => {
+    if (tabParam && validTabs.includes(tabParam) && tabParam !== active) {
+      setActive(tabParam);
+      setContentKey((k) => k + 1);
+    }
+  }, [tabParam, validTabs, active]);
+
+  React.useEffect(() => {
     if (categories && !categories.includes(active)) {
       setActive(categories[0] || 'general');
     }
@@ -105,7 +112,12 @@ export function SettingsLayout({ settings, categories }: SettingsLayoutProps) {
   const handleSelect = React.useCallback((category: SettingsCategory) => {
     setActive(category);
     setContentKey((k) => k + 1);
-  }, []);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('tab', category);
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
 
   return (
     <div

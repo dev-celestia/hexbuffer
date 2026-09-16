@@ -126,8 +126,9 @@ pub async fn get_ai_debug_snapshot(
     app: AppHandle,
     window: WebviewWindow,
     history: State<'_, crate::HistoryBridge>,
+    session_id: Option<String>,
 ) -> Result<types::AiDebugSnapshot, String> {
-    chat::get_ai_debug_snapshot_impl(app, window.label().to_string(), history).await
+    chat::get_ai_debug_snapshot_impl(app, window.label().to_string(), session_id, history).await
 }
 
 /// Aggregated token usage for one chat session (requests + tokens).

@@ -150,7 +150,7 @@ export function AssistantHeader({
                 className="flex items-center gap-2 px-2 py-1.5 text-xs cursor-pointer rounded-md"
               >
                 <GearSixIcon className="size-3.5 text-muted-foreground" />
-                <span>AI Provider &amp; Model</span>
+                <span>AI Settings</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={onOpenDebug}

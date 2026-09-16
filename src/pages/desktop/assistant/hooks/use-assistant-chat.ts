@@ -19,7 +19,13 @@ import { clearPendingToolConfirmations } from '../lib/ai-tools/confirmation';
 import { formatAttachedFileContent } from '../lib/file-utils';
 import { useTokenUsageStore } from '@/stores/token-usage';
 import type { AgentId } from '../constants/agents';
-import type { ChatMessageRecord, CrawlCompletedEvent, DashboardAiSettings, DashboardChatMessage } from '../types';
+import type {
+  AiChatAgentMessageEvent,
+  ChatMessageRecord,
+  CrawlCompletedEvent,
+  DashboardAiSettings,
+  DashboardChatMessage,
+} from '../types';
 
 const DEFAULT_AI_SETTINGS: DashboardAiSettings = {
   provider: 'deepseek',
@@ -94,6 +100,52 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
   } = useChat<DashboardChatMessage>({
     transport,
   });
+
+  const handleAgentMessage = useCallback(
+    (agentMsg: AiChatAgentMessageEvent) => {
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === agentMsg.id)) {
+          return prev;
+        }
+        const newMsg: DashboardChatMessage = {
+          id: agentMsg.id,
+          role: 'assistant',
+          content: agentMsg.content,
+          parts: [{ type: 'text', text: agentMsg.content }],
+          createdAt: new Date(agentMsg.createdAt),
+          metadata: {
+            agentId: agentMsg.agentId,
+            agentName: agentMsg.agentName,
+          },
+        };
+        return [...prev, newMsg];
+      });
+    },
+    [setMessages],
+  );
+
+  useEffect(() => {
+    transport.setOnAgentMessage(handleAgentMessage);
+  }, [transport, handleAgentMessage]);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let cancelled = false;
+
+    listen<AiChatAgentMessageEvent>('ai-chat:agent-message', (event) => {
+      if (!cancelled) {
+        handleAgentMessage(event.payload);
+      }
+    }).then((fn) => {
+      if (cancelled) fn();
+      else unlisten = fn;
+    });
+
+    return () => {
+      cancelled = true;
+      unlisten?.();
+    };
+  }, [handleAgentMessage]);
 
   // Refresh the token-usage badge whenever the active session changes and whenever a
   // response finishes streaming (usage is persisted server-side on ai-chat:finished).
@@ -319,6 +371,8 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
           .filter((p) => p.type === 'text')
           .map((p) => p.text)
           .join('\n'),
+        agentId: m.metadata?.agentId,
+        agentName: m.metadata?.agentName,
         createdAt: new Date().toISOString(),
       }));
 
