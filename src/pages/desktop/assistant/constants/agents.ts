@@ -21,12 +21,12 @@ export interface AgentInfo {
   role: string;
   description: string;
   avatarUrl: string;
-  color: string;
+  /** Semantic token slug; see `--color-agent-*` in src/styles/globals.css. */
+  token: string;
   badgeClass: string;
   borderClass: string;
   textClass: string;
   dotClass: string;
-  mentionTag: string;
 }
 
 export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
@@ -36,12 +36,11 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
     role: '',
     description: 'Coordinates specialized cyber agents and plans multi-step workflows.',
     avatarUrl: celestiaAvatar,
-    color: '#8B5CF6',
-    badgeClass: 'bg-violet-500/10 text-violet-400 border-violet-500/30',
-    borderClass: 'border-violet-500/30',
-    textClass: 'text-violet-400',
-    dotClass: 'bg-violet-500',
-    mentionTag: '@celestia',
+    token: 'agent-orchestrator',
+    badgeClass: 'bg-agent-orchestrator/10 text-agent-orchestrator border-agent-orchestrator/30',
+    borderClass: 'border-agent-orchestrator/30',
+    textClass: 'text-agent-orchestrator',
+    dotClass: 'bg-agent-orchestrator',
   },
   http_traffic: {
     id: 'http_traffic',
@@ -49,12 +48,11 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
     role: 'Traffic & Intercept',
     description: 'Inspects proxy flows, manages live interception, and audits HTTP logs.',
     avatarUrl: httpAvatar,
-    color: '#3B82F6',
-    badgeClass: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-    borderClass: 'border-blue-500/30',
-    textClass: 'text-blue-400',
-    dotClass: 'bg-blue-500',
-    mentionTag: '@traffic',
+    token: 'agent-traffic',
+    badgeClass: 'bg-agent-traffic/10 text-agent-traffic border-agent-traffic/30',
+    borderClass: 'border-agent-traffic/30',
+    textClass: 'text-agent-traffic',
+    dotClass: 'bg-agent-traffic',
   },
   repeater: {
     id: 'repeater',
@@ -62,12 +60,11 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
     role: 'Request Replay',
     description: 'Crafts, normalizes, replays, and organizes requests into collections.',
     avatarUrl: repeaterAvatar,
-    color: '#10B981',
-    badgeClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-    borderClass: 'border-emerald-500/30',
-    textClass: 'text-emerald-400',
-    dotClass: 'bg-emerald-500',
-    mentionTag: '@repeater',
+    token: 'agent-repeater',
+    badgeClass: 'bg-agent-repeater/10 text-agent-repeater border-agent-repeater/30',
+    borderClass: 'border-agent-repeater/30',
+    textClass: 'text-agent-repeater',
+    dotClass: 'bg-agent-repeater',
   },
   intruder: {
     id: 'intruder',
@@ -75,12 +72,11 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
     role: 'Fuzzing & Injection',
     description: 'Detects injection points, suggests $target$ markers, and runs attacks.',
     avatarUrl: intruderAvatar,
-    color: '#F59E0B',
-    badgeClass: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-    borderClass: 'border-amber-500/30',
-    textClass: 'text-amber-400',
-    dotClass: 'bg-amber-500',
-    mentionTag: '@intruder',
+    token: 'agent-intruder',
+    badgeClass: 'bg-agent-intruder/10 text-agent-intruder border-agent-intruder/30',
+    borderClass: 'border-agent-intruder/30',
+    textClass: 'text-agent-intruder',
+    dotClass: 'bg-agent-intruder',
   },
   notes: {
     id: 'notes',
@@ -88,12 +84,11 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
     role: 'Knowledge & Memory',
     description: 'Stores research findings, credential formats, and persistent notes.',
     avatarUrl: notesAvatar,
-    color: '#A855F7',
-    badgeClass: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-    borderClass: 'border-purple-500/30',
-    textClass: 'text-purple-400',
-    dotClass: 'bg-purple-500',
-    mentionTag: '@notes',
+    token: 'agent-notes',
+    badgeClass: 'bg-agent-notes/10 text-agent-notes border-agent-notes/30',
+    borderClass: 'border-agent-notes/30',
+    textClass: 'text-agent-notes',
+    dotClass: 'bg-agent-notes',
   },
   port_scanner: {
     id: 'port_scanner',
@@ -101,12 +96,11 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
     role: 'Network Recon',
     description: 'Discovers open ports, identifies services and banners across targets.',
     avatarUrl: portScannerAvatar,
-    color: '#06B6D4',
-    badgeClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
-    borderClass: 'border-cyan-500/30',
-    textClass: 'text-cyan-400',
-    dotClass: 'bg-cyan-500',
-    mentionTag: '@scanner',
+    token: 'agent-scanner',
+    badgeClass: 'bg-agent-scanner/10 text-agent-scanner border-agent-scanner/30',
+    borderClass: 'border-agent-scanner/30',
+    textClass: 'text-agent-scanner',
+    dotClass: 'bg-agent-scanner',
   },
   jwt: {
     id: 'jwt',
@@ -114,12 +108,11 @@ export const AGENTS_REGISTRY: Record<AgentId, AgentInfo> = {
     role: 'JWT Security',
     description: 'Decodes tokens, tests algorithm vulnerabilities, and generates tampered tokens.',
     avatarUrl: jwtAvatar,
-    color: '#F43F5E',
-    badgeClass: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
-    borderClass: 'border-rose-500/30',
-    textClass: 'text-rose-400',
-    dotClass: 'bg-rose-500',
-    mentionTag: '@jwt',
+    token: 'agent-jwt',
+    badgeClass: 'bg-agent-jwt/10 text-agent-jwt border-agent-jwt/30',
+    borderClass: 'border-agent-jwt/30',
+    textClass: 'text-agent-jwt',
+    dotClass: 'bg-agent-jwt',
   },
 };
 

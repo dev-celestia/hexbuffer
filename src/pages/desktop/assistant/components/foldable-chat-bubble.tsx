@@ -94,7 +94,7 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
                 )}
               >
                 {copied ? (
-                  <CheckIcon className="size-3.5 text-emerald-500" />
+                  <CheckIcon className="size-3.5 text-success" />
                 ) : (
                   <CopyIcon className="size-3.5" />
                 )}
@@ -250,7 +250,7 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
           // Backgrounds & Borders
           'bg-card/70 border border-border/70 shadow-2xs',
           // Interactive & States
-          'cursor-pointer hover:bg-card hover:border-border transition-all select-none',
+          'cursor-pointer hover:bg-card hover:border-border transition-[background-color,border-color] select-none',
           borderClass,
         )}
       >
@@ -313,7 +313,7 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
                 )}
               >
                 {copied ? (
-                  <CheckIcon className="size-3.5 text-emerald-500" />
+                  <CheckIcon className="size-3.5 text-success" />
                 ) : (
                   <CopyIcon className="size-3.5" />
                 )}
@@ -418,7 +418,7 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
                   )}
                 >
                   {copied ? (
-                    <CheckIcon className="size-3.5 text-emerald-500" />
+                    <CheckIcon className="size-3.5 text-success" />
                   ) : (
                     <CopyIcon className="size-3.5" />
                   )}

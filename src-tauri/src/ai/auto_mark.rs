@@ -1,12 +1,17 @@
 use rig::client::AgentClientExt;
+use serde_json::{json, Value};
 use tauri::AppHandle;
 
 use super::chat::ensure_third_party_ai_sharing_allowed;
-use super::keyring::read_required_ai_api_key;
+use super::keyring::read_optional_ai_api_key;
+use super::providers::is_openai_compatible;
 use super::settings::read_ai_settings;
 use super::types::{
     InvokerMarkerSuggestion, InvokerMarkerSuggestionRequest, InvokerMarkerSuggestionResponse,
 };
+
+/// Native tool name, callable by the Intruder agent.
+pub const SUGGEST_MARKERS_TOOL: &str = "suggest_invoker_markers";
 
 pub async fn suggest_invoker_markers_impl(
     app: AppHandle,
@@ -17,12 +22,18 @@ pub async fn suggest_invoker_markers_impl(
     }
 
     let settings = read_ai_settings(&app)?;
-    ensure_third_party_ai_sharing_allowed(&settings)?;
-    let api_key = read_required_ai_api_key(&settings.provider)?;
-
-    if api_key.trim().is_empty() {
-        return Err(format!("No {} API key provided", settings.provider));
+    // Mirror the chat path: a loopback endpoint stays on-box, so it needs neither the
+    // third-party sharing gate nor a key.
+    let is_local = is_openai_compatible(&settings.provider)
+        && super::providers::is_local_ai_url(settings.custom_base_url.as_deref());
+    if !is_local {
+        ensure_third_party_ai_sharing_allowed(&settings)?;
     }
+    let api_key = match read_optional_ai_api_key(&settings.provider)? {
+        Some(key) if !key.trim().is_empty() => key,
+        _ if is_openai_compatible(&settings.provider) => "ollama".to_string(),
+        _ => return Err(format!("No {} API key provided", settings.provider)),
+    };
 
     let config = super::chat::build_ai_config(&settings, &api_key);
     let client = super::providers::create_openai_client(&config)?;
@@ -110,4 +121,34 @@ pub async fn suggest_invoker_markers_impl(
         suggestions,
         candidate_count,
     })
+}
+
+/// Tool-facing wrapper: takes the raw request from a model tool call and returns the
+/// suggestions as a compact JSON string suitable for feeding back as a tool result.
+pub async fn execute_marker_suggestion_tool(app: &AppHandle, args: &Value) -> String {
+    let raw_request = args
+        .get("raw_request")
+        .and_then(|value| value.as_str())
+        .unwrap_or("")
+        .trim();
+    if raw_request.is_empty() {
+        return "Error: 'raw_request' is required and must not be empty.".to_string();
+    }
+
+    match suggest_invoker_markers_impl(
+        app.clone(),
+        InvokerMarkerSuggestionRequest {
+            raw_request: raw_request.to_string(),
+        },
+    )
+    .await
+    {
+        Ok(response) => json!({
+            "status": "success",
+            "candidateCount": response.candidate_count,
+            "suggestions": response.suggestions,
+        })
+        .to_string(),
+        Err(error) => format!("Marker suggestion failed: {error}"),
+    }
 }

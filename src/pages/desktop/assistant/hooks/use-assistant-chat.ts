@@ -498,6 +498,7 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
   return {
     aiSettings,
     aiSettingsLoading,
+    clearError,
     error,
     handleSubmit,
     isStreaming: status === 'submitted' || status === 'streaming',

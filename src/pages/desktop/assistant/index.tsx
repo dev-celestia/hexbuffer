@@ -11,6 +11,8 @@ import { SessionTokenUsageBadge } from './components/session-token-usage-badge';
 import { useAiChatPane } from './hooks/use-ai-chat-pane';
 import { usePendingToolConfirmations } from './lib/ai-tools/confirmation';
 import { getMessageText } from './lib/message-utils';
+import { getContextWindow } from './constants';
+import { useTokenUsageStore } from '@/stores/token-usage';
 import { useNavStore } from '@/stores/nav';
 import { cn } from '@/lib/utils';
 
@@ -23,6 +25,7 @@ interface AIAssistantPaneProps {
 function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssistantPaneProps) {
   const navigate = useNavigate();
   const {
+    clearError,
     error,
     handleSubmit,
     handleModelChange,
@@ -60,6 +63,8 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
   }, [navigate]);
 
   const pendingToolConfirmations = usePendingToolConfirmations();
+  const sessionTotals = useTokenUsageStore((state) => state.sessionTotals);
+  const contextWindow = getContextWindow(model);
 
   const stickToBottomRef = useRef<{
     scrollToBottom: (opts?: any) => any;
@@ -237,6 +242,7 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
             trackedActions={trackedActions}
             pendingToolConfirmations={pendingToolConfirmations}
             error={error}
+            onDismissError={clearError}
             stickToBottomRef={stickToBottomRef}
             messagesEndRef={messagesEndRef}
             onSelectOption={handleSelectOption}
@@ -251,7 +257,8 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
             model={model}
             provider={provider}
             modelOptions={modelOptions}
-            messagesCount={messages.length}
+            usedTokens={sessionTotals.totalTokens}
+            maxTokens={contextWindow}
             status={status}
             onStop={stop}
             onSubmit={wrappedHandleSubmit}
@@ -273,10 +280,3 @@ export function AIAssistantPane({ onClose, compact, className }: AIAssistantPane
   );
 }
 
-export function AssistantPage() {
-  return (
-    <div className="h-full overflow-hidden">
-      <AIAssistantPane />
-    </div>
-  );
-}

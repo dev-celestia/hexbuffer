@@ -39,6 +39,7 @@ import {
 import type { FileUIPart } from 'ai';
 import { useCallback, useRef, useState } from 'react';
 import { ALL_AGENTS_LIST, AGENTS_REGISTRY, type AgentId } from '../constants/agents';
+import { DEFAULT_CONTEXT_WINDOW } from '../constants';
 import { cn } from '@/lib/utils';
 
 function PromptInputAttachmentsBar() {
@@ -75,7 +76,7 @@ function PromptInputAttachmentsBar() {
             'font-medium text-xs text-muted-foreground',
           )}
         >
-          <PaperclipIcon className="size-3.5 text-blue-500 shrink-0" />
+          <PaperclipIcon className="size-3.5 text-info shrink-0" />
           <span>Attachments ({attachments.files.length})</span>
         </div>
         <Button
@@ -123,7 +124,8 @@ interface AssistantPromptBarProps {
   model: string;
   provider: string;
   modelOptions: string[];
-  messagesCount: number;
+  usedTokens?: number;
+  maxTokens?: number;
   status: any;
   onStop: () => void;
   onSubmit: (message: { text: string; files: FileUIPart[] }) => void;
@@ -143,7 +145,8 @@ export function AssistantPromptBar({
   model,
   provider,
   modelOptions,
-  messagesCount,
+  usedTokens = 0,
+  maxTokens = DEFAULT_CONTEXT_WINDOW,
   status,
   onStop,
   onSubmit,
@@ -154,7 +157,6 @@ export function AssistantPromptBar({
   selectedAgent = 'all',
   onSelectAgent,
 }: AssistantPromptBarProps) {
-  const attachments = usePromptInputAttachments();
   const [customHeight, setCustomHeight] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const isDraggingRef = useRef(false);
@@ -257,8 +259,8 @@ export function AssistantPromptBar({
           // Layout & Positioning
           'relative flex flex-col',
           // Sizing & Spacing
-          isExpanded ? 'max-w-3xl' : 'max-w-2xl',
-          'mx-auto w-full transition-all duration-200',
+          'max-w-2xl',
+          'mx-auto w-full',
         )}
       >
         {/* Drag handle to resize prompt height upwards */}
@@ -425,8 +427,8 @@ export function AssistantPromptBar({
                 </PromptInputSelect>
 
                 <Context
-                  usedTokens={Math.min(messagesCount * 180 + (attachments.files.length * 500), 128000)}
-                  maxTokens={128000}
+                  usedTokens={usedTokens}
+                  maxTokens={maxTokens}
                   modelId={model}
                 >
                   <ContextTrigger className="h-8 px-1.5 text-xs flex items-center gap-1 shrink-0" />
@@ -461,7 +463,7 @@ export function AssistantPromptBar({
                       // Sizing & Spacing
                       'size-8 p-0',
                       // Typography
-                      isPaused ? 'text-amber-500' : 'text-muted-foreground',
+                      isPaused ? 'text-warning' : 'text-muted-foreground',
                       // Backgrounds & Borders
                       'rounded-md border border-border bg-background',
                       // Interactive & States

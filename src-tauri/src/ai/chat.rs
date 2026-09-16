@@ -211,7 +211,7 @@ pub async fn get_ai_debug_snapshot_impl(
 
         return Ok(AiDebugSnapshot {
             session_id: Some(sid.clone()),
-            system_prompt: tool_loop::PREAMBLE.to_string(),
+            system_prompt: super::agents::ALL_AGENTS[0].preamble.to_string(),
             app_context_raw: context_raw,
             app_context_object: context_value,
             memory_entries: Vec::new(),
@@ -238,7 +238,7 @@ pub async fn get_ai_debug_snapshot_impl(
 
     Ok(AiDebugSnapshot {
         session_id: None,
-        system_prompt: tool_loop::PREAMBLE.to_string(),
+        system_prompt: super::agents::ALL_AGENTS[0].preamble.to_string(),
         app_context_raw: context_raw,
         app_context_object: context_value,
         memory_entries: Vec::new(),
@@ -474,7 +474,7 @@ pub async fn send_ai_chat_message_impl(
             .collect();
         let snapshot = AiDebugSnapshot {
             session_id: request.session_id.clone(),
-            system_prompt: tool_loop::PREAMBLE.to_string(),
+            system_prompt: selected_agent.preamble.to_string(),
             app_context_raw: context_raw,
             app_context_object: context_value,
             memory_entries: bank_entries.clone(),
@@ -508,6 +508,7 @@ pub async fn send_ai_chat_message_impl(
         prompt,
         cancel_rx,
         pause_rx,
+        0,
     )
     .await?;
 
