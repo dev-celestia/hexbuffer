@@ -2,6 +2,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { useNavStore } from '@/stores/nav';
 import { createCollection, createFolder, createEndpoint, selectEndpoint } from './management';
 import { sendRawToRepeater } from './send-to';
+import { sendRequest } from './ui';
 
 const HTTP_METHOD_PATTERN = /^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS|TRACE|CONNECT)$/;
 
@@ -254,4 +255,19 @@ export async function executeCreateEndpointAiTool(args: Record<string, any>) {
   selectEndpoint(id);
   useNavStore.getState().triggerNavBlink('/repeater');
   return `Endpoint "${args.name}" added to the Repeater collection (id: ${id}).`;
+}
+
+export const SEND_REPEATER_REQUEST_AI_TOOL_DEFINITION = {
+  name: 'send_repeater_request',
+  description: 'Issue and execute the active HTTP request in the Repeater Forge panel, and inspect the live response.',
+  parameters: {
+    type: 'object',
+    properties: {},
+  },
+};
+
+export async function executeSendRepeaterRequestAiTool(): Promise<string> {
+  await sendRequest();
+  useNavStore.getState().triggerNavBlink('/repeater');
+  return 'Executed active Repeater request. The live response is now loaded in the Repeater inspector.';
 }

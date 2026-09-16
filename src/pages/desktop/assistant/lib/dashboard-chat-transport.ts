@@ -77,9 +77,9 @@ function toProviderMessages(messages: DashboardChatMessage[]) {
     }))
     .filter((message) => message.content.length > 0);
 
-  // Keep a sliding window within the backend limit (MAX_CHAT_MESSAGES = 100)
-  // Slicing to the most recent 60 messages avoids hard failures on long-running sessions
-  return filtered.length > 60 ? filtered.slice(-60) : filtered;
+  // Keep a compact sliding window (last 16 messages / ~8 turns) to prevent context
+  // bloat, high latency, and memory degradation on long-running sessions.
+  return filtered.length > 16 ? filtered.slice(-16) : filtered;
 }
 
 function isLocalEndpoint(url?: string | null): boolean {

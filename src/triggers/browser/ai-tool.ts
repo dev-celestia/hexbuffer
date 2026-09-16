@@ -1,9 +1,10 @@
 import { triggerScan } from './crawl';
 import type { TriggerScanOptions } from './crawl';
+import { toggleBrowserCrawl, stopBrowserCrawl } from './ui';
 
 export const BROWSER_AI_TOOL_DEFINITION = {
   name: 'trigger_scan',
-  description: 'Trigger a browser crawler or vulnerability scan against a target URL.',
+  description: 'Trigger a browser crawler or reconnaissance scan against a target URL.',
   parameters: {
     type: 'object',
     properties: {
@@ -13,6 +14,24 @@ export const BROWSER_AI_TOOL_DEFINITION = {
       },
     },
     required: ['url'],
+  },
+};
+
+export const TOGGLE_BROWSER_CRAWL_AI_TOOL_DEFINITION = {
+  name: 'toggle_browser_crawl',
+  description: 'Pause or resume the active browser crawl session.',
+  parameters: {
+    type: 'object',
+    properties: {},
+  },
+};
+
+export const STOP_BROWSER_CRAWL_AI_TOOL_DEFINITION = {
+  name: 'stop_browser_crawl',
+  description: 'Stop and terminate the active browser crawl session.',
+  parameters: {
+    type: 'object',
+    properties: {},
   },
 };
 
@@ -34,4 +53,14 @@ export async function executeTriggerScanAiTool(args: Record<string, any>) {
   }
   await triggerScan({ url } as TriggerScanOptions);
   return `Browser scan started for ${url}. The crawl runs in the background; ask for crawl context once it completes.`;
+}
+
+export async function executeToggleBrowserCrawlAiTool(): Promise<string> {
+  toggleBrowserCrawl();
+  return 'Toggled browser crawl session state (pause/resume).';
+}
+
+export async function executeStopBrowserCrawlAiTool(): Promise<string> {
+  stopBrowserCrawl();
+  return 'Stopped active browser crawl session.';
 }

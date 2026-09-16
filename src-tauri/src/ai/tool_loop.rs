@@ -38,9 +38,15 @@ const NOTES_WRITE_TOOL: &str = "write_note";
 /// Tier 1 — execute immediately: landing/local tools with no external side effects.
 const AUTO_APPROVED_TOOLS: &[&str] = &[
     "send_to_repeater",
+    "send_repeater_request",
     "create_collection",
     "create_folder",
     "create_endpoint",
+    "forward_paused_request",
+    "send_to_intruder",
+    "navigate_to_app",
+    "add_scope_target",
+    "toggle_browser_crawl",
     MEMORY_SEARCH_TOOL,
     MEMORY_SAVE_TOOL,
     NOTES_GET_TOOL,
@@ -52,9 +58,16 @@ const AUTO_APPROVED_TOOLS: &[&str] = &[
 ];
 
 /// Tier 2 — require explicit user confirmation in chat before executing: tools that
-/// change proxy/attack state or write content. start_invoker_attack lives here (it was
-/// previously hard-denied by the default policy, leaving the capability dead).
-const CONFIRMATION_TOOLS: &[&str] = &["trigger_scan", "start_invoker_attack", "toggle_intercept"];
+/// change proxy/attack state or write content. start_invoker_attack lives here.
+const CONFIRMATION_TOOLS: &[&str] = &[
+    "trigger_scan",
+    "start_invoker_attack",
+    "stop_invoker_attack",
+    "toggle_intercept",
+    "drop_paused_request",
+    "remove_scope_target",
+    "stop_browser_crawl",
+];
 
 enum ToolAuthorization {
     AutoApproved,
@@ -153,12 +166,119 @@ fn next_call_id() -> String {
 fn frontend_tool_definitions() -> Vec<ToolDefinition> {
     vec![
         crate::tools::SendToRepeaterTool.definition(),
+        ToolDefinition {
+            name: "send_repeater_request".to_string(),
+            description: "Execute the active HTTP request in Repeater Forge and view the live response."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {},
+                "required": []
+            }),
+        },
         crate::tools::CreateCollectionTool.definition(),
         crate::tools::CreateFolderTool.definition(),
         crate::tools::CreateEndpointTool.definition(),
         crate::tools::StartInvokerAttackTool.definition(),
+        ToolDefinition {
+            name: "stop_invoker_attack".to_string(),
+            description: "Stop the active Intruder / Invoker fuzzing attack.".to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {},
+                "required": []
+            }),
+        },
+        ToolDefinition {
+            name: "send_to_intruder".to_string(),
+            description: "Load an HTTP request into Intruder for parameter fuzzing and payload injection."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "logId": { "type": "string", "description": "Proxy history log ID" },
+                    "rawRequest": { "type": "string", "description": "Raw HTTP request string" },
+                    "payloadValues": { "type": "array", "items": { "type": "string" }, "description": "Optional payload values" }
+                }
+            }),
+        },
         crate::tools::ToggleInterceptTool.definition(),
+        ToolDefinition {
+            name: "forward_paused_request".to_string(),
+            description: "Forward the currently paused/intercepted HTTP request in the proxy queue."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {},
+                "required": []
+            }),
+        },
+        ToolDefinition {
+            name: "drop_paused_request".to_string(),
+            description: "Drop and discard the currently paused/intercepted HTTP request in the proxy queue."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {},
+                "required": []
+            }),
+        },
         crate::tools::TriggerScanTool.definition(),
+        ToolDefinition {
+            name: "toggle_browser_crawl".to_string(),
+            description: "Pause or resume the active browser crawl session.".to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {},
+                "required": []
+            }),
+        },
+        ToolDefinition {
+            name: "stop_browser_crawl".to_string(),
+            description: "Stop and terminate the active browser crawl session.".to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {},
+                "required": []
+            }),
+        },
+        ToolDefinition {
+            name: "navigate_to_app".to_string(),
+            description: "Navigate to, open, and focus a HexBuffer application window (e.g. repeater, http-history, intercept, intruder, notes, port-scanner, jwt, browser, settings, api-mock, api-override)."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "app": { "type": "string", "description": "Target window/app name" }
+                },
+                "required": ["app"]
+            }),
+        },
+        ToolDefinition {
+            name: "add_scope_target".to_string(),
+            description: "Add a target host or domain to the authorized in-scope target list."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "host": { "type": "string", "description": "Target host (e.g. example.com)" },
+                    "name": { "type": "string", "description": "Optional friendly label" }
+                },
+                "required": ["host"]
+            }),
+        },
+        ToolDefinition {
+            name: "remove_scope_target".to_string(),
+            description: "Remove a target host or domain from the in-scope target list."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "target": { "type": "string", "description": "Target hostname or ID" }
+                },
+                "required": ["target"]
+            }),
+        },
     ]
 }
 
@@ -743,22 +863,34 @@ pub struct ToolLoopOutput {
 
 pub fn get_agent_for_tool(tool_name: &str) -> Option<&'static super::agents::AgentSpec> {
     match tool_name {
-        "save_memory_note" | "search_memory" => {
+        "save_memory_note" | "search_memory" | "navigate_to_app" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::Orchestrator))
         }
         "write_note" | "get_notes" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::Notes))
         }
-        "send_to_repeater" | "create_collection" | "create_folder" | "create_endpoint" => {
+        "send_to_repeater"
+        | "send_repeater_request"
+        | "create_collection"
+        | "create_folder"
+        | "create_endpoint" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::Repeater))
         }
-        "start_invoker_attack" => {
+        "start_invoker_attack" | "stop_invoker_attack" | "send_to_intruder" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::Intruder))
         }
-        "toggle_intercept" | "get_crawl_context" => {
+        "toggle_intercept"
+        | "forward_paused_request"
+        | "drop_paused_request"
+        | "add_scope_target"
+        | "remove_scope_target"
+        | "get_crawl_context"
+        | "trigger_scan"
+        | "toggle_browser_crawl"
+        | "stop_browser_crawl" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::HttpTraffic))
         }
-        "trigger_port_scan" | "trigger_scan" => {
+        "trigger_port_scan" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::PortScanner))
         }
         super::agents::jwt_tools::DECODE_JWT_TOOL
@@ -776,11 +908,26 @@ pub fn is_terminal_action_tool(tool_name: &str) -> bool {
         "save_memory_note"
             | "write_note"
             | "decode_jwt"
+            | super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL
+            | super::agents::jwt_tools::TAMPER_JWT_TOOL
             | "send_to_repeater"
+            | "send_repeater_request"
             | "create_collection"
             | "create_folder"
             | "create_endpoint"
             | "toggle_intercept"
+            | "forward_paused_request"
+            | "drop_paused_request"
+            | "start_invoker_attack"
+            | "stop_invoker_attack"
+            | "send_to_intruder"
+            | "trigger_port_scan"
+            | "trigger_scan"
+            | "toggle_browser_crawl"
+            | "stop_browser_crawl"
+            | "navigate_to_app"
+            | "add_scope_target"
+            | "remove_scope_target"
     )
 }
 
@@ -874,6 +1021,46 @@ pub fn format_specialist_message(
         }
         "decode_jwt" => {
             format!("🔑 **JWT Decoded**\n\n{result}")
+        }
+        "send_repeater_request" => {
+            let method = args.get("method").and_then(|v| v.as_str()).unwrap_or("GET");
+            let url = args.get("url").and_then(|v| v.as_str()).unwrap_or("request");
+            format!("🚀 **Executed Repeater Request**\n\nSent `{method} {url}`.\n\n{result}")
+        }
+        "stop_invoker_attack" => {
+            format!("🛑 **Intruder Attack Stopped**\n\n{result}")
+        }
+        "send_to_intruder" => {
+            let target = args
+                .get("url")
+                .or_else(|| args.get("path"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("request");
+            format!("🎯 **Dispatched to Intruder**\n\nDispatched `{target}` to Intruder for security fuzzing.")
+        }
+        "forward_paused_request" => {
+            format!("▶️ **Forwarded Intercepted Request**\n\n{result}")
+        }
+        "drop_paused_request" => {
+            format!("🗑️ **Dropped Intercepted Request**\n\n{result}")
+        }
+        "toggle_browser_crawl" => {
+            format!("🌐 **Browser Crawl State Changed**\n\n{result}")
+        }
+        "stop_browser_crawl" => {
+            format!("🛑 **Browser Crawl Stopped**\n\n{result}")
+        }
+        "navigate_to_app" => {
+            let path = args.get("path").and_then(|v| v.as_str()).unwrap_or("window");
+            format!("🧭 **Navigated to Window**\n\nSwitched view to `{path}`.\n\n{result}")
+        }
+        "add_scope_target" => {
+            let host = args.get("host").and_then(|v| v.as_str()).unwrap_or("target");
+            format!("🎯 **Added Target to Scope**\n\nAdded `{host}` to active interception/proxy scope.\n\n{result}")
+        }
+        "remove_scope_target" => {
+            let host = args.get("host").and_then(|v| v.as_str()).unwrap_or("target");
+            format!("❌ **Removed Target from Scope**\n\nRemoved `{host}` from active scope.\n\n{result}")
         }
         super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL => {
             format!("🔐 **JWT Vulnerability Audit**\n\n{result}")
@@ -1180,9 +1367,9 @@ pub async fn run_tool_loop(
             ));
         }
 
-        if executed_terminal_action && !agent_messages.is_empty() {
+        if executed_terminal_action {
             if accumulated_full_response.trim().is_empty() {
-                accumulated_full_response = "I've coordinated with the specialist team to fulfill your request.".to_string();
+                accumulated_full_response = "The requested tool action has executed successfully.".to_string();
             }
             return Ok(ToolLoopOutput {
                 content: accumulated_full_response,

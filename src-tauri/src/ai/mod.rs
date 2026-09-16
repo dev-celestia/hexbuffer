@@ -7,6 +7,7 @@ pub mod embeddings;
 pub mod keyring;
 pub mod policy;
 pub mod providers;
+pub mod router;
 pub mod settings;
 pub mod token_usage;
 pub mod tool_loop;
