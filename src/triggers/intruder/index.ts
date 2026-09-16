@@ -9,9 +9,4 @@ export {
   stopInvokerUiAttack,
   stopIntruderUiAttack,
 } from './ui';
-export {
-  INTRUDER_AI_TOOL_DEFINITION,
-  INVOKER_AI_TOOL_DEFINITION,
-  executeStartIntruderAttackAiTool,
-  executeStartInvokerAttackAiTool,
-} from './ai-tool';
+export { INVOKER_AI_TOOL_DEFINITION, executeStartInvokerAttackAiTool } from './ai-tool';

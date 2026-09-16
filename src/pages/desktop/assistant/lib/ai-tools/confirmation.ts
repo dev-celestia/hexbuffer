@@ -19,7 +19,6 @@ const CONFIRMATION_TTL_MS = 600_000;
 const TOOL_LABELS: Record<string, string> = {
   trigger_scan: 'Launch a browser scan',
   start_invoker_attack: 'Launch an Invoker attack',
-  start_intruder_attack: 'Launch an Intruder attack',
   toggle_intercept: 'Toggle proxy interception',
 };
 

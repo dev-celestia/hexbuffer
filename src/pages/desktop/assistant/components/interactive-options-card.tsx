@@ -1,6 +1,8 @@
 import { Badge } from '@celestia-project/ui';
+import { motion } from 'motion/react';
 import type { ParsedOptionItem } from '../lib/option-parser';
 import { cn } from '@/lib/utils';
+import { DURATION, EASE_OUT, PRESS_SCALE, staggerDelay } from '../lib/motion';
 
 interface InteractiveOptionsCardProps {
   options: ParsedOptionItem[];
@@ -44,12 +46,16 @@ export function InteractiveOptionsCard({
           'flex flex-col gap-2.5 w-full',
         )}
       >
-        {options.map((opt) => (
-          <button
+        {options.map((opt, idx) => (
+          <motion.button
             key={opt.id}
             type="button"
             disabled={disabled}
             onClick={() => onSelectOption(opt.prompt)}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: DURATION.base, ease: EASE_OUT, delay: staggerDelay(idx) }}
+            whileTap={disabled ? undefined : { scale: PRESS_SCALE }}
             className={cn(
               // Layout & Positioning
               'flex items-start gap-3 text-start w-full cursor-pointer',
@@ -112,7 +118,7 @@ export function InteractiveOptionsCard({
               </div>
             </div>
 
-          </button>
+          </motion.button>
         ))}
 
         {/* Option 3: User can type custom response */}

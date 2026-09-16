@@ -34,7 +34,11 @@ where
 }
 
 pub fn dispatch_tool_call(name: &str, args: serde_json::Value) {
-    if let Some(ref handler) = *get_handler_lock().read() {
-        handler(name, args);
+    match *get_handler_lock().read() {
+        Some(ref handler) => handler(name, args),
+        None => eprintln!(
+            "[tools] No tool call handler is registered; dropping '{name}' instead of \
+             reporting a false success."
+        ),
     }
 }

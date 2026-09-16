@@ -1,5 +1,7 @@
 import { Button, Tool, ToolHeader, ToolContent, ToolInput, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
+import { motion } from 'motion/react';
 import { useState } from 'react';
+import { DURATION, EASE_OUT } from '../lib/motion';
 
 import {
   approveToolConfirmation,
@@ -32,6 +34,12 @@ export function ToolConfirmationCard({ confirmation }: ToolConfirmationCardProps
   const label = toolConfirmationLabel(confirmation.toolName);
 
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ duration: DURATION.base, ease: EASE_OUT }}
+    >
     <Tool
       defaultOpen
       className={cn(
@@ -95,6 +103,7 @@ export function ToolConfirmationCard({ confirmation }: ToolConfirmationCardProps
         </div>
       </ToolContent>
     </Tool>
+    </motion.div>
   );
 }
 

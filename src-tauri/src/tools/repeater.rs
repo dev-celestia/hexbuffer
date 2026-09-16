@@ -69,7 +69,10 @@ impl Tool for SendToRepeaterTool {
                 "headers": { "type": "object", "description": "Optional request headers key-value map" },
                 "body": { "type": "string", "description": "Optional request body (POST/PUT/PATCH)" },
                 "name": { "type": "string", "description": "Optional endpoint name shown in Repeater" }
-            }
+            },
+            // Either a full raw request or a URL must be supplied; `host` is only
+            // needed alongside a relative `url`.
+            "anyOf": [{ "required": ["raw_request"] }, { "required": ["url"] }]
         })
     }
 

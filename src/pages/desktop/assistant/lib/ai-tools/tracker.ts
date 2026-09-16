@@ -14,7 +14,6 @@ const actionLabels: Record<string, string> = {
   create_collection: 'Creating Repeater collection',
   create_folder: 'Creating folder in collection',
   create_endpoint: 'Adding request to collection',
-  start_intruder_attack: 'Launching fuzzing attack',
   start_invoker_attack: 'Launching fuzzing attack',
   toggle_intercept: 'Toggling proxy interception',
   trigger_scan: 'Launching browser scan',

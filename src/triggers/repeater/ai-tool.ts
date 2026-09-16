@@ -99,6 +99,9 @@ export const REPEATER_AI_TOOL_DEFINITION = {
         description: 'Optional endpoint name shown in Repeater',
       },
     },
+    // Either a full raw request or a URL must be supplied; `host` is only needed
+    // alongside a relative `url`.
+    anyOf: [{ required: ['raw_request'] }, { required: ['url'] }],
   },
 };
 

@@ -402,79 +402,6 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
             borderClass,
           )}
         >
-          {/* Top Bar inside bubble: Timestamp & Side Actions (Copy, Fold) */}
-          <div
-            className={cn(
-              // Layout & Positioning
-              'flex items-center justify-end gap-1.5 w-full mb-1',
-            )}
-          >
-            <span
-              className={cn(
-                // Typography
-                'text-[10px] text-muted-foreground/60 font-mono select-none mr-auto',
-              )}
-            >
-              {timestamp}
-            </span>
-
-            {/* Side Copy Icon */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  aria-label={copied ? 'Copied' : 'Copy message'}
-                  className={cn(
-                    // Layout & Positioning
-                    'flex items-center justify-center',
-                    // Sizing & Spacing
-                    'size-6 rounded-md p-1',
-                    // Typography
-                    'text-muted-foreground',
-                    // Interactive & States
-                    'hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer',
-                  )}
-                >
-                  {copied ? (
-                    <CheckIcon className="size-3.5 text-success" />
-                  ) : (
-                    <CopyIcon className="size-3.5" />
-                  )}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="text-xs">
-                {copied ? 'Copied!' : 'Copy response'}
-              </TooltipContent>
-            </Tooltip>
-
-            {/* Fold Button */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={handleToggleFold}
-                  aria-label="Fold response"
-                  className={cn(
-                    // Layout & Positioning
-                    'flex items-center justify-center',
-                    // Sizing & Spacing
-                    'size-6 rounded-md p-1',
-                    // Typography
-                    'text-muted-foreground',
-                    // Interactive & States
-                    'hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer',
-                  )}
-                >
-                  <CaretUpIcon className="size-3.5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="text-xs">
-                Fold response
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
           {/* Message Response Content - Protected against horizontal overflow */}
           <div
             className={cn(
@@ -490,6 +417,86 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
             >
               {text}
             </MessageResponse>
+          </div>
+
+          {/* Footer Bar inside bubble: Timestamp & Side Actions (Copy, Fold) */}
+          <div
+            className={cn(
+              // Layout & Positioning
+              'flex items-center justify-between gap-1.5 w-full mt-1',
+            )}
+          >
+            <span
+              className={cn(
+                // Typography
+                'text-[10px] text-muted-foreground/60 font-mono select-none',
+              )}
+            >
+              {timestamp}
+            </span>
+
+            <div
+              className={cn(
+                // Layout & Positioning
+                'flex items-center gap-1.5 shrink-0',
+              )}
+            >
+              {/* Side Copy Icon */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    aria-label={copied ? 'Copied' : 'Copy message'}
+                    className={cn(
+                      // Layout & Positioning
+                      'flex items-center justify-center',
+                      // Sizing & Spacing
+                      'size-6 rounded-md p-1',
+                      // Typography
+                      'text-muted-foreground',
+                      // Interactive & States
+                      'hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer',
+                    )}
+                  >
+                    {copied ? (
+                      <CheckIcon className="size-3.5 text-success" />
+                    ) : (
+                      <CopyIcon className="size-3.5" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">
+                  {copied ? 'Copied!' : 'Copy response'}
+                </TooltipContent>
+              </Tooltip>
+
+              {/* Fold Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={handleToggleFold}
+                    aria-label="Fold response"
+                    className={cn(
+                      // Layout & Positioning
+                      'flex items-center justify-center',
+                      // Sizing & Spacing
+                      'size-6 rounded-md p-1',
+                      // Typography
+                      'text-muted-foreground',
+                      // Interactive & States
+                      'hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer',
+                    )}
+                  >
+                    <CaretUpIcon className="size-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">
+                  Fold response
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </div>
 
           {/* Bottom Fold Toggle for Long Messages */}

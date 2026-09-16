@@ -119,58 +119,14 @@ pub fn get_latest_debug_snapshot(window_label: &str) -> Option<AiDebugSnapshot> 
 }
 
 pub fn get_registered_tools_debug() -> Vec<AiToolDebugInfo> {
-    vec![
-        AiToolDebugInfo {
-            name: "send_to_repeater".to_string(),
-            description: "Normalize and send an HTTP request to Repeater tab with method, URL, headers, and body".to_string(),
-            tier: "auto_approved".to_string(),
-        },
-        AiToolDebugInfo {
-            name: "create_collection".to_string(),
-            description: "Create a request collection in the Repeater workspace".to_string(),
-            tier: "auto_approved".to_string(),
-        },
-        AiToolDebugInfo {
-            name: "create_folder".to_string(),
-            description: "Create a folder inside a collection in Repeater".to_string(),
-            tier: "auto_approved".to_string(),
-        },
-        AiToolDebugInfo {
-            name: "create_endpoint".to_string(),
-            description: "Add an endpoint to a Repeater collection or folder".to_string(),
-            tier: "auto_approved".to_string(),
-        },
-        AiToolDebugInfo {
-            name: "search_memory".to_string(),
-            description: "Search stored user knowledge memory notes using keywords or semantic embeddings".to_string(),
-            tier: "auto_approved".to_string(),
-        },
-        AiToolDebugInfo {
-            name: "save_memory_note".to_string(),
-            description: "Save discoveries, findings, or notes into the user's persistent memory".to_string(),
-            tier: "auto_approved".to_string(),
-        },
-        AiToolDebugInfo {
-            name: "get_crawl_context".to_string(),
-            description: "Query crawled pages, insights, and browser logs directly from the database".to_string(),
-            tier: "auto_approved".to_string(),
-        },
-        AiToolDebugInfo {
-            name: "toggle_intercept".to_string(),
-            description: "Enable or disable proxy HTTP traffic interception".to_string(),
-            tier: "confirmation_required".to_string(),
-        },
-        AiToolDebugInfo {
-            name: "start_invoker_attack".to_string(),
-            description: "Launch automated Intruder fuzzing / payload injection attack".to_string(),
-            tier: "confirmation_required".to_string(),
-        },
-        AiToolDebugInfo {
-            name: "trigger_scan".to_string(),
-            description: "Launch headless automated browser crawler and scanner on target URL".to_string(),
-            tier: "confirmation_required".to_string(),
-        },
-    ]
+    tool_loop::registered_tools_debug()
+        .into_iter()
+        .map(|(name, description, tier)| AiToolDebugInfo {
+            name,
+            description,
+            tier,
+        })
+        .collect()
 }
 
 pub async fn get_ai_debug_snapshot_impl(
@@ -508,7 +464,6 @@ pub async fn send_ai_chat_message_impl(
         prompt,
         cancel_rx,
         pause_rx,
-        0,
     )
     .await?;
 

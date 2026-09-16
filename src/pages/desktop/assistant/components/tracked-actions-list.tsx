@@ -16,8 +16,10 @@ import {
   SpinnerGapIcon,
   XCircleIcon,
 } from '@phosphor-icons/react';
+import { motion } from 'motion/react';
 import type { TrackedAction } from '../lib/ai-tools/tracker';
 import { cn } from '@/lib/utils';
+import { DURATION, EASE_OUT, staggerDelay } from '../lib/motion';
 
 interface TrackedActionsListProps {
   trackedActions: readonly TrackedAction[];
@@ -40,7 +42,10 @@ export function TrackedActionsList({ trackedActions, isStreaming }: TrackedActio
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: DURATION.base, ease: EASE_OUT }}
         className={cn(
           // Layout & Positioning
           'space-y-2 w-full min-w-0 max-w-full overflow-hidden',
@@ -92,9 +97,14 @@ export function TrackedActionsList({ trackedActions, isStreaming }: TrackedActio
                 'space-y-1.5 pt-2 w-full min-w-0 overflow-hidden',
               )}
             >
-              {trackedActions.map((ta) => (
-                <Collapsible
+              {trackedActions.map((ta, idx) => (
+                <motion.div
                   key={ta.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: DURATION.base, ease: EASE_OUT, delay: staggerDelay(idx) }}
+                >
+                <Collapsible
                   className={cn(
                     // Layout & Positioning
                     'group w-full min-w-0 overflow-hidden',
@@ -240,11 +250,12 @@ export function TrackedActionsList({ trackedActions, isStreaming }: TrackedActio
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
+                </motion.div>
               ))}
             </div>
           </TaskContent>
         </Task>
-      </div>
+      </motion.div>
     </TooltipProvider>
   );
 }

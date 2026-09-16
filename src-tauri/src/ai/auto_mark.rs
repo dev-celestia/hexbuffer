@@ -1,5 +1,4 @@
 use rig::client::AgentClientExt;
-use serde_json::{json, Value};
 use tauri::AppHandle;
 
 use super::chat::ensure_third_party_ai_sharing_allowed;
@@ -9,9 +8,6 @@ use super::settings::read_ai_settings;
 use super::types::{
     InvokerMarkerSuggestion, InvokerMarkerSuggestionRequest, InvokerMarkerSuggestionResponse,
 };
-
-/// Native tool name, callable by the Intruder agent.
-pub const SUGGEST_MARKERS_TOOL: &str = "suggest_invoker_markers";
 
 pub async fn suggest_invoker_markers_impl(
     app: AppHandle,
@@ -121,34 +117,4 @@ pub async fn suggest_invoker_markers_impl(
         suggestions,
         candidate_count,
     })
-}
-
-/// Tool-facing wrapper: takes the raw request from a model tool call and returns the
-/// suggestions as a compact JSON string suitable for feeding back as a tool result.
-pub async fn execute_marker_suggestion_tool(app: &AppHandle, args: &Value) -> String {
-    let raw_request = args
-        .get("raw_request")
-        .and_then(|value| value.as_str())
-        .unwrap_or("")
-        .trim();
-    if raw_request.is_empty() {
-        return "Error: 'raw_request' is required and must not be empty.".to_string();
-    }
-
-    match suggest_invoker_markers_impl(
-        app.clone(),
-        InvokerMarkerSuggestionRequest {
-            raw_request: raw_request.to_string(),
-        },
-    )
-    .await
-    {
-        Ok(response) => json!({
-            "status": "success",
-            "candidateCount": response.candidate_count,
-            "suggestions": response.suggestions,
-        })
-        .to_string(),
-        Err(error) => format!("Marker suggestion failed: {error}"),
-    }
 }

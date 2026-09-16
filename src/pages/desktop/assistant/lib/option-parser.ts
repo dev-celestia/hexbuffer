@@ -8,9 +8,44 @@ export interface ParsedOptionItem {
 }
 
 /**
+ * Extracts an option marker from a single line and returns the normalized option number
+ * plus the remaining content.
+ *
+ * Accepts the numbered and lettered lists this parser originally expected (1., 2), A., B))
+ * as well as the `Option A — …` headings the model actually writes instead — with or
+ * without a bullet prefix, and with or without bold around the marker. The `Option` form
+ * is re-emphasized so the title/description split below can separate the title from the
+ * description lines that follow it.
+ */
+function matchOptionLine(trimmed: string): { num: string; content: string } | null {
+  // Strip a bullet prefix so "- **Option A** — …" parses like the bare form.
+  const line = trimmed.replace(/^[-*+]\s+/, '');
+
+  const optionMatch = line.match(
+    /^(?:\*\*|__)?Option\s+([A-Za-z\d]{1,2})(?:\*\*|__)?\s*[:.)—–-]?\s*(.*)$/,
+  );
+  if (optionMatch) {
+    const body = optionMatch[2].replace(/[*_]+$/, '').trim();
+    if (!body) return null;
+    return {
+      num: optionMatch[1].toUpperCase(),
+      content: body.startsWith('**') || body.startsWith('__') ? body : `**${body}**`,
+    };
+  }
+
+  // Letters are capped at F: the card renders at most six options, so a later letter
+  // cannot be a real choice and is far more likely to be prose ("G. Smith noted").
+  const listMatch = line.match(/^(\d{1,2}|[A-Fa-f])[.)]\s+(.*)$/);
+  if (!listMatch) return null;
+
+  return { num: listMatch[1].toUpperCase(), content: listMatch[2] };
+}
+
+/**
  * Parses structured question options from assistant message markdown.
- * Detects numbered lists (1. **Title** ..., 2. **Title** ...) or lettered lists (A. ..., B. ...).
- * Returns an array of options if at least 2 sequential choices are found.
+ * Detects numbered lists (1. **Title** ...), lettered lists (A. ..., B. ...) and
+ * `Option A — ...` headings. Returns an array of options if at least 2 sequential
+ * choices are found.
  */
 export function parseMessageOptions(text: string): ParsedOptionItem[] {
   if (!text || typeof text !== 'string') return [];
@@ -18,23 +53,18 @@ export function parseMessageOptions(text: string): ParsedOptionItem[] {
   const lines = text.split('\n');
   const items: { num: string; content: string }[] = [];
 
-  const numberedRegex = /^\s*(?:(\d+)[\.\)]|([A-Za-z])[\.\)])\s+(.*)$/;
-
   let currentItem: { num: string; content: string } | null = null;
 
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
 
-    const match = trimmed.match(numberedRegex);
+    const match = matchOptionLine(trimmed);
     if (match) {
       if (currentItem) {
         items.push(currentItem);
       }
-      currentItem = {
-        num: match[1] || match[2].toUpperCase(),
-        content: match[3],
-      };
+      currentItem = match;
     } else if (currentItem) {
       // Check if this line marks the end of the question block
       const isBreakSection =

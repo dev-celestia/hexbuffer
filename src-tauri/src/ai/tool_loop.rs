@@ -10,7 +10,6 @@ use rig::streaming::StreamedAssistantContent;
 use serde_json::{json, Value};
 use tauri::{AppHandle, Emitter, Manager};
 
-use super::agents::{AgentId, INVOKE_AGENT_TOOL};
 use super::types::{AiChatAction, AiConfig};
 
 const MAX_TOOL_ROUNDS: usize = 8;
@@ -25,11 +24,6 @@ const CONFIRMATION_TIMEOUT_SECS: u64 = 600;
 /// Upper bound for tool results fed back into the conversation, limiting how much
 /// untrusted content can ride along in a single result.
 const TOOL_RESULT_MAX_CHARS: usize = 4000;
-/// Maximum nesting depth for `invoke_agent`. Only the orchestrator may delegate, so one
-/// level covers the intended orchestrator → specialist shape and bounds recursion.
-const MAX_AGENT_DEPTH: usize = 1;
-/// Upper bound on the task text handed to a delegated agent.
-const DELEGATED_TASK_MAX_CHARS: usize = 8000;
 
 /// Native read-only tool: returns crawl session data straight from the app database.
 const CRAWL_CONTEXT_TOOL: &str = "get_crawl_context";
@@ -184,69 +178,32 @@ fn tool_definitions() -> Vec<ToolDefinition> {
     definitions.extend(memory_tool_definitions());
     definitions.extend(super::agents::jwt_tools::jwt_tool_definitions());
     definitions.extend(super::agents::port_scanner_tools::port_scanner_tool_definitions());
-    definitions.extend(marker_suggestion_definitions());
-    definitions.push(invoke_agent_definition());
     definitions
 }
 
-/// The Intruder's marker-suggestion capability, surfaced as a real tool so its
-/// `allowed_tools` entry is not a no-op.
-fn marker_suggestion_definitions() -> Vec<ToolDefinition> {
-    vec![ToolDefinition {
-        name: super::auto_mark::SUGGEST_MARKERS_TOOL.to_string(),
-        description: "Analyze a raw HTTP request and suggest high-value parameter injection \
-        points to wrap in $target$ markers for Intruder fuzzing. Returns candidate \
-        parameter names with offsets."
-            .to_string(),
-        parameters: json!({
-            "type": "object",
-            "properties": {
-                "raw_request": {
-                    "type": "string",
-                    "description": "The full raw HTTP request text to analyze"
-                }
-            },
-            "required": ["raw_request"]
-        }),
-    }]
+/// The tier that governs a tool, as a stable string for the debug snapshot.
+/// Mirrors `authorize_tool` so the reported tier cannot drift from the enforced one.
+pub fn tool_tier(tool_name: &str) -> &'static str {
+    if tool_name == CRAWL_CONTEXT_TOOL || AUTO_APPROVED_TOOLS.contains(&tool_name) {
+        "auto_approved"
+    } else if CONFIRMATION_TOOLS.contains(&tool_name) {
+        "confirmation_required"
+    } else {
+        "policy_evaluated"
+    }
 }
 
-/// Delegation tool available to the orchestrator. The specialist list is generated from
-/// the registry so it cannot drift out of sync with the agents that actually exist.
-fn invoke_agent_definition() -> ToolDefinition {
-    let mut specialists = String::new();
-    for agent in super::agents::ALL_AGENTS
-        .iter()
-        .filter(|agent| agent.id != AgentId::Orchestrator)
-    {
-        specialists.push_str(&format!("- {} — {}\n", agent.slug, agent.description));
-    }
-
-    ToolDefinition {
-        name: INVOKE_AGENT_TOOL.to_string(),
-        description: format!(
-            "Delegate a self-contained subtask to a specialist agent and receive its \
-             findings. The specialist runs in an isolated context and CANNOT see this \
-             conversation, so the task must restate every input it needs (tokens, raw \
-             requests, URLs, prior findings). Specialists:\n{specialists}\
-             Use this when a request sits squarely inside one specialist's domain and \
-             benefits from its focused tool set. Answer general questions yourself."
-        ),
-        parameters: json!({
-            "type": "object",
-            "properties": {
-                "agent": {
-                    "type": "string",
-                    "description": "Specialist slug, e.g. \"jwt\", \"repeater\", \"http_traffic\", \"port_scanner\", \"intruder\", \"notes\"."
-                },
-                "task": {
-                    "type": "string",
-                    "description": "A complete, standalone description of the subtask, including all inputs the specialist needs."
-                }
-            },
-            "required": ["agent", "task"]
-        }),
-    }
+/// Authoritative tool inventory for the debug snapshot: every definition the model can
+/// see, paired with its enforced tier. Derived from `tool_definitions` and the tier
+/// lists rather than a hand-maintained copy, so it cannot go stale.
+pub fn registered_tools_debug() -> Vec<(String, String, String)> {
+    tool_definitions()
+        .into_iter()
+        .map(|def| {
+            let tier = tool_tier(&def.name).to_string();
+            (def.name, def.description, tier)
+        })
+        .collect()
 }
 
 fn memory_tool_definitions() -> Vec<ToolDefinition> {
@@ -409,97 +366,6 @@ async fn execute_memory_save(app: &AppHandle, args: &Value) -> String {
     }
 }
 
-/// Runs a delegated subtask under a specialist's own preamble and tool set. The nested
-/// loop shares the parent's cancellation signal, so aborting the parent aborts the
-/// specialist. Depth is bounded by `MAX_AGENT_DEPTH`.
-#[allow(clippy::too_many_arguments)]
-async fn execute_agent_delegation(
-    app: &AppHandle,
-    window_label: &str,
-    request_id: &str,
-    config: &AiConfig,
-    policy: &super::policy::SecurityApprovalPolicy,
-    args: &Value,
-    depth: usize,
-    actions: &mut Vec<AiChatAction>,
-    cancel_rx: &mut tokio::sync::watch::Receiver<bool>,
-    pause_rx: &tokio::sync::watch::Receiver<bool>,
-) -> String {
-    if depth >= MAX_AGENT_DEPTH {
-        return "Delegation depth limit reached: a specialist cannot delegate further."
-            .to_string();
-    }
-
-    let slug = args.get("agent").and_then(|value| value.as_str()).unwrap_or("");
-    let task = args.get("task").and_then(|value| value.as_str()).unwrap_or("");
-    if slug.trim().is_empty() || task.trim().is_empty() {
-        return "Failed: both 'agent' and 'task' are required.".to_string();
-    }
-
-    let Some(target) = AgentId::from_str_loose(slug) else {
-        let available: Vec<&str> = super::agents::ALL_AGENTS
-            .iter()
-            .filter(|agent| agent.id != AgentId::Orchestrator)
-            .map(|agent| agent.slug)
-            .collect();
-        return format!(
-            "Unknown specialist '{}'. Available: {}",
-            slug,
-            available.join(", ")
-        );
-    };
-    if target == AgentId::Orchestrator {
-        return "The orchestrator cannot delegate to itself.".to_string();
-    }
-    let spec = super::agents::get_agent_spec(target);
-
-    // The specialist gets a fresh history: it only sees the task, never the parent chat.
-    let _ = app.emit_to(
-        window_label,
-        "ai-chat:agent-delegated",
-        json!({
-            "requestId": request_id,
-            "agentId": spec.slug,
-            "agentName": spec.name,
-            "task": truncate_chars(task, 500),
-        }),
-    );
-
-    // Both signals are cloned from the parent, so aborting or pausing the parent applies
-    // to the specialist too. A dropped sender would make `changed()` resolve immediately
-    // and spin the nested select loop, so never fabricate a channel here.
-    let nested_cancel = cancel_rx.clone();
-    let nested_pause = pause_rx.clone();
-
-    // `Box::pin` breaks the async recursion cycle: the nested loop can itself reach this
-    // function, and an unboxed recursive future has no statically known size.
-    let outcome = Box::pin(run_tool_loop(
-        app,
-        window_label,
-        request_id,
-        config,
-        policy,
-        spec,
-        Vec::new(),
-        truncate_chars(task, DELEGATED_TASK_MAX_CHARS),
-        nested_cancel,
-        nested_pause,
-        depth + 1,
-    ))
-    .await;
-
-    match outcome {
-        Ok(output) => {
-            actions.extend(output.actions);
-            format!(
-                "{} ({}) reported:\n\n{}",
-                spec.name, spec.slug, output.content
-            )
-        }
-        Err(error) => format!("{} ({}) failed: {}", spec.name, spec.slug, error),
-    }
-}
-
 async fn execute_tool_call(
     app: &AppHandle,
     window_label: &str,
@@ -509,46 +375,11 @@ async fn execute_tool_call(
     tool_name: &str,
     args: Value,
     requires_confirmation: bool,
-    depth: usize,
     actions: &mut Vec<AiChatAction>,
     cancel_rx: &mut tokio::sync::watch::Receiver<bool>,
     pause_rx: &tokio::sync::watch::Receiver<bool>,
 ) -> String {
     let created_at = chrono::Utc::now().to_rfc3339();
-
-    if tool_name == INVOKE_AGENT_TOOL {
-        let result = execute_agent_delegation(
-            app,
-            window_label,
-            request_id,
-            config,
-            policy,
-            &args,
-            depth,
-            actions,
-            cancel_rx,
-            pause_rx,
-        )
-        .await;
-        actions.push(AiChatAction {
-            action: tool_name.to_string(),
-            payload: args,
-            result: Some(result.clone()),
-            created_at,
-        });
-        return result;
-    }
-
-    if tool_name == super::auto_mark::SUGGEST_MARKERS_TOOL {
-        let result = super::auto_mark::execute_marker_suggestion_tool(app, &args).await;
-        actions.push(AiChatAction {
-            action: tool_name.to_string(),
-            payload: args,
-            result: Some(result.clone()),
-            created_at,
-        });
-        return result;
-    }
 
     if tool_name == CRAWL_CONTEXT_TOOL {
         let result = execute_crawl_context(app);
@@ -745,16 +576,18 @@ pub fn get_agent_for_tool(tool_name: &str) -> Option<&'static super::agents::Age
         "send_to_repeater" | "create_collection" | "create_folder" | "create_endpoint" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::Repeater))
         }
-        "suggest_invoker_markers" | "start_invoker_attack" | "start_intruder_attack" => {
+        "start_invoker_attack" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::Intruder))
         }
         "toggle_intercept" | "get_crawl_context" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::HttpTraffic))
         }
-        "trigger_port_scan" | "trigger_scan" | "list_port_scans" | "get_scan_results" => {
+        "trigger_port_scan" | "trigger_scan" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::PortScanner))
         }
-        "decode_jwt" | "check_jwt_vulns" | "tamper_jwt" => {
+        super::agents::jwt_tools::DECODE_JWT_TOOL
+        | super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL
+        | super::agents::jwt_tools::TAMPER_JWT_TOOL => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::Jwt))
         }
         _ => None,
@@ -835,11 +668,8 @@ pub fn format_specialist_message(
                 .unwrap_or("Endpoint");
             format!("📌 **Saved Endpoint**\n\nSaved `{name}` to Repeater.")
         }
-        "start_invoker_attack" | "start_intruder_attack" => {
+        "start_invoker_attack" => {
             format!("⚡ **Fuzzing Attack Launched**\n\n{result}")
-        }
-        "suggest_invoker_markers" => {
-            format!("🎯 **Target Markers Suggested**\n\n{result}")
         }
         "toggle_intercept" => {
             format!("🛡️ **Proxy Interception**\n\n{result}")
@@ -857,10 +687,10 @@ pub fn format_specialist_message(
         "decode_jwt" => {
             format!("🔑 **JWT Decoded**\n\n{result}")
         }
-        "check_jwt_vulns" => {
+        super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL => {
             format!("🔐 **JWT Vulnerability Audit**\n\n{result}")
         }
-        "tamper_jwt" => {
+        super::agents::jwt_tools::TAMPER_JWT_TOOL => {
             format!("🛠️ **JWT Tamper Analysis**\n\n{result}")
         }
         _ => result.to_string(),
@@ -882,7 +712,6 @@ pub async fn run_tool_loop(
     prompt: String,
     mut cancel_rx: tokio::sync::watch::Receiver<bool>,
     mut pause_rx: tokio::sync::watch::Receiver<bool>,
-    depth: usize,
 ) -> Result<ToolLoopOutput, String> {
     let client =
         super::providers::create_openai_client(config).map_err(|e| e.to_string())?;
@@ -987,21 +816,15 @@ pub async fn run_tool_loop(
                                 StreamedAssistantContent::Text(t) => {
                                     if !t.text.is_empty() {
                                         round_streamed_text.push_str(&t.text);
-                                        // A delegated run's tokens are its own working
-                                        // output, captured and relayed by the parent.
-                                        // Emitting them here would splice the
-                                        // specialist's text into the parent's bubble.
-                                        if depth == 0 {
-                                            let _ = app.emit_to(
-                                                window_label,
-                                                "ai-chat:delta",
-                                                json!({ "requestId": request_id, "delta": t.text }),
-                                            );
-                                        }
+                                        let _ = app.emit_to(
+                                            window_label,
+                                            "ai-chat:delta",
+                                            json!({ "requestId": request_id, "delta": t.text }),
+                                        );
                                     }
                                 }
                                 StreamedAssistantContent::ReasoningDelta { reasoning, .. } => {
-                                    if !reasoning.is_empty() && depth == 0 {
+                                    if !reasoning.is_empty() {
                                         let _ = app.emit_to(
                                             window_label,
                                             "ai-chat:reasoning",
@@ -1111,7 +934,6 @@ pub async fn run_tool_loop(
                             &name,
                             args.clone(),
                             matches!(authz, ToolAuthorization::RequiresConfirmation),
-                            depth,
                             &mut actions,
                             &mut cancel_rx,
                             &pause_rx,

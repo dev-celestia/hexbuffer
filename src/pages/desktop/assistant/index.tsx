@@ -1,5 +1,6 @@
 import { PromptInputProvider } from '@celestia-project/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import type { FileUIPart } from 'ai';
 import { useNavigate } from 'react-router-dom';
 import { AssistantConversation } from './components/assistant-conversation';
@@ -12,6 +13,7 @@ import { useAiChatPane } from './hooks/use-ai-chat-pane';
 import { usePendingToolConfirmations } from './lib/ai-tools/confirmation';
 import { getMessageText } from './lib/message-utils';
 import { getContextWindow } from './constants';
+import { DURATION, EASE_OUT } from './lib/motion';
 import { useTokenUsageStore } from '@/stores/token-usage';
 import { useNavStore } from '@/stores/nav';
 import { cn } from '@/lib/utils';
@@ -165,48 +167,63 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
           'flex flex-1 min-h-0 overflow-hidden relative',
         )}
       >
-        {!sidebarCollapsed && (
-          compact ? (
-            <>
-              {/* Overlay Backdrop */}
-              <div
-                onClick={() => setSidebarCollapsed(true)}
-                className={cn(
-                  // Layout & Positioning
-                  'absolute inset-0 z-20',
-                  // Backgrounds & Borders
-                  'bg-background/60 backdrop-blur-xs cursor-pointer',
-                )}
+        <AnimatePresence initial={false}>
+          {!sidebarCollapsed && compact ? (
+            <motion.div
+              key="session-sidebar-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: DURATION.fast, ease: EASE_OUT }}
+              onClick={() => setSidebarCollapsed(true)}
+              className={cn(
+                // Layout & Positioning
+                'absolute inset-0 z-20',
+                // Backgrounds & Borders
+                'bg-background/60 backdrop-blur-xs cursor-pointer',
+              )}
+            />
+          ) : null}
+          {!sidebarCollapsed && compact ? (
+            <motion.div
+              key="session-sidebar-panel"
+              initial={{ opacity: 0, x: '-100%' }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: '-100%' }}
+              transition={{ duration: DURATION.base, ease: EASE_OUT }}
+              className={cn(
+                // Layout & Positioning
+                'absolute inset-y-0 left-0 z-30',
+                // Sizing & Spacing
+                'w-64 max-w-[85vw]',
+                // Backgrounds & Borders
+                'bg-background/95 backdrop-blur-md border-r border-border shadow-xl',
+              )}
+            >
+              <ChatSessionList
+                sessions={sessions}
+                activeSessionId={activeSessionId}
+                disabled={isStreaming}
+                onSelect={(id) => {
+                  handleSwitchSession(id);
+                  setSidebarCollapsed(true);
+                }}
+                onDelete={handleDeleteSession}
+                onCreate={() => {
+                  handleCreateSession();
+                  setSidebarCollapsed(true);
+                }}
+                onRename={handleRenameSession}
               />
-              <div
-                className={cn(
-                  // Layout & Positioning
-                  'absolute inset-y-0 left-0 z-30',
-                  // Sizing & Spacing
-                  'w-64 max-w-[85vw]',
-                  // Backgrounds & Borders
-                  'bg-background/95 backdrop-blur-md border-r border-border shadow-xl',
-                )}
-              >
-                <ChatSessionList
-                  sessions={sessions}
-                  activeSessionId={activeSessionId}
-                  disabled={isStreaming}
-                  onSelect={(id) => {
-                    handleSwitchSession(id);
-                    setSidebarCollapsed(true);
-                  }}
-                  onDelete={handleDeleteSession}
-                  onCreate={() => {
-                    handleCreateSession();
-                    setSidebarCollapsed(true);
-                  }}
-                  onRename={handleRenameSession}
-                />
-              </div>
-            </>
-          ) : (
-            <div
+            </motion.div>
+          ) : null}
+          {!sidebarCollapsed && !compact ? (
+            <motion.div
+              key="session-sidebar-static"
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -8 }}
+              transition={{ duration: DURATION.base, ease: EASE_OUT }}
               className={cn(
                 // Layout & Positioning
                 'shrink-0 z-20',
@@ -223,9 +240,9 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
                 onCreate={handleCreateSession}
                 onRename={handleRenameSession}
               />
-            </div>
-          )
-        )}
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
 
         <div
           className={cn(
@@ -274,9 +291,11 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
 
 export function AIAssistantPane({ onClose, compact, className }: AIAssistantPaneProps = {}) {
   return (
-    <PromptInputProvider>
-      <AIAssistantPaneContent onClose={onClose} compact={compact} className={className} />
-    </PromptInputProvider>
+    <MotionConfig reducedMotion="user">
+      <PromptInputProvider>
+        <AIAssistantPaneContent onClose={onClose} compact={compact} className={className} />
+      </PromptInputProvider>
+    </MotionConfig>
   );
 }
 

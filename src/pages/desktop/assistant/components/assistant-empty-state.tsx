@@ -1,5 +1,7 @@
 import { Agent, AgentContent, AgentHeader, ConversationEmptyState } from '@celestia-project/ui';
+import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { DURATION, EASE_OUT } from '../lib/motion';
 
 interface AssistantEmptyStateProps {
   model: string;
@@ -8,7 +10,10 @@ interface AssistantEmptyStateProps {
 
 export function AssistantEmptyState({ model, providerDisplay }: AssistantEmptyStateProps) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: DURATION.base, ease: EASE_OUT }}
       className={cn(
         // Layout & Positioning
         'flex flex-1 flex-col justify-center',
@@ -53,6 +58,6 @@ export function AssistantEmptyState({ model, providerDisplay }: AssistantEmptySt
           </AgentContent>
         </Agent>
       </ConversationEmptyState>
-    </div>
+    </motion.div>
   );
 }

@@ -4,11 +4,6 @@ pub mod port_scanner_tools;
 use rig::completion::ToolDefinition;
 use serde::{Deserialize, Serialize};
 
-/// Native delegation tool. A coordinating agent calls this to run a self-contained
-/// subtask under a specialist's own preamble and tool set. Declared here rather than
-/// in `tool_loop` so the registry can name it without a circular import.
-pub const INVOKE_AGENT_TOOL: &str = "invoke_agent";
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AgentId {
@@ -74,25 +69,9 @@ pub static ALL_AGENTS: &[AgentSpec] = &[
         role: "Master Coordinator",
         description: "Coordinates specialized security agents (HTTP Traffic, Repeater, Intruder, Memory, Port Scanner, JWT) and plans complex workflows.",
         preamble: "You are Celestia, the Orchestrator Agent in HexBuffer and the lead coordinator of a multi-agent cyber suite. \
-You can delegate a self-contained subtask to a specialist with the `invoke_agent` tool. The specialists are: \
-\
-1. http_traffic — proxy logs, traffic inspection, and interception control. \
-2. repeater — request crafting, replay, and collection management. \
-3. intruder — injection point detection, payload markers ($target$), and fuzzing. \
-4. memory — target intelligence and persistent memory. \
-5. port_scanner — port discovery, service detection, and attack surface mapping. \
-6. jwt — JWT decoding, claim auditing, and forgery checks. \
-\
-When a request falls squarely inside one specialist's domain and benefits from that specialist's focused tool set, call `invoke_agent` with the specialist slug and a task description that stands on its own (the specialist cannot see this conversation). Then relay what the specialist found in your own words and name the specialist that produced it. \
-Handle general security questions, cross-domain reasoning, and anything you can answer without tools yourself. \
-Never claim a specialist ran unless you actually called `invoke_agent` in this turn. \
+Handle general security questions and cross-domain reasoning yourself, and coordinate the specialized capabilities available to you. \
 After any tool call, summarize the action taken and its real outcome in natural language; never reply with raw JSON objects or raw tool result strings.",
-        allowed_tools: &[
-            "get_crawl_context",
-            "search_memory",
-            "save_memory_note",
-            INVOKE_AGENT_TOOL,
-        ],
+        allowed_tools: &["get_crawl_context", "search_memory", "save_memory_note"],
         mentions: &["celestia", "orchestrator", "auto"],
         color: "#8B5CF6",
         icon: "Crown",
@@ -133,12 +112,9 @@ Always summarize the exact method, URL, and collection updated, including the re
         slug: "intruder",
         name: "Intruder Agent",
         role: "Fuzzing & Injection",
-        description: "Analyzes injection points in HTTP requests, suggests $target$ payload markers, and initiates automated Intruder fuzzing attacks.",
-        preamble: "You are the Intruder Agent in HexBuffer. You specialize in web application parameter fuzzing, automated payload injection, brute force testing, and insertion point detection. You analyze raw requests to suggest injection markers ($target$) and configure Intruder attacks (Sniper, Battering Ram, Pitchfork). Never execute high-risk attacks without clear confirmation.",
-        allowed_tools: &[
-            super::auto_mark::SUGGEST_MARKERS_TOOL,
-            "start_invoker_attack",
-        ],
+        description: "Analyzes injection points in HTTP requests and initiates automated Intruder fuzzing attacks.",
+        preamble: "You are the Intruder Agent in HexBuffer. You specialize in web application parameter fuzzing, automated payload injection, brute force testing, and insertion point detection. You configure Intruder attacks (Sniper, Battering Ram, Pitchfork). Never execute high-risk attacks without clear confirmation.",
+        allowed_tools: &["start_invoker_attack"],
         mentions: &["intruder", "fuzzer", "invoker"],
         color: "#F59E0B",
         icon: "Crosshair",

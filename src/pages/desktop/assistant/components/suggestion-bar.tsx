@@ -1,12 +1,18 @@
 import { usePromptInputController, Suggestions, Suggestion } from '@celestia-project/ui';
+import { motion } from 'motion/react';
 import { SUGGESTION_PROMPTS } from '../constants';
 import { cn } from '@/lib/utils';
+import { DURATION, EASE_OUT } from '../lib/motion';
 
 export function SuggestionBar() {
   const controller = usePromptInputController();
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ duration: DURATION.base, ease: EASE_OUT }}
       className={cn(
         // Layout & Positioning
         'relative mx-auto',
@@ -43,7 +49,7 @@ export function SuggestionBar() {
           'bg-gradient-to-r from-background to-transparent',
         )}
       />
-    </div>
+    </motion.div>
   );
 }
 

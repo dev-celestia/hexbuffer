@@ -1,6 +1,6 @@
 import { Badge, Button } from '@celestia-project/ui';
-import { StarFourIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
+import celestiaIcon from '@/assets/celestia.png';
 import { useAiAssistantButton } from '../hooks/use-ai-assistant-button';
 
 export function AiAssistantButton() {
@@ -18,7 +18,7 @@ export function AiAssistantButton() {
         'flex items-center gap-1.5',
       )}
     >
-      <StarFourIcon className="size-3.5 text-violet-500" />
+      <img src={celestiaIcon} alt="" className="size-3.5" />
       <span>ASSISTANT</span>
       <Badge
         variant="secondary"

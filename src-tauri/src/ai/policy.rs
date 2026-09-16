@@ -13,8 +13,6 @@ impl SecurityApprovalPolicy {
         auto_approve.insert("create_collection".to_string());
         auto_approve.insert("create_folder".to_string());
         auto_approve.insert("create_endpoint".to_string());
-        auto_approve.insert("trigger_scan".to_string());
-        auto_approve.insert("toggle_intercept".to_string());
         Self { auto_approve }
     }
 
