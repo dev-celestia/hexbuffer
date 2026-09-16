@@ -70,6 +70,19 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
     updateAiSettings({ embeddingsApiKey: value });
   };
 
+  const handleInputKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        (event.key === 'a' || event.key === 'A' || event.code === 'KeyA')
+      ) {
+        event.preventDefault();
+        event.currentTarget.select();
+      }
+    },
+    [],
+  );
+
   return (
     <>
       <SettingsGroup label="Provider" description="Configure BYOK and the model used by the AI workflow.">
@@ -105,8 +118,13 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
           <Input
             value={aiSettings.customBaseUrl ?? ''}
             onChange={(event) => updateAiSettings({ customBaseUrl: event.target.value })}
+            onKeyDown={handleInputKeyDown}
             placeholder={OPENAI_COMPATIBLE_BASE_URL_PLACEHOLDER}
             disabled={aiSettingsLoading}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
             className={cn(
               // Sizing & Spacing
               "w-72"
@@ -119,8 +137,13 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
           <Input
             value={aiSettings.model}
             onChange={(event) => updateAiSettings({ model: event.target.value })}
+            onKeyDown={handleInputKeyDown}
             placeholder="e.g. gpt-4o-mini, llama3.1:8b"
             disabled={aiSettingsLoading}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
             className={cn(
               // Sizing & Spacing
               "w-40"
@@ -176,12 +199,19 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
             type={showApiKey ? 'text' : 'password'}
             value={apiKeyInput}
             onChange={(event) => handleApiKeyChange(event.target.value)}
+            onKeyDown={handleInputKeyDown}
             placeholder={
               aiSettings.hasApiKey && !aiSettings.apiKey
                 ? '••••••••••••••••••••••••'
                 : (AI_API_KEY_PLACEHOLDERS[aiSettings.provider] ?? 'API key')
             }
             disabled={aiSettingsLoading}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            data-1p-ignore="true"
+            data-lpignore="true"
             className={cn(
               // Sizing & Spacing
               "pr-9"
@@ -369,8 +399,13 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
           <Input
             value={aiSettings.embeddingsBaseUrl ?? ''}
             onChange={(event) => updateAiSettings({ embeddingsBaseUrl: event.target.value })}
+            onKeyDown={handleInputKeyDown}
             placeholder="https://api.openai.com/v1"
             disabled={aiSettingsLoading}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
             className={cn(
               // Sizing & Spacing
               "w-72"
@@ -384,8 +419,13 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
           <Input
             value={aiSettings.embeddingsModel ?? ''}
             onChange={(event) => updateAiSettings({ embeddingsModel: event.target.value })}
+            onKeyDown={handleInputKeyDown}
             placeholder="text-embedding-3-small"
             disabled={aiSettingsLoading}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
             className={cn(
               // Sizing & Spacing
               "w-56"
@@ -404,7 +444,6 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
             className={cn(
               // Layout & Positioning
               "relative",
-
               // Sizing & Spacing
               "w-56"
             )}
@@ -413,12 +452,19 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
               type={showEmbeddingsKey ? 'text' : 'password'}
               value={embeddingsKeyInput}
               onChange={(event) => handleEmbeddingsKeyChange(event.target.value)}
+              onKeyDown={handleInputKeyDown}
               placeholder={
                 hasEmbeddingsKey && !embeddingsKeyInput
                   ? '••••••••••••••••••••••••'
                   : 'sk-… (optional for Ollama)'
               }
               disabled={aiSettingsLoading}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              data-1p-ignore="true"
+              data-lpignore="true"
               className={cn(
                 // Sizing & Spacing
                 "pr-9"
