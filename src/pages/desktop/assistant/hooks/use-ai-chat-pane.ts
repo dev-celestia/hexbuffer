@@ -27,6 +27,7 @@ export function useAiChatPane() {
   const {
     aiSettings,
     aiSettingsLoading,
+    clearError,
     error,
     handleSubmit,
     isStreaming,
@@ -101,6 +102,7 @@ export function useAiChatPane() {
   return {
     aiSettings,
     aiSettingsLoading,
+    clearError,
     error,
     handleSubmit,
     handleModelChange,

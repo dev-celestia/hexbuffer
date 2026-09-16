@@ -87,7 +87,7 @@ export function AiConfigDialog({
               'flex items-center gap-2',
             )}
           >
-            <GearSixIcon className="size-4 text-violet-500" />
+            <GearSixIcon className="size-4 text-agent-orchestrator" />
             <DialogTitle>AI Assistant Configuration</DialogTitle>
             <Badge
               variant="secondary"
@@ -97,7 +97,7 @@ export function AiConfigDialog({
                 // Typography
                 'text-[9px] font-mono font-semibold uppercase tracking-wider',
                 // Backgrounds & Borders
-                'text-amber-500 bg-amber-500/10 border border-amber-500/20',
+                'text-warning bg-warning/10 border border-warning/20',
               )}
             >
               Alpha
@@ -243,7 +243,7 @@ export function AiConfigDialog({
                 <span
                   className={cn(
                     // Typography
-                    'text-[11px] text-green-500 font-medium',
+                    'text-[11px] text-success font-medium',
                   )}
                 >
                   Saved in OS Keyring
@@ -274,7 +274,8 @@ export function AiConfigDialog({
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowApiKey((prev) => !prev)}
-                tabIndex={-1}
+                aria-label={showApiKey ? 'Hide API key' : 'Show API key'}
+                title={showApiKey ? 'Hide API key' : 'Show API key'}
               >
                 {showApiKey ? <EyeSlashIcon className="size-4" /> : <EyeIcon className="size-4" />}
               </Button>

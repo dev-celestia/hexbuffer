@@ -61,9 +61,9 @@ export function TrackedActionsList({ trackedActions, isStreaming }: TrackedActio
               )}
             >
               {isStreaming ? (
-                <SpinnerGapIcon className="size-4 shrink-0 animate-spin text-blue-500" />
+                <SpinnerGapIcon className="size-4 shrink-0 animate-spin motion-reduce:animate-none text-info" />
               ) : (
-                <CheckCircleIcon className="size-4 shrink-0 text-emerald-500" weight="fill" />
+                <CheckCircleIcon className="size-4 shrink-0 text-success" weight="fill" />
               )}
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -121,11 +121,11 @@ export function TrackedActionsList({ trackedActions, isStreaming }: TrackedActio
                         <TooltipTrigger asChild>
                           <span className="shrink-0 cursor-default flex items-center justify-center">
                             {ta.status === 'completed' ? (
-                              <CheckCircleIcon className="size-4 text-emerald-500" weight="fill" />
+                              <CheckCircleIcon className="size-4 text-success" weight="fill" />
                             ) : ta.status === 'error' ? (
-                              <XCircleIcon className="size-4 text-rose-500" weight="fill" />
+                              <XCircleIcon className="size-4 text-destructive" weight="fill" />
                             ) : (
-                              <SpinnerGapIcon className="size-4 animate-spin text-blue-500" />
+                              <SpinnerGapIcon className="size-4 animate-spin motion-reduce:animate-none text-info" />
                             )}
                           </span>
                         </TooltipTrigger>

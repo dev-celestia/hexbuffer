@@ -38,7 +38,7 @@ export function ToolConfirmationCard({ confirmation }: ToolConfirmationCardProps
         // Sizing & Spacing
         'mb-3',
         // Backgrounds & Borders
-        'rounded-xl border border-amber-500/40 bg-amber-500/5',
+        'rounded-xl border border-warning/40 bg-warning/5',
       )}
     >
       <ToolHeader

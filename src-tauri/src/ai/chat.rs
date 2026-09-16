@@ -190,7 +190,7 @@ pub async fn get_ai_debug_snapshot_impl(
         .and_then(|c| serde_json::to_string_pretty(c).ok());
 
     Ok(AiDebugSnapshot {
-        system_prompt: tool_loop::PREAMBLE.to_string(),
+        system_prompt: super::agents::ALL_AGENTS[0].preamble.to_string(),
         app_context_raw: context_raw,
         app_context_object: context_value,
         memory_entries: Vec::new(),
@@ -427,7 +427,7 @@ pub async fn send_ai_chat_message_impl(
         record_debug_snapshot(
             &window_label,
             AiDebugSnapshot {
-                system_prompt: tool_loop::PREAMBLE.to_string(),
+                system_prompt: selected_agent.preamble.to_string(),
                 app_context_raw: context_raw,
                 app_context_object: context_value,
                 memory_entries: bank_entries.clone(),
@@ -455,6 +455,7 @@ pub async fn send_ai_chat_message_impl(
         prompt,
         cancel_rx,
         pause_rx,
+        0,
     )
     .await?;
 

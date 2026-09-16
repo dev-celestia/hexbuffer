@@ -26,6 +26,7 @@ export function ChatSessionList({
 }: ChatSessionListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -104,8 +105,6 @@ export function ChatSessionList({
           // Sizing & Spacing
           'p-1.5',
         )}
-        role="listbox"
-        aria-label="Chat sessions"
       >
         {sessions.length === 0 ? (
           <div
@@ -147,6 +146,7 @@ export function ChatSessionList({
                     <input
                       ref={inputRef}
                       type="text"
+                      aria-label={`Rename chat ${session.title}`}
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
                       onKeyDown={(e) => {
@@ -170,7 +170,7 @@ export function ChatSessionList({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="size-5 shrink-0 text-green-500 hover:text-green-600"
+                      className="size-5 shrink-0 text-success hover:text-success/80"
                       onClick={() => handleCommitRename(session.id)}
                       title="Save name"
                     >
@@ -201,7 +201,7 @@ export function ChatSessionList({
                     // Typography
                     'text-xs',
                     // Backgrounds & Borders
-                    'rounded-lg transition-all duration-150',
+                    'rounded-lg transition-colors duration-150',
                     isActive
                       ? 'bg-accent font-medium text-accent-foreground shadow-2xs'
                       : 'hover:bg-accent/40 text-muted-foreground hover:text-foreground',
@@ -211,6 +211,7 @@ export function ChatSessionList({
                   <button
                     type="button"
                     disabled={disabled}
+                    title={session.title}
                     aria-current={isActive ? 'true' : undefined}
                     onDoubleClick={() => handleStartRename(session)}
                     onClick={() => {
@@ -231,50 +232,95 @@ export function ChatSessionList({
                       // Layout & Positioning
                       'flex items-center gap-1 shrink-0',
                       // Interactive & States
-                      'opacity-0 group-hover:opacity-100 transition-opacity',
-                      isActive && 'opacity-100',
+                      'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity',
+                      (isActive || pendingDeleteId === session.id) && 'opacity-100',
                     )}
                   >
-                    {onRename && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        disabled={disabled}
-                        className={cn(
-                          // Sizing & Spacing
-                          'size-5 shrink-0 p-0',
-                          // Typography
-                          'text-muted-foreground hover:text-foreground',
+                    {pendingDeleteId === session.id ? (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={disabled}
+                          className={cn(
+                            // Sizing & Spacing
+                            'size-5 shrink-0 p-0',
+                            // Typography
+                            'text-destructive hover:text-destructive',
+                          )}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPendingDeleteId(null);
+                            if (!disabled) onDelete(session.id);
+                          }}
+                          title="Confirm delete"
+                          aria-label={`Confirm delete chat ${session.title}`}
+                        >
+                          <CheckIcon className="size-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={cn(
+                            // Sizing & Spacing
+                            'size-5 shrink-0 p-0',
+                            // Typography
+                            'text-muted-foreground hover:text-foreground',
+                          )}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPendingDeleteId(null);
+                          }}
+                          title="Cancel delete"
+                          aria-label="Cancel delete"
+                        >
+                          <XIcon className="size-3" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        {onRename && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={disabled}
+                            className={cn(
+                              // Sizing & Spacing
+                              'size-5 shrink-0 p-0',
+                              // Typography
+                              'text-muted-foreground hover:text-foreground',
+                            )}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStartRename(session);
+                            }}
+                            title="Rename chat"
+                            aria-label={`Rename chat ${session.title}`}
+                          >
+                            <PencilSimpleIcon className="size-3" />
+                          </Button>
                         )}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleStartRename(session);
-                        }}
-                        title="Rename chat"
-                        aria-label={`Rename chat ${session.title}`}
-                      >
-                        <PencilSimpleIcon className="size-3" />
-                      </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={disabled}
+                          className={cn(
+                            // Sizing & Spacing
+                            'size-5 shrink-0 p-0',
+                            // Typography
+                            'text-muted-foreground hover:text-destructive',
+                          )}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!disabled) setPendingDeleteId(session.id);
+                          }}
+                          title={disabled ? 'Waiting for the assistant to finish…' : 'Delete chat'}
+                          aria-label={`Delete chat ${session.title}`}
+                        >
+                          <TrashIcon className="size-3" />
+                        </Button>
+                      </>
                     )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={disabled}
-                      className={cn(
-                        // Sizing & Spacing
-                        'size-5 shrink-0 p-0',
-                        // Typography
-                        'text-muted-foreground hover:text-destructive',
-                      )}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!disabled) onDelete(session.id);
-                      }}
-                      title={disabled ? 'Waiting for the assistant to finish…' : 'Delete chat'}
-                      aria-label={`Delete chat ${session.title}`}
-                    >
-                      <TrashIcon className="size-3" />
-                    </Button>
                   </div>
                 </div>
               );

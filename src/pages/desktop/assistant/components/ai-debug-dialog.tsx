@@ -163,7 +163,7 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
                   // Typography
                   'text-[9px] font-mono font-semibold uppercase tracking-wider',
                   // Backgrounds & Borders
-                  'text-amber-500 bg-amber-500/10 border border-amber-500/20',
+                    'text-warning bg-warning/10 border border-warning/20',
                 )}
               >
                 Alpha
@@ -184,7 +184,7 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
                 title="Refresh snapshot"
               >
                 <ArrowClockwiseIcon
-                  className={cn('h-3.5 w-3.5', loading && 'animate-spin')}
+                  className={cn('h-3.5 w-3.5 text-muted-foreground', loading && 'animate-spin motion-reduce:animate-none')}
                 />
               </Button>
             </div>
@@ -488,9 +488,9 @@ export function AiDebugDialog({ open, onOpenChange }: AiDebugDialogProps) {
                           // Backgrounds & Borders
                           'rounded-md border',
                           msg.role === 'user'
-                            ? 'border-blue-500/30 bg-blue-500/5'
+                            ? 'border-info/30 bg-info/5'
                             : msg.role === 'assistant'
-                              ? 'border-green-500/30 bg-green-500/5'
+                              ? 'border-success/30 bg-success/5'
                               : 'border-border bg-muted/40',
                         )}
                       >

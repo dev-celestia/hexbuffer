@@ -14,7 +14,7 @@ import {
   ReasoningTrigger,
   Shimmer,
 } from '@celestia-project/ui';
-import { PaperclipIcon, PauseIcon, SpinnerGapIcon } from '@phosphor-icons/react';
+import { PaperclipIcon, PauseIcon, SpinnerGapIcon, XIcon } from '@phosphor-icons/react';
 import { Fragment, useMemo } from 'react';
 import type { DashboardChatMessage } from '../types';
 import { AssistantEmptyState } from './assistant-empty-state';
@@ -41,6 +41,7 @@ interface AssistantConversationProps {
   trackedActions: readonly TrackedAction[];
   pendingToolConfirmations: readonly PendingToolConfirmation[];
   error?: { message: string } | null;
+  onDismissError?: () => void;
   stickToBottomRef: React.RefObject<any>;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
 }
@@ -54,6 +55,7 @@ export function AssistantConversation({
   trackedActions,
   pendingToolConfirmations,
   error,
+  onDismissError,
   stickToBottomRef,
   messagesEndRef,
 }: AssistantConversationProps) {
@@ -152,7 +154,7 @@ export function AssistantConversation({
                                 'font-medium text-xs text-muted-foreground',
                               )}
                             >
-                              <PaperclipIcon className="size-3.5 text-blue-500 shrink-0" />
+                              <PaperclipIcon className="size-3.5 text-info shrink-0" />
                               <span>Attached file{attachedFiles.length > 1 ? 's' : ''} sent with prompt</span>
                             </div>
                             <Attachments variant="inline" className="flex flex-wrap gap-2">
@@ -177,6 +179,7 @@ export function AssistantConversation({
                         {reasoningParts.map((part, i) => (
                           <Reasoning
                             key={i}
+                            defaultOpen={false}
                             isStreaming={isStreaming && message.role === 'assistant'}
                           >
                             <ReasoningTrigger />
@@ -237,12 +240,12 @@ export function AssistantConversation({
                         >
                           {isPaused ? (
                             <>
-                              <PauseIcon className="size-4 shrink-0 text-amber-500" weight="fill" />
-                              <span className="text-amber-500 font-medium">Generation paused</span>
+                              <PauseIcon className="size-4 shrink-0 text-warning" weight="fill" />
+                              <span className="text-warning font-medium">Generation paused</span>
                             </>
                           ) : (
                             <>
-                              <SpinnerGapIcon className="size-4 shrink-0 animate-spin text-blue-500" />
+                              <SpinnerGapIcon className="size-4 shrink-0 animate-spin motion-reduce:animate-none text-info" />
                               <Shimmer duration={1}>Thinking and generating response…</Shimmer>
                             </>
                           )}
@@ -260,6 +263,8 @@ export function AssistantConversation({
                       role="alert"
                       aria-live="assertive"
                       className={cn(
+                        // Layout & Positioning
+                        'flex items-start justify-between gap-2',
                         // Sizing & Spacing
                         'p-3',
                         // Typography
@@ -268,7 +273,27 @@ export function AssistantConversation({
                         'rounded-lg border border-destructive/30 bg-destructive/10',
                       )}
                     >
-                      {error.message}
+                      <span className={cn('min-w-0 break-words')}>{error.message}</span>
+                      {onDismissError ? (
+                        <button
+                          type="button"
+                          onClick={onDismissError}
+                          aria-label="Dismiss error"
+                          title="Dismiss error"
+                          className={cn(
+                            // Layout & Positioning
+                            'flex items-center justify-center shrink-0',
+                            // Sizing & Spacing
+                            'size-5 rounded-md p-0.5',
+                            // Typography
+                            'text-destructive/70',
+                            // Interactive & States
+                            'hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer',
+                          )}
+                        >
+                          <XIcon className="size-3.5" />
+                        </button>
+                      ) : null}
                     </div>
                   </MessageContent>
                 </Message>

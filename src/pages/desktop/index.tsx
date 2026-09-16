@@ -85,13 +85,13 @@ export function DesktopPage() {
               "flex flex-col shrink-0 overflow-hidden relative z-0",
 
               // Sizing & Spacing
-              "w-full xl:w-[480px] h-[calc(100vh-theme(spacing.24))] min-h-[420px] max-h-[calc(100vh-120px))]",
+              "w-full xl:w-[480px] h-[calc(100vh-theme(spacing.24))] min-h-[420px] max-h-[calc(100vh-120px)]",
 
               // Backgrounds & Borders
               "rounded-2xl border border-border/60 bg-card/75 backdrop-blur-xl shadow-lg",
 
               // Interactive & States
-              "transition-all duration-300 ease-out"
+              "transition-[background-color,border-color,box-shadow] duration-300 ease-out"
             )}
           >
             <AIAssistantPane
@@ -217,7 +217,7 @@ export function DesktopPage() {
                     "bg-background/80 border-input",
 
                     // Interactive & States
-                    "focus:w-56 transition-all duration-150"
+                    "focus:w-56 transition-[width] duration-150"
                   )}
                 />
                 {searchQuery && (

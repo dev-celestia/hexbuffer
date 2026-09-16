@@ -39,6 +39,20 @@
   --color-brand: var(--brand);
   --color-highlight: var(--highlight);
 
+  /* Status semantics */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+
+  /* Agent identity colors */
+  --color-agent-orchestrator: var(--agent-orchestrator);
+  --color-agent-traffic: var(--agent-traffic);
+  --color-agent-repeater: var(--agent-repeater);
+  --color-agent-intruder: var(--agent-intruder);
+  --color-agent-notes: var(--agent-notes);
+  --color-agent-scanner: var(--agent-scanner);
+  --color-agent-jwt: var(--agent-jwt);
+
   /* Celestia UI tokens & motion */
   --color-bg: hsl(var(--bg, 0 0% 4%));
   --color-surface: hsl(var(--surface, 0 0% 8%));
@@ -73,6 +87,16 @@
 
 :root {
   --radius: 0.475rem;
+  --success: #059669;
+  --warning: #D97706;
+  --info: #2563EB;
+  --agent-orchestrator: #7C3AED;
+  --agent-traffic: #2563EB;
+  --agent-repeater: #059669;
+  --agent-intruder: #D97706;
+  --agent-notes: #9333EA;
+  --agent-scanner: #0891B2;
+  --agent-jwt: #E11D48;
   --background: oklch(97.993% 0.01043 106.761);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -108,6 +132,16 @@
 }
 
 .dark {
+  --success: #34D399;
+  --warning: #FBBF24;
+  --info: #60A5FA;
+  --agent-orchestrator: #A78BFA;
+  --agent-traffic: #60A5FA;
+  --agent-repeater: #34D399;
+  --agent-intruder: #FBBF24;
+  --agent-notes: #C084FC;
+  --agent-scanner: #22D3EE;
+  --agent-jwt: #FB7185;
   --background: oklch(24.776% 0.00003 271.152);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.145 0 0);

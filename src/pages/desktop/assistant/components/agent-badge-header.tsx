@@ -104,9 +104,9 @@ export function AgentBadgeHeader({
             // Sizing & Spacing
             'py-0 px-1.5',
             // Typography
-            'text-[10px] text-amber-500 border-amber-500/40',
+            'text-[10px] text-warning border-warning/40',
             // Backgrounds & Borders
-            'bg-amber-500/10',
+            'bg-warning/10',
           )}
         >
           Paused

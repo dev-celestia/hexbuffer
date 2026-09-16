@@ -85,7 +85,7 @@ export function AssistantHeader({
                 // Sizing & Spacing
                 'size-2',
                 // Backgrounds & Borders
-                'rounded-full bg-emerald-500 ring-1 ring-background',
+                'rounded-full bg-success ring-1 ring-background',
               )}
             />
           )}
@@ -112,7 +112,7 @@ export function AssistantHeader({
               // Typography
               'text-[9px] font-mono font-semibold uppercase tracking-wider',
               // Backgrounds & Borders
-              'text-amber-500 bg-amber-500/10 border border-amber-500/20',
+              'text-warning bg-warning/10 border border-warning/20',
             )}
           >
             Alpha
