@@ -120,6 +120,7 @@ export interface AiDebugMessage {
 }
 
 export interface AiDebugSnapshot {
+  sessionId?: string | null;
   systemPrompt: string;
   appContextRaw: string | null;
   appContextObject: Record<string, unknown> | null;

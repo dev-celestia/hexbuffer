@@ -245,6 +245,7 @@ pub struct AiToolDebugInfo {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AiDebugSnapshot {
+    pub session_id: Option<String>,
     pub system_prompt: String,
     pub app_context_raw: Option<String>,
     pub app_context_object: Option<Value>,

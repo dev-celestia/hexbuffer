@@ -50,6 +50,7 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
     setSelectedAgent,
   } = useAiChatPane();
 
+  const activeSession = sessions.find((s) => s.id === activeSessionId);
   const [debugDialogOpen, setDebugDialogOpen] = useState(false);
 
   const handleOpenConfig = useCallback(() => {
@@ -148,6 +149,8 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: AIAssis
       <AiDebugDialog
         open={debugDialogOpen}
         onOpenChange={setDebugDialogOpen}
+        sessionId={activeSessionId}
+        sessionTitle={activeSession?.title}
       />
 
       {/* Body: Session list sidebar + Conversation & Prompt */}
