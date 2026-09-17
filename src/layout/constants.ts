@@ -37,84 +37,72 @@ import jwtIcon from '@/assets/app-icon/jwt.png';
 import portScannerIcon from '@/assets/app-icon/port-scanner.png';
 import apiOverrideIcon from '@/assets/app-icon/api-override.png';
 import apiMockIcon from '@/assets/app-icon/api-mock.png';
+import browserIcon from '@/assets/app-icon/browser.png';
+import memoryIcon from '@/assets/app-icon/memory.png';
+import fileExplorerIcon from '@/assets/app-icon/file-explorer.png';
+import regressionIcon from '@/assets/app-icon/regression.png';
 
 export type ImageSource = string | { src: string };
 
-export const APP_ICON_IMAGES: Record<string, ImageSource> = {
-  '/http-history': httpIcon,
-  'http-history': httpIcon,
-  '/http': httpIcon,
-  'http': httpIcon,
-  'standalone-http': httpIcon,
-  'hexbuffer http': httpIcon,
-  '/intercept': interceptIcon,
-  'intercept': interceptIcon,
-  '/intruder': intruderIcon,
-  'intruder': intruderIcon,
-  '/scratchpad': notesIcon,
-  'scratchpad': notesIcon,
-  '/notes': notesIcon,
-  'notes': notesIcon,
-  '/repeater': repeaterIcon,
-  'repeater': repeaterIcon,
-  '/settings': settingsIcon,
-  'settings': settingsIcon,
-  '/jwt': jwtIcon,
-  'jwt': jwtIcon,
-  '/port-scanner': portScannerIcon,
-  'port-scanner': portScannerIcon,
-  '/api-override': apiOverrideIcon,
-  'api-override': apiOverrideIcon,
-  '/api-mock': apiMockIcon,
-  'api-mock': apiMockIcon,
-};
+interface AppIconEntry {
+  image: ImageSource;
+  fileName: string;
+  aliases?: string[];
+}
 
 const APP_ICON_BASE_PATH = '/Users/arham/Desktop/project/apprecon/src/assets/app-icon';
 
-export const APP_ICON_FILE_PATHS: Record<string, string> = {
-  '/http-history': `${APP_ICON_BASE_PATH}/http.png`,
-  'http-history': `${APP_ICON_BASE_PATH}/http.png`,
-  '/http': `${APP_ICON_BASE_PATH}/http.png`,
-  'http': `${APP_ICON_BASE_PATH}/http.png`,
-  'standalone-http': `${APP_ICON_BASE_PATH}/http.png`,
-  'hexbuffer http': `${APP_ICON_BASE_PATH}/http.png`,
-  '/intercept': `${APP_ICON_BASE_PATH}/intercept.png`,
-  'intercept': `${APP_ICON_BASE_PATH}/intercept.png`,
-  '/intruder': `${APP_ICON_BASE_PATH}/intruder.png`,
-  'intruder': `${APP_ICON_BASE_PATH}/intruder.png`,
-  '/scratchpad': `${APP_ICON_BASE_PATH}/notes.png`,
-  'scratchpad': `${APP_ICON_BASE_PATH}/notes.png`,
-  '/notes': `${APP_ICON_BASE_PATH}/notes.png`,
-  'notes': `${APP_ICON_BASE_PATH}/notes.png`,
-  '/repeater': `${APP_ICON_BASE_PATH}/repeater.png`,
-  'repeater': `${APP_ICON_BASE_PATH}/repeater.png`,
-  '/settings': `${APP_ICON_BASE_PATH}/settings.png`,
-  'settings': `${APP_ICON_BASE_PATH}/settings.png`,
-  '/jwt': `${APP_ICON_BASE_PATH}/jwt.png`,
-  'jwt': `${APP_ICON_BASE_PATH}/jwt.png`,
-  '/port-scanner': `${APP_ICON_BASE_PATH}/port-scanner.png`,
-  'port-scanner': `${APP_ICON_BASE_PATH}/port-scanner.png`,
-  '/api-override': `${APP_ICON_BASE_PATH}/api-override.png`,
-  'api-override': `${APP_ICON_BASE_PATH}/api-override.png`,
-  '/api-mock': `${APP_ICON_BASE_PATH}/api-mock.png`,
-  'api-mock': `${APP_ICON_BASE_PATH}/api-mock.png`,
+const APP_ICONS: Record<string, AppIconEntry> = {
+  'http-history': { image: httpIcon, fileName: 'http.png', aliases: ['http', 'standalone-http', 'hexbuffer http'] },
+  intercept: { image: interceptIcon, fileName: 'intercept.png' },
+  intruder: { image: intruderIcon, fileName: 'intruder.png' },
+  scratchpad: { image: notesIcon, fileName: 'notes.png', aliases: ['notes'] },
+  repeater: { image: repeaterIcon, fileName: 'repeater.png' },
+  settings: { image: settingsIcon, fileName: 'settings.png' },
+  jwt: { image: jwtIcon, fileName: 'jwt.png' },
+  'port-scanner': { image: portScannerIcon, fileName: 'port-scanner.png' },
+  'api-override': { image: apiOverrideIcon, fileName: 'api-override.png' },
+  'api-mock': { image: apiMockIcon, fileName: 'api-mock.png' },
+  browser: { image: browserIcon, fileName: 'browser.png' },
+  memory: { image: memoryIcon, fileName: 'memory.png' },
+  'file-explorer': { image: fileExplorerIcon, fileName: 'file-explorer.png', aliases: ['file explorer'] },
+  regression: { image: regressionIcon, fileName: 'regression.png' },
 };
+
+function normalizeIconKey(key?: string): string {
+  return key?.trim().toLowerCase().replace(/^\/+/, '').replace(/\s+/g, '-') ?? '';
+}
+
+export const APP_ICON_IMAGES: Record<string, ImageSource> = {};
+export const APP_ICON_FILE_PATHS: Record<string, string> = {};
+
+for (const [key, { image, fileName, aliases = [] }] of Object.entries(APP_ICONS)) {
+  const filePath = `${APP_ICON_BASE_PATH}/${fileName}`;
+  const allKeys = [key, ...aliases];
+  for (const k of allKeys) {
+    const normalized = normalizeIconKey(k);
+    APP_ICON_IMAGES[normalized] = image;
+    APP_ICON_IMAGES[`/${normalized}`] = image;
+    APP_ICON_FILE_PATHS[normalized] = filePath;
+    APP_ICON_FILE_PATHS[`/${normalized}`] = filePath;
+  }
+}
 
 export function getAppIconImage(href: string, label?: string): string | undefined {
   const raw =
     APP_ICON_IMAGES[href] ||
-    APP_ICON_IMAGES[href.toLowerCase()] ||
-    (label ? APP_ICON_IMAGES[label.toLowerCase()] : undefined);
+    APP_ICON_IMAGES[normalizeIconKey(href)] ||
+    (label ? APP_ICON_IMAGES[normalizeIconKey(label)] || APP_ICON_IMAGES[label.toLowerCase()] : undefined);
   if (!raw) return undefined;
   return typeof raw === 'string' ? raw : raw.src;
 }
 
 export function getAppIconFilePath(hrefOrToolId: string, label?: string): string | undefined {
-  const key = hrefOrToolId.toLowerCase();
+  const normalizedKey = normalizeIconKey(hrefOrToolId);
   return (
-    APP_ICON_FILE_PATHS[key] ||
-    APP_ICON_FILE_PATHS[`/${key}`] ||
-    (label ? APP_ICON_FILE_PATHS[label.toLowerCase()] : undefined)
+    APP_ICON_FILE_PATHS[hrefOrToolId] ||
+    APP_ICON_FILE_PATHS[normalizedKey] ||
+    (label ? APP_ICON_FILE_PATHS[normalizeIconKey(label)] || APP_ICON_FILE_PATHS[label.toLowerCase()] : undefined)
   );
 }
 

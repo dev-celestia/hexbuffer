@@ -101,7 +101,7 @@ pub fn read_optional_ai_api_key(provider: &str) -> Result<Option<String>, String
     match keyring_entry(provider)?.get_password() {
         Ok(key) if key.trim().is_empty() => Ok(None),
         Ok(key) => {
-            let key = key.trim().to_string();
+            let key: String = key.trim().to_string();
             let _ = save_file_ai_api_key(provider, &key);
             cache_ai_api_key(provider, Some(key.clone()))?;
             Ok(Some(key))
