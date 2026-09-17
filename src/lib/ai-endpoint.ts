@@ -59,7 +59,16 @@ export function isLocalAiProviderEndpoint(
 }
 
 /**
- * True when the embeddings endpoint may actually be used.
+ * True when the embeddings endpoint is *permitted* to be used.
+ *
+ * This is the permission half only, and it answers exactly what the backend gate answers — it does
+ * **not** say the endpoint is configured. With sharing enabled it returns `true` even for an empty
+ * URL, so every caller must AND it with "a base URL and model are set" before claiming vector
+ * search is usable:
+ *
+ * ```ts
+ * const usable = configured && embeddingsEndpointAllowed(baseUrl, allowThirdPartyAiSharing);
+ * ```
  *
  * A named mirror of `embeddings_sharing_allowed` in `src-tauri/src/ai/embeddings.rs`:
  * `is_local_ai_url(base_url) || allow_third_party_ai_sharing`. It is URL-only, with no provider
@@ -68,8 +77,8 @@ export function isLocalAiProviderEndpoint(
  *
  * Keep the two sides in step. A caller that decides "is vector search usable?" from the endpoint
  * and model alone will claim the feature is on while the backend silently stores entries without
- * vectors, which is exactly how the memory toolbar came to report vector search as enabled on a
- * remote endpoint with sharing off.
+ * vectors, which is exactly how the memory toolbar and the settings badge came to report vector
+ * search as enabled on a remote endpoint with sharing off.
  */
 export function embeddingsEndpointAllowed(
   baseUrl: string | null | undefined,

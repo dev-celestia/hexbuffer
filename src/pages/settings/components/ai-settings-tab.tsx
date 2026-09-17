@@ -1,6 +1,7 @@
 import { Badge, Button, Checkbox, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@celestia-project/ui';
 import * as React from 'react';
 import { WarningCircleIcon, EyeIcon, EyeSlashIcon, FloppyDiskIcon, CheckIcon, TrashIcon } from '@phosphor-icons/react';
+import { embeddingsEndpointAllowed } from '@/lib/ai-endpoint';
 import { cn } from '@/lib/utils';
 
 import {
@@ -300,8 +301,18 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
     aiSettings.provider === 'anthropic';
   const isCustomCompatible = isOpenAiCompatible || isAnthropicCompatible;
   const modelOptions = AI_MODEL_OPTIONS_BY_PROVIDER[aiSettings.provider] ?? [];
+  // Configuration is not the same as usability: the backend also requires a loopback endpoint or
+  // third-party sharing consent (`embeddings_sharing_allowed` in Rust). Reading only the endpoint
+  // and model made this badge claim "Vector Search Active" directly beneath a sharing toggle that
+  // was off, while `tool_loop.rs` stored every new entry without a vector and raised nothing.
   const embeddingsConfigured =
     !!aiSettings.embeddingsBaseUrl?.trim() && !!aiSettings.embeddingsModel?.trim();
+  // `embeddingsEndpointAllowed` is only the *permission* half — it is true whenever sharing is on,
+  // configured or not — so it must be ANDed with "is configured" or an empty endpoint with sharing
+  // on would report vector search as active.
+  const embeddingsUsable =
+    embeddingsConfigured &&
+    embeddingsEndpointAllowed(aiSettings.embeddingsBaseUrl, aiSettings.allowThirdPartyAiSharing);
   // A provider switch clears the model, so this gate also covers the preset dropdowns — the
   // user must pick a model rather than silently inheriting one.
   const needsModel = !aiSettings.model.trim();
@@ -667,13 +678,19 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
         <SettingsRow
           label="Vector Search Status"
           description={
-            embeddingsConfigured
+            embeddingsUsable
               ? 'Semantic vector retrieval is enabled using your configured embeddings model.'
-              : 'Vector search is inactive; falling back to SQLite FTS5 full-text keyword retrieval.'
+              : embeddingsConfigured
+                ? 'Embeddings are configured, but the endpoint is remote and third-party AI data sharing is off, so new entries are stored without vectors. Enable sharing below, or point the endpoint at a local server.'
+                : 'Vector search is inactive; falling back to SQLite FTS5 full-text keyword retrieval.'
           }
         >
-          <Badge variant={embeddingsConfigured ? 'default' : 'secondary'}>
-            {embeddingsConfigured ? 'Vector Search Active' : 'FTS5 Keyword Only'}
+          <Badge variant={embeddingsUsable ? 'default' : 'secondary'}>
+            {embeddingsUsable
+              ? 'Vector Search Active'
+              : embeddingsConfigured
+                ? 'Needs Sharing Consent'
+                : 'FTS5 Keyword Only'}
           </Badge>
         </SettingsRow>
       </SettingsGroup>

@@ -140,6 +140,46 @@ function countNotices(el: HTMLElement): number {
   return (el.textContent ?? '').split(BLOCKED_NOTICE).length - 1;
 }
 
+describe('vector search status badge', () => {
+  // The badge must mirror `embeddings_sharing_allowed` in Rust, not just the configuration. It
+  // previously read "Vector Search Active" for any configured endpoint — directly beneath a
+  // third-party-sharing toggle that was off, while the backend stored every entry without a vector.
+  const CONFIGURED = { embeddingsBaseUrl: 'https://api.openai.com/v1', embeddingsModel: 'text-embedding-3-small' };
+
+  test('reports active when sharing is on, whatever the endpoint', () => {
+    const el = render(makeState({ aiSettings: { ...CONFIGURED, allowThirdPartyAiSharing: true } }));
+    expect(el.textContent).toContain('Vector Search Active');
+  });
+
+  test('reports consent needed, not active, for a remote endpoint with sharing off', () => {
+    const el = render(makeState({ aiSettings: { ...CONFIGURED, allowThirdPartyAiSharing: false } }));
+
+    expect(el.textContent).not.toContain('Vector Search Active');
+    expect(el.textContent).toContain('Needs Sharing Consent');
+  });
+
+  test('reports active for a loopback endpoint without sharing consent', () => {
+    const el = render(
+      makeState({
+        aiSettings: {
+          embeddingsBaseUrl: 'http://localhost:11434/v1',
+          embeddingsModel: 'nomic-embed-text',
+          allowThirdPartyAiSharing: false,
+        },
+      }),
+    );
+
+    expect(el.textContent).toContain('Vector Search Active');
+  });
+
+  test('reports keyword-only when nothing is configured', () => {
+    const el = render(makeState({ aiSettings: { allowThirdPartyAiSharing: true } }));
+
+    expect(el.textContent).toContain('FTS5 Keyword Only');
+    expect(el.textContent).not.toContain('Needs Sharing Consent');
+  });
+});
+
 describe('saved-key row affordances', () => {
   test('a saved key invites a replacement instead of showing fake masked dots', () => {
     const el = render(makeState());

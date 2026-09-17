@@ -197,7 +197,7 @@ traffic is not yours to upload. Redact first, or review that diff yourself.
 | Job | Command | Measured | Blocking? |
 |---|---|---|---|
 | Frontend types | `tsc --noEmit -p tsconfig.json` | 40–150s | **Yes** — baseline 0 errors, so any error is new |
-| Frontend tests | `vitest run` | ~2.2 min | **Yes** — 228 tests / 20 files |
+| Frontend tests | `vitest run` | ~2.2 min | **Yes** — 233 tests / 20 files |
 | Backend tests | `cargo test --lib -- --test-threads=1` | ~4s warm, minutes cold | **Yes** — 161 tests. The single-thread flag is required; several tests touch process-global state |
 | Backend format | `rustfmt --check` on **changed files only** | instant | **Yes** — see the ratchet note |
 | Backend lints | `cargo clippy --all-targets` | ~30s warm | **Advisory** until the baseline is cleared |

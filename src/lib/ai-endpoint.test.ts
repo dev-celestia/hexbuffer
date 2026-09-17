@@ -112,4 +112,13 @@ describe('embeddingsEndpointAllowed', () => {
     // A LAN endpoint is remote, so it is gated like any other.
     expect(embeddingsEndpointAllowed('http://192.168.1.50:11434/v1', false)).toBe(false);
   });
+
+  it('is true for an unconfigured endpoint once sharing is on, so callers must AND with "configured"', () => {
+    // This answers "is it *permitted*?", not "is it *usable*?" — it mirrors the backend gate, which
+    // has nothing to say about whether an endpoint is set. Reading it as a readiness check shipped a
+    // real bug: sharing on + no endpoint reported "Vector Search Active" in the settings badge.
+    // Correct shape: `configured && embeddingsEndpointAllowed(baseUrl, sharing)`.
+    expect(embeddingsEndpointAllowed('', true)).toBe(true);
+    expect(embeddingsEndpointAllowed(undefined, true)).toBe(true);
+  });
 });
