@@ -6,6 +6,7 @@ pub mod commands;
 pub mod db;
 pub mod hashcat;
 pub mod history;
+pub mod memory;
 pub mod paths;
 #[path = "port-scanner/mod.rs"]
 pub mod port_scanner;
@@ -13,6 +14,9 @@ pub mod proxy;
 pub mod sqli;
 pub mod tools;
 
+pub use memory::{
+    DreamReportDto, EngineStatusDto, MemoryEdgeDto, MemoryItemDto, SaveMemoryDto, UtekeEngine,
+};
 pub use paths::{get_shared_app_dir, get_shared_db_path};
 
 pub use ai::{

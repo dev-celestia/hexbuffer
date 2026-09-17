@@ -82,6 +82,9 @@ const NucleiRunPage = React.lazy(() =>
 const SplitViewPage = React.lazy(() =>
   import("@/pages/split-view").then((m) => ({ default: m.SplitViewPage }))
 );
+const MemoryPage = React.lazy(() =>
+  import("@/pages/memory").then((m) => ({ default: m.MemoryPage }))
+);
 
 
 
@@ -138,6 +141,7 @@ function AppRoutes() {
           <Route path="/nuclei" element={<NucleiRunPage />} />
           <Route path="/scanner" element={<NucleiRunPage />} />
           <Route path="/split-view" element={<SplitViewPage />} />
+          <Route path="/memory" element={<MemoryPage />} />
         </Routes>
       </React.Suspense>
     </>

@@ -13,16 +13,15 @@ import type { Scratchpad } from '@/stores/scratchpad';
 export async function promoteNoteToMemory(note: Scratchpad): Promise<string> {
   const saved = await invoke<{ id: string }>('save_memory_entry', {
     entry: {
-      id: '',
       title: note.name.trim() || 'Untitled Note',
       content: note.note,
       tags: [],
-      sourceType: 'user',
-      sourceRef: note.id,
-      url: null,
+      namespace: 'default',
+      memoryType: 'fact',
+      importance: 0.5,
       pinned: false,
-      createdAt: '',
-      updatedAt: '',
+      source: note.id,
+      sourceType: 'note',
     },
   });
 

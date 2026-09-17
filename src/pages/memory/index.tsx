@@ -1,15 +1,18 @@
 import * as React from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { cn } from '@/lib/utils';
-import { useMemory } from './hooks/use-memory';
-import { MemoryToolbar } from './components/memory-toolbar';
-import { MemoryTable } from './components/memory-table';
-import { MemoryDetailPane } from './components/memory-detail-pane';
-import { MemoryEntryDialog } from './components/memory-entry-dialog';
-import { MemoryDeleteDialog } from './components/memory-delete-dialog';
+import { useMemoryPage } from './hooks/use-memory-page';
+import {
+  MemoryDetailPane,
+  MemoryDreamDialog,
+  MemoryEntryDialog,
+  MemoryLinkDialog,
+  MemoryTable,
+  MemoryToolbar,
+} from './components';
 
-export function MemoryTab() {
-  const state = useMemory();
+export function MemoryPage() {
+  const state = useMemoryPage();
 
   return (
     <div
@@ -21,8 +24,10 @@ export function MemoryTab() {
         "h-full"
       )}
     >
+      {/* Top Toolbar */}
       <MemoryToolbar state={state} />
 
+      {/* Main Split Content: Table & Detail Pane */}
       <div
         className={cn(
           // Layout & Positioning
@@ -30,14 +35,14 @@ export function MemoryTab() {
         )}
       >
         <ResizablePanelGroup orientation="horizontal" className="h-full min-h-0">
-          <ResizablePanel defaultSize="65" minSize="40">
+          <ResizablePanel defaultSize="60" minSize="35">
             <MemoryTable state={state} />
           </ResizablePanel>
 
           {state.selectedEntry && (
             <>
               <ResizableHandle withHandle />
-              <ResizablePanel defaultSize="35" minSize="25" maxSize="55">
+              <ResizablePanel defaultSize="40" minSize="25" maxSize="60">
                 <MemoryDetailPane state={state} />
               </ResizablePanel>
             </>
@@ -45,8 +50,12 @@ export function MemoryTab() {
         </ResizablePanelGroup>
       </div>
 
+      {/* Dialogs */}
       <MemoryEntryDialog state={state} />
-      <MemoryDeleteDialog state={state} />
+      <MemoryDreamDialog state={state} />
+      <MemoryLinkDialog state={state} />
     </div>
   );
 }
+
+export default MemoryPage;

@@ -536,28 +536,31 @@ fn execute_memory_search(app: &AppHandle, args: &Value) -> String {
         return "No query provided.".to_string();
     }
 
-    let state = app.state::<crate::HistoryBridge>();
-    match state.search_memory_keyword(query, 8) {
-        Ok(entries) if entries.is_empty() => {
-            format!("No memory entries match '{query}'.")
-        }
-        Ok(entries) => {
-            let payload: Vec<Value> = entries
-                .iter()
-                .map(|entry| {
-                    json!({
-                        "title": entry.title,
-                        "content": entry.content,
-                        "tags": entry.tags,
-                        "url": entry.url,
-                        "sourceType": entry.source_type,
+    if let Some(engine) = app.try_state::<crate::memory::UtekeEngine>() {
+        match engine.recall(query, 8, None) {
+            Ok(entries) if entries.is_empty() => {
+                format!("No memory entries match '{query}'.")
+            }
+            Ok(entries) => {
+                let payload: Vec<Value> = entries
+                    .iter()
+                    .map(|entry| {
+                        json!({
+                            "title": entry.title,
+                            "content": entry.content,
+                            "tags": entry.tags,
+                            "sourceType": entry.source_type,
+                            "memoryType": entry.memory_type,
+                        })
                     })
-                })
-                .collect();
-            serde_json::to_string(&payload)
-                .unwrap_or_else(|error| format!("Failed to serialize results: {error}"))
+                    .collect();
+                serde_json::to_string(&payload)
+                    .unwrap_or_else(|error| format!("Failed to serialize results: {error}"))
+            }
+            Err(error) => format!("Memory search failed: {error}"),
         }
-        Err(error) => format!("Memory search failed: {error}"),
+    } else {
+        "Memory engine not available".to_string()
     }
 }
 
@@ -600,54 +603,30 @@ async fn execute_memory_save(app: &AppHandle, args: &Value) -> String {
         })
         .unwrap_or_default();
 
-    let mut entry = crate::db::repository::types::MemoryEntry {
-        id: uuid::Uuid::new_v4().to_string(),
-        title: title_bounded,
-        content: content_bounded,
-        tags,
-        source_type: "ai".to_string(),
-        source_ref: None,
-        url: None,
-        pinned: false,
-        embedding: None,
-        embedding_model: None,
-        created_at: chrono::Utc::now().to_rfc3339(),
-        updated_at: chrono::Utc::now().to_rfc3339(),
-    };
+    if let Some(engine) = app.try_state::<crate::memory::UtekeEngine>() {
+        let dto = crate::memory::SaveMemoryDto {
+            id: None,
+            title: title_bounded,
+            content: content_bounded,
+            tags,
+            namespace: Some("default".to_string()),
+            memory_type: Some("fact".to_string()),
+            importance: Some(0.6),
+            pinned: Some(false),
+            source: Some("ai".to_string()),
+            source_type: Some("ai".to_string()),
+        };
 
-    // Embed for vector retrieval when an embeddings endpoint is configured and the user
-    // has authorized third-party AI sharing (the embeddings endpoint may be external).
-    let settings = match crate::ai::read_ai_settings(app) {
-        Ok(settings) => settings,
-        Err(error) => return format!("Failed to save memory note (settings unavailable): {error}"),
-    };
-    if let Ok(Some(config)) = super::embeddings::resolve_embeddings_config(&settings, app) {
-        if super::embeddings::embeddings_sharing_allowed(&settings, &config.base_url) {
-            let model = super::embeddings::build_embedding_model(&config);
-            let text = format!("{}\n{}", entry.title, entry.content);
-            match super::embeddings::embed_text(&model, &text).await {
-                Ok(vector) => {
-                    entry.embedding = Some(vector);
-                    entry.embedding_model = Some(config.model);
-                }
-                Err(error) => {
-                    eprintln!("[memory] embedding failed on AI save (stored without vector): {error}");
-                }
-            }
-        } else {
-            eprintln!("[memory] embeddings sharing disabled; note stored without vector");
+        match engine.save(dto) {
+            Ok(saved) => format!(
+                "Saved to memory: \"{}\" ({} tag(s)). The user can review it in Memory.",
+                saved.title,
+                saved.tags.len()
+            ),
+            Err(error) => format!("Failed to save the memory note: {error}"),
         }
-    }
-
-    let state = app.state::<crate::HistoryBridge>();
-    match state.upsert_memory_entry(&entry) {
-        Ok(()) => format!(
-            "Saved to memory: \"{}\" ({} tag(s)). The user can review it in \
-            File Explorer → Memory.",
-            entry.title,
-            entry.tags.len()
-        ),
-        Err(error) => format!("Failed to save the memory note: {error}"),
+    } else {
+        "Memory engine not available".to_string()
     }
 }
 

@@ -74,6 +74,9 @@ const InspectorPage = React.lazy(() =>
 const WorkflowPage = React.lazy(() =>
   import("@/pages/workflow").then((m) => ({ default: m.AutomationPage }))
 );
+const MemoryPage = React.lazy(() =>
+  import("@/pages/memory").then((m) => ({ default: m.MemoryPage }))
+);
 
 function StandaloneHttpHistoryPage() {
   React.useEffect(() => {
@@ -243,6 +246,8 @@ export function StandaloneAppView({ target }: { readonly target: string }) {
       case "automation":
       case "workflow":
         return <StandaloneLayout id="/automation" title="Workflow"><WorkflowPage /></StandaloneLayout>;
+      case "memory":
+        return <StandaloneLayout id="/memory" title="Memory"><MemoryPage /></StandaloneLayout>;
       default:
         return null;
     }

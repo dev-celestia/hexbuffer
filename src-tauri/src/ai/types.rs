@@ -269,7 +269,7 @@ pub struct AiDebugSnapshot {
     pub system_prompt: String,
     pub app_context_raw: Option<String>,
     pub app_context_object: Option<Value>,
-    pub memory_entries: Vec<crate::db::repository::types::MemoryEntry>,
+    pub memory_entries: Vec<crate::memory::MemoryItemDto>,
     pub tools: Vec<AiToolDebugInfo>,
     pub last_request_id: Option<String>,
     pub last_prompt: Option<String>,
