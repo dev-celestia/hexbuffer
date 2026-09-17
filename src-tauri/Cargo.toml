@@ -38,7 +38,7 @@ objc2-foundation = { version = "0.3", features = ["NSData"] }
 tauri-plugin-updater = "2"
 rusqlite = { version = "0.40", features = ["bundled"] }
 keyring = { version = "3.6.3", default-features = false, features = ["apple-native", "windows-native", "linux-native-sync-persistent", "crypto-rust"] }
-uteke-core = { version = "0.1.0", default-features = false, features = ["onnx", "vecq"] }
+uteke-core = { version = "0.18.1", default-features = false, features = ["onnx", "vecq"] }
 
 hyper = { version = "1", features = ["http1", "server"] }
 hyper-util = { version = "0.1", features = ["server", "service", "tokio"] }
