@@ -47,6 +47,17 @@ pub(crate) fn is_openai_compatible(provider: &str) -> bool {
         .eq_ignore_ascii_case(OPENAI_COMPATIBLE_PROVIDER)
 }
 
+/// True when the configured provider talks to a loopback endpoint, so traffic never leaves the
+/// machine and neither third-party sharing consent nor a real API key is needed.
+///
+/// Deliberately scoped to OpenAI-compatible providers: the Anthropic-compatible path always
+/// requires the sharing policy. `chat.rs` and `auto_mark.rs` must both call this — they had
+/// drifted apart (auto_mark exempted both wire formats), and the fix that lets an
+/// Anthropic-compatible base URL persist would have made that divergence reachable.
+pub(crate) fn is_local_ai_endpoint(settings: &super::types::AiSettings) -> bool {
+    is_openai_compatible(&settings.provider) && is_local_ai_url(settings.custom_base_url.as_deref())
+}
+
 pub(crate) fn is_anthropic(provider: &str) -> bool {
     let trimmed = provider.trim();
     trimmed.eq_ignore_ascii_case(ANTHROPIC_COMPATIBLE_PROVIDER)
@@ -75,7 +86,8 @@ pub fn is_local_ai_url(url: Option<&str>) -> bool {
         Some(url::Host::Ipv6(ip)) => {
             ip.is_loopback()
                 || ip.is_unspecified()
-                || ip.to_ipv4_mapped()
+                || ip
+                    .to_ipv4_mapped()
                     .map(|v4| v4.is_loopback() || v4.is_unspecified())
                     .unwrap_or(false)
         }
@@ -87,12 +99,18 @@ pub fn is_local_ai_url(url: Option<&str>) -> bool {
 /// Returns a normalized (trailing-slash trimmed) URL string on success.
 pub fn validate_http_base_url(raw: &str) -> Result<String, String> {
     let trimmed = raw.trim().trim_end_matches('/');
-    let parsed = url::Url::parse(trimmed)
-        .map_err(|_| "Base URL must be a valid URL (e.g. https://api.openai.com/v1).".to_string())?;
+    let parsed = url::Url::parse(trimmed).map_err(|_| {
+        "Base URL must be a valid URL (e.g. https://api.openai.com/v1).".to_string()
+    })?;
     if parsed.scheme() != "http" && parsed.scheme() != "https" {
         return Err("Base URL must use http:// or https://.".to_string());
     }
-    if parsed.host_str().map(str::trim).unwrap_or_default().is_empty() {
+    if parsed
+        .host_str()
+        .map(str::trim)
+        .unwrap_or_default()
+        .is_empty()
+    {
         return Err("Base URL must include a host (e.g. https://api.openai.com/v1).".to_string());
     }
     Ok(trimmed.to_string())
@@ -204,7 +222,6 @@ pub fn create_completion_model(
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -224,10 +241,7 @@ mod tests {
 
     #[test]
     fn test_api_key_env_name_anthropic() {
-        assert_eq!(
-            api_key_env_name("anthropic").unwrap(),
-            "ANTHROPIC_API_KEY"
-        );
+        assert_eq!(api_key_env_name("anthropic").unwrap(), "ANTHROPIC_API_KEY");
         assert_eq!(
             api_key_env_name("anthropic-compatible").unwrap(),
             "ANTHROPIC_API_KEY"
@@ -274,8 +288,12 @@ mod tests {
     #[test]
     fn test_is_local_ai_url_rejects_disguised_external_hosts() {
         // Substring/prefix tricks must NOT be treated as local.
-        assert!(!is_local_ai_url(Some("https://localhost.attacker.example/v1")));
-        assert!(!is_local_ai_url(Some("https://attacker.example/v1?x=localhost")));
+        assert!(!is_local_ai_url(Some(
+            "https://localhost.attacker.example/v1"
+        )));
+        assert!(!is_local_ai_url(Some(
+            "https://attacker.example/v1?x=localhost"
+        )));
         assert!(!is_local_ai_url(Some("https://127.0.0.1.attacker.example")));
         assert!(!is_local_ai_url(Some("https://127.0.0.1.evil.com")));
         assert!(!is_local_ai_url(Some("https://example.com")));
@@ -290,6 +308,28 @@ mod tests {
         assert!(!is_local_ai_url(Some("file:///etc/passwd")));
         assert!(!is_local_ai_url(Some("")));
         assert!(!is_local_ai_url(None));
+    }
+
+    #[test]
+    fn test_is_local_ai_endpoint_is_scoped_to_openai_compatible() {
+        let mut settings = crate::ai::types::AiSettings::default();
+
+        settings.provider = OPENAI_COMPATIBLE_PROVIDER.to_string();
+        settings.custom_base_url = Some("http://localhost:11434/v1".to_string());
+        assert!(is_local_ai_endpoint(&settings));
+
+        // The same loopback URL on the Anthropic-compatible wire format stays gated.
+        settings.provider = ANTHROPIC_COMPATIBLE_PROVIDER.to_string();
+        assert!(!is_local_ai_endpoint(&settings));
+
+        // A remote endpoint stays gated.
+        settings.provider = OPENAI_COMPATIBLE_PROVIDER.to_string();
+        settings.custom_base_url = Some("https://api.openai.com/v1".to_string());
+        assert!(!is_local_ai_endpoint(&settings));
+
+        // No endpoint configured stays gated.
+        settings.custom_base_url = None;
+        assert!(!is_local_ai_endpoint(&settings));
     }
 
     #[test]

@@ -287,8 +287,7 @@ pub async fn send_ai_chat_message_impl(
     validate_chat_request(&request)?;
 
     let is_openai = super::providers::is_openai_compatible(&settings.provider);
-    let is_local =
-        is_openai && super::providers::is_local_ai_url(settings.custom_base_url.as_deref());
+    let is_local = super::providers::is_local_ai_endpoint(&settings);
 
     if !is_local {
         ensure_third_party_ai_sharing_allowed(&settings)?;

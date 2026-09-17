@@ -1,0 +1,179 @@
+# Code review gate.
+#
+# This workflow is the primary code review mechanism for this repository: there is a
+# single maintainer, so automated checks are what actually hold the line. See
+# docs/code-review/PROCESS.md §5 for the rationale and the ratchet policy.
+#
+# Design rules for anything added here:
+#   1. Never add a gate that is red on arrival. Measure the baseline first, then set
+#      the threshold to today's number. A gate that fails immediately gets disabled.
+#   2. Baselines may fall, never rise.
+#   3. Prefer a check scoped to changed files over a repo-wide check when the repo has
+#      existing debt. That is a ratchet: new code is clean, old code erodes over time.
+#
+# Baselines as of 2026-09-17 (update these comments when they change):
+#   tsc            0 errors
+#   vitest         207 tests / 19 files, all passing
+#   cargo test     161 tests, all passing
+#   cargo clippy   28 warnings across 13 lint types (advisory until cleared)
+#   rustfmt        82 of 117 files unformatted (hence: changed files only)
+
+name: CI
+
+on:
+  pull_request:
+    branches: [master, Development]
+  push:
+    branches: [master, Development]
+  workflow_dispatch:
+
+# A new push to the same branch makes the previous run obsolete.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Frontend: the repo is at 0 type errors, so any error here is a new one.
+  # ---------------------------------------------------------------------------
+  frontend:
+    name: Frontend — types & tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # tsconfig.json maps @celestia-project/ui to ../celestia-starter/packages/ui/src/index.ts,
+      # which does not exist. TypeScript falls through to the published 0.3.6 in node_modules,
+      # so this passes on a fresh checkout. If it ever fails with TS2307 for that package,
+      # the dead path alias is the cause — delete the mapping rather than adding a checkout step.
+      - name: Typecheck
+        run: node_modules/.bin/tsc --noEmit -p tsconfig.json
+
+      # ~5 min locally, dominated by per-file worker startup. `isolate: false` in
+      # vitest.config.ts would cut ~50s; not enabled because the DOM suites stub globals.
+      - name: Tests
+        run: node_modules/.bin/vitest run
+
+  # ---------------------------------------------------------------------------
+  # Backend: format, lints, tests.
+  # ---------------------------------------------------------------------------
+  backend:
+    name: Backend — fmt, lints & tests
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history: the rustfmt ratchet needs a merge base against the PR base.
+          fetch-depth: 0
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            pkg-config \
+            libssl-dev \
+            libgtk-3-dev \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libsecret-1-dev \
+            libdbus-1-dev
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      # No sidecar stub step is needed: src-tauri/build.rs writes a stub
+      # binaries/ai-engine-<target> if one is missing.
+
+      # Blocking, but scoped to files this change touches. 82 of 117 files are
+      # currently unformatted, so a repo-wide `cargo fmt --check` would fail on
+      # arrival; new and edited code is formatted from day one instead.
+      - name: Rust format (changed files)
+        env:
+          # PRs diff against the base branch; pushes diff against the previous commit.
+          BASE_REF: ${{ github.event.pull_request.base.ref && format('origin/{0}', github.event.pull_request.base.ref) || github.event.before }}
+        run: |
+          if [ -n "$BASE_REF" ]; then
+            bash scripts/ci/check-rustfmt-changed.sh "$BASE_REF"
+          else
+            echo "No base ref available; skipping."
+          fi
+
+      # Advisory until the 28-warning baseline is cleared. Once it reaches zero,
+      # remove `continue-on-error` and add `-- -D warnings` to make it blocking.
+      - name: Rust lints (advisory)
+        continue-on-error: true
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets
+
+      # --test-threads=1 is required: several tests touch process-global state.
+      # See src-tauri/tests/README.md.
+      - name: Rust tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml --lib -- --test-threads=1
+
+  # ---------------------------------------------------------------------------
+  # Hygiene: cheap diff-level checks that catch things a formatter will not.
+  # ---------------------------------------------------------------------------
+  hygiene:
+    name: Hygiene — diff sanity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: No trailing whitespace or conflict markers in the diff
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          set -uo pipefail
+          BASE_REF=""
+          if [ -n "$PR_BASE" ]; then
+            BASE_REF="origin/$PR_BASE"
+          elif [ -n "$PUSH_BEFORE" ] && ! echo "$PUSH_BEFORE" | grep -qE '^0+$'; then
+            BASE_REF="$PUSH_BEFORE"
+          fi
+
+          if [ -n "$BASE_REF" ] && git rev-parse --verify --quiet "$BASE_REF" >/dev/null; then
+            MERGE_BASE="$(git merge-base "$BASE_REF" HEAD)"
+          elif git rev-parse --verify --quiet HEAD~1 >/dev/null; then
+            MERGE_BASE="HEAD~1"
+          else
+            echo "Initial commit; nothing to diff against."
+            exit 0
+          fi
+
+          echo "Checking diff $MERGE_BASE..HEAD"
+          # Exits non-zero on trailing whitespace and conflict markers, reporting
+          # file:line. Only added lines are checked, so this ratchets over the
+          # existing codebase rather than demanding a repo-wide cleanup.
+          git diff --check "$MERGE_BASE" HEAD

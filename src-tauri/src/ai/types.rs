@@ -2,6 +2,18 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::BTreeMap;
 
+/// Configuration remembered for one provider so switching back restores it. The top-level
+/// `provider` / `model` / `custom_base_url` on [`AiSettings`] stay the *active* selection; this is
+/// the per-provider memory behind them.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AiProviderProfile {
+    #[serde(default)]
+    pub model: String,
+    #[serde(default)]
+    pub custom_base_url: Option<String>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AiSettings {
@@ -18,6 +30,9 @@ pub struct AiSettings {
     /// Base URL for the `openai-compatible` provider (e.g. `https://api.openai.com/v1`).
     #[serde(default)]
     pub custom_base_url: Option<String>,
+    /// Model + base URL remembered per provider, keyed by provider id.
+    #[serde(default)]
+    pub provider_profiles: BTreeMap<String, AiProviderProfile>,
     /// Optional embeddings endpoint used by the memory vector search
     /// (OpenAI-compatible `/embeddings`). Empty = keyword fallback only.
     #[serde(default)]
@@ -36,6 +51,7 @@ impl Default for AiSettings {
             provider_key_status: default_ai_key_status(),
             allow_third_party_ai_sharing: false,
             custom_base_url: None,
+            provider_profiles: BTreeMap::new(),
             embeddings_base_url: None,
             embeddings_model: None,
         }
@@ -266,5 +282,3 @@ pub struct AiDebugSnapshot {
     pub model: String,
     pub timestamp: String,
 }
-
-

@@ -18,10 +18,8 @@ pub async fn suggest_invoker_markers_impl(
 
     let settings = read_ai_settings(&app)?;
     // Mirror the chat path: a loopback endpoint stays on-box, so it needs neither the
-    let is_compat = is_openai_compatible(&settings.provider)
-        || super::providers::is_anthropic(&settings.provider);
-    let is_local = is_compat
-        && super::providers::is_local_ai_url(settings.custom_base_url.as_deref());
+    // third-party sharing policy nor a real API key.
+    let is_local = super::providers::is_local_ai_endpoint(&settings);
     if !is_local {
         ensure_third_party_ai_sharing_allowed(&settings)?;
     }

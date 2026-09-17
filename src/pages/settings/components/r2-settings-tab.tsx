@@ -64,7 +64,12 @@ export function R2SettingsTab({ settings }: Readonly<R2SettingsTabProps>) {
             type={showSecret ? 'text' : 'password'}
             value={r2SecretAccessKey}
             onChange={(e) => setR2SecretAccessKey(e.target.value)}
-            placeholder={r2HasSecretKey ? '••••••••••••••••••••••••••••••••' : 'Secret Access Key'}
+            // Not dots: they are indistinguishable from a masked stored value, so the field looks
+            // filled and read-only (same trap as the AI API key rows). This also states the real
+            // behaviour — leaving it blank on save keeps the secret already in the keychain.
+            placeholder={
+              r2HasSecretKey ? 'Leave blank to keep the saved secret' : 'Secret Access Key'
+            }
             disabled={r2Loading}
             className="pr-9"
           />

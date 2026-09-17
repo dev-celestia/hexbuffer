@@ -8,7 +8,14 @@ import { useUpdater } from '@/hooks/use-updater';
 import { useIsMac } from '@/hooks/use-platform';
 import { DEFAULT_PROXY_PORT, MAX_PROXY_PORT, MIN_PROXY_PORT, isValidProxyPort, useAppStore } from '@/stores/app';
 import { useBrowserAutomationStore } from '@/stores/browser-automation';
-import { AI_MODEL_OPTIONS_BY_PROVIDER } from '../constants';
+import { AI_KEY_PROVIDER_OPTIONS } from '../constants';
+import {
+  buildAiProviderKeyEntries,
+  canSaveProviderKey,
+  keyGateBaseUrl,
+  switchAiProvider,
+  type AiProviderProfile,
+} from '../lib/ai-providers';
 
 export interface AiSettings {
   provider: string;
@@ -17,10 +24,14 @@ export interface AiSettings {
   hasApiKey: boolean;
   allowThirdPartyAiSharing: boolean;
   customBaseUrl?: string | null;
+  /**
+   * Model + base URL remembered per provider, keyed by provider id. Read-only from the UI's point
+   * of view — the backend rebuilds it from the active selection on every save, so switching back
+   * to a provider restores the configuration it had.
+   */
+  providerProfiles?: Record<string, AiProviderProfile>;
   embeddingsBaseUrl?: string | null;
   embeddingsModel?: string | null;
-  /** Transient: typed into the settings UI, persisted to the OS keychain on save. */
-  embeddingsApiKey?: string;
 }
 
 export interface StorageInfo {
@@ -53,6 +64,14 @@ export function useSettingsPage() {
   const [aiSettingsLoading, setAiSettingsLoading] = React.useState(true);
   const [aiSettingsSaving, setAiSettingsSaving] = React.useState(false);
   const [providerKeyStatus, setProviderKeyStatus] = React.useState<AiKeyStatus>({});
+  /** Provider whose key is currently being saved or cleared, so only that row shows a pending state. */
+  const [keyActionProvider, setKeyActionProvider] = React.useState<string | null>(null);
+  /**
+   * Last settings the backend confirmed. The sharing policy is persisted on its own (see
+   * `handleToggleThirdPartyAiSharing`) and is rebuilt from this snapshot rather than the draft,
+   * so an unsaved provider/model edit can never be dragged into that write.
+   */
+  const [savedAiSettings, setSavedAiSettings] = React.useState<AiSettings | null>(null);
   const [storageInfo, setStorageInfo] = React.useState<StorageInfo | null>(null);
   const [deletingAllData, setDeletingAllData] = React.useState(false);
   const [deletingArtifact, setDeletingArtifact] = React.useState<string | null>(null);
@@ -166,6 +185,7 @@ export function useSettingsPage() {
       const keyStatus = await refreshAiKeyStatus();
       const settings = await invoke<AiSettings>('get_ai_settings');
       setAiSettings({ ...settings, hasApiKey: !!keyStatus[settings.provider] });
+      setSavedAiSettings(settings);
     } catch (error) {
       console.error('Failed to load AI settings:', error);
       toast.error(`Failed to load AI settings: ${error}`);
@@ -376,54 +396,136 @@ export function useSettingsPage() {
     }
   }, []);
 
-  const updateAiProvider = React.useCallback((provider: string) => {
-    const models = AI_MODEL_OPTIONS_BY_PROVIDER[provider] ?? [];
+  const aiProviderLabel = React.useCallback(
+    (provider: string) =>
+      AI_KEY_PROVIDER_OPTIONS.find((option) => option.id === provider)?.label ?? provider,
+    [],
+  );
 
-    setAiSettings((current) => ({
-      ...current,
-      provider,
-      model: models[0] ?? '',
-      apiKey: '',
-      hasApiKey: !!providerKeyStatus[provider],
-    }));
+  const updateAiProvider = React.useCallback((provider: string) => {
+    // switchAiProvider drops every provider-scoped draft (model, base URL, typed key) so a
+    // provider switch never leaks the previous provider's configuration into the new one, then
+    // restores whatever that provider had saved in its own profile.
+    setAiSettings((current) =>
+      switchAiProvider(current, provider, !!providerKeyStatus[provider], current.providerProfiles),
+    );
   }, [providerKeyStatus]);
 
   const updateAiSettings = React.useCallback((updates: Partial<AiSettings>) => {
     setAiSettings((current) => ({ ...current, ...updates }));
   }, []);
 
+  const handleSaveProviderKey = React.useCallback(
+    async (provider: string, apiKey: string) => {
+      const trimmedKey = apiKey.trim();
+
+      if (!trimmedKey) {
+        toast.error(`Enter the ${aiProviderLabel(provider)} API key before saving`);
+        return false;
+      }
+
+      // A key pointed at a loopback endpoint never leaves the machine, so it does not need the
+      // third-party sharing policy — the same exemption the chat path applies. Replacing a key
+      // that is already stored needs no consent either: the credential is already local, and the
+      // authoritative gate on sending data is the send-time check in Rust. Only the first key for
+      // a remote provider requires consent. `canSaveProviderKey` is the single source of this
+      // rule; the row's button uses it too, so the two cannot disagree.
+      //
+      // The base URL must come from `keyGateBaseUrl`, not `baseUrlForProvider`: the embeddings
+      // pseudo-provider keeps its endpoint in `embeddingsBaseUrl`, so reading it through the
+      // profile map would return undefined and block a save the row's button had enabled.
+      const baseUrl = keyGateBaseUrl(provider, {
+        activeProvider: aiSettings.provider,
+        activeBaseUrl: aiSettings.customBaseUrl,
+        embeddingsBaseUrl: aiSettings.embeddingsBaseUrl,
+        profiles: aiSettings.providerProfiles,
+      });
+
+      const allowed = canSaveProviderKey({
+        provider,
+        hasKey: providerKeyStatus[provider] === true,
+        allowThirdPartyAiSharing: aiSettings.allowThirdPartyAiSharing,
+        baseUrl,
+      });
+
+      if (!allowed) {
+        toast.error('Enable third-party AI data sharing before saving an API key');
+        return false;
+      }
+
+      try {
+        setKeyActionProvider(provider);
+        const nextKeyStatus = await invoke<AiKeyStatus>('set_ai_api_key', {
+          provider,
+          apiKey: trimmedKey,
+        });
+        setProviderKeyStatus(nextKeyStatus);
+        setAiSettings((current) => ({
+          ...current,
+          apiKey: '',
+          hasApiKey: current.provider === provider ? true : current.hasApiKey,
+        }));
+        toast.success(`${aiProviderLabel(provider)} API key saved`);
+        return true;
+      } catch (error) {
+        console.error('Failed to save AI API key:', error);
+        toast.error(`Failed to save AI API key: ${error}`);
+        return false;
+      } finally {
+        setKeyActionProvider(null);
+      }
+    },
+    [
+      aiProviderLabel,
+      aiSettings.allowThirdPartyAiSharing,
+      aiSettings.provider,
+      aiSettings.customBaseUrl,
+      // Read through `keyGateBaseUrl` to decide the embeddings exemption, so a change to the
+      // embeddings endpoint must re-create this callback.
+      aiSettings.embeddingsBaseUrl,
+      aiSettings.providerProfiles,
+      // Read inside the callback to decide whether this is a first save or a replacement, so it
+      // must be a dependency or the check would run against a stale status map.
+      providerKeyStatus,
+    ],
+  );
+
+  const handleClearProviderKey = React.useCallback(
+    async (provider: string) => {
+      try {
+        setKeyActionProvider(provider);
+        const nextKeyStatus = await invoke<AiKeyStatus>('clear_ai_api_key', { provider });
+        setProviderKeyStatus(nextKeyStatus);
+        setAiSettings((current) =>
+          current.provider === provider ? { ...current, apiKey: '', hasApiKey: false } : current,
+        );
+        toast.success(`${aiProviderLabel(provider)} API key cleared`);
+        return true;
+      } catch (error) {
+        console.error('Failed to clear AI API key:', error);
+        toast.error(`Failed to clear AI API key: ${error}`);
+        return false;
+      } finally {
+        setKeyActionProvider(null);
+      }
+    },
+    [aiProviderLabel],
+  );
+
   const handleSaveAiSettings = React.useCallback(async () => {
     try {
       setAiSettingsSaving(true);
 
-      let nextKeyStatus = providerKeyStatus;
-      if (aiSettings.apiKey.trim()) {
-        nextKeyStatus = await invoke<AiKeyStatus>('set_ai_api_key', {
-          provider: aiSettings.provider,
-          apiKey: aiSettings.apiKey.trim(),
-        });
-        setProviderKeyStatus(nextKeyStatus);
-      }
-
-      // Memory embeddings key: keyring-only pseudo provider.
-      if (aiSettings.embeddingsApiKey?.trim()) {
-        nextKeyStatus = await invoke<AiKeyStatus>('set_ai_api_key', {
-          provider: 'embeddings',
-          apiKey: aiSettings.embeddingsApiKey.trim(),
-        });
-        setProviderKeyStatus(nextKeyStatus);
-      }
-
-      // FloppyDisk provider/model settings to backend (without the keys)
-      const settingsToSave = { ...aiSettings, apiKey: '', embeddingsApiKey: '' };
+      // API keys are managed per provider by the saved-keys list, never by this save.
+      const settingsToSave = { ...aiSettings, apiKey: '' };
       const savedSettings = await invoke<AiSettings>('save_ai_settings', {
         settings: settingsToSave,
       });
       setAiSettings({
         ...savedSettings,
-        hasApiKey: !!nextKeyStatus[savedSettings.provider],
-        embeddingsApiKey: '',
+        hasApiKey: !!providerKeyStatus[savedSettings.provider],
       });
+      setSavedAiSettings(savedSettings);
       toast.success('AI settings saved');
     } catch (error) {
       console.error('Failed to save AI settings:', error);
@@ -433,39 +535,57 @@ export function useSettingsPage() {
     }
   }, [aiSettings, providerKeyStatus]);
 
-  const handleClearAiApiKey = React.useCallback(async () => {
-    try {
-      setAiSettingsSaving(true);
-      const nextKeyStatus = await invoke<AiKeyStatus>('clear_ai_api_key', {
-        provider: aiSettings.provider,
-      });
-      setProviderKeyStatus(nextKeyStatus);
-      setAiSettings((current) => ({ ...current, apiKey: '', hasApiKey: false }));
-      toast.success('AI API key cleared');
-    } catch (error) {
-      console.error('Failed to clear AI API key:', error);
-      toast.error(`Failed to clear AI API key: ${error}`);
-    } finally {
-      setAiSettingsSaving(false);
-    }
-  }, [aiSettings.provider]);
+  /**
+   * The sharing policy gates every non-local request and every key save, so it is persisted the
+   * moment it is toggled instead of waiting for the main Save — otherwise a key saved right
+   * afterwards would sit behind a policy that was never written out.
+   *
+   * The payload is rebuilt from the last saved settings, never from the draft, so this write
+   * cannot carry unsaved provider/model/base-URL edits along with it, and it cannot trip the
+   * backend's model/base-URL validation while the user is mid-edit.
+   */
+  const handleToggleThirdPartyAiSharing = React.useCallback(
+    async (enabled: boolean) => {
+      updateAiSettings({ allowThirdPartyAiSharing: enabled });
 
-  const handleClearEmbeddingsApiKey = React.useCallback(async () => {
-    try {
-      setAiSettingsSaving(true);
-      const nextKeyStatus = await invoke<AiKeyStatus>('clear_ai_api_key', {
-        provider: 'embeddings',
-      });
-      setProviderKeyStatus(nextKeyStatus);
-      setAiSettings((current) => ({ ...current, embeddingsApiKey: '' }));
-      toast.success('Embeddings API key cleared');
-    } catch (error) {
-      console.error('Failed to clear embeddings API key:', error);
-      toast.error(`Failed to clear embeddings API key: ${error}`);
-    } finally {
-      setAiSettingsSaving(false);
-    }
-  }, []);
+      if (!savedAiSettings) {
+        return;
+      }
+
+      try {
+        const saved = await invoke<AiSettings>('save_ai_settings', {
+          settings: { ...savedAiSettings, allowThirdPartyAiSharing: enabled, apiKey: '' },
+        });
+        setSavedAiSettings(saved);
+      } catch (error) {
+        console.error('Failed to persist third-party AI sharing policy:', error);
+        toast.error(`Failed to save sharing policy: ${error}`);
+      }
+    },
+    [savedAiSettings, updateAiSettings],
+  );
+
+  const aiProviderKeyEntries = React.useMemo(
+    () =>
+      buildAiProviderKeyEntries({
+        keyStatus: providerKeyStatus,
+        activeProvider: aiSettings.provider,
+        activeBaseUrl: aiSettings.customBaseUrl,
+        // The embeddings row is gated on its own endpoint (URL-only in Rust), so it must be fed
+        // here or the row would stay blocked on a loopback Ollama/LM Studio endpoint.
+        embeddingsBaseUrl: aiSettings.embeddingsBaseUrl,
+        profiles: aiSettings.providerProfiles,
+        allowThirdPartyAiSharing: aiSettings.allowThirdPartyAiSharing,
+      }),
+    [
+      providerKeyStatus,
+      aiSettings.provider,
+      aiSettings.customBaseUrl,
+      aiSettings.embeddingsBaseUrl,
+      aiSettings.providerProfiles,
+      aiSettings.allowThirdPartyAiSharing,
+    ],
+  );
 
   const handleSaveProxyDefaultPort = React.useCallback(async () => {
     const parsedPort = Number(proxyPortDraft);
@@ -522,15 +642,19 @@ export function useSettingsPage() {
     handleDownloadCert,
     handleInstallMacCert,
     handleRegenerateCert,
-    handleClearAiApiKey,
-    handleClearEmbeddingsApiKey,
+    handleClearProviderKey,
+    handleSaveProviderKey,
     handleDeleteAllData,
     handleResetProxyDefaultPort,
     handleSaveProxyDefaultPort,
     handleSaveAiSettings,
+    handleToggleThirdPartyAiSharing,
     setProxyPortDraft,
     storageInfo,
     providerKeyStatus,
+    aiProviderKeyEntries,
+    keyActionProvider,
+    savedAiSettings,
     updateAiProvider,
     updateAiSettings,
     updateAvailable,

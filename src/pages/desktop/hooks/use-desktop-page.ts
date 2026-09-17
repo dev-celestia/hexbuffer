@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useReducedMotion } from 'motion/react';
 import {
   KeyboardSensor,
   PointerSensor,
@@ -11,6 +12,7 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { ALL_NAV_ITEMS } from '@/layout/constants';
 import { useNavStore } from '@/stores/nav';
 import { DESKTOP_WIDGETS } from '../constants';
+import { assistantPanelEntrance } from '../assistant/lib/motion';
 import {
   useAppSettingsStore,
   DEFAULT_WIDGET_ORDER,
@@ -27,6 +29,13 @@ export function useDesktopPage() {
   const reorderWidgets = useAppSettingsStore((s) => s.reorderWidgets);
   const isAssistantOpen = useNavStore((s) => s.isDesktopAssistantOpen);
   const setDesktopAssistantOpen = useNavStore((s) => s.setDesktopAssistantOpen);
+
+  // Slide the assistant in, or just fade it for users who asked for less motion. `useReducedMotion`
+  // reads its value synchronously on the first render — it is `useState` over a module-level ref —
+  // so the variant is already correct on mount. Motion v12 reads that ref once and destructures no
+  // setter, so the value never changes afterwards; the variant therefore cannot flip mid-animation.
+  const prefersReducedMotion = useReducedMotion();
+  const assistantEntrance = assistantPanelEntrance(prefersReducedMotion ?? false);
 
   const handleCloseAssistant = React.useCallback(() => {
     setDesktopAssistantOpen(false);
@@ -118,5 +127,6 @@ export function useDesktopPage() {
     handleClearSearch,
     isAssistantOpen,
     handleCloseAssistant,
+    assistantEntrance,
   };
 }

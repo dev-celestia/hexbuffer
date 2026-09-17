@@ -1,2 +1,17 @@
-[build]
-target-dir = "../target"
+# Intentionally no `build.target-dir` override here.
+#
+# This file used to contain:
+#
+#     [build]
+#     target-dir = "../target"
+#
+# which made cargo write into the repo-root `target/`. That directory ended up owned by root
+# (a stray `sudo cargo` at some point), so every normal cargo invocation failed with:
+#
+#     failed to open .../target/debug/.cargo-build-lock: Permission denied (os error 13)
+#
+# Without the override cargo uses `src-tauri/target`, which is owned by the developer and
+# already holds a warm build cache. Don't re-add the override unless the repo-root `target/`
+# is first removed or chowned back:
+#
+#     sudo chown -R "$(id -u)":"$(id -g)" target

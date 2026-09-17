@@ -1,6 +1,6 @@
 import { Badge, Button, Checkbox, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@celestia-project/ui';
 import * as React from 'react';
-import { WarningCircleIcon, EyeIcon, EyeSlashIcon, FloppyDiskIcon } from '@phosphor-icons/react';
+import { WarningCircleIcon, EyeIcon, EyeSlashIcon, FloppyDiskIcon, CheckIcon, TrashIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
 import {
@@ -14,8 +14,263 @@ import {
   OPENAI_COMPATIBLE_BASE_URL_PLACEHOLDER,
   OPENAI_COMPATIBLE_PROVIDER_ID,
 } from '../constants';
+import type { AiProviderKeyEntry } from '../lib/ai-providers';
 import type { SettingsPageState } from '../hooks/use-settings-page';
-import { SettingsGroup, SettingsRow } from './settings-group';
+import { SettingsGroup, SettingsRow, SettingsRowSeparator } from './settings-group';
+
+/**
+ * Keeps Ctrl/Cmd+A selecting the contents of the focused field instead of the whole page.
+ * Shared by every credential-ish input on this tab.
+ */
+const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  if (
+    (event.ctrlKey || event.metaKey) &&
+    (event.key === 'a' || event.key === 'A' || event.code === 'KeyA')
+  ) {
+    event.preventDefault();
+    event.currentTarget.select();
+  }
+};
+
+interface AiProviderKeyRowProps {
+  readonly entry: AiProviderKeyEntry;
+  readonly disabled: boolean;
+  /**
+   * `entry.canSaveKey` — the shared policy verdict, not a local rule. False only for a remote
+   * provider with no key yet while sharing is off; the row then says so next to the button.
+   */
+  readonly canSave: boolean;
+  readonly pending: boolean;
+  readonly onClear: (provider: string) => Promise<boolean>;
+  readonly onSave: (provider: string, apiKey: string) => Promise<boolean>;
+  readonly onUse: (provider: string) => void;
+}
+
+/**
+ * One provider in the saved-keys list: status badges, an inline key field, and the
+ * per-provider save/clear actions. Draft state is local because it is discarded on save.
+ */
+function AiProviderKeyRow({
+  entry,
+  disabled,
+  canSave,
+  pending,
+  onClear,
+  onSave,
+  onUse,
+}: Readonly<AiProviderKeyRowProps>) {
+  const [apiKeyInput, setApiKeyInput] = React.useState('');
+  const [showApiKey, setShowApiKey] = React.useState(false);
+
+  const resetDraft = () => {
+    setApiKeyInput('');
+    setShowApiKey(false);
+  };
+
+  const handleSave = async () => {
+    if (await onSave(entry.id, apiKeyInput)) {
+      resetDraft();
+    }
+  };
+
+  const handleClear = async () => {
+    if (await onClear(entry.id)) {
+      resetDraft();
+    }
+  };
+
+  return (
+    <div
+      className={cn(
+        // Layout & Positioning
+        "flex flex-col gap-2",
+
+        // Sizing & Spacing
+        "px-4 py-3"
+      )}
+    >
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-start justify-between gap-4"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "min-w-0 space-y-1"
+          )}
+        >
+          <div
+            className={cn(
+              // Layout & Positioning
+              "flex items-center gap-2"
+            )}
+          >
+            <p
+              className={cn(
+                // Typography
+                "text-sm font-medium leading-none"
+              )}
+            >
+              {entry.label}
+            </p>
+            <Badge variant={entry.hasKey ? 'secondary' : 'outline'}>
+              {entry.hasKey ? 'Key saved' : 'No key'}
+            </Badge>
+            {entry.isActive ? <Badge variant="default">Active</Badge> : null}
+          </div>
+          <p
+            className={cn(
+              // Typography
+              "text-xs leading-relaxed text-muted-foreground"
+            )}
+          >
+            {entry.description}
+          </p>
+        </div>
+        {entry.selectable ? (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onUse(entry.id)}
+            disabled={disabled || pending || entry.isActive}
+          >
+            <CheckIcon
+              className={cn(
+                // Sizing & Spacing
+                "mr-1.5 size-3.5"
+              )}
+            />
+            {entry.isActive ? 'In use' : 'Use'}
+          </Button>
+        ) : null}
+      </div>
+
+      <div
+        className={cn(
+          // Layout & Positioning
+          "flex items-center gap-2"
+        )}
+      >
+        <div
+          className={cn(
+            // Layout & Positioning
+            "relative",
+
+            // Sizing & Spacing
+            "w-72"
+          )}
+        >
+          <Input
+            type={showApiKey ? 'text' : 'password'}
+            value={apiKeyInput}
+            onChange={(event) => setApiKeyInput(event.target.value)}
+            onKeyDown={handleInputKeyDown}
+            aria-label={`${entry.label} API key`}
+            // A saved key is never read back into the field, so this must read as an invitation to
+            // type a replacement. Dots here look exactly like a masked stored value and made the
+            // field appear read-only — users tried to edit them and nothing happened.
+            placeholder={
+              entry.hasKey
+                ? 'Enter a new key to replace the saved one'
+                : (AI_API_KEY_PLACEHOLDERS[entry.id] ?? 'API key')
+            }
+            disabled={disabled || pending}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            data-1p-ignore="true"
+            data-lpignore="true"
+            className={cn(
+              // Sizing & Spacing
+              "pr-9"
+            )}
+          />
+          <button
+            type="button"
+            onClick={() => setShowApiKey((prev) => !prev)}
+            aria-label={showApiKey ? 'Hide API key' : 'Show API key'}
+            className={cn(
+              // Layout & Positioning
+              "absolute right-2 top-1/2 -translate-y-1/2",
+
+              // Sizing & Spacing
+              "rounded p-0.5",
+
+              // Typography
+              "text-muted-foreground",
+
+              // Interactive & States
+              "hover:text-foreground"
+            )}
+            tabIndex={-1}
+          >
+            {showApiKey ? (
+              <EyeSlashIcon
+                className={cn(
+                  // Sizing & Spacing
+                  "size-4"
+                )}
+              />
+            ) : (
+              <EyeIcon
+                className={cn(
+                  // Sizing & Spacing
+                  "size-4"
+                )}
+              />
+            )}
+          </button>
+        </div>
+        <Button
+          size="sm"
+          onClick={handleSave}
+          disabled={disabled || pending || !canSave || !apiKeyInput.trim()}
+        >
+          <FloppyDiskIcon
+            className={cn(
+              // Sizing & Spacing
+              "mr-1.5 size-3.5"
+            )}
+          />
+          {pending ? 'Saving…' : entry.hasKey ? 'Replace key' : 'Save key'}
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleClear}
+          disabled={disabled || pending || !entry.hasKey}
+        >
+          <TrashIcon
+            className={cn(
+              // Sizing & Spacing
+              "mr-1.5 size-3.5"
+            )}
+          />
+          Clear
+        </Button>
+      </div>
+
+      {/*
+        Without this the row shows a disabled save button next to a working Clear button, which
+        reads as "the key can only be deleted, not edited". Say which one is blocked and why.
+        Only reachable for a provider with no key yet — replacing a saved key needs no consent.
+      */}
+      {!canSave ? (
+        <p
+          className={cn(
+            // Typography
+            "text-xs text-amber-700 dark:text-amber-300"
+          )}
+        >
+          Enable third-party AI data sharing above to save a key for this provider.
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 interface AiSettingsTabProps {
   readonly settings: SettingsPageState;
@@ -23,13 +278,16 @@ interface AiSettingsTabProps {
 
 export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
   const {
+    aiProviderKeyEntries,
     aiSettings,
     aiSettingsLoading,
     aiSettingsSaving,
-    handleClearAiApiKey,
-    handleClearEmbeddingsApiKey,
+    handleClearProviderKey,
     handleSaveAiSettings,
-    providerKeyStatus,
+    handleSaveProviderKey,
+    handleToggleThirdPartyAiSharing,
+    keyActionProvider,
+    savedAiSettings,
     updateAiProvider,
     updateAiSettings,
   } = settings;
@@ -42,53 +300,28 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
     aiSettings.provider === 'anthropic';
   const isCustomCompatible = isOpenAiCompatible || isAnthropicCompatible;
   const modelOptions = AI_MODEL_OPTIONS_BY_PROVIDER[aiSettings.provider] ?? [];
-  const [showApiKey, setShowApiKey] = React.useState(false);
-  const [apiKeyInput, setApiKeyInput] = React.useState(aiSettings.apiKey);
-  const [showEmbeddingsKey, setShowEmbeddingsKey] = React.useState(false);
-  const [embeddingsKeyInput, setEmbeddingsKeyInput] = React.useState(
-    aiSettings.embeddingsApiKey ?? '',
-  );
   const embeddingsConfigured =
     !!aiSettings.embeddingsBaseUrl?.trim() && !!aiSettings.embeddingsModel?.trim();
-  const hasEmbeddingsKey = !!providerKeyStatus?.embeddings;
-  const isSavingNewApiKey = apiKeyInput.trim().length > 0;
-  const canSaveAiSettings = !isSavingNewApiKey || aiSettings.allowThirdPartyAiSharing;
-  const canSaveCustomCompatible =
-    !isCustomCompatible ||
-    (!!aiSettings.model.trim() && (isAnthropicCompatible || !!aiSettings.customBaseUrl?.trim()));
+  // A provider switch clears the model, so this gate also covers the preset dropdowns — the
+  // user must pick a model rather than silently inheriting one.
+  const needsModel = !aiSettings.model.trim();
+  const needsBaseUrl = isOpenAiCompatible && !aiSettings.customBaseUrl?.trim();
+  const canSaveProviderSettings = !needsModel && !needsBaseUrl;
+  const sharingPolicyUnsaved =
+    aiSettings.allowThirdPartyAiSharing !== !!savedAiSettings?.allowThirdPartyAiSharing;
+  // The "Active" badge follows the draft, so a provider picked with "Use" looks applied before it
+  // is. Say so explicitly rather than letting the badge imply the assistant already switched.
+  const providerSwitchUnsaved =
+    !!savedAiSettings && aiSettings.provider !== savedAiSettings.provider;
 
-  React.useEffect(() => {
-    setApiKeyInput(aiSettings.apiKey);
-    setShowApiKey(false);
-  }, [aiSettings.apiKey, aiSettings.provider]);
-
-  React.useEffect(() => {
-    setEmbeddingsKeyInput(aiSettings.embeddingsApiKey ?? '');
-    setShowEmbeddingsKey(false);
-  }, [aiSettings.embeddingsApiKey]);
-
-  const handleApiKeyChange = (value: string) => {
-    setApiKeyInput(value);
-    updateAiSettings({ apiKey: value });
-  };
-
-  const handleEmbeddingsKeyChange = (value: string) => {
-    setEmbeddingsKeyInput(value);
-    updateAiSettings({ embeddingsApiKey: value });
-  };
-
-  const handleInputKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        (event.key === 'a' || event.key === 'A' || event.code === 'KeyA')
-      ) {
-        event.preventDefault();
-        event.currentTarget.select();
-      }
-    },
-    [],
-  );
+  let saveBlockedHint: string | null = null;
+  if (needsBaseUrl) {
+    saveBlockedHint = 'Enter a base URL for the OpenAI-compatible provider.';
+  } else if (needsModel) {
+    saveBlockedHint = isCustomCompatible
+      ? `Enter a model name for the ${isOpenAiCompatible ? 'OpenAI' : 'Anthropic'}-compatible provider.`
+      : `Select a model for ${selectedProviderLabel}.`;
+  }
 
   return (
     <>
@@ -218,81 +451,6 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
           </Select>
         )}
       </SettingsRow>
-      <SettingsRow
-        label={`${selectedProviderLabel} API Key`}
-        description={
-          aiSettings.hasApiKey
-            ? 'A key is saved in your OS credential store.'
-            : 'No key saved yet. Provider and model are saved locally; API keys are kept in the OS credential store.'
-        }
-      >
-        <div
-          className={cn(
-            // Layout & Positioning
-            "relative",
-
-            // Sizing & Spacing
-            "w-56"
-          )}
-        >
-          <Input
-            type={showApiKey ? 'text' : 'password'}
-            value={apiKeyInput}
-            onChange={(event) => handleApiKeyChange(event.target.value)}
-            onKeyDown={handleInputKeyDown}
-            placeholder={
-              aiSettings.hasApiKey && !aiSettings.apiKey
-                ? '••••••••••••••••••••••••'
-                : (AI_API_KEY_PLACEHOLDERS[aiSettings.provider] ?? 'API key')
-            }
-            disabled={aiSettingsLoading}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            data-1p-ignore="true"
-            data-lpignore="true"
-            className={cn(
-              // Sizing & Spacing
-              "pr-9"
-            )}
-          />
-          <button
-            type="button"
-            onClick={() => setShowApiKey((prev) => !prev)}
-            className={cn(
-              // Layout & Positioning
-              "absolute right-2 top-1/2 -translate-y-1/2",
-
-              // Sizing & Spacing
-              "rounded p-0.5",
-
-              // Typography
-              "text-muted-foreground",
-
-              // Interactive & States
-              "hover:text-foreground"
-            )}
-            tabIndex={-1}
-          >
-            {showApiKey ? (
-              <EyeSlashIcon
-                className={cn(
-                  // Sizing & Spacing
-                  "size-4"
-                )}
-              />
-            ) : (
-              <EyeIcon
-                className={cn(
-                  // Sizing & Spacing
-                  "size-4"
-                )}
-              />
-            )}
-          </button>
-        </div>
-      </SettingsRow>
 
       <div
         className={cn(
@@ -314,7 +472,9 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
         >
           <Checkbox
             checked={aiSettings.allowThirdPartyAiSharing}
-            onCheckedChange={(checked) => updateAiSettings({ allowThirdPartyAiSharing: checked === true })}
+            onCheckedChange={(checked) => {
+              void handleToggleThirdPartyAiSharing(checked === true);
+            }}
             disabled={aiSettingsLoading}
           />
           <span
@@ -370,7 +530,7 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
           <Button
             size="sm"
             onClick={handleSaveAiSettings}
-            disabled={aiSettingsLoading || aiSettingsSaving || !canSaveAiSettings || !canSaveCustomCompatible}
+            disabled={aiSettingsLoading || aiSettingsSaving || !canSaveProviderSettings}
           >
             <FloppyDiskIcon
               className={cn(
@@ -380,75 +540,89 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
             />
             {aiSettingsSaving ? 'Saving…' : 'Save'}
           </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleClearAiApiKey}
-            disabled={aiSettingsLoading || aiSettingsSaving || !aiSettings.hasApiKey}
-          >
-            Clear API Key
-          </Button>
         </div>
       </SettingsRow>
 
-      {!canSaveAiSettings && (
+      {saveBlockedHint || providerSwitchUnsaved ? (
         <div
           className={cn(
-            // Sizing & Spacing
-            "px-4 py-2"
-          )}
-        >
-          <p
-            className={cn(
-              // Typography
-              "text-xs text-amber-700 dark:text-amber-300"
-            )}
-          >
-            Enable third-party AI data sharing before saving or using an API key.
-          </p>
-        </div>
-      )}
+            // Layout & Positioning
+            "space-y-1",
 
-      {isOpenAiCompatible && !canSaveCustomCompatible && (
-        <div
-          className={cn(
             // Sizing & Spacing
             "px-4 py-2"
           )}
         >
-          <p
-            className={cn(
-              // Typography
-              "text-xs text-amber-700 dark:text-amber-300"
-            )}
-          >
-            Enter a base URL and model name for the OpenAI-compatible provider.
-          </p>
+          {saveBlockedHint ? (
+            <p
+              className={cn(
+                // Typography
+                "text-xs text-amber-700 dark:text-amber-300"
+              )}
+            >
+              {saveBlockedHint}
+            </p>
+          ) : null}
+          {providerSwitchUnsaved ? (
+            <p
+              className={cn(
+                // Typography
+                "text-xs text-muted-foreground"
+              )}
+            >
+              {selectedProviderLabel} is selected here but not applied yet — press Save to switch
+              the assistant over to it.
+            </p>
+          ) : null}
         </div>
-      )}
+      ) : null}
+      </SettingsGroup>
 
-      {isAnthropicCompatible && !canSaveCustomCompatible && (
-        <div
-          className={cn(
-            // Sizing & Spacing
-            "px-4 py-2"
-          )}
-        >
-          <p
+      <SettingsGroup
+        label="Saved API Keys"
+        description="Every provider keeps its own API key in the OS credential store, so you can configure several at once and switch between them without re-entering a key."
+      >
+        {aiProviderKeyEntries.map((entry, index) => (
+          <React.Fragment key={entry.id}>
+            {index > 0 ? <SettingsRowSeparator /> : null}
+            <AiProviderKeyRow
+              entry={entry}
+              disabled={aiSettingsLoading}
+              canSave={entry.canSaveKey}
+              pending={keyActionProvider === entry.id}
+              onClear={handleClearProviderKey}
+              onSave={handleSaveProviderKey}
+              onUse={updateAiProvider}
+            />
+          </React.Fragment>
+        ))}
+        {/*
+          Each blocked row already explains itself inline, so this only covers the one thing a row
+          cannot say: the toggle was flipped but not yet applied to the backend.
+        */}
+        {sharingPolicyUnsaved ? (
+          <div
             className={cn(
-              // Typography
-              "text-xs text-amber-700 dark:text-amber-300"
+              // Sizing & Spacing
+              "px-4 pb-3"
             )}
           >
-            Enter a model name for the Anthropic-compatible provider.
-          </p>
-        </div>
-      )}
+            <p
+              className={cn(
+                // Typography
+                "text-xs text-amber-700 dark:text-amber-300"
+              )}
+            >
+              Press Save above to apply third-party AI data sharing; until then the assistant blocks
+              non-local providers.
+            </p>
+          </div>
+        ) : null}
       </SettingsGroup>
 
       <SettingsGroup
         label="Embeddings (Memory RAG)"
-        description="Optional OpenAI-compatible embeddings endpoint used by Memory for semantic vector search. Leave blank to use SQLite FTS5 keyword search."
+        description="Optional OpenAI-compatible embeddings endpoint used by Memory for semantic vector search. Leave blank to use SQLite FTS5 keyword search. Its API key is managed in Saved API Keys."
       >
         <SettingsRow
           label="Embeddings Base URL"
@@ -491,80 +665,6 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
           />
         </SettingsRow>
         <SettingsRow
-          label="Embeddings API Key"
-          description={
-            hasEmbeddingsKey
-              ? 'A key is saved in your OS credential store.'
-              : 'Optional for local models (e.g. Ollama). Saved to the OS credential store under provider "embeddings".'
-          }
-        >
-          <div
-            className={cn(
-              // Layout & Positioning
-              "relative",
-              // Sizing & Spacing
-              "w-56"
-            )}
-          >
-            <Input
-              type={showEmbeddingsKey ? 'text' : 'password'}
-              value={embeddingsKeyInput}
-              onChange={(event) => handleEmbeddingsKeyChange(event.target.value)}
-              onKeyDown={handleInputKeyDown}
-              placeholder={
-                hasEmbeddingsKey && !embeddingsKeyInput
-                  ? '••••••••••••••••••••••••'
-                  : 'sk-… (optional for Ollama)'
-              }
-              disabled={aiSettingsLoading}
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck={false}
-              data-1p-ignore="true"
-              data-lpignore="true"
-              className={cn(
-                // Sizing & Spacing
-                "pr-9"
-              )}
-            />
-            <button
-              type="button"
-              onClick={() => setShowEmbeddingsKey((prev) => !prev)}
-              className={cn(
-                // Layout & Positioning
-                "absolute right-2 top-1/2 -translate-y-1/2",
-
-                // Sizing & Spacing
-                "rounded p-0.5",
-
-                // Typography
-                "text-muted-foreground",
-
-                // Interactive & States
-                "hover:text-foreground"
-              )}
-              tabIndex={-1}
-            >
-              {showEmbeddingsKey ? (
-                <EyeSlashIcon
-                  className={cn(
-                    // Sizing & Spacing
-                    "size-4"
-                  )}
-                />
-              ) : (
-                <EyeIcon
-                  className={cn(
-                    // Sizing & Spacing
-                    "size-4"
-                  )}
-                />
-              )}
-            </button>
-          </div>
-        </SettingsRow>
-        <SettingsRow
           label="Vector Search Status"
           description={
             embeddingsConfigured
@@ -576,18 +676,6 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
             {embeddingsConfigured ? 'Vector Search Active' : 'FTS5 Keyword Only'}
           </Badge>
         </SettingsRow>
-        {hasEmbeddingsKey ? (
-          <SettingsRow label="Embeddings Key Action">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleClearEmbeddingsApiKey}
-              disabled={aiSettingsLoading || aiSettingsSaving}
-            >
-              Clear Embeddings Key
-            </Button>
-          </SettingsRow>
-        ) : null}
       </SettingsGroup>
     </>
   );

@@ -2,6 +2,7 @@ import { Toaster } from "@/components/toaster";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import { MotionConfig } from "motion/react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -92,8 +93,24 @@ function Root() {
   );
 }
 
+/**
+ * One place for the OS reduce-motion preference, for the whole app.
+ *
+ * Motion only honours the setting when a `MotionConfig` is an ancestor — without one, every
+ * `motion.*` transform animates regardless. Measured on a `motion.div` with `animate={{ x: 100 }}`
+ * while the preference was on: with no config it tweened (`39.7 → 73.4 → 95.9`), with this config it
+ * jumped straight to the target. It is set here rather than per-subtree because motion usages are
+ * spread across the app (splash screen, floating link card, contexts dialog, clipboard widget), and
+ * a per-subtree config is easy to forget.
+ *
+ * This covers **transform** animations only. A layout property — `width`, `height`, `margin`, `top`
+ * — is tweened even under this setting, so anything animating one of those needs its own guard; see
+ * `pages/desktop/assistant/lib/motion.ts` for the pattern.
+ */
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <Root />
+    <MotionConfig reducedMotion="user">
+      <Root />
+    </MotionConfig>
   </React.StrictMode>
 );

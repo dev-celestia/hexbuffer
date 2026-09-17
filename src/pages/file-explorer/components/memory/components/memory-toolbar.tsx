@@ -25,6 +25,7 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
     handleReindex,
     reindexing,
     embeddingsActive,
+    embeddingsBlocked,
     embeddingsModel,
     embeddedCount,
     entries,
@@ -125,7 +126,9 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
           title={
             embeddingsActive
               ? `Vector search enabled with ${embeddingsModel}. ${embeddedCount}/${entries.length} entries have vectors.`
-              : 'Vector search is disabled. Memory falls back to SQLite FTS5 keyword matching.'
+              : embeddingsBlocked
+                ? `Embeddings are configured (${embeddingsModel}) but the endpoint is remote and third-party AI data sharing is off, so new entries are stored without vectors. Enable third-party AI data sharing in Settings, or point the embeddings endpoint at a local server.`
+                : 'Vector search is disabled. Memory falls back to SQLite FTS5 keyword matching.'
           }
         >
           <LightningIcon
@@ -136,9 +139,16 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
           />
           {embeddingsActive
             ? `RAG: ${embeddingsModel ?? 'active'} (${embeddedCount}/${entries.length})`
-            : 'RAG: Keyword FTS5'}
+            : embeddingsBlocked
+              ? 'RAG: Needs sharing consent'
+              : 'RAG: Keyword FTS5'}
         </Badge>
 
+        {/*
+          Only offered when a reindex can actually succeed. With sharing off on a remote endpoint
+          the backend rejects the call outright, so a visible button would exist purely to raise an
+          error toast; the badge above carries the remedy instead.
+        */}
         {embeddingsActive && (
           <Button
             size="sm"

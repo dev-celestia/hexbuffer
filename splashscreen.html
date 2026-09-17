@@ -159,6 +159,24 @@
       background: var(--primary);
       box-shadow: 0 0 8px var(--primary-glow);
     }
+
+    /*
+     * Respect the OS reduce-motion setting.
+     *
+     * This entry has its own stylesheet and is not part of the React tree, so neither the app-wide
+     * `MotionConfig reducedMotion="user"` in `src/main.tsx` nor any global CSS rule reaches it. The
+     * carousel is decorative, auto-plays, and animates transform + blur — the exact motion the
+     * preference exists to suppress.
+     *
+     * Transitions only: `splashscreen.js` still advances slides and still clears the `exit` class on
+     * its own 450ms timer, so slides switch instantly and nothing depends on the animation running.
+     */
+    @media (prefers-reduced-motion: reduce) {
+      .slide,
+      .dot {
+        transition: none;
+      }
+    }
   </style>
 </head>
 

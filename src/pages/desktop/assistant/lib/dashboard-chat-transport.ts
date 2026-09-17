@@ -2,6 +2,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createUIMessageStream, type ChatTransport, type UIMessageStreamWriter } from 'ai';
+import { isLocalAiProviderEndpoint } from '@/lib/ai-endpoint';
 import { useRepeaterStore } from '@/stores/repeater';
 import type { DashboardAiSettings, DashboardChatMessage, AiChatAgentMessageEvent } from '../types';
 
@@ -84,31 +85,8 @@ function toProviderMessages(messages: DashboardChatMessage[]) {
   return filtered.length > 16 ? filtered.slice(-16) : filtered;
 }
 
-function isLocalEndpoint(url?: string | null): boolean {
-  if (!url) return false;
-  try {
-    const parsed = new URL(url);
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
-    const hostname = parsed.hostname.toLowerCase();
-    if (hostname === 'localhost' || hostname.endsWith('.localhost')) return true;
-    // IPv4 loopback (127.0.0.0/8) and unspecified (0.0.0.0)
-    if (/^127(\.\d{1,3}){3}$/.test(hostname) || hostname === '0.0.0.0') return true;
-    // IPv6 loopback / unspecified, including IPv4-mapped ::ffff:127.0.0.1
-    if (hostname === '[::1]' || hostname === '::1' || hostname === '[::]' || hostname === '::') {
-      return true;
-    }
-    return false;
-  } catch {
-    return false;
-  }
-}
-
 function fallbackContent(aiSettings: DashboardAiSettings | undefined, error?: unknown) {
-  const isCompat =
-    aiSettings?.provider === 'openai-compatible' ||
-    aiSettings?.provider === 'anthropic-compatible' ||
-    aiSettings?.provider === 'anthropic';
-  const isLocal = isCompat && isLocalEndpoint(aiSettings?.customBaseUrl);
+  const isLocal = isLocalAiProviderEndpoint(aiSettings?.provider, aiSettings?.customBaseUrl);
   if (!aiSettings?.hasApiKey && !isLocal) {
     return 'Add an API key in Settings or AI Config to start chatting with the configured AI provider.';
   }
@@ -196,11 +174,7 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
         let agentName: string | undefined;
         const textId = `response-${Date.now()}`;
 
-        const isCompat =
-          aiSettings?.provider === 'openai-compatible' ||
-          aiSettings?.provider === 'anthropic-compatible' ||
-          aiSettings?.provider === 'anthropic';
-        const isLocal = isCompat && isLocalEndpoint(aiSettings?.customBaseUrl);
+        const isLocal = isLocalAiProviderEndpoint(aiSettings?.provider, aiSettings?.customBaseUrl);
         if ((!aiSettings?.hasApiKey && !isLocal) || (!aiSettings?.allowThirdPartyAiSharing && !isLocal)) {
           writeAssistantText(writer, textId, fallbackContent(aiSettings), provider, model);
           return;

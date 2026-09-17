@@ -115,6 +115,8 @@ export const SECURITY_NOTICE_ICON = WarningCircleIcon;
 
 export const OPENAI_COMPATIBLE_PROVIDER_ID = 'openai-compatible';
 export const ANTHROPIC_COMPATIBLE_PROVIDER_ID = 'anthropic-compatible';
+/** Keyring-only pseudo provider holding the optional memory embeddings key. */
+export const EMBEDDINGS_KEY_PROVIDER_ID = 'embeddings';
 
 export const AI_PROVIDER_OPTIONS = [
   { id: 'deepseek', label: 'DeepSeek' },
@@ -157,7 +159,53 @@ export const AI_API_KEY_PLACEHOLDERS: Record<string, string> = {
   deepseek: 'sk-...',
   [OPENAI_COMPATIBLE_PROVIDER_ID]: 'sk-... (OpenAI or gateway key)',
   [ANTHROPIC_COMPATIBLE_PROVIDER_ID]: 'sk-ant-... (Anthropic or gateway key)',
+  [EMBEDDINGS_KEY_PROVIDER_ID]: 'sk-... (optional for Ollama)',
 };
+
+export interface AiKeyProviderOption {
+  readonly id: string;
+  readonly label: string;
+  readonly description: string;
+  /** True when the provider can be selected as the active chat provider. */
+  readonly selectable: boolean;
+}
+
+/**
+ * Providers that each keep their own API key in the OS credential store.
+ * The order here drives the "Saved API Keys" list in the AI settings tab.
+ *
+ * Whether a provider is exempt from the third-party sharing policy on a loopback base URL is
+ * deliberately NOT declared here — that rule lives in `providerIsSharingExempt`
+ * (`lib/ai-providers.ts`), which mirrors the two backend gates (`is_local_ai_endpoint` for chat,
+ * `embeddings_sharing_allowed` for embeddings) and delegates to `src/lib/ai-endpoint.ts`.
+ */
+export const AI_KEY_PROVIDER_OPTIONS: readonly AiKeyProviderOption[] = [
+  {
+    id: 'deepseek',
+    label: 'DeepSeek',
+    description: 'Built-in provider using the OpenAI Chat Completions wire format.',
+    selectable: true,
+  },
+  {
+    id: OPENAI_COMPATIBLE_PROVIDER_ID,
+    label: 'OpenAI Compatible',
+    description:
+      'Any OpenAI Chat Completions endpoint (OpenAI, OpenRouter, Ollama, LM Studio, or a gateway).',
+    selectable: true,
+  },
+  {
+    id: ANTHROPIC_COMPATIBLE_PROVIDER_ID,
+    label: 'Anthropic Compatible',
+    description: 'Anthropic Messages endpoint (api.anthropic.com or a compatible gateway).',
+    selectable: true,
+  },
+  {
+    id: EMBEDDINGS_KEY_PROVIDER_ID,
+    label: 'Embeddings (Memory RAG)',
+    description: 'Key for the optional embeddings endpoint used by Memory vector search.',
+    selectable: false,
+  },
+];
 
 export const OPENAI_COMPATIBLE_BASE_URL_PLACEHOLDER = 'https://api.openai.com/v1';
 

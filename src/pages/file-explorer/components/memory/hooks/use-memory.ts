@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
+import { embeddingsEndpointAllowed } from '@/lib/ai-endpoint';
 import { useScratchpadStore } from '@/stores/scratchpad';
 import type { MemoryEntry, ReindexResult } from '../types';
 
 interface AiSettingsResponse {
   embeddingsBaseUrl?: string | null;
   embeddingsModel?: string | null;
+  allowThirdPartyAiSharing?: boolean;
 }
 
 export function useMemory() {
@@ -19,16 +21,31 @@ export function useMemory() {
   const [deletingEntry, setDeletingEntry] = React.useState<MemoryEntry | null>(null);
   const [reindexing, setReindexing] = React.useState(false);
   const [embeddingsActive, setEmbeddingsActive] = React.useState(false);
+  /** Configured, but the backend will refuse to embed until sharing consent or a loopback endpoint. */
+  const [embeddingsBlocked, setEmbeddingsBlocked] = React.useState(false);
   const [embeddingsModel, setEmbeddingsModel] = React.useState<string | null>(null);
 
   const fetchAiSettings = React.useCallback(async () => {
     try {
       const settings = await invoke<AiSettingsResponse>('get_ai_settings');
-      const active = !!(settings.embeddingsBaseUrl?.trim() && settings.embeddingsModel?.trim());
-      setEmbeddingsActive(active);
+      const configured = !!(
+        settings.embeddingsBaseUrl?.trim() && settings.embeddingsModel?.trim()
+      );
+      // Configuration alone is not enough to claim vector search works. The backend gate
+      // (`embeddings_sharing_allowed`) also requires a loopback endpoint or sharing consent, and
+      // when it refuses it stores new entries **silently** without a vector — no error reaches the
+      // UI. Reading only "is it configured" therefore showed a green "RAG: <model>" badge while
+      // nothing was ever embedded, with an unexplained 0/N as the only clue.
+      const allowed = embeddingsEndpointAllowed(
+        settings.embeddingsBaseUrl,
+        settings.allowThirdPartyAiSharing === true,
+      );
+      setEmbeddingsActive(configured && allowed);
+      setEmbeddingsBlocked(configured && !allowed);
       setEmbeddingsModel(settings.embeddingsModel?.trim() || null);
     } catch {
       setEmbeddingsActive(false);
+      setEmbeddingsBlocked(false);
       setEmbeddingsModel(null);
     }
   }, []);
@@ -224,6 +241,7 @@ export function useMemory() {
     setDeletingEntry,
     reindexing,
     embeddingsActive,
+    embeddingsBlocked,
     embeddingsModel,
     embeddedCount,
     handleRefresh,

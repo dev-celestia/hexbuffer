@@ -482,16 +482,34 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
 
     const models = AI_MODEL_OPTIONS_BY_PROVIDER[provider] ?? [];
     setAiSettings((prev) => {
-      const nextModel = models.includes(prev.model) ? prev.model : (models[0] ?? prev.model);
-      const next = { ...prev, provider, model: nextModel, hasApiKey: hasKey };
-      invoke('save_ai_settings', {
+      // Mirror the settings tab: drop the previous provider's drafts, then restore the target
+      // provider's remembered model / base URL. Without this the picker would carry the old
+      // provider's base URL across, which is exactly the leak a provider switch must prevent.
+      const profile = prev.providerProfiles?.[provider];
+      const nextModel =
+        profile?.model ?? (models.includes(prev.model) ? prev.model : (models[0] ?? prev.model));
+      const next: DashboardAiSettings = {
+        ...prev,
+        provider,
+        model: nextModel,
+        customBaseUrl: profile?.customBaseUrl ?? '',
+        hasApiKey: hasKey,
+      };
+      invoke<DashboardAiSettings>('save_ai_settings', {
         settings: {
           provider: next.provider,
           model: next.model,
           allowThirdPartyAiSharing: next.allowThirdPartyAiSharing,
           customBaseUrl: next.customBaseUrl,
         },
-      }).catch((e) => console.error('Failed to save provider change:', e));
+      })
+        // The backend owns the profile map (it rebuilds it from disk on every save), so take the
+        // authoritative copy back — otherwise a later switch in this session would restore a
+        // stale profile for the provider we just left.
+        .then((saved) => {
+          setAiSettings((current) => ({ ...current, providerProfiles: saved.providerProfiles }));
+        })
+        .catch((e) => console.error('Failed to save provider change:', e));
       return next;
     });
   }, []);
@@ -505,7 +523,7 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
       });
       current.hasApiKey = true;
     }
-    await invoke('save_ai_settings', {
+    const saved = await invoke<DashboardAiSettings>('save_ai_settings', {
       settings: {
         provider: current.provider,
         model: current.model,
@@ -513,7 +531,9 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
         customBaseUrl: current.customBaseUrl,
       },
     });
-    setAiSettings(current);
+    // Keep the backend-owned profile map fresh, so switching away and back restores the edit
+    // that was just made here.
+    setAiSettings({ ...current, providerProfiles: saved.providerProfiles });
   }, []);
 
   return {

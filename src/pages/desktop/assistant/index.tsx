@@ -1,5 +1,5 @@
 import { PromptInputProvider } from '@celestia-project/ui';
-import { AnimatePresence, MotionConfig, motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { AssistantConversation } from './components/assistant-conversation';
 import { AssistantHeader } from './components/assistant-header';
 import { AssistantPromptBar } from './components/assistant-prompt-bar';
@@ -214,12 +214,12 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: Readonl
 }
 
 export function AIAssistantPane({ onClose, compact, className }: Readonly<AIAssistantPaneProps> = {}) {
+  // No `MotionConfig` here: `main.tsx` sets `reducedMotion="user"` for the whole app, and a second
+  // one at this level would suggest the pane's own motion is handled locally when it is not.
   return (
-    <MotionConfig reducedMotion="user">
-      <PromptInputProvider>
-        <AIAssistantPaneContent onClose={onClose} compact={compact} className={className} />
-      </PromptInputProvider>
-    </MotionConfig>
+    <PromptInputProvider>
+      <AIAssistantPaneContent onClose={onClose} compact={compact} className={className} />
+    </PromptInputProvider>
   );
 }
 

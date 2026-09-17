@@ -1,6 +1,7 @@
 import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, Input } from '@celestia-project/ui';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { AnimatePresence, motion } from 'motion/react';
 import { useDesktopPage } from './hooks/use-desktop-page';
 import { RecentsWidget } from './components/recents-widget';
 import { ProxyWidget } from './components/proxy-widget';
@@ -49,6 +50,7 @@ export function DesktopPage() {
     handleClearSearch,
     isAssistantOpen,
     handleCloseAssistant,
+    assistantEntrance,
   } = useDesktopPage();
 
   const ROOT_BG = 'bg-transparent';
@@ -76,31 +78,38 @@ export function DesktopPage() {
         )}
       >
         {/* Left: AI Assistant Widget (docked on desktop, same z-index level as icons) */}
-        {isAssistantOpen && (
-          <aside
-            data-desktop-widget
-            aria-label="AI Assistant"
-            className={cn(
-              // Layout & Positioning
-              "flex flex-col shrink-0 overflow-hidden relative z-0",
+        <AnimatePresence>
+          {isAssistantOpen && (
+            <motion.aside
+              key="ai-assistant"
+              data-desktop-widget
+              aria-label="AI Assistant"
+              initial={assistantEntrance.initial}
+              animate={assistantEntrance.animate}
+              exit={assistantEntrance.exit}
+              transition={assistantEntrance.transition}
+              className={cn(
+                // Layout & Positioning
+                "flex flex-col shrink-0 overflow-hidden relative z-0",
 
-              // Sizing & Spacing
-              "w-full xl:w-[480px] h-[calc(100vh-theme(spacing.24))] min-h-[420px] max-h-[calc(100vh-120px)]",
+                // Sizing & Spacing
+                "w-full xl:w-[480px] h-[calc(100vh-theme(spacing.24))] min-h-[420px] max-h-[calc(100vh-120px)]",
 
-              // Backgrounds & Borders
-              "rounded-2xl border border-border/60 bg-card/75 backdrop-blur-xl shadow-lg",
+                // Backgrounds & Borders
+                "rounded-2xl border border-border/60 bg-card/75 backdrop-blur-xl shadow-lg",
 
-              // Interactive & States
-              "transition-[background-color,border-color,box-shadow] duration-300 ease-out"
-            )}
-          >
-            <AIAssistantPane
-              compact
-              onClose={handleCloseAssistant}
-              className="bg-transparent"
-            />
-          </aside>
-        )}
+                // Interactive & States
+                "transition-[background-color,border-color,box-shadow] duration-300 ease-out"
+              )}
+            >
+              <AIAssistantPane
+                compact
+                onClose={handleCloseAssistant}
+                className="bg-transparent"
+              />
+            </motion.aside>
+          )}
+        </AnimatePresence>
 
         {/* Center: Search & Desktop Icons */}
         <div

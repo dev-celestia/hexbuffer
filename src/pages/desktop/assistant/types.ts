@@ -13,6 +13,12 @@ export interface DashboardAiSettings {
   hasApiKey: boolean;
   allowThirdPartyAiSharing: boolean;
   customBaseUrl?: string | null;
+  /**
+   * Model + base URL remembered per provider, keyed by provider id. The backend owns this map —
+   * it rebuilds it on every save — so the quick picker only reads it to restore a provider's
+   * configuration instead of inheriting the one it is switching away from.
+   */
+  providerProfiles?: Record<string, { model: string; customBaseUrl?: string | null }>;
 }
 
 export interface DashboardChatMetadata {
