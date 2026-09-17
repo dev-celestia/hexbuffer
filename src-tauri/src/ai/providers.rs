@@ -285,6 +285,20 @@ mod tests {
         assert!(is_local_ai_url(Some("http://[::1]:11434/v1")));
     }
 
+    /// Pins the Rust half of the IPv4-mapped IPv6 rule. The frontend's `isLocalAiEndpoint` mirrors
+    /// this branch, so if one side changes the other must too — otherwise the settings gate demands
+    /// sharing consent the backend does not require.
+    #[test]
+    fn test_is_local_ai_url_unwraps_ipv4_mapped_ipv6() {
+        assert!(is_local_ai_url(Some("http://[::ffff:127.0.0.1]:11434/v1")));
+        assert!(is_local_ai_url(Some("http://[::ffff:127.9.9.9]/v1")));
+        // Mapped unspecified.
+        assert!(is_local_ai_url(Some("http://[::ffff:0.0.0.0]/v1")));
+        // The unwrap must not become a blanket yes for anything mapped.
+        assert!(!is_local_ai_url(Some("http://[::ffff:8.8.8.8]/v1")));
+        assert!(!is_local_ai_url(Some("http://[::ffff:192.168.1.50]/v1")));
+    }
+
     #[test]
     fn test_is_local_ai_url_rejects_disguised_external_hosts() {
         // Substring/prefix tricks must NOT be treated as local.

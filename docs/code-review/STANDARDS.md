@@ -328,7 +328,7 @@ anything that builds a path or a shell command, or the AI tool registry.
 The suite is small and uneven, so test review is about *placement*, not percentage:
 
 - [ ] Pure logic (parsers, formatters, filters, policy predicates) has unit tests. This is where the
-      existing suite is strongest: 233 frontend tests across 20 files, 161 Rust tests across 37
+      existing suite is strongest: 234 frontend tests across 20 files, 161 Rust tests across 37
       modules.
 - [ ] **Any rule with a security consequence is a pure function with a test.** The
       sharing-exemption and `canSaveProviderKey` rules exist in this shape deliberately.
@@ -407,7 +407,7 @@ A change is done when every line is true. Copy this into the PR description.
 
 - [ ] The stated problem is solved, and the diff does nothing else.
 - [ ] `tsc --noEmit` clean (baseline: 0 errors).
-- [ ] `vitest run` green (baseline: 233 tests / 20 files).
+- [ ] `vitest run` green (baseline: 234 tests / 20 files).
 - [ ] `cargo test --lib -- --test-threads=1` green (baseline: 161 tests).
 - [ ] `cargo fmt --check` clean **for every file this diff touches**.
 - [ ] No new clippy warnings (baseline: 28).

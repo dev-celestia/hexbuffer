@@ -269,6 +269,22 @@ function AiProviderKeyRow({
           Enable third-party AI data sharing above to save a key for this provider.
         </p>
       ) : null}
+
+      {/*
+        The mirror of the notice above. A loopback endpoint leaves Save enabled with sharing off,
+        which looks like the gate is broken unless the row says why — and a local endpoint is
+        exactly the case where a key is optional, so say that too.
+      */}
+      {entry.savesKeyWithoutSharing ? (
+        <p
+          className={cn(
+            // Typography
+            "text-xs text-muted-foreground"
+          )}
+        >
+          Local endpoint, so no third-party sharing consent is needed. A key is optional here.
+        </p>
+      ) : null}
     </div>
   );
 }

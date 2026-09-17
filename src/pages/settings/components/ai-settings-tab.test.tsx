@@ -101,6 +101,10 @@ function button(el: HTMLElement, label: string) {
 /**
  * The saved-key row for `label`, found by walking up from its key field.
  *
+ * Anchored on the row's own heading (`<p>` whose text is exactly the label) rather than on the
+ * presence of its buttons: the button row is a *sibling* of the row's notices, so stopping there
+ * would silently exclude the blocked/local-endpoint text from every row-scoped assertion.
+ *
  * Needed because several rows can show the same action text at once — with keys stored for only
  * some providers, `button(el, 'Save key')` silently returns whichever row comes first in the list
  * rather than the row under test.
@@ -109,7 +113,10 @@ function rowFor(el: HTMLElement, label: string): HTMLElement {
   let node: HTMLElement | null = apiKeyField(el, label).parentElement;
 
   while (node && node !== el) {
-    if (button(node, 'Save key') ?? button(node, 'Replace key')) return node;
+    const heading = Array.from(node.querySelectorAll('p')).find(
+      (candidate) => (candidate.textContent ?? '').trim() === label,
+    );
+    if (heading) return node;
     node = node.parentElement;
   }
 
@@ -134,6 +141,9 @@ function typeInto(input: HTMLInputElement, value: string) {
 
 const BLOCKED_NOTICE =
   'Enable third-party AI data sharing above to save a key for this provider';
+
+/** The informational counterpart, shown on a row whose endpoint is loopback. */
+const LOCAL_HINT = 'no third-party sharing consent is needed';
 
 /** How many rows show the inline "blocked" explanation. */
 function countNotices(el: HTMLElement): number {
@@ -294,6 +304,29 @@ describe('saved-key row affordances', () => {
     // deepseek holds a key (replaceable) and embeddings is loopback-exempt, so the blocked notice
     // belongs only to the two remote providers with no key yet.
     expect(countNotices(el)).toBe(2);
+    // The loopback row explains its own enabled state instead.
+    expect(rowFor(el, 'Embeddings (Memory RAG)').textContent).toContain(LOCAL_HINT);
+  });
+
+  test('explains why a loopback row stays savable with sharing off', () => {
+    // Without this, an enabled Save button beside a disabled-by-policy explanation reads as a
+    // broken gate. It is also the case where a key is genuinely optional.
+    const el = render(
+      makeState({
+        aiSettings: {
+          provider: 'openai-compatible',
+          model: 'llama3.1',
+          allowThirdPartyAiSharing: false,
+          customBaseUrl: 'http://localhost:11434/v1',
+        },
+        keyStatus: {},
+      }),
+    );
+
+    expect(rowFor(el, 'OpenAI Compatible').textContent).toContain(LOCAL_HINT);
+    // A remote row carries the blocked notice instead — never both.
+    expect(rowFor(el, 'DeepSeek').textContent).not.toContain(LOCAL_HINT);
+    expect(rowFor(el, 'DeepSeek').textContent).toContain(BLOCKED_NOTICE);
   });
 
   test('a provider with no key shows the save action and a real key placeholder', () => {

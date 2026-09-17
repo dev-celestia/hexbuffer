@@ -1,14 +1,39 @@
 /**
+ * IPv4-mapped IPv6, which `new URL` canonicalises to two hex groups — `[::ffff:127.0.0.1]` arrives
+ * as `[::ffff:7f00:1]`, and `[::ffff:0.0.0.0]` as `[::ffff:0:0]`.
+ */
+const IPV4_MAPPED_IPV6 = /^\[::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})\]$/i;
+
+/**
+ * The IPv4 loopback / unspecified test applied to an IPv4-mapped IPv6 host, mirroring Rust's
+ * `ip.to_ipv4_mapped().map(|v4| v4.is_loopback() || v4.is_unspecified())` in `is_local_ai_url`.
+ *
+ * The two 16-bit groups spell out the four octets, so the first octet is the high byte of the first
+ * group: `7f00` → 127 (loopback), `808` → 8 (remote), both groups zero → 0.0.0.0 (unspecified).
+ */
+function isLoopbackIpv4Mapped(hostname: string): boolean {
+  const match = IPV4_MAPPED_IPV6.exec(hostname);
+  if (!match) return false;
+
+  const high = Number.parseInt(match[1], 16);
+  const low = Number.parseInt(match[2], 16);
+
+  return ((high >> 8) & 0xff) === 127 || (high === 0 && low === 0);
+}
+
+/**
  * True when an AI endpoint URL resolves to this machine (loopback or unspecified host), so
  * requests never leave the box and need neither third-party sharing consent nor a real API key.
  *
- * Mirrors `is_local_ai_url` in `src-tauri/src/ai/providers.rs`. Parsing is exact, so hosts such
- * as `localhost.attacker.example`, `127.0.0.1@evil.com` or `attacker.example?x=localhost` are
- * never misclassified, and unparseable URLs fail closed (treated as remote).
+ * Mirrors `is_local_ai_url` in `src-tauri/src/ai/providers.rs`, including its IPv4-mapped IPv6
+ * handling. Parsing is exact, so hosts such as `localhost.attacker.example`,
+ * `127.0.0.1@evil.com` or `attacker.example?x=localhost` are never misclassified, and unparseable
+ * URLs fail closed (treated as remote).
  *
- * One deliberate divergence from the Rust version: IPv4-mapped IPv6 hosts (`[::ffff:127.0.0.1]`)
- * are treated as remote here, where Rust unwraps them. The backend gate is authoritative and
- * exempts them; this side is simply stricter, which fails closed rather than open.
+ * The two sides are kept deliberately identical. An earlier version treated IPv4-mapped IPv6 as
+ * remote while Rust exempted it — safe (it failed closed) but wrong in the direction that matters
+ * for the UI: the settings gate asked for sharing consent the backend did not require, and the
+ * memory badge reported "Needs Sharing Consent" for an endpoint that would have worked.
  */
 export function isLocalAiEndpoint(url?: string | null): boolean {
   if (!url) return false;
@@ -19,11 +44,12 @@ export function isLocalAiEndpoint(url?: string | null): boolean {
     if (hostname === 'localhost' || hostname.endsWith('.localhost')) return true;
     // IPv4 loopback (127.0.0.0/8) and unspecified (0.0.0.0)
     if (/^127(\.\d{1,3}){3}$/.test(hostname) || hostname === '0.0.0.0') return true;
-    // IPv6 loopback / unspecified
+    // IPv6 loopback / unspecified. `URL` always brackets an IPv6 host, so the bracketed forms are
+    // the ones that can match; the bare forms are kept as cheap defence.
     if (hostname === '[::1]' || hostname === '::1' || hostname === '[::]' || hostname === '::') {
       return true;
     }
-    return false;
+    return isLoopbackIpv4Mapped(hostname);
   } catch {
     return false;
   }

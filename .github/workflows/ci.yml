@@ -13,7 +13,7 @@
 #
 # Baselines as of 2026-09-17 (update these comments when they change):
 #   tsc            0 errors
-#   vitest         233 tests / 20 files, all passing
+#   vitest         234 tests / 20 files, all passing
 #   cargo test     161 tests, all passing
 #   cargo clippy   28 warnings across 13 lint types (advisory until cleared)
 #   rustfmt        82 of 117 files unformatted (hence: changed files only)

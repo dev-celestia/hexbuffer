@@ -55,10 +55,17 @@ describe('isLocalAiEndpoint', () => {
     expect(isLocalAiEndpoint('javascript:alert(1)')).toBe(false);
   });
 
-  it('documents the deliberate divergence from Rust on IPv4-mapped IPv6', () => {
-    // Rust unwraps `::ffff:127.0.0.1` and exempts it; this side treats it as remote. Stricter, so
-    // it fails closed rather than open — the backend gate is authoritative either way.
-    expect(isLocalAiEndpoint('http://[::ffff:127.0.0.1]:11434/v1')).toBe(false);
+  it('unwraps IPv4-mapped IPv6 exactly as Rust does', () => {
+    // Rust applies `to_ipv4_mapped()` and then the IPv4 loopback/unspecified test, so these must
+    // match — otherwise the settings gate demands consent the backend does not require and the
+    // memory badge reports "Needs Sharing Consent" for an endpoint that would have worked.
+    expect(isLocalAiEndpoint('http://[::ffff:127.0.0.1]:11434/v1')).toBe(true);
+    expect(isLocalAiEndpoint('http://[::ffff:127.9.9.9]/v1')).toBe(true);
+    // Unspecified, mapped.
+    expect(isLocalAiEndpoint('http://[::ffff:0.0.0.0]/v1')).toBe(true);
+    // A mapped address that is not loopback stays remote — the unwrap must not become a blanket yes.
+    expect(isLocalAiEndpoint('http://[::ffff:8.8.8.8]/v1')).toBe(false);
+    expect(isLocalAiEndpoint('http://[::ffff:192.168.1.50]/v1')).toBe(false);
   });
 });
 
