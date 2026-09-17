@@ -8,7 +8,7 @@ export const NAVIGATE_TO_APP_AI_TOOL_DEFINITION = {
     properties: {
       app: {
         type: 'string',
-        description: 'The target application or window name: "repeater", "http-history", "intercept", "intruder", "notes", "port-scanner", "jwt", "browser", "settings", "api-mock", or "api-override".',
+        description: 'The target application or window name: "repeater", "http-history", "intercept", "intruder", "notes", "port-scanner", "jwt", "browser", "settings", "api-mock", "api-override", or "memory".',
       },
     },
     required: ['app'],
@@ -27,7 +27,7 @@ export async function executeNavigateToAppAiTool(args: {
 
   const success = openApp(app);
   if (!success) {
-    return `Could not find application window "${app}". Available windows: repeater, http-history, intercept, intruder, notes, port-scanner, jwt, browser, settings, api-mock, api-override.`;
+    return `Could not find application window "${app}". Available windows: repeater, http-history, intercept, intruder, notes, port-scanner, jwt, browser, settings, api-mock, api-override, memory.`;
   }
 
   return `Successfully opened and focused the ${app} window.`;

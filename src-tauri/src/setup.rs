@@ -22,7 +22,7 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let db_path = hexbuffer::paths::get_shared_db_path();
     crate::log(&format!("Opening database at {:?}", db_path));
     let database =
-        hexbuffer::db::repository::Database::new(db_path).expect("Failed to initialize database");
+        hexbuffer::db::repository::Database::new(db_path.clone()).expect("Failed to initialize database");
     if let Err(e) = database.init() {
         crate::log(&format!(
             "FATAL: Failed to initialize database schema: {}",
@@ -55,6 +55,19 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     app.manage(HashEngineState::default());
     app.manage(hexbuffer::commands::nuclei::NucleiScanState::default());
     app.manage(hexbuffer::commands::regression::RegressionEngineState::new());
+
+    let uteke_dir = app_dir.join("uteke");
+    match hexbuffer::UtekeEngine::new(uteke_dir) {
+        Ok(engine) => {
+            engine.migrate_legacy_entries_if_needed(&db_path);
+            app.manage(engine);
+            crate::log("Uteke memory engine initialized successfully");
+        }
+        Err(e) => {
+            crate::log(&format!("Failed to initialize Uteke memory engine: {e}"));
+            panic!("Failed to initialize Uteke memory engine: {e}");
+        }
+    }
 
     // ponytail: manage MockForgeState
     let mock_forge = hexbuffer::commands::mock_forge::MockForgeState::new();

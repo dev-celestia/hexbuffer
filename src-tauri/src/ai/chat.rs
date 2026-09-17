@@ -1,6 +1,6 @@
 use rig::completion::Message as RigMessage;
 use serde_json::json;
-use tauri::{AppHandle, Emitter, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 
 use super::settings::read_ai_settings;
 use super::tool_loop;
@@ -425,7 +425,7 @@ pub async fn send_ai_chat_message_impl(
     let bank_entries = if selected_agent.id == super::agents::AgentId::Orchestrator
         || prompt.to_lowercase().contains("memory")
     {
-        retrieve_memory_entries(&app, &history, &settings, &prompt).await
+        retrieve_memory_entries(&app, &prompt).await
     } else {
         Vec::new()
     };
@@ -637,88 +637,39 @@ pub async fn send_ai_chat_message_impl(
     })
 }
 
-/// Retrieves relevant memory entries for the user's prompt: vector search via
-/// rig embeddings when configured, FTS5 keyword search always, pinned entries as the
-/// final fallback. Results are merged and deduplicated by id.
+/// Retrieves relevant memory entries for the user's prompt using Uteke's hybrid fusion
+/// recall (vector + BM25 RRF), falling back to pinned entries when query recall is empty.
 async fn retrieve_memory_entries(
     app: &AppHandle,
-    history: &crate::HistoryBridge,
-    settings: &AiSettings,
     prompt: &str,
-) -> Vec<crate::db::repository::types::MemoryEntry> {
-    use super::embeddings::{
-        build_embedding_model, resolve_embeddings_config, vector_search_memory,
-        CONTEXT_BANK_MAX_RETRIEVED, CONTEXT_BANK_SIMILARITY_THRESHOLD,
-    };
-
-    let mut selected: Vec<crate::db::repository::types::MemoryEntry> = Vec::new();
-    let mut selected_ids: std::collections::HashSet<String> = std::collections::HashSet::new();
-
-    // 1. Vector pass — semantic similarity via the configured embeddings endpoint.
-    match resolve_embeddings_config(settings, app) {
-        Ok(Some(config)) => {
-            let is_local = super::providers::is_local_ai_url(Some(&config.base_url));
-            if !is_local && !settings.allow_third_party_ai_sharing {
-                eprintln!("[memory] embeddings sharing disabled; falling back to keyword search");
-            } else {
-                let model = build_embedding_model(&config);
-                match history.memory_entries_with_embeddings(&config.model) {
-                    Ok(entries) if !entries.is_empty() => {
-                        match vector_search_memory(&model, &entries, prompt, 5).await {
-                            Ok(results) => {
-                                for (id, score) in results {
-                                    if score < CONTEXT_BANK_SIMILARITY_THRESHOLD {
-                                        continue;
-                                    }
-                                    if let Some(entry) = entries.iter().find(|entry| entry.id == id)
-                                    {
-                                        if selected_ids.insert(entry.id.clone()) {
-                                            selected.push(entry.clone());
-                                        }
-                                    }
-                                }
-                            }
-                            Err(error) => {
-                                eprintln!("[memory] vector search failed: {error}");
-                            }
-                        }
-                    }
-                    Ok(_) => {}
-                    Err(error) => eprintln!("[memory] failed to load embeddings: {error}"),
-                }
+) -> Vec<crate::memory::MemoryItemDto> {
+    if let Some(engine) = app.try_state::<crate::memory::UtekeEngine>() {
+        let engine = engine.inner().clone();
+        let prompt_clone = prompt.to_string();
+        let results = tauri::async_runtime::spawn_blocking(move || {
+            let mut list = engine.recall(&prompt_clone, 5, None).unwrap_or_default();
+            if list.is_empty() {
+                list = engine
+                    .list(None, None, None)
+                    .unwrap_or_default()
+                    .into_iter()
+                    .filter(|m| m.pinned)
+                    .take(5)
+                    .collect();
             }
-        }
-        Ok(None) => {}
-        Err(error) => eprintln!("[memory] embeddings config unavailable: {error}"),
-    }
+            list
+        })
+        .await
+        .unwrap_or_default();
 
-    // 2. Keyword pass — FTS5, always available.
-    if let Ok(entries) = history.search_memory_keyword(prompt, 5) {
-        for entry in entries {
-            if selected_ids.insert(entry.id.clone()) {
-                selected.push(entry);
-            }
-        }
+        return results;
     }
-
-    // 3. Fallback — pinned entries so curated knowledge is always available.
-    if selected.is_empty() {
-        if let Ok(all) = history.list_memory_entries(None) {
-            for entry in all.into_iter().filter(|entry| entry.pinned) {
-                if selected_ids.insert(entry.id.clone()) {
-                    selected.push(entry);
-                }
-            }
-        }
-    }
-
-    selected.truncate(CONTEXT_BANK_MAX_RETRIEVED);
-    selected
+    Vec::new()
 }
 
 /// Renders retrieved memory entries as a chat context block. Returns None when
 /// there is nothing to include.
-fn format_memory_block(entries: &[crate::db::repository::types::MemoryEntry]) -> Option<String> {
+fn format_memory_block(entries: &[crate::memory::MemoryItemDto]) -> Option<String> {
     if entries.is_empty() {
         return None;
     }
@@ -733,7 +684,7 @@ fn format_memory_block(entries: &[crate::db::repository::types::MemoryEntry]) ->
         let content_preview: String = entry.content.chars().take(800).collect();
         block.push_str(&format!(
             "- ({}{}) {}\n{}\n",
-            entry.source_type, tags, entry.title, content_preview
+            entry.memory_type, tags, entry.title, content_preview
         ));
     }
     block.push_str(

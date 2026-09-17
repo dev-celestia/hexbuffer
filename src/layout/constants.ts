@@ -24,6 +24,7 @@ import {
   BroadcastIcon,
   FolderOpenIcon,
   ShieldCheckIcon,
+  BrainIcon,
 } from '@phosphor-icons/react';
 
 import httpIcon from '@/assets/app-icon/http.png';
@@ -214,6 +215,15 @@ export const RELEASE_NAV_ITEMS: NavItem[] = [
     href: '/jwt',
     description: 'Decode, edit, and sign JSON Web Tokens.',
     colors: { bg: 'bg-lime-700 dark:bg-lime-700', hoverBg: 'group-hover:bg-lime-700 dark:group-hover:bg-lime-700', border: 'border-lime-700 dark:border-lime-700' },
+    flag: 'release',
+    isNew: true,
+  },
+  {
+    label: 'Memory',
+    icon: BrainIcon,
+    href: '/memory',
+    description: 'Autonomous hybrid memory engine powered by Uteke: vector recall, knowledge graph, and dream cycles.',
+    colors: { bg: 'bg-indigo-600 dark:bg-indigo-600', hoverBg: 'group-hover:bg-indigo-600 dark:group-hover:bg-indigo-600', border: 'border-indigo-600 dark:border-indigo-600' },
     flag: 'release',
     isNew: true,
   },

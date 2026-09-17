@@ -45,6 +45,10 @@ export function normalizeAppPath(path: string): string {
     case 'api-override':
     case 'override':
       return '/api-override';
+    case 'memory':
+    case 'knowledge':
+    case 'uteke':
+      return '/memory';
     case 'desktop':
     case 'home':
     case '':

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {
-  LinkSimpleIcon,
+  GitForkIcon,
   PencilSimpleIcon,
   StarIcon,
   TrashIcon,
@@ -22,41 +22,16 @@ import {
   TableRow,
 } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
-import type { MemoryEntry } from '../types';
-import type { MemoryState } from '../hooks/use-memory';
+import {
+  formatRelativeTime,
+  getImportanceLabel,
+  getMemoryTypeBadgeVariant,
+} from '../lib/helpers';
+import type { MemoryPageState } from '../hooks/use-memory-page';
+import type { MemoryItem } from '../types';
 
 interface MemoryTableProps {
-  state: MemoryState;
-}
-
-function formatRelativeTime(isoString: string): string {
-  if (!isoString) return '—';
-  try {
-    const date = new Date(isoString);
-    const now = Date.now();
-    const diffMs = now - date.getTime();
-    const diffMinutes = Math.floor(diffMs / 60000);
-    if (diffMinutes < 1) return 'just now';
-    if (diffMinutes < 60) return `${diffMinutes}m ago`;
-    const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
-    const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-  } catch {
-    return '—';
-  }
-}
-
-function getSourceVariant(source: string): 'default' | 'secondary' | 'outline' {
-  switch (source) {
-    case 'ai':
-      return 'default';
-    case 'insight':
-      return 'secondary';
-    default:
-      return 'outline';
-  }
+  state: MemoryPageState;
 }
 
 export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
@@ -67,7 +42,9 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
     setSelectedId,
     handleTogglePin,
     handleOpenEdit,
-    setDeletingEntry,
+    handleDeleteEntry,
+    handleOpenCreate,
+    setIsLinkDialogOpen,
   } = state;
 
   if (!loading && entries.length === 0) {
@@ -83,19 +60,19 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
       >
         <Empty>
           <EmptyHeader>
-            <EmptyTitle>No Memory Entries</EmptyTitle>
+            <EmptyTitle>No Memory Records Found</EmptyTitle>
             <EmptyDescription>
-              Store reusable security findings, scope notes, and AI insights. Entries are
-              retrieved into AI chat per prompt via vector RAG or keyword search.
+              Store reusable security findings, scope facts, credentials, and AI insights.
+              Uteke indexes memory embeddings locally for fast hybrid retrieval and associative recall.
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <Button
               size="sm"
               variant="outline"
-              onClick={state.handleOpenCreate}
+              onClick={handleOpenCreate}
             >
-              Create First Entry
+              Add First Memory
             </Button>
           </EmptyContent>
         </Empty>
@@ -120,7 +97,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
             "sticky top-0 z-10",
 
             // Backgrounds & Borders
-            "bg-muted/65 backdrop-blur-sm"
+            "bg-muted/60 backdrop-blur-sm"
           )}
         >
           <TableRow>
@@ -135,10 +112,10 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
             <TableHead
               className={cn(
                 // Sizing & Spacing
-                "min-w-[200px] px-3"
+                "min-w-[220px] px-3"
               )}
             >
-              Title
+              Title & Preview
             </TableHead>
             <TableHead
               className={cn(
@@ -146,15 +123,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                 "w-24 px-3"
               )}
             >
-              Source
-            </TableHead>
-            <TableHead
-              className={cn(
-                // Sizing & Spacing
-                "px-3"
-              )}
-            >
-              Tags
+              Namespace
             </TableHead>
             <TableHead
               className={cn(
@@ -162,12 +131,28 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                 "w-24 px-3"
               )}
             >
-              RAG
+              Type
             </TableHead>
             <TableHead
               className={cn(
                 // Sizing & Spacing
-                "w-28 px-3"
+                "w-20 px-3"
+              )}
+            >
+              Priority
+            </TableHead>
+            <TableHead
+              className={cn(
+                // Sizing & Spacing
+                "w-20 px-3 text-center"
+              )}
+            >
+              Links
+            </TableHead>
+            <TableHead
+              className={cn(
+                // Sizing & Spacing
+                "w-24 px-3"
               )}
             >
               Updated
@@ -175,7 +160,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
             <TableHead
               className={cn(
                 // Sizing & Spacing
-                "w-20 px-2 text-right"
+                "w-24 px-2 text-right"
               )}
             >
               Actions
@@ -214,7 +199,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                       // Interactive & States
                       "hover:bg-muted focus:outline-none"
                     )}
-                    title={entry.pinned ? 'Unpin entry' : 'Pin entry'}
+                    title={entry.pinned ? 'Unpin memory' : 'Pin memory'}
                   >
                     <StarIcon
                       weight={entry.pinned ? 'fill' : 'regular'}
@@ -223,13 +208,13 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                         "size-3.5",
 
                         // Typography
-                        entry.pinned ? "text-amber-500" : "text-muted-foreground/50"
+                        entry.pinned ? "text-amber-500" : "text-muted-foreground/40"
                       )}
                     />
                   </button>
                 </TableCell>
 
-                {/* Title */}
+                {/* Title & Preview */}
                 <TableCell
                   className={cn(
                     // Sizing & Spacing
@@ -239,43 +224,70 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                   <div
                     className={cn(
                       // Layout & Positioning
-                      "flex items-center gap-1.5 min-w-0"
+                      "flex flex-col gap-0.5 min-w-0"
                     )}
                   >
+                    <div
+                      className={cn(
+                        // Layout & Positioning
+                        "flex items-center gap-1.5 min-w-0"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          // Layout & Positioning
+                          "truncate",
+
+                          // Typography
+                          "text-xs font-semibold text-foreground"
+                        )}
+                      >
+                        {entry.title}
+                      </span>
+                      {entry.score !== undefined && entry.score !== null && (
+                        <span
+                          className={cn(
+                            // Typography
+                            "text-[10px] text-muted-foreground font-mono shrink-0"
+                          )}
+                          title="Hybrid recall match score"
+                        >
+                          ({Math.round(entry.score * 100)}%)
+                        </span>
+                      )}
+                    </div>
                     <span
                       className={cn(
                         // Layout & Positioning
-                        "truncate",
+                        "line-clamp-1",
 
                         // Typography
-                        "text-xs text-foreground"
+                        "text-[11px] text-muted-foreground font-normal"
                       )}
                     >
-                      {entry.title}
+                      {entry.content}
                     </span>
-                    {entry.url && (
-                      <span
-                        title={entry.url}
-                        className={cn(
-                          // Layout & Positioning
-                          "shrink-0",
-
-                          // Typography
-                          "text-muted-foreground"
-                        )}
-                      >
-                        <LinkSimpleIcon
-                          className={cn(
-                            // Sizing & Spacing
-                            "size-3"
-                          )}
-                        />
-                      </span>
-                    )}
                   </div>
                 </TableCell>
 
-                {/* Source Badge */}
+                {/* Namespace */}
+                <TableCell
+                  className={cn(
+                    // Sizing & Spacing
+                    "px-3 py-1.5"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      // Typography
+                      "text-[11px] font-mono text-muted-foreground"
+                    )}
+                  >
+                    {entry.namespace}
+                  </span>
+                </TableCell>
+
+                {/* Memory Type */}
                 <TableCell
                   className={cn(
                     // Sizing & Spacing
@@ -283,116 +295,90 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                   )}
                 >
                   <Badge
-                    variant={getSourceVariant(entry.sourceType)}
+                    variant={getMemoryTypeBadgeVariant(entry.memoryType)}
                     className={cn(
                       // Sizing & Spacing
-                      "text-[10px] uppercase font-mono px-1.5 py-0"
+                      "text-[10px] px-1.5 py-0 capitalize"
                     )}
                   >
-                    {entry.sourceType}
+                    {entry.memoryType}
                   </Badge>
                 </TableCell>
 
-                {/* Tags */}
+                {/* Importance / Priority */}
                 <TableCell
                   className={cn(
                     // Sizing & Spacing
                     "px-3 py-1.5"
                   )}
                 >
-                  <div
+                  <span
                     className={cn(
-                      // Layout & Positioning
-                      "flex flex-wrap gap-1 max-w-xs"
+                      // Typography
+                      "text-[11px] text-muted-foreground"
                     )}
                   >
-                    {entry.tags.length > 0 ? (
-                      entry.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className={cn(
-                            // Sizing & Spacing
-                            "px-1.5 py-0.5 rounded",
-
-                            // Typography
-                            "text-[10px] font-mono text-muted-foreground",
-
-                            // Backgrounds & Borders
-                            "bg-muted/70 border border-border"
-                          )}
-                        >
-                          {tag}
-                        </span>
-                      ))
-                    ) : (
-                      <span
-                        className={cn(
-                          // Typography
-                          "text-xs text-muted-foreground/40 italic"
-                        )}
-                      >
-                        —
-                      </span>
-                    )}
-                  </div>
+                    {getImportanceLabel(entry.importance)}
+                  </span>
                 </TableCell>
 
-                {/* RAG Vector status */}
+                {/* Graph Edges / Connections */}
+                <TableCell
+                  className={cn(
+                    // Sizing & Spacing
+                    "px-3 py-1.5 text-center"
+                  )}
+                >
+                  {entry.edgesCount > 0 ? (
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        // Layout & Positioning
+                        "inline-flex items-center gap-1",
+
+                        // Sizing & Spacing
+                        "text-[10px] px-1.5 py-0 font-mono"
+                      )}
+                    >
+                      <GitForkIcon
+                        className={cn(
+                          // Sizing & Spacing
+                          "size-3 text-indigo-400"
+                        )}
+                      />
+                      <span>{entry.edgesCount}</span>
+                    </Badge>
+                  ) : (
+                    <span
+                      className={cn(
+                        // Typography
+                        "text-[11px] text-muted-foreground/50"
+                      )}
+                    >
+                      —
+                    </span>
+                  )}
+                </TableCell>
+
+                {/* Updated relative time */}
                 <TableCell
                   className={cn(
                     // Sizing & Spacing
                     "px-3 py-1.5"
                   )}
                 >
-                  {entry.embeddingModel ? (
-                    <span
-                      title={`Embedded using ${entry.embeddingModel}`}
-                      className={cn(
-                        // Sizing & Spacing
-                        "px-1.5 py-0.5 rounded",
-
-                        // Typography
-                        "text-[10px] font-mono text-emerald-600 dark:text-emerald-400",
-
-                        // Backgrounds & Borders
-                        "bg-emerald-500/10 border border-emerald-500/20"
-                      )}
-                    >
-                      vector
-                    </span>
-                  ) : (
-                    <span
-                      title="Keyword FTS5 only"
-                      className={cn(
-                        // Sizing & Spacing
-                        "px-1.5 py-0.5 rounded",
-
-                        // Typography
-                        "text-[10px] font-mono text-muted-foreground",
-
-                        // Backgrounds & Borders
-                        "bg-muted/40"
-                      )}
-                    >
-                      fts5
-                    </span>
-                  )}
+                  <span
+                    className={cn(
+                      // Typography
+                      "text-[11px] text-muted-foreground"
+                    )}
+                    title={entry.updatedAt}
+                  >
+                    {formatRelativeTime(entry.updatedAt)}
+                  </span>
                 </TableCell>
 
-                {/* Updated date */}
-                <TableCell
-                  className={cn(
-                    // Sizing & Spacing
-                    "px-3 py-1.5",
-
-                    // Typography
-                    "text-xs font-mono text-muted-foreground"
-                  )}
-                >
-                  {formatRelativeTime(entry.updatedAt)}
-                </TableCell>
-
-                {/* Actions */}
+                {/* Row actions */}
                 <TableCell
                   className={cn(
                     // Sizing & Spacing
@@ -406,15 +392,50 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                       "flex items-center justify-end gap-1"
                     )}
                   >
+                    {/* Link */}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setSelectedId(entry.id);
+                        setIsLinkDialogOpen(true);
+                      }}
+                      className={cn(
+                        // Sizing & Spacing
+                        "h-6 w-6 p-0",
+
+                        // Typography
+                        "text-muted-foreground",
+
+                        // Interactive & States
+                        "hover:text-indigo-400"
+                      )}
+                      title="Link finding relationship"
+                    >
+                      <GitForkIcon
+                        className={cn(
+                          // Sizing & Spacing
+                          "size-3.5"
+                        )}
+                      />
+                    </Button>
+
+                    {/* Edit */}
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => handleOpenEdit(entry)}
                       className={cn(
                         // Sizing & Spacing
-                        "h-6 w-6 p-0"
+                        "h-6 w-6 p-0",
+
+                        // Typography
+                        "text-muted-foreground",
+
+                        // Interactive & States
+                        "hover:text-foreground"
                       )}
-                      title="Edit note"
+                      title="Edit memory"
                     >
                       <PencilSimpleIcon
                         className={cn(
@@ -423,18 +444,23 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                         )}
                       />
                     </Button>
+
+                    {/* Delete */}
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => setDeletingEntry(entry)}
+                      onClick={() => void handleDeleteEntry(entry.id)}
                       className={cn(
                         // Sizing & Spacing
                         "h-6 w-6 p-0",
 
                         // Typography
-                        "text-destructive hover:text-destructive"
+                        "text-muted-foreground",
+
+                        // Interactive & States
+                        "hover:text-destructive"
                       )}
-                      title="Delete note"
+                      title="Delete memory"
                     >
                       <TrashIcon
                         className={cn(

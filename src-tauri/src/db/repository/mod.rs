@@ -2,7 +2,6 @@ pub mod ai_browser;
 pub mod api_collection;
 pub mod chat_sessions;
 pub mod collaborator;
-pub mod memory;
 pub mod notes;
 pub mod documents;
 pub mod http_sessions;

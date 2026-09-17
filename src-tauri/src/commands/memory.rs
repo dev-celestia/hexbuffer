@@ -1,202 +1,127 @@
-use tauri::{AppHandle, State};
+use tauri::State;
 
-use crate::db::repository::types::MemoryEntry;
-use crate::HistoryBridge;
-
-use super::super::ai::embeddings::{build_embedding_model, embed_text, resolve_embeddings_config};
-
-fn now() -> String {
-    chrono::Utc::now().to_rfc3339()
-}
+use crate::memory::{
+    DreamReportDto, EngineStatusDto, MemoryEdgeDto, MemoryItemDto, SaveMemoryDto, UtekeEngine,
+};
 
 #[tauri::command]
 pub async fn list_memory_entries(
-    history: State<'_, HistoryBridge>,
+    engine: State<'_, UtekeEngine>,
+    namespace: Option<String>,
     query: Option<String>,
-) -> Result<Vec<MemoryEntry>, String> {
-    let history = history.inner().clone();
-    tauri::async_runtime::spawn_blocking(move || history.list_memory_entries(query))
+    memory_type: Option<String>,
+) -> Result<Vec<MemoryItemDto>, String> {
+    let engine = engine.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        engine.list(namespace, query, memory_type)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+pub async fn save_memory_entry(
+    engine: State<'_, UtekeEngine>,
+    entry: SaveMemoryDto,
+) -> Result<MemoryItemDto, String> {
+    let engine = engine.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || engine.save(entry))
         .await
         .map_err(|e| e.to_string())?
 }
 
-/// Saves an entry and embeds it for vector retrieval when an embeddings endpoint is
-/// configured. On embedding failure the entry is still stored (keyword-searchable).
-#[tauri::command]
-pub async fn save_memory_entry(
-    app: AppHandle,
-    history: State<'_, HistoryBridge>,
-    mut entry: MemoryEntry,
-) -> Result<MemoryEntry, String> {
-    let history = history.inner().clone();
-
-    if entry.id.trim().is_empty() {
-        entry.id = uuid::Uuid::new_v4().to_string();
-    }
-    entry.title = entry.title.trim().to_string();
-    entry.content = entry.content.trim().to_string();
-    entry.tags = entry
-        .tags
-        .iter()
-        .map(|tag| tag.trim().to_lowercase())
-        .filter(|tag| !tag.is_empty())
-        .collect();
-    if entry.source_type.trim().is_empty() {
-        entry.source_type = "user".to_string();
-    }
-    if entry.title.is_empty() || entry.content.is_empty() {
-        return Err("Title and content are required.".to_string());
-    }
-
-    // Preserve an existing vector when the content is unchanged and no re-embed is due.
-    let previous = history.get_memory_entry(&entry.id)?;
-    let timestamp = now();
-    entry.created_at = previous
-        .as_ref()
-        .map(|p| p.created_at.clone())
-        .filter(|_| !entry.created_at.is_empty())
-        .unwrap_or_else(|| timestamp.clone());
-    entry.updated_at = timestamp;
-
-    let content_unchanged = previous
-        .as_ref()
-        .map(|p| p.title == entry.title && p.content == entry.content)
-        .unwrap_or(false);
-
-    let mut embedding: Option<(Vec<f64>, String)> = None;
-    if content_unchanged {
-        if let Some(prev) = previous.as_ref() {
-            if let (Some(vector), Some(model)) = (&prev.embedding, &prev.embedding_model) {
-                embedding = Some((vector.clone(), model.clone()));
-            }
-        }
-    }
-
-    if embedding.is_none() {
-        let settings = crate::ai::read_ai_settings(&app)?;
-        if let Ok(Some(config)) = resolve_embeddings_config(&settings, &app) {
-            if crate::ai::embeddings::embeddings_sharing_allowed(&settings, &config.base_url) {
-                let model = build_embedding_model(&config);
-                let text = format!("{}\n{}", entry.title, entry.content);
-                match embed_text(&model, &text).await {
-                    Ok(vector) => embedding = Some((vector, config.model)),
-                    Err(error) => {
-                        eprintln!("[memory] embedding failed (entry stored without vector): {error}");
-                    }
-                }
-            } else {
-                eprintln!("[memory] embeddings sharing disabled; entry stored without vector");
-            }
-        }
-    }
-
-    if let Some((vector, model_name)) = embedding {
-        entry.embedding = Some(vector);
-        entry.embedding_model = Some(model_name);
-    } else {
-        entry.embedding = None;
-        entry.embedding_model = None;
-    }
-
-    history.upsert_memory_entry(&entry)?;
-    let stored = history.get_memory_entry(&entry.id)?.unwrap_or(entry);
-    Ok(stored)
-}
-
 #[tauri::command]
 pub async fn delete_memory_entry(
-    history: State<'_, HistoryBridge>,
+    engine: State<'_, UtekeEngine>,
     entry_id: String,
 ) -> Result<(), String> {
-    let history = history.inner().clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        history.delete_memory_entry(&entry_id)?;
-        Ok(())
-    })
-    .await
-    .map_err(|e| e.to_string())?
+    let engine = engine.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || engine.delete(&entry_id))
+        .await
+        .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
 pub async fn set_memory_entry_pinned(
-    history: State<'_, HistoryBridge>,
+    engine: State<'_, UtekeEngine>,
     entry_id: String,
     pinned: bool,
 ) -> Result<(), String> {
-    let history = history.inner().clone();
+    let engine = engine.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || engine.set_pinned(&entry_id, pinned))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+pub async fn search_memory_hybrid(
+    engine: State<'_, UtekeEngine>,
+    query: String,
+    namespace: Option<String>,
+    limit: Option<usize>,
+) -> Result<Vec<MemoryItemDto>, String> {
+    let engine = engine.inner().clone();
+    let lim = limit.unwrap_or(20);
     tauri::async_runtime::spawn_blocking(move || {
-        history.set_memory_entry_pinned(&entry_id, pinned)?;
-        Ok(())
+        engine.recall(&query, lim, namespace.as_deref())
     })
     .await
     .map_err(|e| e.to_string())?
 }
 
-/// Re-embeds every entry that has no vector or was embedded with a different model.
-/// Run after changing the embeddings configuration.
 #[tauri::command]
-pub async fn reindex_memory_embeddings(
-    app: AppHandle,
-    history: State<'_, HistoryBridge>,
-) -> Result<serde_json::Value, String> {
-    let history = history.inner().clone();
-    let settings = crate::ai::read_ai_settings(&app)?;
-    let Some(config) = resolve_embeddings_config(&settings, &app)? else {
-        return Err(
-            "Embeddings are not configured. Set an embeddings base URL and model in Settings."
-                .to_string(),
-        );
-    };
-    if !crate::ai::embeddings::embeddings_sharing_allowed(&settings, &config.base_url) {
-        return Err(
-            "Third-party AI sharing is disabled. Enable it in Settings before re-embedding memory against the embeddings endpoint."
-                .to_string(),
-        );
-    }
-    let model = build_embedding_model(&config);
-
-    let pending = history.memory_entries_missing_embeddings(&config.model)?;
-    let _total = pending.len();
-    let mut embedded = 0usize;
-    let mut failed = 0usize;
-
-    for chunk in pending.chunks(16) {
-        let texts: Vec<String> = chunk
-            .iter()
-            .map(|entry| format!("{}\n{}", entry.title, entry.content))
-            .collect();
-
-        match embed_texts_batch(&model, texts).await {
-            Ok(vectors) => {
-                for (entry, vector) in chunk.iter().zip(vectors) {
-                    if history
-                        .update_memory_embedding(&entry.id, &vector, &config.model)
-                        .is_ok()
-                    {
-                        embedded += 1;
-                    } else {
-                        failed += 1;
-                    }
-                }
-            }
-            Err(error) => {
-                eprintln!("[memory] reindex batch failed: {error}");
-                failed += chunk.len();
-            }
-        }
-    }
-
-    let count = history.count_memory_entries().unwrap_or(0);
-    Ok(serde_json::json!({
-        "embedded": embedded,
-        "failed": failed,
-        "total": count,
-    }))
+pub async fn run_memory_dream_cycle(
+    engine: State<'_, UtekeEngine>,
+    namespace: Option<String>,
+) -> Result<DreamReportDto, String> {
+    let engine = engine.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        engine.run_dream(namespace.as_deref())
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
-async fn embed_texts_batch(
-    model: &rig::providers::openai::EmbeddingModel,
-    texts: Vec<String>,
-) -> Result<Vec<Vec<f64>>, String> {
-    crate::ai::embeddings::embed_texts(model, texts).await
+#[tauri::command]
+pub async fn get_memory_edges(
+    engine: State<'_, UtekeEngine>,
+    entry_id: String,
+) -> Result<Vec<MemoryEdgeDto>, String> {
+    let engine = engine.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || engine.get_edges(&entry_id))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+pub async fn link_memory_entries(
+    engine: State<'_, UtekeEngine>,
+    from_id: String,
+    to_id: String,
+    relation: String,
+) -> Result<(), String> {
+    let engine = engine.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || engine.link(&from_id, &to_id, &relation))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+pub async fn list_memory_namespaces(
+    engine: State<'_, UtekeEngine>,
+) -> Result<Vec<String>, String> {
+    let engine = engine.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || engine.list_namespaces())
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+pub async fn get_memory_engine_status(
+    engine: State<'_, UtekeEngine>,
+) -> Result<EngineStatusDto, String> {
+    let engine = engine.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || engine.status())
+        .await
+        .map_err(|e| e.to_string())?
 }
