@@ -9555,6 +9555,8 @@ dependencies = [
 [[package]]
 name = "uteke-core"
 version = "0.18.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6d884119efe4bb8c186cac299a6e90581d264551616469b4b3205c4deebb440"
 dependencies = [
  "chrono",
  "dirs 7.0.0",
