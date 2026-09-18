@@ -166,9 +166,11 @@ export function useUpdater() {
     }
   }, [pendingUpdate, downloading, updateDownloadProgress]);
 
+  // Mount-only: `checkForUpdates` closes over the update state above, so listing it as a dependency
+  // would re-run the check on every progress tick. The updater is asked once per app start.
   React.useEffect(() => {
     void checkForUpdates(true);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   React.useEffect(() => {
     void getVersion()

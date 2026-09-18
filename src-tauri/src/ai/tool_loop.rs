@@ -78,7 +78,10 @@ enum ToolAuthorization {
 /// explicitly here; anything unknown falls back to the configured security policy
 /// (fail-closed) and, even when that policy would approve it, still requires
 /// confirmation because it is not on the reviewed auto-approve list.
-fn authorize_tool(policy: &super::policy::SecurityApprovalPolicy, tool_name: &str) -> ToolAuthorization {
+fn authorize_tool(
+    policy: &super::policy::SecurityApprovalPolicy,
+    tool_name: &str,
+) -> ToolAuthorization {
     if tool_name == CRAWL_CONTEXT_TOOL || AUTO_APPROVED_TOOLS.contains(&tool_name) {
         return ToolAuthorization::AutoApproved;
     }
@@ -131,20 +134,17 @@ fn pending_map() -> &'static Mutex<PendingResultMap> {
 /// The pending entry is only removed after its secret token authenticates, so a caller that
 /// guesses a call ID but submits a wrong token cannot cancel another window's legitimate call.
 pub fn resolve_tool_result(id: &str, token: &str, success: bool, message: String) -> bool {
-    let pending = pending_map()
-        .lock()
-        .ok()
-        .and_then(|mut calls| {
-            let matched = calls
-                .get(id)
-                .map(|call| call.token == token)
-                .unwrap_or(false);
-            if matched {
-                calls.remove(id)
-            } else {
-                None
-            }
-        });
+    let pending = pending_map().lock().ok().and_then(|mut calls| {
+        let matched = calls
+            .get(id)
+            .map(|call| call.token == token)
+            .unwrap_or(false);
+        if matched {
+            calls.remove(id)
+        } else {
+            None
+        }
+    });
     match pending {
         Some(call) => call
             .sender
@@ -597,7 +597,12 @@ async fn execute_memory_save(app: &AppHandle, args: &Value) -> String {
                 .filter_map(|item| item.as_str())
                 .map(str::trim)
                 .filter(|tag| !tag.is_empty())
-                .map(|tag| tag.chars().take(MAX_TAG_CHARS).collect::<String>().to_lowercase())
+                .map(|tag| {
+                    tag.chars()
+                        .take(MAX_TAG_CHARS)
+                        .collect::<String>()
+                        .to_lowercase()
+                })
                 .take(MAX_TAGS_COUNT)
                 .collect()
         })
@@ -855,9 +860,9 @@ pub struct ToolLoopOutput {
 
 pub fn get_agent_for_tool(tool_name: &str) -> Option<&'static super::agents::AgentSpec> {
     match tool_name {
-        "save_memory_note" | "search_memory" | "navigate_to_app" => {
-            Some(super::agents::get_agent_spec(super::agents::AgentId::Orchestrator))
-        }
+        "save_memory_note" | "search_memory" | "navigate_to_app" => Some(
+            super::agents::get_agent_spec(super::agents::AgentId::Orchestrator),
+        ),
         "write_note" | "get_notes" => {
             Some(super::agents::get_agent_spec(super::agents::AgentId::Notes))
         }
@@ -865,12 +870,12 @@ pub fn get_agent_for_tool(tool_name: &str) -> Option<&'static super::agents::Age
         | "send_repeater_request"
         | "create_collection"
         | "create_folder"
-        | "create_endpoint" => {
-            Some(super::agents::get_agent_spec(super::agents::AgentId::Repeater))
-        }
-        "start_invoker_attack" | "stop_invoker_attack" | "send_to_intruder" => {
-            Some(super::agents::get_agent_spec(super::agents::AgentId::Intruder))
-        }
+        | "create_endpoint" => Some(super::agents::get_agent_spec(
+            super::agents::AgentId::Repeater,
+        )),
+        "start_invoker_attack" | "stop_invoker_attack" | "send_to_intruder" => Some(
+            super::agents::get_agent_spec(super::agents::AgentId::Intruder),
+        ),
         "toggle_intercept"
         | "forward_paused_request"
         | "drop_paused_request"
@@ -879,12 +884,12 @@ pub fn get_agent_for_tool(tool_name: &str) -> Option<&'static super::agents::Age
         | "get_crawl_context"
         | "trigger_scan"
         | "toggle_browser_crawl"
-        | "stop_browser_crawl" => {
-            Some(super::agents::get_agent_spec(super::agents::AgentId::HttpTraffic))
-        }
-        "trigger_port_scan" => {
-            Some(super::agents::get_agent_spec(super::agents::AgentId::PortScanner))
-        }
+        | "stop_browser_crawl" => Some(super::agents::get_agent_spec(
+            super::agents::AgentId::HttpTraffic,
+        )),
+        "trigger_port_scan" => Some(super::agents::get_agent_spec(
+            super::agents::AgentId::PortScanner,
+        )),
         super::agents::jwt_tools::DECODE_JWT_TOOL
         | super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL
         | super::agents::jwt_tools::TAMPER_JWT_TOOL => {
@@ -935,29 +940,20 @@ pub fn format_specialist_message(
                 .get("title")
                 .and_then(|v| v.as_str())
                 .unwrap_or("Untitled Memory Entry");
-            let content = args
-                .get("content")
-                .and_then(|v| v.as_str())
-                .unwrap_or("");
+            let content = args.get("content").and_then(|v| v.as_str()).unwrap_or("");
             format!(
                 "📝 **Saved to Memory**\n\n- **Title:** {title}\n- **Content:** {content}\n\n*Stored in your persistent memory knowledge base and retrievable as context in future sessions.*"
             )
         }
         "search_memory" => {
-            let query = args
-                .get("query")
-                .and_then(|v| v.as_str())
-                .unwrap_or("");
+            let query = args.get("query").and_then(|v| v.as_str()).unwrap_or("");
             format!("🔍 **Search Memory Results for \"{query}\"**\n\n{result}")
         }
         NOTES_GET_TOOL => {
             format!("📓 **Notes Retrieved**\n\n{result}")
         }
         NOTES_WRITE_TOOL => {
-            let name = args
-                .get("name")
-                .and_then(|v| v.as_str())
-                .unwrap_or("note");
+            let name = args.get("name").and_then(|v| v.as_str()).unwrap_or("note");
             format!("📝 **Note Saved: {name}**\n\n{result}")
         }
         "send_to_repeater" => {
@@ -1078,6 +1074,10 @@ pub fn format_specialist_message(
 /// Drives the completion model via true provider SSE streaming (`model.stream(request)`),
 /// live token emission (`ai-chat:delta`) and reasoning emission (`ai-chat:reasoning`),
 /// supporting PauseControl and multi-turn tool execution.
+// The orchestration surface: the request context, the resolved config, the security policy and the
+// two control channels are all distinct inputs. Regrouping them is a refactor of the hottest path
+// in the app — a separate task, not a lint cleanup.
+#[allow(clippy::too_many_arguments)]
 pub async fn run_tool_loop(
     app: &AppHandle,
     window_label: &str,
@@ -1090,8 +1090,7 @@ pub async fn run_tool_loop(
     mut cancel_rx: tokio::sync::watch::Receiver<bool>,
     mut pause_rx: tokio::sync::watch::Receiver<bool>,
 ) -> Result<ToolLoopOutput, String> {
-    let model =
-        super::providers::create_completion_model(config).map_err(|e| e.to_string())?;
+    let model = super::providers::create_completion_model(config).map_err(|e| e.to_string())?;
     let all_tools = tool_definitions();
     let tools = super::agents::filter_tools_for_agent(agent, &all_tools);
 
@@ -1200,15 +1199,18 @@ pub async fn run_tool_loop(
                                         );
                                     }
                                 }
-                                StreamedAssistantContent::ReasoningDelta { reasoning, .. } => {
-                                    if !reasoning.is_empty() {
-                                        accumulated_reasoning.push_str(&reasoning);
-                                        let _ = app.emit_to(
-                                            window_label,
-                                            "ai-chat:reasoning",
-                                            json!({ "requestId": request_id, "delta": reasoning }),
-                                        );
-                                    }
+                                // Guard rather than a nested `if`: an empty delta is simply not a
+                                // reasoning event, so it falls through to `_` like any other
+                                // unhandled variant.
+                                StreamedAssistantContent::ReasoningDelta { reasoning, .. }
+                                    if !reasoning.is_empty() =>
+                                {
+                                    accumulated_reasoning.push_str(&reasoning);
+                                    let _ = app.emit_to(
+                                        window_label,
+                                        "ai-chat:reasoning",
+                                        json!({ "requestId": request_id, "delta": reasoning }),
+                                    );
                                 }
                                 _ => {}
                             }
@@ -1293,7 +1295,11 @@ pub async fn run_tool_loop(
             let name = tool_call.function.name;
             let args = tool_call.function.arguments;
             let call_id = tool_call.id;
-            let call_sig = format!("{}:{}", name, serde_json::to_string(&args).unwrap_or_default());
+            let call_sig = format!(
+                "{}:{}",
+                name,
+                serde_json::to_string(&args).unwrap_or_default()
+            );
 
             let tool_result = if executed_tools.contains(&call_sig) {
                 format!(
@@ -1337,7 +1343,8 @@ pub async fn run_tool_loop(
                     || agent.slug != spec_agent.slug
                     || is_terminal_action_tool(&name)
                 {
-                    let formatted = format_specialist_message(spec_agent, &name, &args, &tool_result);
+                    let formatted =
+                        format_specialist_message(spec_agent, &name, &args, &tool_result);
                     let agent_msg = super::types::AiChatAgentMessage {
                         id: format!("msg-agent-{}", uuid::Uuid::new_v4()),
                         agent_id: spec_agent.slug.to_string(),

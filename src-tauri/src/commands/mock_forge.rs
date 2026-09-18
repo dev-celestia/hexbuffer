@@ -338,6 +338,9 @@ fn matchers_satisfied(
     true
 }
 
+// The request parts (host, method, path, headers, query, body) are each independently meaningful
+// to a route matcher; grouping them would only rename them.
+#[allow(clippy::too_many_arguments)]
 pub fn find_matching_route(
     domains: &[MockDomain],
     routes: &[MockRoute],

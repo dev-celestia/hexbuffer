@@ -142,6 +142,11 @@ impl HashcatEngine {
             return;
         }
         if let Some(pid) = *self.child_pid.lock() {
+            // SAFETY: `child_pid` is only ever written from `Child::id()` of the hashcat process
+            // this engine spawned (line ~241), and the guard above proves it holds a pid. That
+            // entry is cleared before `is_running` goes false, and this method returns early unless
+            // `is_running` is set — so the pid still names a live, unreaped child of this process
+            // and `SIGSTOP` is a signal we are entitled to send it.
             unsafe {
                 libc::kill(pid, libc::SIGSTOP);
             }
@@ -155,6 +160,10 @@ impl HashcatEngine {
             return;
         }
         if let Some(pid) = *self.child_pid.lock() {
+            // SAFETY: same invariant as `pause` — the guard proves `child_pid` holds the pid of a
+            // hashcat child this engine spawned and has not reaped, and the early return above
+            // requires both `is_running` and `is_paused`, so the process is alive and stopped.
+            // `SIGCONT` on a stopped process of ours is exactly the intended effect.
             unsafe {
                 libc::kill(pid, libc::SIGCONT);
             }
@@ -283,18 +292,29 @@ impl HashcatEngine {
         let exit_status = loop {
             if self.stop_requested.load(Ordering::Relaxed) {
                 if let Some(pid) = *self.child_pid.lock() {
+                    // Escalating shutdown of the hashcat child: resume it if we had it stopped,
+                    // then SIGTERM, then SIGKILL if it has not gone within 3s.
                     match sigterm_sent_at {
                         None => {
                             if self.is_paused.load(Ordering::Relaxed) {
+                                // SAFETY: the guard above proves `child_pid` holds a pid, and the
+                                // loop only reaches this line while `try_wait` still reports the
+                                // child as unreaped — the kernel keeps the pid allocated until it is
+                                // reaped, so it cannot have been recycled and SIGCONT reaches that
+                                // same child.
                                 unsafe {
                                     libc::kill(pid, libc::SIGCONT);
                                 }
                             }
+                            // SAFETY: as above — an unreaped child of this process, so the pid is
+                            // still ours to signal and SIGTERM is the documented stop request.
                             unsafe {
                                 libc::kill(pid, libc::SIGTERM);
                             }
                             sigterm_sent_at = Some(Instant::now());
                         }
+                        // SAFETY: as above — still an unreaped child of this process. SIGKILL is
+                        // the last resort once SIGTERM has been ignored for 3s.
                         Some(sent) if sent.elapsed() > Duration::from_secs(3) => unsafe {
                             libc::kill(pid, libc::SIGKILL);
                         },
@@ -316,6 +336,12 @@ impl HashcatEngine {
                 }
             }
         };
+
+        // The wait loop above only exits once `try_wait` has reaped the child, so this pid is no
+        // longer ours to signal. Drop it *before* the post-processing below — joining the reader
+        // threads can take a while — so a `pause()`/`resume()` racing in cannot end up signalling a
+        // pid the kernel has since recycled.
+        *self.child_pid.lock() = None;
 
         // Clear the running flag first so reader/watcher threads finish.
         self.is_running.store(false, Ordering::SeqCst);

@@ -20,7 +20,7 @@ import {
 } from '@/stores/app';
 import type { SettingsPageState } from '../hooks/use-settings-page';
 import { ManualUpdateCommand } from './manual-update-command';
-import { SettingsGroup, SettingsRow, SettingsRowSeparator } from './settings-group';
+import { SettingsGroup, SettingsRow } from './settings-group';
 
 interface GeneralSettingsTabProps {
   settings: SettingsPageState;
@@ -240,8 +240,6 @@ export function GeneralSettingsTab({ settings }: Readonly<GeneralSettingsTabProp
           </div>
         </SettingsRow>
 
-        <SettingsRowSeparator />
-
         {/* Log File */}
         <SettingsRow
           label="Log File"
@@ -260,8 +258,6 @@ export function GeneralSettingsTab({ settings }: Readonly<GeneralSettingsTabProp
             />
           </div>
         </SettingsRow>
-
-        <SettingsRowSeparator />
 
         {/* Delete all data */}
         <SettingsRow label="Delete all data" description="Deletes the SQLite database, browser artifacts, intercept browser profile, CA certificates, and settings files. The app will reload to a fresh state.">

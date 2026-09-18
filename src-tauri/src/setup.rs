@@ -21,8 +21,8 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
     let db_path = hexbuffer::paths::get_shared_db_path();
     crate::log(&format!("Opening database at {:?}", db_path));
-    let database =
-        hexbuffer::db::repository::Database::new(db_path.clone()).expect("Failed to initialize database");
+    let database = hexbuffer::db::repository::Database::new(db_path.clone())
+        .expect("Failed to initialize database");
     if let Err(e) = database.init() {
         crate::log(&format!(
             "FATAL: Failed to initialize database schema: {}",
@@ -117,7 +117,7 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         if let Some(splash) = app.get_webview_window("splashscreen") {
             let _ = splash.close();
         }
-        open_or_focus_subapp_window_with_query(&app.handle(), clean_target, query.as_deref());
+        open_or_focus_subapp_window_with_query(app.handle(), clean_target, query.as_deref());
     }
 
     #[cfg(desktop)]
@@ -235,7 +235,7 @@ pub fn open_or_focus_subapp_window_with_query(
         let _ = win.show();
         let _ = win.set_focus();
         #[cfg(target_os = "macos")]
-        crate::app_commands::activate_current_process();
+        crate::app_commands::activate_current_process(app);
 
         // Forward the deep-link payload to the live window so it can react
         // (focus alone would silently drop the new request).
@@ -297,7 +297,7 @@ pub fn open_or_focus_subapp_window_with_query(
             let _ = subapp_win.show();
             let _ = subapp_win.set_focus();
             #[cfg(target_os = "macos")]
-            crate::app_commands::activate_current_process();
+            crate::app_commands::activate_current_process(app);
             crate::log(&format!(
                 "Sub-app window [{}] opened and brought to front successfully",
                 subapp_label

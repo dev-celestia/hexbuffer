@@ -11,12 +11,16 @@
 #   3. Prefer a check scoped to changed files over a repo-wide check when the repo has
 #      existing debt. That is a ratchet: new code is clean, old code erodes over time.
 #
-# Baselines as of 2026-09-17 (update these comments when they change):
+# Baselines as of 2026-09-18 (update these comments when they change):
 #   tsc            0 errors
-#   vitest         234 tests / 20 files, all passing
-#   cargo test     161 tests, all passing
-#   cargo clippy   28 warnings across 13 lint types (advisory until cleared)
-#   rustfmt        82 of 117 files unformatted (hence: changed files only)
+#   vitest         332 tests / 24 files, all passing
+#   cargo test     160 tests, all passing
+#   cargo clippy   0 warnings — blocking (`-D warnings`) since 2026-09-18
+#   rustfmt        27 of 118 files unformatted (hence: changed files only)
+#
+# Measuring rustfmt: count *files*, not diff hunks. `cargo fmt --check | grep -c '^Diff in'`
+# counts hunks and overstated the backlog by ~3x. Also note rustfmt writes its diff to
+# stderr with ANSI colour, so `2>/dev/null | grep -c '^[-+]'` silently returns 0.
 
 name: CI
 
@@ -112,7 +116,7 @@ jobs:
       # No sidecar stub step is needed: src-tauri/build.rs writes a stub
       # binaries/ai-engine-<target> if one is missing.
 
-      # Blocking, but scoped to files this change touches. 82 of 117 files are
+      # Blocking, but scoped to files this change touches. 27 of 118 files are
       # currently unformatted, so a repo-wide `cargo fmt --check` would fail on
       # arrival; new and edited code is formatted from day one instead.
       - name: Rust format (changed files)
@@ -126,11 +130,11 @@ jobs:
             echo "No base ref available; skipping."
           fi
 
-      # Advisory until the 28-warning baseline is cleared. Once it reaches zero,
-      # remove `continue-on-error` and add `-- -D warnings` to make it blocking.
-      - name: Rust lints (advisory)
-        continue-on-error: true
-        run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets
+      # Blocking. The 28-warning baseline was cleared to zero on 2026-09-18 and the
+      # remaining `too_many_arguments` sites carry documented `#[allow]`s, so a new
+      # warning here is a new warning.
+      - name: Rust lints
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
 
       # --test-threads=1 is required: several tests touch process-global state.
       # See src-tauri/tests/README.md.

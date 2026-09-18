@@ -1,11 +1,11 @@
 use super::crawl_helpers::{add_log, now, persist_insight, persist_page, upsert_page_memory};
 use super::crawl_types::{AIInsight, ActivityLog, AiBrowserState, CrawlConfig, CrawlPage};
+use crate::ai::providers::AnyCompletionModel as PageAnalysisModel;
 use celestia_spider::{extract_links, transform_html_to_ir};
 use celestia_spider::{
     CrawlControl, CrawlResult, CrawlerEvent, Options as SpiderOptions, Runner, Strategy,
 };
 use parking_lot::Mutex;
-use crate::ai::providers::AnyCompletionModel as PageAnalysisModel;
 use rig::completion::{AssistantContent, CompletionModel as CompletionModelTrait};
 use std::collections::HashMap;
 use std::sync::{
@@ -160,6 +160,9 @@ fn parse_ai_findings(text: &str) -> Result<Vec<AiFinding>, String> {
 
 /// Runs one LLM page analysis and persists/emits the resulting insights. Failures are
 /// logged once per crawl to avoid log spam.
+// One page's identity plus its already-fetched content; all eight are needed and none group
+// naturally. Regrouping is a refactor of an untouched path — a separate task.
+#[allow(clippy::too_many_arguments)]
 async fn run_page_analysis(
     analyzer: PageAnalyzer,
     app: AppHandle,
@@ -319,7 +322,9 @@ fn build_spider_options(config: &CrawlConfig, seed_url: &str) -> SpiderOptions {
     if delay_ms >= 1000 {
         options.delay = delay_ms / 1000;
     } else if delay_ms > 0 {
-        options.rate_limit = (1000 / delay_ms).max(1) as usize;
+        // The guard makes the divisor non-zero; `checked_div` states that in the type instead of
+        // leaving the reader to connect the guard to the division.
+        options.rate_limit = 1000_u64.checked_div(delay_ms).unwrap_or(1).max(1) as usize;
     }
     if let Some(proxy_port) = crate::proxy::active_proxy_port() {
         options.proxy = format!("http://127.0.0.1:{}", proxy_port);

@@ -140,7 +140,7 @@ function StandaloneRepeaterPage() {
     // is already open, the backend (or the sending window) forwards the
     // deep-link params through this event.
     let unlisten: (() => void) | undefined;
-    if (typeof window !== "undefined" && Boolean((window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__)) {
+    if (typeof window !== "undefined" && Boolean((window as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__)) {
       import("@tauri-apps/api/event")
         .then(({ listen }) =>
           listen<string>("hexbuffer:subapp-params", (event) => {

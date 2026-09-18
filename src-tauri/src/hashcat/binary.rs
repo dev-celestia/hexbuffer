@@ -71,9 +71,11 @@ mod tests {
 
     #[test]
     fn test_resolve_missing_override_fails() {
-        // SAFETY: tests run single-threaded via `cargo test -- --test-threads=1`
+        // SAFETY: tests run single-threaded via `cargo test -- --test-threads=1` (required by CI
+        // and by PROCESS.md), so no other thread can observe the environment mid-mutation.
         unsafe { std::env::set_var("HEXBUFFER_HASHCAT_PATH", "/nonexistent/hashcat") };
         let result = resolve_hashcat_binary();
+        // SAFETY: as above — same single-threaded guarantee, and the variable was set by this test.
         unsafe { std::env::remove_var("HEXBUFFER_HASHCAT_PATH") };
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("HEXBUFFER_HASHCAT_PATH"));

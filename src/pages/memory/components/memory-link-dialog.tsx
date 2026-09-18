@@ -110,7 +110,13 @@ export function MemoryLinkDialog({ state }: Readonly<MemoryLinkDialogProps>) {
             {/* Relation Type */}
             <div className="flex flex-col gap-1.5">
               <Label className="text-xs font-medium">Relationship</Label>
-              <Select value={relation} onValueChange={setRelation}>
+              <Select
+                value={relation}
+                // Base UI reports a cleared selection as `null`; a link always has a relation.
+                onValueChange={(v) => {
+                  if (v !== null) setRelation(v);
+                }}
+              >
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue />
                 </SelectTrigger>
@@ -132,7 +138,13 @@ export function MemoryLinkDialog({ state }: Readonly<MemoryLinkDialogProps>) {
                   No other memory entries available in store.
                 </div>
               ) : (
-                <Select value={targetId} onValueChange={setTargetId}>
+                <Select
+                  value={targetId}
+                  // `''` is this field's own "nothing chosen" sentinel — the trigger renders a
+                  // placeholder for it — so a cleared selection maps back onto it instead of being
+                  // absorbed.
+                  onValueChange={(v) => setTargetId(v ?? '')}
+                >
                   <SelectTrigger className="h-8 text-xs truncate">
                     <SelectValue placeholder="Select target memory..." />
                   </SelectTrigger>

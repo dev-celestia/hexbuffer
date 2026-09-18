@@ -7,7 +7,7 @@ import {
   DEFAULT_AUTOMATION_SETTINGS,
 } from '@/stores/automation/constants';
 import type { AutomationRuntimeSettings } from '@/stores/automation';
-import { SettingsGroup, SettingsRow } from './settings-group';
+import { SettingsBlock, SettingsGroup, SettingsRow } from './settings-group';
 
 export function AutomationSettingsTab() {
   const automationSettings = useAutomationStore((state) => state.automationSettings);
@@ -62,8 +62,8 @@ export function AutomationSettingsTab() {
         onChange={updateNumberSetting}
       />
 
-      <div className="px-4 py-3">
-        <label className="flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50/60 p-3 dark:border-amber-500/30 dark:bg-amber-500/10">
+      <SettingsBlock label="Allow local run-script actions">
+        <label className="flex items-start gap-3 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 dark:border-amber-500/30 dark:bg-amber-500/10">
           <Checkbox
             id="allowRunScriptActions"
             checked={automationSettings.allowRunScriptActions}
@@ -79,7 +79,7 @@ export function AutomationSettingsTab() {
             </p>
           </div>
         </label>
-      </div>
+      </SettingsBlock>
 
       <SettingsRow
         label="Reset to defaults"
@@ -117,9 +117,11 @@ function AutomationNumberRow({
   const limits = AUTOMATION_SETTINGS_LIMITS[id];
 
   return (
+    // `htmlFor` so clicking the row text focuses the field — the input already carries this id.
     <SettingsRow
       label={label}
       description={`${description} Range: ${limits.min}–${limits.max}`}
+      htmlFor={id}
     >
       <Input
         id={id}

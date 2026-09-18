@@ -694,7 +694,9 @@ impl HistoryBridge {
     // ── Token Usage ────────────────────────────────────────────────
 
     pub fn insert_token_usage(&self, record: &TokenUsageRecord) -> Result<(), String> {
-        self.db.insert_token_usage(record).map_err(|e| e.to_string())
+        self.db
+            .insert_token_usage(record)
+            .map_err(|e| e.to_string())
     }
 
     pub fn list_token_usage_by_session(
@@ -721,8 +723,6 @@ impl HistoryBridge {
             .delete_token_usage_for_session(session_id)
             .map_err(|e| e.to_string())
     }
-
-
 
     // ── Notes ────────────────────────────────────────────────────
 
@@ -775,7 +775,7 @@ fn normalize_string_vec(values: Option<Vec<String>>) -> Option<Vec<String>> {
 }
 
 fn normalize_u16_vec(values: Option<Vec<u16>>) -> Option<Vec<u16>> {
-    values.and_then(|items| if items.is_empty() { None } else { Some(items) })
+    values.filter(|items| !items.is_empty())
 }
 
 impl From<WebSocketConnectionRecord> for WebSocketConnectionSummary {

@@ -185,9 +185,11 @@ mod tests {
     fn test_seed_active_provider_profile_skips_a_default_install() {
         // Nothing to migrate: a fresh install must not gain a bogus profile entry, or the first
         // provider switch would restore an empty model over the user's choice.
-        let mut settings = AiSettings::default();
-        settings.model = String::new();
-        settings.custom_base_url = None;
+        let mut settings = AiSettings {
+            model: String::new(),
+            custom_base_url: None,
+            ..AiSettings::default()
+        };
 
         seed_active_provider_profile(&mut settings);
 

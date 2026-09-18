@@ -1,6 +1,4 @@
-use super::agents::{
-    get_agent_spec, resolve_agent_by_mention_or_slug, AgentId, AgentSpec,
-};
+use super::agents::{get_agent_spec, resolve_agent_by_mention_or_slug, AgentId, AgentSpec};
 use super::types::AiConfig;
 use rig::completion::{AssistantContent, CompletionModel as CompletionModelTrait};
 use serde::Deserialize;
@@ -60,7 +58,9 @@ fn contains_raw_http_request(text: &str) -> bool {
     ];
     prefixes.iter().any(|prefix| trimmed.starts_with(prefix))
         || text.lines().any(|line| {
-            prefixes.iter().any(|prefix| line.trim_start().starts_with(prefix))
+            prefixes
+                .iter()
+                .any(|prefix| line.trim_start().starts_with(prefix))
                 && (line.contains("HTTP/1.") || line.contains("HTTP/2"))
         })
 }
@@ -171,9 +171,9 @@ async fn classify_with_ai(prompt: &str, config: &AiConfig) -> Result<RoutingDeci
     if !classification.is_supported {
         return Ok(RoutingDecision::UnsupportedAction {
             action_name: prompt.chars().take(50).collect::<String>(),
-            explanation: classification
-                .unsupported_reason
-                .unwrap_or_else(|| "This operational action is not supported by HexBuffer.".to_string()),
+            explanation: classification.unsupported_reason.unwrap_or_else(|| {
+                "This operational action is not supported by HexBuffer.".to_string()
+            }),
         });
     }
 
@@ -198,23 +198,24 @@ fn fallback_heuristic_route(prompt: &str) -> RoutingDecision {
     let lower = prompt.to_lowercase();
     let trimmed = lower.trim();
 
-    if lower.contains("sqlmap")
+    // Both halves must hold: the prompt names an external attack tool *and* asks to run it.
+    // Naming one ("what does hashcat do?") is a question, not a request to invoke it.
+    let names_external_tool = lower.contains("sqlmap")
         || lower.contains("hashcat")
         || lower.contains("john the ripper")
         || lower.contains("metasploit")
         || lower.contains("aircrack")
-        || lower.contains("wireshark")
-    {
-        if trimmed.starts_with("run ")
-            || trimmed.starts_with("execute ")
-            || trimmed.starts_with("crack ")
-            || trimmed.starts_with("exploit ")
-        {
-            return RoutingDecision::UnsupportedAction {
-                action_name: "External Attack Tool".to_string(),
-                explanation: "HexBuffer does not embed external CLI tools (SQLMap, Metasploit, Hashcat, Aircrack). Use HexBuffer's built-in web auditing capabilities.".to_string(),
-            };
-        }
+        || lower.contains("wireshark");
+    let is_imperative = trimmed.starts_with("run ")
+        || trimmed.starts_with("execute ")
+        || trimmed.starts_with("crack ")
+        || trimmed.starts_with("exploit ");
+
+    if names_external_tool && is_imperative {
+        return RoutingDecision::UnsupportedAction {
+            action_name: "External Attack Tool".to_string(),
+            explanation: "HexBuffer does not embed external CLI tools (SQLMap, Metasploit, Hashcat, Aircrack). Use HexBuffer's built-in web auditing capabilities.".to_string(),
+        };
     }
 
     if lower.contains("jwt") || lower.contains("token") {

@@ -8,7 +8,7 @@ import {
   TROUBLESHOOTING_GUIDES,
 } from '../constants';
 import type { SettingsPageState } from '../hooks/use-settings-page';
-import { SettingsGroup } from './settings-group';
+import { SettingsBlock, SettingsGroup } from './settings-group';
 
 interface CaCertificateSettingsTabProps {
   settings: SettingsPageState;
@@ -38,32 +38,32 @@ export function CaCertificateSettingsTab({ settings }: Readonly<CaCertificateSet
       </Alert>
 
       <SettingsGroup label="Certificate Actions" description="Manage the CA certificate for external browsers and apps.">
-        <div className="flex flex-wrap gap-2 px-4 py-3">
-          {isMac && (
-            <Button size="sm" onClick={handleInstallMacCert} disabled={installingCa}>
-              <KeyIcon className="mr-1.5 size-4" />
-              {installingCa ? 'Installing…' : 'Install to macOS Keychain'}
+        <SettingsBlock label="Install, download, or regenerate the CA certificate">
+          <div className="flex flex-wrap gap-2">
+            {isMac && (
+              <Button size="sm" onClick={handleInstallMacCert} disabled={installingCa}>
+                <KeyIcon className="mr-1.5 size-4" />
+                {installingCa ? 'Installing…' : 'Install to macOS Keychain'}
+              </Button>
+            )}
+            <Button size="sm" variant="outline" onClick={handleDownloadCert} disabled={downloading}>
+              <DownloadSimpleIcon className="mr-1.5 size-4" />
+              {downloading ? 'Saving…' : 'Download CA Certificate'}
             </Button>
-          )}
-          <Button size="sm" variant="outline" onClick={handleDownloadCert} disabled={downloading}>
-            <DownloadSimpleIcon className="mr-1.5 size-4" />
-            {downloading ? 'Saving…' : 'Download CA Certificate'}
-          </Button>
-          <Button size="sm" variant="outline" onClick={handleRegenerateCert} disabled={regeneratingCa}>
-            <ArrowClockwiseIcon className="mr-1.5 size-4" />
-            {regeneratingCa ? 'Regenerating…' : 'Regenerate CA'}
-          </Button>
-        </div>
-        <div className="px-4 pb-3">
-          <p className="text-xs text-muted-foreground">
+            <Button size="sm" variant="outline" onClick={handleRegenerateCert} disabled={regeneratingCa}>
+              <ArrowClockwiseIcon className="mr-1.5 size-4" />
+              {regeneratingCa ? 'Regenerating…' : 'Regenerate CA'}
+            </Button>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
             Use Open Browser for the managed Chrome profile. Install or save the CA only for external
             browsers and apps.
           </p>
-        </div>
+        </SettingsBlock>
       </SettingsGroup>
 
       <SettingsGroup label="Installation Guides" description="Follow the steps for your browser or device.">
-        <div className="px-4 py-2">
+        <SettingsBlock label="Installation guides for each browser and device" className="py-2">
           <Accordion className="w-full">
             {INSTALLATION_GUIDES.map((guide) => (
               <AccordionItem key={guide.id} value={guide.id}>
@@ -84,11 +84,11 @@ export function CaCertificateSettingsTab({ settings }: Readonly<CaCertificateSet
               </AccordionItem>
             ))}
           </Accordion>
-        </div>
+        </SettingsBlock>
       </SettingsGroup>
 
       <SettingsGroup label="How It Works" description="Understanding the certificate-based proxy mechanism.">
-        <div className="px-4 py-3">
+        <SettingsBlock label="How the certificate-based proxy works">
           <div className="space-y-3 text-sm text-muted-foreground">
             {HOW_IT_WORKS.map((item) => (
               <p key={item.title}>
@@ -96,11 +96,11 @@ export function CaCertificateSettingsTab({ settings }: Readonly<CaCertificateSet
               </p>
             ))}
           </div>
-        </div>
+        </SettingsBlock>
       </SettingsGroup>
 
       <SettingsGroup label="Troubleshooting" description="Common issues and solutions.">
-        <div className="px-4 py-2">
+        <SettingsBlock label="Troubleshooting certificate problems" className="py-2">
           <Accordion className="w-full">
             {TROUBLESHOOTING_GUIDES.map((guide) => (
               <AccordionItem key={guide.id} value={guide.id}>
@@ -125,7 +125,7 @@ export function CaCertificateSettingsTab({ settings }: Readonly<CaCertificateSet
               </AccordionItem>
             ))}
           </Accordion>
-        </div>
+        </SettingsBlock>
       </SettingsGroup>
     </>
   );

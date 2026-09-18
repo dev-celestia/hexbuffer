@@ -14,7 +14,7 @@ import {
 
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { useTheme } from '@/components/theme-provider';
-import { SettingsGroup, SettingsRow, SettingsRowSeparator } from './settings-group';
+import { SettingsBlock, SettingsGroup, SettingsRow } from './settings-group';
 import { ShortcutManager } from '@/pages/desktop/components/shortcut-manager';
 import { cn } from '@/lib/utils';
 import { PRIMARY_COLOR_PRESETS } from '@/constants/theme';
@@ -96,7 +96,6 @@ export function AppearanceSettingsTab() {
             />
           </div>
         </SettingsRow>
-        <SettingsRowSeparator />
         <SettingsRow
           label="Accent color"
           description="Choose the primary accent color across buttons, highlights, and active controls."
@@ -265,9 +264,11 @@ export function AppearanceSettingsTab() {
       </SettingsGroup>
 
       <SettingsGroup label="Workspace Customization" description="Configure shortcuts and widgets shown on your desktop and sidebar.">
-        <div className="p-4 rounded-md border border-border/80 bg-muted/10">
-          <ShortcutManager />
-        </div>
+        <SettingsBlock label="Workspace shortcuts and widgets" className="p-4">
+          <div className="rounded-md border border-border/80 bg-muted/10 p-4">
+            <ShortcutManager />
+          </div>
+        </SettingsBlock>
       </SettingsGroup>
     </>
   );

@@ -141,7 +141,11 @@ export async function importCollectionsFromFile(): Promise<ImportResult | null> 
     if (typeof pId === 'string' && stashIds.has(pId)) {
       // It's a sub-collection nested inside another imported stash, keep parentId as-is
     } else {
-      (s as unknown as StashRecord).parentId = null;
+      // `s` is the loose record parsed from the imported JSON, not a validated `StashRecord` — only
+      // `id` and `name` have been checked at this point. Writing through the record keeps that
+      // honest; the double cast that used to sit here asserted five more fields' worth of
+      // validation that has not happened yet.
+      s.parentId = null;
     }
   }
 

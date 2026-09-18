@@ -39,7 +39,10 @@ impl AiSettings {
             .as_deref()
             .map(str::trim)
             .filter(|value| !value.is_empty())?;
-        Some((base_url.trim_end_matches('/').to_string(), model.to_string()))
+        Some((
+            base_url.trim_end_matches('/').to_string(),
+            model.to_string(),
+        ))
     }
 }
 
@@ -95,13 +98,15 @@ pub fn vector_to_bytes(vector: &[f64]) -> Vec<u8> {
 }
 
 pub fn bytes_to_vector(bytes: &[u8]) -> Option<Vec<f64>> {
-    if bytes.len() % 8 != 0 {
+    if !bytes.len().is_multiple_of(8) {
         return None;
     }
     Some(
         bytes
-            .chunks_exact(8)
-            .map(|chunk| f64::from_le_bytes(chunk.try_into().expect("8-byte chunk")))
+            .as_chunks::<8>()
+            .0
+            .iter()
+            .map(|chunk| f64::from_le_bytes(*chunk))
             .collect(),
     )
 }
@@ -118,14 +123,14 @@ pub async fn embed_texts(
     .await
     .map_err(|_| "Embeddings request timed out.".to_string())?
     .map_err(|e| e.to_string())?;
-    Ok(embeddings.into_iter().map(|embedding| embedding.vec).collect())
+    Ok(embeddings
+        .into_iter()
+        .map(|embedding| embedding.vec)
+        .collect())
 }
 
 /// Embeds a single text through the rig embedding model.
-pub async fn embed_text(
-    model: &openai::EmbeddingModel,
-    text: &str,
-) -> Result<Vec<f64>, String> {
+pub async fn embed_text(model: &openai::EmbeddingModel, text: &str) -> Result<Vec<f64>, String> {
     let embedding = tokio::time::timeout(
         std::time::Duration::from_secs(EMBEDDING_TIMEOUT_SECS),
         model.embed_text(text),
@@ -177,8 +182,5 @@ pub async fn vector_search_memory(
     .map_err(|_| "Embeddings vector search timed out.".to_string())?
     .map_err(|e| e.to_string())?;
 
-    Ok(results
-        .into_iter()
-        .map(|(score, id)| (id, score))
-        .collect())
+    Ok(results.into_iter().map(|(score, id)| (id, score)).collect())
 }

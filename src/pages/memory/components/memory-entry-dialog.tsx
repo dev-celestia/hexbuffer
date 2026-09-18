@@ -154,7 +154,14 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
               {/* Memory Type */}
               <div className="flex flex-col gap-1.5">
                 <Label className="text-xs font-medium">Type</Label>
-                <Select value={memoryType} onValueChange={setMemoryType}>
+                <Select
+                  value={memoryType}
+                  // Base UI reports a cleared selection as `null`. `all` is filtered out of the
+                  // options, so this field must always hold a concrete type — absorb the clear.
+                  onValueChange={(v) => {
+                    if (v !== null) setMemoryType(v);
+                  }}
+                >
                   <SelectTrigger className="h-8 text-xs capitalize">
                     <SelectValue />
                   </SelectTrigger>
@@ -171,7 +178,13 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
               {/* Importance */}
               <div className="flex flex-col gap-1.5">
                 <Label className="text-xs font-medium">Priority</Label>
-                <Select value={importance} onValueChange={setImportance}>
+                <Select
+                  value={importance}
+                  // As above — priority is always one of the four bands.
+                  onValueChange={(v) => {
+                    if (v !== null) setImportance(v);
+                  }}
+                >
                   <SelectTrigger className="h-8 text-xs">
                     <SelectValue />
                   </SelectTrigger>

@@ -631,6 +631,9 @@ fn execute_script_analyze(node: &AutomationNode, input_data: &Value) -> Result<V
     ))
 }
 
+// Section identity and content are separate axes and every one of them is used. Regrouping them
+// into a struct is a refactor of an untouched path, which STANDARDS.md keeps as a separate task.
+#[allow(clippy::too_many_arguments)]
 fn upsert_document_section(
     app: &AppHandle,
     document_id: Option<String>,

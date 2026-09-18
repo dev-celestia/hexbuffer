@@ -1,6 +1,7 @@
 use crate::db::payload_store::PayloadStore;
 use crate::proxy::state::{ProxyFilter, ProxyRecord, ProxyRequest, ProxyResponse};
 use rusqlite::{params, Result as SqlResult};
+use std::cmp::Reverse;
 use uuid::Uuid;
 
 use super::types::{ProxySummaryRow, TreeNode, TreePath};
@@ -412,7 +413,8 @@ impl Database {
             let rows = stmt.query_map([], |row| row_to_proxy_record(row, payload_store))?;
             results.extend(collect_records(rows));
         }
-        results.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+        // Newest first. `Reverse` keeps this a key sort without cloning the timestamps.
+        results.sort_by_key(|record| Reverse(record.timestamp));
         Ok(results)
     }
 
@@ -957,7 +959,7 @@ impl Database {
         for (host, paths_map) in hosts {
             let mut paths_vec: Vec<TreePath> = Vec::new();
             let mut paths: Vec<_> = paths_map.into_iter().collect();
-            paths.sort_by(|a, b| b.1.count.cmp(&a.1.count));
+            paths.sort_by_key(|path| Reverse(path.1.count));
 
             for (_url, info) in paths {
                 let mut methods: Vec<String> = info.methods.into_iter().collect();

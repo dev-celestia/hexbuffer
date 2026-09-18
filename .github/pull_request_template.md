@@ -23,7 +23,7 @@ Call out anything a reader would otherwise have to reverse-engineer.
 
 <!--
 Be specific. "Tested it" is not verification.
-Examples: "tsc 0 errors", "vitest 207 tests green", "render test in ai-settings-tab.test.tsx
+Examples: "tsc 0 errors", "vitest green", "render test in ai-settings-tab.test.tsx
 covers the disabled-button case", "curl'd the transformed module on :1420".
 -->
 
@@ -31,7 +31,7 @@ covers the disabled-button case", "curl'd the transformed module on :1420".
 - [ ] `vitest run` — green
 - [ ] `cargo test --lib -- --test-threads=1` — green
 - [ ] `cargo fmt --check` clean for every file touched
-- [ ] `cargo clippy --all-targets` — no new warnings (baseline: 28)
+- [ ] `cargo clippy --all-targets -- -D warnings` — clean (blocking; the baseline is 0 warnings)
 
 ## Not verified
 

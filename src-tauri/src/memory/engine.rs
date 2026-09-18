@@ -1,7 +1,7 @@
-use std::path::{Path, PathBuf};
-use std::sync::Arc;
 use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
+use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use uteke_core::{RecallStrategy, Uteke};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -76,12 +76,7 @@ fn memory_to_dto(m: uteke_core::Memory, score: Option<f32>, edges_count: usize) 
         .metadata
         .get("title")
         .and_then(|v| v.as_str())
-        .unwrap_or_else(|| {
-            m.content
-                .lines()
-                .next()
-                .unwrap_or("Untitled")
-        })
+        .unwrap_or_else(|| m.content.lines().next().unwrap_or("Untitled"))
         .to_string();
 
     MemoryItemDto {
@@ -178,7 +173,16 @@ impl UtekeEngine {
             let pinned: bool = row.get::<_, i64>(7)? != 0;
 
             let tags: Vec<String> = serde_json::from_str(&tags_str).unwrap_or_default();
-            Ok((id, title, content, tags, source_type, source_ref, url, pinned))
+            Ok((
+                id,
+                title,
+                content,
+                tags,
+                source_type,
+                source_ref,
+                url,
+                pinned,
+            ))
         });
 
         if let Ok(entries) = rows {
@@ -210,7 +214,11 @@ impl UtekeEngine {
                         None,
                         None,
                         None,
-                        Some(if source_type == "insight" { "insight" } else { "fact" }),
+                        Some(if source_type == "insight" {
+                            "insight"
+                        } else {
+                            "fact"
+                        }),
                     );
                 }
             }
@@ -240,7 +248,10 @@ impl UtekeEngine {
                         continue;
                     }
                 }
-                let edges = engine.edges_for(&r.memory.id).map(|e| e.total()).unwrap_or(0);
+                let edges = engine
+                    .edges_for(&r.memory.id)
+                    .map(|e| e.total())
+                    .unwrap_or(0);
                 items.push(memory_to_dto(r.memory, Some(r.score), edges));
             }
             return Ok(items);
@@ -286,7 +297,10 @@ impl UtekeEngine {
 
         let mut items = Vec::with_capacity(results.len());
         for r in results {
-            let edges = engine.edges_for(&r.memory.id).map(|e| e.total()).unwrap_or(0);
+            let edges = engine
+                .edges_for(&r.memory.id)
+                .map(|e| e.total())
+                .unwrap_or(0);
             items.push(memory_to_dto(r.memory, Some(r.score), edges));
         }
         Ok(items)
@@ -353,15 +367,7 @@ impl UtekeEngine {
                 let _ = engine.store().pin(&id);
             }
             if (importance - 0.5).abs() > f64::EPSILON {
-                let _ = engine.update_memory(
-                    &id,
-                    None,
-                    None,
-                    None,
-                    Some(importance),
-                    None,
-                    None,
-                );
+                let _ = engine.update_memory(&id, None, None, None, Some(importance), None, None);
             }
             id
         };
@@ -469,7 +475,7 @@ impl UtekeEngine {
 
     pub fn status(&self) -> Result<EngineStatusDto, String> {
         let engine = self.inner.lock();
-        let total = engine.store().count_all_memories().unwrap_or(0) as usize;
+        let total = engine.store().count_all_memories().unwrap_or(0);
         Ok(EngineStatusDto {
             engine: "Uteke (Hybrid Fusion)".to_string(),
             model: "EmbeddingGemma Q4 (768d, CPU-only)".to_string(),

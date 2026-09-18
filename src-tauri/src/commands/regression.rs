@@ -109,18 +109,17 @@ fn parse_template_docs(yaml: &str) -> (Vec<TemplateMeta>, Vec<String>) {
             continue;
         }
 
-        templates.push(TemplateMeta {
-            id,
-            name,
-            severity,
-        });
+        templates.push(TemplateMeta { id, name, severity });
     }
 
     // Nuclei template ids must be unique per scan for condition tracking
     let mut seen = HashSet::new();
     for t in &templates {
         if !seen.insert(t.id.clone()) {
-            errors.push(format!("Duplicate template id `{}` — ids must be unique", t.id));
+            errors.push(format!(
+                "Duplicate template id `{}` — ids must be unique",
+                t.id
+            ));
         }
     }
 
@@ -144,9 +143,7 @@ fn templates_to_conditions(templates: &[TemplateMeta]) -> Vec<Value> {
 }
 
 #[tauri::command]
-pub async fn list_regression_scripts(
-    state: State<'_, Database>,
-) -> Result<Vec<Value>, String> {
+pub async fn list_regression_scripts(state: State<'_, Database>) -> Result<Vec<Value>, String> {
     let db = state.inner().clone();
     let records = run_blocking(move || {
         db.list_regression_scripts()
@@ -220,15 +217,8 @@ pub async fn save_regression_script(
 
     let db = state.inner().clone();
     let record = run_blocking(move || {
-        db.save_regression_script(
-            &actual_id,
-            &name,
-            &description,
-            &target_url,
-            &yaml,
-            enabled,
-        )
-        .map_err(|e| format!("Failed to save regression script: {}", e))
+        db.save_regression_script(&actual_id, &name, &description, &target_url, &yaml, enabled)
+            .map_err(|e| format!("Failed to save regression script: {}", e))
     })
     .await?;
 
@@ -343,6 +333,10 @@ pub async fn run_regression_script(
         engine: Arc::clone(&engine),
         cancelled: Arc::new(std::sync::atomic::AtomicBool::new(false)),
     });
+    // Take the flag from the handle we are about to publish rather than re-reading it out of the
+    // map afterwards: that second lookup could only ever hand back this same `Arc` or panic inside
+    // the IPC handler, so it was pure panic surface. `Arc::clone` before the move keeps it alive.
+    let cancelled_flag = Arc::clone(&handle.cancelled);
     engine_state.runs.lock().insert(run_id.clone(), handle);
 
     let (event_tx, mut event_rx) = tokio::sync::mpsc::channel::<ScannerEvent>(1000);
@@ -353,7 +347,6 @@ pub async fn run_regression_script(
     let run_id_bridge = run_id.clone();
     let script_id_bridge = script_id.clone();
     let conditions_base = templates_to_conditions(&templates);
-    let cancelled_flag = Arc::clone(&engine_state.runs.lock().get(&run_id).unwrap().cancelled);
     tokio::spawn(async move {
         let mut findings: Vec<Value> = Vec::new();
         let mut messages: Vec<Value> = Vec::new();
@@ -497,11 +490,9 @@ pub async fn run_regression_script(
         let error = if completed {
             None
         } else {
-            Some(
-                last_error.unwrap_or_else(|| {
-                    "Scan ended without completing — check the script YAML".to_string()
-                }),
-            )
+            Some(last_error.unwrap_or_else(|| {
+                "Scan ended without completing — check the script YAML".to_string()
+            }))
         };
 
         let findings_json = serde_json::to_string(&findings).unwrap_or_else(|_| "[]".into());
@@ -580,7 +571,9 @@ pub async fn abort_regression_run(
 ) -> Result<(), String> {
     let handle = engine_state.runs.lock().get(&run_id).cloned();
     if let Some(handle) = handle {
-        handle.cancelled.store(true, std::sync::atomic::Ordering::SeqCst);
+        handle
+            .cancelled
+            .store(true, std::sync::atomic::Ordering::SeqCst);
         let _ = handle.engine.cancel_scan().await;
         let _ = app.emit(
             "regression://scan-aborted",

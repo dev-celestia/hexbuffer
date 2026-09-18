@@ -133,7 +133,11 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
         >
           <Select
             value={selectedNamespace}
-            onValueChange={setSelectedNamespace}
+            // Base UI reports a cleared selection as `null`; this filter always holds a valid
+            // namespace, so a clear is absorbed rather than propagated.
+            onValueChange={(v) => {
+              if (v !== null) setSelectedNamespace(v);
+            }}
           >
             <SelectTrigger
               className={cn(
@@ -162,7 +166,10 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
         >
           <Select
             value={selectedType}
-            onValueChange={setSelectedType}
+            // As above: the type filter is never empty.
+            onValueChange={(v) => {
+              if (v !== null) setSelectedType(v);
+            }}
           >
             <SelectTrigger
               className={cn(
@@ -192,31 +199,35 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
       >
         {/* Engine status indicator */}
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Badge
-              variant={engineStatus?.isReady ? 'secondary' : 'outline'}
-              className={cn(
-                // Layout & Positioning
-                "flex items-center gap-1.5 cursor-default",
-
-                // Sizing & Spacing
-                "h-6 px-2",
-
-                // Typography
-                "text-[11px] font-mono"
-              )}
-            >
-              <BrainIcon
+          {/* Base UI has no `asChild` (R1) — the element goes on `render` and its children stay on
+              the trigger. `Badge` is itself built on `useRender`, so the trigger's props merge in. */}
+          <TooltipTrigger
+            render={
+              <Badge
+                variant={engineStatus?.isReady ? 'secondary' : 'outline'}
                 className={cn(
+                  // Layout & Positioning
+                  "flex items-center gap-1.5 cursor-default",
+
                   // Sizing & Spacing
-                  "size-3.5",
+                  "h-6 px-2",
 
                   // Typography
-                  engineStatus?.isReady ? "text-emerald-500" : "text-amber-500"
+                  "text-[11px] font-mono"
                 )}
               />
-              <span>Uteke: {engineStatus?.totalMemories ?? 0} memories</span>
-            </Badge>
+            }
+          >
+            <BrainIcon
+              className={cn(
+                // Sizing & Spacing
+                "size-3.5",
+
+                // Typography
+                engineStatus?.isReady ? "text-emerald-500" : "text-amber-500"
+              )}
+            />
+            <span>Uteke: {engineStatus?.totalMemories ?? 0} memories</span>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-xs max-w-xs">
             <p className="font-semibold">Uteke Hybrid Memory Engine</p>

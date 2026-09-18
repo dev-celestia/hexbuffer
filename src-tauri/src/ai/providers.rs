@@ -30,9 +30,11 @@ pub(crate) fn normalize_ai_provider(provider: &str) -> Result<&str, String> {
         Ok("deepseek")
     } else if provider.eq_ignore_ascii_case(OPENAI_COMPATIBLE_PROVIDER) {
         Ok(OPENAI_COMPATIBLE_PROVIDER)
-    } else if provider.eq_ignore_ascii_case(ANTHROPIC_COMPATIBLE_PROVIDER) {
-        Ok(ANTHROPIC_COMPATIBLE_PROVIDER)
-    } else if provider.eq_ignore_ascii_case(ANTHROPIC_PROVIDER) {
+    } else if provider.eq_ignore_ascii_case(ANTHROPIC_COMPATIBLE_PROVIDER)
+        || provider.eq_ignore_ascii_case(ANTHROPIC_PROVIDER)
+    {
+        // `anthropic` is the legacy id for the same wire format, so both normalise to the
+        // canonical `anthropic-compatible`.
         Ok(ANTHROPIC_COMPATIBLE_PROVIDER)
     } else if provider == EMBEDDINGS_KEY_PROVIDER {
         Ok(EMBEDDINGS_KEY_PROVIDER)
@@ -326,10 +328,11 @@ mod tests {
 
     #[test]
     fn test_is_local_ai_endpoint_is_scoped_to_openai_compatible() {
-        let mut settings = crate::ai::types::AiSettings::default();
-
-        settings.provider = OPENAI_COMPATIBLE_PROVIDER.to_string();
-        settings.custom_base_url = Some("http://localhost:11434/v1".to_string());
+        let mut settings = crate::ai::types::AiSettings {
+            provider: OPENAI_COMPATIBLE_PROVIDER.to_string(),
+            custom_base_url: Some("http://localhost:11434/v1".to_string()),
+            ..Default::default()
+        };
         assert!(is_local_ai_endpoint(&settings));
 
         // The same loopback URL on the Anthropic-compatible wire format stays gated.

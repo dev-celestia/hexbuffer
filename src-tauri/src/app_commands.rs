@@ -440,43 +440,74 @@ pub fn set_macos_dock_icon_from_file(path: &std::path::Path) -> Result<(), Strin
     use objc2_foundation::NSData;
 
     let bytes = std::fs::read(path).map_err(|e| e.to_string())?;
-    let mtm = unsafe { MainThreadMarker::new_unchecked() };
+
+    // AppKit is main-thread-only. This is reached from `set_dock_icon`, a *sync* `#[tauri::command]`
+    // — Tauri gives those `ExecutionContext::Blocking`, so the body runs inline in the IPC handler
+    // on the main thread and the checked constructor succeeds. Asking rather than asserting keeps a
+    // future caller that breaks that assumption out of undefined behaviour.
+    let mtm = MainThreadMarker::new()
+        .ok_or_else(|| "set_dock_icon must be called from the main thread".to_string())?;
+
     let app = NSApplication::sharedApplication(mtm);
     let data = NSData::with_bytes(&bytes);
     let app_icon = NSImage::initWithData(NSImage::alloc(), &data)
         .ok_or_else(|| "Failed to create NSImage from icon data".to_string())?;
+    // SAFETY: `setApplicationIconImage:` is `unsafe` only because the receiver may reject `None`
+    // (per its objc2 binding). We pass `Some`, which every AppKit version accepts.
     unsafe { app.setApplicationIconImage(Some(&app_icon)) };
     Ok(())
 }
 
 #[cfg(target_os = "macos")]
-pub fn activate_current_process() {
+pub fn activate_current_process(app: &tauri::AppHandle) {
     use objc2::MainThreadMarker;
     use objc2_app_kit::NSApplication;
 
-    let mtm = unsafe { MainThreadMarker::new_unchecked() };
-    let app = NSApplication::sharedApplication(mtm);
+    // `activateIgnoringOtherApps:` is main-thread-only, but this helper is reachable from the
+    // single-instance callback, which `tauri-plugin-single-instance` invokes inside
+    // `async_runtime::spawn` — i.e. on a tokio worker thread, *not* the main thread. Hand the work
+    // to the main thread rather than asserting we are already on it.
+    let Some(mtm) = MainThreadMarker::new() else {
+        let handle = app.clone();
+        let _ = app.run_on_main_thread(move || activate_current_process(&handle));
+        return;
+    };
+
+    let ns_app = NSApplication::sharedApplication(mtm);
     #[allow(deprecated)]
-    app.activateIgnoringOtherApps(true);
+    ns_app.activateIgnoringOtherApps(true);
 }
 
 #[cfg(target_os = "macos")]
 pub fn focus_window_native(window: &tauri::WebviewWindow) {
+    use objc2::MainThreadMarker;
     use objc2_app_kit::NSWindow;
+
+    // Every AppKit window call below is main-thread-only, but `focus_main_suite_window` reaches
+    // this from the single-instance callback, which the plugin runs on a tokio worker thread.
+    // Bounce to the main thread instead of assuming we are already on it.
+    if MainThreadMarker::new().is_none() {
+        let win = window.clone();
+        let _ = window.run_on_main_thread(move || focus_window_native(&win));
+        return;
+    }
 
     if let Ok(ns_ptr) = window.ns_window() {
         if !ns_ptr.is_null() {
-            unsafe {
-                if let Some(ns_win) = (ns_ptr as *const NSWindow).as_ref() {
-                    ns_win.deminiaturize(None);
-                    ns_win.makeKeyAndOrderFront(None);
-                    ns_win.makeMainWindow();
-                    ns_win.orderFrontRegardless();
-                }
+            // SAFETY: `ns_window()` hands back the `NSWindow` backing this live webview window, and
+            // the null case is excluded by the guard above. `window` is borrowed for the whole call
+            // so the pointer cannot be freed underneath us, and the reference is used only inside
+            // this block — it never escapes.
+            let ns_win = unsafe { (ns_ptr as *const NSWindow).as_ref() };
+            if let Some(ns_win) = ns_win {
+                ns_win.deminiaturize(None);
+                ns_win.makeKeyAndOrderFront(None);
+                ns_win.makeMainWindow();
+                ns_win.orderFrontRegardless();
             }
         }
     }
-    activate_current_process();
+    activate_current_process(window.app_handle());
 }
 
 /// Brings the main suite window to the front and focuses it.

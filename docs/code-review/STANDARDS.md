@@ -84,6 +84,14 @@ Two rules that keep this honest:
   `.await`. In this codebase that means `proxy/state.rs`, the automation slices, and any `Arc<Mutex<_>>`
   touched by both an IPC command and a background task.
 - **Resource leaks.** A spawned task, file handle, temp dir, or `join_set` entry with no exit path.
+- **An `unsafe` block whose stated invariant does not actually hold.** Every block carries a
+  `// SAFETY:` comment naming the invariant that makes it sound (§5.2). If you cannot write that
+  sentence *truthfully*, the block is a 🔴 — a documentation gap is not the problem. The fix is to
+  remove the obligation (call the checked API) rather than to word the comment more loosely.
+  Worked example from this repo: `MainThreadMarker::new_unchecked()` in `app_commands.rs` asserted
+  the main thread, and it was reachable from `focus_main_suite_window` — which
+  `tauri-plugin-single-instance` invokes from inside `async_runtime::spawn`, i.e. on a tokio worker
+  thread. Two blocks were removed for this reason on 2026-09-18.
 - **Breaking the IPC contract.** Removing or renaming a command, or changing a payload's shape,
   without updating the TypeScript caller. See §3.3.
 - **Schema/data migration without a rollback story.** Anything touching `db/promotion.rs`,
@@ -288,8 +296,9 @@ Use the relevant list as a *lens*, not a form. Not every line applies to every d
       string at the boundary.
 - [ ] New commands are registered in `generate_handler!` and mirrored in TypeScript (§3.3).
 - [ ] Locks are not held across `.await`; poisoned locks are handled rather than unwrapped.
-- [ ] `unsafe` blocks (11 today, in 3 files) are not added without a `// SAFETY:` comment naming the
-      invariant that makes them sound.
+- [ ] `unsafe` blocks (9 today, in 3 files — all justified) are not added without a `// SAFETY:`
+      comment naming the invariant that makes them sound. One comment per block, not one per group:
+      a shared comment above three blocks is exactly where the fourth gets added unnoticed.
 - [ ] Tests: `#[cfg(test)] mod tests` at the bottom of the module, named
       `test_<subject>_<behavior>`, no network and no running proxy — per
       `src-tauri/tests/README.md`. Update that file's coverage map when you add a testable module.
@@ -328,7 +337,7 @@ anything that builds a path or a shell command, or the AI tool registry.
 The suite is small and uneven, so test review is about *placement*, not percentage:
 
 - [ ] Pure logic (parsers, formatters, filters, policy predicates) has unit tests. This is where the
-      existing suite is strongest: 234 frontend tests across 20 files, 161 Rust tests across 37
+      existing suite is strongest: 332 frontend tests across 24 files, 160 Rust tests across 37
       modules.
 - [ ] **Any rule with a security consequence is a pure function with a test.** The
       sharing-exemption and `canSaveProviderKey` rules exist in this shape deliberately.
@@ -356,9 +365,10 @@ Deferring these is what makes review fast enough to actually happen.
 |---|---|---|
 | Formatting, import order, quotes, line width | CI (`cargo fmt`, Prettier once adopted) | Zero judgement involved; a machine does it perfectly. |
 | Type errors | CI (`tsc --noEmit`) | The repo is at **0 errors**; a new one is caught mechanically. |
-| Dead `eslint-disable` comments | CI / cleanup pass | There are 7 across 5 files and **no ESLint config**, so they suppress nothing. |
-| Generated and lock files | `.gitignore` | `tsconfig.tsbuildinfo` is tracked and currently shows as modified — see the debt register. |
-| Refactors of untouched code | Separate task | Bundling them makes the real change unreviewable. |
+| Dead `eslint-disable` comments | done 2026-09-18 | All removed. The count said "7 across 5 files"; `src/` actually held **8** — always grep `eslint-disable` across the whole tree, not the directories you remember. They suppressed nothing, because there is no ESLint config. |
+| Generated and lock files | `.gitignore` | `tsconfig.tsbuildinfo` is untracked and ignored (closed 2026-09-17). |
+| Lint warnings (`clippy`, once ESLint exists) | CI (`-D warnings`) | Clippy is at **0** and blocking. A new warning is a new warning. |
+| Refactors of untouched code | Separate task | Bundling them makes the real change unreviewable. This is why the six `too_many_arguments` sites carry documented `#[allow]`s rather than being regrouped into parameter structs. |
 
 ---
 
@@ -407,8 +417,8 @@ A change is done when every line is true. Copy this into the PR description.
 
 - [ ] The stated problem is solved, and the diff does nothing else.
 - [ ] `tsc --noEmit` clean (baseline: 0 errors).
-- [ ] `vitest run` green (baseline: 234 tests / 20 files).
-- [ ] `cargo test --lib -- --test-threads=1` green (baseline: 161 tests).
+- [ ] `vitest run` green (baseline: 332 tests / 24 files).
+- [ ] `cargo test --lib -- --test-threads=1` green (baseline: 160 tests).
 - [ ] `cargo fmt --check` clean **for every file this diff touches**.
 - [ ] No new clippy warnings (baseline: 28).
 - [ ] No new `any`, no new unjustified `as unknown as`, no `asChild`.
@@ -428,23 +438,29 @@ UI renders; a plain browser cannot even mount this app, because `main.tsx` calls
 
 ## 9. Known debt register
 
-Measured 2026-09-17. This is the baseline the ratchet compares against — the numbers are allowed to
+Measured 2026-09-18. This is the baseline the ratchet compares against — the numbers are allowed to
 fall, never to rise.
 
 | Item | Baseline | Severity | Notes |
 |---|---|---|---|
-| No automated gate on PRs | CI builds only on `v*` tags | 🔴 | The single highest-value fix. See `PROCESS.md` §5. |
-| `cargo fmt` non-compliance | **82 / 117 files** | 🟡 | Gate on changed files only; do not big-bang reformat while work is in flight. 4 files were formatted on 2026-09-17; the number moves as files are touched, so re-measure rather than trusting this row. |
-| Clippy warnings | **28**, 13 lint types, all trivial | 🟡 | Mostly `cargo clippy --fix`-able. Clear it once, then gate at `-D warnings`. |
-| No ESLint / Prettier / editorconfig | absent | 🟡 | Lint rules currently live in one IDE (see commit `dcfcaed5`, SonarLint S6759). |
-| Dead `eslint-disable` comments | 7 across 5 files | 💭 | Suppress nothing; there is no ESLint config. |
+| ~~No automated gate on PRs~~ | ~~CI builds only on `v*` tags~~ | ✅ | **Closed 2026-09-17** — `.github/workflows/ci.yml` gates `tsc`, `vitest`, rustfmt (changed files), clippy and `cargo test` on PRs and pushes to `master`/`Development`. |
+| `cargo fmt` non-compliance | **27 / 118 files** | 🟡 | Gate on changed files only; do not big-bang reformat while work is in flight. **The earlier "82 / 117" figure was wrong — it counted diff *hunks*, not files** (`cargo fmt --check \| grep -c '^Diff in'` reports hunks; there are 83 of those across these 27 files). Measure files, and read rustfmt's diff from **stderr** after stripping ANSI, or a `grep -c '^[-+]'` returns 0 for every file. |
+| ~~Clippy warnings~~ | ~~**28**, 13 lint types~~ | ✅ | **Closed 2026-09-18** — now **0**; CI runs `clippy --all-targets -- -D warnings` and is blocking. 27 warnings fixed (mechanical lints rewritten, e.g. `is_multiple_of`, `as_chunks`, `sort_by_key` + `Reverse`, `manual_filter`, `collapsible_if`/`_match`, `field_reassign_with_default`, `type_complexity` aliases). Six `too_many_arguments` sites carry a documented `#[allow]` instead — see the next row. |
+| `too_many_arguments` allows | 6 sites | 💭 | `commands/history.rs` (Tauri IPC — the args *are* the payload contract), `commands/mock_forge.rs`, `automation/actions.rs`, `automation/events.rs` (~10 call sites), `browser/crawl_runner.rs`, `ai/tool_loop.rs`. Each carries a comment saying why. Regrouping them into parameter structs is a refactor of untouched paths, which this document keeps as a **separate task** — do not fold it into a lint cleanup. |
+| No ESLint / Prettier / editorconfig | absent | 🟡 | Lint rules currently live in one IDE (see commit `dcfcaed5`, SonarLint S6759). Adopting ESLint is now a clean slate: the tree carries **zero** `eslint-disable` comments (next row), so nothing was suppressed to hide a pre-existing violation. |
+| ~~Dead `eslint-disable` comments~~ | ~~7 across 5 files~~ | ✅ | **Closed 2026-09-18** — **0** remain in `src/`. The register said 7; a repo-wide grep found **8** (the extra one was in `src/__preview__/settings-preview.tsx`, outside the directories the count was taken from — always grep the whole tree, not the tree you remember). They suppressed nothing, because there is no ESLint config; the `react-hooks/exhaustive-deps` ones became prose stating *why* each dependency array is what it is, which is the durable half of what the suppression was standing in for. |
 | ~~`tsconfig.tsbuildinfo` tracked~~ | ~~1 file~~ | ✅ | **Closed 2026-09-17** — untracked (`git rm --cached`, file kept on disk) and `*.tsbuildinfo` added to `.gitignore`. |
 | Dead path alias in `tsconfig.json` | `@celestia-project/ui` → `../celestia-starter/packages/ui/src/index.ts` | 🟡 | That path **does not exist** today, so resolution silently falls through to the published 0.3.6 in `node_modules`. This is most likely **intentional local-dev wiring** (the package's own repo is `dev-celestia/celestia-starter`), so do not just delete it — but be aware of the failure mode: the moment that sibling checkout exists, builds silently switch to an unreleased local copy of the UI library. That is a "works on my machine" in its purest form, and it would explain UI behaviour nobody else can reproduce. If you want to keep the local-dev path, make it explicit (comment it out by default, or document it in `AGENTS.md`); if you no longer develop against the sibling, remove it. |
 | `any` usage | 66 across 28 files | 🟡 | Ratchet, do not increase. |
-| `as unknown as` casts | 53 across 19 files | 🟡 | Each is a documented boundary or a latent bug — triage over time. |
-| `.unwrap()` / `.expect()` in Rust | 123 + 47 across 33 files | 🟡 | Mostly tests and infallible cases; audit the command and proxy paths first. |
-| `unsafe` blocks | 11 across 3 files | 💭 | Ensure each has a `// SAFETY:` justification. |
+| `as unknown as` casts | **51** across 17 files | 🟡 | **Triaged 2026-09-18.** Measured **55 across 21 files** before the triage (this row said 53/19 — take the count again rather than quoting it). Four were removed; the remaining 51 are all **legitimate boundaries**, in three clusters: **React Flow node data (27)** — `data as unknown as XNodeData`, forced because `useAutomationStore.saveWorkflow(nodes: unknown, edges: unknown)` types persisted nodes as `unknown`, so the cast is the only thing between the persisted schema and React Flow's `Node`; the real fix is typing the persisted workflow, a refactor of untouched paths, so it is a separate task; **the sync store registry (18)** — `useXStore as unknown as AnyStore` where `AnyStore = StoreApi<Record<string, unknown>>`, and heterogeneous zustand state cannot unify without it; **test fixtures / preview state slices (5)** — a partial object asserted to a full interface genuinely needs the hop, since neither type is assignable to the other. One asset-import hack remains (`components/floating-link-card/constants.ts`). |
+| ↳ *same item — removed* | 4 casts | ✅ | Three `(window as unknown as { __TAURI_INTERNALS__?: unknown })` probes compiled as a **single** cast once the `unknown` hop was deleted — verified by editing and running `tsc`, not by reasoning — so the hop was noise; now `(window as { __TAURI_INTERNALS__?: unknown })` in `routes/page-resolver.tsx`, `stores/app.ts`, `stores/sync/bus.ts`. The fourth, `(s as unknown as StashRecord).parentId = null` in `pages/repeater/lib/collection-io.ts`, was **both unnecessary and misleading**: `s` is already `Record<string, unknown>`, so no cast was needed at all, and the assertion claimed a fully-validated `StashRecord` when only `id` and `name` had been checked at that point. |
+| ↳ *measurement note* | — | 💭 | Two traps when working a grep-based count. (1) **Your own explanatory comment matches the pattern** — the removal plus a comment naming the old cast left the file still counting as a hit. Write "the double cast", not the literal. (2) **The tree moves**: a probe test file appeared and vanished, and a preview module was renamed, by a concurrent editor *during* this triage — a register count is a claim about a tree that may no longer exist. |
+| `.unwrap()` / `.expect()` in Rust | 123 + 47 across 33 files | 🟡 | **Priority pass done 2026-09-18** — the command and proxy paths are audited (see below); the remainder is a ratchet, do not increase. |
+| ↳ *same item — audit result* | command + proxy paths | ✅ | **Audited 2026-09-18.** The raw count badly overstates the risk: of 32 matches across the 9 priority files (`app_commands.rs`, `commands/*`, `proxy/*`), **29 were inside `#[cfg(test)] mod tests`**. Only three sat on a production path, and two were fixed: `commands/regression.rs` re-read `cancelled_flag` back out of the run map with `.get(&run_id).unwrap()` immediately after inserting it — the `Arc` was already in hand, so the lookup could only ever return that same `Arc` or panic inside the IPC handler; it now clones from the handle before the insert. `proxy/lifecycle.rs` built the `x-rusxy` header with `"1".parse().unwrap()` on the intercept path, twice; both are now `HeaderValue::from_static("1")`, which validates the literal at compile time and so cannot panic per request. `setup.rs`'s four `.expect()`s were reviewed and **left alone**: they run once in `init()` before any window exists, carry clear messages, and are fail-fast — not per-operation panics. |
+| ↳ *measurement note* | — | 💭 | A bare `grep -c '\.unwrap()'` is not the metric. The number that matters is **matches outside `#[cfg(test)]`**, and in this repo that is a small fraction of the headline. Subtract the test modules before deciding a panic count is alarming. |
+| `unsafe` blocks | **9** across 3 files | ✅ | **Closed 2026-09-18** — all nine carry a `// SAFETY:` comment naming their invariant (`app_commands.rs` ×2, `hashcat/binary.rs` ×2 test-only, `hashcat/engine.rs` ×5). Two were **removed rather than documented**: the `MainThreadMarker::new_unchecked()` calls were *unsound*, not merely undocumented — see §3.1. The remaining five `libc::kill` sites are sound because `child_pid` is only ever set from `Child::id()` of the hashcat child this engine spawned and is cleared before `is_running` goes false; `hashcat/engine.rs` now drops it as soon as the wait loop reaps the child, so a racing `pause()`/`resume()` cannot signal a recycled pid. |
 | No logging policy | 205 `console.*` (186 error, 17 warn, 2 log) | 💭 | Overwhelmingly error reporting, not debug spam. Needs a logger abstraction eventually so release builds can capture diagnostics. |
-| Untested large modules | `stores/browser-automation.ts` (906), `stores/collections.ts` (822), `pages/nuclei-run/*` (6 files in the top 25 by size) | 🟡 | The store layer has the project's best tests (7 files) and these two stores have none. |
+| Untested large modules | `pages/nuclei-run/*` (6 files in the top 25 by size) | 🟡 | **Partly closed 2026-09-18** — `stores/browser-automation.ts` (906) and `stores/collections.ts` (822) now have **84 tests between them** (`browser-automation.test.ts` 56, `collections.test.ts` 28), so the store layer's coverage is 8 files, not the 6 it had. The `nuclei-run/*` modules remain uncovered. |
+| ↳ *correction* | store test count | 💭 | This row claimed the store layer had "7 test files". Measured, it had **6** (`api-mock`, `api-override`, `jwt-store`, `nav`, `notifications`, `target`). Same failure mode as the `eslint-disable` count: a number written from memory rather than taken. Recount before quoting. |
 | Oversized files | `nuclei-template-hub-step.tsx` 1129 · `browser-automation.ts` 906 · `default-templates.ts` 905 · `use-drawing-canvas.ts` 878 | 🟡 | Split when you next touch them, not on principle. |
 | Broad Tauri capabilities | `fs:allow-home-write-recursive`, `assetProtocol.scope: ["**"]` | 🟡 | Legitimate for this app's function; review every widening. |

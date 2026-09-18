@@ -90,8 +90,7 @@ impl Database {
         }
 
         let conn = self.conn.lock();
-        let placeholders = std::iter::repeat("?")
-            .take(ids.len())
+        let placeholders = std::iter::repeat_n("?", ids.len())
             .collect::<Vec<_>>()
             .join(", ");
         conn.execute(

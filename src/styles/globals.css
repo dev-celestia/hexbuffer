@@ -67,6 +67,14 @@
   --animate-scroll-down: scroll-down 1.5s ease-in-out infinite;
   --animate-role-fade-in: role-fade-in 0.4s cubic-bezier(0.23, 1, 0.32, 1) both;
   --animate-gradient-shift: gradient-shift 6s ease infinite;
+  /* Settings panel swap. Transform + opacity only, so `motion-reduce:animate-none` is a complete
+     opt-out — a layout property (height, margin) would keep tweening under that variant. */
+  --animate-settings-panel: settings-panel-in 0.22s var(--ease-out) both;
+
+  @keyframes settings-panel-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+  }
 
   @keyframes scroll-down {
     0% { transform: translateY(-100%); }
@@ -744,4 +752,27 @@
   border: none !important;
   text-decoration: none !important;
   display: none !important;
+}
+
+/* ===== Settings search =====
+ *
+ * Rows that do not match the query return `null`, so a filtered-out row is genuinely absent from
+ * the DOM. That is what lets the rest of the page be pure CSS: `divide-y` on the group card stays
+ * correct (no hidden row can leave a trailing hairline), and the browser can answer "is this group
+ * empty?" with `:has()`.
+ *
+ * The alternative — counting matching rows in React and re-rendering the group — loops, because
+ * hiding a group unmounts the very children that would report the count.
+ */
+[data-settings-search="active"] [data-settings-group]:not(:has([data-settings-match])) {
+  display: none;
+}
+
+/* Empty state for the active tab, shown only when nothing in the pane matched at all. */
+[data-settings-empty] {
+  display: none;
+}
+
+[data-settings-search="active"] [data-settings-pane]:not(:has([data-settings-match])) [data-settings-empty] {
+  display: block;
 }

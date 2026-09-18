@@ -17,7 +17,8 @@ import {
 } from '../constants';
 import type { AiProviderKeyEntry } from '../lib/ai-providers';
 import type { SettingsPageState } from '../hooks/use-settings-page';
-import { SettingsGroup, SettingsRow, SettingsRowSeparator } from './settings-group';
+import { SettingsBlock, SettingsGroup, SettingsRow } from './settings-group';
+import { matchesSettingsQuery, useSettingsQuery } from './settings-search';
 
 /**
  * Keeps Ctrl/Cmd+A selecting the contents of the focused field instead of the whole page.
@@ -50,6 +51,10 @@ interface AiProviderKeyRowProps {
 /**
  * One provider in the saved-keys list: status badges, an inline key field, and the
  * per-provider save/clear actions. Draft state is local because it is discarded on save.
+ *
+ * This is hand-rolled rather than a `SettingsRow` (it needs two stacked control rows), so it has to
+ * opt into the settings search itself — otherwise the whole "Saved API Keys" group would vanish
+ * while a provider name was being searched for.
  */
 function AiProviderKeyRow({
   entry,
@@ -60,6 +65,7 @@ function AiProviderKeyRow({
   onSave,
   onUse,
 }: Readonly<AiProviderKeyRowProps>) {
+  const query = useSettingsQuery();
   const [apiKeyInput, setApiKeyInput] = React.useState('');
   const [showApiKey, setShowApiKey] = React.useState(false);
 
@@ -80,8 +86,11 @@ function AiProviderKeyRow({
     }
   };
 
+  if (!matchesSettingsQuery(query, entry.label, entry.description)) return null;
+
   return (
     <div
+      data-settings-match
       className={cn(
         // Layout & Positioning
         "flex flex-col gap-2",
@@ -479,11 +488,9 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
         )}
       </SettingsRow>
 
-      <div
-        className={cn(
-          // Sizing & Spacing
-          "px-4 py-3"
-        )}
+      <SettingsBlock
+        label="Allow third-party AI data sharing"
+        description={`Sends selected prompts, chat messages, crawl context, page summaries, logs, insights, URLs, and analysis context to ${selectedProviderLabel}.`}
       >
         <label
           className={cn(
@@ -545,7 +552,7 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
             </span>
           </span>
         </label>
-      </div>
+      </SettingsBlock>
 
       <SettingsRow label="Actions">
         <div
@@ -609,19 +616,17 @@ export function AiSettingsTab({ settings }: Readonly<AiSettingsTabProps>) {
         label="Saved API Keys"
         description="Every provider keeps its own API key in the OS credential store, so you can configure several at once and switch between them without re-entering a key."
       >
-        {aiProviderKeyEntries.map((entry, index) => (
-          <React.Fragment key={entry.id}>
-            {index > 0 ? <SettingsRowSeparator /> : null}
-            <AiProviderKeyRow
-              entry={entry}
-              disabled={aiSettingsLoading}
-              canSave={entry.canSaveKey}
-              pending={keyActionProvider === entry.id}
-              onClear={handleClearProviderKey}
-              onSave={handleSaveProviderKey}
-              onUse={updateAiProvider}
-            />
-          </React.Fragment>
+        {aiProviderKeyEntries.map((entry) => (
+          <AiProviderKeyRow
+            key={entry.id}
+            entry={entry}
+            disabled={aiSettingsLoading}
+            canSave={entry.canSaveKey}
+            pending={keyActionProvider === entry.id}
+            onClear={handleClearProviderKey}
+            onSave={handleSaveProviderKey}
+            onUse={updateAiProvider}
+          />
         ))}
         {/*
           Each blocked row already explains itself inline, so this only covers the one thing a row

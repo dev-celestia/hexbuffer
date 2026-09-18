@@ -66,7 +66,7 @@ pub fn jwt_tool_definitions() -> Vec<ToolDefinition> {
 fn decode_b64url(s: &str) -> Result<Vec<u8>, String> {
     // ponytail: normalize padding manually if needed
     let mut normalized = s.replace('-', "+").replace('_', "/");
-    while normalized.len() % 4 != 0 {
+    while !normalized.len().is_multiple_of(4) {
         normalized.push('=');
     }
     general_purpose::STANDARD
@@ -108,14 +108,19 @@ pub fn text_contains_jwt(text: &str) -> bool {
 }
 
 pub fn execute_decode_jwt(args: &Value) -> String {
-    let token = args.get("token").and_then(|v| v.as_str()).unwrap_or("").trim();
+    let token = args
+        .get("token")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .trim();
     if token.is_empty() {
         return "Error: Empty JWT token provided.".to_string();
     }
 
     let parts: Vec<&str> = token.split('.').collect();
     if parts.len() < 2 {
-        return "Error: Invalid JWT format. Expected at least header.payload[.signature]".to_string();
+        return "Error: Invalid JWT format. Expected at least header.payload[.signature]"
+            .to_string();
     }
 
     let header_raw = match decode_b64url(parts[0]) {
@@ -129,7 +134,8 @@ pub fn execute_decode_jwt(args: &Value) -> String {
     };
 
     let header_json: Value = serde_json::from_str(&header_raw).unwrap_or(Value::String(header_raw));
-    let payload_json: Value = serde_json::from_str(&payload_raw).unwrap_or(Value::String(payload_raw));
+    let payload_json: Value =
+        serde_json::from_str(&payload_raw).unwrap_or(Value::String(payload_raw));
 
     let signature = parts.get(2).copied().unwrap_or("");
 
@@ -139,11 +145,16 @@ pub fn execute_decode_jwt(args: &Value) -> String {
         "payload": payload_json,
         "has_signature": !signature.is_empty(),
         "signature_length": signature.len()
-    }).to_string()
+    })
+    .to_string()
 }
 
 pub fn execute_check_jwt_vulns(args: &Value) -> String {
-    let token = args.get("token").and_then(|v| v.as_str()).unwrap_or("").trim();
+    let token = args
+        .get("token")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .trim();
     if token.is_empty() {
         return "Error: Empty JWT token provided.".to_string();
     }
@@ -209,7 +220,14 @@ pub fn execute_check_jwt_vulns(args: &Value) -> String {
     }
 
     // 3. Sensitive data exposure in unencrypted payload
-    let sensitive_keys = ["password", "secret", "private_key", "ssn", "credit_card", "pin"];
+    let sensitive_keys = [
+        "password",
+        "secret",
+        "private_key",
+        "ssn",
+        "credit_card",
+        "pin",
+    ];
     if let Some(obj) = payload.as_object() {
         for key in obj.keys() {
             let lower = key.to_lowercase();
@@ -238,11 +256,16 @@ pub fn execute_check_jwt_vulns(args: &Value) -> String {
         "findings": findings,
         "algorithm": header.get("alg"),
         "subject": payload.get("sub"),
-    }).to_string()
+    })
+    .to_string()
 }
 
 pub fn execute_tamper_jwt(args: &Value) -> String {
-    let token = args.get("token").and_then(|v| v.as_str()).unwrap_or("").trim();
+    let token = args
+        .get("token")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .trim();
     if token.is_empty() {
         return "Error: Empty JWT token provided.".to_string();
     }
@@ -271,7 +294,10 @@ pub fn execute_tamper_jwt(args: &Value) -> String {
     };
 
     // Apply algorithm 'none'
-    let set_none = args.get("set_alg_none").and_then(|v| v.as_bool()).unwrap_or(false);
+    let set_none = args
+        .get("set_alg_none")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false);
     if set_none {
         if let Some(obj) = header.as_object_mut() {
             obj.insert("alg".to_string(), json!("none"));
@@ -303,7 +329,8 @@ pub fn execute_tamper_jwt(args: &Value) -> String {
         "modified_header": header,
         "modified_payload": payload,
         "signature_stripped": set_none
-    }).to_string()
+    })
+    .to_string()
 }
 
 #[cfg(test)]
@@ -341,10 +368,7 @@ sig";
         let result = execute_decode_jwt(&json!({ "token": REAL_JWT }));
         let value: Value = serde_json::from_str(&result).expect("valid json");
         assert_eq!(value["status"], "success");
-        assert_eq!(
-            value["payload"]["sub"],
-            "dGVsa29tdGRzY3VzdG9tZXI="
-        );
+        assert_eq!(value["payload"]["sub"], "dGVsa29tdGRzY3VzdG9tZXI=");
         assert_eq!(value["payload"]["iss"], "telkomdev");
         assert_eq!(value["header"]["alg"], "RS256");
     }

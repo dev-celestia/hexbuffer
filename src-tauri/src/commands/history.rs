@@ -28,6 +28,9 @@ pub async fn get_http_sessions(
 }
 
 #[tauri::command]
+// Each parameter is deserialised from the invoke payload *by name*, so these eight are the IPC
+// contract itself. Folding them into a struct would change the shape the frontend has to send.
+#[allow(clippy::too_many_arguments)]
 pub async fn create_http_session(
     history: State<'_, HistoryBridge>,
     proxy_state: State<'_, ProxyState>,

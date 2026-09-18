@@ -107,15 +107,19 @@ pub struct ActivityLog {
     pub human_input_request: Option<serde_json::Value>,
 }
 
+/// Live crawl engine handles, keyed by session id then worker id. Pause, resume and stop commands
+/// drive the running celestia-spider crawl through these.
+pub(crate) type CrawlControls =
+    HashMap<String, HashMap<String, Arc<celestia_spider::CrawlControl>>>;
+/// Per-worker cancellation flags, keyed the same way as [`CrawlControls`].
+pub(crate) type CrawlCancellations = HashMap<String, HashMap<String, Arc<AtomicBool>>>;
+
 #[derive(Default, Clone)]
 pub struct AiBrowserState {
     pub(crate) sessions: Arc<Mutex<HashMap<String, CrawlSession>>>,
     pub(crate) pages: Arc<Mutex<HashMap<String, Vec<CrawlPage>>>>,
     pub(crate) insights: Arc<Mutex<HashMap<String, Vec<AIInsight>>>>,
     pub(crate) logs: Arc<Mutex<HashMap<String, Vec<ActivityLog>>>>,
-    /// Live crawl engine controls keyed by session id then worker id. Pause, resume and
-    /// stop commands drive the running celestia-spider crawl through these handles.
-    pub(crate) controls:
-        Arc<Mutex<HashMap<String, HashMap<String, Arc<celestia_spider::CrawlControl>>>>>,
-    pub(crate) cancellations: Arc<Mutex<HashMap<String, HashMap<String, Arc<AtomicBool>>>>>,
+    pub(crate) controls: Arc<Mutex<CrawlControls>>,
+    pub(crate) cancellations: Arc<Mutex<CrawlCancellations>>,
 }

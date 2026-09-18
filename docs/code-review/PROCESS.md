@@ -73,7 +73,7 @@ most regressions in under a minute:
 ```bash
 node_modules/.bin/tsc --noEmit -p tsconfig.json      # 40–150s, must stay at 0 errors
 cd src-tauri && cargo fmt --check                     # instant
-cd src-tauri && cargo clippy --all-targets            # ~30s warm, must not exceed 28 warnings
+cd src-tauri && cargo clippy --all-targets            # ~30s warm, must stay at 0 warnings
 ```
 
 **4. Self-review.** The ritual — see §3. This is the step that replaces a human reviewer.
@@ -136,11 +136,18 @@ Before the human questions, run the pattern scan over your own diff. Every one o
 a real bug in this repo, which is why they are on the list:
 
 ```bash
-git diff master...HEAD | grep -nE "asChild|as unknown as|: any|@ts-expect-error|\.unwrap\(\)|dangerouslySetInnerHTML|console\.(log|info)"
+git diff master...HEAD | grep -nE "asChild|as unknown as|: any|@ts-expect-error|\.unwrap\(\)|dangerouslySetInnerHTML|console\.(log|info)|unsafe \{"
 ```
 
 `asChild` → R1. `as unknown as` / `any` → must be justified or removed. `.unwrap()` → is it reachable
 with bad input? `dangerouslySetInnerHTML` → where did that content come from?
+
+`unsafe {` → is there a `// SAFETY:` comment *immediately above that block* naming the invariant, and
+is the sentence **true**? Trace the callers before believing it. The two unsound blocks removed on
+2026-09-18 read as obviously correct until you followed `focus_main_suite_window` into
+`tauri-plugin-single-instance`, which invokes its callback from inside `async_runtime::spawn`. A
+`unsafe` block that merely *looks* safe from its own file is the normal case, not the exception — so
+this is the one sweep item that cannot be answered from the diff alone.
 
 ### Check your own PR against the gate you cannot run locally
 
@@ -197,18 +204,25 @@ traffic is not yours to upload. Redact first, or review that diff yourself.
 | Job | Command | Measured | Blocking? |
 |---|---|---|---|
 | Frontend types | `tsc --noEmit -p tsconfig.json` | 40–150s | **Yes** — baseline 0 errors, so any error is new |
-| Frontend tests | `vitest run` | ~2.2 min | **Yes** — 234 tests / 20 files |
-| Backend tests | `cargo test --lib -- --test-threads=1` | ~4s warm, minutes cold | **Yes** — 161 tests. The single-thread flag is required; several tests touch process-global state |
+| Frontend tests | `vitest run` | ~2.2 min | **Yes** — 332 tests / 24 files |
+| Backend tests | `cargo test --lib -- --test-threads=1` | ~4s warm, minutes cold | **Yes** — 160 tests. The single-thread flag is required; several tests touch process-global state |
 | Backend format | `rustfmt --check` on **changed files only** | instant | **Yes** — see the ratchet note |
-| Backend lints | `cargo clippy --all-targets` | ~30s warm | **Advisory** until the baseline is cleared |
+| Backend lints | `cargo clippy --all-targets -- -D warnings` | ~30s warm | **Yes** — baseline 0 warnings since 2026-09-18 |
 
 ### Why `rustfmt` is scoped to changed files
 
-82 of 117 Rust files are not currently `rustfmt`-clean. Running `cargo fmt` repo-wide would produce an
-~82-file whitespace commit, which would collide with any work in flight and bury the next real diff.
+27 of 118 Rust files are not currently `rustfmt`-clean. Running `cargo fmt` repo-wide would produce a
+27-file whitespace commit, which would collide with any work in flight and bury the next real diff.
 So the gate checks only the files the PR touches. **Every new or edited line is formatted from day
 one, and the existing backlog is fixed opportunistically** — run `cargo fmt` on a file the next
 time you are already editing it.
+
+> **Measure files, not hunks.** The original figure here was "82 of 117 files", which came from
+> `cargo fmt --check | grep -c '^Diff in'` — that counts diff *hunks*. There are 83 hunks across 27
+> files, so the backlog was overstated ~3x. Two further traps: rustfmt writes its diff to **stderr**
+> (so `2>/dev/null | grep -c '^[-+]'` returns 0 for every file), and it colours it with ANSI escapes
+> (so `grep -c '^[-+]'` still returns 0 until you strip them). BSD `sed` has no `\x1b` escape — use
+> `perl`, or compare `rustfmt --emit stdout <file>` against the file with `diff`.
 
 ### The ratchet policy
 
@@ -219,10 +233,17 @@ The general rule for introducing any new gate to a codebase with existing debt:
    within a week — and a disabled gate is worse than none, because the team stops believing in the
    ones that still work.
 3. **Ratchet in one direction only.** The baseline may fall, never rise.
-4. **Clear a baseline once, then lock it.** The clippy baseline is 28 warnings, all trivial
-   (`needless_borrow`, `collapsible_if`, `redundant_pattern_matching`, `manual_is_multiple_of`).
-   Most are `cargo clippy --fix`-able in one sitting. Once it is at zero, flip clippy to blocking
-   with `-D warnings` and it stays clean forever.
+4. **Clear a baseline once, then lock it.** Done for clippy on 2026-09-18: the 28-warning baseline
+   was taken to zero and CI now runs `clippy --all-targets -- -D warnings`. Two things learned
+   doing it, worth reusing on the next baseline:
+   - **`cargo clippy --fix` is not a one-shot.** It aborts the whole apply when any single
+     suggestion fails to compile — the `chunks_exact` → `as_chunks` fix did exactly that here, so
+     the run applied one fix out of eight and reported an error. Apply the safe rewrites by hand
+     and verify with a compile after each batch.
+   - **Some lints are worth an `#[allow]`, not a rewrite.** The six `too_many_arguments` sites are
+     IPC signatures and logging helpers; regrouping them is a refactor of untouched code, which §6
+     keeps as a separate task. A documented `#[allow]` is honest; a hurried refactor to satisfy a
+     style lint is not.
 
 ### Local pre-flight
 
@@ -327,8 +348,17 @@ Do this in order. Steps 1–3 are the ones that change behaviour; the rest can f
 | 1 | **Land `ci.yml`.** Nothing else matters until the gate exists. | done — verify the first PR run |
 | 2 | **Adopt the 15-minute self-review** on your next change. Time it. | immediate |
 | 3 | **Stop committing to `master`.** Branch, PR, let CI run, merge. | immediate |
-| 4 | **Clear the clippy baseline** (28 warnings, mostly auto-fixable), then flip clippy to `-D warnings`. | ~1 hour |
-| 5 | **Untrack `tsconfig.tsbuildinfo`** and add it to `.gitignore` — it is a build artefact that currently shows as modified in every `git status`. | minutes |
-| 6 | **Delete the 7 dead `eslint-disable` comments**, or adopt ESLint and make them real. | minutes |
-| 7 | **Weekly debt pass** — start with the two untested large stores (`browser-automation.ts`, `collections.ts`). | 30 min/week |
-| 8 | **Run `cargo fmt` on each file you touch**, so the 82-file baseline erodes instead of sitting there. | ongoing |
+| 4 | ~~**Clear the clippy baseline** (28 warnings, mostly auto-fixable), then flip clippy to `-D warnings`.~~ | **done 2026-09-18** — 0 warnings, CI blocking |
+| 5 | ~~**Untrack `tsconfig.tsbuildinfo`** and add it to `.gitignore`.~~ | **done 2026-09-17** |
+| 6 | ~~**Audit the `unsafe` blocks** for a truthful `// SAFETY:` comment each.~~ | **done 2026-09-18** — 11 → 9 blocks, all justified; 2 were *unsound* and were removed, not documented (§3.1 of STANDARDS.md) |
+| 7 | ~~**Delete the dead `eslint-disable` comments**, or adopt ESLint and make them real.~~ | **done 2026-09-18** — 8 removed (the register said 7); the `exhaustive-deps` ones became prose saying *why* each dep array is what it is |
+| 8 | ~~**Audit `.unwrap()` / `.expect()` on the command and proxy paths.**~~ | **done 2026-09-18** — 29 of 32 matches in those paths were test-only; 2 real fixes (`commands/regression.rs` needless map re-lookup, `proxy/lifecycle.rs` `parse().unwrap()` → `from_static`) |
+| 9 | ~~**Cover the two untested large stores** (`browser-automation.ts` 906 lines, `collections.ts` 822 lines).~~ | **done 2026-09-18** — 84 tests across the two stores; vitest baseline 248/22 → 332/24. First pass, not exhaustive: the remaining `nuclei-run/*` modules are still uncovered. |
+| 10 | **Run `cargo fmt` on each file you touch**, so the 27-file baseline erodes instead of sitting there. | ongoing |
+
+Note on step 10: this is not merely good manners — the `check-rustfmt-changed.sh` gate makes it
+**mandatory**. Touching a file that was already non-compliant turns the gate red, so you must format
+that whole file before the PR can pass. Verified 2026-09-18: a one-line change to
+`commands/regression.rs` pulled in its six pre-existing formatting hunks. That is the gate working as
+intended (incremental erosion), but it means a one-line fix can arrive with a formatting diff — say so
+in the PR description so the reviewer knows which hunk is the change.

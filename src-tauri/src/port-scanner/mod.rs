@@ -139,7 +139,7 @@ pub async fn scan_ports(
 
                 let current = completed.fetch_add(1, Ordering::Relaxed) + 1;
                 let emit_interval = (total / 100).clamp(5, 250);
-                if current % emit_interval == 0 || current == total {
+                if current.is_multiple_of(emit_interval) || current == total {
                     let _ = app.emit(
                         &format!("port-scan-progress-{}", scan_id),
                         PortScanProgress::Update { current, total },
@@ -149,7 +149,7 @@ pub async fn scan_ports(
         }
     }
 
-    while let Some(_) = join_set.join_next().await {}
+    while join_set.join_next().await.is_some() {}
 
     let was_cancelled = cancel_flag.load(Ordering::Relaxed);
     let mut cancellations = scan_state.cancellations.lock();

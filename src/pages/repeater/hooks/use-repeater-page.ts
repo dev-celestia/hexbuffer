@@ -23,10 +23,11 @@ export function useRepeaterPage() {
 
   const migrationDoneRef = React.useRef(false);
 
-  // Hydrate collections from DB on mount
+  // Hydrate collections from DB on mount. Mount-only: re-running this whenever the store changes
+  // would re-read the whole collection set on every edit.
   React.useEffect(() => {
     void fetchFromDb();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Auto-create a default workspace if none exist (only after hydration + DB load)
   React.useEffect(() => {

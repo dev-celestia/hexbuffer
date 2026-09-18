@@ -720,15 +720,15 @@ fn split_conversation(
     }
 }
 
-/// Builds the engine config for the configured provider. The `openai-compatible` provider
-/// Builds the engine config for the configured provider. Custom base URLs are passed
-/// through for OpenAI-compatible and Anthropic-compatible endpoints.
+/// Builds the engine config for the configured provider. Custom base URLs are passed through for
+/// both compatible wire formats — OpenAI-compatible and Anthropic-compatible — and dropped for the
+/// fixed-endpoint providers, which use their own default.
 pub(crate) fn build_ai_config(settings: &AiSettings, api_key: &str) -> super::types::AiConfig {
-    if super::providers::is_anthropic(&settings.provider) {
-        let mut config = super::types::AiConfig::new(&settings.provider, &settings.model, api_key);
-        config.base_url = settings.custom_base_url.clone();
-        config
-    } else if super::providers::is_openai_compatible(&settings.provider) {
+    // One branch for both compatible wire formats: they differ in how the request is encoded, not
+    // in how the config is assembled, so duplicating the body only invited the two to drift.
+    if super::providers::is_anthropic(&settings.provider)
+        || super::providers::is_openai_compatible(&settings.provider)
+    {
         let mut config = super::types::AiConfig::new(&settings.provider, &settings.model, api_key);
         config.base_url = settings.custom_base_url.clone();
         config

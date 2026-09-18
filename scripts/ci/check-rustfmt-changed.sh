@@ -2,10 +2,15 @@
 #
 # Ratcheted rustfmt gate.
 #
-# 96 of 117 Rust files in this repo are not currently rustfmt-clean, so a repo-wide
+# 27 of 118 Rust files in this repo are not currently rustfmt-clean, so a repo-wide
 # `cargo fmt --check` would be red on arrival and would get disabled. This checks only
 # the files a change actually touches: every new or edited line is formatted from day
 # one, and the existing backlog erodes opportunistically.
+#
+# Re-measuring: count *files*, not diff hunks. `cargo fmt --check | grep -c '^Diff in'`
+# counts hunks and overstated the backlog by roughly 3x (83 hunks across 27 files). Also
+# note rustfmt writes its diff to stderr with ANSI colour, so the obvious
+# `2>/dev/null | grep -c '^[-+]'` silently returns 0 for every file.
 #
 # See docs/code-review/PROCESS.md §5 ("The ratchet policy").
 #

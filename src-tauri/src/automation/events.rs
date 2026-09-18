@@ -38,6 +38,9 @@ pub(crate) struct ExecutionLogEvent {
 
 // ── Log / node runtime ────────────────────────────────────────────────────
 
+// A logging helper with ~10 call sites; a parameter struct would add ceremony at every one of them
+// for no gain. Regrouping it is a refactor of an untouched path — a separate task.
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn append_log(
     app: &AppHandle,
     workflow_id: &str,

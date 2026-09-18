@@ -167,7 +167,9 @@ export function useListenerPage() {
     [payloads, setPayloads]
   );
 
-  // auto-polling
+  // Auto-polling. The dependency is `servers.length` and not `servers` on purpose: the loop below
+  // only reads `server.id`, and every `setServers` call above preserves ids — while depending on the
+  // array itself would tear down and restart the 10s interval on every unrelated server edit.
   useEffect(() => {
     if (!isEnabled || servers.length === 0) {
       setIsPolling(false);
@@ -197,19 +199,19 @@ export function useListenerPage() {
       clearInterval(interval);
       setIsPolling(false);
     };
-  }, [isEnabled, servers.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isEnabled, servers.length]);
 
   // load data on mount
   useEffect(() => {
     loadServers();
     loadPayloads();
     loadStats();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // reload interactions when filters change
   useEffect(() => {
     loadInteractions();
-  }, [selectedPayloadFilter, selectedTypeFilter]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedPayloadFilter, selectedTypeFilter]);
 
   // ponytail: auto-generate a default callback payload in the background if a server has none
   useEffect(() => {

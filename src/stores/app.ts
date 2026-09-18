@@ -279,7 +279,7 @@ export function initProxySync() {
   });
 
   // 3. Listen to Tauri backend event broadcast
-  if (Boolean((window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__)) {
+  if (Boolean((window as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__)) {
     import('@tauri-apps/api/event')
       .then(({ listen }) => {
         listen<ProxyRuntimeStatus>('proxy-status-changed', (event) => {

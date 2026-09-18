@@ -120,7 +120,8 @@ export function useRouteEditor(
   };
 
   const handleClone = () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // Drop `id` so the clone is assigned a fresh one on save. Destructuring it out — rather than
+    // deleting the key — keeps `rest` exhaustive if the rule shape grows.
     const { id: _id, ...rest } = route;
     onAdd({ ...rest });
     toast.success(`Cloned override rule: ${route.method} ${route.path}`);

@@ -257,7 +257,10 @@ impl HttpHandler for AppHandler {
                     self.pending_ctxs.lock().insert(http_ctx.id, ctx.clone());
                     // Bytes clone is a refcount bump, not a full body copy.
                     let mut req = Request::from_parts(parts, Body::from(body_bytes.clone()));
-                    req.headers_mut().insert("x-rusxy", "1".parse().unwrap());
+                    // `from_static` validates the literal at compile time, so this cannot panic on
+                    // the request path. The previous `"1".parse().unwrap()` read as though it might.
+                    req.headers_mut()
+                        .insert("x-rusxy", HeaderValue::from_static("1"));
                     return Ok(RequestOrResponse::Request(req));
                 }
 
@@ -359,7 +362,8 @@ impl HttpHandler for AppHandler {
             body_bytes.clone()
         };
         let mut req = Request::from_parts(parts, Body::from(request_body));
-        req.headers_mut().insert("x-rusxy", "1".parse().unwrap());
+        req.headers_mut()
+            .insert("x-rusxy", HeaderValue::from_static("1"));
 
         Ok(RequestOrResponse::Request(req))
     }
