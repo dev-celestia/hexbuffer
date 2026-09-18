@@ -146,6 +146,66 @@ impl Database {
             }
         }
     }
+
+    /// Incrementally appends messages to a session without rewriting the transcript.
+    /// Used to checkpoint a long-running assistant turn as it progresses, so an
+    /// interrupted or killed run still leaves a complete transcript on disk. Idempotent
+    /// per message id (INSERT OR REPLACE). Like `replace_chat_messages`, a missing
+    /// session is an error — a stale checkpoint must not resurrect a deleted session.
+    pub fn append_chat_messages(
+        &self,
+        session_id: &str,
+        messages: &[ChatMessageRecord],
+    ) -> SqlResult<()> {
+        let conn = self.conn.lock();
+
+        conn.execute("BEGIN IMMEDIATE", [])?;
+
+        let result = (|| -> SqlResult<()> {
+            let session_exists: bool = conn
+                .query_row(
+                    "SELECT COUNT(*) > 0 FROM ai_chat_sessions WHERE id = ?1",
+                    params![session_id],
+                    |row| row.get(0),
+                )
+                .unwrap_or(false);
+
+            if !session_exists {
+                return Err(rusqlite::Error::QueryReturnedNoRows);
+            }
+
+            for msg in messages {
+                let reasoning: Option<&str> = if reasoning_persistence_enabled() {
+                    msg.reasoning.as_deref()
+                } else {
+                    None
+                };
+                conn.execute(
+                    "INSERT OR REPLACE INTO ai_chat_messages (id, session_id, role, content, created_at, reasoning) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                    params![msg.id, session_id, msg.role, msg.content, msg.created_at, reasoning],
+                )?;
+            }
+
+            let now = chrono::Utc::now().to_rfc3339();
+            conn.execute(
+                "UPDATE ai_chat_sessions SET updated_at = ?1 WHERE id = ?2",
+                params![now, session_id],
+            )?;
+
+            Ok(())
+        })();
+
+        match result {
+            Ok(()) => {
+                conn.execute("COMMIT", [])?;
+                Ok(())
+            }
+            Err(e) => {
+                let _ = conn.execute("ROLLBACK", []);
+                Err(e)
+            }
+        }
+    }
 }
 
 /// Whether chain-of-thought reasoning may be written to disk. Reasoning is a debugging

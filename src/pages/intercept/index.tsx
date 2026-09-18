@@ -1,7 +1,7 @@
-import { Alert, AlertAction, AlertDescription, Badge, Button, Input } from '@celestia-project/ui';
+import { Alert, AlertAction, AlertDescription, AlertTitle, Badge, Button, Input } from '@celestia-project/ui';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import * as React from 'react';
-import { PauseIcon, PlayIcon, PlusIcon, XIcon } from '@phosphor-icons/react';
+import { PauseIcon, PlugsIcon, PlayIcon, PlusIcon, XIcon } from '@phosphor-icons/react';
 
 import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { useProxyStart } from '@/hooks/use-proxy-start';
@@ -41,29 +41,37 @@ export function InterceptPage() {
             "p-2"
           )}
         >
+          {/*
+            `Alert` lays itself out as a grid and puts its icon in column 1, spanning both rows. The
+            old `flex items-center` replaced that grid outright — same `display` group, so
+            tailwind-merge dropped the grid — leaving the icon and text aligned only by accident.
+            Nothing here overrides `display` now; the icon, title and description place themselves.
+          */}
           <Alert
-            variant="default"
             className={cn(
-              // Layout & Positioning
-              "flex items-center shrink-0",
+              // Sizing & Spacing
+              "px-3 py-2.5",
 
               // Backgrounds & Borders
-              "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-200"
+              "border-warning/40 bg-warning/10 text-warning-foreground"
             )}
           >
-            <AlertDescription
+            <PlugsIcon />
+            <AlertTitle
               className={cn(
-                // Layout & Positioning
-                "flex items-center",
-
-                // Sizing & Spacing
-                "gap-2",
-
                 // Typography
-                "text-amber-700 dark:text-amber-200/70"
+                "text-sm font-semibold"
               )}
             >
-              <span>Start the proxy to intercept HTTP requests.</span>
+              Proxy is not running
+            </AlertTitle>
+            <AlertDescription
+              className={cn(
+                // Typography
+                "text-warning-foreground/85"
+              )}
+            >
+              Start the proxy to intercept HTTP requests.
             </AlertDescription>
             <AlertAction>
               <Button

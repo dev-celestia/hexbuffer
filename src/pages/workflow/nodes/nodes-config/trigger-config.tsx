@@ -120,10 +120,10 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
             </p>
 
             {liveTrafficWarning && (
-              <Alert className="border-amber-500/60 bg-amber-500/15 py-3 text-amber-800 shadow-sm shadow-amber-500/10 dark:text-amber-100">
+              <Alert className="border-warning/60 bg-warning/15 py-3 text-warning-foreground shadow-sm shadow-warning/10">
                 <WarningCircleIcon className="size-5" />
                 <AlertTitle className="text-sm font-semibold">Host whitelist required</AlertTitle>
-                <AlertDescription className="text-xs text-amber-800/85 dark:text-amber-100/85">
+                <AlertDescription className="text-xs text-warning-foreground/85">
                   {liveTrafficWarning} Add a specific host to keep capture strict and prevent unrelated traffic from entering the queue.
                 </AlertDescription>
               </Alert>
@@ -151,7 +151,7 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
             <div className="space-y-1.5">
               <Label className="text-[11px]">
                 <GlobeIcon className="size-3 inline mr-1" />
-                Host whitelist <span className="text-amber-500">*</span>
+                Host whitelist <span className="text-warning">*</span>
               </Label>
               <Textarea
                 className="min-h-20 resize-none text-xs"
@@ -286,10 +286,10 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
               Message filter
             </p>
             {websocketWarning && (
-              <Alert className="border-amber-500/60 bg-amber-500/15 py-3 text-amber-800 shadow-sm shadow-amber-500/10 dark:text-amber-100">
+              <Alert className="border-warning/60 bg-warning/15 py-3 text-warning-foreground shadow-sm shadow-warning/10">
                 <WarningCircleIcon className="size-5" />
                 <AlertTitle className="text-sm font-semibold">Host whitelist required</AlertTitle>
-                <AlertDescription className="text-xs text-amber-800/85 dark:text-amber-100/85">
+                <AlertDescription className="text-xs text-warning-foreground/85">
                   {websocketWarning} Add a specific WebSocket host so unrelated sockets cannot enter the queue.
                 </AlertDescription>
               </Alert>
@@ -395,10 +395,10 @@ function LiveTrafficHostList({
       </div>
 
       {stats && stats.dropped > 0 && (
-        <Alert className="border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-200">
+        <Alert className="border-warning/30 bg-warning/10 text-warning-foreground">
           <WarningCircleIcon className="size-4" />
           <AlertTitle className="text-xs">Live traffic queue is dropping requests</AlertTitle>
-          <AlertDescription className="text-xs text-amber-700/80 dark:text-amber-200/80">
+          <AlertDescription className="text-xs text-warning-foreground/80">
             Dropped {stats.dropped} oldest pending request{stats.dropped === 1 ? '' : 's'} for this trigger.
           </AlertDescription>
         </Alert>

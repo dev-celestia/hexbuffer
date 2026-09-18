@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, AlertAction, AlertDescription, Badge, Button, Input, Tabs, TabsList, TabsTrigger } from '@celestia-project/ui';
+import { Alert, AlertAction, AlertDescription, AlertTitle, Badge, Button, Input, Tabs, TabsList, TabsTrigger } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
-import { PlayIcon, SquareIcon, PauseIcon, ArrowCounterClockwiseIcon, InfoIcon, MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react';
+import { PlayIcon, SquareIcon, PauseIcon, ArrowCounterClockwiseIcon, MagnifyingGlassIcon, PlugsIcon, ShieldWarningIcon, XIcon } from '@phosphor-icons/react';
 import { AiInsightsPanel } from './components/insight-panel';
 import { CrawlConsole } from './components/crawl-console';
 import { CrawlSetupScreen } from './components/setup-screen';
@@ -47,95 +47,106 @@ export function BrowserAutomationPage() {
 
   return (
     <>
-      {proxyStatus !== 'connected' && (
+      {/*
+        One wrapper for both notices, so the gap between them and the gap down to the panel below are
+        a single `gap-2` / `p-2`. The previous markup gave each notice its own `p-2` wrapper *and* an
+        `mb-2`, which stacked to a different spacing than the panel's own `m-2`.
+      */}
+      {(proxyStatus !== 'connected' || !page.browserAutomationSafetyAlertDismissed) && (
         <div
           className={cn(
+            // Layout & Positioning
+            "flex flex-col",
+
             // Sizing & Spacing
-            "p-2"
+            "gap-2 p-2"
           )}
         >
-          <Alert
-            variant="default"
-            className={cn(
-              // Layout & Positioning
-              "flex items-center shrink-0",
-
-              // Sizing & Spacing
-              "mb-2",
-
-              // Backgrounds & Borders
-              "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-200"
-            )}
-          >
-            <AlertDescription
+          {proxyStatus !== 'connected' && (
+            /*
+              `Alert` lays itself out as a grid and puts its icon in column 1, spanning both rows.
+              The old `flex items-center` replaced that grid outright — same `display` group, so
+              tailwind-merge dropped the grid — leaving the icon and text aligned only by accident.
+              Nothing here overrides `display` now; the icon, title and description place themselves.
+            */
+            <Alert
               className={cn(
-                // Layout & Positioning
-                "flex items-center",
-
                 // Sizing & Spacing
-                "gap-2",
+                "px-3 py-2.5",
 
-                // Typography
-                "text-amber-700 dark:text-amber-200/70"
+                // Backgrounds & Borders
+                "border-warning/40 bg-warning/10 text-warning-foreground"
               )}
             >
-              <span>Start the proxy to intercept HTTP requests.</span>
-            </AlertDescription>
-            <AlertAction>
-              <Button
-                variant="outline"
-                size="sm"
+              <PlugsIcon />
+              <AlertTitle
                 className={cn(
-                  // Sizing & Spacing
-                  "h-6",
-
-                  // Typography / Visuals & Colors
-                  "border-amber-300 text-amber-800 hover:bg-amber-100 dark:border-amber-500/50 dark:text-amber-300 dark:hover:bg-amber-500/20"
+                  // Typography
+                  "text-sm font-semibold"
                 )}
-                onClick={handleStartProxy}
-                disabled={isStarting || proxyStatus === 'starting'}
               >
-                Start Proxy
-              </Button>
-            </AlertAction>
-          </Alert>
-        </div>
-      )}
-
-      {!page.browserAutomationSafetyAlertDismissed && (
-        <div
-          className={cn(
-            // Sizing & Spacing
-            "p-2"
+                Proxy is not running
+              </AlertTitle>
+              <AlertDescription
+                className={cn(
+                  // Typography
+                  "text-warning-foreground/85"
+                )}
+              >
+                Start the proxy to intercept HTTP requests.
+              </AlertDescription>
+              <AlertAction>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  onClick={handleStartProxy}
+                  disabled={isStarting || proxyStatus === 'starting'}
+                >
+                  Start Proxy
+                </Button>
+              </AlertAction>
+            </Alert>
           )}
-        >
-          <Alert
-            variant="default"
-            className={cn(
-              // Layout & Positioning
-              "shrink-0 min-h-12",
 
-              // Sizing & Spacing
-              "mb-0",
+          {!page.browserAutomationSafetyAlertDismissed && (
+            <Alert
+              className={cn(
+                // Sizing & Spacing
+                "px-3 py-2.5",
 
-              // Backgrounds & Borders
-              "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-200"
-            )}
-          >
-            <InfoIcon className="!text-amber-600 shrink-0" />
-            <AlertDescription className="text-amber-600">
-              The browser automation will interact with external websites. Only scan targets you own or are authorized to assess. Unauthorized scanning may violate terms of service or applicable laws.
-            </AlertDescription>
-            <AlertAction>
-              <Button size="sm"
-                variant="outline"
-                aria-label="Dismiss safety notice"
-                onClick={() => page.setBrowserAutomationSafetyAlertDismissed(true)}
+                // Backgrounds & Borders
+                "border-warning/40 bg-warning/10 text-warning-foreground"
+              )}
+            >
+              <ShieldWarningIcon />
+              <AlertTitle
+                className={cn(
+                  // Typography
+                  "text-sm font-semibold"
+                )}
               >
-                Dismiss
-              </Button>
-            </AlertAction>
-          </Alert>
+                Authorized targets only
+              </AlertTitle>
+              <AlertDescription
+                className={cn(
+                  // Typography
+                  "text-warning-foreground/85"
+                )}
+              >
+                The browser automation will interact with external websites. Only scan targets you own or are authorized to assess. Unauthorized scanning may violate terms of service or applicable laws.
+              </AlertDescription>
+              <AlertAction>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  aria-label="Dismiss safety notice"
+                  onClick={() => page.setBrowserAutomationSafetyAlertDismissed(true)}
+                >
+                  Dismiss
+                </Button>
+              </AlertAction>
+            </Alert>
+          )}
         </div>
       )}
 

@@ -9,6 +9,7 @@ import { NUCLEI_NODE_TYPES } from '../nodes';
 import { NUCLEI_EDGE_TYPES } from '../edges/nuclei-flow-edge';
 import { NucleiFlowToolbar } from './nuclei-flow-toolbar';
 import { NucleiFlowInspector } from './nuclei-flow-inspector';
+import type { InspectableNucleiNode } from './nuclei-flow-inspector';
 import { useNucleiFlow } from '../hooks/use-nuclei-flow';
 import type { NucleiFlowNode, NucleiFlowEdge } from '../types';
 
@@ -79,8 +80,8 @@ function NucleiFlowCanvasInner({
             nodesConnectable={false}
             nodesDraggable={true}
             elementsSelectable={true}
-            nodeTypes={NUCLEI_NODE_TYPES as any}
-            edgeTypes={NUCLEI_EDGE_TYPES as any}
+            nodeTypes={NUCLEI_NODE_TYPES}
+            edgeTypes={NUCLEI_EDGE_TYPES}
             onNodeClick={(_, node) => flow.setSelectedNodeId(node.id)}
             onPaneClick={() => flow.setSelectedNodeId(null)}
             fitView
@@ -97,7 +98,9 @@ function NucleiFlowCanvasInner({
         {/* Slide-Over Property Inspector */}
         {flow.selectedNode && (
           <NucleiFlowInspector
-            node={flow.selectedNode}
+            // Re-correlate the node type/data once here; the inspector's branches then read
+            // `data` already narrowed, with no per-branch assertions.
+            node={flow.selectedNode as InspectableNucleiNode}
             onClose={() => flow.setSelectedNodeId(null)}
           />
         )}

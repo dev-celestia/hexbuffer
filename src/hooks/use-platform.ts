@@ -2,6 +2,16 @@ import * as React from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
 /**
+ * `navigator.userAgentData` is Chromium-only and is absent from the DOM types, so its shape is named
+ * here rather than casting the whole navigator to `any`. Falls back to the deprecated
+ * `navigator.platform`, then to an empty string.
+ */
+function readPlatform(): string {
+  const uaData = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData;
+  return uaData?.platform || navigator.platform || '';
+}
+
+/**
  * Checks whether the current operating system is macOS.
  * Can be called anywhere (inside or outside React components).
  */
@@ -10,7 +20,7 @@ export function isMacOS(): boolean {
     return false;
   }
   const userAgent = navigator.userAgent || '';
-  const platform = (navigator as any).userAgentData?.platform || navigator.platform || '';
+  const platform = readPlatform();
   return (
     /Macintosh|Mac OS X|MacIntel|MacPPC|Mac68K|Darwin/i.test(userAgent) ||
     /Mac/i.test(platform)
@@ -34,7 +44,7 @@ export function isWindowsOS(): boolean {
     return false;
   }
   const userAgent = navigator.userAgent || '';
-  const platform = (navigator as any).userAgentData?.platform || navigator.platform || '';
+  const platform = readPlatform();
   return /Win/i.test(userAgent) || /Win/i.test(platform);
 }
 
@@ -46,7 +56,7 @@ export function isLinuxOS(): boolean {
     return false;
   }
   const userAgent = navigator.userAgent || '';
-  const platform = (navigator as any).userAgentData?.platform || navigator.platform || '';
+  const platform = readPlatform();
   return /Linux/i.test(userAgent) || /Linux/i.test(platform);
 }
 

@@ -2,10 +2,12 @@ import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { CheckCircleIcon, ProhibitIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
-import type { NucleiFlowNode, MatcherNodeData } from '../types';
+import type { NucleiFlowNodeOf } from '../types';
 
-export function MatcherNode({ data, selected }: NodeProps<NucleiFlowNode>) {
-  const nodeData = data as unknown as MatcherNodeData;
+export function MatcherNode({
+  data: nodeData,
+  selected,
+}: NodeProps<NucleiFlowNodeOf<'matcherNode'>>) {
   const valuesDisplay =
     nodeData.type === 'status'
       ? `HTTP ${(nodeData.status || [200]).join(', ')}`

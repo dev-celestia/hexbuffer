@@ -372,9 +372,14 @@ async function syncAutomationRuntime(): Promise<void> {
 
 let unlisteners: UnlistenFn[] = [];
 let unsubscribeAutomationSync: (() => void) | null = null;
-let syncTimer: any = null;
+// `number | null` rather than `any`: both are only ever assigned from `window.setTimeout` and cleared
+// with `window.clearTimeout`, so `any` bought nothing and silenced the check that catches a wrong value
+// being passed to `clearTimeout`. Note that `ReturnType<typeof window.setTimeout>` is *not* the right
+// type here — it resolves to Node's `Timeout` through the global overload, while `window.setTimeout`
+// itself returns `number` (verified by typechecking both).
+let syncTimer: number | null = null;
 let lastSyncSignature = '';
-let hostInsightFlushTimer: any = null;
+let hostInsightFlushTimer: number | null = null;
 let queuedHostInsightsBuffer: LiveTrafficHostInsight[] = [];
 let capturedHostInsightsBuffer: LiveTrafficHostInsight[] = [];
 let hostInsightRemoveBuffer: string[] = [];

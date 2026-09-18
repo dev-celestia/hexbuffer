@@ -2,10 +2,12 @@ import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { TreeStructureIcon, EyeClosedIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
-import type { NucleiFlowNode, ExtractorNodeData } from '../types';
+import type { NucleiFlowNodeOf } from '../types';
 
-export function ExtractorNode({ data, selected }: NodeProps<NucleiFlowNode>) {
-  const nodeData = data as unknown as ExtractorNodeData;
+export function ExtractorNode({
+  data: nodeData,
+  selected,
+}: NodeProps<NucleiFlowNodeOf<'extractorNode'>>) {
   const pattern =
     nodeData.regex?.[0] ||
     nodeData.json?.[0] ||

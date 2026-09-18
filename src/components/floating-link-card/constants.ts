@@ -5,7 +5,7 @@ import type { FloatingCardCustomProps, FloatingLinkCardData } from './types';
 
 export type { FloatingCardCustomProps, FloatingLinkCardData };
 
-const bannerImageSrc = (proxyBannerImage as unknown as { src: string }).src ?? proxyBannerImage;
+const bannerImageSrc = proxyBannerImage;
 
 export const CA_CERTIFICATE_CARD_ID = 'ca-certificate';
 export const THEME_SWITCH_CARD_ID = 'theme-switch';

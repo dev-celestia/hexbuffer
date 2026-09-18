@@ -691,6 +691,16 @@ impl HistoryBridge {
             .map_err(|e| e.to_string())
     }
 
+    pub fn append_chat_messages(
+        &self,
+        session_id: &str,
+        messages: &[ChatMessageRecord],
+    ) -> Result<(), String> {
+        self.db
+            .append_chat_messages(session_id, messages)
+            .map_err(|e| e.to_string())
+    }
+
     // ── Token Usage ────────────────────────────────────────────────
 
     pub fn insert_token_usage(&self, record: &TokenUsageRecord) -> Result<(), String> {

@@ -407,7 +407,7 @@ pub async fn send_ai_chat_message_impl(
             }
         }
     }
-    let _chat_guard = ChatCleanup(request_id.clone());
+    let chat_guard = ChatCleanup(request_id.clone());
 
     let _ = app.emit_to(
         &window_label,
@@ -551,90 +551,135 @@ pub async fn send_ai_chat_message_impl(
     }
 
     let policy = super::policy::SecurityApprovalPolicy::default_policy();
+    let history_bridge = history.inner().clone();
+    let session_id = request.session_id.clone();
 
-    let output = tool_loop::run_tool_loop(
-        &app,
-        &window_label,
-        &request_id,
-        &config,
-        &policy,
-        selected_agent,
-        loop_history,
-        prompt,
-        cancel_rx,
-        pause_rx,
-    )
-    .await?;
-
-    // Attach the reasoning streamed during this request to the recorded snapshot so the
-    // debug inspector can show the model's thinking for the turn. This is a debug artifact
-    // only — it is never inserted into the loop history or sent back to the provider.
-    if !output.reasoning.is_empty() {
-        let mut labels: Vec<String> = Vec::new();
-        if let Some(ref sid) = request.session_id {
-            if !sid.trim().is_empty() {
-                labels.push(sid.clone());
-            }
+    // Per-round transcript checkpoint for long runs: the loop hands us the messages it
+    // accumulated this round and they land on disk immediately, so a run that is
+    // interrupted, aborted, or killed still leaves a complete transcript. The frontend's
+    // whole-snapshot save_chat_messages remains the authority and reconciles on finish.
+    let checkpoint: Option<tool_loop::RoundCheckpoint> = match session_id.clone() {
+        Some(sid) if !sid.trim().is_empty() => {
+            let bridge = history_bridge.clone();
+            Some(std::sync::Arc::new(move |messages: Vec<crate::ai::types::ChatMessageRecord>| {
+                let bridge = bridge.clone();
+                let sid = sid.clone();
+                tauri::async_runtime::spawn_blocking(move || {
+                    if let Err(error) = bridge.append_chat_messages(&sid, &messages) {
+                        eprintln!("[ai-checkpoint] failed to persist round transcript: {error}");
+                    }
+                });
+            }))
         }
-        labels.push(window_label.clone());
-        for label in labels {
-            if let Some(mut snap) = get_latest_debug_snapshot(&label) {
-                snap.last_reasoning = Some(output.reasoning.clone());
-                record_debug_snapshot(&label, snap);
+        _ => None,
+    };
+
+    // The run executes as a detached task so its lifetime belongs to the backend rather
+    // than to this command's future: a dropped command (closed or navigated-away panel)
+    // can no longer strand an in-flight run midway. The command still resolves when the
+    // run completes, so the frontend transport contract — the invoke response doubling as
+    // the completion signal and content fallback — is unchanged.
+    let (run_tx, run_rx) = tokio::sync::oneshot::channel::<Result<AiChatResponse, String>>();
+    tauri::async_runtime::spawn(async move {
+        // Holds the ACTIVE_CHATS entry (the cancel/pause senders) for exactly the run.
+        let _chat_guard = chat_guard;
+
+        let output = match tool_loop::run_tool_loop(
+            &app,
+            &window_label,
+            &request_id,
+            &config,
+            &policy,
+            selected_agent,
+            loop_history,
+            prompt,
+            cancel_rx,
+            pause_rx,
+            checkpoint,
+        )
+        .await
+        {
+            Ok(output) => output,
+            Err(error) => {
+                let _ = run_tx.send(Err(error));
+                return;
             }
-        }
-    }
-
-    let _ = app.emit_to(
-        &window_label,
-        "ai-chat:finished",
-        json!({
-            "requestId": request_id,
-            "provider": &settings.provider,
-            "model": &settings.model,
-            "agentId": output.agent_id,
-            "agentName": output.agent_name,
-            "contentLength": output.content.len(),
-            "actionCount": output.actions.len(),
-            "usage": {
-                "inputTokens": output.usage.input_tokens,
-                "outputTokens": output.usage.output_tokens,
-                "totalTokens": output.usage.total_tokens,
-                "cachedInputTokens": output.usage.cached_input_tokens,
-                "cacheCreationInputTokens": output.usage.cache_creation_input_tokens,
-                "toolUsePromptTokens": output.usage.tool_use_prompt_tokens,
-                "reasoningTokens": output.usage.reasoning_tokens,
-            },
-            "createdAt": chrono::Utc::now().to_rfc3339(),
-        }),
-    );
-
-    // Persist token usage for the completed request when the provider reported metrics.
-    if output.usage.has_values() {
-        let record = super::token_usage::TokenUsageRecord {
-            request_id: request_id.clone(),
-            session_id: request.session_id.clone().unwrap_or_default(),
-            message_id: String::new(),
-            model: settings.model.clone(),
-            provider: settings.provider.clone(),
-            usage: output.usage,
-            created_at: chrono::Utc::now().to_rfc3339(),
         };
-        if let Err(error) = history.insert_token_usage(&record) {
-            eprintln!("[token-usage] failed to persist usage: {error}");
-        }
-    }
 
-    Ok(AiChatResponse {
-        provider: settings.provider,
-        model: settings.model,
-        content: output.content,
-        agent_id: Some(output.agent_id),
-        agent_name: Some(output.agent_name),
-        actions: output.actions,
-        agent_messages: output.agent_messages,
-        usage: output.usage,
-    })
+        // Attach the reasoning streamed during this request to the recorded snapshot so the
+        // debug inspector can show the model's thinking for the turn. This is a debug artifact
+        // only — it is never inserted into the loop history or sent back to the provider.
+        if !output.reasoning.is_empty() {
+            let mut labels: Vec<String> = Vec::new();
+            if let Some(ref sid) = session_id {
+                if !sid.trim().is_empty() {
+                    labels.push(sid.clone());
+                }
+            }
+            labels.push(window_label.clone());
+            for label in labels {
+                if let Some(mut snap) = get_latest_debug_snapshot(&label) {
+                    snap.last_reasoning = Some(output.reasoning.clone());
+                    record_debug_snapshot(&label, snap);
+                }
+            }
+        }
+
+        let _ = app.emit_to(
+            &window_label,
+            "ai-chat:finished",
+            json!({
+                "requestId": request_id,
+                "provider": &settings.provider,
+                "model": &settings.model,
+                "agentId": output.agent_id,
+                "agentName": output.agent_name,
+                "contentLength": output.content.len(),
+                "actionCount": output.actions.len(),
+                "usage": {
+                    "inputTokens": output.usage.input_tokens,
+                    "outputTokens": output.usage.output_tokens,
+                    "totalTokens": output.usage.total_tokens,
+                    "cachedInputTokens": output.usage.cached_input_tokens,
+                    "cacheCreationInputTokens": output.usage.cache_creation_input_tokens,
+                    "toolUsePromptTokens": output.usage.tool_use_prompt_tokens,
+                    "reasoningTokens": output.usage.reasoning_tokens,
+                },
+                "createdAt": chrono::Utc::now().to_rfc3339(),
+            }),
+        );
+
+        // Persist token usage for the completed request when the provider reported metrics.
+        if output.usage.has_values() {
+            let record = super::token_usage::TokenUsageRecord {
+                request_id: request_id.clone(),
+                session_id: session_id.unwrap_or_default(),
+                message_id: String::new(),
+                model: settings.model.clone(),
+                provider: settings.provider.clone(),
+                usage: output.usage,
+                created_at: chrono::Utc::now().to_rfc3339(),
+            };
+            if let Err(error) = history_bridge.insert_token_usage(&record) {
+                eprintln!("[token-usage] failed to persist usage: {error}");
+            }
+        }
+
+        let _ = run_tx.send(Ok(AiChatResponse {
+            provider: settings.provider,
+            model: settings.model,
+            content: output.content,
+            agent_id: Some(output.agent_id),
+            agent_name: Some(output.agent_name),
+            actions: output.actions,
+            agent_messages: output.agent_messages,
+            usage: output.usage,
+        }));
+    });
+
+    run_rx
+        .await
+        .map_err(|_| "The AI run ended unexpectedly before reporting its result.".to_string())?
 }
 
 /// Retrieves relevant memory entries for the user's prompt using Uteke's hybrid fusion

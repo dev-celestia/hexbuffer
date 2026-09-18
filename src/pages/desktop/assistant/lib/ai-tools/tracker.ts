@@ -54,15 +54,16 @@ function notifyActionListeners() {
   actionListeners.forEach((fn) => fn());
 }
 
-export function addTrackedAction(action: string, args?: Record<string, any>): string {
+export function addTrackedAction(action: string, args?: Record<string, any>, explicitLabel?: string): string {
   const id = `ta-${++actionCounter}`;
   const { label, detail } = formatActionLabel(action, args);
+  const finalLabel = explicitLabel ?? label;
   trackedActions = [
     ...trackedActions,
     {
       id,
       action,
-      label,
+      label: finalLabel,
       detail,
       status: 'in_progress' as const,
       timestamp: Date.now(),

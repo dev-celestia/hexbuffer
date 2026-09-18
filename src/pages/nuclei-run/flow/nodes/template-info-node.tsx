@@ -3,10 +3,12 @@ import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { ShieldWarningIcon, TagIcon, UserIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import { SEVERITY_CONFIG } from '../../constants';
-import type { NucleiFlowNode, TemplateInfoNodeData } from '../types';
+import type { NucleiFlowNodeOf } from '../types';
 
-export function TemplateInfoNode({ data, selected }: NodeProps<NucleiFlowNode>) {
-  const nodeData = data as unknown as TemplateInfoNodeData;
+export function TemplateInfoNode({
+  data: nodeData,
+  selected,
+}: NodeProps<NucleiFlowNodeOf<'templateInfo'>>) {
   const sevConfig = SEVERITY_CONFIG[nodeData.severity] || SEVERITY_CONFIG.info;
 
   return (

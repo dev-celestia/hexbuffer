@@ -1,8 +1,8 @@
-import { Alert, AlertDescription, Button } from '@celestia-project/ui';
+import { Alert, AlertAction, AlertDescription, AlertTitle, Button } from '@celestia-project/ui';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import * as React from 'react';
 
-import { InfoIcon, PlayIcon, SquareIcon } from '@phosphor-icons/react';
+import { PlayIcon, ShieldWarningIcon, SquareIcon } from '@phosphor-icons/react';
 import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { IntruderConfigDialog } from './components/intruder-config';
 import { IntruderResultsPanel } from './components/results-panel';
@@ -37,46 +37,49 @@ export function IntruderPage() {
             "p-2"
           )}
         >
+          {/*
+            `Alert` lays itself out as a grid and puts its icon in column 1, spanning both rows.
+            The old `flex items-center justify-between` replaced that grid outright — same
+            `display` group, so tailwind-merge dropped the grid. The icon was also nested in a
+            wrapper `div`, so `has-[>svg]` never matched and alignment was accidental. Nothing
+            overrides `display` now; the icon, title and description place themselves.
+          */}
           <Alert
-            variant="default"
             className={cn(
-              // Layout & Positioning
-              "flex items-center justify-between min-h-10",
-
               // Sizing & Spacing
-              "px-3 py-1.5 gap-3",
+              "px-3 py-2.5",
 
               // Backgrounds & Borders
-              "border-amber-500/30 bg-amber-500/5 text-amber-900 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-200 rounded-md"
+              "border-warning/40 bg-warning/10 text-warning-foreground"
             )}
           >
-            <div
+            <ShieldWarningIcon />
+            <AlertTitle
               className={cn(
-                // Layout & Positioning
-                "flex items-center",
-
-                // Sizing & Spacing
-                "gap-2"
+                // Typography
+                "text-sm font-semibold"
               )}
             >
-              <InfoIcon className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-              <AlertDescription
-                className={cn(
-                  // Typography
-                  "text-xs font-sans leading-normal text-amber-800 dark:text-amber-300"
-                )}
-              >
-                Only run intruder tests against systems you own or are explicitly authorized to assess. Unauthorized assessments can be illegal.
-              </AlertDescription>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              aria-label="Dismiss safety notice"
-              onClick={() => page.setIntruderSafetyAlertDismissed(true)}
+              Authorized targets only
+            </AlertTitle>
+            <AlertDescription
+              className={cn(
+                // Typography
+                "text-warning-foreground/85"
+              )}
             >
-              Dismiss
-            </Button>
+              Only run intruder tests against systems you own or are explicitly authorized to assess. Unauthorized assessments can be illegal.
+            </AlertDescription>
+            <AlertAction>
+              <Button
+                variant="ghost"
+                size="xs"
+                aria-label="Dismiss safety notice"
+                onClick={() => page.setIntruderSafetyAlertDismissed(true)}
+              >
+                Dismiss
+              </Button>
+            </AlertAction>
           </Alert>
         </div>
       )}

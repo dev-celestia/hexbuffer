@@ -1,11 +1,8 @@
 import type {
   NucleiFlowNode,
   NucleiFlowEdge,
+  NucleiNodeDataOf,
   TemplateInfoNodeData,
-  RequestNodeData,
-  ExtractorNodeData,
-  MatcherNodeData,
-  FlowNodeData,
   HttpMethod,
   Severity,
   ProtocolType,
@@ -46,7 +43,8 @@ export function nucleiYamlToGraph(yamlText: string): {
 
   let inInfo = false;
   let inReference = false;
-  let inHttp = false;
+  let inDescription = false;
+  let descriptionIndent = 0;
   let inFlow = false;
   let flowCode = '';
 
@@ -66,8 +64,29 @@ export function nucleiYamlToGraph(yamlText: string): {
       if (indent === 0 && trimmed && !trimmed.startsWith('info:')) {
         inInfo = false;
         inReference = false;
+        inDescription = false;
       } else {
-        if (trimmed.startsWith('name:')) {
+        // `description: |` (or `>`) introduces a block scalar: everything indented beneath it is
+        // literal text, whatever it looks like. Consume it before the key tests below, otherwise a
+        // body line that happens to read like `name: x` would be parsed as that key instead.
+        if (inDescription) {
+          if (indent > descriptionIndent) {
+            description += (description ? '\n' : '') + trimmed;
+            continue;
+          }
+          inDescription = false;
+        }
+
+        // Only a `- ` item continues a `reference:` list; any other key ends it. Without this reset
+        // a block-style list under a later key (e.g. `tags:`) was appended to `reference` and the
+        // later key silently came back empty.
+        const continuesReference = inReference && trimmed.startsWith('-');
+        if (!continuesReference) inReference = false;
+
+        if (continuesReference) {
+          const ref = trimmed.replace(/^[-\s]+/, '').trim();
+          if (ref) references.push(ref);
+        } else if (trimmed.startsWith('name:')) {
           name = trimmed.replace('name:', '').trim().replace(/^['"]|['"]$/g, '');
         } else if (trimmed.startsWith('author:')) {
           author = trimmed.replace('author:', '').trim().replace(/^['"]|['"]$/g, '');
@@ -77,7 +96,14 @@ export function nucleiYamlToGraph(yamlText: string): {
             severity = sev as Severity;
           }
         } else if (trimmed.startsWith('description:')) {
-          description = trimmed.replace('description:', '').trim().replace(/^['"]|['"]$/g, '');
+          const raw = trimmed.replace('description:', '').trim();
+          if (/^[|>][-+]?$/.test(raw)) {
+            description = '';
+            inDescription = true;
+            descriptionIndent = indent;
+          } else {
+            description = raw.replace(/^['"]|['"]$/g, '');
+          }
         } else if (trimmed.startsWith('tags:')) {
           const tagsStr = trimmed.replace('tags:', '').trim().replace(/^['"]|['"]$/g, '');
           tagsStr.split(',').forEach((t) => {
@@ -86,38 +112,40 @@ export function nucleiYamlToGraph(yamlText: string): {
           });
         } else if (trimmed.startsWith('reference:')) {
           inReference = true;
-          continue;
-        } else if (inReference) {
-          if (trimmed.startsWith('-')) {
-            const ref = trimmed.replace(/^[-\s]+/, '').trim();
-            if (ref) references.push(ref);
-          } else if (indent <= 2) {
-            inReference = false;
-          }
         }
       }
     }
 
-    // Protocol detection
-    if (trimmed.startsWith('http:')) {
-      detectedProtocol = 'http';
-      inHttp = true;
-    } else if (trimmed.startsWith('dns:')) {
-      detectedProtocol = 'dns';
-    } else if (trimmed.startsWith('tcp:')) {
-      detectedProtocol = 'tcp';
-    } else if (trimmed.startsWith('ssl:')) {
-      detectedProtocol = 'ssl';
-    } else if (trimmed.startsWith('flow:')) {
-      inFlow = true;
-      const inlineFlow = trimmed.replace('flow:', '').replace(/[|>]/g, '').trim();
-      if (inlineFlow) flowCode += inlineFlow + '\n';
-      continue;
-    } else if (inFlow) {
+    // Flow block body. This has to be tested before the protocol checks below: a `flow:` block is
+    // normally followed by `http:`, and that branch used to match first and `continue` past the old
+    // termination check, so the entire request section was swallowed into `flowCode`.
+    if (inFlow) {
       if (indent > 0 && trimmed) {
         flowCode += trimmed + '\n';
-      } else if (indent === 0 && trimmed) {
+        continue;
+      }
+      if (trimmed) {
         inFlow = false;
+      }
+    }
+
+    // Protocol detection. Protocol keys are top-level in Nuclei YAML, so require indent 0: a request
+    // header that happens to be named `ssl:`/`http:`/`dns:`/`tcp:` used to override the template's
+    // protocol, and that value is copied onto every request node.
+    if (indent === 0) {
+      if (trimmed.startsWith('http:')) {
+        detectedProtocol = 'http';
+      } else if (trimmed.startsWith('dns:')) {
+        detectedProtocol = 'dns';
+      } else if (trimmed.startsWith('tcp:')) {
+        detectedProtocol = 'tcp';
+      } else if (trimmed.startsWith('ssl:')) {
+        detectedProtocol = 'ssl';
+      } else if (trimmed.startsWith('flow:')) {
+        inFlow = true;
+        const inlineFlow = trimmed.replace('flow:', '').replace(/[|>]/g, '').trim();
+        if (inlineFlow) flowCode += inlineFlow + '\n';
+        continue;
       }
     }
   }
@@ -138,7 +166,7 @@ export function nucleiYamlToGraph(yamlText: string): {
       reference: references,
       tags,
       protocol: detectedProtocol,
-    } as unknown as TemplateInfoNodeData & { nodeType: 'templateInfo' },
+    },
   });
 
   // 2. Parse Requests, Matchers, and Extractors
@@ -230,10 +258,23 @@ export function nucleiYamlToGraph(yamlText: string): {
     let inWords = false;
     let inStatus = false;
     let inRegex = false;
+    let inBody = false;
+    let bodyIndent = 0;
 
     for (const rLine of reqLines) {
       const tr = rLine.trim();
       if (!tr) continue;
+
+      // `body: |` is a block scalar: the payload lives on the following indented lines, and it is
+      // the normal way to send a JSON body. Consume it before the key tests below, otherwise the
+      // body came out as the literal "|" and the payload was silently dropped.
+      if (inBody) {
+        if (rLine.search(/\S|$/) > bodyIndent) {
+          body += (body ? '\n' : '') + tr;
+          continue;
+        }
+        inBody = false;
+      }
 
       if (tr.startsWith('method:') || tr.startsWith('- method:')) {
         method = (tr.replace(/^[-\s]*method:\s*/, '').trim().toUpperCase() as HttpMethod) || 'GET';
@@ -248,7 +289,14 @@ export function nucleiYamlToGraph(yamlText: string): {
         inMatchers = false;
         inExtractors = false;
       } else if (tr.startsWith('body:')) {
-        body = tr.replace('body:', '').trim().replace(/^['"]|['"]$/g, '');
+        const rawBody = tr.replace('body:', '').trim();
+        if (/^[|>][-+]?$/.test(rawBody)) {
+          body = '';
+          inBody = true;
+          bodyIndent = rLine.search(/\S|$/);
+        } else {
+          body = rawBody.replace(/^['"]|['"]$/g, '');
+        }
       } else if (tr.startsWith('stop-at-first-match:')) {
         stopAtFirstMatch = tr.includes('true');
       } else if (tr.startsWith('matchers:')) {
@@ -347,7 +395,7 @@ export function nucleiYamlToGraph(yamlText: string): {
         headers,
         body,
         stopAtFirstMatch,
-      } as unknown as RequestNodeData & { nodeType: 'requestNode' },
+      },
     });
 
     // Connect from previous node
@@ -370,11 +418,11 @@ export function nucleiYamlToGraph(yamlText: string): {
         data: {
           nodeType: 'extractorNode',
           name: ext.name,
-          type: ext.type as any,
-          part: ext.part as any,
+          type: ext.type,
+          part: ext.part,
           regex: ext.regex,
           internal: ext.internal,
-        } as unknown as ExtractorNodeData & { nodeType: 'extractorNode' },
+        },
       });
 
       // Sequential connection from request to extractor
@@ -398,13 +446,13 @@ export function nucleiYamlToGraph(yamlText: string): {
         data: {
           nodeType: 'matcherNode',
           name: mat.words[0] || `match-${mat.type}`,
-          type: mat.type as any,
-          part: mat.part as any,
+          type: mat.type,
+          part: mat.part,
           condition: mat.condition,
           negative: mat.negative,
           status: mat.status,
           words: mat.words,
-        } as unknown as MatcherNodeData & { nodeType: 'matcherNode' },
+        },
       });
 
       edges.push({
@@ -431,7 +479,7 @@ export function nucleiYamlToGraph(yamlText: string): {
         nodeType: 'flowNode',
         flowCode: flowCode.trim(),
         description: 'Nuclei v3 programmatic flow condition',
-      } as unknown as FlowNodeData & { nodeType: 'flowNode' },
+      },
     });
 
     edges.push({
@@ -496,7 +544,7 @@ export function graphToNucleiYaml(
   // Flow node if present
   const flowNode = nodes.find((n) => n.type === 'flowNode');
   if (flowNode) {
-    const fData = flowNode.data as unknown as FlowNodeData;
+    const fData = flowNode.data as NucleiNodeDataOf<'flowNode'>;
     yaml += `flow: |\n`;
     (fData.flowCode || 'http(1)').split('\n').forEach((fl) => {
       yaml += `  ${fl}\n`;
@@ -511,7 +559,7 @@ export function graphToNucleiYaml(
     yaml += `${protocol}:\n`;
 
     requestNodes.forEach((req) => {
-      const rData = req.data as unknown as RequestNodeData;
+      const rData = req.data as NucleiNodeDataOf<'requestNode'>;
       yaml += `  - method: ${rData.method || 'GET'}\n`;
 
       const paths = rData.path && rData.path.length > 0 ? rData.path : ['{{BaseURL}}/'];
@@ -554,7 +602,7 @@ export function graphToNucleiYaml(
         yaml += `    matchers:\n`;
 
         reqMatchers.forEach((mat) => {
-          const mData = mat.data as unknown as MatcherNodeData;
+          const mData = mat.data as NucleiNodeDataOf<'matcherNode'>;
           yaml += `      - type: ${mData.type || 'status'}\n`;
 
           if (mData.part && mData.type !== 'status') {
@@ -600,7 +648,7 @@ export function graphToNucleiYaml(
         yaml += `    extractors:\n`;
 
         reqExtractors.forEach((ext) => {
-          const eData = ext.data as unknown as ExtractorNodeData;
+          const eData = ext.data as NucleiNodeDataOf<'extractorNode'>;
           yaml += `      - type: ${eData.type || 'regex'}\n`;
           yaml += `        name: ${eData.name || 'token'}\n`;
           yaml += `        part: ${eData.part || 'body'}\n`;

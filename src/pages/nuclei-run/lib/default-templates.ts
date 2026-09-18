@@ -523,7 +523,7 @@ http:
         condition: and`,
   },
   {
-    id: 'env-file-disclosure',
+    id: 'env-file-secrets-disclosure',
     name: '.env Environment Secrets Disclosure',
     severity: 'critical',
     protocol: 'http',
@@ -531,7 +531,7 @@ http:
     category: 'exposures',
     author: 'projectdiscovery',
     description: 'Direct disclosure of .env file containing database passwords, API keys, and application secrets.',
-    yaml_content: `id: env-file-disclosure
+    yaml_content: `id: env-file-secrets-disclosure
 
 info:
   name: .env Environment Secrets Disclosure

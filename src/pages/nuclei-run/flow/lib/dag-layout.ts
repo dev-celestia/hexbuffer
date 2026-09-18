@@ -64,7 +64,12 @@ export function calculateDagLayout(
     for (const neighbor of adj.get(currentId) || []) {
       const existingRank = ranks.get(neighbor);
       const newRank = currentRank + 1;
-      if (existingRank === undefined || newRank > existingRank) {
+      // The rank of a node in a DAG is at most the longest simple path, i.e. `nodes.length - 1`.
+      // A cycle breaks that: every pass re-relaxes the same edges and `newRank` grows without bound,
+      // so the queue never drains and this loop hangs forever. The canvas cannot currently create a
+      // cycle (`nodesConnectable={false}`), but the graph model allows one and `validateNucleiGraph`
+      // reports it, so the layout must terminate on one. For any DAG this bound is never reached.
+      if ((existingRank === undefined || newRank > existingRank) && newRank < nodes.length) {
         ranks.set(neighbor, newRank);
         queue.push(neighbor);
       }

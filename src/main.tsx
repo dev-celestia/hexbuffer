@@ -33,8 +33,11 @@ function MainWindowReadySignal() {
   React.useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       // Mark as dismissed so the HTML fallback timer won't fire
-      if (typeof (window as any).__dismissSplash === 'function') {
-        (window as any).__dismissSplash();
+      // `__dismissSplash` is defined by the inline splash script in index.html, so it is not part of
+      // the DOM types. Naming its shape keeps the guard meaningful; `any` accepted any call at all.
+      const splashWindow = window as Window & { __dismissSplash?: () => void };
+      if (typeof splashWindow.__dismissSplash === 'function') {
+        splashWindow.__dismissSplash();
       }
       invoke("show_main_window").catch((error) => {
         console.error("Failed to show main window:", error);

@@ -1,6 +1,20 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 
+/**
+ * A readable message for a thrown value.
+ *
+ * The catch blocks below used to be `catch (e: any)` followed by `e.message`. That is wrong for the
+ * most common failure on this path: Tauri's `invoke` rejects with the Rust `Err(String)`, so `e` is
+ * a *string* and `e.message` is `undefined`. Where a `|| e.toString()` fallback happened to follow,
+ * the mistake was masked; where it did not (`Network.getResponseBody`), the real CDP error was
+ * silently replaced by a generic placeholder. Taking `unknown` also removes the `null.message`
+ * crash that a `throw null` would otherwise cause inside the error path itself.
+ */
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export interface Target {
   id: string;
   title: string;
@@ -87,24 +101,35 @@ export function useInspectExternal() {
   // WS references
   const wsRef = useRef<WebSocket | null>(null);
   const idCounter = useRef<number>(1);
-  const pendingCommands = useRef<Map<number, { resolve: (val: any) => void; reject: (err: any) => void }>>(new Map());
+  // Pending CDP commands, keyed by the id echoed back on the response. `resolve` is widened to
+  // `unknown` because this map holds responses for every `T` that `sendCommand` was called with; the
+  // value actually passed in is the JSON-parsed `data.result`, which is untyped by construction.
+  const pendingCommands = useRef<
+    Map<number, { resolve: (value: unknown) => void; reject: (reason?: unknown) => void }>
+  >(new Map());
 
   // Search filter
   const [searchQuery, setSearchQuery] = useState('');
 
   // Send CDP Command
-  const sendCommand = useCallback(<T = any>(method: string, params: any = {}): Promise<T> => {
-    return new Promise((resolve, reject) => {
-      const ws = wsRef.current;
-      if (!ws || ws.readyState !== WebSocket.OPEN) {
-        reject(new Error('WebSocket not connected'));
-        return;
-      }
-      const id = idCounter.current++;
-      pendingCommands.current.set(id, { resolve, reject });
-      ws.send(JSON.stringify({ id, method, params }));
-    });
-  }, []);
+  const sendCommand = useCallback(
+    <T = unknown>(method: string, params: Record<string, unknown> = {}): Promise<T> => {
+      return new Promise((resolve, reject) => {
+        const ws = wsRef.current;
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+          reject(new Error('WebSocket not connected'));
+          return;
+        }
+        const id = idCounter.current++;
+        pendingCommands.current.set(id, {
+          resolve: resolve as (value: unknown) => void,
+          reject,
+        });
+        ws.send(JSON.stringify({ id, method, params }));
+      });
+    },
+    []
+  );
 
   // Emulate network conditions
   const emulateNetwork = useCallback(async (profile: string) => {
@@ -243,9 +268,12 @@ export function useInspectExternal() {
       }));
       setLoadingBodyId(null);
       return result;
-    } catch (e: any) {
+    } catch (e) {
       console.error('Failed to get response body:', e);
-      const errResult = { body: e.message || 'No response body available for this request.', base64Encoded: false };
+      // `errorMessage` rather than `e.message`: a Tauri rejection is a string, so the previous
+      // `e.message` was always `undefined` here and the real CDP error was thrown away in favour of
+      // the placeholder. There is no `e.toString()` fallback on this branch to mask it.
+      const errResult = { body: errorMessage(e) || 'No response body available for this request.', base64Encoded: false };
       setResponseBodies((prev) => ({
         ...prev,
         [requestId]: errResult,
@@ -296,7 +324,7 @@ export function useInspectExternal() {
 
         // Initial fetch of storage data
         await refreshAllStorage();
-      } catch (e: any) {
+      } catch (e) {
         console.error('Failed to enable domains:', e);
       }
     };
@@ -438,7 +466,9 @@ export function useInspectExternal() {
         // Handle Console API Calls
         else if (method === 'Runtime.consoleAPICalled') {
           const { type: logType, args, timestamp } = params;
-          const text = args.map((arg: any) => arg.value || JSON.stringify(arg)).join(' ');
+          const text = args
+            .map((arg: { value?: unknown }) => arg.value || JSON.stringify(arg))
+            .join(' ');
           const levelMap: Record<string, ConsoleLog['level']> = {
             log: 'log',
             info: 'info',
@@ -521,9 +551,9 @@ export function useInspectExternal() {
       setScanCount((c) => c + 1);
       setIsBrowserRunning(true);
       return filtered;
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
-      setError(e.message || e.toString() || 'Failed to fetch targets. Make sure the browser is running with --remote-debugging-port=' + targetPort);
+      setError(errorMessage(e) || 'Failed to fetch targets. Make sure the browser is running with --remote-debugging-port=' + targetPort);
       setTargets([]);
       setIsBrowserRunning(false);
       return [];
@@ -539,7 +569,7 @@ export function useInspectExternal() {
       
       // Poll for active target tabs (up to 8 times, every 500ms)
       let scannedTargets: Target[] = [];
-      let lastFetchError: any = null;
+      let lastFetchError: unknown = null;
       for (let i = 0; i < 8; i++) {
         await new Promise((resolve) => setTimeout(resolve, 500));
         try {
@@ -556,7 +586,7 @@ export function useInspectExternal() {
               break;
             }
           }
-        } catch (err: any) {
+        } catch (err) {
           lastFetchError = err;
         }
       }
@@ -566,7 +596,7 @@ export function useInspectExternal() {
         await connect(scannedTargets[0]);
       } else {
         if (lastFetchError) {
-          const errMsg = lastFetchError.message || lastFetchError.toString() || 'Failed to connect to the browser debugging port.';
+          const errMsg = errorMessage(lastFetchError) || 'Failed to connect to the browser debugging port.';
           setError(`Failed to connect to browser on port ${targetPort}: ${errMsg}`);
           setIsBrowserRunning(false);
         } else {
@@ -574,9 +604,11 @@ export function useInspectExternal() {
           setIsBrowserRunning(true);
         }
       }
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
-      setError(e.toString() || 'Failed to open browser with remote debugging on port ' + targetPort);
+      // Was `e.toString()`, which prefixed every Error with "Error: ". `errorMessage` gives the bare
+      // message for an Error and the value itself for a thrown string, matching the other banners.
+      setError(errorMessage(e) || 'Failed to open browser with remote debugging on port ' + targetPort);
     }
   }, [port, connect]);
 

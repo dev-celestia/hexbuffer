@@ -10,4 +10,6 @@ export * from './intercept';
 export * from './browser';
 export * from './navigation';
 export * from './live-traffic';
+export * from './jobs';
+export * from '../jobs/job-registry';
 

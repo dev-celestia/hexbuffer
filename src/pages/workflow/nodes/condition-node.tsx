@@ -17,7 +17,7 @@ import { getAutomationNodeWarning } from '../lib/node-warnings';
 import { NodeCapabilityBadge } from './node-capability-badge';
 import { NodeCardMenu } from './node-card-menu';
 import { NodeRuntimeStatus, useNodeRuntimeStatus } from './node-runtime-status';
-import type { AutomationNodeData, ConditionConfig } from '../types';
+import type { AutomationNode, AutomationNodeData, ConditionConfig } from '../types';
 
 const operatorGlyphs: Record<string, string> = {
   equals: '=',
@@ -28,8 +28,11 @@ const operatorGlyphs: Record<string, string> = {
   regex: '\u2248',
 };
 
-function ConditionNodeComponent({ id, data, selected }: NodeProps) {
-  const nodeData = data as unknown as AutomationNodeData;
+function ConditionNodeComponent({
+  id,
+  data: nodeData,
+  selected,
+}: NodeProps<AutomationNode>) {
   const config = nodeData.config as ConditionConfig;
   const glyph = operatorGlyphs[config?.operator] ?? '?';
   const dataPath = config?.dataPath;

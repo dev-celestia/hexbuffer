@@ -2,10 +2,12 @@ import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { LightningIcon, CodeIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
-import type { NucleiFlowNode, FlowNodeData } from '../types';
+import type { NucleiFlowNodeOf } from '../types';
 
-export function FlowNode({ data, selected }: NodeProps<NucleiFlowNode>) {
-  const nodeData = data as unknown as FlowNodeData;
+export function FlowNode({
+  data: nodeData,
+  selected,
+}: NodeProps<NucleiFlowNodeOf<'flowNode'>>) {
 
   return (
     <div

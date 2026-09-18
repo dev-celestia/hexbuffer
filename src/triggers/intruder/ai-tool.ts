@@ -1,5 +1,12 @@
 import { startIntruderAttack, stopIntruderAttack } from './ui';
 import { sendToIntruder } from './send-to';
+import { useIntruderStore } from '@/stores/intruder';
+import {
+  registerJob,
+  nextJobId,
+  listJobs,
+  cancelJob,
+} from '@/pages/desktop/assistant/lib/jobs/job-registry';
 
 export const INVOKER_AI_TOOL_DEFINITION = {
   name: 'start_invoker_attack',
@@ -43,11 +50,79 @@ export const SEND_TO_INTRUDER_AI_TOOL_DEFINITION = {
 };
 
 export async function executeStartInvokerAttackAiTool(): Promise<string> {
+  const state = useIntruderStore.getState();
+  const tabId = state.activeTabId;
+  const tab = state.tabs.find((t) => t.id === tabId);
+  if (!tab) {
+    throw new Error('No active Intruder attack tab to launch.');
+  }
+  if (tab.isRunning) {
+    return `An Intruder attack is already running on tab ${tab.name}. Stop it (cancel_job or stop_invoker_attack) before launching another.`;
+  }
+
+  // A stale startError from a previous failed launch would otherwise settle the
+  // new job as errored before this attack even starts.
+  state.clearStartError();
+
+  const jobId = nextJobId('intruder-attack');
+  registerJob({
+    id: jobId,
+    kind: 'intruder-attack',
+    label: `Intruder attack: ${tab.config.name}`,
+    cancel: () => stopIntruderAttack(),
+    subscribe: (update, settle) => {
+      let seenRunning = false;
+      const apply = () => {
+        const current = useIntruderStore
+          .getState()
+          .tabs.find((t) => t.id === tabId);
+        if (!current) {
+          settle('error', 'The Intruder attack tab was closed.');
+          return;
+        }
+        if (current.startError) {
+          settle('error', current.startError);
+          return;
+        }
+        if (current.isRunning) {
+          seenRunning = true;
+          const progress = current.progress;
+          update({
+            progress:
+              progress && progress.total > 0
+                ? Math.round((progress.current / progress.total) * 100)
+                : null,
+            message: progress
+              ? `${progress.current}/${progress.total} payloads sent`
+              : 'Attack running',
+          });
+          return;
+        }
+        if (seenRunning) {
+          settle(
+            'completed',
+            `Attack finished. ${current.results.length} results collected.`,
+          );
+        }
+      };
+      const unsubscribe = useIntruderStore.subscribe(apply);
+      apply();
+      return unsubscribe;
+    },
+  });
+
   startIntruderAttack();
-  return 'Intruder attack launched. You can monitor attack progress in the Intruder tab.';
+  return `Intruder attack launched as job ${jobId}. Poll get_job_status with jobId "${jobId}" for progress, or cancel_job to stop it.`;
 }
 
 export async function executeStopInvokerAttackAiTool(): Promise<string> {
+  const active = listJobs({ activeOnly: true }).find((j) => j.kind === 'intruder-attack');
+  if (active) {
+    const result = cancelJob(active.id);
+    return result.ok
+      ? `Stopped the running Intruder attack (job ${active.id}).`
+      : `Failed to stop Intruder attack job ${active.id}: ${result.message}`;
+  }
   stopIntruderAttack();
   return 'Stopped active Intruder attack.';
 }

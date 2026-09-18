@@ -54,22 +54,20 @@ export function UpdateDialog({
         <Alert
           className={cn(
             // Backgrounds & Borders
-            "border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200"
+            "border-warning/30 bg-warning/10 text-warning-foreground"
           )}
         >
           <WarningCircleIcon
             weight="fill"
             className={cn(
               // Sizing & Spacing
-              "size-4 shrink-0",
-              // Typography
-              "text-amber-600 dark:text-amber-400"
+              "size-4 shrink-0"
             )}
           />
           <AlertTitle
             className={cn(
               // Typography
-              "font-medium text-amber-900 dark:text-amber-200"
+              "font-medium"
             )}
           >
             Restart notice
@@ -77,7 +75,7 @@ export function UpdateDialog({
           <AlertDescription
             className={cn(
               // Typography
-              "text-xs text-amber-800/90 dark:text-amber-300/90"
+              "text-xs text-warning-foreground/85"
             )}
           >
             Your app will restart after the app is updated.

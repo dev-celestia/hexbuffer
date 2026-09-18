@@ -111,7 +111,7 @@ There are two kinds of tool, and which one you need changes where the work lands
 
 ## Testing Guidelines
 
-Frontend tests are not configured in `package.json`; when adding UI behavior, document manual verification steps in the PR. Rust tests require a running proxy before execution, as described in `src-tauri/tests/README.md`. Name new tests by behavior, for example `test_connect_tunnel_tls_upgrade_example_com`.
+Frontend tests run with `pnpm test` (`vitest run`; `pnpm test:watch` while developing), configured in `vitest.config.ts`. The default environment is `node` — a suite that needs the DOM opts in per file with a leading `// @vitest-environment jsdom`. Pure logic (parsers, formatters, validators, policy predicates) belongs in a plain `.test.ts`; UI affordances need a render test, because pure-function tests cannot see an unusable control. `tsc --noEmit` and the suite are both blocking in CI, so run them before opening a PR rather than describing manual steps in its place. Rust tests require a running proxy before execution, as described in `src-tauri/tests/README.md`. Name new tests by behavior, for example `test_connect_tunnel_tls_upgrade_example_com`.
 
 ## Commit & Pull Request Guidelines
 

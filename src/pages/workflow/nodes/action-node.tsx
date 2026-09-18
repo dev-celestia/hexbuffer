@@ -38,7 +38,7 @@ import { getAutomationNodeWarning } from '../lib/node-warnings';
 import { NodeCapabilityBadge } from './node-capability-badge';
 import { NodeCardMenu } from './node-card-menu';
 import { NodeRuntimeStatus, useNodeRuntimeStatus } from './node-runtime-status';
-import type { AutomationNodeData } from '../types';
+import type { AutomationNode, AutomationNodeData } from '../types';
 
 const iconMap: Record<string, typeof SparkleIcon> = {
   ArrowClockwiseIcon,
@@ -61,8 +61,11 @@ const iconMap: Record<string, typeof SparkleIcon> = {
   SquareIcon,
 };
 
-function ActionNodeComponent({ id, data, selected }: NodeProps) {
-  const nodeData = data as unknown as AutomationNodeData;
+function ActionNodeComponent({
+  id,
+  data: nodeData,
+  selected,
+}: NodeProps<AutomationNode>) {
   const Icon = iconMap[nodeData.iconName] || SparkleIcon;
   const runtime = useNodeRuntimeStatus(id);
   const isExecuting = runtime?.status === 'running';

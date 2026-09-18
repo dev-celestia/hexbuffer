@@ -42,6 +42,7 @@
   /* Status semantics */
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --color-info: var(--info);
 
   /* Agent identity colors */
@@ -97,6 +98,9 @@
   --radius: 0.475rem;
   --success: #059669;
   --warning: #D97706;
+  /* Text drawn on a warning-tinted surface. `--warning` is too light for body copy over
+     `bg-warning/10` in this theme (2.9:1); this pair restores AA (8.1:1 light, 9.9:1 dark). */
+  --warning-foreground: #78350f;
   --info: #2563EB;
   --agent-orchestrator: #7C3AED;
   --agent-traffic: #2563EB;
@@ -142,6 +146,7 @@
 .dark {
   --success: #34D399;
   --warning: #FBBF24;
+  --warning-foreground: #FDE68A;
   --info: #60A5FA;
   --agent-orchestrator: #A78BFA;
   --agent-traffic: #60A5FA;

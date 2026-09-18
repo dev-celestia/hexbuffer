@@ -11,7 +11,18 @@ use tauri::{AppHandle, Emitter, Manager};
 
 use super::types::AiChatAction;
 
-const MAX_TOOL_ROUNDS: usize = 8;
+/// Round cap used when a persona does not declare its own `max_tool_rounds`.
+const DEFAULT_MAX_TOOL_ROUNDS: usize = 24;
+/// Number of rounds before the cap in which the model is steered toward concluding,
+/// instead of being told to conclude from the very first follow-up round.
+const CONCLUDE_NUDGE_WINDOW: usize = 2;
+/// Wall-clock budget for one run. When spent, the run gets a single final tool-less
+/// round to summarize the work it already did rather than failing outright.
+const MAX_RUN_SECS: u64 = 1800;
+/// Max seconds without any streamed delta (text or reasoning) before a round's open
+/// stream is treated as stalled and abandoned. Bounds the case the provider
+/// completion timeout cannot: a connection that stays open but never emits.
+const STREAM_INACTIVITY_TIMEOUT_SECS: u64 = 60;
 /// Upper bound for a single provider completion round-trip.
 const PROVIDER_COMPLETION_TIMEOUT_SECS: u64 = 180;
 /// Default output token cap when none is configured, bounding cost and memory.
@@ -46,6 +57,8 @@ const AUTO_APPROVED_TOOLS: &[&str] = &[
     "navigate_to_app",
     "add_scope_target",
     "toggle_browser_crawl",
+    "list_jobs",
+    "get_job_status",
     MEMORY_SEARCH_TOOL,
     MEMORY_SAVE_TOOL,
     NOTES_GET_TOOL,
@@ -66,6 +79,7 @@ const CONFIRMATION_TOOLS: &[&str] = &[
     "drop_paused_request",
     "remove_scope_target",
     "stop_browser_crawl",
+    "cancel_job",
 ];
 
 enum ToolAuthorization {
@@ -91,6 +105,16 @@ fn authorize_tool(
     match policy.evaluate_tool_call(tool_name) {
         Ok(()) => ToolAuthorization::RequiresConfirmation,
         Err(denial) => ToolAuthorization::Denied(denial),
+    }
+}
+
+/// Resolves the round cap for a persona: its declared `max_tool_rounds`, or the
+/// loop default when the spec leaves it at zero.
+fn resolve_max_rounds(agent: &super::agents::AgentSpec) -> usize {
+    if agent.max_tool_rounds == 0 {
+        DEFAULT_MAX_TOOL_ROUNDS
+    } else {
+        agent.max_tool_rounds
     }
 }
 
@@ -276,6 +300,42 @@ fn frontend_tool_definitions() -> Vec<ToolDefinition> {
                     "target": { "type": "string", "description": "Target hostname or ID" }
                 },
                 "required": ["target"]
+            }),
+        },
+        ToolDefinition {
+            name: "list_jobs".to_string(),
+            description: "List background jobs started by AI tools (Intruder attacks, browser crawls) with their live status, percent progress and job ids."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "activeOnly": { "type": "boolean", "description": "When true, only return jobs that have not finished. Defaults to false." }
+                },
+                "required": []
+            }),
+        },
+        ToolDefinition {
+            name: "get_job_status".to_string(),
+            description: "Poll a background job by id: status (running/completed/error/cancelled), percent progress and the latest message. To wait for a long operation, poll this between rounds instead of blocking."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "jobId": { "type": "string", "description": "Job id returned by a launch tool or by list_jobs." }
+                },
+                "required": ["jobId"]
+            }),
+        },
+        ToolDefinition {
+            name: "cancel_job".to_string(),
+            description: "Cancel a running background job by id, stopping the Intruder attack or browser crawl it drives."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "jobId": { "type": "string", "description": "Job id of a running job." }
+                },
+                "required": ["jobId"]
             }),
         },
     ]
@@ -860,7 +920,7 @@ pub struct ToolLoopOutput {
 
 pub fn get_agent_for_tool(tool_name: &str) -> Option<&'static super::agents::AgentSpec> {
     match tool_name {
-        "save_memory_note" | "search_memory" | "navigate_to_app" => Some(
+        "save_memory_note" | "search_memory" | "navigate_to_app" | "list_jobs" => Some(
             super::agents::get_agent_spec(super::agents::AgentId::Orchestrator),
         ),
         "write_note" | "get_notes" => {
@@ -902,7 +962,10 @@ pub fn get_agent_for_tool(tool_name: &str) -> Option<&'static super::agents::Age
 pub fn is_terminal_action_tool(tool_name: &str) -> bool {
     matches!(
         tool_name,
-        "save_memory_note"
+        "list_jobs"
+            | "get_job_status"
+            | "cancel_job"
+            | "save_memory_note"
             | "write_note"
             | "decode_jwt"
             | super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL
@@ -1060,6 +1123,25 @@ pub fn format_specialist_message(
                 .unwrap_or("target");
             format!("❌ **Removed Target from Scope**\n\nRemoved `{target}` from active scope.\n\n{result}")
         }
+        "list_jobs" => {
+            format!("📋 **Background Jobs**\n\n{result}")
+        }
+        "get_job_status" => {
+            let job_id = args
+                .get("jobId")
+                .or_else(|| args.get("job_id"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("job");
+            format!("🔄 **Job Status: {job_id}**\n\n{result}")
+        }
+        "cancel_job" => {
+            let job_id = args
+                .get("jobId")
+                .or_else(|| args.get("job_id"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("job");
+            format!("🛑 **Job Cancelled: {job_id}**\n\n{result}")
+        }
         super::agents::jwt_tools::CHECK_JWT_VULNS_TOOL => {
             format!("🔐 **JWT Vulnerability Audit**\n\n{result}")
         }
@@ -1069,6 +1151,12 @@ pub fn format_specialist_message(
         _ => result.to_string(),
     }
 }
+
+/// Hands the messages accumulated in one round to persistent storage immediately,
+/// so an interrupted or killed run still leaves a complete transcript. The callback
+/// must not block the loop; implementations are expected to spawn the write.
+pub type RoundCheckpoint =
+    std::sync::Arc<dyn Fn(Vec<super::types::ChatMessageRecord>) + Send + Sync>;
 
 /// Multi-turn streaming tool loop built directly on Rig 0.42.
 /// Drives the completion model via true provider SSE streaming (`model.stream(request)`),
@@ -1089,6 +1177,7 @@ pub async fn run_tool_loop(
     prompt: String,
     mut cancel_rx: tokio::sync::watch::Receiver<bool>,
     mut pause_rx: tokio::sync::watch::Receiver<bool>,
+    checkpoint: Option<RoundCheckpoint>,
 ) -> Result<ToolLoopOutput, String> {
     let model = super::providers::create_completion_model(config).map_err(|e| e.to_string())?;
     let all_tools = tool_definitions();
@@ -1105,26 +1194,59 @@ pub async fn run_tool_loop(
     // model's follow-up round streams nothing (otherwise the user sees only a
     // dangling "Let me pull the crawl context…" with no findings).
     let mut last_round_tool_results: Vec<String> = Vec::new();
+    // Index into agent_messages of the first message not yet handed to the checkpoint.
+    let mut checkpointed_agent_message_count = 0usize;
 
-    for _round in 0..MAX_TOOL_ROUNDS {
+    let max_rounds = resolve_max_rounds(agent);
+    let run_started = std::time::Instant::now();
+    // Set once the round cap or the wall-clock budget is spent. The run then gets exactly
+    // one final tool-less round in which to report what it already accomplished.
+    let mut budget_exhausted = false;
+    let mut round = 0usize;
+
+    loop {
         if *cancel_rx.borrow() {
             return Err("AI chat cancelled by user.".to_string());
         }
 
-        let round_prompt = if _round == 0 {
+        if !budget_exhausted
+            && (round >= max_rounds
+                || run_started.elapsed() >= Duration::from_secs(MAX_RUN_SECS))
+        {
+            budget_exhausted = true;
+        }
+
+        let round_prompt = if budget_exhausted {
+            "You have reached the working limit for this request. Do not call any more \
+            tools. Summarize what has been accomplished so far: which actions ran, what \
+            their results showed, and what remains unfinished."
+                .to_string()
+        } else if round == 0 {
             prompt.clone()
-        } else {
+        } else if round + CONCLUDE_NUDGE_WINDOW >= max_rounds {
             "The requested tool has completed execution and results are delivered. \
             Conclude your response or provide any necessary follow-up coordination. \
             Do not repeat previous statements or call the same tool again."
                 .to_string()
+        } else {
+            "The requested tool has completed execution and results are delivered. \
+            Continue working toward the user's goal using these results, or give your \
+            final answer if the goal is met. Do not repeat previous statements or call \
+            the same tool again."
+                .to_string()
+        };
+
+        let round_tools = if budget_exhausted {
+            Vec::new()
+        } else {
+            tools.clone()
         };
 
         let mut req_builder = model
             .completion_request(round_prompt)
             .preamble(agent.preamble.to_string())
             .messages(chat_history.clone())
-            .tools(tools.clone());
+            .tools(round_tools);
 
         if let Some(temp) = config.temperature {
             req_builder = req_builder.temperature(temp);
@@ -1146,12 +1268,23 @@ pub async fn run_tool_loop(
                 Duration::from_secs(PROVIDER_COMPLETION_TIMEOUT_SECS),
                 model.stream(request),
             ) => {
-                res.map_err(|_| {
-                    format!(
-                        "The AI provider did not respond within {PROVIDER_COMPLETION_TIMEOUT_SECS} seconds. Check the configured provider/model and try again."
-                    )
-                })?
-                .map_err(|e| e.to_string())?
+                match res {
+                    Ok(Ok(stream)) => stream,
+                    Ok(Err(error)) => {
+                        if budget_exhausted {
+                            break;
+                        }
+                        return Err(error.to_string());
+                    }
+                    Err(_) => {
+                        if budget_exhausted {
+                            break;
+                        }
+                        return Err(format!(
+                            "The AI provider did not respond within {PROVIDER_COMPLETION_TIMEOUT_SECS} seconds. Check the configured provider/model and try again."
+                        ));
+                    }
+                }
             }
         };
 
@@ -1185,9 +1318,12 @@ pub async fn run_tool_loop(
                 _ = pause_rx.changed() => {
                     continue;
                 }
-                item = stream.next() => {
+                item = tokio::time::timeout(
+                    Duration::from_secs(STREAM_INACTIVITY_TIMEOUT_SECS),
+                    stream.next(),
+                ) => {
                     match item {
-                        Some(Ok(content)) => {
+                        Ok(Some(Ok(content))) => {
                             match content {
                                 StreamedAssistantContent::Text(t) => {
                                     if !t.text.is_empty() {
@@ -1215,11 +1351,25 @@ pub async fn run_tool_loop(
                                 _ => {}
                             }
                         }
-                        Some(Err(err)) => {
+                        Ok(Some(Err(err))) => {
+                            if budget_exhausted {
+                                break;
+                            }
                             return Err(format!("Streaming error from AI provider: {err}"));
                         }
-                        None => {
+                        Ok(None) => {
                             break;
+                        }
+                        Err(_) => {
+                            stream.cancel();
+                            if budget_exhausted {
+                                break;
+                            }
+                            return Err(format!(
+                                "The AI provider stream went silent for \
+                                 {STREAM_INACTIVITY_TIMEOUT_SECS} seconds. Check the \
+                                 configured provider/model and try again."
+                            ));
                         }
                     }
                 }
@@ -1271,6 +1421,37 @@ pub async fn run_tool_loop(
                 );
             }
 
+            if let Some(ref ck) = checkpoint {
+                let mut round_messages: Vec<super::types::ChatMessageRecord> = Vec::new();
+                if !accumulated_full_response.trim().is_empty() {
+                    round_messages.push(super::types::ChatMessageRecord {
+                        id: format!("ckpt-{request_id}-final"),
+                        session_id: String::new(),
+                        role: "assistant".to_string(),
+                        content: accumulated_full_response.clone(),
+                        agent_id: Some(agent.slug.to_string()),
+                        agent_name: Some(agent.name.to_string()),
+                        reasoning: None,
+                        created_at: chrono::Utc::now().to_rfc3339(),
+                    });
+                }
+                for msg in &agent_messages[checkpointed_agent_message_count..] {
+                    round_messages.push(super::types::ChatMessageRecord {
+                        id: msg.id.clone(),
+                        session_id: String::new(),
+                        role: "assistant".to_string(),
+                        content: msg.content.clone(),
+                        agent_id: Some(msg.agent_id.clone()),
+                        agent_name: Some(msg.agent_name.clone()),
+                        reasoning: None,
+                        created_at: msg.created_at.clone(),
+                    });
+                }
+                if !round_messages.is_empty() {
+                    ck(round_messages);
+                }
+            }
+
             return Ok(ToolLoopOutput {
                 content: accumulated_full_response,
                 actions,
@@ -1283,7 +1464,7 @@ pub async fn run_tool_loop(
         }
 
         if !round_streamed_text.is_empty() {
-            chat_history.push(Message::assistant(round_streamed_text));
+            chat_history.push(Message::assistant(round_streamed_text.clone()));
         }
 
         // Reset the per-round tool-result buffer before collecting this round's results.
@@ -1385,6 +1566,38 @@ pub async fn run_tool_loop(
             ));
         }
 
+        if let Some(ref ck) = checkpoint {
+            let mut round_messages: Vec<super::types::ChatMessageRecord> = Vec::new();
+            if !round_streamed_text.trim().is_empty() {
+                round_messages.push(super::types::ChatMessageRecord {
+                    id: format!("ckpt-{request_id}-text-{round}"),
+                    session_id: String::new(),
+                    role: "assistant".to_string(),
+                    content: round_streamed_text.clone(),
+                    agent_id: Some(agent.slug.to_string()),
+                    agent_name: Some(agent.name.to_string()),
+                    reasoning: None,
+                    created_at: chrono::Utc::now().to_rfc3339(),
+                });
+            }
+            for msg in &agent_messages[checkpointed_agent_message_count..] {
+                round_messages.push(super::types::ChatMessageRecord {
+                    id: msg.id.clone(),
+                    session_id: String::new(),
+                    role: "assistant".to_string(),
+                    content: msg.content.clone(),
+                    agent_id: Some(msg.agent_id.clone()),
+                    agent_name: Some(msg.agent_name.clone()),
+                    reasoning: None,
+                    created_at: msg.created_at.clone(),
+                });
+            }
+            checkpointed_agent_message_count = agent_messages.len();
+            if !round_messages.is_empty() {
+                ck(round_messages);
+            }
+        }
+
         if executed_terminal_action {
             if accumulated_full_response.trim().is_empty() {
                 let success_msg = "The requested tool action has executed successfully.";
@@ -1405,10 +1618,116 @@ pub async fn run_tool_loop(
                 reasoning: accumulated_reasoning,
             });
         }
+
+        round += 1;
     }
 
-    Err(format!(
-        "The AI assistant reached the maximum number of tool rounds ({MAX_TOOL_ROUNDS}) without \
-        producing a final answer. Try narrowing the request."
-    ))
+    // Only reachable when the final tool-less conclusion round itself failed (provider
+    // error or stalled stream). Everything accumulated so far is still returned: a long
+    // run that hit its budget must not lose the actions and specialist messages it took.
+    let note = if accumulated_full_response.trim().is_empty() {
+        "I reached the working limit for this request before producing a summary. \
+         The actions listed above did run, and their results reflect real application \
+         state."
+            .to_string()
+    } else {
+        "\n\nI reached the working limit for this request before I could finish \
+         summarizing. The actions above did run, and their results reflect real \
+         application state."
+            .to_string()
+    };
+    accumulated_full_response.push_str(&note);
+    let _ = app.emit_to(
+        window_label,
+        "ai-chat:delta",
+        json!({ "requestId": request_id, "delta": note }),
+    );
+
+    Ok(ToolLoopOutput {
+        content: accumulated_full_response,
+        actions,
+        agent_id: agent.slug.to_string(),
+        agent_name: agent.name.to_string(),
+        agent_messages,
+        usage: accumulated_usage,
+        reasoning: accumulated_reasoning,
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ai::policy::SecurityApprovalPolicy;
+
+    #[test]
+    fn job_tools_follow_the_read_write_tier_split() {
+        let policy = SecurityApprovalPolicy::default_policy();
+        assert!(matches!(
+            authorize_tool(&policy, "list_jobs"),
+            ToolAuthorization::AutoApproved
+        ));
+        assert!(matches!(
+            authorize_tool(&policy, "get_job_status"),
+            ToolAuthorization::AutoApproved
+        ));
+        assert!(matches!(
+            authorize_tool(&policy, "cancel_job"),
+            ToolAuthorization::RequiresConfirmation
+        ));
+    }
+
+    #[test]
+    fn unknown_tools_stay_denied_by_the_fail_closed_policy() {
+        let policy = SecurityApprovalPolicy::default_policy();
+        assert!(matches!(
+            authorize_tool(&policy, "definitely_not_a_tool"),
+            ToolAuthorization::Denied(_)
+        ));
+    }
+
+    #[test]
+    fn job_tools_are_attributed_and_terminal() {
+        assert_eq!(
+            get_agent_for_tool("list_jobs").map(|agent| agent.slug),
+            Some("orchestrator")
+        );
+        for name in ["list_jobs", "get_job_status", "cancel_job"] {
+            assert!(is_terminal_action_tool(name), "{name} should be terminal");
+        }
+    }
+
+    #[test]
+    fn job_tools_appear_in_the_registered_inventory() {
+        let names: Vec<String> = registered_tools_debug()
+            .into_iter()
+            .map(|(name, _, _)| name)
+            .collect();
+        for expected in ["list_jobs", "get_job_status", "cancel_job"] {
+            assert!(names.iter().any(|n| n == expected), "{expected} missing");
+        }
+    }
+
+    #[test]
+    fn round_cap_resolves_per_persona_with_default_fallback() {
+        let orchestrator =
+            super::super::agents::get_agent_spec(super::super::agents::AgentId::Orchestrator);
+        assert_eq!(resolve_max_rounds(orchestrator), 40);
+        let intruder =
+            super::super::agents::get_agent_spec(super::super::agents::AgentId::Intruder);
+        assert_eq!(resolve_max_rounds(intruder), 24);
+        let mut undeclared = orchestrator.clone();
+        undeclared.max_tool_rounds = 0;
+        assert_eq!(resolve_max_rounds(&undeclared), DEFAULT_MAX_TOOL_ROUNDS);
+    }
+
+    #[test]
+    fn every_persona_declares_a_round_cap() {
+        for agent in super::super::agents::ALL_AGENTS {
+            assert!(
+                agent.max_tool_rounds > 0,
+                "{} declares no round cap and would silently use the default",
+                agent.slug
+            );
+        }
+    }
 }

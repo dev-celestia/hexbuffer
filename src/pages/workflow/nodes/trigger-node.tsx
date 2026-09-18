@@ -31,7 +31,7 @@ import { getAutomationNodeWarning } from '../lib/node-warnings';
 import { NodeCapabilityBadge } from './node-capability-badge';
 import { NodeCardMenu } from './node-card-menu';
 import { NodeRuntimeStatus, useNodeRuntimeStatus } from './node-runtime-status';
-import type { AutomationNodeData, TriggerConfig } from '../types';
+import type { AutomationNode, AutomationNodeData, TriggerConfig } from '../types';
 
 const iconMap: Record<string, typeof PlayIcon> = {
   PlayIcon,
@@ -46,8 +46,11 @@ const iconMap: Record<string, typeof PlayIcon> = {
   NetworkIcon,
 };
 
-function TriggerNodeComponent({ id, data, selected }: NodeProps) {
-  const nodeData = data as unknown as AutomationNodeData;
+function TriggerNodeComponent({
+  id,
+  data: nodeData,
+  selected,
+}: NodeProps<AutomationNode>) {
   const Icon = iconMap[nodeData.iconName] || PlayIcon;
   const config = nodeData.config as TriggerConfig;
   const isManual = config?.triggerType === 'trigger:manual';

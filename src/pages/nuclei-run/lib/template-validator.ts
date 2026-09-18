@@ -31,6 +31,12 @@ export function validateNucleiTemplate(yamlContent: string): TemplateValidationR
   let detectedProtocol: ProtocolType = 'http';
   const detectedTags: string[] = [];
 
+  // `id:` and the protocol keys are top-level; the metadata fields live one level down inside
+  // `info:`. Without tracking that, any indented `name:` counted as the template name — an
+  // extractor's own `name:` (indent 8) is the common case, and it made `metadata.name` report
+  // "wp_version" / "db_host" / "apache_version" for the built-in templates that have extractors.
+  let inInfo = false;
+
   for (let i = 0; i < lines.length; i++) {
     const lineNum = i + 1;
     const line = lines[i];
@@ -38,8 +44,15 @@ export function validateNucleiTemplate(yamlContent: string): TemplateValidationR
 
     if (trimmed.startsWith('#') || !trimmed) continue;
 
+    const indent = line.search(/\S|$/);
+    const isTopLevel = indent === 0;
+
+    if (isTopLevel) {
+      inInfo = trimmed === 'info:' || trimmed.startsWith('info:');
+    }
+
     // Check id
-    if (trimmed.startsWith('id:')) {
+    if (isTopLevel && trimmed.startsWith('id:')) {
       hasId = true;
       detectedId = trimmed.replace('id:', '').trim().replace(/['"]/g, '');
       if (!detectedId) {
@@ -58,20 +71,20 @@ export function validateNucleiTemplate(yamlContent: string): TemplateValidationR
     }
 
     // Check info block
-    if (trimmed === 'info:' || trimmed.startsWith('info:')) {
+    if (isTopLevel && (trimmed === 'info:' || trimmed.startsWith('info:'))) {
       hasInfo = true;
     }
 
-    if (trimmed.startsWith('name:')) {
+    if (inInfo && trimmed.startsWith('name:')) {
       hasName = true;
       detectedName = trimmed.replace('name:', '').trim().replace(/['"]/g, '');
     }
 
-    if (trimmed.startsWith('author:')) {
+    if (inInfo && trimmed.startsWith('author:')) {
       detectedAuthor = trimmed.replace('author:', '').trim().replace(/['"]/g, '');
     }
 
-    if (trimmed.startsWith('severity:')) {
+    if (inInfo && trimmed.startsWith('severity:')) {
       hasSeverity = true;
       const rawSev = trimmed.replace('severity:', '').trim().toLowerCase().replace(/['"]/g, '');
       if (['critical', 'high', 'medium', 'low', 'info'].includes(rawSev)) {
@@ -85,14 +98,19 @@ export function validateNucleiTemplate(yamlContent: string): TemplateValidationR
       }
     }
 
-    if (trimmed.startsWith('tags:')) {
+    if (inInfo && trimmed.startsWith('tags:')) {
       const rawTags = trimmed.replace('tags:', '').trim().replace(/['"]/g, '');
       if (rawTags) {
         detectedTags.push(...rawTags.split(',').map((t) => t.trim()).filter(Boolean));
       }
     }
 
-    // Protocol blocks
+    // Protocol blocks. These are top-level keys, so require indent 0 — otherwise an indented key
+    // that happens to be named `ssl:`/`http:`/`dns:`/`tcp:` overrides the template's protocol, and
+    // the flow-canvas parser (which does scope this to indent 0) would then disagree with us.
+    // The guard covers the whole chain below, which is the last thing the loop does.
+    if (!isTopLevel) continue;
+
     if (
       trimmed === 'http:' ||
       trimmed === 'requests:' ||
@@ -122,6 +140,12 @@ export function validateNucleiTemplate(yamlContent: string): TemplateValidationR
     } else if (trimmed === 'code:' || trimmed.startsWith('code:')) {
       hasProtocol = true;
       detectedProtocol = 'code';
+    } else if (trimmed === 'file:' || trimmed.startsWith('file:')) {
+      // `file` is a member of `ProtocolType` and has its own "File Inspection" category, so a
+      // file-protocol template is valid. This branch was missing, which made every one of them report
+      // "Missing protocol execution block" and fail validation.
+      hasProtocol = true;
+      detectedProtocol = 'file';
     } else if (trimmed === 'whois:' || trimmed.startsWith('whois:')) {
       hasProtocol = true;
       detectedProtocol = 'whois';

@@ -51,8 +51,10 @@ export interface RequestNodeData {
 }
 
 // 3. Extractor Node Data
-export type ExtractorType = 'regex' | 'json' | 'xpath' | 'dsl' | 'kval';
-export type ExtractorPart = 'body' | 'header' | 'all' | 'response';
+/** Known extractor types plus any string the YAML parser may encounter. */
+export type ExtractorType = 'regex' | 'json' | 'xpath' | 'dsl' | 'kval' | (string & {});
+/** Known extractor parts plus any string the YAML parser may encounter. */
+export type ExtractorPart = 'body' | 'header' | 'all' | 'response' | (string & {});
 
 export interface ExtractorNodeData {
   name: string;
@@ -69,6 +71,7 @@ export interface ExtractorNodeData {
 }
 
 // 4. Matcher Node Data
+/** Known matcher types plus any string the YAML parser may encounter. */
 export type MatcherType =
   | 'status'
   | 'word'
@@ -76,10 +79,12 @@ export type MatcherType =
   | 'binary'
   | 'dsl'
   | 'size'
-  | 'time';
+  | 'time'
+  | (string & {});
 
 export type MatcherCondition = 'and' | 'or';
-export type MatcherPart = 'body' | 'header' | 'all' | 'status' | 'response';
+/** Known matcher parts plus any string the YAML parser may encounter. */
+export type MatcherPart = 'body' | 'header' | 'all' | 'status' | 'response' | (string & {});
 
 export interface MatcherNodeData {
   name?: string;
@@ -113,6 +118,30 @@ export type NucleiFlowNodeData =
   | ({ nodeType: 'flowNode' } & FlowNodeData);
 
 export type NucleiFlowNode = Node<NucleiFlowNodeData, NucleiNodeType>;
+
+/**
+ * One member of the node-data union, selected by its `nodeType` discriminant.
+ *
+ * Exists because `NucleiFlowNode` above is `Node<NucleiFlowNodeData, NucleiNodeType>`: the data is a
+ * union *and* the node-type parameter is the union of all node types, so a `node.type` check cannot
+ * narrow `node.data`. Reading a node's data therefore needs an assertion — and because a union member
+ * is assignable to the union, that assertion is a plain narrowing and does **not** need the double-cast
+ * hop that every read site used to carry.
+ */
+export type NucleiNodeDataOf<T extends NucleiFlowNodeData['nodeType']> = Extract<
+  NucleiFlowNodeData,
+  { nodeType: T }
+>;
+
+/**
+ * The correlated sibling of `NucleiFlowNode`: `data` and `type` are pinned to the *same* member.
+ *
+ * `NodeProps<T>` in React Flow v12 takes the whole **node** type, not the data type, so a renderer
+ * that statically knows which node it draws is declared `NodeProps<NucleiFlowNodeOf<'matcherNode'>>`
+ * — and then `data` arrives already narrowed, with no assertion at the call site at all.
+ */
+export type NucleiFlowNodeOf<T extends NucleiNodeType> = Node<NucleiNodeDataOf<T>, T>;
+
 export type NucleiFlowEdge = Edge<{ edgeType?: NucleiEdgeType; label?: string }>;
 
 export interface FlowDiagnostic {

@@ -25,6 +25,11 @@ import {
   executeAddScopeTargetAiTool,
   executeRemoveScopeTargetAiTool,
 } from './live-traffic';
+import {
+  executeListJobsAiTool,
+  executeGetJobStatusAiTool,
+  executeCancelJobAiTool,
+} from './jobs';
 import { addTrackedAction, completeTrackedAction } from './tracker';
 
 async function dispatchToolExecution(toolName: string, args: Record<string, any>): Promise<any> {
@@ -60,7 +65,7 @@ async function dispatchToolExecution(toolName: string, args: Record<string, any>
       return executeToggleInterceptAiTool(args);
 
     case 'forward_paused_request':
-      return executeForwardPausedRequestAiTool();
+      return executeForwardPausedRequestAiTool(args);
 
     case 'drop_paused_request':
       return executeDropPausedRequestAiTool();
@@ -84,6 +89,16 @@ async function dispatchToolExecution(toolName: string, args: Record<string, any>
 
     case 'remove_scope_target':
       return executeRemoveScopeTargetAiTool(args);
+
+    // Background Job Tools
+    case 'list_jobs':
+      return executeListJobsAiTool(args);
+
+    case 'get_job_status':
+      return executeGetJobStatusAiTool(args);
+
+    case 'cancel_job':
+      return executeCancelJobAiTool(args);
 
     default:
       throw new Error(`Unknown AI Tool capability: ${toolName}`);

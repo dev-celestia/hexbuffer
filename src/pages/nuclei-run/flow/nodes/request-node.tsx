@@ -2,7 +2,7 @@ import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { GlobeIcon, StopCircleIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
-import type { NucleiFlowNode, RequestNodeData } from '../types';
+import type { NucleiFlowNodeOf } from '../types';
 
 const METHOD_COLORS: Record<string, string> = {
   GET: 'bg-sky-500/15 text-sky-500 border-sky-500/30',
@@ -12,8 +12,10 @@ const METHOD_COLORS: Record<string, string> = {
   PATCH: 'bg-purple-500/15 text-purple-500 border-purple-500/30',
 };
 
-export function RequestNode({ data, selected }: NodeProps<NucleiFlowNode>) {
-  const nodeData = data as unknown as RequestNodeData;
+export function RequestNode({
+  data: nodeData,
+  selected,
+}: NodeProps<NucleiFlowNodeOf<'requestNode'>>) {
   const methodClass = METHOD_COLORS[nodeData.method] || 'bg-muted text-foreground border-border';
   const displayPath = nodeData.path?.[0] || '{{BaseURL}}/';
 

@@ -23,6 +23,7 @@ import {
 import { deleteConnectedWires } from '../lib/node-capabilities';
 import { createAutomationNode, hasTriggerNode as hasAnyTriggerNode } from '../lib/node-factory';
 import type {
+  AutomationNode,
   AutomationNodeType,
   AutomationNodeData,
 } from '../types';
@@ -51,9 +52,7 @@ export function useWorkflowCanvas(
   const runWorkflow = useAutomationStore((s) => s.runWorkflow);
   const workflowIdRef = React.useRef(activeWorkflowId);
 
-  const [nodes, setNodes] = useNodesState(
-    (workflow?.nodes ?? []) as unknown as Node[]
-  );
+  const [nodes, setNodes] = useNodesState(workflow?.nodes ?? []);
   const [edges, setEdges] = useEdgesState(
     normalizeAutomationEdges(workflow?.edges ?? [])
   );
@@ -154,7 +153,7 @@ export function useWorkflowCanvas(
       event.preventDefault();
       const rect = reactFlowWrapper.current?.getBoundingClientRect();
       if (!rect) return;
-      const nodeData = node.data as unknown as { label?: string };
+      const nodeData = (node as AutomationNode).data;
       setNodeContextMenu({
         x: event.clientX - rect.left,
         y: event.clientY - rect.top,
@@ -201,7 +200,7 @@ export function useWorkflowCanvas(
       setNodes((nds) => {
         const nextNodes = nds.map((n) => {
           if (n.id !== nodeId) return n;
-          return { ...n, data: data as unknown as Record<string, unknown> };
+          return { ...n, data };
         });
         persist(nextNodes, edgesRef.current);
         return nextNodes;
@@ -221,7 +220,7 @@ export function useWorkflowCanvas(
       if (!newNode) return;
 
       setNodes((nds) => {
-        const nextNodes = [...nds, newNode as unknown as Node];
+        const nextNodes = [...nds, newNode];
         persist(nextNodes, edgesRef.current);
         return nextNodes;
       });
@@ -249,7 +248,7 @@ export function useWorkflowCanvas(
       const newNode = createAutomationNode(nodeType, position);
       if (!newNode) return;
       setNodes((nds) => {
-        const nextNodes = [...nds, newNode as unknown as Node];
+        const nextNodes = [...nds, newNode];
         persist(nextNodes, edgesRef.current);
         return nextNodes;
       });
@@ -348,7 +347,7 @@ export function useWorkflowCanvas(
   }, [deleteEdge]);
 
   const onNodesChange = React.useCallback(
-    (changes: NodeChange[]) => {
+    (changes: NodeChange<AutomationNode>[]) => {
       setNodes((nds) => {
         const nextNodes = applyNodeChanges(changes, nds);
         persist(nextNodes, edgesRef.current);

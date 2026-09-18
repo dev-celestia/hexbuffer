@@ -13,7 +13,8 @@ import {
 } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import type {
-  NucleiFlowNode,
+  NucleiFlowNodeOf,
+  NucleiNodeType,
   TemplateInfoNodeData,
   RequestNodeData,
   ExtractorNodeData,
@@ -21,8 +22,22 @@ import type {
   FlowNodeData,
 } from '../types';
 
+/**
+ * A selected node with `type` and `data` re-correlated.
+ *
+ * `NucleiFlowNode` is `Node<NucleiFlowNodeData, NucleiNodeType>` — the data is a union *and* the
+ * node-type parameter is the union of all node types — so a `type === '…'` test cannot narrow
+ * `node.data`. This type is the same Node shape with `data` and `type` pinned to the *same* member,
+ * so destructured discriminant narrowing works and every branch below reads `data` already narrowed;
+ * each branch then only has to *widen* it back to the interface its markup was written against,
+ * which is a checked assignment rather than an assertion.
+ */
+export type InspectableNucleiNode = {
+  [T in NucleiNodeType]: NucleiFlowNodeOf<T>;
+}[NucleiNodeType];
+
 interface NucleiFlowInspectorProps {
-  node: NucleiFlowNode | null;
+  node: InspectableNucleiNode | null;
   onClose: () => void;
 }
 
@@ -116,7 +131,7 @@ export function NucleiFlowInspector({
       >
         {/* Template Info Node */}
         {type === 'templateInfo' && (() => {
-          const tData = data as unknown as TemplateInfoNodeData;
+          const tData: TemplateInfoNodeData = data;
           return (
             <div className="flex flex-col gap-3">
               <div>
@@ -166,7 +181,7 @@ export function NucleiFlowInspector({
 
         {/* Request Node */}
         {type === 'requestNode' && (() => {
-          const rData = data as unknown as RequestNodeData;
+          const rData: RequestNodeData = data;
           return (
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
@@ -204,7 +219,7 @@ export function NucleiFlowInspector({
 
         {/* Matcher Node */}
         {type === 'matcherNode' && (() => {
-          const mData = data as unknown as MatcherNodeData;
+          const mData: MatcherNodeData = data;
           return (
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
@@ -248,7 +263,7 @@ export function NucleiFlowInspector({
 
         {/* Extractor Node */}
         {type === 'extractorNode' && (() => {
-          const eData = data as unknown as ExtractorNodeData;
+          const eData: ExtractorNodeData = data;
           return (
             <div className="flex flex-col gap-3">
               <div>
@@ -285,7 +300,7 @@ export function NucleiFlowInspector({
 
         {/* Flow Logic Node */}
         {type === 'flowNode' && (() => {
-          const fData = data as unknown as FlowNodeData;
+          const fData: FlowNodeData = data;
           return (
             <div className="flex flex-col gap-2">
               <span className="text-[11px] font-medium text-muted-foreground">Flow Logic Script (Nuclei v3)</span>

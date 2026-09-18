@@ -59,19 +59,24 @@ function StorageRowDelete({ artifact, label, description, deletingArtifact, onDe
 
   return (
     <AlertDialog open={open} onOpenChange={(next) => { if (!isDeleting) setOpen(next); }}>
-      <AlertDialogTrigger>
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={isDeleting || deletingArtifact !== null}
-        >
-          {isDeleting ? (
-            <CircleNotchIcon className="mr-1.5 size-3.5 animate-spin" />
-          ) : (
-            <TrashIcon className="mr-1.5 size-3.5" />
-          )}
-          {isDeleting ? 'Clearing…' : 'Clear'}
-        </Button>
+      {/* Base UI has no `asChild` — the element goes on `render` and its children stay on the
+          trigger. Passing `<Button>` as a *child* instead nests a `<button>` inside the trigger's
+          own `<button>`: invalid HTML, a React warning, and two tab stops for one control. */}
+      <AlertDialogTrigger
+        render={
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={isDeleting || deletingArtifact !== null}
+          />
+        }
+      >
+        {isDeleting ? (
+          <CircleNotchIcon className="mr-1.5 size-3.5 animate-spin" />
+        ) : (
+          <TrashIcon className="mr-1.5 size-3.5" />
+        )}
+        {isDeleting ? 'Clearing…' : 'Clear'}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -262,19 +267,21 @@ export function GeneralSettingsTab({ settings }: Readonly<GeneralSettingsTabProp
         {/* Delete all data */}
         <SettingsRow label="Delete all data" description="Deletes the SQLite database, browser artifacts, intercept browser profile, CA certificates, and settings files. The app will reload to a fresh state.">
           <AlertDialog>
-            <AlertDialogTrigger>
-              <Button
-                size="sm"
-                variant="destructive"
-                disabled={deletingAllData}
-              >
-                {deletingAllData ? (
-                  <CircleNotchIcon className="mr-1.5 size-3.5 animate-spin" />
-                ) : (
-                  <TrashIcon className="mr-1.5 size-3.5" />
-                )}
-                {deletingAllData ? 'Deleting…' : 'Delete'}
-              </Button>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  disabled={deletingAllData}
+                />
+              }
+            >
+              {deletingAllData ? (
+                <CircleNotchIcon className="mr-1.5 size-3.5 animate-spin" />
+              ) : (
+                <TrashIcon className="mr-1.5 size-3.5" />
+              )}
+              {deletingAllData ? 'Deleting…' : 'Delete'}
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
