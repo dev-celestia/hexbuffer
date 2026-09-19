@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
 import type { HashType, TabMode, AttackConfig, TargetHash, HashcatAvailability } from '../types';
 import { useAttackEngine } from './use-attack-engine';
+import { toErrorMessage } from '@/lib/ipc';
 
 export function useHashPage() {
   // Tab management
@@ -42,7 +43,7 @@ export function useHashPage() {
             available: false,
             path: null,
             version: null,
-            error: error instanceof Error ? error.message : String(error),
+            error: toErrorMessage(error, 'Unknown error'),
           });
         }
       });

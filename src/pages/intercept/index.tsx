@@ -334,11 +334,11 @@ export function InterceptPage() {
             )}
           >
             <ResizablePanelGroup orientation="horizontal" className="h-full">
-              <ResizablePanel defaultSize={35} minSize={20}>
+              <ResizablePanel defaultSize="35" minSize="20">
                 <InterceptQueuePanel />
               </ResizablePanel>
               <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={65} minSize={30}>
+              <ResizablePanel defaultSize="65" minSize="30">
                 <InterceptRequestPanel />
               </ResizablePanel>
             </ResizablePanelGroup>

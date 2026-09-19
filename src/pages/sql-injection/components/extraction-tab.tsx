@@ -42,7 +42,7 @@ export function ExtractionTab({
     <div className="flex-1 min-h-0 h-full flex bg-background">
       <ResizablePanelGroup orientation="horizontal" className="h-full w-full">
         {/* Databases Column Panel */}
-        <ResizablePanel defaultSize={20} minSize={15} className="flex flex-col h-full">
+        <ResizablePanel defaultSize="20" minSize="15" className="flex flex-col h-full">
           <div className="p-2 border-b bg-muted/10 shrink-0 flex items-center justify-between h-9 select-none">
             <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
               Databases
@@ -78,7 +78,7 @@ export function ExtractionTab({
         <ResizableHandle withHandle />
 
         {/* Tables Column Panel */}
-        <ResizablePanel defaultSize={20} minSize={15} className="flex flex-col h-full border-r-0">
+        <ResizablePanel defaultSize="20" minSize="15" className="flex flex-col h-full border-r-0">
           <div className="p-2 border-b bg-muted/10 shrink-0 flex items-center justify-between h-9 select-none">
             <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
               Tables
@@ -125,7 +125,7 @@ export function ExtractionTab({
         <ResizableHandle withHandle />
 
         {/* Data Rows Column Panel */}
-        <ResizablePanel defaultSize={60} minSize={30} className="flex flex-col h-full">
+        <ResizablePanel defaultSize="60" minSize="30" className="flex flex-col h-full">
           <div className="p-2 border-b bg-muted/10 flex items-center justify-between shrink-0 h-9 select-none">
             <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider truncate">
               Data: {selectedTable || 'Select Table'}

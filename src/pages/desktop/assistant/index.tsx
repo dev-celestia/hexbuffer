@@ -48,6 +48,8 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: Readonl
     contextWindow,
     selectedAgent,
     setSelectedAgent,
+    isAutonomous,
+    setIsAutonomous,
     debugDialogOpen,
     setDebugDialogOpen,
     handleOpenConfig,
@@ -206,6 +208,8 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: Readonl
             onModelChange={handleModelChange}
             selectedAgent={selectedAgent}
             onSelectAgent={setSelectedAgent}
+            autonomous={isAutonomous}
+            onAutonomousChange={setIsAutonomous}
           />
         </div>
       </div>

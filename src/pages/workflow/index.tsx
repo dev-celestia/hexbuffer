@@ -53,12 +53,12 @@ export function AutomationPage() {
         >
           <ResizablePanel
             id="automation-canvas-panel"
-            defaultSize={page.selectedNode ? 60 : 100}
+            defaultSize={page.selectedNode ? "60" : "100"}
             minSize="420px"
             className="min-w-0"
           >
             <ResizablePanelGroup orientation="vertical" className="h-full min-h-0">
-              <ResizablePanel defaultSize={75} minSize={30}>
+              <ResizablePanel defaultSize="75" minSize="30">
                 <div
                   className={cn(
                     // Layout & Positioning
@@ -93,7 +93,7 @@ export function AutomationPage() {
               {page.showExecutionLog && (
                 <>
                   <ResizableHandle withHandle />
-                  <ResizablePanel defaultSize={25} minSize={10}>
+                  <ResizablePanel defaultSize="25" minSize="10">
                     <div
                       className={cn(
                         // Layout & Positioning

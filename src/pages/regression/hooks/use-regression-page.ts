@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
+import { invokeTauri, toErrorMessage } from '@/lib/ipc';
 import { useRegressionStore } from '@/stores/regression';
 import { STARTER_YAML } from '../constants';
 import type {
@@ -46,7 +46,9 @@ export function useRegressionPage() {
   const [isValidating, setIsValidating] = useState(false);
 
   useEffect(() => {
-    loadScripts().catch((error) => toast.error(`Failed to load test cases: ${error}`));
+    loadScripts().catch((error) =>
+      toast.error(`Failed to load test cases: ${toErrorMessage(error, 'Unknown error')}`),
+    );
   }, [loadScripts]);
 
   const activeScript = useMemo(
@@ -110,7 +112,7 @@ export function useRegressionPage() {
       setValidation(null);
       toast.success('Test case created');
     } catch (error) {
-      toast.error(`Failed to create test case: ${error}`);
+      toast.error(`Failed to create test case: ${toErrorMessage(error, 'Unknown error')}`);
     }
   }, [activeScript, saveScript]);
 
@@ -129,12 +131,12 @@ export function useRegressionPage() {
     if (!effectiveDraft) return;
     setIsValidating(true);
     try {
-      const result = await invoke<ValidationResult>('validate_regression_script', {
+      const result = await invokeTauri<ValidationResult>('validate_regression_script', {
         yaml: effectiveDraft.yaml,
       });
       setValidation(result);
     } catch (error) {
-      toast.error(`Validation failed: ${error}`);
+      toast.error(`Validation failed: ${toErrorMessage(error, 'Unknown error')}`);
     } finally {
       setIsValidating(false);
     }
@@ -144,7 +146,7 @@ export function useRegressionPage() {
     if (!effectiveDraft || !activeScriptId) return;
     setIsSaving(true);
     try {
-      const result = await invoke<ValidationResult>('validate_regression_script', {
+      const result = await invokeTauri<ValidationResult>('validate_regression_script', {
         yaml: effectiveDraft.yaml,
       });
       setValidation(result);
@@ -165,7 +167,7 @@ export function useRegressionPage() {
       setIsDirty(false);
       toast.success('Test case saved');
     } catch (error) {
-      toast.error(`Failed to save test case: ${error}`);
+      toast.error(`Failed to save test case: ${toErrorMessage(error, 'Unknown error')}`);
     } finally {
       setIsSaving(false);
     }
@@ -183,7 +185,7 @@ export function useRegressionPage() {
         }
         toast.success('Test case deleted');
       } catch (error) {
-        toast.error(`Failed to delete test case: ${error}`);
+        toast.error(`Failed to delete test case: ${toErrorMessage(error, 'Unknown error')}`);
       }
     },
     [activeScriptId, scripts, deleteScript],
@@ -203,7 +205,7 @@ export function useRegressionPage() {
       await runScript(activeScriptId);
       setActiveTab('run');
     } catch (error) {
-      toast.error(`Failed to start run: ${error}`);
+      toast.error(`Failed to start run: ${toErrorMessage(error, 'Unknown error')}`);
     }
   }, [activeScriptId, effectiveDraft, isDirty, runScript]);
 

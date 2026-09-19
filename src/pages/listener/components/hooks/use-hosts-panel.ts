@@ -9,6 +9,7 @@ import type {
   CreatePayloadRequest,
   ListenerPayload,
 } from '../../types';
+import { toErrorMessage } from '@/lib/ipc';
 
 export const SERVER_FORM_SCHEMA = z.object({
   name: z.string().trim().min(1, 'Name is required.'),
@@ -121,7 +122,7 @@ export function useHostsPanel({
       }
     } catch (error) {
       form.setError('root', {
-        message: error instanceof Error ? error.message : String(error),
+        message: toErrorMessage(error, 'Unknown error'),
       });
       return;
     }

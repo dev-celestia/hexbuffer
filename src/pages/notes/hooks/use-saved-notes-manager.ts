@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { toast } from 'sonner';
+import { toErrorMessage } from '@/lib/ipc';
 import { useScratchpadStore, type Scratchpad } from '@/stores/scratchpad';
 import type { NoteFilterTab, NoteSortOption } from '../types';
 import { downloadAsMarkdown, copyNoteToClipboard } from '../lib/helpers';
@@ -153,7 +154,7 @@ export function useSavedNotesManager(onCloseModal?: () => void) {
           description: `"${note.name}" is now available to the AI as context.`,
         });
       } catch (error) {
-        toast.error(`Failed to promote note: ${error}`);
+        toast.error(`Failed to promote note: ${toErrorMessage(error, 'Unknown error')}`);
       }
     },
     [notes]

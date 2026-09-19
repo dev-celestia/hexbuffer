@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
 import { useNotificationStore } from './notifications';
+import { toErrorMessage } from '@/lib/ipc';
 
 export type ProxyStatus = 'connected' | 'disconnected' | 'starting' | 'stopping';
 
@@ -160,7 +161,7 @@ export const useAppStore = create<AppState>()(
           broadcastProxyStatus(status);
         } catch (error) {
           console.error('[store] Failed to start proxy:', error);
-          const errMsg = error instanceof Error ? error.message : String(error);
+          const errMsg = toErrorMessage(error, 'Unknown error');
           useNotificationStore.getState().addAlert({
             title: 'Proxy Failed to Start',
             message: errMsg,
@@ -199,7 +200,7 @@ export const useAppStore = create<AppState>()(
           const status = await invoke<ProxyRuntimeStatus>('get_proxy_status');
           useNotificationStore.getState().addAlert({
             title: 'Proxy Stop Error',
-            message: error instanceof Error ? error.message : String(error),
+            message: toErrorMessage(error, 'Unknown error'),
             type: 'error',
             source: 'Proxy',
           });

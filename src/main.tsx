@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { MotionConfig } from "motion/react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { AppErrorBoundary } from "@/components/error-boundary";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppLayout } from "@/layout";
 
@@ -113,7 +114,10 @@ function Root() {
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <MotionConfig reducedMotion="user">
-      <Root />
+      {/* Outermost boundary — a crash anywhere below keeps a reload affordance on screen. */}
+      <AppErrorBoundary>
+        <Root />
+      </AppErrorBoundary>
     </MotionConfig>
   </React.StrictMode>
 );

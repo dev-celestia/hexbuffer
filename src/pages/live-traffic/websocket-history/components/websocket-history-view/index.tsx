@@ -10,14 +10,14 @@ export function WebSocketHistoryView() {
 
   return (
     <ResizablePanelGroup orientation="vertical" className="flex-1 min-w-0">
-      <ResizablePanel defaultSize={60}>
+      <ResizablePanel defaultSize="60">
         <WebSocketTable
           selectedConnectionId={selectedConnectionId}
           onSelectConnection={setSelectedConnectionId}
         />
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={40}>
+      <ResizablePanel defaultSize="40">
         <WebSocketEntryView selectedConnectionId={selectedConnectionId} />
       </ResizablePanel>
     </ResizablePanelGroup>

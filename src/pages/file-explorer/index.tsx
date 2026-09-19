@@ -305,8 +305,8 @@ export function FileExplorerPage() {
                 <ResizablePanel
                   panelRef={detailsPanelRef}
                   collapsible
-                  collapsedSize={0}
-                  defaultSize={0}
+                  collapsedSize="0"
+                  defaultSize="0"
                   minSize="18"
                   maxSize="40"
                 >

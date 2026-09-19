@@ -16,6 +16,7 @@ import { ArrowClockwiseIcon, CopyIcon, BugIcon } from '@phosphor-icons/react';
 import { invoke } from '@tauri-apps/api/core';
 import { cn } from '@/lib/utils';
 import type { AiDebugSnapshot } from '../types';
+import { toErrorMessage } from '@/lib/ipc';
 
 interface AiDebugDialogProps {
   open: boolean;
@@ -125,7 +126,7 @@ export function AiDebugDialog({
       });
       setSnapshot(result);
     } catch (err) {
-      setError(String(err));
+      setError(toErrorMessage(err, 'Unknown error'));
     } finally {
       setLoading(false);
     }

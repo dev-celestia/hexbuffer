@@ -1,6 +1,7 @@
 use parking_lot::Mutex;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use uteke_core::{RecallStrategy, Uteke};
 
@@ -69,6 +70,20 @@ pub struct EngineStatusDto {
 #[derive(Clone)]
 pub struct UtekeEngine {
     inner: Arc<Mutex<Uteke>>,
+    /// Whether the local embedder is usable. Seeded from on-disk model presence
+    /// at startup and set for real by [`UtekeEngine::warm_up`].
+    embedder_ready: Arc<AtomicBool>,
+}
+
+/// On-disk evidence that first-run setup already ran: the ONNX graph and its
+/// weight bundle download together and are sha256-verified, so their presence
+/// means a previous run finished the ~200 MB fetch.
+fn model_files_present() -> bool {
+    let Ok(home) = uteke_core::uteke_home() else {
+        return false;
+    };
+    let onnx_dir = home.join("models").join("embeddinggemma-q4").join("onnx");
+    onnx_dir.join("model_q4.onnx").is_file() && onnx_dir.join("model_q4.onnx_data").is_file()
 }
 
 fn memory_to_dto(m: uteke_core::Memory, score: Option<f32>, edges_count: usize) -> MemoryItemDto {
@@ -109,7 +124,23 @@ impl UtekeEngine {
 
         Ok(Self {
             inner: Arc::new(Mutex::new(uteke)),
+            embedder_ready: Arc::new(AtomicBool::new(model_files_present())),
         })
+    }
+
+    /// Runs first-run setup: initializes ONNX Runtime, downloads the
+    /// EmbeddingGemma model bundle (~200 MB, one-time) and loads the session.
+    ///
+    /// Blocking for the whole download — call it from a blocking context. Once
+    /// the ORT library fails to load, uteke caches that failure for the life of
+    /// the process, so a retry after installing the runtime needs an app restart.
+    pub fn warm_up(&self) -> Result<(), String> {
+        let engine = self.inner.lock();
+        engine
+            .embed_text("hexbuffer memory engine warm-up")
+            .map_err(|e| e.to_string())?;
+        self.embedder_ready.store(true, Ordering::Release);
+        Ok(())
     }
 
     /// Auto-migrates old `context_bank_entries` from Apprecon's legacy SQLite DB if present.
@@ -480,7 +511,7 @@ impl UtekeEngine {
             engine: "Uteke (Hybrid Fusion)".to_string(),
             model: "EmbeddingGemma Q4 (768d, CPU-only)".to_string(),
             total_memories: total,
-            is_ready: true,
+            is_ready: self.embedder_ready.load(Ordering::Acquire),
         })
     }
 }

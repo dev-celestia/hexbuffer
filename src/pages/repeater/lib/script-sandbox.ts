@@ -1,4 +1,5 @@
 import type { TestResult } from '@/stores/collections';
+import { toErrorMessage } from '@/lib/ipc';
 
 interface SandboxRequest {
   url: string;
@@ -103,7 +104,7 @@ export function runScriptSandbox(
         testFn();
         testResults.push({ name, passed: true });
       } catch (err: any) {
-        testResults.push({ name, passed: false, message: err.message || String(err) });
+        testResults.push({ name, passed: false, message: toErrorMessage(err, 'Unknown error') });
       }
     },
     log: (...args: any[]) => {
@@ -132,7 +133,7 @@ export function runScriptSandbox(
     testResults.push({
       name: 'Script execution error',
       passed: false,
-      message: err.message || String(err)
+      message: toErrorMessage(err, 'Unknown error')
     });
   }
 

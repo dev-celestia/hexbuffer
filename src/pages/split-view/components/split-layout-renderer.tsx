@@ -21,7 +21,7 @@ export function SplitLayoutRenderer({
   if (layout === 'split-2') {
     return (
       <ResizablePanelGroup orientation="horizontal" className="h-full w-full min-h-0">
-        <ResizablePanel defaultSize={50} minSize={20}>
+        <ResizablePanel defaultSize="50" minSize="20">
           <SplitSlot
             slotId="slot-0"
             appHref={slots['slot-0'] ?? null}
@@ -33,7 +33,7 @@ export function SplitLayoutRenderer({
 
         <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize={50} minSize={20}>
+        <ResizablePanel defaultSize="50" minSize="20">
           <SplitSlot
             slotId="slot-1"
             appHref={slots['slot-1'] ?? null}
@@ -49,7 +49,7 @@ export function SplitLayoutRenderer({
   if (layout === 'split-3') {
     return (
       <ResizablePanelGroup orientation="horizontal" className="h-full w-full min-h-0">
-        <ResizablePanel defaultSize={50} minSize={20}>
+        <ResizablePanel defaultSize="50" minSize="20">
           <SplitSlot
             slotId="slot-0"
             appHref={slots['slot-0'] ?? null}
@@ -61,9 +61,9 @@ export function SplitLayoutRenderer({
 
         <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize={50} minSize={20}>
+        <ResizablePanel defaultSize="50" minSize="20">
           <ResizablePanelGroup orientation="vertical" className="h-full w-full min-h-0">
-            <ResizablePanel defaultSize={50} minSize={20}>
+            <ResizablePanel defaultSize="50" minSize="20">
               <SplitSlot
                 slotId="slot-1"
                 appHref={slots['slot-1'] ?? null}
@@ -75,7 +75,7 @@ export function SplitLayoutRenderer({
 
             <ResizableHandle withHandle />
 
-            <ResizablePanel defaultSize={50} minSize={20}>
+            <ResizablePanel defaultSize="50" minSize="20">
               <SplitSlot
                 slotId="slot-2"
                 appHref={slots['slot-2'] ?? null}
@@ -93,9 +93,9 @@ export function SplitLayoutRenderer({
   // layout === 'split-4' (four screen grid)
   return (
     <ResizablePanelGroup orientation="vertical" className="h-full w-full min-h-0">
-      <ResizablePanel defaultSize={50} minSize={20}>
+      <ResizablePanel defaultSize="50" minSize="20">
         <ResizablePanelGroup orientation="horizontal" className="h-full w-full min-h-0">
-          <ResizablePanel defaultSize={50} minSize={20}>
+          <ResizablePanel defaultSize="50" minSize="20">
             <SplitSlot
               slotId="slot-0"
               appHref={slots['slot-0'] ?? null}
@@ -107,7 +107,7 @@ export function SplitLayoutRenderer({
 
           <ResizableHandle withHandle />
 
-          <ResizablePanel defaultSize={50} minSize={20}>
+          <ResizablePanel defaultSize="50" minSize="20">
             <SplitSlot
               slotId="slot-1"
               appHref={slots['slot-1'] ?? null}
@@ -121,9 +121,9 @@ export function SplitLayoutRenderer({
 
       <ResizableHandle withHandle />
 
-      <ResizablePanel defaultSize={50} minSize={20}>
+      <ResizablePanel defaultSize="50" minSize="20">
         <ResizablePanelGroup orientation="horizontal" className="h-full w-full min-h-0">
-          <ResizablePanel defaultSize={50} minSize={20}>
+          <ResizablePanel defaultSize="50" minSize="20">
             <SplitSlot
               slotId="slot-2"
               appHref={slots['slot-2'] ?? null}
@@ -135,7 +135,7 @@ export function SplitLayoutRenderer({
 
           <ResizableHandle withHandle />
 
-          <ResizablePanel defaultSize={50} minSize={20}>
+          <ResizablePanel defaultSize="50" minSize="20">
             <SplitSlot
               slotId="slot-3"
               appHref={slots['slot-3'] ?? null}

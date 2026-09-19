@@ -47,7 +47,7 @@ export function HttpHistoryView({
       id="http-history-view"
       className="h-full min-w-0"
     >
-      <ResizablePanel id="http-history-table" defaultSize={selectedCallId ? 60 : 100} minSize={20} className="min-w-0">
+      <ResizablePanel id="http-history-table" defaultSize={selectedCallId ? "60" : "100"} minSize="20" className="min-w-0">
         <div className="h-full overflow-hidden min-w-0" style={{ width: '100%', ...coverStyle }}>
           <TrafficTable
             activeTabId={activeTabId}
@@ -64,7 +64,7 @@ export function HttpHistoryView({
             withHandle
             onPointerDown={handlePointerDown}
           />
-          <ResizablePanel id="http-history-detail" defaultSize={40} minSize={15} className="bg-muted">
+          <ResizablePanel id="http-history-detail" defaultSize="40" minSize="15" className="bg-muted">
             <div className="h-full overflow-hidden" style={coverStyle}>
               <LogDetailView />
             </div>

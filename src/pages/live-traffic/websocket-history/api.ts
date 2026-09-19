@@ -1,48 +1,5 @@
-import { invoke } from '@tauri-apps/api/core';
+import { invokeTauri } from '@/lib/ipc';
 import type { PaginatedResponse } from '@/types';
-
-declare global {
-  interface Window {
-    __TAURI_INTERNALS__?: unknown;
-  }
-}
-
-function toErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
-  if (typeof error === 'string' && error.trim().length > 0) {
-    return error;
-  }
-
-  if (error && typeof error === 'object') {
-    const maybeMessage = 'message' in error ? error.message : undefined;
-    if (typeof maybeMessage === 'string' && maybeMessage.trim().length > 0) {
-      return maybeMessage;
-    }
-
-    try {
-      return JSON.stringify(error);
-    } catch {
-      return fallback;
-    }
-  }
-
-  return fallback;
-}
-
-async function invokeTauri<T>(command: string, args?: Record<string, unknown>): Promise<T> {
-  if (typeof window !== 'undefined' && !window.__TAURI_INTERNALS__) {
-    throw new Error('Tauri backend is unavailable. Start the desktop app with `pnpm tauri`, not `pnpm dev`.');
-  }
-
-  try {
-    return await invoke<T>(command, args);
-  } catch (error) {
-    throw new Error(toErrorMessage(error, `Failed to run Tauri command: ${command}`));
-  }
-}
 
 export interface WebSocketFilter {
   search: string | null;

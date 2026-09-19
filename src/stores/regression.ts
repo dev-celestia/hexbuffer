@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
+import { invokeTauri } from '@/lib/ipc';
 import type {
   RegressionCondition,
   RegressionFinding,
@@ -51,12 +51,12 @@ export const useRegressionStore = create<RegressionState>()((set, get) => ({
   progress: null,
 
   loadScripts: async () => {
-    const scripts = await invoke<RegressionScript[]>('list_regression_scripts');
+    const scripts = await invokeTauri<RegressionScript[]>('list_regression_scripts');
     set({ scripts });
   },
 
   saveScript: async (script) => {
-    const saved = await invoke<RegressionScript>('save_regression_script', {
+    const saved = await invokeTauri<RegressionScript>('save_regression_script', {
       script: {
         id: script.id,
         name: script.name,
@@ -73,7 +73,7 @@ export const useRegressionStore = create<RegressionState>()((set, get) => ({
   },
 
   deleteScript: async (id) => {
-    await invoke('delete_regression_script', { id });
+    await invokeTauri('delete_regression_script', { id });
     const runsByScript = { ...get().runsByScript };
     delete runsByScript[id];
     set({
@@ -85,14 +85,14 @@ export const useRegressionStore = create<RegressionState>()((set, get) => ({
   },
 
   loadRuns: async (scriptId) => {
-    const runs = await invoke<RegressionRun[]>('list_regression_script_runs', {
+    const runs = await invokeTauri<RegressionRun[]>('list_regression_script_runs', {
       scriptId,
     });
     set({ runsByScript: { ...get().runsByScript, [scriptId]: runs } });
   },
 
   runScript: async (scriptId, options) => {
-    const result = await invoke<{ runId: string }>('run_regression_script', {
+    const result = await invokeTauri<{ runId: string }>('run_regression_script', {
       scriptId,
       concurrency: options?.concurrency ?? null,
       rateLimitRps: options?.rateLimitRps ?? null,
@@ -115,7 +115,7 @@ export const useRegressionStore = create<RegressionState>()((set, get) => ({
     const activeRun = get().activeRun;
     if (!activeRun) return;
     try {
-      await invoke('abort_regression_run', { runId: activeRun.runId });
+      await invokeTauri('abort_regression_run', { runId: activeRun.runId });
       set({ activeRun: { ...activeRun, status: 'aborted' } });
     } catch (error) {
       console.error('Failed to abort regression run:', error);

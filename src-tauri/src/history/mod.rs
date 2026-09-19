@@ -701,6 +701,68 @@ impl HistoryBridge {
             .map_err(|e| e.to_string())
     }
 
+    // ── Spooled Tool Outputs ───────────────────────────────────────
+
+    pub fn insert_tool_output(
+        &self,
+        handle: &str,
+        tool_name: &str,
+        session_id: &str,
+        content: &str,
+    ) -> Result<(), String> {
+        self.db
+            .insert_tool_output(handle, tool_name, session_id, content)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn get_tool_output(
+        &self,
+        handle: &str,
+    ) -> Result<Option<crate::db::repository::tool_outputs::SpooledToolOutput>, String> {
+        self.db.get_tool_output(handle).map_err(|e| e.to_string())
+    }
+
+    // ── Engagement State ───────────────────────────────────────────
+
+    pub fn get_engagement_state(
+        &self,
+        session_id: &str,
+    ) -> Result<
+        Option<(
+            crate::ai::types::EngagementPlan,
+            Vec<crate::ai::types::EngagementLedgerEntry>,
+        )>,
+        String,
+    > {
+        self.db
+            .get_engagement_state(session_id)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn upsert_engagement_state(
+        &self,
+        session_id: &str,
+        plan: &crate::ai::types::EngagementPlan,
+        ledger: &[crate::ai::types::EngagementLedgerEntry],
+    ) -> Result<(), String> {
+        self.db
+            .upsert_engagement_state(session_id, plan, ledger)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn update_plan_item(
+        &self,
+        session_id: &str,
+        item_id: &str,
+        status: &str,
+        evidence: Option<&str>,
+        reason: Option<&str>,
+    ) -> Result<crate::ai::types::EngagementPlan, String> {
+        self.db
+            .update_plan_item(session_id, item_id, status, evidence, reason)
+            .map_err(|e| e.to_string())
+    }
+
     // ── Token Usage ────────────────────────────────────────────────
 
     pub fn insert_token_usage(&self, record: &TokenUsageRecord) -> Result<(), String> {

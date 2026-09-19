@@ -2,6 +2,8 @@ import * as React from 'react';
 import {
   ArrowClockwiseIcon,
   BrainIcon,
+  CircleNotchIcon,
+  DownloadSimpleIcon,
   MagnifyingGlassIcon,
   MoonStarsIcon,
   PlusIcon,
@@ -39,6 +41,8 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
     selectedType,
     setSelectedType,
     engineStatus,
+    isEngineInitializing,
+    handleInitializeEngine,
     handleRefresh,
     handleOpenCreate,
     setIsDreamDialogOpen,
@@ -237,8 +241,58 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
             <p className="text-muted-foreground">
               Embeddings & graph relationships run locally on device.
             </p>
+            {engineStatus && !engineStatus.isReady && (
+              <p className="text-amber-500 mt-0.5">
+                Embedding model not loaded yet — run the one-time setup to enable hybrid recall.
+              </p>
+            )}
           </TooltipContent>
         </Tooltip>
+
+        {/* First-run engine setup: initializes ONNX Runtime and downloads the local model.
+            Gated on a loaded status so an unknown engine does not flash the prompt. */}
+        {engineStatus && !engineStatus.isReady && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => void handleInitializeEngine()}
+            disabled={isEngineInitializing}
+            className={cn(
+              // Layout & Positioning
+              "flex items-center gap-1.5",
+
+              // Sizing & Spacing
+              "h-7 px-2.5",
+
+              // Typography
+              "text-xs"
+            )}
+            title="Initialize ONNX Runtime and download the local embedding model (~200MB, one-time)"
+          >
+            {isEngineInitializing ? (
+              <CircleNotchIcon
+                className={cn(
+                  // Sizing & Spacing
+                  "size-3.5",
+
+                  // Interactive & States
+                  "animate-spin"
+                )}
+              />
+            ) : (
+              <DownloadSimpleIcon
+                className={cn(
+                  // Sizing & Spacing
+                  "size-3.5",
+
+                  // Typography
+                  "text-emerald-500"
+                )}
+              />
+            )}
+            <span>{isEngineInitializing ? 'Setting up…' : 'Set Up Engine'}</span>
+          </Button>
+        )}
 
         {/* Dream Cycle Button */}
         <Button

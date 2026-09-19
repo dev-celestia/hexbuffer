@@ -8,6 +8,7 @@ import type {
   CreateServerRequest,
   ListenerServer,
 } from '../types';
+import { toErrorMessage } from '@/lib/ipc';
 
 export function useListenerPage() {
   const {
@@ -188,7 +189,7 @@ export function useListenerPage() {
         await loadStats();
         await loadPayloads();
       } catch (e) {
-        setLastPollError(e instanceof Error ? e.message : String(e));
+        setLastPollError(toErrorMessage(e, 'Unknown error'));
       }
     };
 

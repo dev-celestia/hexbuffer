@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { toErrorMessage } from '@/lib/ipc';
 
 /**
  * A readable message for a thrown value.
@@ -12,7 +13,7 @@ import { invoke } from '@tauri-apps/api/core';
  * crash that a `throw null` would otherwise cause inside the error path itself.
  */
 function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+  return toErrorMessage(error, 'Unknown error');
 }
 
 export interface Target {

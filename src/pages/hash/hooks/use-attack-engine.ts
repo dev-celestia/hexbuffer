@@ -11,6 +11,7 @@ import type {
   HashType
 } from '../types';
 import { INITIAL_TELEMETRY } from '../constants';
+import { toErrorMessage } from '@/lib/ipc';
 
 interface RustCrackedMatch {
   id: string;
@@ -112,7 +113,7 @@ export function useAttackEngine() {
         await invoke('start_hash_attack', { config: rustConfig });
         toast.success('Hashcat engine started');
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        const message = toErrorMessage(error, 'Unknown error');
         setStatus('error');
         setErrorMessage(message);
         toast.error(`Attack failed to start: ${message}`);

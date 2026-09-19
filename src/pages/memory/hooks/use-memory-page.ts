@@ -10,6 +10,7 @@ import type {
   SaveMemoryPayload,
 } from '../types';
 import { DEFAULT_NAMESPACE } from '../constants';
+import { toErrorMessage } from '@/lib/ipc';
 
 export function useMemoryPage() {
   const [entries, setEntries] = React.useState<MemoryItem[]>([]);
@@ -33,6 +34,7 @@ export function useMemoryPage() {
   const [edgesLoading, setEdgesLoading] = React.useState(false);
 
   const [engineStatus, setEngineStatus] = React.useState<EngineStatus | null>(null);
+  const [isEngineInitializing, setIsEngineInitializing] = React.useState(false);
 
   const loadStatus = React.useCallback(async () => {
     try {
@@ -241,6 +243,25 @@ export function useMemoryPage() {
     }
   }, [selectedNamespace, loadEntries, searchQuery, selectedType]);
 
+  const handleInitializeEngine = React.useCallback(async () => {
+    try {
+      setIsEngineInitializing(true);
+      const status = await invoke<EngineStatus>('initialize_memory_engine');
+      setEngineStatus(status);
+      toast.success('Memory engine ready', {
+        description: 'Embedding model loaded — hybrid recall is now available.',
+      });
+    } catch (err) {
+      console.error('Failed to initialize memory engine:', err);
+      toast.error('Engine setup failed', {
+        description: toErrorMessage(err, 'Unknown error'),
+        duration: 15000,
+      });
+    } finally {
+      setIsEngineInitializing(false);
+    }
+  }, []);
+
   const handleCopyContent = React.useCallback((text: string) => {
     void navigator.clipboard.writeText(text);
     toast.success('Content copied to clipboard');
@@ -282,6 +303,8 @@ export function useMemoryPage() {
     edges,
     edgesLoading,
     engineStatus,
+    isEngineInitializing,
+    handleInitializeEngine,
     handleRefresh,
     handleOpenCreate,
     handleOpenEdit,

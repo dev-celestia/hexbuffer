@@ -4,11 +4,13 @@ pub mod chat_sessions;
 pub mod collaborator;
 pub mod notes;
 pub mod documents;
+pub mod engagement;
 pub mod http_sessions;
 pub mod mock_forge;
 pub mod proxy_logs;
 pub mod regression;
 pub mod token_usage;
+pub mod tool_outputs;
 pub mod types;
 pub mod websocket;
 
@@ -195,6 +197,8 @@ impl Database {
         conn.execute_batch(crate::db::schema::CREATE_CHRONICLE_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_MOCK_FORGE_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_NOTES_TABLES)?;
+        conn.execute_batch(crate::db::schema::CREATE_AI_TOOL_OUTPUTS_TABLE)?;
+        conn.execute_batch(crate::db::schema::CREATE_ENGAGEMENT_STATE_TABLE)?;
         Ok(())
     }
 

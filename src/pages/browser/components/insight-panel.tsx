@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { HighlightedText } from '@/components/highlighted-text';
 
 import { cn } from '@/lib/utils';
+import { toErrorMessage } from '@/lib/ipc';
 import { getSeverityColor } from '@/lib/status-colors';
 import { formatTime } from '../lib/crawl-data';
 import type { AIInsight, CrawlPage } from '../types';
@@ -91,7 +92,7 @@ function AiInsightsPanelComponent({
       toast.success('Saved insight to Memory');
     } catch (error) {
       console.error('Failed to save to Memory:', error);
-      toast.error(`Failed to save to Memory: ${error}`);
+      toast.error(`Failed to save to Memory: ${toErrorMessage(error, 'Unknown error')}`);
     }
   };
 

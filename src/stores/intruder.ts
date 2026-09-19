@@ -19,6 +19,7 @@ import {
   createDefaultAttackConfig,
   syncPositionPayloads,
 } from '@/pages/intruder/types';
+import { toErrorMessage } from '@/lib/ipc';
 
 interface InterceptBypassState {
   bypassPatterns: string[];
@@ -511,7 +512,7 @@ export const useIntruderStore = create<IntruderState>((set, get) => ({
       unlistenProgressByTab.set(tab.id, unlistenProgress);
       unlistenResultByTab.set(tab.id, unlistenResult);
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = toErrorMessage(error, 'Unknown error');
       console.error('Failed to start:', error);
       set((state) => ({
         tabs: state.tabs.map((currentTab) =>

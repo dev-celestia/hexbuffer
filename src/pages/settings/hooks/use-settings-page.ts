@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { toast } from 'sonner';
+import { toErrorMessage } from '@/lib/ipc';
 import { getCaCert, regenerateCaCert, saveCaCert, trustInterceptCa } from '@/pages/live-traffic/http-history/api';
 import { useUpdater } from '@/hooks/use-updater';
 import { useIsMac } from '@/hooks/use-platform';
@@ -174,7 +175,7 @@ export function useSettingsPage() {
     } catch (error) {
       window.localStorage.setItem(LEGACY_AI_KEY_MIGRATION_ATTEMPTED_KEY, 'true');
       console.error('Failed to migrate legacy AI API keys:', error);
-      toast.error(`Failed to migrate saved AI API keys: ${error}`);
+      toast.error(`Failed to migrate saved AI API keys: ${toErrorMessage(error, 'Unknown error')}`);
     }
   }, []);
 
@@ -188,7 +189,7 @@ export function useSettingsPage() {
       setSavedAiSettings(settings);
     } catch (error) {
       console.error('Failed to load AI settings:', error);
-      toast.error(`Failed to load AI settings: ${error}`);
+      toast.error(`Failed to load AI settings: ${toErrorMessage(error, 'Unknown error')}`);
     } finally {
       setAiSettingsLoading(false);
     }
@@ -257,7 +258,7 @@ export function useSettingsPage() {
       toast.success('R2 settings saved successfully');
     } catch (error) {
       console.error('Failed to save R2 settings:', error);
-      toast.error(`Failed to save R2 settings: ${error}`);
+      toast.error(`Failed to save R2 settings: ${toErrorMessage(error, 'Unknown error')}`);
     } finally {
       setR2Saving(false);
     }
@@ -275,7 +276,7 @@ export function useSettingsPage() {
       toast.success('R2 settings cleared');
     } catch (error) {
       console.error('Failed to clear R2 settings:', error);
-      toast.error(`Failed to clear R2 settings: ${error}`);
+      toast.error(`Failed to clear R2 settings: ${toErrorMessage(error, 'Unknown error')}`);
     } finally {
       setR2Saving(false);
     }
@@ -319,7 +320,7 @@ export function useSettingsPage() {
       }, 1000);
     } catch (error) {
       console.error('Failed to delete data:', error);
-      toast.error(`Failed to delete data: ${error}`);
+      toast.error(`Failed to delete data: ${toErrorMessage(error, 'Unknown error')}`);
     } finally {
       setDeletingAllData(false);
     }
@@ -334,7 +335,7 @@ export function useSettingsPage() {
       await refreshStorageInfo();
     } catch (error) {
       console.error('Failed to delete artifact:', error);
-      toast.error(`Failed to delete: ${error}`);
+      toast.error(`Failed to delete: ${toErrorMessage(error, 'Unknown error')}`);
     } finally {
       setDeletingArtifact(null);
     }
@@ -364,7 +365,7 @@ export function useSettingsPage() {
       toast.success(`Certificate saved to ${filePath}`);
     } catch (error) {
       console.error('Failed to download CA certificate:', error);
-      toast.error(`Failed to save certificate: ${error}`);
+      toast.error(`Failed to save certificate: ${toErrorMessage(error, 'Unknown error')}`);
     } finally {
       setDownloading(false);
     }
@@ -377,7 +378,7 @@ export function useSettingsPage() {
       toast.success(message);
     } catch (error) {
       console.error('Failed to install CA certificate:', error);
-      toast.error(`Failed to install certificate: ${error}`);
+      toast.error(`Failed to install certificate: ${toErrorMessage(error, 'Unknown error')}`);
     } finally {
       setInstallingCa(false);
     }
@@ -390,7 +391,7 @@ export function useSettingsPage() {
       toast.success('CA certificate regenerated. You may need to re-install it in your browsers.');
     } catch (error) {
       console.error('Failed to regenerate CA certificate:', error);
-      toast.error(`Failed to regenerate certificate: ${error}`);
+      toast.error(`Failed to regenerate certificate: ${toErrorMessage(error, 'Unknown error')}`);
     } finally {
       setRegeneratingCa(false);
     }
@@ -469,7 +470,7 @@ export function useSettingsPage() {
         return true;
       } catch (error) {
         console.error('Failed to save AI API key:', error);
-        toast.error(`Failed to save AI API key: ${error}`);
+        toast.error(`Failed to save AI API key: ${toErrorMessage(error, 'Unknown error')}`);
         return false;
       } finally {
         setKeyActionProvider(null);
@@ -503,7 +504,7 @@ export function useSettingsPage() {
         return true;
       } catch (error) {
         console.error('Failed to clear AI API key:', error);
-        toast.error(`Failed to clear AI API key: ${error}`);
+        toast.error(`Failed to clear AI API key: ${toErrorMessage(error, 'Unknown error')}`);
         return false;
       } finally {
         setKeyActionProvider(null);
@@ -529,7 +530,7 @@ export function useSettingsPage() {
       toast.success('AI settings saved');
     } catch (error) {
       console.error('Failed to save AI settings:', error);
-      toast.error(`Failed to save AI settings: ${error}`);
+      toast.error(`Failed to save AI settings: ${toErrorMessage(error, 'Unknown error')}`);
     } finally {
       setAiSettingsSaving(false);
     }
@@ -559,7 +560,7 @@ export function useSettingsPage() {
         setSavedAiSettings(saved);
       } catch (error) {
         console.error('Failed to persist third-party AI sharing policy:', error);
-        toast.error(`Failed to save sharing policy: ${error}`);
+        toast.error(`Failed to save sharing policy: ${toErrorMessage(error, 'Unknown error')}`);
       }
     },
     [savedAiSettings, updateAiSettings],
@@ -603,7 +604,7 @@ export function useSettingsPage() {
           : `Proxy listener port saved: ${parsedPort}`
       );
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : `Failed to save proxy port: ${error}`);
+      toast.error(toErrorMessage(error, 'Failed to save proxy port'));
     }
   }, [proxyPortDraft, proxyStatus, saveProxyDefaultPort]);
   const handleResetProxyDefaultPort = React.useCallback(async () => {
@@ -616,7 +617,7 @@ export function useSettingsPage() {
           : 'Proxy listener port reset'
       );
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : `Failed to reset proxy port: ${error}`);
+      toast.error(toErrorMessage(error, 'Failed to reset proxy port'));
     }
   }, [proxyStatus, saveProxyDefaultPort]);
 

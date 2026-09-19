@@ -20,6 +20,7 @@ import {
   getCachedOfficialTemplates,
 } from '@/pages/nuclei-run/lib/nuclei-ipc';
 import type { Severity } from '@/pages/nuclei-run/types';
+import { toErrorMessage } from '@/lib/ipc';
 
 interface NucleiState {
   // Navigation & Tabs
@@ -430,7 +431,7 @@ export const useNucleiStore = create<NucleiState>((set, get) => ({
         syncStatus: {
           ...state.syncStatus,
           isSyncing: false,
-          error: err?.message || String(err),
+          error: toErrorMessage(err, 'Unknown error'),
         },
       }));
     }

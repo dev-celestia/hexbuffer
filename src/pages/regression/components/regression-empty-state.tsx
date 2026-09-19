@@ -1,4 +1,4 @@
-import { FlaskIcon } from '@phosphor-icons/react';
+import { FlaskIcon, PlusIcon } from '@phosphor-icons/react';
 import { Button } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 
@@ -11,37 +11,60 @@ export function RegressionEmptyState({ onCreate }: Readonly<RegressionEmptyState
     <div
       className={cn(
         // Layout & Positioning
-        'flex flex-col items-center justify-center gap-3 h-full',
+        'flex h-full flex-col items-center justify-center',
 
         // Sizing & Spacing
-        'p-8',
+        'gap-4 p-8',
 
         // Typography
         'text-center'
       )}
     >
-      <FlaskIcon className="h-8 w-8 text-muted-foreground/50" />
       <div
         className={cn(
-          // Typography
-          'text-sm font-semibold'
-        )}
-      >
-        No test case selected
-      </div>
-      <p
-        className={cn(
-          // Sizing & Spacing
-          'max-w-sm',
+          // Layout & Positioning
+          'flex items-center justify-center',
 
-          // Typography
-          'text-[11px] text-muted-foreground'
+          // Sizing & Spacing
+          'size-12',
+
+          // Backgrounds & Borders
+          'rounded-full border border-border/60 bg-muted/40'
         )}
       >
-        Create a test case, write its regression conditions as Nuclei YAML, then run it against
-        your target. A matcher hit counts as a passed condition.
-      </p>
+        <FlaskIcon className="size-6 text-muted-foreground/60" />
+      </div>
+
+      <div
+        className={cn(
+          // Layout & Positioning
+          'flex flex-col items-center gap-1.5'
+        )}
+      >
+        <span
+          className={cn(
+            // Typography
+            'text-sm font-semibold text-foreground'
+          )}
+        >
+          No test case selected
+        </span>
+        <p
+          className={cn(
+            // Sizing & Spacing
+            'max-w-sm',
+
+            // Typography
+            'text-xs leading-relaxed text-muted-foreground'
+          )}
+        >
+          Create a test case, write its regression conditions as Nuclei YAML, then run it against
+          your target. A matcher hit counts as a passed condition.
+        </p>
+      </div>
+
       <Button size="sm" onClick={onCreate}>
+        <PlusIcon className="size-3.5" weight="bold" />
         New Test Case
       </Button>
     </div>

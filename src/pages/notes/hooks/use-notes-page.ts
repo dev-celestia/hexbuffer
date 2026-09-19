@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { toast } from 'sonner';
+import { toErrorMessage } from '@/lib/ipc';
 import { useScratchpadStore } from '@/stores/scratchpad';
 import type { PageTabItem } from '@/layout/tabs-layout/types';
 import type { TextEditorInstance, MonacoInstance } from '@celestia-project/ui';
@@ -211,7 +212,7 @@ export function useNotesPage() {
         description: `"${activeNote.name}" is now available to the AI as context.`,
       });
     } catch (error) {
-      toast.error(`Failed to promote note: ${error}`);
+      toast.error(`Failed to promote note: ${toErrorMessage(error, 'Unknown error')}`);
     }
   }, [activeNote]);
 

@@ -3,6 +3,7 @@ import { getVersion } from '@tauri-apps/api/app';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { check } from '@tauri-apps/plugin-updater';
 import type { DownloadEvent, Update } from '@tauri-apps/plugin-updater';
+import { toErrorMessage } from '@/lib/ipc';
 
 type DownloadProgressPhase = 'idle' | 'downloading' | 'installing' | 'installed' | 'failed';
 
@@ -27,7 +28,7 @@ function toUpdaterErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return String(error);
+  return toErrorMessage(error, 'Unknown error');
 }
 
 export function useUpdater() {

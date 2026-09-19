@@ -34,6 +34,7 @@ import {
   selectEndpoint,
   selectCollection,
 } from '@/triggers/repeater';
+import { toErrorMessage } from '@/lib/ipc';
 
 
 export function useCollectionsTree(workspaceId: string) {
@@ -247,7 +248,7 @@ export function useCollectionsTree(workspaceId: string) {
     try {
       await exportCollectionsToFile();
     } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
+      const message = toErrorMessage(e, 'Unknown error');
       toast.error(message || 'Failed to export collections');
     }
   }, []);
@@ -259,7 +260,7 @@ export function useCollectionsTree(workspaceId: string) {
       setPendingImport(result);
       setImportDialogOpen(true);
     } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
+      const message = toErrorMessage(e, 'Unknown error');
       toast.error(message || 'Failed to import collections');
     }
   }, []);

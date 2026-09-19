@@ -5,6 +5,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { toast } from 'sonner';
 import type { MockDomain, MockRoute, RequestLog, MockServerConfig, MockServerStatus } from '../types';
+import { toErrorMessage } from '@/lib/ipc';
 
 export function useMockApiPage() {
   const {
@@ -89,7 +90,7 @@ export function useMockApiPage() {
       toast.success(`Mock API server started on http://127.0.0.1:${status.port}`);
       return status;
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = toErrorMessage(err, 'Unknown error');
       toast.error(`Failed to start Mock API server: ${msg}`);
       throw err;
     } finally {

@@ -8,6 +8,7 @@ import {
   generateKeyPairPem,
 } from '../lib/jwt-helpers';
 import { useJwtStore } from '@/stores/jwt-store';
+import { toErrorMessage } from '@/lib/ipc';
 
 export type { JwtMode } from '../types';
 
@@ -115,7 +116,7 @@ export function useJwtPage() {
           : `Generated new ${genAlgorithm} private key (PEM)`,
       );
     } catch (err) {
-      toast.error(`Key generation failed: ${err instanceof Error ? err.message : String(err)}`);
+      toast.error(`Key generation failed: ${toErrorMessage(err, 'Unknown error')}`);
     } finally {
       setGeneratingKey(false);
     }

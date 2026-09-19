@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { invoke } from '@tauri-apps/api/core';
 import { toast } from 'sonner';
+import { toErrorMessage } from '@/lib/ipc';
 
 // ── Types (mirroring Rust StashRecord, StashEndpointRecord, etc.) ──
 
@@ -706,7 +707,7 @@ export const useCollectionsStore = create<CollectionsState>()(
           await invoke('delete_stash_endpoint', { id: ep.id });
         } catch (e) {
           console.error(`Failed to delete endpoint ${ep.id}:`, e);
-          errors.push(String(e));
+          errors.push(toErrorMessage(e, 'Unknown error'));
         }
       }
 
@@ -716,7 +717,7 @@ export const useCollectionsStore = create<CollectionsState>()(
           await invoke('delete_stash', { id: stashId });
         } catch (e) {
           console.error(`Failed to delete stash ${stashId}:`, e);
-          errors.push(String(e));
+          errors.push(toErrorMessage(e, 'Unknown error'));
         }
       }
 
@@ -791,7 +792,7 @@ export const useCollectionsStore = create<CollectionsState>()(
           stashesImported++;
         } catch (e) {
           console.error(`Failed to import stash ${st.id}:`, e);
-          errors.push(`Stash "${st.name}": ${String(e)}`);
+          errors.push(`Stash "${st.name}": ${toErrorMessage(e, 'Unknown error')}`);
         }
       }
 
@@ -801,7 +802,7 @@ export const useCollectionsStore = create<CollectionsState>()(
           endpointsImported++;
         } catch (e) {
           console.error(`Failed to import endpoint ${ep.id}:`, e);
-          errors.push(`Endpoint "${ep.name}": ${String(e)}`);
+          errors.push(`Endpoint "${ep.name}": ${toErrorMessage(e, 'Unknown error')}`);
         }
       }
 

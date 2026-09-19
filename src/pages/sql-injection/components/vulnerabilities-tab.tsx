@@ -47,7 +47,7 @@ export function VulnerabilitiesTab({
     <div className="flex-1 min-h-0 h-full flex flex-col bg-background">
       <ResizablePanelGroup orientation="horizontal" className="h-full w-full">
         {/* Vulnerabilities Table Panel */}
-        <ResizablePanel defaultSize={68} minSize={40} className="flex flex-col h-full">
+        <ResizablePanel defaultSize="68" minSize="40" className="flex flex-col h-full">
           <ScrollArea className="flex-1 min-h-0">
             <Table className="text-xs border-b">
               <TableHeader className="sticky top-0 z-10 bg-muted/95 border-b backdrop-blur-sm shadow-sm select-none">
@@ -106,7 +106,7 @@ export function VulnerabilitiesTab({
             <ResizableHandle withHandle />
             
             {/* Vulnerability Details Panel */}
-            <ResizablePanel defaultSize={32} minSize={20} className="flex flex-col h-full bg-card/45">
+            <ResizablePanel defaultSize="32" minSize="20" className="flex flex-col h-full bg-card/45">
               <div className="flex h-9 shrink-0 items-center justify-between border-b bg-muted/15 px-3 select-none">
                 <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
                   Vulnerability Details

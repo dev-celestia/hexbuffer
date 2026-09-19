@@ -65,6 +65,8 @@ export function useAiChatPane() {
     stop,
     selectedAgent,
     setSelectedAgent,
+    isAutonomous,
+    setIsAutonomous,
   } = useAssistantChat({
     sessionId: activeSessionId,
     setMessagesRef,
@@ -231,6 +233,8 @@ export function useAiChatPane() {
     contextWindow,
     selectedAgent,
     setSelectedAgent,
+    isAutonomous,
+    setIsAutonomous,
     debugDialogOpen,
     setDebugDialogOpen,
     handleOpenConfig,

@@ -9,6 +9,7 @@ import {
   findRequestPayloadPositions,
   parseRawRequest,
 } from '../../types';
+import { toErrorMessage } from '@/lib/ipc';
 
 export interface InvokerMarkerSuggestion {
   id: string;
@@ -249,7 +250,7 @@ export function useRequestTab() {
       setSelectedSuggestionIds(new Set(validSuggestions.map((suggestion) => suggestion.id)));
       setSuggestionsDialogOpen(true);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : String(error));
+      toast.error(toErrorMessage(error, 'Unknown error'));
     } finally {
       setAutoMarkLoading(false);
     }

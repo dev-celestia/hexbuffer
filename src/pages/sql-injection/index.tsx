@@ -114,7 +114,7 @@ export function SqlInjectionPage() {
 
         <ResizablePanelGroup orientation="horizontal" className="flex-1 min-h-0">
           {/* Left: parameters config */}
-          <ResizablePanel defaultSize={25} minSize={18} maxSize={45}>
+          <ResizablePanel defaultSize="25" minSize="18" maxSize="45">
             <div
               className={cn(
                 // Layout & Positioning
@@ -146,7 +146,7 @@ export function SqlInjectionPage() {
           <ResizableHandle withHandle />
 
           {/* Right: results tabs */}
-          <ResizablePanel defaultSize={75} minSize={40}>
+          <ResizablePanel defaultSize="75" minSize="40">
             <div
               className={cn(
                 // Layout & Positioning

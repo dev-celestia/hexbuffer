@@ -10,6 +10,7 @@ import { copyText } from '@/lib/clipboard';
 import { getMimeType } from '../lib/mime';
 import { safePathSegments } from '../lib/path';
 import type { R2Item, R2Credentials } from '../types';
+import { toErrorMessage } from '@/lib/ipc';
 
 export interface R2UploadProgressEvent {
   fileName: string;
@@ -128,7 +129,7 @@ export function useFileExplorer() {
         toast.success(`Bucket '${clean}' created on R2`);
       } catch (err) {
         console.warn('R2 bucket creation failed, fallback to local registration:', err);
-        const errMsg = String(err);
+        const errMsg = toErrorMessage(err, 'Unknown error');
         if (errMsg.includes('BucketAlreadyExists') || errMsg.includes('BucketAlreadyOwnedByYou')) {
           toast.info(`Bucket '${clean}' already exists, registered locally`);
         } else {

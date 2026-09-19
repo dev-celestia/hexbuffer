@@ -176,8 +176,8 @@ export function ListenerInteractions({
         >
           <ResizablePanel
             id="listener-interactions-list"
-            defaultSize={selectedInteraction ? 60 : 100}
-            minSize={20}
+            defaultSize={selectedInteraction ? "60" : "100"}
+            minSize="20"
             className="min-w-0 flex flex-col"
           >
             <div className="min-h-0 flex-1 overflow-auto" style={coverStyle}>
@@ -351,8 +351,8 @@ export function ListenerInteractions({
               <ResizableHandle withHandle onPointerDown={handlePointerDown} />
               <ResizablePanel
                 id="listener-interactions-detail"
-                defaultSize={40}
-                minSize={15}
+                defaultSize="40"
+                minSize="15"
                 className="bg-background border-t"
               >
                 <div className="h-full overflow-hidden" style={coverStyle}>

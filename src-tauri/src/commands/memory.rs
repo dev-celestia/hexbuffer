@@ -117,6 +117,19 @@ pub async fn list_memory_namespaces(
 }
 
 #[tauri::command]
+pub async fn initialize_memory_engine(
+    engine: State<'_, UtekeEngine>,
+) -> Result<EngineStatusDto, String> {
+    let engine = engine.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        engine.warm_up()?;
+        engine.status()
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
 pub async fn get_memory_engine_status(
     engine: State<'_, UtekeEngine>,
 ) -> Result<EngineStatusDto, String> {

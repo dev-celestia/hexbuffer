@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 
 import { FloatingLinkCardData, FLOATING_LINK_CARD_BASE_Z } from '../constants';
 import { Footer } from './footer';
+import { toErrorMessage } from '@/lib/ipc';
 
 const PEEK_OFFSET_PX = 8;
 const PEEK_SCALE_STEP = 0.04;
@@ -94,7 +95,7 @@ export function FloatingCard({
       toast.success(`Certificate saved to ${filePath}`);
     } catch (error) {
       console.error('Failed to download CA certificate:', error);
-      toast.error(`Failed to save certificate: ${error instanceof Error ? error.message : String(error)}`);
+      toast.error(`Failed to save certificate: ${toErrorMessage(error, 'Unknown error')}`);
     } finally {
       setDownloading(false);
     }

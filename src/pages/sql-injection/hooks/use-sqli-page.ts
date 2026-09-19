@@ -11,6 +11,7 @@ import type {
   SqliProgressEvent,
 } from '../types';
 import { exportAsJson, exportAsCsv } from '../lib/export-helpers';
+import { toErrorMessage } from '@/lib/ipc';
 
 export interface ProgressState {
   current: number;
@@ -166,7 +167,7 @@ export function useSqliPage() {
         setSelectedDb(result.databases[0].name);
       }
     } catch (scanError) {
-      setError(scanError instanceof Error ? scanError.message : String(scanError));
+      setError(toErrorMessage(scanError, 'Unknown error'));
     } finally {
       setIsRunning(false);
       unlisteners.forEach(u => u());

@@ -1,4 +1,5 @@
 import type { JwtAlgorithm, JwtDecoded, JwtVulnerability } from '../types';
+import { toErrorMessage } from '@/lib/ipc';
 
 // ── Base64url ─────────────────────────────────────────────
 
@@ -346,7 +347,7 @@ export async function signJwt(
       return `${data}.${base64UrlEncodeBytes(new Uint8Array(signature))}`;
     } catch (err) {
       throw new Error(
-        `Failed to sign with HMAC (${algorithm}): ${err instanceof Error ? err.message : String(err)}`,
+        `Failed to sign with HMAC (${algorithm}): ${toErrorMessage(err, 'Unknown error')}`,
       );
     }
   }

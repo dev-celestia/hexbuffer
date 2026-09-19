@@ -51,11 +51,19 @@ function makeState(overrides: Record<string, unknown> = {}): MemoryPageState {
     selectedType: 'all',
     setSelectedType: noop,
     engineStatus: { isReady: true, totalMemories: 42, model: 'bge-small-en-v1.5 (ONNX)' },
+    isEngineInitializing: false,
+    handleInitializeEngine: noop,
     handleRefresh: noop,
     handleOpenCreate: noop,
     setIsDreamDialogOpen: noop,
     ...overrides,
   } as unknown as MemoryPageState;
+}
+
+function findSetupButton(container: HTMLDivElement): HTMLButtonElement | undefined {
+  return Array.from(container.querySelectorAll('button')).find((button) =>
+    button.textContent?.includes('Set Up Engine')
+  );
 }
 
 function render(state: MemoryPageState): HTMLDivElement {
@@ -90,6 +98,60 @@ describe('memory toolbar engine badge', () => {
     const html = render(makeState({ engineStatus: null })).innerHTML;
     expect(html).toContain('Uteke: 0 memories');
     expect(html).toContain('text-amber-500');
+  });
+});
+
+describe('memory toolbar engine setup', () => {
+  test('offers the one-time setup while the engine is not ready', () => {
+    const container = render(
+      makeState({ engineStatus: { isReady: false, totalMemories: 3, model: 'EmbeddingGemma Q4' } })
+    );
+
+    const setup = findSetupButton(container);
+    expect(setup).not.toBeUndefined();
+    expect(setup?.disabled).toBe(false);
+  });
+
+  test('hides the setup once the engine is ready', () => {
+    // The ready state ships the model already on disk, so the prompt must not linger.
+    expect(findSetupButton(render(makeState()))).toBeUndefined();
+  });
+
+  test('clicking setup runs the engine warm-up', () => {
+    let started = 0;
+    const container = render(
+      makeState({
+        engineStatus: { isReady: false, totalMemories: 0, model: 'EmbeddingGemma Q4' },
+        handleInitializeEngine: () => {
+          started += 1;
+        },
+      })
+    );
+
+    const setup = findSetupButton(container);
+    act(() => {
+      setup?.click();
+    });
+
+    expect(started).toBe(1);
+  });
+
+  test('a warm-up in flight disables the button and reports progress', () => {
+    const container = render(
+      makeState({
+        engineStatus: { isReady: false, totalMemories: 0, model: 'EmbeddingGemma Q4' },
+        isEngineInitializing: true,
+      })
+    );
+
+    // The download takes minutes — the label has to say so, and a second click
+    // must not launch a second fetch.
+    expect(findSetupButton(container)).toBeUndefined();
+    const setup = Array.from(container.querySelectorAll('button')).find((button) =>
+      button.textContent?.includes('Setting up')
+    );
+    expect(setup).not.toBeUndefined();
+    expect(setup?.disabled).toBe(true);
   });
 });
 

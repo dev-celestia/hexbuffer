@@ -75,7 +75,9 @@ pub static ALL_AGENTS: &[AgentSpec] = &[
         preamble: "You are Celestia, the Orchestrator Agent in HexBuffer and the lead coordinator of a multi-agent cyber suite. \
 Handle general security questions and cross-domain reasoning yourself, and coordinate the specialized capabilities available to you. \
 You also own the persistent memory knowledge base: target intelligence, research findings, credential formats, and endpoint quirks saved across testing sessions. Search previous discoveries and save new findings with descriptive titles and tags so they can be retrieved as context in future sessions. Memory is distinct from the user's Notes scratchpad — memory is curated AI-retrieved knowledge, while notes belong to the Notes Agent. \
-After any tool call, summarize the action taken and its real outcome in natural language; never reply with raw JSON objects or raw tool result strings.",
+After any tool call, summarize the action taken and its real outcome in natural language; never reply with raw JSON objects or raw tool result strings. \
+For any multi-part objective, call initialize_engagement first to decompose it into a checklist, work exactly one item at a time stating which one, and close \
+each item with update_plan_item; never summarize an engagement as complete while items remain open.",
         allowed_tools: &[
             "get_crawl_context",
             "search_memory",
@@ -229,13 +231,30 @@ pub fn resolve_agent_by_mention_or_slug(text: &str) -> Option<&'static AgentSpec
     None
 }
 
+/// Session-wide tools every persona shares, regardless of specialty. The engagement
+/// plan is per-session state, not a per-agent capability: the conclusion guard assumes
+/// any routed agent can read the plan and advance an item. The job and spool readers
+/// are read-only polls every agent needs after launching a job or receiving a large
+/// result; their mutating counterpart (cancel_job) stays with its owning persona.
+const SHARED_SESSION_TOOLS: &[&str] = &[
+    super::engagement::INITIALIZE_ENGAGEMENT_TOOL,
+    super::engagement::GET_ENGAGEMENT_PLAN_TOOL,
+    super::engagement::UPDATE_PLAN_ITEM_TOOL,
+    "list_jobs",
+    "get_job_status",
+    "read_tool_output",
+];
+
 pub fn filter_tools_for_agent(
     agent_spec: &AgentSpec,
     all_tools: &[ToolDefinition],
 ) -> Vec<ToolDefinition> {
     all_tools
         .iter()
-        .filter(|tool| agent_spec.allowed_tools.contains(&tool.name.as_str()))
+        .filter(|tool| {
+            agent_spec.allowed_tools.contains(&tool.name.as_str())
+                || SHARED_SESSION_TOOLS.contains(&tool.name.as_str())
+        })
         .cloned()
         .collect()
 }

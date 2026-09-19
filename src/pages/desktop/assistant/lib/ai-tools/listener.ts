@@ -4,6 +4,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { addPendingToolConfirmation, clearPendingToolConfirmations, describeToolResult } from './confirmation';
 import { executeAiToolCall } from './executor';
 import type { AppAiToolCallPayload } from './types';
+import { toErrorMessage } from '@/lib/ipc';
 
 // Matches CONFIRMATION_TIMEOUT_SECS in src-tauri/src/ai/tool_loop.rs so the card stops
 // being executable at the same moment the backend stops waiting.
@@ -46,7 +47,7 @@ export async function setupAiToolEventListener(): Promise<UnlistenFn> {
           message: describeToolResult(result),
         });
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
+        const message = toErrorMessage(err, 'Unknown error');
         console.error(`[AI Tool Dispatcher] Error executing ${tool_name}:`, err);
         await invoke('resolve_ai_tool_result', { id, token, success: false, message }).catch(
           () => {},

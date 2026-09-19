@@ -19,6 +19,7 @@ import type {
   WordlistItemWithStatus,
   WordlistManifestItem,
 } from '../types';
+import { toErrorMessage } from '@/lib/ipc';
 
 const CACHE_KEY = 'hexbuffer_wordlists_manifest_cache';
 
@@ -183,7 +184,7 @@ export function useWordlistsHub() {
           );
         }
       } catch (err) {
-        toast.error(`Failed to load wordlists: ${err instanceof Error ? err.message : String(err)}`);
+        toast.error(`Failed to load wordlists: ${toErrorMessage(err, 'Unknown error')}`);
       } finally {
         setLoading(false);
       }
@@ -300,7 +301,7 @@ export function useWordlistsHub() {
 
         toast.success(`Downloaded "${item.name}"`);
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
+        const message = toErrorMessage(err, 'Unknown error');
         setItems((prev) =>
           prev.map((i) => (i.id === item.id ? { ...i, status: 'error', error: message } : i))
         );
@@ -413,7 +414,7 @@ export function useWordlistsHub() {
           setPreviewContent(previewLines);
         }
       } catch (err) {
-        setPreviewContent(`[Preview unavailable: ${err instanceof Error ? err.message : String(err)}]`);
+        setPreviewContent(`[Preview unavailable: ${toErrorMessage(err, 'Unknown error')}]`);
       } finally {
         setPreviewLoading(false);
       }

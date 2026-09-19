@@ -5,6 +5,7 @@ import { ALL_NAV_ITEMS, getAppIconImage, getAppIconFilePath, hasAppIcon } from '
 import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { DEFAULT_ICON_COLORS } from '../constants';
 import { openSubAppWindow, normalizeSubAppTarget } from '@/lib/sub-window';
+import { toErrorMessage } from '@/lib/ipc';
 
 interface UseDesktopIconOptions {
   href: string;
@@ -30,7 +31,7 @@ export function useDesktopIcon({ href, label, onNavigateCurrent }: UseDesktopIco
     try {
       await openSubAppWindow(href, label);
     } catch (err) {
-      toast.error(`Failed to open ${label} window: ${String(err)}`);
+      toast.error(`Failed to open ${label} window: ${toErrorMessage(err, 'Unknown error')}`);
     }
   }, [href, label]);
 
@@ -55,7 +56,7 @@ export function useDesktopIcon({ href, label, onNavigateCurrent }: UseDesktopIco
       });
       toast.success(`Pinned "${label}" to your OS Desktop!`, { id: toastId });
     } catch (err) {
-      toast.error(`Failed to create desktop shortcut: ${String(err)}`, { id: toastId });
+      toast.error(`Failed to create desktop shortcut: ${toErrorMessage(err, 'Unknown error')}`, { id: toastId });
     }
   }, [canPinToDesktop, toolTarget, href, label]);
 

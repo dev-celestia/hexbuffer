@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+import { invokeTauri, isTauriAvailable } from '@/lib/ipc';
 import type { Scratchpad } from '@/stores/scratchpad';
 
 /** Wire shape of a note row. Timestamps are RFC3339 strings, matching the SQLite column type. */
@@ -10,52 +10,7 @@ interface NoteRecord {
   updatedAt: string;
 }
 
-declare global {
-  interface Window {
-    __TAURI_INTERNALS__?: unknown;
-  }
-}
-
-export function isTauriAvailable(): boolean {
-  return typeof window !== 'undefined' && Boolean(window.__TAURI_INTERNALS__);
-}
-
-function toErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
-  if (typeof error === 'string' && error.trim().length > 0) {
-    return error;
-  }
-
-  if (error && typeof error === 'object') {
-    const maybeMessage = 'message' in error ? error.message : undefined;
-    if (typeof maybeMessage === 'string' && maybeMessage.trim().length > 0) {
-      return maybeMessage;
-    }
-
-    try {
-      return JSON.stringify(error);
-    } catch {
-      return fallback;
-    }
-  }
-
-  return fallback;
-}
-
-async function invokeTauri<T>(command: string, args?: Record<string, unknown>): Promise<T> {
-  if (!isTauriAvailable()) {
-    throw new Error('Tauri backend is unavailable. Start the desktop app with `pnpm tauri`, not `pnpm dev`.');
-  }
-
-  try {
-    return await invoke<T>(command, args);
-  } catch (error) {
-    throw new Error(toErrorMessage(error, `Failed to run Tauri command: ${command}`));
-  }
-}
+export { isTauriAvailable };
 
 /** Epoch millis (the frontend representation) to RFC3339, or '' to let the backend assign it. */
 function toIsoString(ms: number | undefined): string {

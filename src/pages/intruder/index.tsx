@@ -309,7 +309,7 @@ export function IntruderPage() {
                     </div>
                   ) : (
                     <ResizablePanelGroup orientation="vertical" className="h-full">
-                      <ResizablePanel defaultSize={50} minSize={25}>
+                      <ResizablePanel defaultSize="50" minSize="25">
                         <div
                           className={cn(
                             // Layout & Positioning
@@ -323,7 +323,7 @@ export function IntruderPage() {
                         </div>
                       </ResizablePanel>
                       <ResizableHandle withHandle />
-                      <ResizablePanel defaultSize={50} minSize={25}>
+                      <ResizablePanel defaultSize="50" minSize="25">
                         <div
                           className={cn(
                             // Layout & Positioning
@@ -362,7 +362,7 @@ export function IntruderPage() {
               /* Standard Split Layout with Resizable Panels */
               <ResizablePanelGroup orientation="horizontal" className="h-full">
                 {/* Left Column: Attack configurations and Request templates */}
-                <ResizablePanel defaultSize={45} minSize={30}>
+                <ResizablePanel defaultSize="45" minSize="30">
                   <div
                     className={cn(
                       // Layout & Positioning
@@ -383,7 +383,7 @@ export function IntruderPage() {
                 <ResizableHandle withHandle />
 
                 {/* Right Column: Results & inspector view */}
-                <ResizablePanel defaultSize={55} minSize={30}>
+                <ResizablePanel defaultSize="55" minSize="30">
                   <div
                     className={cn(
                       // Layout & Positioning
@@ -414,7 +414,7 @@ export function IntruderPage() {
                         </div>
                       ) : (
                         <ResizablePanelGroup orientation="vertical" className="h-full">
-                          <ResizablePanel defaultSize={50} minSize={25}>
+                          <ResizablePanel defaultSize="50" minSize="25">
                             <div
                               className={cn(
                                 // Layout & Positioning
@@ -428,7 +428,7 @@ export function IntruderPage() {
                             </div>
                           </ResizablePanel>
                           <ResizableHandle withHandle />
-                          <ResizablePanel defaultSize={50} minSize={25}>
+                          <ResizablePanel defaultSize="50" minSize="25">
                             <div
                               className={cn(
                                 // Layout & Positioning

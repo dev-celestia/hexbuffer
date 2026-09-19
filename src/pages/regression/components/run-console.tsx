@@ -2,18 +2,11 @@ import { ScrollArea } from '@celestia-project/ui';
 import { cn } from '@/lib/utils';
 import type { RunMessage } from '../types';
 
-const LEVEL_CLASS: Record<string, string> = {
-  info: 'text-muted-foreground',
-  success: 'text-emerald-500',
-  error: 'text-red-500',
-  warning: 'text-amber-500',
-};
-
-const LEVEL_LABEL: Record<string, string> = {
-  info: 'INFO',
-  success: 'PASS',
-  error: 'ERROR',
-  warning: 'WARN',
+const LEVEL_META: Record<string, { label: string; className: string }> = {
+  info: { label: 'INFO', className: 'text-muted-foreground' },
+  success: { label: 'PASS', className: 'text-emerald-600 dark:text-emerald-400' },
+  error: { label: 'ERROR', className: 'text-red-600 dark:text-red-400' },
+  warning: { label: 'WARN', className: 'text-amber-600 dark:text-amber-400' },
 };
 
 interface RunConsoleProps {
@@ -25,45 +18,63 @@ export function RunConsole({ messages }: Readonly<RunConsoleProps>) {
     <ScrollArea className="h-full min-h-0">
       <div
         className={cn(
+          // Layout & Positioning
+          'flex flex-col gap-0.5',
+
           // Sizing & Spacing
-          'p-3 flex flex-col gap-1',
+          'px-3 py-2',
 
           // Typography
           'font-mono text-[11px]'
         )}
       >
         {messages.length === 0 && (
-          <span className="text-muted-foreground">
+          <span
+            className={cn(
+              // Typography
+              'text-muted-foreground'
+            )}
+          >
             Run messages will appear here. Press Run to execute the script against the target.
           </span>
         )}
-        {messages.map((message, i) => (
-          <div key={i} className="flex items-start gap-2">
-            <span
+        {messages.map((message, i) => {
+          const meta = LEVEL_META[message.level] ?? LEVEL_META.info;
+          return (
+            <div
+              key={i}
               className={cn(
-                // Sizing & Spacing
-                'shrink-0',
-
-                // Typography
-                LEVEL_CLASS[message.level] ?? 'text-muted-foreground'
+                // Layout & Positioning
+                'flex items-start gap-2'
               )}
             >
-              {LEVEL_LABEL[message.level] ?? 'INFO'}
-            </span>
-            <span
-              className={cn(
-                // Sizing & Spacing
-                'shrink-0',
+              <span
+                className={cn(
+                  // Sizing & Spacing
+                  'w-11 shrink-0',
 
-                // Typography
-                'text-muted-foreground/60'
-              )}
-            >
-              {new Date(message.at).toLocaleTimeString()}
-            </span>
-            <span className="break-all">{message.message}</span>
-          </div>
-        ))}
+                  // Typography
+                  'font-semibold',
+                  meta.className
+                )}
+              >
+                {meta.label}
+              </span>
+              <span
+                className={cn(
+                  // Sizing & Spacing
+                  'shrink-0 tabular-nums',
+
+                  // Typography
+                  'text-muted-foreground/60'
+                )}
+              >
+                {new Date(message.at).toLocaleTimeString()}
+              </span>
+              <span className="min-w-0 break-all text-foreground/90">{message.message}</span>
+            </div>
+          );
+        })}
       </div>
     </ScrollArea>
   );

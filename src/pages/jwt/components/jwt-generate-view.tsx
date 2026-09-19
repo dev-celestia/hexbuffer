@@ -97,7 +97,7 @@ export function JwtGenerateView({
     >
       <ResizablePanelGroup orientation="horizontal" className="h-full">
         {/* Left: Config */}
-        <ResizablePanel defaultSize={50} minSize={30}>
+        <ResizablePanel defaultSize="50" minSize="30">
           <div
             className={cn(
               // Layout & Positioning
@@ -525,7 +525,7 @@ export function JwtGenerateView({
         <ResizableHandle withHandle />
 
         {/* Right: Output */}
-        <ResizablePanel defaultSize={50} minSize={30}>
+        <ResizablePanel defaultSize="50" minSize="30">
           <div
             className={cn(
               // Layout & Positioning

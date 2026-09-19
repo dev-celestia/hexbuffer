@@ -152,6 +152,7 @@ fn main() {
             hexbuffer::commands::memory::link_memory_entries,
             hexbuffer::commands::memory::list_memory_namespaces,
             hexbuffer::commands::memory::get_memory_engine_status,
+            hexbuffer::commands::memory::initialize_memory_engine,
             hexbuffer::commands::notes::list_notes,
             hexbuffer::commands::notes::save_note,
             hexbuffer::commands::notes::import_notes,

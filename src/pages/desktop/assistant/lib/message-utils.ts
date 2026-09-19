@@ -45,3 +45,10 @@ export function providerLabel(message: DashboardChatMessage) {
   const provider = PROVIDER_LABELS[message.metadata.provider] ?? message.metadata.provider;
   return [provider, message.metadata.model].filter(Boolean).join(' ');
 }
+
+/** Notice line for an autonomous continuation pass, mirroring the backend's
+ *  `ai-chat:continuation-started` payload. */
+export function formatContinuationNotice(pass: number, total: number, openItems: number) {
+  const itemWord = openItems === 1 ? 'item' : 'items';
+  return `Autonomous continuation ${pass}/${total} — ${openItems} checklist ${itemWord} still open.`;
+}

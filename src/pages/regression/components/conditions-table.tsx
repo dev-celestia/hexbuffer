@@ -1,6 +1,18 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@celestia-project/ui';
-import { CheckCircleIcon, WarningCircleIcon, MinusCircleIcon } from '@phosphor-icons/react';
-import { Badge } from '@celestia-project/ui';
+import {
+  Badge,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@celestia-project/ui';
+import {
+  CheckCircleIcon,
+  MinusCircleIcon,
+  RowsIcon,
+  WarningCircleIcon,
+} from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import type { RegressionCondition } from '../types';
 import { CONDITION_STATUS_META, SEVERITY_CLASS } from '../constants';
@@ -14,23 +26,39 @@ export function ConditionsTable({ conditions }: Readonly<ConditionsTableProps>) 
     return (
       <div
         className={cn(
-          // Sizing & Spacing
-          'p-4',
+          // Layout & Positioning
+          'flex flex-col items-center justify-center',
 
-          // Typography
-          'text-[11px] text-muted-foreground'
+          // Sizing & Spacing
+          'gap-2 px-4 py-10'
         )}
       >
-        Save and validate the script to see its conditions here.
+        <RowsIcon className="size-6 text-muted-foreground/40" />
+        <p
+          className={cn(
+            // Typography
+            'text-center text-xs text-muted-foreground'
+          )}
+        >
+          No conditions yet — save and validate the script to see them here.
+        </p>
       </div>
     );
   }
 
   return (
     <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-16">Result</TableHead>
+      <TableHeader
+        className={cn(
+          // Layout & Positioning
+          'sticky top-0 z-10',
+
+          // Backgrounds & Borders
+          'border-b bg-muted/95 backdrop-blur-sm'
+        )}
+      >
+        <TableRow className="hover:bg-transparent">
+          <TableHead className="w-20">Result</TableHead>
           <TableHead>Condition</TableHead>
           <TableHead className="w-24">Severity</TableHead>
           <TableHead>Matched URL</TableHead>
@@ -55,12 +83,12 @@ export function ConditionsTable({ conditions }: Readonly<ConditionsTableProps>) 
                   )}
                 >
                   {condition.status === 'passed' && (
-                    <CheckCircleIcon className="h-3.5 w-3.5" weight="fill" />
+                    <CheckCircleIcon className="size-3.5" weight="fill" />
                   )}
                   {condition.status === 'failed' && (
-                    <WarningCircleIcon className="h-3.5 w-3.5" weight="fill" />
+                    <WarningCircleIcon className="size-3.5" weight="fill" />
                   )}
-                  {condition.status === 'pending' && <MinusCircleIcon className="h-3.5 w-3.5" />}
+                  {condition.status === 'pending' && <MinusCircleIcon className="size-3.5" />}
                   {meta.label}
                 </span>
               </TableCell>
@@ -68,7 +96,7 @@ export function ConditionsTable({ conditions }: Readonly<ConditionsTableProps>) 
                 <div
                   className={cn(
                     // Typography
-                    'text-[12px] font-medium'
+                    'text-xs font-medium text-foreground'
                   )}
                 >
                   {condition.name}
@@ -76,7 +104,7 @@ export function ConditionsTable({ conditions }: Readonly<ConditionsTableProps>) 
                 <div
                   className={cn(
                     // Typography
-                    'text-[10px] font-mono text-muted-foreground'
+                    'font-mono text-[10px] text-muted-foreground'
                   )}
                 >
                   {condition.id}
@@ -87,7 +115,7 @@ export function ConditionsTable({ conditions }: Readonly<ConditionsTableProps>) 
                   variant="outline"
                   className={cn(
                     // Typography
-                    'text-[9px] font-mono',
+                    'font-mono text-[10px]',
 
                     // Backgrounds & Borders
                     'border',
@@ -101,7 +129,7 @@ export function ConditionsTable({ conditions }: Readonly<ConditionsTableProps>) 
                 <span
                   className={cn(
                     // Typography
-                    'text-[11px] font-mono text-muted-foreground break-all'
+                    'font-mono text-[11px] break-all text-muted-foreground'
                   )}
                 >
                   {condition.matchedUrl ?? '—'}

@@ -263,6 +263,30 @@ CREATE INDEX IF NOT EXISTS idx_ai_chat_messages_session ON ai_chat_messages(sess
 CREATE INDEX IF NOT EXISTS idx_ai_chat_messages_created ON ai_chat_messages(created_at);
 "#;
 
+pub const CREATE_AI_TOOL_OUTPUTS_TABLE: &str = r#"
+CREATE TABLE IF NOT EXISTS ai_tool_outputs (
+    handle TEXT PRIMARY KEY,
+    tool_name TEXT NOT NULL,
+    session_id TEXT NOT NULL DEFAULT '',
+    content TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_ai_tool_outputs_created ON ai_tool_outputs(created_at);
+"#;
+
+pub const CREATE_ENGAGEMENT_STATE_TABLE: &str = r#"
+CREATE TABLE IF NOT EXISTS ai_engagement_state (
+    session_id TEXT PRIMARY KEY,
+    plan_json TEXT NOT NULL DEFAULT '{"goal":"","scope":[],"items":[]}',
+    ledger_json TEXT NOT NULL DEFAULT '[]',
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY(session_id) REFERENCES ai_chat_sessions(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_ai_engagement_state_updated ON ai_engagement_state(updated_at);
+"#;
+
 pub const CREATE_REGRESSION_TABLES: &str = r#"
 CREATE TABLE IF NOT EXISTS regression_scripts (
     id TEXT PRIMARY KEY,

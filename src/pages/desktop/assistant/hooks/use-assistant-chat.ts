@@ -15,6 +15,7 @@ import {
   resumeActiveAiChat,
 } from '../lib/dashboard-chat-transport';
 import { setupAiToolEventListener } from '../lib/ai-tools/listener';
+import { formatContinuationNotice } from '../lib/message-utils';
 import { clearPendingToolConfirmations } from '../lib/ai-tools/confirmation';
 import { formatAttachedFileContent } from '../lib/file-utils';
 import { useTokenUsageStore } from '@/stores/token-usage';
@@ -37,6 +38,13 @@ const DEFAULT_AI_SETTINGS: DashboardAiSettings = {
 interface PromptInputMessage {
   text: string;
   files: FileUIPart[];
+}
+
+interface ContinuationStartedEvent {
+  requestId: string;
+  pass: number;
+  totalPasses: number;
+  openItems: number;
 }
 
 interface UseAssistantChatOptions {
@@ -88,6 +96,7 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
   const transport = useMemo(() => new DashboardSettingsChatTransport(), []);
 
   const [isPaused, setIsPaused] = useState(false);
+  const [isAutonomous, setIsAutonomous] = useState(false);
 
   const {
     clearError,
@@ -204,6 +213,40 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
       unlistenResumed?.();
     };
   }, []);
+
+  // Surface autonomous continuation passes in the transcript. The backend emits
+  // `ai-chat:continuation-started` before each clean-context pass; the pass summary
+  // itself arrives as a regular `ai-chat:agent-message` bubble.
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let cancelled = false;
+
+    listen<ContinuationStartedEvent>('ai-chat:continuation-started', (event) => {
+      if (cancelled) return;
+      const { pass, totalPasses, openItems } = event.payload;
+      const content = formatContinuationNotice(pass, totalPasses, openItems);
+      const noticeId = `cont-notice-${pass}`;
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === noticeId)) return prev;
+        const notice: DashboardChatMessage = {
+          id: noticeId,
+          role: 'assistant',
+          content,
+          parts: [{ type: 'text', text: content }],
+          createdAt: new Date(),
+        };
+        return [...prev, notice];
+      });
+    }).then((fn) => {
+      if (cancelled) fn();
+      else unlisten = fn;
+    });
+
+    return () => {
+      cancelled = true;
+      unlisten?.();
+    };
+  }, [setMessages]);
 
   const handlePause = useCallback(async () => {
     await pauseActiveAiChat();
@@ -447,6 +490,7 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
             aiSettings: aiSettingsRef.current,
             sessionId,
             targetAgent: selectedAgent !== 'all' ? selectedAgent : undefined,
+            autonomous: isAutonomous,
           },
         },
       );
@@ -456,7 +500,7 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
     } finally {
       submittingRef.current = false;
     }
-  }, [clearError, sendMessage, promptController, sessionId, selectedAgent]);
+  }, [clearError, sendMessage, promptController, sessionId, selectedAgent, isAutonomous]);
 
   const setModel = useCallback((model: string) => {
     setAiSettings((prev) => {
@@ -556,6 +600,8 @@ export function useAssistantChat({ sessionId, setMessagesRef, onSaveMessages }: 
     stop: handleStop,
     selectedAgent,
     setSelectedAgent,
+    isAutonomous,
+    setIsAutonomous,
   };
 }
 

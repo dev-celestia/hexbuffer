@@ -588,6 +588,8 @@ async fn execute_ai_analyze(
         provider: None,
         model: None,
         target_agent: None,
+        active_jobs: None,
+        autonomous: None,
     };
     // Automation-driven analysis has no originating chat window; target the main
     // window. If the model requests tools, events go there and simply time out

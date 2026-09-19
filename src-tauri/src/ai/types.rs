@@ -76,6 +76,19 @@ pub struct WorkspaceInfo {
     pub name: String,
 }
 
+/// A background job live in the webview at send time, mirrored into the run's
+/// context so a fresh model window knows work is already in flight.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ActiveJobInfo {
+    pub id: String,
+    pub kind: String,
+    pub label: String,
+    pub status: String,
+    #[serde(default)]
+    pub progress: Option<u8>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct AiChatRequest {
@@ -92,6 +105,13 @@ pub struct AiChatRequest {
     pub model: Option<String>,
     #[serde(default)]
     pub target_agent: Option<String>,
+    #[serde(default)]
+    pub active_jobs: Option<Vec<ActiveJobInfo>>,
+    /// Opt-in long-horizon mode: when a run ends with open engagement-plan items, the
+    /// backend chains bounded clean-context continuation passes until the plan resolves,
+    /// the budget is spent, or progress stalls.
+    #[serde(default)]
+    pub autonomous: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -280,5 +300,55 @@ pub struct AiDebugSnapshot {
     pub last_messages: Vec<AiChatMessage>,
     pub provider: String,
     pub model: String,
+    pub timestamp: String,
+}
+
+/// One checklist item in an engagement plan. Items are created `open` and may only
+/// move to `confirmed` (with evidence that passes validation) or `dismissed` (with a
+/// reason). Title, priority and test steps are immutable after creation — the model
+/// cannot rewrite the goalposts, only report against them.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EngagementPlanItem {
+    pub id: String,
+    pub title: String,
+    /// "high" | "medium" | "low"; free-form so older rows stay readable.
+    #[serde(default)]
+    pub priority: String,
+    /// "open" | "confirmed" | "dismissed".
+    pub status: String,
+    #[serde(default)]
+    pub test_steps: Vec<String>,
+    #[serde(default)]
+    pub evidence: Option<String>,
+    #[serde(default)]
+    pub reason: Option<String>,
+}
+
+/// The durable decomposition of a user's objective for one chat session: the goal,
+/// the in-scope targets, and the checklist of items that must each be confirmed or
+/// dismissed before the engagement can be called complete.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EngagementPlan {
+    pub goal: String,
+    #[serde(default)]
+    pub scope: Vec<String>,
+    #[serde(default)]
+    pub items: Vec<EngagementPlanItem>,
+}
+
+/// Append-only record of plan-item transitions — the "what happened on the last
+/// shift" log that orients a fresh context window.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EngagementLedgerEntry {
+    pub item_id: String,
+    pub item_title: String,
+    pub status: String,
+    #[serde(default)]
+    pub evidence: Option<String>,
+    #[serde(default)]
+    pub reason: Option<String>,
     pub timestamp: String,
 }

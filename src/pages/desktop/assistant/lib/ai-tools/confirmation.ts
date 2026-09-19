@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { useSyncExternalStore } from 'react';
 import { executeAiToolCall } from './executor';
+import { toErrorMessage } from '@/lib/ipc';
 
 export interface PendingToolConfirmation {
   id: string;
@@ -143,7 +144,7 @@ export async function approveToolConfirmation(id: string): Promise<void> {
       message: describeToolResult(result),
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = toErrorMessage(error, 'Unknown error');
     console.error(`[AI Tool Confirmation] Error executing ${confirmation.toolName}:`, error);
     await invoke('resolve_ai_tool_result', {
       id,

@@ -35,6 +35,7 @@ import {
   PaperclipIcon,
   PauseIcon,
   PlayIcon,
+  SparkleIcon,
 } from '@phosphor-icons/react';
 import type { FileUIPart } from 'ai';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -135,6 +136,8 @@ interface AssistantPromptBarProps {
   onTextareaKeyDown?: (e: any) => void;
   selectedAgent?: AgentId | 'all';
   onSelectAgent?: (agentId: AgentId | 'all') => void;
+  autonomous?: boolean;
+  onAutonomousChange?: (value: boolean) => void;
 }
 
 export function AssistantPromptBar({
@@ -156,6 +159,8 @@ export function AssistantPromptBar({
   onTextareaKeyDown,
   selectedAgent = 'all',
   onSelectAgent,
+  autonomous = false,
+  onAutonomousChange,
 }: Readonly<AssistantPromptBarProps>) {
   const [customHeight, setCustomHeight] = useState<number | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -466,6 +471,39 @@ export function AssistantPromptBar({
                     </ContextContentBody>
                   </ContextContent>
                 </Context>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={isStreaming}
+                  aria-pressed={autonomous}
+                  title={
+                    autonomous
+                      ? 'Autonomous mode on — open checklist items are continued in clean-context passes'
+                      : 'Enable autonomous mode'
+                  }
+                  onClick={() => onAutonomousChange?.(!autonomous)}
+                  className={cn(
+                    // Layout & Positioning
+                    'flex items-center gap-1.5 shrink-0',
+                    // Sizing & Spacing
+                    'h-8 px-2',
+                    // Typography
+                    'text-xs font-normal',
+                    // Backgrounds & Borders
+                    'rounded-md border border-border',
+                    autonomous ? 'bg-accent/60 text-foreground' : 'bg-background',
+                    // Interactive & States
+                    'hover:bg-accent hover:text-foreground transition-colors',
+                  )}
+                >
+                  <SparkleIcon
+                    className={cn('size-3.5 shrink-0', autonomous ? 'text-primary' : 'opacity-60')}
+                    weight={autonomous ? 'fill' : 'regular'}
+                  />
+                  <span>Auto</span>
+                </Button>
               </PromptInputTools>
               <div
                 className={cn(

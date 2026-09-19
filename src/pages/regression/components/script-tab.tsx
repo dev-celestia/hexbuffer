@@ -1,4 +1,9 @@
-import { CheckCircleIcon, FloppyDiskIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import {
+  CheckCircleIcon,
+  FloppyDiskIcon,
+  WarningCircleIcon,
+  WarningDiamondIcon,
+} from '@phosphor-icons/react';
 import {
   Badge,
   Button,
@@ -12,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/theme-provider';
 import type { ScriptDraft, ValidationResult } from '../types';
 import { SEVERITY_CLASS } from '../constants';
+import { PaneHeader } from './pane-header';
 
 interface ScriptTabProps {
   draft: ScriptDraft;
@@ -25,6 +31,11 @@ interface ScriptTabProps {
   onSave: () => void;
 }
 
+const FIELD_LABEL_CLASS = cn(
+  // Typography
+  'text-[11px] font-semibold text-muted-foreground'
+);
+
 export function ScriptTab({
   draft,
   validation,
@@ -37,40 +48,37 @@ export function ScriptTab({
   onSave,
 }: Readonly<ScriptTabProps>) {
   const { theme } = useTheme();
-  const hasErrors = (validation?.errors.length ?? 0) > 0;
+  const errors = validation?.errors ?? [];
+  const hasErrors = errors.length > 0;
 
   return (
     <div
       className={cn(
         // Layout & Positioning
-        'flex flex-col min-h-0 h-full'
+        'flex h-full min-h-0 flex-col'
       )}
     >
       {/* Meta fields */}
       <div
         className={cn(
           // Layout & Positioning
-          'grid grid-cols-2 gap-3 shrink-0',
+          'grid shrink-0 grid-cols-2 gap-3',
 
           // Sizing & Spacing
-          'p-4 pb-3'
+          'border-b border-border/60 p-3'
         )}
       >
         <div
           className={cn(
             // Layout & Positioning
-            'flex flex-col gap-1.5'
+            'flex min-w-0 flex-col gap-1.5'
           )}
         >
-          <label
-            className={cn(
-              // Typography
-              'text-[11px] font-semibold text-muted-foreground'
-            )}
-          >
+          <label className={FIELD_LABEL_CLASS} htmlFor="regression-name">
             Name
           </label>
           <Input
+            id="regression-name"
             value={draft.name}
             onChange={(e) => onChange({ name: e.target.value })}
             placeholder="Test case name"
@@ -79,41 +87,35 @@ export function ScriptTab({
         <div
           className={cn(
             // Layout & Positioning
-            'flex flex-col gap-1.5'
+            'flex min-w-0 flex-col gap-1.5'
           )}
         >
-          <label
-            className={cn(
-              // Typography
-              'text-[11px] font-semibold text-muted-foreground'
-            )}
-          >
+          <label className={FIELD_LABEL_CLASS} htmlFor="regression-target">
             Target URL
           </label>
           <Input
+            id="regression-target"
             value={draft.targetUrl}
             onChange={(e) => onChange({ targetUrl: e.target.value })}
             placeholder="https://target.example.com"
+            className="font-mono"
           />
         </div>
         <div
           className={cn(
             // Layout & Positioning
-            'col-span-2 flex flex-col gap-1.5'
+            'col-span-2 flex min-w-0 flex-col gap-1.5'
           )}
         >
-          <label
-            className={cn(
-              // Typography
-              'text-[11px] font-semibold text-muted-foreground'
-            )}
-          >
+          <label className={FIELD_LABEL_CLASS} htmlFor="regression-description">
             Description
           </label>
           <Textarea
+            id="regression-description"
             value={draft.description}
             onChange={(e) => onChange({ description: e.target.value })}
             placeholder="What does this regression test case verify?"
+            rows={2}
           />
         </div>
       </div>
@@ -122,106 +124,59 @@ export function ScriptTab({
       <div
         className={cn(
           // Layout & Positioning
-          'flex-1 min-h-0 relative',
+          'relative flex min-h-0 flex-1 flex-col',
 
           // Backgrounds & Borders
           'bg-background'
         )}
       >
-        <TextEditor
-          value={draft.yaml}
-          onChange={(val) => onChange({ yaml: val ?? '' })}
-          language="yaml"
-          height="100%"
-          theme={theme}
+        <PaneHeader
+          label="Nuclei YAML"
+          meta={
+            conditionCount > 0
+              ? `${conditionCount} condition${conditionCount === 1 ? '' : 's'}`
+              : 'No conditions detected'
+          }
         />
-      </div>
-
-      {/* Footer: conditions + actions */}
-      <div
-        className={cn(
-          // Layout & Positioning
-          'flex items-center gap-3 shrink-0',
-
-          // Sizing & Spacing
-          'px-4 py-2.5',
-
-          // Backgrounds & Borders
-          'border-t bg-muted/10'
-        )}
-      >
-        <span
-          className={cn(
-            // Typography
-            'text-[11px] text-muted-foreground'
-          )}
-        >
-          {conditionCount > 0
-            ? `${conditionCount} condition${conditionCount === 1 ? '' : 's'} detected`
-            : 'No conditions detected yet'}
-        </span>
-
-        {validation && (
-          <span
-            className={cn(
-              // Layout & Positioning
-              'flex items-center gap-1',
-
-              // Typography
-              'text-[11px] font-semibold',
-
-              // Interactive & States
-              validation.valid ? 'text-emerald-500' : 'text-red-500'
-            )}
-          >
-            {validation.valid ? (
-              <CheckCircleIcon className="h-3.5 w-3.5" />
-            ) : (
-              <WarningCircleIcon className="h-3.5 w-3.5" />
-            )}
-            {validation.valid ? 'Valid script' : `${validation.errors.length} error(s)`}
-          </span>
-        )}
-
-        <div
-          className={cn(
-            // Layout & Positioning
-            'ml-auto flex items-center gap-2'
-          )}
-        >
-          <Button variant="outline" size="sm" onClick={onValidate} disabled={isValidating}>
-            {isValidating && <Spinner className="h-3 w-3" />}
-            Validate
-          </Button>
-          <Button size="sm" onClick={onSave} disabled={isSaving}>
-            {isSaving ? <Spinner className="h-3 w-3" /> : <FloppyDiskIcon className="h-3.5 w-3.5" />}
-            Save
-          </Button>
+        <div className="min-h-0 flex-1">
+          <TextEditor
+            value={draft.yaml}
+            onChange={(val) => onChange({ yaml: val ?? '' })}
+            language="yaml"
+            height="100%"
+            theme={theme}
+          />
         </div>
       </div>
 
       {/* Validation diagnostics */}
-      {validation && validation.errors.length > 0 && (
+      {hasErrors && (
         <ScrollArea
           className={cn(
             // Sizing & Spacing
             'max-h-24 shrink-0',
 
             // Backgrounds & Borders
-            'border-t bg-red-500/5'
+            'border-t border-red-500/30 bg-red-500/5'
           )}
         >
           <div
             className={cn(
+              // Layout & Positioning
+              'flex flex-col gap-1',
+
               // Sizing & Spacing
-              'p-2.5 flex flex-col gap-1',
+              'p-2.5',
 
               // Typography
-              'text-[11px] font-mono text-red-400'
+              'font-mono text-[11px] text-red-600 dark:text-red-400'
             )}
           >
-            {validation.errors.map((error, i) => (
-              <span key={i}>{error}</span>
+            {errors.map((error, i) => (
+              <span key={i} className="flex items-start gap-1.5">
+                <WarningCircleIcon className="mt-0.5 size-3 shrink-0" weight="fill" />
+                <span className="break-all">{error}</span>
+              </span>
             ))}
           </div>
         </ScrollArea>
@@ -232,13 +187,10 @@ export function ScriptTab({
         <div
           className={cn(
             // Layout & Positioning
-            'flex flex-wrap items-center gap-1.5 shrink-0',
+            'flex shrink-0 flex-wrap items-center gap-1.5',
 
             // Sizing & Spacing
-            'px-4 py-2',
-
-            // Backgrounds & Borders
-            'border-t'
+            'border-t border-border/60 px-3 py-2'
           )}
         >
           {validation.templates.map((template) => (
@@ -247,7 +199,7 @@ export function ScriptTab({
               variant="outline"
               className={cn(
                 // Typography
-                'text-[9px] font-mono',
+                'font-mono text-[10px]',
 
                 // Backgrounds & Borders
                 'border',
@@ -260,22 +212,78 @@ export function ScriptTab({
         </div>
       )}
 
-      {isDirty && (
+      {/* Footer: validation state + actions */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          'flex shrink-0 items-center gap-3',
+
+          // Sizing & Spacing
+          'border-t border-border/60 px-3 py-2.5'
+        )}
+      >
+        {validation ? (
+          <span
+            className={cn(
+              // Layout & Positioning
+              'flex items-center gap-1',
+
+              // Typography
+              'text-[11px] font-semibold',
+              validation.valid
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-red-600 dark:text-red-400'
+            )}
+          >
+            {validation.valid ? (
+              <CheckCircleIcon className="size-3.5" weight="fill" />
+            ) : (
+              <WarningCircleIcon className="size-3.5" weight="fill" />
+            )}
+            {validation.valid ? 'Valid script' : `${errors.length} error(s)`}
+          </span>
+        ) : (
+          <span
+            className={cn(
+              // Typography
+              'text-[11px] text-muted-foreground'
+            )}
+          >
+            Not validated yet
+          </span>
+        )}
+
+        {isDirty && (
+          <span
+            className={cn(
+              // Layout & Positioning
+              'flex items-center gap-1',
+
+              // Typography
+              'text-[11px] text-amber-600 dark:text-amber-400'
+            )}
+          >
+            <WarningDiamondIcon className="size-3.5" />
+            Unsaved changes — Run uses the last saved version
+          </span>
+        )}
+
         <div
           className={cn(
-            // Sizing & Spacing
-            'px-4 py-1.5 shrink-0',
-
-            // Typography
-            'text-[10px] text-amber-500',
-
-            // Backgrounds & Borders
-            'border-t bg-amber-500/5'
+            // Layout & Positioning
+            'ms-auto flex items-center gap-2'
           )}
         >
-          Unsaved changes — the Run tab uses the last saved version.
+          <Button variant="outline" size="sm" onClick={onValidate} disabled={isValidating}>
+            {isValidating && <Spinner className="size-3" />}
+            Validate
+          </Button>
+          <Button size="sm" onClick={onSave} disabled={isSaving}>
+            {isSaving ? <Spinner className="size-3" /> : <FloppyDiskIcon className="size-3.5" />}
+            Save
+          </Button>
         </div>
-      )}
+      </div>
     </div>
   );
 }

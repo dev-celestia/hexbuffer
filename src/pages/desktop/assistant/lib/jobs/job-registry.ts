@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { addTrackedAction, completeTrackedAction } from '../ai-tools/tracker';
+import { toErrorMessage } from '@/lib/ipc';
 
 export type JobStatus = 'queued' | 'running' | 'completed' | 'error' | 'cancelled';
 
@@ -155,7 +156,7 @@ export function cancelJob(id: string): { ok: boolean; message: string } {
   } catch (error) {
     return {
       ok: false,
-      message: `Cancelling job '${id}' failed: ${error instanceof Error ? error.message : String(error)}`,
+      message: `Cancelling job '${id}' failed: ${toErrorMessage(error, 'Unknown error')}`,
     };
   }
   // Sources that settle through their subscription win; this covers sources

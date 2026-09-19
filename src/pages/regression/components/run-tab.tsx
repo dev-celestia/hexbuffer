@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import type { RegressionCondition, RegressionFinding, RegressionRun, RunMessage, RunProgress } from '../types';
 import { RUN_STATUS_META } from '../constants';
 import { ConditionsTable } from './conditions-table';
+import { PaneHeader } from './pane-header';
 import { RunConsole } from './run-console';
 
 interface RunTabProps {
@@ -49,83 +50,107 @@ export function RunTab({
     <div
       className={cn(
         // Layout & Positioning
-        'flex flex-col min-h-0 h-full'
+        'flex h-full min-h-0 flex-col'
       )}
     >
       {/* Toolbar */}
       <div
         className={cn(
           // Layout & Positioning
-          'flex items-center gap-3 shrink-0',
+          'flex shrink-0 items-center gap-3',
 
           // Sizing & Spacing
-          'px-4 py-2.5',
+          'px-3 py-2.5',
 
           // Backgrounds & Borders
-          'border-b bg-muted/10'
+          'border-b border-border/60'
         )}
       >
         <div
           className={cn(
             // Layout & Positioning
-            'flex flex-col min-w-0 flex-1'
+            'flex min-w-0 flex-1 flex-col gap-0.5'
           )}
         >
           <span
             className={cn(
               // Typography
-              'text-[12px] font-medium truncate'
+              'truncate text-xs font-medium text-foreground'
             )}
+            title={targetUrl || undefined}
           >
             {targetUrl || 'No target set'}
           </span>
           <span
             className={cn(
+              // Layout & Positioning
+              'flex items-center gap-1.5',
+
               // Typography
               'text-[10px] text-muted-foreground'
             )}
           >
-            {statusMeta
-              ? `${statusMeta.label}${progress ? ` · ${progress.completedRequests}/${progress.totalRequests} requests · ${progress.rps.toFixed(1)} rps` : ''}`
-              : 'Idle'}
+            {statusMeta ? (
+              <>
+                <span
+                  aria-hidden
+                  className={cn(
+                    // Sizing & Spacing
+                    'size-1.5 shrink-0 rounded-full',
+
+                    // Backgrounds & Borders
+                    statusMeta.dotClass
+                  )}
+                />
+                <span className={statusMeta.textClass}>{statusMeta.label}</span>
+                {progress && (
+                  <span className="truncate">
+                    · {progress.completedRequests}/{progress.totalRequests} requests ·{' '}
+                    {progress.rps.toFixed(1)} rps
+                  </span>
+                )}
+              </>
+            ) : (
+              <span>Idle — press Run to execute the last saved script</span>
+            )}
           </span>
         </div>
 
         {isRunning ? (
           <Button variant="destructive" size="sm" onClick={onAbort}>
-            <StopIcon className="h-3.5 w-3.5" />
+            <StopIcon className="size-3" weight="fill" />
             Abort
           </Button>
         ) : (
           <Button size="sm" onClick={onRun}>
-            <PlayIcon className="h-3.5 w-3.5" weight="fill" />
+            <PlayIcon className="size-3" weight="fill" />
             Run
           </Button>
         )}
       </div>
 
-      {/* Summary */}
+      {/* Result summary */}
       {hasSummary && (
         <div
           className={cn(
             // Layout & Positioning
-            'flex items-center gap-2 shrink-0 flex-wrap',
+            'flex shrink-0 flex-wrap items-center gap-1.5',
 
             // Sizing & Spacing
-            'px-4 py-2',
+            'px-3 py-2',
 
             // Backgrounds & Borders
-            'border-b'
+            'border-b border-border/60'
           )}
         >
           <Badge
             variant="outline"
             className={cn(
               // Typography
-              'text-[10px] font-semibold text-emerald-500',
+              'text-[10px] font-semibold',
 
               // Backgrounds & Borders
-              'border-emerald-500/30 bg-emerald-500/10'
+              'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
             )}
           >
             {passed} passed
@@ -134,10 +159,10 @@ export function RunTab({
             variant="outline"
             className={cn(
               // Typography
-              'text-[10px] font-semibold text-red-500',
+              'text-[10px] font-semibold',
 
               // Backgrounds & Borders
-              'border-red-500/30 bg-red-500/10'
+              'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400'
             )}
           >
             {failed} failed
@@ -145,28 +170,46 @@ export function RunTab({
           <Badge variant="secondary" className="text-[10px]">
             {findings.length} matches
           </Badge>
-          <Badge variant="secondary" className="text-[10px]">
+          <Badge variant="secondary" className="text-[10px] tabular-nums">
             {formatDuration(elapsedMillis)}
           </Badge>
-          {progress && (
-            <Badge variant="secondary" className="text-[10px]">
-              {progress.rps.toFixed(1)} rps
-            </Badge>
-          )}
-          {isRunning && <Spinner className="h-3 w-3" />}
+          {isRunning && <Spinner className="size-3" />}
         </div>
       )}
 
-      {/* Conditions + console */}
+      {/* Conditions + console. Sizes carry explicit units — bare numbers mean pixels. */}
       <ResizablePanelGroup orientation="vertical" className="flex-1 min-h-0">
-        <ResizablePanel defaultSize={55} minSize={25}>
-          <ScrollArea className="h-full min-h-0">
-            <ConditionsTable conditions={conditions} />
-          </ScrollArea>
+        <ResizablePanel defaultSize="55" minSize="140px">
+          <div
+            className={cn(
+              // Layout & Positioning
+              'flex h-full min-h-0 flex-col'
+            )}
+          >
+            <PaneHeader
+              label="Conditions"
+              meta={hasSummary ? `${passed}/${conditions.length} passed` : undefined}
+            />
+            <ScrollArea className="flex-1 min-h-0">
+              <ConditionsTable conditions={conditions} />
+            </ScrollArea>
+          </div>
         </ResizablePanel>
+
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={45} minSize={15}>
-          <RunConsole messages={messages} />
+
+        <ResizablePanel defaultSize="45" minSize="120px">
+          <div
+            className={cn(
+              // Layout & Positioning
+              'flex h-full min-h-0 flex-col'
+            )}
+          >
+            <PaneHeader label="Console" meta={`${messages.length} lines`} />
+            <div className="flex-1 min-h-0">
+              <RunConsole messages={messages} />
+            </div>
+          </div>
         </ResizablePanel>
       </ResizablePanelGroup>
 
@@ -174,31 +217,21 @@ export function RunTab({
       <div
         className={cn(
           // Layout & Positioning
-          'shrink-0',
+          'flex shrink-0 flex-col',
 
-          // Sizing & Spacing
-          'border-t'
+          // Backgrounds & Borders
+          'border-t border-border/60'
         )}
       >
-        <div
-          className={cn(
-            // Sizing & Spacing
-            'px-4 py-1.5',
-
-            // Typography
-            'text-[10px] font-bold uppercase tracking-wide text-muted-foreground',
-
-            // Backgrounds & Borders
-            'bg-muted/10'
-          )}
-        >
-          Recent Runs
-        </div>
+        <PaneHeader label="Recent Runs" meta={`${history.length} total`} />
         <ScrollArea className="max-h-28">
           <div
             className={cn(
+              // Layout & Positioning
+              'flex flex-col gap-1',
+
               // Sizing & Spacing
-              'px-4 py-1.5 flex flex-col gap-1'
+              'px-3 py-2'
             )}
           >
             {history.length === 0 && (
@@ -221,17 +254,30 @@ export function RunTab({
                     'flex items-center gap-2',
 
                     // Typography
-                    'text-[10px] font-mono text-muted-foreground'
+                    'font-mono text-[10px] text-muted-foreground'
                   )}
                 >
-                  <span className={cn('h-1.5 w-1.5 rounded-full shrink-0', meta?.dotClass ?? 'bg-border')} />
-                  <span>{new Date(run.createdAt).toLocaleString()}</span>
-                  <span>{meta?.label ?? run.status}</span>
-                  <span>
+                  <span
+                    aria-hidden
+                    className={cn(
+                      // Sizing & Spacing
+                      'size-1.5 shrink-0 rounded-full',
+
+                      // Backgrounds & Borders
+                      meta?.dotClass ?? 'bg-border'
+                    )}
+                  />
+                  <span className="shrink-0 tabular-nums">
+                    {new Date(run.createdAt).toLocaleString()}
+                  </span>
+                  <span className={cn('shrink-0', meta?.textClass)}>
+                    {meta?.label ?? run.status}
+                  </span>
+                  <span className="shrink-0 tabular-nums">
                     {run.passedConditions}/{run.totalTemplates} passed
                   </span>
-                  <span>{formatDuration(run.elapsedMillis)}</span>
-                  {run.error && <span className="text-red-500 truncate">{run.error}</span>}
+                  <span className="shrink-0 tabular-nums">{formatDuration(run.elapsedMillis)}</span>
+                  {run.error && <span className="truncate text-red-600 dark:text-red-400">{run.error}</span>}
                 </div>
               );
             })}

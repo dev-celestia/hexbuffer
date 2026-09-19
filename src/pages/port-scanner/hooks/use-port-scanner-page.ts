@@ -7,6 +7,7 @@ import type { PortPreset } from '../constants';
 import { parsePorts, sortScanResults, describePortPreset } from '../lib/port-helpers';
 import { usePortScannerStore } from '@/stores/port-scanner';
 import { useNotificationStore } from '@/stores/notifications';
+import { toErrorMessage } from '@/lib/ipc';
 
 type ProgressEvent =
   | { type: 'Update'; current: number; total: number }
@@ -129,7 +130,7 @@ export function usePortScannerPage() {
       setResults(finalResults.filter((r) => r.state === 'open').sort(sortScanResults));
       setProgress((c) => ({ current: c.total || finalResults.length, total: c.total || finalResults.length }));
     } catch (scanError) {
-      setError(scanError instanceof Error ? scanError.message : String(scanError));
+      setError(toErrorMessage(scanError, 'Unknown error'));
     } finally {
       setIsRunning(false);
       unlisteners.forEach((u) => u());

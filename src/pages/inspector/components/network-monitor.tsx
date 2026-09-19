@@ -139,7 +139,7 @@ export function NetworkMonitor({
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup orientation="horizontal" className="h-full min-h-0">
           {/* Ledger Table */}
-          <ResizablePanel defaultSize={50} minSize={20} className="flex flex-col min-h-0">
+          <ResizablePanel defaultSize="50" minSize="20" className="flex flex-col min-h-0">
             <div className="flex flex-col h-full min-h-0">
               {/* Header Columns */}
               <div className="grid grid-cols-[80px_1fr_65px_80px_70px] px-3 py-1.5 border-b bg-muted/20 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider shrink-0 select-none">
@@ -247,7 +247,7 @@ export function NetworkMonitor({
           <ResizableHandle withHandle />
 
           {/* Details Panel */}
-          <ResizablePanel defaultSize={50} minSize={20} className="flex flex-col min-h-0 bg-card">
+          <ResizablePanel defaultSize="50" minSize="20" className="flex flex-col min-h-0 bg-card">
             {selectedRequest ? (
               <div className="flex flex-col h-full min-h-0 border-l">
                 {/* Panel Header */}

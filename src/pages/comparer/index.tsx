@@ -87,7 +87,7 @@ export function ComparerPage() {
         >
           {showInputs ? (
             <ResizablePanelGroup orientation="vertical" className="h-full min-h-0">
-              <ResizablePanel defaultSize={35} minSize={15}>
+              <ResizablePanel defaultSize="35" minSize="15">
                 <ComparerInputs
                   valueA={page.valueA}
                   setValueA={page.setValueA}
@@ -100,7 +100,7 @@ export function ComparerPage() {
 
               <ResizableHandle withHandle />
 
-              <ResizablePanel defaultSize={65} minSize={30}>
+              <ResizablePanel defaultSize="65" minSize="30">
                 <div
                   className={cn(
                     // Layout & Positioning

@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@celestia-project/ui';
+import { Badge, Tabs, TabsContent, TabsList, TabsTrigger } from '@celestia-project/ui';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 
 import { useRegressionPage } from './hooks/use-regression-page';
@@ -8,6 +8,20 @@ import { ScriptTab } from './components/script-tab';
 import { RunTab } from './components/run-tab';
 import { cn } from '@/lib/utils';
 
+/**
+ * Both tab panels share one shell so the card edge never shifts when switching tabs.
+ */
+const TAB_CONTENT_CLASS = cn(
+  // Layout & Positioning
+  'flex-1 min-h-0',
+
+  // Sizing & Spacing
+  'mx-3 mb-3 mt-2',
+
+  // Backgrounds & Borders
+  'overflow-hidden rounded-md border border-border/60'
+);
+
 export function RegressionPage() {
   const page = useRegressionPage();
 
@@ -15,18 +29,15 @@ export function RegressionPage() {
     <div
       className={cn(
         // Layout & Positioning
-        'flex flex-col min-h-0',
-
-        // Sizing & Spacing
-        'h-full',
+        'flex h-full min-h-0 flex-col',
 
         // Backgrounds & Borders
         'bg-background'
       )}
     >
       <ResizablePanelGroup orientation="horizontal" className="h-full min-h-0">
-        {/* Left: test case list */}
-        <ResizablePanel defaultSize={22} minSize={14} maxSize={40}>
+        {/* Left: test case list. Sizes are explicit units — a bare number means pixels. */}
+        <ResizablePanel defaultSize="288px" minSize="232px" maxSize="45%">
           <RegressionSidebar
             scripts={page.scripts}
             activeScriptId={page.activeScriptId}
@@ -41,58 +52,109 @@ export function RegressionPage() {
         <ResizableHandle withHandle />
 
         {/* Right: two-tab content */}
-        <ResizablePanel defaultSize={78} minSize={45}>
+        <ResizablePanel minSize="420px">
           {page.activeScript && page.draft ? (
             <Tabs
               value={page.activeTab}
               onValueChange={(value) => page.setActiveTab(value as 'script' | 'run')}
               className={cn(
                 // Layout & Positioning
-                'flex flex-col min-h-0',
-
-                // Sizing & Spacing
-                'h-full'
+                'flex h-full min-h-0 flex-col'
               )}
             >
-              <TabsList
+              {/* Context band: which test case the tabs below are editing */}
+              <div
                 className={cn(
                   // Layout & Positioning
-                  'shrink-0',
+                  'flex h-11 shrink-0 items-center justify-between gap-3',
 
                   // Sizing & Spacing
-                  'mx-4 mt-2 w-fit'
-                )}
-              >
-                <TabsTrigger value="script">Script</TabsTrigger>
-                <TabsTrigger value="run">
-                  Run
-                  {page.isRunning && (
-                    <span
-                      className={cn(
-                        // Sizing & Spacing
-                        'ml-1.5 h-1.5 w-1.5 rounded-full',
-
-                        // Backgrounds & Borders
-                        'bg-amber-500 animate-pulse'
-                      )}
-                    />
-                  )}
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent
-                value="script"
-                className={cn(
-                  // Layout & Positioning
-                  'flex-1 min-h-0',
-
-                  // Sizing & Spacing
-                  'm-4 mt-2',
+                  'px-3',
 
                   // Backgrounds & Borders
-                  'border rounded-md overflow-hidden'
+                  'border-b border-border/60 bg-muted/20'
                 )}
               >
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    'flex min-w-0 items-center gap-2'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      // Typography
+                      'truncate text-xs font-semibold text-foreground'
+                    )}
+                  >
+                    {page.activeScript.name}
+                  </span>
+                  {page.isDirty && (
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        // Sizing & Spacing
+                        'h-4 shrink-0 px-1.5 py-0',
+
+                        // Typography
+                        'text-[10px] font-semibold',
+
+                        // Backgrounds & Borders
+                        'border border-warning/40 bg-warning/10 text-warning-foreground'
+                      )}
+                    >
+                      Unsaved
+                    </Badge>
+                  )}
+                </div>
+                <span
+                  className={cn(
+                    // Sizing & Spacing
+                    'min-w-0 shrink truncate',
+
+                    // Typography
+                    'font-mono text-[10px] text-muted-foreground'
+                  )}
+                  title={page.activeScript.targetUrl}
+                >
+                  {page.activeScript.targetUrl || 'No target set'}
+                </span>
+              </div>
+
+              {/* Tab switcher */}
+              <div
+                className={cn(
+                  // Sizing & Spacing
+                  'shrink-0 px-3 pt-2.5'
+                )}
+              >
+                <TabsList>
+                  <TabsTrigger value="script">Script</TabsTrigger>
+                  <TabsTrigger value="run">
+                    Run
+                    {page.isRunning && (
+                      <span
+                        aria-hidden
+                        className={cn(
+                          // Layout & Positioning
+                          'ms-1.5 inline-block',
+
+                          // Sizing & Spacing
+                          'size-1.5 rounded-full',
+
+                          // Backgrounds & Borders
+                          'bg-warning',
+
+                          // Interactive & States
+                          'animate-pulse motion-reduce:animate-none'
+                        )}
+                      />
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="script" className={TAB_CONTENT_CLASS}>
                 <ScriptTab
                   draft={page.draft}
                   validation={page.validation}
@@ -106,19 +168,7 @@ export function RegressionPage() {
                 />
               </TabsContent>
 
-              <TabsContent
-                value="run"
-                className={cn(
-                  // Layout & Positioning
-                  'flex-1 min-h-0',
-
-                  // Sizing & Spacing
-                  'm-4 mt-2',
-
-                  // Backgrounds & Borders
-                  'border rounded-md overflow-hidden'
-                )}
-              >
+              <TabsContent value="run" className={TAB_CONTENT_CLASS}>
                 <RunTab
                   targetUrl={page.activeScript.targetUrl}
                   isRunning={page.isRunning}

@@ -4,7 +4,9 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { createUIMessageStream, type ChatTransport, type UIMessageStreamWriter } from 'ai';
 import { isLocalAiProviderEndpoint } from '@/lib/ai-endpoint';
 import { useRepeaterStore } from '@/stores/repeater';
+import { listJobs } from './jobs/job-registry';
 import type { DashboardAiSettings, DashboardChatMessage, AiChatAgentMessageEvent } from '../types';
+import { toErrorMessage } from '@/lib/ipc';
 
 const WINDOW_EVENT_TARGET = { kind: 'AnyLabel' as const, label: getCurrentWindow().label };
 
@@ -12,6 +14,7 @@ interface DashboardChatBody {
   aiSettings?: DashboardAiSettings;
   targetAgent?: string;
   sessionId?: string;
+  autonomous?: boolean;
 }
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -96,8 +99,7 @@ function fallbackContent(aiSettings: DashboardAiSettings | undefined, error?: un
 
   return `I could not reach ${
     aiSettings?.provider ? PROVIDER_LABELS[aiSettings.provider] ?? aiSettings.provider : 'the AI provider'
-  } right now: ${error instanceof Error ? error.message : String(error)
-    }`;
+  } right now: ${toErrorMessage(error, 'Unknown error')}`;
 }
 
 let activeRequestId: string | null = null;
@@ -319,6 +321,14 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
               provider,
               model,
               targetAgent: agentId,
+              autonomous: requestBody?.autonomous ?? false,
+              activeJobs: listJobs({ activeOnly: true }).map((job) => ({
+                id: job.id,
+                kind: job.kind,
+                label: job.label,
+                status: job.status,
+                progress: job.progress,
+              })),
             },
           });
           provider = response.provider;

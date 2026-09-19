@@ -14,6 +14,7 @@ import type {
   CrawlSetupConfig,
   HumanInputRequest,
 } from '@/pages/browser/types';
+import { toErrorMessage } from '@/lib/ipc';
 
 type CrawlSessionPatch = Partial<CrawlSession> & { sessionId?: string };
 
@@ -416,7 +417,7 @@ export const useBrowserAutomationStore = create<BrowserAutomationState>((set, ge
     try {
       await invoke('ai_browser_start_crawl', { config: setup, sessionId: session.id });
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = toErrorMessage(error, 'Unknown error');
       updateTab(set, tab.id, (current) => ({
         ...current,
         session: { ...session, status: 'failed', finishedAt: new Date().toISOString() },
@@ -688,7 +689,7 @@ export const useBrowserAutomationStore = create<BrowserAutomationState>((set, ge
         });
         return;
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        const message = toErrorMessage(error, 'Unknown error');
         get().applyLogCreated({
           id: `log-${Date.now()}`,
           sessionId: request.sessionId,
@@ -711,7 +712,7 @@ export const useBrowserAutomationStore = create<BrowserAutomationState>((set, ge
         await invoke('ai_browser_stop_crawl', { sessionId: request.sessionId });
         return;
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        const message = toErrorMessage(error, 'Unknown error');
         get().applyLogCreated({
           id: `log-${Date.now()}`,
           sessionId: request.sessionId,
@@ -737,7 +738,7 @@ export const useBrowserAutomationStore = create<BrowserAutomationState>((set, ge
         fields: {},
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = toErrorMessage(error, 'Unknown error');
       get().applyLogCreated({
         id: `log-${Date.now()}`,
         sessionId: request.sessionId,
@@ -829,7 +830,7 @@ export const useBrowserAutomationStore = create<BrowserAutomationState>((set, ge
         sessionId: tab.session.id,
         level: 'error',
         type: 'ai',
-        message: `AI analysis failed for ${page.url}: ${error instanceof Error ? error.message : String(error)}`,
+        message: `AI analysis failed for ${page.url}: ${toErrorMessage(error, 'Unknown error')}`,
         url: page.url,
         createdAt: new Date().toISOString(),
       });

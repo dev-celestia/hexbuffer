@@ -125,7 +125,7 @@ export function JwtDecodeView({
       >
         <ResizablePanelGroup orientation="horizontal" className="h-full">
           {/* Left: Token Input */}
-          <ResizablePanel defaultSize={50} minSize={30}>
+          <ResizablePanel defaultSize="50" minSize="30">
             <div
               className={cn(
                 // Layout & Positioning
@@ -231,7 +231,7 @@ export function JwtDecodeView({
           <ResizableHandle withHandle />
 
           {/* Right: Decoded Output */}
-          <ResizablePanel defaultSize={50} minSize={30}>
+          <ResizablePanel defaultSize="50" minSize="30">
             <div
               className={cn(
                 // Layout & Positioning
