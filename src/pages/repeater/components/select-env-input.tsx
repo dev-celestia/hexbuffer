@@ -14,6 +14,11 @@ export interface ColorizedUrlInputProps
   value: string;
   onChange: (value: string) => void;
   containerClassName?: string;
+  /**
+   * Show the single-line ↔ multi-line toggle. Turn it off inside dense grids (header and
+   * query-param rows) where the caret reads as a stray dropdown rather than a resize handle.
+   */
+  expandable?: boolean;
 }
 
 // ── Syntax Highlighter Helper: Colorizes {{variable_name}} tokens ──
@@ -363,6 +368,7 @@ export function ColorizedUrlInput({
   placeholder,
   className,
   containerClassName,
+  expandable = true,
   onKeyDown: propOnKeyDown,
   ...props
 }: Readonly<ColorizedUrlInputProps>) {
@@ -447,7 +453,7 @@ export function ColorizedUrlInput({
       }
     }
 
-    if (e.key === 'Enter' && (!isExpanded || !e.shiftKey)) {
+    if (e.key === 'Enter' && (!expandable || !isExpanded || !e.shiftKey)) {
       e.preventDefault();
     }
 
@@ -456,6 +462,7 @@ export function ColorizedUrlInput({
   };
 
   const toggleExpand = () => {
+    if (!expandable) return;
     setIsExpanded((prev) => !prev);
     requestAnimationFrame(() => {
       textareaRef.current?.focus();
@@ -484,7 +491,8 @@ export function ColorizedUrlInput({
             ? 'overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-all [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
             : 'overflow-hidden overflow-x-hidden overflow-y-hidden whitespace-nowrap break-normal [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
           // Sizing & Spacing
-          'pl-2 pr-6 py-1 min-w-0',
+          'pl-2 py-1 min-w-0',
+          expandable ? 'pr-6' : 'pr-2',
           // Typography
           'font-mono text-xs leading-normal select-none',
           // Backgrounds & Borders
@@ -516,7 +524,8 @@ export function ColorizedUrlInput({
           'resize-none relative z-10',
           // Sizing & Spacing
           isExpanded ? 'min-h-16 max-h-48' : 'min-h-7 h-7',
-          'pl-2 pr-6 py-1 min-w-0',
+          'pl-2 py-1 min-w-0',
+          expandable ? 'pr-6' : 'pr-2',
           // Typography
           'font-mono text-xs leading-normal text-transparent caret-foreground selection:bg-primary/30 selection:text-foreground placeholder:text-muted-foreground',
           // Backgrounds & Borders
@@ -527,28 +536,30 @@ export function ColorizedUrlInput({
       />
 
       {/* Caret icon at the end of input to toggle between single-line and multiline textarea */}
-      <button
-        type="button"
-        onClick={toggleExpand}
-        title={isExpanded ? 'Collapse to single line' : 'Expand to textarea'}
-        aria-label={isExpanded ? 'Collapse to single line' : 'Expand to textarea'}
-        className={cn(
-          // Layout & Positioning
-          'absolute right-1 top-1.5 z-20 flex items-center justify-center',
-          // Sizing & Spacing
-          'size-4 rounded-xs',
-          // Backgrounds & Borders
-          'hover:bg-muted/60 text-muted-foreground hover:text-foreground',
-          // Interactive & States
-          'transition-colors cursor-pointer',
-        )}
-      >
-        {isExpanded ? (
-          <CaretUpIcon className="size-3" />
-        ) : (
-          <CaretDownIcon className="size-3" />
-        )}
-      </button>
+      {expandable && (
+        <button
+          type="button"
+          onClick={toggleExpand}
+          title={isExpanded ? 'Collapse to single line' : 'Expand to textarea'}
+          aria-label={isExpanded ? 'Collapse to single line' : 'Expand to textarea'}
+          className={cn(
+            // Layout & Positioning
+            'absolute right-1 top-1.5 z-20 flex items-center justify-center',
+            // Sizing & Spacing
+            'size-4 rounded-xs',
+            // Backgrounds & Borders
+            'hover:bg-muted/60 text-muted-foreground hover:text-foreground',
+            // Interactive & States
+            'transition-colors cursor-pointer',
+          )}
+        >
+          {isExpanded ? (
+            <CaretUpIcon className="size-3" />
+          ) : (
+            <CaretDownIcon className="size-3" />
+          )}
+        </button>
+      )}
 
       <EnvSuggestionDropdown
         isOpen={watcher.isOpen}

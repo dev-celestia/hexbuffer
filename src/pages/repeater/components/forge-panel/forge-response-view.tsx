@@ -1,7 +1,11 @@
-
-
-import { Button, ButtonGroup, ScrollArea, TextEditor } from '@celestia-project/ui';
-import { CheckCircleIcon, XCircleIcon, CopyIcon, CheckIcon } from '@phosphor-icons/react';
+import { Button, ScrollArea, Tabs, TabsList, TabsTrigger, TextEditor } from '@celestia-project/ui';
+import {
+  CheckCircleIcon,
+  XCircleIcon,
+  CopyIcon,
+  CheckIcon,
+  WarningCircleIcon,
+} from '@phosphor-icons/react';
 import { useMemo } from 'react';
 import { useCollectionsStore, type ForgeResponse, type TestResult } from '@/stores/collections';
 import { useTheme } from '@/components/theme-provider';
@@ -24,8 +28,98 @@ interface ForgeResponseViewProps {
   requestBodyType: string;
 }
 
+const RESPONSE_TABS = ['pretty', 'raw', 'headers', 'request', 'testResults'] as const;
+
+const TAB_LABELS: Record<(typeof RESPONSE_TABS)[number], string> = {
+  pretty: 'Pretty',
+  raw: 'Raw',
+  headers: 'Headers',
+  request: 'Request',
+  testResults: 'Tests',
+};
+
+/** Placeholder shown when a tab has nothing to render. */
+function EmptyTab({ message }: Readonly<{ message: string }>) {
+  return (
+    <div
+      className={cn(
+        // Layout & Positioning
+        'flex h-full flex-col items-center justify-center',
+
+        // Sizing & Spacing
+        'gap-1 p-8',
+
+        // Backgrounds & Borders
+        'rounded-md border border-dashed'
+      )}
+    >
+      <p
+        className={cn(
+          // Typography
+          'text-xs text-muted-foreground'
+        )}
+      >
+        {message}
+      </p>
+    </div>
+  );
+}
+
+/** Label/value row used by the headers and sent-request tables. */
+function DetailRow({
+  label,
+  value,
+  muted = false,
+}: Readonly<{ label: string; value: string; muted?: boolean }>) {
+  return (
+    <div
+      className={cn(
+        // Layout & Positioning
+        'grid grid-cols-[minmax(120px,240px)_minmax(0,1fr)]',
+
+        // Sizing & Spacing
+        'gap-3 px-2 py-1.5',
+
+        // Backgrounds & Borders
+        'rounded-sm odd:bg-muted/20'
+      )}
+    >
+      <span
+        className={cn(
+          // Typography
+          'truncate font-mono text-xs font-medium text-muted-foreground'
+        )}
+        title={label}
+      >
+        {label}
+      </span>
+      <span
+        className={cn(
+          // Typography
+          'font-mono text-xs break-all',
+          muted ? 'text-muted-foreground italic' : 'text-foreground'
+        )}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function SectionLabel({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <span
+      className={cn(
+        // Typography
+        'text-[10px] font-semibold tracking-wider text-muted-foreground/70 uppercase'
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
 export function ForgeResponseView({
-  isLoading,
   error,
   response,
   testResults,
@@ -48,6 +142,7 @@ export function ForgeResponseView({
       void copy(response.body, 'Response body copied to clipboard');
     }
   };
+
   const contexts = useCollectionsStore((s) => s.contexts) || [];
 
   const variables = useMemo(() => {
@@ -81,262 +176,474 @@ export function ForgeResponseView({
   const safeBodyType = requestBodyType || 'none';
   const safeRequestMethod = requestMethod || 'GET';
   const safeRequestUrl = requestUrl || '';
+  const enabledHeaders = safeHeaders.filter((h) => h.enabled);
 
-  const renderContent = () => {
-    if (isLoading) {
-      return (
-        <div className="h-full flex-1 flex flex-col items-center justify-center space-y-2">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <span className="text-xs font-medium text-muted-foreground">
-            Executing endpoint request...
-          </span>
-        </div>
-      );
-    }
+  const passedCount = testResults.filter((t) => t.passed).length;
+  const failedCount = testResults.length - passedCount;
 
-    if (error || response) {
-      return (
-        <div className="h-full flex-1 flex flex-col min-h-0">
-          {/* Status / Error bar */}
-          {error ? (
-            <div className="flex items-center space-x-2 border-b pb-2 shrink-0 text-xs bg-destructive/5 p-2 rounded border border-destructive/20 mb-2">
-              <XCircleIcon className="h-4 w-4 text-destructive shrink-0" />
-              <span className="font-semibold text-destructive">Execution Failed:</span>
-              <span className="text-muted-foreground font-mono break-all">{error}</span>
-            </div>
-          ) : (
-            response && (
-              <div className="flex items-center justify-between border-b pb-2 shrink-0 text-xs">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-1.5">
-                    <span className="text-muted-foreground uppercase font-bold">Status:</span>
-                    <span
-                      className={`font-semibold px-1 rounded ${response.status >= 200 && response.status < 300
-                          ? 'bg-emerald-500/10 text-emerald-600'
-                          : 'bg-destructive/10 text-destructive'
-                        }`}
-                    >
-                      {response.status} {response.statusText}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-1.5">
-                    <span className="text-muted-foreground uppercase font-bold">Time:</span>
-                    <span className="font-semibold text-foreground">{response.timeMs} ms</span>
-                  </div>
-                  <div className="flex items-center space-x-1.5">
-                    <span className="text-muted-foreground uppercase font-bold">Size:</span>
-                    <span className="font-semibold text-foreground">
-                      {new Blob([response.body]).size} bytes
-                    </span>
-                  </div>
-                </div>
+  return (
+    <div
+      className={cn(
+        // Layout & Positioning
+        'flex min-h-0 flex-1 flex-col',
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-2 text-xs flex items-center gap-1.5 transition-transform active:scale-95 text-muted-foreground hover:text-foreground cursor-pointer"
-                  onClick={handleCopy}
-                  title="Copy response body"
-                >
-                  {isCopied ? (
-                    <>
-                      <CheckIcon className="h-3.5 w-3.5 text-emerald-500" />
-                      <span className="text-emerald-500 font-medium">Copied</span>
-                    </>
-                  ) : (
-                    <>
-                      <CopyIcon className="h-3.5 w-3.5" />
-                      <span>Copy</span>
-                    </>
-                  )}
-                </Button>
-              </div>
-            )
+        // Sizing & Spacing
+        'gap-3'
+      )}
+    >
+      {/* Execution failure banner */}
+      {error && (
+        <div
+          className={cn(
+            // Layout & Positioning
+            'flex shrink-0 items-start',
+
+            // Sizing & Spacing
+            'gap-2 p-2.5',
+
+            // Backgrounds & Borders
+            'rounded-md border border-rose-500/30 bg-rose-500/10'
           )}
+        >
+          <XCircleIcon className="mt-px size-4 shrink-0 text-rose-500" />
+          <div
+            className={cn(
+              // Layout & Positioning
+              'flex min-w-0 flex-col',
 
-          {/* Response body & details tab */}
-          <div className="flex-1 flex flex-col min-h-0 mt-2">
-            <ButtonGroup orientation="horizontal" className="shrink-0 w-full h-auto p-0 mb-2">
-              {(['pretty', 'raw', 'headers', 'request', 'testResults'] as const).map((t) => (
-                <Button
-                  key={t}
-                  variant="outline"
-                  size="sm"
-                  className={cn('text-xs uppercase', activeResTab === t && 'text-primary')}
-                  onClick={() => onResTabChange(t)}
+              // Sizing & Spacing
+              'gap-0.5'
+            )}
+          >
+            <span
+              className={cn(
+                // Typography
+                'text-xs font-semibold text-rose-600 dark:text-rose-400'
+              )}
+            >
+              Request failed
+            </span>
+            <span
+              className={cn(
+                // Typography
+                'font-mono text-xs break-all text-muted-foreground'
+              )}
+            >
+              {error}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Tabs + copy action on one row */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          'flex shrink-0 items-center justify-between',
+
+          // Sizing & Spacing
+          'gap-3'
+        )}
+      >
+        <Tabs
+          value={activeResTab}
+          onValueChange={onResTabChange}
+          className={cn(
+            // Layout & Positioning
+            'min-w-0 flex-1'
+          )}
+        >
+          <TabsList
+            variant="line"
+            className={cn(
+              // Layout & Positioning
+              'w-full justify-start'
+            )}
+          >
+            {RESPONSE_TABS.map((tab) => (
+              <TabsTrigger
+                key={tab}
+                value={tab}
+                className={cn(
+                  // Sizing & Spacing
+                  'flex-none px-3'
+                )}
+              >
+                {TAB_LABELS[tab]}
+                {tab === 'testResults' && failedCount > 0 && (
+                  <span
+                    className={cn(
+                      // Layout & Positioning
+                      'inline-flex items-center justify-center',
+
+                      // Sizing & Spacing
+                      'min-w-4 rounded-full px-1',
+
+                      // Typography
+                      'text-[10px] leading-4 font-semibold tabular-nums',
+
+                      // Backgrounds & Borders
+                      'bg-rose-500/15 text-rose-600 dark:text-rose-400'
+                    )}
+                  >
+                    {failedCount}
+                  </span>
+                )}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+
+        {response && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn(
+              // Sizing & Spacing
+              'h-6 shrink-0 gap-1.5 px-2',
+
+              // Typography
+              'text-xs',
+
+              // Interactive & States
+              'text-muted-foreground hover:text-foreground'
+            )}
+            onClick={handleCopy}
+            title="Copy response body"
+          >
+            {isCopied ? (
+              <>
+                <CheckIcon className="size-3.5 text-emerald-500" />
+                <span className="font-medium text-emerald-500">Copied</span>
+              </>
+            ) : (
+              <>
+                <CopyIcon className="size-3.5" />
+                <span>Copy</span>
+              </>
+            )}
+          </Button>
+        )}
+      </div>
+
+      <div
+        className={cn(
+          // Layout & Positioning
+          'flex min-h-0 flex-1 flex-col'
+        )}
+      >
+        {activeResTab === 'pretty' && (
+          <div
+            className={cn(
+              // Layout & Positioning
+              'min-h-0 flex-1 overflow-hidden',
+
+              // Backgrounds & Borders
+              'rounded-md border'
+            )}
+          >
+            {response ? (
+              <TextEditor value={getFormattedBody()} options={{ readOnly: true }} theme={theme} />
+            ) : (
+              <EmptyTab message="No response body yet — send the request to see it here." />
+            )}
+          </div>
+        )}
+
+        {activeResTab === 'raw' && (
+          <div
+            className={cn(
+              // Layout & Positioning
+              'min-h-0 flex-1 overflow-hidden',
+
+              // Backgrounds & Borders
+              'rounded-md border'
+            )}
+          >
+            {response ? (
+              <TextEditor value={response.body} options={{ readOnly: true }} theme={theme} />
+            ) : (
+              <EmptyTab message="No response body yet — send the request to see it here." />
+            )}
+          </div>
+        )}
+
+        {activeResTab === 'headers' && (
+          <ScrollArea className="h-full">
+            {response && Object.keys(response.headers || {}).length > 0 ? (
+              <div className="pr-2">
+                {Object.entries(response.headers).map(([key, value]) => (
+                  <DetailRow key={key} label={key} value={value} />
+                ))}
+              </div>
+            ) : (
+              <EmptyTab message="No response headers." />
+            )}
+          </ScrollArea>
+        )}
+
+        {activeResTab === 'request' && (
+          <ScrollArea className="h-full">
+            <div
+              className={cn(
+                // Layout & Positioning
+                'flex flex-col',
+
+                // Sizing & Spacing
+                'gap-4 pr-2'
+              )}
+            >
+              {/* Request line */}
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  'flex flex-col',
+
+                  // Sizing & Spacing
+                  'gap-1.5'
+                )}
+              >
+                <SectionLabel>Request line</SectionLabel>
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    'flex items-baseline',
+
+                    // Sizing & Spacing
+                    'gap-2 rounded-md border bg-muted/30 px-2.5 py-2'
+                  )}
                 >
-                  {t === 'testResults' ? 'Test Results' : t}
-                </Button>
-              ))}
-            </ButtonGroup>
-
-            {activeResTab === 'pretty' && (
-              <div className="flex-1 min-h-0 mt-2">
-                <div className="h-full border rounded-md overflow-hidden bg-background">
-                  {response ? (
-                    <TextEditor value={getFormattedBody()} options={{ readOnly: true }} theme={theme} />
-                  ) : (
-                    <div className="h-full flex items-center justify-center text-xs text-muted-foreground bg-muted/5">
-                      No response received
-                    </div>
-                  )}
+                  <span
+                    className={cn(
+                      // Typography
+                      'font-mono text-xs font-bold text-primary'
+                    )}
+                  >
+                    {safeRequestMethod}
+                  </span>
+                  <span
+                    className={cn(
+                      // Typography
+                      'font-mono text-xs break-all text-foreground'
+                    )}
+                  >
+                    {expandVars(safeRequestUrl)}
+                  </span>
                 </div>
               </div>
-            )}
 
-            {activeResTab === 'raw' && (
-              <div className="flex-1 min-h-0 mt-2">
-                <div className="h-full border rounded-md overflow-hidden bg-background">
-                  {response ? (
-                    <TextEditor value={response.body} options={{ readOnly: true }} theme={theme} />
-                  ) : (
-                    <div className="h-full flex items-center justify-center text-xs text-muted-foreground bg-muted/5">
-                      No response received
-                    </div>
+              {/* Headers */}
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  'flex flex-col',
+
+                  // Sizing & Spacing
+                  'gap-1.5'
+                )}
+              >
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    'flex items-center justify-between',
+
+                    // Sizing & Spacing
+                    'gap-2'
                   )}
+                >
+                  <SectionLabel>Headers</SectionLabel>
+                  <span
+                    className={cn(
+                      // Typography
+                      'text-[10px] tabular-nums text-muted-foreground'
+                    )}
+                  >
+                    {enabledHeaders.length} sent
+                  </span>
                 </div>
-              </div>
-            )}
-
-            {activeResTab === 'headers' && (
-              <div className="flex-1 min-h-0 mt-2">
-                {response ? (
-                  <ScrollArea className="h-full">
-                    <div className="space-y-1 text-xs font-mono">
-                      {Object.entries(response.headers || {}).map(([key, value]) => (
-                        <div key={key} className="flex border-b py-1">
-                          <span className="w-1/3 text-muted-foreground font-semibold truncate pr-2">
-                            {key}
-                          </span>
-                          <span className="w-2/3 text-foreground break-all">{value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
+                {enabledHeaders.length === 0 ? (
+                  <p
+                    className={cn(
+                      // Typography
+                      'px-2 text-xs text-muted-foreground italic'
+                    )}
+                  >
+                    No headers sent with this request.
+                  </p>
                 ) : (
-                  <div className="h-full flex items-center justify-center text-xs text-muted-foreground bg-muted/5">
-                    No response headers
+                  <div>
+                    {enabledHeaders.map((header, index) => (
+                      <DetailRow
+                        key={index}
+                        label={expandVars(header.key)}
+                        value={expandVars(header.value)}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
-            )}
 
-            {activeResTab === 'request' && (
-              <div className="flex-1 min-h-0 mt-2 flex flex-col">
-                <ScrollArea className="h-full">
-                  <div className="space-y-3 pr-2">
-                    {/* Request line */}
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-                        Request
-                      </span>
-                      <div className="mt-1 font-mono text-xs bg-muted/30 rounded px-2 py-1">
-                        <span className="font-semibold text-primary">{safeRequestMethod}</span>{' '}
-                        <span className="text-foreground break-all">{expandVars(safeRequestUrl)}</span>
-                      </div>
-                    </div>
+              {/* Body */}
+              {safeBodyType !== 'none' && (
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    'flex min-h-0 flex-col',
 
-                    {/* Request headers */}
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-                        Headers
-                      </span>
-                      <div className="mt-1 space-y-0.5 text-xs font-mono">
-                        {safeHeaders.filter((h) => h.enabled).length === 0 ? (
-                          <span className="text-muted-foreground italic">No headers</span>
-                        ) : (
-                          safeHeaders
-                            .filter((h) => h.enabled)
-                            .map((h, i) => (
-                              <div key={i} className="flex border-b border-muted/30 py-1">
-                                <span className="w-1/3 text-muted-foreground font-semibold truncate pr-2">
-                                  {expandVars(h.key)}
-                                </span>
-                                <span className="w-2/3 text-foreground break-all">
-                                  {expandVars(h.value)}
-                                </span>
-                              </div>
-                            ))
-                        )}
-                      </div>
-                    </div>
+                    // Sizing & Spacing
+                    'gap-1.5'
+                  )}
+                >
+                  <SectionLabel>Body · {safeBodyType}</SectionLabel>
+                  <div
+                    className={cn(
+                      // Layout & Positioning
+                      'overflow-hidden',
 
-                    {/* Request body */}
-                    {safeBodyType !== 'none' && (
-                      <div className="flex-1 min-h-0 flex flex-col">
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">
-                          Body ({safeBodyType})
-                        </span>
-                        <div className="flex-1 border rounded-md overflow-hidden bg-background min-h-[100px]">
-                          <TextEditor value={expandVars(safeBody)} options={{ readOnly: true }} theme={theme} />
-                        </div>
-                      </div>
+                      // Sizing & Spacing
+                      'min-h-[140px]',
+
+                      // Backgrounds & Borders
+                      'rounded-md border'
                     )}
+                  >
+                    <TextEditor
+                      value={expandVars(safeBody)}
+                      options={{ readOnly: true }}
+                      theme={theme}
+                    />
                   </div>
-                </ScrollArea>
-              </div>
-            )}
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        )}
 
-            {activeResTab === 'testResults' && (
-              <div className="flex-1 min-h-0 mt-2">
-                <ScrollArea className="h-full">
-                  <div className="space-y-2 pr-2">
-                    {testResults.map((tr, index) => (
-                      <div
-                        key={index}
-                        className={`p-2 border rounded-md flex items-center justify-between text-xs ${tr.passed
-                            ? 'bg-emerald-500/5 border-emerald-500/20'
-                            : 'bg-destructive/5 border-destructive/20'
-                          }`}
+        {activeResTab === 'testResults' && (
+          <ScrollArea className="h-full">
+            {testResults.length > 0 ? (
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  'flex flex-col',
+
+                  // Sizing & Spacing
+                  'gap-3 pr-2'
+                )}
+              >
+                {/* Summary */}
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    'flex items-center',
+
+                    // Sizing & Spacing
+                    'gap-3 rounded-md border px-2.5 py-2',
+
+                    // Typography
+                    'text-xs'
+                  )}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <CheckCircleIcon className="size-3.5 text-emerald-500" />
+                    <span className="font-semibold tabular-nums text-foreground">
+                      {passedCount}
+                    </span>
+                    <span className="text-muted-foreground">passed</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <XCircleIcon className="size-3.5 text-rose-500" />
+                    <span className="font-semibold tabular-nums text-foreground">
+                      {failedCount}
+                    </span>
+                    <span className="text-muted-foreground">failed</span>
+                  </span>
+                </div>
+
+                {testResults.map((result, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      // Layout & Positioning
+                      'flex items-start',
+
+                      // Sizing & Spacing
+                      'gap-2.5 rounded-md border p-2.5',
+
+                      // Backgrounds & Borders
+                      result.passed
+                        ? 'border-emerald-500/25 bg-emerald-500/5'
+                        : 'border-rose-500/25 bg-rose-500/5'
+                    )}
+                  >
+                    {result.passed ? (
+                      <CheckCircleIcon className="mt-px size-4 shrink-0 text-emerald-500" />
+                    ) : (
+                      <XCircleIcon className="mt-px size-4 shrink-0 text-rose-500" />
+                    )}
+                    <div
+                      className={cn(
+                        // Layout & Positioning
+                        'flex min-w-0 flex-col',
+
+                        // Sizing & Spacing
+                        'gap-0.5'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          // Typography
+                          'text-xs font-medium text-foreground'
+                        )}
                       >
-                        <div className="flex items-center space-x-2">
-                          {tr.passed ? (
-                            <CheckCircleIcon className="h-4 w-4 text-emerald-500 shrink-0" />
-                          ) : (
-                            <XCircleIcon className="h-4 w-4 text-destructive shrink-0" />
+                        {result.name}
+                      </span>
+                      {!result.passed && result.message && (
+                        <span
+                          className={cn(
+                            // Typography
+                            'font-mono text-[11px] break-all text-rose-600 dark:text-rose-400'
                           )}
-                          <span className="font-semibold">{tr.name}</span>
-                        </div>
-                        {!tr.passed && tr.message && (
-                          <span className="text-[10px] text-destructive font-mono">{tr.message}</span>
-                        )}
-                      </div>
-                    ))}
-                    {testScript && testResults.length === 0 && (
-                      <div className="text-center text-xs text-muted-foreground py-8">
-                        Scripts did not output any assertion checks. Use `pm.test` inside scripts to register assertions.
-                      </div>
-                    )}
-                    {!testScript && (
-                      <div className="text-center text-xs text-muted-foreground py-8">
-                        No test scripts defined for this request.
-                      </div>
-                    )}
+                        >
+                          {result.message}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </ScrollArea>
+                ))}
+              </div>
+            ) : (
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  'flex flex-col items-center justify-center',
+
+                  // Sizing & Spacing
+                  'gap-2 p-8',
+
+                  // Backgrounds & Borders
+                  'rounded-md border border-dashed'
+                )}
+              >
+                <WarningCircleIcon className="size-5 text-muted-foreground/40" />
+                <p
+                  className={cn(
+                    // Sizing & Spacing
+                    'max-w-sm',
+
+                    // Typography
+                    'text-center text-xs text-muted-foreground'
+                  )}
+                >
+                  {testScript
+                    ? 'The test script ran but registered no assertions. Call pm.test() to record one.'
+                    : 'This request has no test script. Add assertions on the Scripts tab to check the response automatically.'}
+                </p>
               </div>
             )}
-          </div>
-        </div>
-      );
-    }
-
-    // No response yet
-    return (
-      <div className="h-full flex-1 flex flex-col items-center justify-center text-center p-4">
-        <span className="text-sm font-medium text-muted-foreground">
-          No response received yet.
-        </span>
-        <span className="text-xs text-muted-foreground/60 max-w-[200px] mt-1">
-          Enter target URL and click Send to execute the endpoint.
-        </span>
+          </ScrollArea>
+        )}
       </div>
-    );
-  };
-
-  return (
-    <div className="h-full flex-1 border rounded-lg p-2 bg-background/50 flex flex-col min-h-0">
-      {renderContent()}
     </div>
   );
 }

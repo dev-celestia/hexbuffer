@@ -22,15 +22,25 @@ pub enum RoutingDecision {
         action_name: String,
         explanation: String,
     },
+    /// A prompt unrelated to cybersecurity, web application testing, or HexBuffer
+    /// (recipes, homework, general programming, personal advice). The chat must end
+    /// immediately with a canned refusal — no model text is trusted for this decision.
+    OutOfScope,
 }
 
 #[derive(Debug, Deserialize)]
 struct AiIntentClassification {
     agent: String,
+    #[serde(default = "default_true")]
+    is_in_scope: bool,
     is_supported: bool,
     unsupported_reason: Option<String>,
     #[serde(default)]
     requires_proxy_context: bool,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 const CLASSIFIER_PREAMBLE: &str = r#"You are the HexBuffer Security Assistant Intent Classifier and Tool Gate.
@@ -47,8 +57,9 @@ CRITICAL RULES:
 1. If the user prompt asks HexBuffer to EXECUTE an unsupported tool, exploit, or action (e.g. sqlmap, metasploit, hashcat, john the ripper, aircrack/wifi cracking, apk/binary decompilation, layer 2 packet sniffing, cloud takeover), set "is_supported": false and state the reason in "unsupported_reason".
 2. Conceptual/educational/advisory questions about unsupported tools (e.g. "how does sqlmap work?", "explain wifi 4-way handshake") ARE supported by orchestrator (set "is_supported": true, "agent": "orchestrator").
 3. "requires_proxy_context" is true ONLY if the user specifically asks to inspect, analyze, or replay captured proxy traffic / tree / history.
-4. Respond with ONLY a raw JSON object (no markdown, no backticks, no other text):
-{"agent": "repeater"|"http_traffic"|"intruder"|"jwt"|"port_scanner"|"notes"|"orchestrator", "is_supported": true|false, "unsupported_reason": "string"|null, "requires_proxy_context": true|false}"#;
+4. "is_in_scope" is false ONLY if the prompt is unrelated to cybersecurity, web application testing, proxies, or HexBuffer itself (e.g. recipes, homework, general programming, personal advice). Brief greetings, thanks, and "what can you do / who are you" meta questions stay in scope ("agent": "orchestrator").
+5. Respond with ONLY a raw JSON object (no markdown, no backticks, no other text):
+{"agent": "repeater"|"http_traffic"|"intruder"|"jwt"|"port_scanner"|"notes"|"orchestrator", "is_in_scope": true|false, "is_supported": true|false, "unsupported_reason": "string"|null, "requires_proxy_context": true|false}"#;
 
 /// Checks if text looks like a raw HTTP request line
 fn contains_raw_http_request(text: &str) -> bool {
@@ -168,28 +179,42 @@ async fn classify_with_ai(prompt: &str, config: &AiConfig) -> Result<RoutingDeci
     let classification: AiIntentClassification = serde_json::from_str(json_str)
         .map_err(|e| format!("Failed to parse intent classifier JSON: {e} ({text})"))?;
 
+    Ok(decision_from_classification(prompt, classification))
+}
+
+/// Maps a classifier result to a routing decision. Scope is checked before support:
+/// an out-of-scope prompt is refused with a canned message regardless of what the
+/// model said about agent fit, since scope refusals never trust model-generated text.
+fn decision_from_classification(
+    prompt: &str,
+    classification: AiIntentClassification,
+) -> RoutingDecision {
+    if !classification.is_in_scope {
+        return RoutingDecision::OutOfScope;
+    }
+
     if !classification.is_supported {
-        return Ok(RoutingDecision::UnsupportedAction {
+        return RoutingDecision::UnsupportedAction {
             action_name: prompt.chars().take(50).collect::<String>(),
             explanation: classification.unsupported_reason.unwrap_or_else(|| {
                 "This operational action is not supported by HexBuffer.".to_string()
             }),
-        });
+        };
     }
 
     let agent_id = AgentId::from_str_loose(&classification.agent).unwrap_or(AgentId::Orchestrator);
     let spec = get_agent_spec(agent_id);
 
     if agent_id == AgentId::Orchestrator {
-        Ok(RoutingDecision::InformationalQA {
+        RoutingDecision::InformationalQA {
             agent: spec,
             requires_proxy_context: classification.requires_proxy_context,
-        })
+        }
     } else {
-        Ok(RoutingDecision::ExecuteAction {
+        RoutingDecision::ExecuteAction {
             agent: spec,
             requires_proxy_context: classification.requires_proxy_context,
-        })
+        }
     }
 }
 
@@ -309,6 +334,130 @@ pub async fn route_prompt(
         Err(error) => {
             eprintln!("[router] AI classifier failed ({error}); falling back to heuristic route");
             fallback_heuristic_route(prompt)
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn classification(
+        agent: &str,
+        is_in_scope: bool,
+        is_supported: bool,
+        unsupported_reason: Option<&str>,
+        requires_proxy_context: bool,
+    ) -> AiIntentClassification {
+        AiIntentClassification {
+            agent: agent.to_string(),
+            is_in_scope,
+            is_supported,
+            unsupported_reason: unsupported_reason.map(str::to_string),
+            requires_proxy_context,
+        }
+    }
+
+    #[test]
+    fn test_decision_out_of_scope_refuses_supported_prompt() {
+        let decision = decision_from_classification(
+            "recipe for ice cream",
+            classification("orchestrator", false, true, None, false),
+        );
+        assert!(matches!(decision, RoutingDecision::OutOfScope));
+    }
+
+    #[test]
+    fn test_decision_out_of_scope_takes_precedence_over_unsupported() {
+        // Scope is checked first: even a sqlmap request gets the deterministic scope
+        // refusal when the model flags it, so the canned message always wins.
+        let decision = decision_from_classification(
+            "run sqlmap against the target",
+            classification(
+                "orchestrator",
+                false,
+                false,
+                Some("sqlmap is external"),
+                false,
+            ),
+        );
+        assert!(matches!(decision, RoutingDecision::OutOfScope));
+    }
+
+    #[test]
+    fn test_decision_unsupported_when_in_scope() {
+        let decision = decision_from_classification(
+            "run sqlmap",
+            classification(
+                "orchestrator",
+                true,
+                false,
+                Some("sqlmap is not embedded"),
+                false,
+            ),
+        );
+        match decision {
+            RoutingDecision::UnsupportedAction { explanation, .. } => {
+                assert!(explanation.contains("sqlmap is not embedded"));
+            }
+            other => panic!("expected UnsupportedAction, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_decision_in_scope_informational_qa() {
+        let decision = decision_from_classification(
+            "what is sqlmap",
+            classification("orchestrator", true, true, None, false),
+        );
+        assert!(matches!(decision, RoutingDecision::InformationalQA { .. }));
+    }
+
+    #[test]
+    fn test_decision_in_scope_execute_action() {
+        let decision = decision_from_classification(
+            "replay the login request",
+            classification("repeater", true, true, None, true),
+        );
+        match decision {
+            RoutingDecision::ExecuteAction {
+                agent,
+                requires_proxy_context,
+            } => {
+                assert_eq!(agent.id, AgentId::Repeater);
+                assert!(requires_proxy_context);
+            }
+            other => panic!("expected ExecuteAction, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn test_classification_json_defaults_is_in_scope_true() {
+        // Older classifier responses (and cached prompts) without is_in_scope must
+        // keep routing instead of being refused after this contract change.
+        let json = r#"{"agent":"orchestrator","is_supported":true,"unsupported_reason":null,"requires_proxy_context":false}"#;
+        let parsed: AiIntentClassification = serde_json::from_str(json).unwrap();
+        assert!(parsed.is_in_scope);
+    }
+
+    #[test]
+    fn test_heuristic_fallback_cannot_judge_scope() {
+        // The fallback only runs when the classifier fails, where no scope signal
+        // exists — an off-topic prompt still routes to orchestrator QA there.
+        let decision = fallback_heuristic_route("recipe for ice cream please");
+        assert!(matches!(decision, RoutingDecision::InformationalQA { .. }));
+    }
+
+    #[test]
+    fn test_fast_path_bypasses_scope_gate() {
+        // An explicit @mention is unambiguous intent — the scope gate must not
+        // intercept it, even if the rest of the prompt is off-topic.
+        let decision = fast_path_route("@repeater recipe for ice cream", None);
+        match decision {
+            Some(RoutingDecision::ExecuteAction { agent, .. }) => {
+                assert_eq!(agent.id, AgentId::Repeater);
+            }
+            other => panic!("expected ExecuteAction for @repeater, got {other:?}"),
         }
     }
 }

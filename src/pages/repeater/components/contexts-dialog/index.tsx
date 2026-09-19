@@ -48,15 +48,20 @@ export function ContextsDialog({ open, onOpenChange }: Readonly<ContextsDialogPr
         className={cn(
           // Layout & Positioning
           'flex flex-col overflow-hidden',
+
           // Sizing & Spacing
-          'sm:max-w-4xl h-[580px] p-0',
+          'h-[580px] p-0 sm:max-w-4xl'
         )}
       >
         <DialogTitle className="sr-only">Manage Environments</DialogTitle>
         <div
           className={cn(
             // Layout & Positioning
-            'flex flex-1 min-h-0 divide-x divide-border',
+            'flex min-h-0 flex-1',
+
+            // Backgrounds & Borders
+            // `divide-border` was redundant — divide-x already inherits the theme border colour.
+            'divide-x'
           )}
         >
           {/* Left Sidebar */}
@@ -81,9 +86,7 @@ export function ContextsDialog({ open, onOpenChange }: Readonly<ContextsDialogPr
           <div
             className={cn(
               // Layout & Positioning
-              'flex flex-1 flex-col min-h-0',
-              // Backgrounds & Borders
-              'bg-background',
+              'flex min-h-0 flex-1 flex-col'
             )}
           >
             <AnimatePresence mode="wait">

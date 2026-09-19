@@ -67,6 +67,17 @@ export async function exportCollectionsToFile(workspaceId?: string): Promise<voi
 export interface ImportResult {
   stashes: StashRecord[];
   endpoints: StashEndpointRecord[];
+  /**
+   * Basename of the file that was read, so the confirmation can name its source rather than
+   * asking the user to trust that the right file was picked. Null when the path is unparseable.
+   */
+  fileName: string | null;
+}
+
+/** Last path segment, tolerating both separators since the picker returns a platform path. */
+function baseName(path: string): string | null {
+  const segment = path.split(/[\\/]/).filter(Boolean).pop();
+  return segment ?? null;
 }
 
 // ── Import ──
@@ -176,5 +187,6 @@ export async function importCollectionsFromFile(): Promise<ImportResult | null> 
   return {
     stashes: stashes as StashRecord[],
     endpoints: endpoints as StashEndpointRecord[],
+    fileName: baseName(selectedPath),
   };
 }

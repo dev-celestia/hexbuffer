@@ -1,82 +1,11 @@
-import { Button, ButtonGroup, Checkbox, Label, RadioGroup, RadioGroupItem, ScrollArea, Switch, TextEditor } from '@celestia-project/ui';
-import { useState, useRef } from "react";
+import { Button, ScrollArea, Switch, Tabs, TabsList, TabsTrigger, TextEditor } from '@celestia-project/ui';
+import { useState, useRef } from 'react';
 
-import { TrashIcon, PlusIcon, UploadSimpleIcon, ImageSquareIcon } from '@phosphor-icons/react';
-import type { KeyValuePair, ActiveRequestState } from "@/stores/collections";
-import { useTheme } from "@/components/theme-provider";
-import { cn } from "@/lib/utils";
-import { ColorizedUrlInput } from "@/pages/repeater/components/select-env-input";
-
-// ── Shared key-value list editor ──
-
-interface KeyValueEditorProps {
-  items: KeyValuePair[];
-  onItemChange: (index: number, field: "key" | "value", value: string) => void;
-  onItemToggle: (index: number) => void;
-  onAdd: () => void;
-  onRemove: (index: number) => void;
-  noun: string;
-  emptyMessage: string;
-}
-
-function KeyValueEditor({
-  items,
-  onItemChange,
-  onItemToggle,
-  onAdd,
-  onRemove,
-  noun,
-  emptyMessage,
-}: Readonly<KeyValueEditorProps>) {
-  return (
-    <div className="space-y-2">
-      <div className="flex justify-between items-center px-1">
-        <span className="text-[10px] uppercase font-bold text-muted-foreground">
-          {noun}
-        </span>
-        <Button variant="ghost" size="sm" className="h-7 px-2" onClick={onAdd}>
-          <PlusIcon className="h-3.5 w-3.5 mr-1" /> Add
-        </Button>
-      </div>
-      {items.map((item, index) => (
-        <div key={index} className="flex items-center space-x-2">
-          <Checkbox
-            checked={item.enabled}
-            onCheckedChange={() => onItemToggle(index)}
-          />
-          <div className="flex-1 flex min-w-0">
-            <ColorizedUrlInput
-              placeholder="Name"
-              className="font-mono rounded-none text-xs border-r-0"
-              value={item.key}
-              onChange={(v) => onItemChange(index, "key", v)}
-            />
-            <ColorizedUrlInput
-              placeholder="Value"
-              className="font-mono text-xs rounded-none"
-              value={item.value}
-              onChange={(v) => onItemChange(index, "value", v)}
-            />
-          </div>
-         
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-4 mr-4 text-muted-foreground hover:text-destructive shrink-0"
-            onClick={() => onRemove(index)}
-          >
-            <TrashIcon className="h-4 w-4" />
-          </Button>
-        </div>
-      ))}
-      {items.length === 0 && (
-        <div className="text-center text-xs text-muted-foreground py-8">
-          {emptyMessage}
-        </div>
-      )}
-    </div>
-  );
-}
+import { TrashIcon, UploadSimpleIcon, ImageSquareIcon } from '@phosphor-icons/react';
+import type { KeyValuePair, ActiveRequestState } from '@/stores/collections';
+import { useTheme } from '@/components/theme-provider';
+import { cn } from '@/lib/utils';
+import { ForgeKeyValueEditor } from './forge-key-value-editor';
 
 // ── Request tabs ──
 
@@ -87,7 +16,7 @@ interface ForgeRequestTabsProps {
   onReqTabChange: (tab: string) => void;
   onQueryParamChange: (
     index: number,
-    field: "key" | "value",
+    field: 'key' | 'value',
     value: string,
   ) => void;
   onQueryParamToggle: (index: number) => void;
@@ -95,7 +24,7 @@ interface ForgeRequestTabsProps {
   onRemoveQueryParam: (index: number) => void;
   onHeaderChange: (
     index: number,
-    field: "key" | "value",
+    field: 'key' | 'value',
     value: string,
   ) => void;
   onHeaderToggle: (index: number) => void;
@@ -107,7 +36,40 @@ interface ForgeRequestTabsProps {
   onTestScriptChange: (script: string) => void;
 }
 
-const BODY_OPTIONS = ["none", "raw", "json"] as const;
+const BODY_OPTIONS = ['none', 'raw', 'json'] as const;
+
+const REQUEST_TABS = ['params', 'headers', 'body', 'scripts'] as const;
+
+const TAB_LABELS: Record<(typeof REQUEST_TABS)[number], string> = {
+  params: 'Params',
+  headers: 'Headers',
+  body: 'Body',
+  scripts: 'Scripts',
+};
+
+/** Small count chip on a tab, e.g. how many headers are actually enabled. */
+function TabCount({ value }: Readonly<{ value: number }>) {
+  if (value <= 0) return null;
+  return (
+    <span
+      className={cn(
+        // Layout & Positioning
+        'inline-flex items-center justify-center',
+
+        // Sizing & Spacing
+        'min-w-4 rounded-full px-1',
+
+        // Typography
+        'text-[10px] leading-4 font-semibold tabular-nums',
+
+        // Backgrounds & Borders
+        'bg-muted text-muted-foreground'
+      )}
+    >
+      {value}
+    </span>
+  );
+}
 
 export function ForgeRequestTabs({
   queryParams,
@@ -131,10 +93,13 @@ export function ForgeRequestTabs({
   const [activeScriptTab, setActiveScriptTab] = useState<'pre' | 'test'>('pre');
   const [isImageMode, setIsImageMode] = useState(() => {
     // ponytail: default to image mode if the body is already an image data URL
-    return req.body.startsWith("data:image/");
+    return req.body.startsWith('data:image/');
   });
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const enabledParamCount = queryParams.filter((p) => p.enabled && p.key).length;
+  const enabledHeaderCount = req.headers.filter((h) => h.enabled && h.key).length;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -175,148 +140,284 @@ export function ForgeRequestTabs({
   };
 
   const getFileInfo = () => {
-    if (!req.body.startsWith("data:image/")) return null;
+    if (!req.body.startsWith('data:image/')) return null;
     const match = req.body.match(/^data:([^;]+);base64,/);
-    const mimeType = match ? match[1] : "unknown";
-    const base64Len = req.body.split(",")[1]?.length || 0;
+    const mimeType = match ? match[1] : 'unknown';
+    const base64Len = req.body.split(',')[1]?.length || 0;
     const sizeBytes = Math.round((base64Len * 3) / 4);
     const sizeKb = (sizeBytes / 1024).toFixed(1);
     return { mimeType, sizeKb };
   };
 
   const fileInfo = getFileInfo();
-  return (
-    <div className="h-full flex-1 border rounded-lg p-2 bg-background/50 flex flex-col min-h-0">
-      <div className="flex-1 flex flex-col min-h-0">
-        <ButtonGroup
-          orientation="horizontal"
-          className="shrink-0 w-full h-auto p-0 mb-2"
-        >
-          {(["params", "headers", "body", "scripts"] as const).map((t) => (
-            <Button
-              key={t}
-              variant="outline"
-              size="sm"
-              className={cn("uppercase text-xs", activeReqTab === t && "text-primary")}
-              onClick={() => onReqTabChange(t)}
-            >
-              {t}
-            </Button>
-          ))}
-        </ButtonGroup>
 
+  return (
+    <div
+      className={cn(
+        // Layout & Positioning
+        'flex min-h-0 flex-1 flex-col'
+      )}
+    >
+      {/* Content tabs — an underline set, so they read as sub-navigation under the
+          Request/Response mode switch rather than competing with it. */}
+      <Tabs
+        value={activeReqTab}
+        onValueChange={onReqTabChange}
+        className={cn(
+          // Sizing & Spacing
+          'w-full shrink-0'
+        )}
+      >
+        <TabsList
+          variant="line"
+          className={cn(
+            // Layout & Positioning
+            'w-full justify-start'
+          )}
+        >
+          {REQUEST_TABS.map((tab) => (
+            <TabsTrigger
+              key={tab}
+              value={tab}
+              className={cn(
+                // Sizing & Spacing
+                'flex-none px-3'
+              )}
+            >
+              {TAB_LABELS[tab]}
+              {tab === 'params' && <TabCount value={enabledParamCount} />}
+              {tab === 'headers' && <TabCount value={enabledHeaderCount} />}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+
+      <div
+        className={cn(
+          // Layout & Positioning
+          'flex min-h-0 flex-1 flex-col',
+
+          // Sizing & Spacing
+          'pt-3'
+        )}
+      >
         {/* ── Params tab ── */}
-        {activeReqTab === "params" && (
-          <div className="flex-1 min-h-0 mt-2">
-            <ScrollArea className="h-full">
-              <KeyValueEditor
-                items={queryParams}
-                onItemChange={onQueryParamChange}
-                onItemToggle={onQueryParamToggle}
-                onAdd={onAddQueryParam}
-                onRemove={onRemoveQueryParam}
-                noun="Query Parameters"
-                emptyMessage="No URL query parameters. Add parameter above to configure."
-              />
-            </ScrollArea>
-          </div>
+        {activeReqTab === 'params' && (
+          <ScrollArea className="h-full">
+            <ForgeKeyValueEditor
+              items={queryParams}
+              onItemChange={onQueryParamChange}
+              onItemToggle={onQueryParamToggle}
+              onAdd={onAddQueryParam}
+              onRemove={onRemoveQueryParam}
+              noun="Query parameters"
+              emptyMessage="No query parameters. Add one to append it to the request URL."
+            />
+          </ScrollArea>
         )}
 
         {/* ── Headers tab ── */}
-        {activeReqTab === "headers" && (
-          <div className="flex-1 min-h-0 mt-2">
-            <ScrollArea className="h-full">
-              <KeyValueEditor
-                items={req.headers}
-                onItemChange={onHeaderChange}
-                onItemToggle={onHeaderToggle}
-                onAdd={onAddHeader}
-                onRemove={onRemoveHeader}
-                noun="Headers"
-                emptyMessage="No custom headers."
-              />
-            </ScrollArea>
-          </div>
+        {activeReqTab === 'headers' && (
+          <ScrollArea className="h-full">
+            <ForgeKeyValueEditor
+              items={req.headers}
+              onItemChange={onHeaderChange}
+              onItemToggle={onHeaderToggle}
+              onAdd={onAddHeader}
+              onRemove={onRemoveHeader}
+              noun="Headers"
+              emptyMessage="No custom headers. Add one to send it with this request."
+            />
+          </ScrollArea>
         )}
 
         {/* ── Body tab ── */}
-        {activeReqTab === "body" && (
-          <div className="flex-1 min-h-0 mt-2 flex flex-col font-sans">
-            <div className="flex items-center justify-between mb-2 shrink-0">
-              <div className="flex items-center space-x-4">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground">
-                  Body Format:
-                </span>
-                <RadioGroup
-                  value={req.bodyType}
-                  onValueChange={onBodyTypeChange}
-                  className="flex space-x-3"
-                >
-                  {BODY_OPTIONS.map((t) => (
-                    <label
-                      key={t}
-                      className="flex items-center space-x-1 cursor-pointer font-medium text-xs"
-                    >
-                      <RadioGroupItem value={t} />
-                      <span className="capitalize">{t}</span>
-                    </label>
-                  ))}
-                </RadioGroup>
-              </div>
+        {activeReqTab === 'body' && (
+          <div
+            className={cn(
+              // Layout & Positioning
+              'flex min-h-0 flex-1 flex-col',
 
-              {req.bodyType !== "none" && (
-                <div className="flex items-center space-x-2">
-                  <Label htmlFor="image-mode-switch" className="text-xs text-muted-foreground cursor-pointer font-medium">
-                    Image mode
-                  </Label>
-                  <Switch
-                    id="image-mode-switch"
-                    checked={isImageMode}
-                    onCheckedChange={setIsImageMode}
-                  />
-                </div>
+              // Sizing & Spacing
+              'gap-3'
+            )}
+          >
+            <div
+              className={cn(
+                // Layout & Positioning
+                'flex shrink-0 items-center justify-between',
+
+                // Sizing & Spacing
+                'gap-3'
+              )}
+            >
+              <Tabs
+                value={req.bodyType}
+                onValueChange={onBodyTypeChange}
+                className={cn(
+                  // Sizing & Spacing
+                  'w-fit'
+                )}
+              >
+                <TabsList>
+                  {BODY_OPTIONS.map((option) => (
+                    <TabsTrigger
+                      key={option}
+                      value={option}
+                      className={cn(
+                        // Sizing & Spacing
+                        'flex-none px-3',
+
+                        // Typography
+                        'capitalize'
+                      )}
+                    >
+                      {option}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+
+              {req.bodyType !== 'none' && (
+                <label
+                  className={cn(
+                    // Layout & Positioning
+                    'flex cursor-pointer items-center',
+
+                    // Sizing & Spacing
+                    'gap-2',
+
+                    // Typography
+                    'text-xs font-medium text-muted-foreground'
+                  )}
+                >
+                  Image mode
+                  <Switch checked={isImageMode} onCheckedChange={setIsImageMode} />
+                </label>
               )}
             </div>
 
-            <div className="flex-1 min-h-0 border rounded-md overflow-hidden bg-background">
-              {req.bodyType === "none" ? (
-                <div className="h-full flex flex-col items-center justify-center text-xs text-muted-foreground font-medium p-8">
-                  This request does not have a body payload.
+            <div
+              className={cn(
+                // Layout & Positioning
+                'min-h-0 flex-1 overflow-hidden',
+
+                // Backgrounds & Borders
+                'rounded-md border'
+              )}
+            >
+              {req.bodyType === 'none' ? (
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    'flex h-full flex-col items-center justify-center',
+
+                    // Sizing & Spacing
+                    'gap-1 p-8'
+                  )}
+                >
+                  <p
+                    className={cn(
+                      // Typography
+                      'text-xs font-medium text-foreground'
+                    )}
+                  >
+                    No body
+                  </p>
+                  <p
+                    className={cn(
+                      // Sizing & Spacing
+                      'max-w-xs',
+
+                      // Typography
+                      'text-center text-xs text-muted-foreground'
+                    )}
+                  >
+                    This request sends no payload. Switch the format above to add one.
+                  </p>
                 </div>
               ) : isImageMode ? (
-                <div className="h-full flex flex-col items-center justify-center p-6 bg-muted/5">
-                  {req.body.startsWith("data:image/") ? (
-                    <div className="flex flex-col items-center space-y-4 w-full max-w-md">
-                      <div className="relative group max-h-60 border rounded-lg overflow-hidden bg-muted/20 flex items-center justify-center p-2 shadow-sm">
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    'flex h-full flex-col items-center justify-center',
+
+                    // Sizing & Spacing
+                    'p-6',
+
+                    // Backgrounds & Borders
+                    'bg-muted/5'
+                  )}
+                >
+                  {req.body.startsWith('data:image/') ? (
+                    <div
+                      className={cn(
+                        // Layout & Positioning
+                        'flex w-full flex-col items-center',
+
+                        // Sizing & Spacing
+                        'max-w-md gap-4'
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          'flex items-center justify-center',
+
+                          // Sizing & Spacing
+                          'max-h-60 p-2',
+
+                          // Backgrounds & Borders
+                          'overflow-hidden rounded-lg border bg-muted/20'
+                        )}
+                      >
                         <img
                           src={req.body}
                           alt="Request body preview"
-                          className="max-h-56 object-contain rounded-md select-none"
+                          className="max-h-56 rounded-md object-contain select-none"
                         />
                       </div>
                       {fileInfo && (
-                        <div className="text-center space-y-1">
-                          <p className="text-xs font-mono text-muted-foreground">
-                            {fileInfo.mimeType} • {fileInfo.sizeKb} KB
-                          </p>
-                        </div>
+                        <p
+                          className={cn(
+                            // Typography
+                            'font-mono text-xs text-muted-foreground'
+                          )}
+                        >
+                          {fileInfo.mimeType} · {fileInfo.sizeKb} KB
+                        </p>
                       )}
-                      <div className="flex items-center space-x-2">
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          'flex items-center',
+
+                          // Sizing & Spacing
+                          'gap-2'
+                        )}
+                      >
                         <Button
                           variant="outline"
                           size="sm"
+                          className="h-7"
                           onClick={() => fileInputRef.current?.click()}
                         >
-                          <UploadSimpleIcon className="h-4 w-4 mr-1.5" />
-                          Replace Image
+                          <UploadSimpleIcon className="size-3.5" />
+                          Replace image
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => onBodyChange("")}
+                          className={cn(
+                            // Sizing & Spacing
+                            'h-7',
+
+                            // Interactive & States
+                            'text-destructive hover:bg-destructive/10 hover:text-destructive'
+                          )}
+                          onClick={() => onBodyChange('')}
                         >
-                          <TrashIcon className="h-4 w-4 mr-1.5" />
+                          <TrashIcon className="size-3.5" />
                           Remove
                         </Button>
                       </div>
@@ -327,24 +428,67 @@ export function ForgeRequestTabs({
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
                       className={cn(
-                        "w-full max-w-md border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center space-y-3 transition-colors",
-                        isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/20 hover:border-muted-foreground/40"
+                        // Layout & Positioning
+                        'flex w-full flex-col items-center justify-center',
+
+                        // Sizing & Spacing
+                        'max-w-md gap-3 p-8',
+
+                        // Backgrounds & Borders
+                        'rounded-lg border-2 border-dashed',
+
+                        // Interactive & States
+                        'transition-colors',
+                        isDragging
+                          ? 'border-primary bg-primary/5'
+                          : 'border-muted-foreground/20 hover:border-muted-foreground/40'
                       )}
                     >
-                      <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-                        <ImageSquareIcon className="h-6 w-6" />
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          'flex items-center justify-center',
+
+                          // Sizing & Spacing
+                          'size-10',
+
+                          // Backgrounds & Borders
+                          'rounded-full bg-muted',
+
+                          // Typography
+                          'text-muted-foreground'
+                        )}
+                      >
+                        <ImageSquareIcon className="size-5" />
                       </div>
-                      <div className="text-center space-y-1">
-                        <p className="text-sm font-semibold">Upload an image</p>
-                        <p className="text-xs text-muted-foreground">
-                          Drag and drop your image file here, or click below
+                      <div
+                        className={cn(
+                          // Layout & Positioning
+                          'flex flex-col items-center',
+
+                          // Sizing & Spacing
+                          'gap-1'
+                        )}
+                      >
+                        <p
+                          className={cn(
+                            // Typography
+                            'text-sm font-medium'
+                          )}
+                        >
+                          Upload an image
+                        </p>
+                        <p
+                          className={cn(
+                            // Typography
+                            'text-center text-xs text-muted-foreground'
+                          )}
+                        >
+                          Drag a file here, or choose one below
                         </p>
                       </div>
-                      <Button
-                        size="sm"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        Choose File
+                      <Button size="sm" className="h-7" onClick={() => fileInputRef.current?.click()}>
+                        Choose file
                       </Button>
                     </div>
                   )}
@@ -359,7 +503,7 @@ export function ForgeRequestTabs({
               ) : (
                 <TextEditor
                   value={req.body}
-                  onChange={(val) => onBodyChange(val || "")}
+                  onChange={(val) => onBodyChange(val || '')}
                   theme={theme}
                 />
               )}
@@ -368,48 +512,71 @@ export function ForgeRequestTabs({
         )}
 
         {/* ── Scripts tab ── */}
-        {activeReqTab === "scripts" && (
-          <div className="flex-1 min-h-0 mt-2 flex flex-col">
-            <div className="flex items-center justify-between mb-2 shrink-0">
-              <ButtonGroup orientation="horizontal" className="h-auto p-0">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className={cn(
-                    "text-xs uppercase",
-                    activeScriptTab === "pre" && "text-primary font-semibold"
-                  )}
-                  onClick={() => setActiveScriptTab("pre")}
-                >
-                  Pre-Request Script
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className={cn(
-                    "text-xs uppercase",
-                    activeScriptTab === "test" && "text-primary font-semibold"
-                  )}
-                  onClick={() => setActiveScriptTab("test")}
-                >
-                  Test / Assertion Script
-                </Button>
-              </ButtonGroup>
-            </div>
+        {activeReqTab === 'scripts' && (
+          <div
+            className={cn(
+              // Layout & Positioning
+              'flex min-h-0 flex-1 flex-col',
 
-            <div className="flex-1 min-h-0 border rounded-md overflow-hidden bg-background">
-              {activeScriptTab === "pre" ? (
+              // Sizing & Spacing
+              'gap-3'
+            )}
+          >
+            <Tabs
+              value={activeScriptTab}
+              onValueChange={(val) => setActiveScriptTab(val as 'pre' | 'test')}
+              className={cn(
+                // Sizing & Spacing
+                'w-full shrink-0'
+              )}
+            >
+              <TabsList
+                variant="line"
+                className={cn(
+                  // Layout & Positioning
+                  'w-full justify-start'
+                )}
+              >
+                <TabsTrigger
+                  value="pre"
+                  className={cn(
+                    // Sizing & Spacing
+                    'flex-none px-3'
+                  )}
+                >
+                  Pre-request
+                </TabsTrigger>
+                <TabsTrigger
+                  value="test"
+                  className={cn(
+                    // Sizing & Spacing
+                    'flex-none px-3'
+                  )}
+                >
+                  Tests
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <div
+              className={cn(
+                // Layout & Positioning
+                'min-h-0 flex-1 overflow-hidden',
+
+                // Backgrounds & Borders
+                'rounded-md border'
+              )}
+            >
+              {activeScriptTab === 'pre' ? (
                 <TextEditor
                   value={req.preScript}
-                  onChange={(val) => onPreScriptChange(val || "")}
+                  onChange={(val) => onPreScriptChange(val || '')}
                   theme={theme}
                 />
               ) : (
                 <TextEditor
                   value={req.testScript}
-                  onChange={(val) => onTestScriptChange(val || "")}
+                  onChange={(val) => onTestScriptChange(val || '')}
                   theme={theme}
                 />
               )}

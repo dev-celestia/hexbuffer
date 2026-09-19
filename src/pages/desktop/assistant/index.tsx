@@ -76,6 +76,8 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: Readonl
         onOpenConfig={handleOpenConfig}
         onOpenDebug={() => setDebugDialogOpen(true)}
         onClose={onClose}
+        autonomous={isAutonomous}
+        onAutonomousChange={setIsAutonomous}
         trailing={<SessionTokenUsageBadge />}
       />
 
@@ -208,8 +210,6 @@ function AIAssistantPaneContent({ onClose, compact = false, className }: Readonl
             onModelChange={handleModelChange}
             selectedAgent={selectedAgent}
             onSelectAgent={setSelectedAgent}
-            autonomous={isAutonomous}
-            onAutonomousChange={setIsAutonomous}
           />
         </div>
       </div>

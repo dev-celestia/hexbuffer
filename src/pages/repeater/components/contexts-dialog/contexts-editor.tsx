@@ -4,6 +4,7 @@ import { PlusIcon } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import type { ContextRecord, KeyValuePair } from '@/stores/collections';
+import { VARIABLE_COLUMNS, VARIABLE_GUTTER } from './columns';
 import { ContextsVariableRow } from './contexts-variable-row';
 import { ContextsVariablesEmpty } from './contexts-variables-empty';
 
@@ -19,6 +20,16 @@ interface ContextsEditorProps {
   onSave: () => void;
 }
 
+/**
+ * The environment editor.
+ *
+ * Chrome went from four stacked bands to three. The identity row (name) and the dialog footer
+ * (Cancel / Save) were two separate full-width rules that both existed to hold one control each, so
+ * they are now one band — the name on the left, the commit actions on the right, which is also
+ * where the eye already is after typing a name. `Add Row` likewise moved out of the identity row,
+ * where a variable action sat next to the environment's own name, down into the column header it
+ * actually adds a row to.
+ */
 export function ContextsEditor({
   editingContext,
   name,
@@ -30,6 +41,8 @@ export function ContextsEditor({
   onCancel,
   onSave,
 }: Readonly<ContextsEditorProps>) {
+  const configuredCount = variables.filter((variable) => variable.key.trim() !== '').length;
+
   return (
     <motion.div
       key={editingContext?.id || 'create'}
@@ -39,167 +52,192 @@ export function ContextsEditor({
       transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
       className={cn(
         // Layout & Positioning
-        'flex flex-1 flex-col min-h-0',
+        'flex min-h-0 flex-1 flex-col'
       )}
     >
-      {/* Header with Title and Actions */}
+      {/* Identity + commit actions */}
       <div
         className={cn(
           // Layout & Positioning
-          'flex items-center justify-between border-b border-border shrink-0',
+          'flex shrink-0 items-center justify-between',
+
           // Sizing & Spacing
-          'p-4 gap-4',
+          'h-12 gap-3 px-4',
+
           // Backgrounds & Borders
-          'bg-muted/5',
+          'border-b'
         )}
       >
-        <div
+        <Input
+          placeholder="Environment name (e.g. Production, Staging)"
+          value={name}
+          onChange={(e) => onNameChange(e.target.value)}
+          aria-label="Environment name"
+          autoComplete="off"
           className={cn(
             // Layout & Positioning
-            'flex-1 min-w-0',
+            // The base input carries `w-full`, which would overflow this flex row on its own.
+            'flex-1'
           )}
-        >
-          <Input
-            placeholder="Environment Name (e.g. Production, Development)"
-            value={name}
-            onChange={(e) => onNameChange(e.target.value)}
-          />
-        </div>
+        />
 
         <div
           className={cn(
             // Layout & Positioning
-            'flex items-center',
+            'flex shrink-0 items-center',
+
             // Sizing & Spacing
-            'gap-1.5',
+            'gap-1.5'
           )}
         >
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onAddVar}
-          >
-            <PlusIcon className="size-3.5" />
-            Add Row
-          </Button>
-        </div>
-      </div>
-
-      {/* Variables Table */}
-      <div
-        className={cn(
-          // Layout & Positioning
-          'flex flex-1 flex-col min-h-0',
-        )}
-      >
-        {/* Table Header */}
-        <div
-          className={cn(
-            // Layout & Positioning
-            'grid grid-cols-[36px_1fr_1.2fr_36px] border-b border-border/60 shrink-0',
-            // Sizing & Spacing
-            'gap-2 px-6 py-2',
-            // Typography
-            'text-[10px] font-semibold text-muted-foreground uppercase tracking-wider',
-            // Backgrounds & Borders
-            'bg-muted/10',
-          )}
-        >
-          <div className="text-center">Active</div>
-          <div>Key</div>
-          <div>Value</div>
-          <div className="text-center">Action</div>
-        </div>
-
-        {/* Table Rows */}
-        <ScrollArea className="flex-1">
-          <div
-            className={cn(
-              // Sizing & Spacing
-              'px-4 py-2 space-y-1.5',
-            )}
-          >
-            {variables.map((item, index) => (
-              <ContextsVariableRow
-                key={index}
-                item={item}
-                index={index}
-                onVarChange={onVarChange}
-                onRemoveVar={onRemoveVar}
-              />
-            ))}
-
-            {variables.length === 0 && (
-              <ContextsVariablesEmpty onAddVar={onAddVar} />
-            )}
-          </div>
-        </ScrollArea>
-
-        {/* Footer Help Bar */}
-        <div
-          className={cn(
-            // Layout & Positioning
-            'flex items-center justify-between border-t border-border shrink-0 select-none',
-            // Sizing & Spacing
-            'p-3',
-            // Typography
-            'text-[10px] text-muted-foreground',
-            // Backgrounds & Borders
-            'bg-muted/5',
-          )}
-        >
-          <span>
-            Reference variables in requests using:{' '}
-            <code
-              className={cn(
-                // Sizing & Spacing
-                'px-1 py-0.5 rounded',
-                // Typography
-                'font-mono text-foreground',
-                // Backgrounds & Borders
-                'bg-muted/40',
-              )}
-            >
-              {'{{variable_key}}'}
-            </code>
-          </span>
-        </div>
-      </div>
-
-      {/* Dialog Footer */}
-      <div
-        className={cn(
-          // Layout & Positioning
-          'flex justify-end border-t border-border shrink-0',
-          // Sizing & Spacing
-          'p-4',
-          // Backgrounds & Borders
-          'bg-muted/5',
-        )}
-      >
-        <div
-          className={cn(
-            // Layout & Positioning
-            'flex',
-            // Sizing & Spacing
-            'gap-2',
-          )}
-        >
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onCancel}
-          >
+          <Button size="default" variant="ghost" onClick={onCancel}>
             Cancel
           </Button>
-          <Button
-            size="sm"
-            onClick={onSave}
-            disabled={!name.trim()}
-          >
-            Save Environment
+          <Button size="default" onClick={onSave} disabled={!name.trim()}>
+            {editingContext ? 'Save changes' : 'Create environment'}
           </Button>
         </div>
+      </div>
+
+      {/* Column header. Carries no actions: an add button here would sit inside the flex row that
+          the grid needs to span, pulling the VALUE column's right edge in and breaking the
+          alignment with the rows below it. Adding lives at the end of the list instead. */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          'flex shrink-0 items-center',
+
+          // Sizing & Spacing
+          'h-9',
+          VARIABLE_GUTTER,
+
+          // Backgrounds & Borders
+          'border-b bg-muted/20'
+        )}
+      >
+        <div className={cn(VARIABLE_COLUMNS, 'flex-1')}>
+          <div
+            className={cn(
+              // Typography
+              'text-center text-[10px] font-semibold tracking-wider text-muted-foreground uppercase'
+            )}
+          >
+            On
+          </div>
+          <div
+            className={cn(
+              // Typography
+              'text-[10px] font-semibold tracking-wider text-muted-foreground uppercase'
+            )}
+          >
+            Key
+          </div>
+          <div
+            className={cn(
+              // Typography
+              'text-[10px] font-semibold tracking-wider text-muted-foreground uppercase'
+            )}
+          >
+            Value
+          </div>
+          <div />
+        </div>
+      </div>
+
+      {/* Rows */}
+      <ScrollArea className="flex-1">
+        <div className={cn('py-1.5', VARIABLE_GUTTER)}>
+          {variables.map((item, index) => (
+            <ContextsVariableRow
+              key={index}
+              item={item}
+              index={index}
+              onVarChange={onVarChange}
+              onRemoveVar={onRemoveVar}
+            />
+          ))}
+
+          {variables.length === 0 ? (
+            <ContextsVariablesEmpty onAddVar={onAddVar} />
+          ) : (
+            /* Sits in the row grid so it reads as the next row rather than as chrome. Only shown
+               once there is at least one row — otherwise it would duplicate the empty state's own
+               call to action. */
+            <button
+              type="button"
+              onClick={onAddVar}
+              className={cn(
+                // Layout & Positioning
+                'w-full text-left',
+                VARIABLE_COLUMNS,
+
+                // Sizing & Spacing
+                'rounded-md py-1',
+
+                // Typography
+                'text-[11px] text-muted-foreground',
+
+                // Interactive & States
+                'transition-colors',
+                'hover:bg-muted/50 hover:text-foreground'
+              )}
+            >
+              <span
+                className={cn(
+                  // Layout & Positioning
+                  'flex items-center justify-center'
+                )}
+              >
+                <PlusIcon className="size-3.5" />
+              </span>
+              <span className={cn('col-span-2')}>Add variable</span>
+            </button>
+          )}
+        </div>
+      </ScrollArea>
+
+      {/* Reference hint */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          'flex shrink-0 items-center justify-between select-none',
+
+          // Sizing & Spacing
+          'h-8 px-4',
+
+          // Typography
+          'text-[10px] text-muted-foreground',
+
+          // Backgrounds & Borders
+          'border-t bg-muted/20'
+        )}
+      >
+        <span>
+          Reference variables in requests with{' '}
+          <code
+            className={cn(
+              // Sizing & Spacing
+              'rounded px-1 py-0.5',
+
+              // Typography
+              'font-mono text-foreground',
+
+              // Backgrounds & Borders
+              'bg-muted/60'
+            )}
+          >
+            {'{{variable_key}}'}
+          </code>
+        </span>
+
+        <span
+          className={cn(
+            // Typography
+            'tabular-nums'
+          )}
+        >
+          {configuredCount} {configuredCount === 1 ? 'variable' : 'variables'}
+        </span>
       </div>
     </motion.div>
   );

@@ -1,11 +1,14 @@
 import * as React from 'react';
-import { Button } from '@celestia-project/ui';
 import {
-  BracketsCurlyIcon,
-  GlobeIcon,
-  PlusIcon,
-  SlidersHorizontalIcon,
-} from '@phosphor-icons/react';
+  Button,
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@celestia-project/ui';
+import { BracketsCurlyIcon, GlobeIcon, PlusIcon, SlidersHorizontalIcon } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +17,15 @@ interface ContextsEmptyStateProps {
   onClose: () => void;
 }
 
+/**
+ * The right-hand panel when no environment is being edited.
+ *
+ * Rebuilt on the `Empty` primitives. The previous version wrapped two feature hints in a bordered
+ * two-column grid, which put a box inside a box on a panel that is already a box — the hints now
+ * read as a short list. The dismiss button says "Close" rather than "Cancel", because the editor's
+ * own Cancel discards edits rather than closing the dialog and the two meanings should not share a
+ * word.
+ */
 export function ContextsEmptyState({ onStartCreate, onClose }: Readonly<ContextsEmptyStateProps>) {
   return (
     <motion.div
@@ -24,166 +36,149 @@ export function ContextsEmptyState({ onStartCreate, onClose }: Readonly<Contexts
       transition={{ duration: 0.15 }}
       className={cn(
         // Layout & Positioning
-        'flex flex-1 flex-col min-h-0',
-        // Backgrounds & Borders
-        'bg-muted/5',
+        'flex min-h-0 flex-1 flex-col'
       )}
     >
-      {/* Center Body */}
       <div
         className={cn(
           // Layout & Positioning
-          'flex flex-1 flex-col items-center justify-center text-center',
+          'flex min-h-0 flex-1 items-center justify-center',
+
           // Sizing & Spacing
-          'p-8 max-w-md mx-auto',
+          'p-6'
         )}
       >
-        {/* Icon Badge */}
-        <div
-          className={cn(
-            // Layout & Positioning
-            'flex items-center justify-center border',
-            // Sizing & Spacing
-            'size-12 rounded-2xl mb-4',
-            // Backgrounds & Borders
-            'bg-muted/30 border-border/60 shadow-xs',
-          )}
-        >
-          <SlidersHorizontalIcon className="size-6 text-foreground/70" />
-        </div>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <SlidersHorizontalIcon />
+            </EmptyMedia>
+            <EmptyTitle>Environments &amp; variables</EmptyTitle>
+            <EmptyDescription>
+              Store key-value variables and swap them per target, so one request can point at
+              staging, development or production without being rewritten.
+            </EmptyDescription>
+          </EmptyHeader>
 
-        <h3
-          className={cn(
-            // Typography
-            'text-sm font-semibold tracking-tight text-foreground',
-          )}
-        >
-          Environments & Variables
-        </h3>
-
-        <p
-          className={cn(
-            // Sizing & Spacing
-            'mt-1.5 mb-6',
-            // Typography
-            'text-xs text-muted-foreground/75 leading-relaxed',
-          )}
-        >
-          Store key-value variables to dynamically substitute endpoint URLs, authentication tokens, and headers across different targets.
-        </p>
-
-        {/* Feature Highlights Grid */}
-        <div
-          className={cn(
-            // Layout & Positioning
-            'grid grid-cols-2 text-left border',
-            // Sizing & Spacing
-            'gap-3 p-3.5 mb-6 w-full rounded-xl',
-            // Backgrounds & Borders
-            'bg-background/60 border-border/50',
-          )}
-        >
-          <div
+          <ul
             className={cn(
               // Layout & Positioning
-              'flex flex-col',
+              'flex max-w-sm flex-col text-left',
+
               // Sizing & Spacing
-              'gap-1',
+              'gap-2'
             )}
           >
-            <div
+            <li
               className={cn(
                 // Layout & Positioning
-                'flex items-center',
+                'flex items-start',
+
                 // Sizing & Spacing
-                'gap-1.5',
-                // Typography
-                'text-xs font-medium text-foreground',
+                'gap-2'
               )}
             >
-              <BracketsCurlyIcon className="size-3.5 text-sky-400" />
-              <span>Variables</span>
-            </div>
-            <span
-              className={cn(
-                // Typography
-                'text-[11px] text-muted-foreground/70 leading-normal',
-              )}
-            >
-              Reference variables with{' '}
-              <code
+              <BracketsCurlyIcon
                 className={cn(
+                  // Layout & Positioning
+                  'mt-0.5 shrink-0',
+
                   // Sizing & Spacing
-                  'px-1 py-0.2 rounded',
+                  'size-3.5',
+
                   // Typography
-                  'font-mono text-[10px] text-sky-400',
-                  // Backgrounds & Borders
-                  'bg-sky-500/10',
+                  'text-sky-400'
+                )}
+              />
+              <span
+                className={cn(
+                  // Typography
+                  'text-[11px] text-muted-foreground'
                 )}
               >
-                {'{{base_url}}'}
-              </code>
-            </span>
-          </div>
+                Reference a variable anywhere in a request with{' '}
+                <code
+                  className={cn(
+                    // Sizing & Spacing
+                    'rounded px-1 py-0.5',
 
-          <div
-            className={cn(
-              // Layout & Positioning
-              'flex flex-col',
-              // Sizing & Spacing
-              'gap-1',
-            )}
-          >
-            <div
+                    // Typography
+                    'font-mono text-[10px] text-sky-400',
+
+                    // Backgrounds & Borders
+                    'bg-sky-500/10'
+                  )}
+                >
+                  {'{{base_url}}'}
+                </code>
+              </span>
+            </li>
+
+            <li
               className={cn(
                 // Layout & Positioning
-                'flex items-center',
-                // Sizing & Spacing
-                'gap-1.5',
-                // Typography
-                'text-xs font-medium text-foreground',
-              )}
-            >
-              <GlobeIcon className="size-3.5 text-emerald-400" />
-              <span>Multiple Profiles</span>
-            </div>
-            <span
-              className={cn(
-                // Typography
-                'text-[11px] text-muted-foreground/70 leading-normal',
-              )}
-            >
-              Switch seamlessly between staging, dev, and production.
-            </span>
-          </div>
-        </div>
+                'flex items-start',
 
-        <Button
-          size="sm"
-          onClick={onStartCreate}
-        >
-          <PlusIcon className="size-3.5" />
-          Create Environment
-        </Button>
+                // Sizing & Spacing
+                'gap-2'
+              )}
+            >
+              <GlobeIcon
+                className={cn(
+                  // Layout & Positioning
+                  'mt-0.5 shrink-0',
+
+                  // Sizing & Spacing
+                  'size-3.5',
+
+                  // Typography
+                  'text-emerald-400'
+                )}
+              />
+              <span
+                className={cn(
+                  // Typography
+                  'text-[11px] text-muted-foreground'
+                )}
+              >
+                Exactly one environment is active at a time — the one the request bar shows.
+              </span>
+            </li>
+          </ul>
+
+          <EmptyContent>
+            <Button
+              size="sm"
+              className={cn(
+                // Sizing & Spacing
+                'h-6 gap-1 px-2',
+
+                // Typography
+                'text-xs'
+              )}
+              onClick={onStartCreate}
+            >
+              <PlusIcon className="size-3.5" />
+              New environment
+            </Button>
+          </EmptyContent>
+        </Empty>
       </div>
 
-      {/* Footer with Cancel / Close button */}
       <div
         className={cn(
           // Layout & Positioning
-          'flex items-center justify-end border-t border-border shrink-0',
+          'flex shrink-0 items-center justify-end',
+
           // Sizing & Spacing
-          'p-4',
+          'h-12 px-4',
+
           // Backgrounds & Borders
-          'bg-muted/5',
+          'border-t'
         )}
       >
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={onClose}
-        >
-          Cancel
+        <Button size="sm" variant="ghost" onClick={onClose}>
+          Close
         </Button>
       </div>
     </motion.div>

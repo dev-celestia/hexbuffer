@@ -7,7 +7,9 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
 import type { FlatNode, DropAction } from './utils';
-import { getMethodColor } from '@/lib/status-colors';
+import { ROW_HEIGHT, rowIndent } from './utils';
+import { HighlightText } from './highlight-text';
+import { getMethodTreatment } from '../../lib/method-styles';
 
 // ── Props ──
 
@@ -18,6 +20,15 @@ export interface TreeNodeRowProps {
   isDragOver: boolean;
   dropAction: DropAction | null;
   endpointCount: number;
+  /**
+   * True while the tree is showing filter results. Filtered rows are a read-only projection: the
+   * hierarchy is forced open, so expanding and collapsing have nothing to act on, and reordering a
+   * pruned list would renumber only the rows on screen. Both affordances are therefore withdrawn
+   * rather than left as dead controls.
+   */
+  isFiltering?: boolean;
+  /** Active filter text, used to mark the characters that caused this row to match. */
+  highlightQuery?: string;
   isRenaming?: boolean;
   renameValue?: string;
   onRenameValueChange?: (value: string) => void;
@@ -39,6 +50,8 @@ export function TreeNodeRow({
   isDragOver,
   dropAction,
   endpointCount,
+  isFiltering = false,
+  highlightQuery = '',
   isRenaming = false,
   renameValue = '',
   onRenameValueChange,
@@ -60,6 +73,7 @@ export function TreeNodeRow({
   } = useSortable({
     id: node.id,
     data: { flatNode: node },
+    disabled: isFiltering,
   });
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -79,6 +93,16 @@ export function TreeNodeRow({
 
   const isCollection = node.kind === 'collection';
   const isEndpoint = node.kind === 'endpoint';
+  const methodTreatment = getMethodTreatment(node.method);
+
+  // A filtered row matched on its name, its method or its url, and the row only shows the name —
+  // so the url rides a second line. Without it a url match renders as a highlight-free row, which
+  // reads as a bug. It is shown for every filtered endpoint rather than only url matches so the
+  // result list keeps one consistent row shape.
+  const showUrlHint = isFiltering && isEndpoint && !!node.url;
+
+  // Two-line rows are content-sized; everything else keeps the fixed rhythm the drop maths assumes.
+  const isTwoLine = showUrlHint && !isRenaming;
 
   // Drop indicator classes
   const showBeforeLine = dropAction?.action === 'reorder-before';
@@ -91,27 +115,42 @@ export function TreeNodeRow({
       id={node.id}
       style={{
         ...style,
-        paddingLeft: `${node.depth * 12 + 4}px`,
+        paddingLeft: `${rowIndent(node.depth)}px`,
       }}
-      className="relative group/tree-row"
+      className={cn(
+        // Layout & Positioning
+        'group/tree-row relative'
+      )}
     >
       {/* Drop indicator: insert-before line */}
       {showBeforeLine && (
-        <div className="absolute -top-[1px] left-2 right-2 h-[2px] rounded-full bg-primary z-10" />
+        <div className="bg-primary absolute -top-px right-2 left-2 z-10 h-0.5 rounded-full" />
       )}
 
       {/* Drop indicator: insert-after line */}
       {showAfterLine && (
-        <div className="absolute -bottom-[1px] left-2 right-2 h-[2px] rounded-full bg-primary z-10" />
+        <div className="bg-primary absolute right-2 -bottom-px left-2 z-10 h-0.5 rounded-full" />
       )}
 
       <ContextMenu>
         <ContextMenuTrigger>
           <div
+            style={{ height: isTwoLine ? undefined : ROW_HEIGHT }}
             className={cn(
-              'flex cursor-pointer items-center gap-1 rounded-sm py-0.5 transition-colors hover:bg-muted group/tree-row',
-              isSelected && 'bg-muted',
-              isDragOver && showInsideHighlight && 'bg-primary/30 ring-1 ring-primary/30',
+              // Layout & Positioning
+              'relative flex cursor-pointer items-center',
+
+              // Sizing & Spacing
+              'gap-1.5 rounded-md pr-1',
+              isTwoLine && 'py-1',
+
+              // Backgrounds & Borders
+              isSelected && 'bg-accent',
+              isDragOver && showInsideHighlight && 'bg-primary/20 ring-primary/40 ring-1',
+
+              // Interactive & States
+              'transition-colors',
+              !isSelected && 'hover:bg-muted/60'
             )}
             onClick={() => {
               if (isRenaming) return;
@@ -122,11 +161,37 @@ export function TreeNodeRow({
               // Collections: clicking row toggles expand (override for chevron handled separately)
             }}
           >
-            {/* Expand/Collapse Chevron */}
-            {isCollection ? (
+            {/* Selection rail — flush with the highlight's left edge so the two read as one mark */}
+            {isSelected && (
+              <span
+                className={cn(
+                  // Layout & Positioning
+                  'absolute top-1.5 bottom-1.5 left-0',
+
+                  // Sizing & Spacing
+                  'w-0.5',
+
+                  // Backgrounds & Borders
+                  'bg-primary rounded-full'
+                )}
+              />
+            )}
+
+            {/* Expand/Collapse Chevron — becomes a spacer while filtering, since every match is
+                already shown with its full path and there is nothing left to collapse. */}
+            {isCollection && !isFiltering ? (
               <button
                 type="button"
-                className="flex h-4 w-4 flex-shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"
+                className={cn(
+                  // Layout & Positioning
+                  'flex shrink-0 items-center justify-center',
+
+                  // Sizing & Spacing
+                  'size-4',
+
+                  // Interactive & States
+                  'text-muted-foreground hover:text-foreground'
+                )}
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleExpand(node.id);
@@ -138,7 +203,12 @@ export function TreeNodeRow({
                 />
               </button>
             ) : (
-              <span className="w-4 flex-shrink-0" />
+              <span
+                className={cn(
+                  // Sizing & Spacing
+                  'w-4 shrink-0'
+                )}
+              />
             )}
 
             {/* Folder icon — clickable for collections to toggle expand */}
@@ -147,23 +217,37 @@ export function TreeNodeRow({
               <img
                 src={isExpanded ? folderOpenIcon : folderIcon}
                 alt="folder"
-                className="size-4 flex-shrink-0 cursor-pointer hover:scale-110 transition-transform"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleExpand(node.id);
-                }}
+                className={cn(
+                  // Sizing & Spacing
+                  'size-4 shrink-0',
+
+                  // Interactive & States
+                  isFiltering ? 'transition-transform' : 'cursor-pointer transition-transform hover:scale-110'
+                )}
+                onClick={
+                  isFiltering
+                    ? undefined
+                    : (e) => {
+                        e.stopPropagation();
+                        onToggleExpand(node.id);
+                      }
+                }
               />
             )}
 
             {/* Label */}
             <div
-              className={cn('min-w-0 flex-1', isCollection && 'cursor-pointer')}
+              className={cn(
+                // Layout & Positioning
+                'min-w-0 flex-1',
+                isCollection && !isFiltering && 'cursor-pointer'
+              )}
               onClick={(e) => {
                 if (isRenaming) {
                   e.stopPropagation();
                   return;
                 }
-                if (isCollection) {
+                if (isCollection && !isFiltering) {
                   e.stopPropagation();
                   onToggleExpand(node.id);
                 }
@@ -175,10 +259,32 @@ export function TreeNodeRow({
                 }
               }}
             >
-              <div className="flex min-w-0 items-center gap-1.5">
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  'flex min-w-0 items-center',
+
+                  // Sizing & Spacing
+                  'gap-2'
+                )}
+              >
                 {/* Method badge for endpoints */}
                 {isEndpoint && node.method && (
-                  <span className={cn('text-[9px] font-bold font-mono uppercase shrink-0', getMethodColor(node.method))}>
+                  <span
+                    className={cn(
+                      // Layout & Positioning
+                      'inline-flex shrink-0 items-center',
+
+                      // Sizing & Spacing
+                      'rounded border px-1',
+
+                      // Typography
+                      'font-mono text-[9px] leading-4 font-bold uppercase',
+
+                      // Backgrounds & Borders
+                      methodTreatment.pill
+                    )}
+                  >
                     {node.method}
                   </span>
                 )}
@@ -204,33 +310,94 @@ export function TreeNodeRow({
                     onDoubleClick={(e) => e.stopPropagation()}
                     onPointerDown={(e) => e.stopPropagation()}
                     onMouseDown={(e) => e.stopPropagation()}
-                    className="h-5 w-full min-w-0 bg-background border border-ring/55 rounded px-1 text-xs focus:outline-none focus:border-ring focus:ring-1 focus:ring-ring font-sans"
+                    className={cn(
+                      // Sizing & Spacing
+                      'h-5 w-full min-w-0 rounded px-1',
+
+                      // Typography
+                      'font-sans text-xs',
+
+                      // Backgrounds & Borders
+                      'border-ring/55 bg-background focus:border-ring focus:ring-ring border focus:ring-1 focus:outline-none'
+                    )}
                   />
                 ) : (
-                  <span className={cn('truncate text-xs')}>
-                    {node.label}
+                  <span
+                    className={cn(
+                      // Layout & Positioning
+                      'truncate',
+
+                      // Typography
+                      'text-xs',
+                      isSelected && 'font-medium'
+                    )}
+                  >
+                    {isFiltering ? (
+                      <HighlightText text={node.label} query={highlightQuery} />
+                    ) : (
+                      node.label
+                    )}
                   </span>
                 )}
+
                 {/* Endpoint count badge for collections */}
                 {isCollection && endpointCount > 0 && !isRenaming && (
-                  <span className="shrink-0 text-[10px] leading-none text-muted-foreground/60 tabular-nums">
+                  <span
+                    className={cn(
+                      // Layout & Positioning
+                      'shrink-0',
+
+                      // Typography
+                      'text-[10px] leading-none tabular-nums',
+                      isSelected ? 'text-foreground/60' : 'text-muted-foreground/60'
+                    )}
+                  >
                     {endpointCount}
                   </span>
                 )}
-
               </div>
+
+              {/* Second line: why this row is in the results. Rendered for every filtered endpoint
+                  so the list keeps one shape; the highlight itself says which part matched. */}
+              {isTwoLine && (
+                <div
+                  data-slot="tree-url-hint"
+                  className={cn(
+                    // Layout & Positioning
+                    'truncate',
+
+                    // Typography
+                    'font-mono text-[10px] leading-4',
+                    'text-muted-foreground'
+                  )}
+                >
+                  <HighlightText text={node.url!} query={highlightQuery} />
+                </div>
+              )}
             </div>
 
-            {/* Drag handle Handle — drag trigger, visible on hover */}
-            <button
-              type="button"
-              className="flex h-5 w-4 flex-shrink-0 items-center justify-center rounded-sm text-muted-foreground/30 opacity-0 group-hover/tree-row:opacity-100 transition-opacity cursor-grab active:cursor-grabbing hover:text-muted-foreground touch-none"
-              {...attributes}
-              {...listeners}
-              aria-label="Drag to reorder"
-            >
-              <DotsSixVerticalIcon className="h-3.5 w-3.5" />
-            </button>
+            {/* Drag handle — drag trigger, visible on hover. Withdrawn while filtering, because
+                reordering a pruned list would collide with the rows that were filtered out. */}
+            {!isFiltering && (
+              <button
+                type="button"
+                className={cn(
+                  // Layout & Positioning
+                  'flex shrink-0 touch-none items-center justify-center',
+
+                  // Sizing & Spacing
+                  'h-5 w-4 rounded-sm',
+
+                  // Interactive & States
+                  'text-muted-foreground/30 group-hover/tree-row:opacity-100 hover:text-muted-foreground cursor-grab opacity-0 transition-opacity active:cursor-grabbing'
+                )}
+                {...attributes}
+                {...listeners}
+                aria-label="Drag to reorder"
+              >
+                <DotsSixVerticalIcon className="size-3.5" />
+              </button>
+            )}
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent className="w-48">
@@ -252,18 +419,11 @@ export function TreeNodeRow({
               </ContextMenuItem>
             </>
           )}
-          <ContextMenuItem
-            onClick={() => onRename(node)}
-            className="text-xs"
-          >
+          <ContextMenuItem onClick={() => onRename(node)} className="text-xs">
             <PencilSimpleIcon className="mr-2 h-4 w-4" />
             Rename
           </ContextMenuItem>
-          <ContextMenuItem
-            onClick={() => onDelete(node)}
-            variant="destructive"
-            className="text-xs"
-          >
+          <ContextMenuItem onClick={() => onDelete(node)} variant="destructive" className="text-xs">
             <TrashIcon className="mr-2 h-4 w-4" />
             Delete
           </ContextMenuItem>

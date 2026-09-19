@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Badge, Button, ButtonGroup } from '@celestia-project/ui';
-import { CheckIcon, CopyIcon, PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
+import { Badge, Button } from '@celestia-project/ui';
+import { CheckIcon, CopyIcon, TrashIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import type { ContextRecord } from '@/stores/collections';
 
@@ -12,13 +12,25 @@ interface ContextsListItemProps {
   summary: string;
   onSelect: () => void;
   onSetActive: () => void;
-  onEdit: () => void;
   onDuplicate: () => void;
   onStartDelete: () => void;
   onConfirmDelete: () => void;
   onCancelDelete: () => void;
 }
 
+/**
+ * One environment in the sidebar.
+ *
+ * Selection uses the same mark as a selected collection row — a tinted background plus a 2px
+ * primary rail on the row's own left edge — so "the thing I am looking at" reads identically on
+ * both sides of the app.
+ *
+ * The hover actions were four `size="icon"` outline buttons sitting on a gradient scrim. Three
+ * changes: the outline variant's raised shadow is gone in favour of ghost keys, the Edit button is
+ * gone because clicking the row already edits it, and the scrim is gone because it fought the
+ * hover tint underneath. The keys keep their layout space via opacity rather than being unmounted,
+ * so revealing them never re-truncates the name.
+ */
 export function ContextsListItem({
   ctx,
   isActive,
@@ -27,173 +39,203 @@ export function ContextsListItem({
   summary,
   onSelect,
   onSetActive,
-  onEdit,
   onDuplicate,
   onStartDelete,
   onConfirmDelete,
   onCancelDelete,
 }: Readonly<ContextsListItemProps>) {
+  const actions: {
+    key: string;
+    title: string;
+    icon: typeof CheckIcon;
+    hidden?: boolean;
+    destructive?: boolean;
+    onClick: () => void;
+  }[] = [
+    {
+      key: 'activate',
+      title: 'Set as active',
+      icon: CheckIcon,
+      hidden: isActive,
+      onClick: onSetActive,
+    },
+    { key: 'duplicate', title: 'Duplicate', icon: CopyIcon, onClick: onDuplicate },
+    {
+      key: 'delete',
+      title: 'Delete',
+      icon: TrashIcon,
+      destructive: true,
+      onClick: onStartDelete,
+    },
+  ];
+
   return (
     <div
+      role="option"
+      aria-selected={isSelected}
+      aria-label={ctx.name}
       onClick={() => {
         if (!isDeleting) onSelect();
       }}
       className={cn(
         // Layout & Positioning
-        'group relative flex flex-col select-none cursor-pointer border',
+        'group/ctx-row relative select-none',
+
         // Sizing & Spacing
-        'p-2.5 rounded-lg',
-        // Typography
-        'text-sm',
+        'cursor-pointer rounded-md px-2 py-1.5',
+
         // Backgrounds & Borders
-        isSelected
-          ? 'bg-accent/40 border-accent/80'
-          : 'hover:bg-muted/40 border-transparent',
+        isSelected && 'bg-accent',
+
         // Interactive & States
-        'transition-all duration-200',
+        'transition-colors',
+        !isSelected && 'hover:bg-muted/60'
       )}
     >
+      {/* Selection rail — flush with the highlight's left edge so the two read as one mark */}
+      {isSelected && (
+        <span
+          className={cn(
+            // Layout & Positioning
+            'absolute top-1.5 bottom-1.5 left-0',
+
+            // Sizing & Spacing
+            'w-0.5',
+
+            // Backgrounds & Borders
+            'rounded-full bg-primary'
+          )}
+        />
+      )}
+
       {isDeleting ? (
         <div
           onClick={(e) => e.stopPropagation()}
           className={cn(
             // Layout & Positioning
             'flex flex-col',
+
             // Sizing & Spacing
-            'gap-1.5 py-0.5',
+            'gap-1.5 py-0.5'
           )}
         >
           <span
             className={cn(
-              // Layout & Positioning
-              'flex items-center gap-1 animate-pulse',
               // Typography
-              'text-[11px] font-semibold text-destructive uppercase tracking-wider',
+              'text-[10px] font-semibold tracking-wider text-destructive uppercase'
             )}
           >
-            Delete Environment?
+            Delete “{ctx.name}”?
           </span>
-          <ButtonGroup>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={onConfirmDelete}
-            >
-              Confirm
+          <div
+            className={cn(
+              // Layout & Positioning
+              'flex items-center',
+
+              // Sizing & Spacing
+              'gap-1'
+            )}
+          >
+            <Button size="sm" variant="destructive" onClick={onConfirmDelete}>
+              Delete
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={onCancelDelete}
-            >
+            <Button size="sm" variant="ghost" onClick={onCancelDelete}>
               Cancel
             </Button>
-          </ButtonGroup>
+          </div>
         </div>
       ) : (
         <>
           <div
             className={cn(
               // Layout & Positioning
-              'flex items-center justify-between min-w-0',
+              'flex min-w-0 items-center',
+
+              // Sizing & Spacing
+              'gap-1'
             )}
           >
             <span
               className={cn(
                 // Layout & Positioning
-                'truncate flex-1',
-                // Sizing & Spacing
-                'pr-1',
+                'min-w-0 flex-1 truncate',
+
                 // Typography
-                'text-xs font-medium',
-                isSelected
-                  ? 'text-foreground font-semibold'
-                  : 'text-muted-foreground group-hover:text-foreground',
+                'text-xs',
+                isSelected ? 'font-medium text-foreground' : 'text-muted-foreground group-hover/ctx-row:text-foreground'
               )}
             >
               {ctx.name}
             </span>
 
-            {isActive && (
-              <Badge variant="secondary">
-                Active
-              </Badge>
-            )}
-          </div>
+            <div
+              className={cn(
+                // Layout & Positioning
+                'flex shrink-0 items-center',
 
-          <span
-            className={cn(
-              // Layout & Positioning
-              'truncate',
-              // Sizing & Spacing
-              'mt-1 max-w-[210px]',
-              // Typography
-              'text-[10px] text-muted-foreground/60',
-            )}
-          >
-            {summary}
-          </span>
+                // Sizing & Spacing
+                'gap-0.5',
+
+                // Interactive & States
+                'opacity-0 transition-opacity group-hover/ctx-row:opacity-100 focus-within:opacity-100'
+              )}
+            >
+              {actions.map(({ key, title, icon: Icon, hidden, destructive, onClick }) => (
+                <Button
+                  key={key}
+                  size="icon-sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClick();
+                  }}
+                  title={title}
+                  aria-label={title}
+                  className={cn(
+                    // Layout & Positioning
+                    // Hidden rather than unmounted, so revealing the cluster never re-truncates the
+                    // name above it.
+                    hidden && 'invisible',
+
+                    // Interactive & States
+                    destructive
+                      ? 'text-muted-foreground hover:text-destructive'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  <Icon className="size-3.5" />
+                </Button>
+              ))}
+            </div>
+          </div>
 
           <div
             className={cn(
               // Layout & Positioning
-              'absolute right-2 top-1/2 -translate-y-1/2 flex items-center',
+              'flex min-w-0 items-center',
+
               // Sizing & Spacing
-              'pl-4 py-1.5',
-              // Backgrounds & Borders
-              'bg-gradient-to-l from-muted/40 via-background/90 to-transparent',
-              // Interactive & States
-              'opacity-0 group-hover:opacity-100 transition-opacity',
+              'mt-0.5 gap-1.5'
             )}
           >
-            <ButtonGroup>
-              {!isActive && (
-                <Button
-                  size="icon"
-                  variant="outline"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSetActive();
-                  }}
-                  title="Set Active"
-                >
-                  <CheckIcon className="size-3.5" />
-                </Button>
+            <span
+              className={cn(
+                // Layout & Positioning
+                'min-w-0 flex-1 truncate',
+
+                // Typography
+                'text-[10px]',
+                'text-muted-foreground/70'
               )}
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit();
-                }}
-                title="Edit"
-              >
-                <PencilSimpleIcon className="size-3.5" />
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDuplicate();
-                }}
-                title="Duplicate"
-              >
-                <CopyIcon className="size-3.5" />
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onStartDelete();
-                }}
-                title="Delete"
-              >
-                <TrashIcon className="size-3.5" />
-              </Button>
-            </ButtonGroup>
+            >
+              {summary}
+            </span>
+
+            {isActive && (
+              <Badge variant="secondary" className={cn('shrink-0')}>
+                Active
+              </Badge>
+            )}
           </div>
         </>
       )}

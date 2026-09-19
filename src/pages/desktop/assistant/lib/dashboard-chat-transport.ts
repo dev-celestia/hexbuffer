@@ -104,6 +104,15 @@ function fallbackContent(aiSettings: DashboardAiSettings | undefined, error?: un
 
 let activeRequestId: string | null = null;
 
+// Mirror of WINDOW_BUSY_MESSAGE in src-tauri/src/ai/chat.rs. The backend rejects a send
+// while a run (including an autonomous continuation chain) is still live for this window;
+// that is a normal state, not a provider failure, so it must not read as one.
+const WINDOW_BUSY_ERROR_SNIPPET = 'already in progress in this window';
+
+function isWindowBusyError(error: unknown): boolean {
+  return toErrorMessage(error, '').includes(WINDOW_BUSY_ERROR_SNIPPET);
+}
+
 export async function abortActiveAiChat(): Promise<boolean> {
   if (activeRequestId) {
     try {
@@ -362,7 +371,9 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
             writeAssistantText(
               writer,
               textId,
-              fallbackContent(aiSettings, error),
+              isWindowBusyError(error)
+                ? toErrorMessage(error, 'An AI run is already in progress in this window.')
+                : fallbackContent(aiSettings, error),
               provider,
               model,
             );

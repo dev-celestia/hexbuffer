@@ -1,6 +1,19 @@
 import * as React from 'react';
-import { Button, Input, ScrollArea } from '@celestia-project/ui';
-import { GlobeIcon, PlusIcon } from '@phosphor-icons/react';
+import {
+  Button,
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+  ScrollArea,
+} from '@celestia-project/ui';
+import { GlobeIcon, MagnifyingGlassIcon, PlusIcon, XIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 import type { ContextRecord } from '@/stores/collections';
 import { ContextsListItem } from './contexts-list-item';
@@ -22,6 +35,14 @@ interface ContextsSidebarProps {
   getVariablesSummary: (ctx: ContextRecord) => string;
 }
 
+/**
+ * The environments column.
+ *
+ * Header and search now match the collections tree on the other side of the app: a 36px band with
+ * 24px ghost actions, and an `InputGroup` search box with a clear button. The list previously used
+ * `Button size="icon"` for its add action, which carries a raised shadow that made one quiet icon
+ * compete with the list below it.
+ */
 export function ContextsSidebar({
   filteredContexts,
   activeContextId,
@@ -38,115 +59,168 @@ export function ContextsSidebar({
   onCancelDelete,
   getVariablesSummary,
 }: Readonly<ContextsSidebarProps>) {
+  const isSearching = searchQuery.trim().length > 0;
+
   return (
     <div
       className={cn(
         // Layout & Positioning
-        'flex flex-col shrink-0 min-h-0',
+        'flex min-h-0 shrink-0 flex-col',
+
         // Sizing & Spacing
         'w-72',
+
         // Backgrounds & Borders
-        'bg-muted/20',
+        'bg-muted/20'
       )}
     >
-      {/* Sidebar Header */}
       <div
         className={cn(
           // Layout & Positioning
-          'flex flex-col shrink-0 border-b border-border',
+          'flex shrink-0 items-center justify-between',
+
           // Sizing & Spacing
-          'p-3 gap-2',
+          'h-9 px-2.5',
+
+          // Backgrounds & Borders
+          'border-b'
         )}
       >
-        <div
+        <span
           className={cn(
-            // Layout & Positioning
-            'flex items-center justify-between',
+            // Typography
+            'text-[11px] font-semibold tracking-wide text-muted-foreground uppercase'
           )}
         >
-          <span
-            className={cn(
-              // Typography
-              'text-xs font-semibold tracking-tight text-foreground',
-            )}
-          >
-            Environments
-          </span>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={onStartCreate}
-            title="Create Environment"
-          >
-            <PlusIcon className="size-4" />
-          </Button>
-        </div>
+          Environments
+        </span>
 
-        {/* Search Bar */}
-        <Input
-          placeholder="Search environments..."
-          value={searchQuery}
-          onChange={(e) => onSearchQueryChange(e.target.value)}
-        />
+        <Button
+          size="icon-sm"
+          variant="ghost"
+          onClick={onStartCreate}
+          title="New environment"
+          aria-label="New environment"
+          className={cn(
+            // Interactive & States
+            'text-muted-foreground hover:text-foreground'
+          )}
+        >
+          <PlusIcon className="size-3.5" />
+        </Button>
       </div>
 
-      {/* Environments List */}
+      {/* Search */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          'flex shrink-0 items-center',
+
+          // Sizing & Spacing
+          'px-1.5 py-1.5'
+        )}
+      >
+        <InputGroup>
+          <InputGroupAddon align="inline-start">
+            <MagnifyingGlassIcon />
+          </InputGroupAddon>
+
+          <InputGroupInput
+            value={searchQuery}
+            onChange={(e) => onSearchQueryChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') onSearchQueryChange('');
+            }}
+            placeholder="Search environments"
+            aria-label="Search environments"
+            spellCheck={false}
+            autoComplete="off"
+          />
+
+          {isSearching && (
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                size="icon-xs"
+                aria-label="Clear search"
+                title="Clear search"
+                onClick={() => onSearchQueryChange('')}
+              >
+                <XIcon />
+              </InputGroupButton>
+            </InputGroupAddon>
+          )}
+        </InputGroup>
+      </div>
+
       <ScrollArea className="flex-1">
         <div
           className={cn(
             // Sizing & Spacing
-            'p-2 space-y-1',
+            'px-1.5 pb-1.5'
           )}
         >
-          {filteredContexts.map((ctx) => {
-            const isActive = activeContextId === ctx.id;
-            const isSelected = editingContextId === ctx.id;
-            const isDeleting = deletingContextId === ctx.id;
-
-            return (
-              <ContextsListItem
-                key={ctx.id}
-                ctx={ctx}
-                isActive={isActive}
-                isSelected={isSelected}
-                isDeleting={isDeleting}
-                summary={getVariablesSummary(ctx)}
-                onSelect={() => onStartEdit(ctx)}
-                onSetActive={() => onSetActive(ctx)}
-                onEdit={() => onStartEdit(ctx)}
-                onDuplicate={() => onDuplicate(ctx)}
-                onStartDelete={() => onStartDelete(ctx.id)}
-                onConfirmDelete={() => onConfirmDelete(ctx.id)}
-                onCancelDelete={onCancelDelete}
-              />
-            );
-          })}
-
-          {filteredContexts.length === 0 && (
-            <div
+          {filteredContexts.length > 0 ? (
+            /* The listbox wraps only the options — the empty state below is not an option, and
+               putting it inside would be invalid ARIA. */
+            <div role="listbox" aria-label="Environments">
+              {filteredContexts.map((ctx) => (
+                <ContextsListItem
+                  key={ctx.id}
+                  ctx={ctx}
+                  isActive={activeContextId === ctx.id}
+                  isSelected={editingContextId === ctx.id}
+                  isDeleting={deletingContextId === ctx.id}
+                  summary={getVariablesSummary(ctx)}
+                  onSelect={() => onStartEdit(ctx)}
+                  onSetActive={() => onSetActive(ctx)}
+                  onDuplicate={() => onDuplicate(ctx)}
+                  onStartDelete={() => onStartDelete(ctx.id)}
+                  onConfirmDelete={() => onConfirmDelete(ctx.id)}
+                  onCancelDelete={onCancelDelete}
+                />
+              ))}
+            </div>
+          ) : (
+            <Empty
               className={cn(
-                // Layout & Positioning
-                'flex flex-col items-center justify-center text-center',
                 // Sizing & Spacing
-                'py-12 px-4 gap-2',
-                // Typography
-                'text-xs text-muted-foreground',
+                // Not `h-full`: this sits in the scroll content, which is not a flex parent.
+                'py-10'
               )}
             >
-              <GlobeIcon className="size-8 text-muted-foreground/30 stroke-[1.5]" />
-              <span>
-                {searchQuery ? 'No matching environments' : 'No environments configured'}
-              </span>
-              {!searchQuery && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={onStartCreate}
-                >
-                  Add Environment
-                </Button>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <GlobeIcon />
+                </EmptyMedia>
+                <EmptyTitle>
+                  {isSearching ? 'No matches' : 'No environments'}
+                </EmptyTitle>
+                <EmptyDescription>
+                  {isSearching
+                    ? `Nothing matches “${searchQuery.trim()}”.`
+                    : 'Environments hold the variables your requests substitute.'}
+                </EmptyDescription>
+              </EmptyHeader>
+              {!isSearching && (
+                <EmptyContent>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      // Sizing & Spacing
+                      'h-6 gap-1 px-2',
+
+                      // Typography
+                      'text-xs'
+                    )}
+                    onClick={onStartCreate}
+                  >
+                    <PlusIcon className="size-3.5" />
+                    New environment
+                  </Button>
+                </EmptyContent>
               )}
-            </div>
+            </Empty>
           )}
         </div>
       </ScrollArea>

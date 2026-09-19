@@ -11,17 +11,17 @@ import {
 import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import {
-  useCollectionsStore,
-  type StashRecord,
-  type StashEndpointRecord,
-} from '@/stores/collections';
+import { useCollectionsStore } from '@/stores/collections';
 import { toast } from 'sonner';
-import { exportCollectionsToFile, importCollectionsFromFile } from '@/pages/repeater/lib/collection-io';
+import { exportCollectionsToFile, importCollectionsFromFile, type ImportResult } from '@/pages/repeater/lib/collection-io';
 import {
   flattenVisibleTree,
+  flattenFilteredTree,
+  isFilterActive,
   computeDropResult,
+  computeDeleteImpact,
   type FlatNode,
+  type ImportSummary,
 } from './utils';
 import {
   createCollection,
@@ -44,6 +44,7 @@ export function useCollectionsTree(workspaceId: string) {
 
   // ── State ──
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
+  const [filterQuery, setFilterQuery] = useState('');
   const [inlineCreate, setInlineCreate] = useState<{ parentId: string; type: 'endpoint' | 'collection' } | null>(null);
   const [renameTarget, setRenameTarget] = useState<{ id: string; name: string } | null>(null);
   const [renameValue, setRenameValue] = useState('');
@@ -53,10 +54,7 @@ export function useCollectionsTree(workspaceId: string) {
   const hoverExpandTargetRef = useRef<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<FlatNode | null>(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
-  const [pendingImport, setPendingImport] = useState<{
-    stashes: StashRecord[];
-    endpoints: StashEndpointRecord[];
-  } | null>(null);
+  const [pendingImport, setPendingImport] = useState<ImportResult | null>(null);
 
   // ── Sensors ──
   const sensors = useSensors(
@@ -65,9 +63,29 @@ export function useCollectionsTree(workspaceId: string) {
   );
 
   // ── Flat tree ──
+  //
+  // Filtering swaps the flatten strategy rather than post-filtering the visible rows: a match has
+  // to drag its ancestor folders along or it cannot be placed, and `flattenFilteredTree` is the
+  // only thing that knows how to keep a path intact.
+  const isFiltering = isFilterActive(filterQuery);
+
   const flatNodes = useMemo(
-    () => flattenVisibleTree(stashes, endpoints, expandedIds, workspaceId),
-    [stashes, endpoints, expandedIds, workspaceId],
+    () =>
+      isFiltering
+        ? flattenFilteredTree(stashes, endpoints, filterQuery, workspaceId)
+        : flattenVisibleTree(stashes, endpoints, expandedIds, workspaceId),
+    [isFiltering, filterQuery, stashes, endpoints, expandedIds, workspaceId],
+  );
+
+  /**
+   * While a filter is active every match is shown with its full path, so collapse state stops
+   * being meaningful. Reporting a set containing every visible node keeps the folder glyphs open
+   * without touching `expandedIds` — the user's real expansion comes back the moment the box is
+   * cleared.
+   */
+  const committedExpandedIds = useMemo(
+    () => (isFiltering ? new Set(flatNodes.map((n) => n.id)) : expandedIds),
+    [isFiltering, flatNodes, expandedIds],
   );
 
   // ── Lookup helpers ──
@@ -163,6 +181,8 @@ export function useCollectionsTree(workspaceId: string) {
       next.add(`stash-${parentId}`);
       return next;
     });
+    // Creating something the current filter would hide is a dead end, so drop the filter first.
+    setFilterQuery('');
     setInlineCreate({ parentId, type });
     setRenameTarget(null);
   }, []);
@@ -191,6 +211,7 @@ export function useCollectionsTree(workspaceId: string) {
   const handleCreateCollection = useCallback(() => {
     setRenameTarget(null);
     setInlineCreate(null);
+    setFilterQuery('');
     void createCollection(workspaceId, 'New Collection');
   }, [workspaceId]);
 
@@ -242,6 +263,27 @@ export function useCollectionsTree(workspaceId: string) {
     }
     setDeleteTarget(null);
   }, [deleteTarget]);
+
+  /**
+   * How much the pending delete will actually take with it.
+   *
+   * Derived here rather than in the dialog so the presentational component stays free of store
+   * reads. The cascade itself lives in `computeDeleteImpact`, which is where it is unit tested.
+   */
+  const deleteImpact = useMemo(
+    () => (deleteTarget ? computeDeleteImpact(deleteTarget, stashes, stashEndpointCounts) : null),
+    [deleteTarget, stashes, stashEndpointCounts],
+  );
+
+  /** The staged import, reduced to the numbers the confirmation dialog shows. */
+  const importSummary = useMemo((): ImportSummary | null => {
+    if (!pendingImport) return null;
+    return {
+      fileName: pendingImport.fileName,
+      collections: pendingImport.stashes.length,
+      endpoints: pendingImport.endpoints.length,
+    };
+  }, [pendingImport]);
 
   // ── Import / Export ──
   const handleExport = useCallback(async () => {
@@ -541,7 +583,9 @@ export function useCollectionsTree(workspaceId: string) {
 
   return {
     // State
-    expandedIds,
+    expandedIds: committedExpandedIds,
+    filterQuery,
+    isFiltering,
     inlineCreate,
     renameTarget,
     renameValue,
@@ -557,6 +601,8 @@ export function useCollectionsTree(workspaceId: string) {
     flatNodeIds,
     nonEmptyStashIds,
     stashEndpointCounts,
+    deleteImpact,
+    importSummary,
     // Handlers
     handleToggleExpand,
     handleSelectNode,
@@ -582,5 +628,6 @@ export function useCollectionsTree(workspaceId: string) {
     // Setters
     setDeleteTarget,
     setImportDialogOpen,
+    setFilterQuery,
   };
 }

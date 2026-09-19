@@ -1,53 +1,64 @@
 import * as React from 'react';
-import { Button } from '@celestia-project/ui';
-import { GlobeIcon, PlusIcon } from '@phosphor-icons/react';
+import {
+  Button,
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@celestia-project/ui';
+import { BracketsCurlyIcon, PlusIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
 interface ContextsVariablesEmptyProps {
   onAddVar: () => void;
 }
 
+/**
+ * Shown in place of the variable rows when an environment has none. Built on the same `Empty`
+ * primitives as every other empty state on the page rather than the bespoke icon-and-spans block
+ * this used to be, so "there is nothing here" looks the same wherever you meet it.
+ */
 export function ContextsVariablesEmpty({ onAddVar }: Readonly<ContextsVariablesEmptyProps>) {
   return (
-    <div
+    <Empty
       className={cn(
-        // Layout & Positioning
-        'flex flex-col items-center justify-center text-center border border-dashed',
         // Sizing & Spacing
-        'py-16 px-4 m-2 rounded-xl',
+        'py-10',
+
         // Backgrounds & Borders
-        'border-border/80 bg-muted/5',
+        // `rounded-md`, not the primitive's `rounded-xl`, so the block matches the radius of the
+        // variable rows it stands in for.
+        'rounded-md border border-dashed bg-muted/5'
       )}
     >
-      <GlobeIcon className="size-8 text-muted-foreground/30 stroke-[1.5] mb-2" />
-      <span
-        className={cn(
-          // Sizing & Spacing
-          'mb-1',
-          // Typography
-          'text-xs font-semibold text-muted-foreground',
-        )}
-      >
-        No Variables Configured
-      </span>
-      <span
-        className={cn(
-          // Sizing & Spacing
-          'max-w-[250px] mb-4',
-          // Typography
-          'text-[11px] text-muted-foreground/60',
-        )}
-      >
-        Add variables to refer to endpoint URLs, tokens, and other workspace settings dynamically.
-      </span>
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={onAddVar}
-      >
-        <PlusIcon className="size-3.5" />
-        Add First Variable
-      </Button>
-    </div>
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <BracketsCurlyIcon />
+        </EmptyMedia>
+        <EmptyTitle>No variables yet</EmptyTitle>
+        <EmptyDescription>
+          Variables let one request definition target several hosts and credentials.
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn(
+            // Sizing & Spacing
+            'h-6 gap-1 px-2',
+
+            // Typography
+            'text-xs'
+          )}
+          onClick={onAddVar}
+        >
+          <PlusIcon className="size-3.5" />
+          Add variable
+        </Button>
+      </EmptyContent>
+    </Empty>
   );
 }

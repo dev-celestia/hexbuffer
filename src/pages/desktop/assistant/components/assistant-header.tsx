@@ -6,6 +6,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  Switch,
 } from '@celestia-project/ui';
 import {
   BugIcon,
@@ -14,6 +15,7 @@ import {
   SidebarIcon,
   XIcon,
 } from '@phosphor-icons/react';
+import celestiaAvatar from '@/assets/celestia.png';
 import { cn } from '@/lib/utils';
 
 interface AssistantHeaderProps {
@@ -23,6 +25,9 @@ interface AssistantHeaderProps {
   onOpenConfig: () => void;
   onOpenDebug: () => void;
   onClose?: () => void;
+  /** Celestia autonomous mode — open checklist items continue in clean-context passes. */
+  autonomous?: boolean;
+  onAutonomousChange?: (value: boolean) => void;
   /** Optional slot rendered right before the action icons (e.g. token usage). */
   trailing?: React.ReactNode;
 }
@@ -34,6 +39,8 @@ export function AssistantHeader({
   onOpenConfig,
   onOpenDebug,
   onClose,
+  autonomous = false,
+  onAutonomousChange,
   trailing,
 }: Readonly<AssistantHeaderProps>) {
   return (
@@ -85,14 +92,17 @@ export function AssistantHeader({
             'flex items-center gap-1.5',
           )}
         >
-          <span
+          <img
+            src={celestiaAvatar}
+            alt="Celestia"
+            title="Celestia — AI Assistant"
             className={cn(
-              // Typography
-              'text-xs font-semibold text-foreground',
+              // Sizing & Spacing
+              'size-6 shrink-0',
+              // Backgrounds & Borders
+              'rounded-full object-contain',
             )}
-          >
-            AI Assistant
-          </span>
+          />
           <Badge
             variant="secondary"
             className={cn(
@@ -115,6 +125,35 @@ export function AssistantHeader({
           'flex items-center gap-1.5',
         )}
       >
+        <div
+          className={cn(
+            // Layout & Positioning
+            'flex items-center gap-1.5 me-1',
+          )}
+        >
+          <span
+            className={cn(
+              // Typography
+              'text-xs',
+              autonomous ? 'text-foreground' : 'text-muted-foreground',
+            )}
+          >
+            Auto
+          </span>
+          <Switch
+            size="sm"
+            checked={autonomous}
+            onCheckedChange={(checked) => onAutonomousChange?.(checked)}
+            disabled={!onAutonomousChange}
+            aria-label="Celestia autonomous mode"
+            title={
+              autonomous
+                ? 'Celestia autonomous mode on — open checklist items are continued in clean-context passes'
+                : 'Enable Celestia autonomous mode'
+            }
+          />
+        </div>
+
         {trailing}
 
         {/* 3-dots icon menu */}

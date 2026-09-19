@@ -1,7 +1,9 @@
 import { Input } from '@celestia-project/ui';
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 
 import { PlusIcon } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
+import { labelIndent } from './utils';
 
 export interface InlineCreateProps {
   depth: number;
@@ -18,7 +20,7 @@ export function InlineCreate({ depth, type, onSubmit, onCancel }: Readonly<Inlin
     inputRef.current?.focus();
   }, []);
 
-  const placeholder = type === 'collection' ? 'Folder name...' : 'Endpoint name...';
+  const placeholder = type === 'collection' ? 'Folder name…' : 'Endpoint name…';
 
   const handleSubmit = () => {
     const name = inputRef.current?.value.trim();
@@ -31,14 +33,23 @@ export function InlineCreate({ depth, type, onSubmit, onCancel }: Readonly<Inlin
 
   return (
     <div
-      className="flex items-center gap-1 py-0.5"
-      style={{ paddingLeft: `${depth * 16 + 4}px` }}
-    >
-      <span className="w-4 flex-shrink-0" />
-      <span className="w-3.5 flex-shrink-0" />
+      className={cn(
+        // Layout & Positioning
+        'flex items-center',
 
+        // Sizing & Spacing
+        'gap-1.5 py-0.5 pr-2'
+      )}
+      style={{ paddingLeft: `${labelIndent(depth)}px` }}
+    >
       <form
-        className="flex-1 flex items-center gap-1 min-w-0"
+        className={cn(
+          // Layout & Positioning
+          'flex min-w-0 flex-1 items-center',
+
+          // Sizing & Spacing
+          'gap-1'
+        )}
         onSubmit={(e) => {
           e.preventDefault();
           handleSubmit();
@@ -46,7 +57,13 @@ export function InlineCreate({ depth, type, onSubmit, onCancel }: Readonly<Inlin
       >
         <Input
           ref={inputRef}
-          className="h-6 text-xs"
+          className={cn(
+            // Sizing & Spacing
+            'h-6',
+
+            // Typography
+            'text-xs'
+          )}
           placeholder={placeholder}
           onBlur={() => {
             // Delay to allow submit button click to register
@@ -65,10 +82,19 @@ export function InlineCreate({ depth, type, onSubmit, onCancel }: Readonly<Inlin
         />
         <button
           type="submit"
-          className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
+          className={cn(
+            // Layout & Positioning
+            'flex shrink-0 items-center justify-center',
+
+            // Sizing & Spacing
+            'size-5 rounded',
+
+            // Interactive & States
+            'text-muted-foreground hover:bg-accent hover:text-foreground'
+          )}
           title={type === 'collection' ? 'Create folder' : 'Create endpoint'}
         >
-          <PlusIcon className="h-3 w-3" />
+          <PlusIcon className="size-3" />
         </button>
       </form>
     </div>

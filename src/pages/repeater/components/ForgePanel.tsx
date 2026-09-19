@@ -1,31 +1,14 @@
 import { Tabs, TabsList, TabsTrigger } from '@celestia-project/ui';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { ArrowDownIcon, ArrowUpIcon, SpinnerIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
+import { getStatusTreatment } from '../lib/status-styles';
 import { useForgePanel } from './forge-panel/use-forge-panel';
 import { ForgeRequestBar } from './forge-panel/forge-request-bar';
 import { ForgeRequestTabs } from './forge-panel/forge-request-tabs';
 import { ForgeResponseView } from './forge-panel/forge-response-view';
-
-function ForgeLoadingView() {
-  return (
-    <div className="flex-1 flex flex-col items-center justify-center space-y-4 border rounded-lg bg-background/50 p-6 min-h-[300px] transition-opacity duration-300 ease-out animate-in fade-in">
-      <div className="relative flex items-center justify-center">
-        {/* Outer pulse */}
-        <div className="absolute h-10 w-10 animate-ping rounded-full bg-primary/20" style={{ animationDuration: '1.2s' }} />
-        {/* Inner spinner */}
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" style={{ animationDuration: '0.6s' }} />
-      </div>
-      <div className="space-y-1.5 text-center">
-        <h4 className="text-sm font-semibold text-foreground tracking-tight animate-pulse">
-          Forging Request...
-        </h4>
-        <p className="text-xs text-muted-foreground max-w-[240px]">
-          Executing script sandbox, establishing secure connection, and performing handshake...
-        </p>
-      </div>
-    </div>
-  );
-}
+import { ForgeResponseMeta } from './forge-panel/forge-response-meta';
+import { ForgeLoadingView } from './forge-panel/forge-loading-view';
 
 export function ForgePanel() {
   const {
@@ -55,7 +38,6 @@ export function ForgePanel() {
 
   const [activeView, setActiveView] = useState<'request' | 'response'>('request');
 
-  // Auto-switch to response when request completes
   // ponytail: automatically transition to response view when request completes
   useEffect(() => {
     if (!req.isLoading && (req.response || req.error)) {
@@ -63,14 +45,17 @@ export function ForgePanel() {
     }
   }, [req.isLoading, req.response, req.error]);
 
+  const statusTreatment = getStatusTreatment(req.response?.status);
+  const hasFailed = Boolean(req.error) && !req.response;
+
   return (
     <div
       className={cn(
         // Layout & Positioning
-        "flex flex-col min-h-0",
+        'flex min-h-0 flex-col',
 
         // Sizing & Spacing
-        "h-full space-y-2 p-2"
+        'h-full gap-2 p-2'
       )}
     >
       <ForgeRequestBar
@@ -81,95 +66,139 @@ export function ForgePanel() {
         onUrlChange={handleUrlChange}
       />
 
-      {/* Switch View Tabs */}
-      {/* ponytail: show switcher if a response, error, or loading state exists */}
-      {(req.response || req.error || req.isLoading) && (
+      {/* Mode switch — always visible so the layout does not jump when a response lands.
+          The right side carries the live status readout in response mode. */}
+      <div
+        className={cn(
+          // Layout & Positioning
+          'flex shrink-0 items-center justify-between gap-3',
+
+          // Sizing & Spacing
+          'pb-2',
+
+          // Backgrounds & Borders
+          'border-b'
+        )}
+      >
+        <Tabs
+          value={activeView}
+          onValueChange={(val) => setActiveView(val as 'request' | 'response')}
+          className={cn(
+            // Sizing & Spacing
+            'w-fit'
+          )}
+        >
+          <TabsList>
+            <TabsTrigger value="request">
+              <ArrowUpIcon />
+              Request
+            </TabsTrigger>
+            <TabsTrigger value="response">
+              <ArrowDownIcon />
+              Response
+              {req.response && (
+                <span
+                  className={cn(
+                    // Layout & Positioning
+                    'inline-flex items-center',
+
+                    // Sizing & Spacing
+                    'rounded border px-1',
+
+                    // Typography
+                    'font-mono text-[10px] leading-4 font-semibold tabular-nums',
+
+                    // Backgrounds & Borders
+                    statusTreatment.pill
+                  )}
+                >
+                  {req.response.status}
+                </span>
+              )}
+              {hasFailed && (
+                <span
+                  className={cn(
+                    // Layout & Positioning
+                    'inline-flex items-center',
+
+                    // Sizing & Spacing
+                    'rounded border px-1',
+
+                    // Typography
+                    'font-mono text-[10px] leading-4 font-semibold',
+
+                    // Backgrounds & Borders
+                    'border-rose-500/25 bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                  )}
+                >
+                  Failed
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center justify-between shrink-0",
+            'flex min-w-0 items-center overflow-hidden',
 
             // Sizing & Spacing
-            "pb-1"
+            'gap-3'
           )}
         >
-          <Tabs
-            value={activeView}
-            onValueChange={(val) => setActiveView(val as 'request' | 'response')}
-            className={cn(
-              // Sizing & Spacing
-              "w-fit"
-            )}
-          >
-            <TabsList>
-              <TabsTrigger
-                value="request"
-              >
-                Request
-              </TabsTrigger>
-              <TabsTrigger
-                value="response"
-                disabled={req.isLoading && !req.response && !req.error}
-              >
-                <span>Response</span>
-                {req.response && (
-                  <span
-                    className={cn(
-                      // Sizing & Spacing
-                      "px-1 py-0.2",
+          {req.isLoading && (
+            <span
+              className={cn(
+                // Layout & Positioning
+                'flex items-center',
 
-                      // Typography
-                      "text-[10px] font-bold",
+                // Sizing & Spacing
+                'gap-1.5',
 
-                      // Backgrounds & Borders
-                      "rounded",
+                // Typography
+                'text-xs text-muted-foreground'
+              )}
+            >
+              <SpinnerIcon className="size-3.5 animate-spin text-primary" />
+              Sending
+            </span>
+          )}
 
-                      // Interactive & States
-                      "transition-colors",
-
-                      req.response.status >= 200 && req.response.status < 300
-                        ? "bg-emerald-500/10 text-emerald-500 font-bold"
-                        : "bg-destructive/10 text-destructive font-bold"
-                    )}
-                  >
-                    {req.response.status}
-                  </span>
-                )}
-                {req.error && (
-                  <span
-                    className={cn(
-                      // Sizing & Spacing
-                      "px-1 py-0.2",
-
-                      // Typography
-                      "text-[10px] font-bold",
-
-                      // Backgrounds & Borders
-                      "bg-destructive/10 text-destructive rounded",
-
-                      // Interactive & States
-                      "transition-colors"
-                    )}
-                  >
-                    Err
-                  </span>
-                )}
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {!req.isLoading && activeView === 'response' && req.response && (
+            <ForgeResponseMeta response={req.response} />
+          )}
         </div>
-      )}
+      </div>
 
       {/* Main Content Area */}
       <div
         className={cn(
           // Layout & Positioning
-          "flex flex-col flex-1 min-h-0"
+          'flex min-h-0 flex-1 flex-col'
         )}
       >
-        {req.isLoading ? (
-          <ForgeLoadingView />
-        ) : activeView === 'request' ? (
+        {activeView === 'response' ? (
+          req.isLoading ? (
+            <ForgeLoadingView />
+          ) : (
+            <ForgeResponseView
+              isLoading={req.isLoading}
+              error={req.error}
+              response={req.response}
+              testResults={req.testResults}
+              testScript={req.testScript}
+              activeResTab={activeResTab}
+              onResTabChange={setActiveResTab}
+              getFormattedBody={getFormattedBody}
+              requestMethod={req.method}
+              requestUrl={req.url}
+              requestHeaders={req.headers}
+              requestBody={req.body}
+              requestBodyType={req.bodyType}
+            />
+          )
+        ) : (
           <ForgeRequestTabs
             queryParams={queryParams}
             req={req}
@@ -187,22 +216,6 @@ export function ForgePanel() {
             onBodyChange={handleBodyChange}
             onPreScriptChange={handlePreScriptChange}
             onTestScriptChange={handleTestScriptChange}
-          />
-        ) : (
-          <ForgeResponseView
-            isLoading={req.isLoading}
-            error={req.error}
-            response={req.response}
-            testResults={req.testResults}
-            testScript={req.testScript}
-            activeResTab={activeResTab}
-            onResTabChange={setActiveResTab}
-            getFormattedBody={getFormattedBody}
-            requestMethod={req.method}
-            requestUrl={req.url}
-            requestHeaders={req.headers}
-            requestBody={req.body}
-            requestBodyType={req.bodyType}
           />
         )}
       </div>

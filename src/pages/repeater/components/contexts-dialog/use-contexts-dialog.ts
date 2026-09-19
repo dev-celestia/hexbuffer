@@ -96,15 +96,23 @@ export function useContextsDialog({ open }: { open: boolean }): UseContextsDialo
     const filteredVars = variables.filter((v) => v.key.trim() !== '');
 
     if (isCreating) {
+      // `createContext` only activates the new record when nothing was active, so without this the
+      // open-effect would re-run and bounce the editor to whatever environment was already active —
+      // you would create "Staging" and watch the panel jump to "Production". Diffing the ids is how
+      // we find the record we just made without widening the store's signature.
+      const before = new Set(useCollectionsStore.getState().contexts.map((c) => c.id));
       await store.createContext(name, filteredVars);
       toast.success(`Created environment: ${name}`);
+
+      const created = useCollectionsStore.getState().contexts.find((c) => !before.has(c.id));
+      if (created) handleStartEdit(created);
     } else if (editingContext) {
       await store.updateContext(editingContext.id, name, filteredVars);
       toast.success(`Updated environment: ${name}`);
     }
 
     setIsCreating(false);
-  }, [name, variables, isCreating, editingContext, store]);
+  }, [name, variables, isCreating, editingContext, store, handleStartEdit]);
 
   const handleConfirmDelete = React.useCallback(
     async (id: string) => {

@@ -1,31 +1,64 @@
-import React from 'react';
 import { cn } from '@/lib/utils';
-import type { FlatNode } from './utils';
+import folderIcon from '@/assets/explorer-icon/_folder.svg';
+import { getMethodTreatment } from '../../lib/method-styles';
+import { ROW_HEIGHT, type FlatNode } from './utils';
 
 interface DragOverlayContentProps {
   node: FlatNode | null;
 }
 
+/**
+ * The chip that follows the cursor while dragging a tree row.
+ *
+ * Mirrors TreeNodeRow's arrangement (method pill, then label) and reads its colours from the same
+ * `getMethodTreatment` table, so the chip cannot drift from the row it represents.
+ */
 export function DragOverlayContent({ node }: Readonly<DragOverlayContentProps>) {
   if (!node) return null;
 
+  const isEndpoint = node.kind === 'endpoint';
+  const treatment = getMethodTreatment(node.method);
+
   return (
-    <div className="flex items-center gap-1.5 rounded-sm bg-popover border px-2 py-1 shadow-md text-xs">
-      <span className="truncate">{node.label}</span>
-      {node.kind === 'endpoint' && node.method && (
+    <div
+      style={{ height: ROW_HEIGHT }}
+      className={cn(
+        // Layout & Positioning
+        'flex items-center',
+
+        // Sizing & Spacing
+        'gap-2 rounded-md border px-2 shadow-lg',
+
+        // Typography
+        'text-xs',
+
+        // Backgrounds & Borders
+        'bg-popover text-popover-foreground'
+      )}
+    >
+      {isEndpoint && node.method && (
         <span
           className={cn(
-            'font-semibold uppercase text-[9px] px-1 rounded',
-            node.method === 'GET' && 'bg-emerald-500/10 text-emerald-600',
-            node.method === 'POST' && 'bg-blue-500/10 text-blue-600',
-            node.method === 'PUT' && 'bg-amber-500/10 text-amber-600',
-            node.method === 'DELETE' && 'bg-red-500/10 text-red-600',
-            node.method === 'PATCH' && 'bg-purple-500/10 text-purple-600',
+            // Layout & Positioning
+            'inline-flex shrink-0 items-center',
+
+            // Sizing & Spacing
+            'rounded border px-1',
+
+            // Typography
+            'font-mono text-[9px] leading-4 font-bold uppercase',
+
+            // Backgrounds & Borders
+            treatment.pill
           )}
         >
           {node.method}
         </span>
       )}
+
+      {!isEndpoint && <img src={folderIcon} alt="" className="size-4 shrink-0" />}
+
+      <span className={cn('truncate')}>{node.label}</span>
     </div>
   );
 }

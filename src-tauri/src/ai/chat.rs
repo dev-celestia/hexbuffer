@@ -27,6 +27,34 @@ fn active_chats() -> &'static Mutex<HashMap<String, ActiveChatState>> {
     ACTIVE_CHATS.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
+/// Error returned when a window already has a live AI run. Surfaced verbatim to the user,
+/// so it must stay self-explanatory. The chat transport mirrors a snippet of this message
+/// to recognize the condition — keep the two in sync.
+const WINDOW_BUSY_MESSAGE: &str =
+    "An AI run is already in progress in this window. Wait for it to finish, or stop it before sending another message.";
+
+/// Registers a run as active for its window, enforcing one live run per window: a second
+/// send while a run (including its autonomous continuation chain) is still executing would
+/// interleave tool side effects on the same app state. Check and insert share one lock so
+/// the pair is atomic; deregistration is `ChatCleanup`'s Drop in the command.
+fn register_active_chat(
+    request_id: String,
+    window_label: &str,
+    state: ActiveChatState,
+) -> Result<(), String> {
+    let mut map = active_chats()
+        .lock()
+        .map_err(|_| "The active chat registry is poisoned.".to_string())?;
+    if map
+        .values()
+        .any(|existing| existing.window_label == window_label)
+    {
+        return Err(WINDOW_BUSY_MESSAGE.to_string());
+    }
+    map.insert(request_id, state);
+    Ok(())
+}
+
 pub fn pause_ai_chat_message_impl(
     app: &AppHandle,
     window_label: &str,
@@ -259,6 +287,59 @@ fn validate_chat_request(request: &AiChatRequest) -> Result<(), String> {
     Ok(())
 }
 
+const CAPABILITIES_LIST: &str = "**Available Capabilities & Specialist Agents:**\n\
+- 🔁 **Repeater** (`@repeater`): Replay HTTP requests & organize collections/folders\n\
+- 🛡️ **HTTP Traffic** (`@traffic`): Live proxy traffic inspection & interception toggle\n\
+- ⚡ **Intruder** (`@intruder`): Parameter fuzzing & automated payload injection\n\
+- 🔑 **JWT** (`@jwt`): Token decoding, tampering & cryptographic claim auditing\n\
+- 📡 **Port Scanner** (`@scanner`): TCP port discovery & banner reconnaissance\n\
+- 📓 **Notes** (`@notes`): Session notes & scratchpad management\n\
+- 🧠 **Memory & Orchestration** (`@celestia`): Persistent intelligence & multi-step coordination";
+
+/// Emits the started/delta events for a router refusal and returns the terminal
+/// response, so both refusal paths end the chat identically without an LLM call.
+fn immediate_refusal_response(
+    app: &AppHandle,
+    window_label: &str,
+    request_id: &str,
+    provider: &str,
+    model: &str,
+    refusal_content: String,
+) -> AiChatResponse {
+    let _ = app.emit_to(
+        window_label,
+        "ai-chat:started",
+        json!({
+            "requestId": request_id,
+            "provider": provider,
+            "model": model,
+            "agentId": "orchestrator",
+            "agentName": "Celestia",
+            "createdAt": chrono::Utc::now().to_rfc3339(),
+        }),
+    );
+
+    let _ = app.emit_to(
+        window_label,
+        "ai-chat:delta",
+        json!({
+            "requestId": request_id,
+            "delta": refusal_content,
+        }),
+    );
+
+    AiChatResponse {
+        content: refusal_content,
+        provider: provider.to_string(),
+        model: model.to_string(),
+        agent_id: Some("orchestrator".to_string()),
+        agent_name: Some("Celestia".to_string()),
+        actions: Vec::new(),
+        agent_messages: Vec::new(),
+        usage: super::token_usage::TokenUsage::new(),
+    }
+}
+
 pub async fn send_ai_chat_message_impl(
     app: AppHandle,
     window_label: String,
@@ -322,49 +403,35 @@ pub async fn send_ai_chat_message_impl(
             "⚠️ **Action Not Supported**\n\n\
             HexBuffer does not have an automated tool or agent to execute `{action_name}`.\n\n\
             {explanation}\n\n\
-            **Available Capabilities & Specialist Agents:**\n\
-            - 🔁 **Repeater** (`@repeater`): Replay HTTP requests & organize collections/folders\n\
-            - 🛡️ **HTTP Traffic** (`@traffic`): Live proxy traffic inspection & interception toggle\n\
-            - ⚡ **Intruder** (`@intruder`): Parameter fuzzing & automated payload injection\n\
-            - 🔑 **JWT** (`@jwt`): Token decoding, tampering & cryptographic claim auditing\n\
-            - 📡 **Port Scanner** (`@scanner`): TCP port discovery & banner reconnaissance\n\
-            - 📓 **Notes** (`@notes`): Session notes & scratchpad management\n\
-            - 🧠 **Memory & Orchestration** (`@celestia`): Persistent intelligence & multi-step coordination\n\n\
+            {CAPABILITIES_LIST}\n\n\
             *Execution terminated.*"
         );
-
-        let _ = app.emit_to(
+        return Ok(immediate_refusal_response(
+            &app,
             &window_label,
-            "ai-chat:started",
-            json!({
-                "requestId": request_id,
-                "provider": &settings.provider,
-                "model": &settings.model,
-                "agentId": "orchestrator",
-                "agentName": "Celestia",
-                "createdAt": chrono::Utc::now().to_rfc3339(),
-            }),
-        );
+            &request_id,
+            &settings.provider,
+            &settings.model,
+            refusal_content,
+        ));
+    }
 
-        let _ = app.emit_to(
+    if let super::router::RoutingDecision::OutOfScope = route_decision {
+        let refusal_content = format!(
+            "⚠️ **Outside Scope**\n\n\
+            I'm HexBuffer's security testing assistant, so I can't help with requests unrelated \
+            to cybersecurity, web application testing, or this tool.\n\n\
+            {CAPABILITIES_LIST}\n\n\
+            *Execution terminated.*"
+        );
+        return Ok(immediate_refusal_response(
+            &app,
             &window_label,
-            "ai-chat:delta",
-            json!({
-                "requestId": request_id,
-                "delta": refusal_content,
-            }),
-        );
-
-        return Ok(AiChatResponse {
-            content: refusal_content,
-            provider: settings.provider,
-            model: settings.model,
-            agent_id: Some("orchestrator".to_string()),
-            agent_name: Some("Celestia".to_string()),
-            actions: Vec::new(),
-            agent_messages: Vec::new(),
-            usage: super::token_usage::TokenUsage::new(),
-        });
+            &request_id,
+            &settings.provider,
+            &settings.model,
+            refusal_content,
+        ));
     }
 
     let (selected_agent, requires_proxy_context) = match route_decision {
@@ -376,7 +443,8 @@ pub async fn send_ai_chat_message_impl(
             agent,
             requires_proxy_context,
         } => (agent, requires_proxy_context),
-        super::router::RoutingDecision::UnsupportedAction { .. } => unreachable!(),
+        super::router::RoutingDecision::UnsupportedAction { .. }
+        | super::router::RoutingDecision::OutOfScope => unreachable!(),
     };
 
     let context = if requires_proxy_context {
@@ -388,16 +456,15 @@ pub async fn send_ai_chat_message_impl(
 
     let (cancel_tx, cancel_rx) = watch::channel(false);
     let (pause_tx, pause_rx) = watch::channel(false);
-    if let Ok(mut map) = active_chats().lock() {
-        map.insert(
-            request_id.clone(),
-            ActiveChatState {
-                window_label: window_label.clone(),
-                cancel_tx,
-                pause_tx,
-            },
-        );
-    }
+    register_active_chat(
+        request_id.clone(),
+        &window_label,
+        ActiveChatState {
+            window_label: window_label.clone(),
+            cancel_tx,
+            pause_tx,
+        },
+    )?;
 
     struct ChatCleanup(String);
     impl Drop for ChatCleanup {
@@ -1135,6 +1202,39 @@ pub(crate) fn build_crawl_context_value(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_register_active_chat_rejects_second_run_same_window() {
+        fn state_for(label: &str) -> ActiveChatState {
+            let (cancel_tx, _) = watch::channel(false);
+            let (pause_tx, _) = watch::channel(false);
+            ActiveChatState {
+                window_label: label.to_string(),
+                cancel_tx,
+                pause_tx,
+            }
+        }
+
+        // The registry is process-global, so use window labels unique to this test.
+        let window_a = "test-busy-a";
+        let window_b = "test-busy-b";
+
+        register_active_chat("req-a1".to_string(), window_a, state_for(window_a)).unwrap();
+        let second = register_active_chat("req-a2".to_string(), window_a, state_for(window_a));
+        assert_eq!(second.unwrap_err(), WINDOW_BUSY_MESSAGE);
+
+        // A different window is unaffected.
+        register_active_chat("req-b1".to_string(), window_b, state_for(window_b)).unwrap();
+
+        // Once the first run's guard drops, the window is free again.
+        active_chats().lock().unwrap().remove("req-a1");
+        register_active_chat("req-a3".to_string(), window_a, state_for(window_a)).unwrap();
+
+        // Leave the registry as we found it for other tests.
+        let mut map = active_chats().lock().unwrap();
+        map.remove("req-a3");
+        map.remove("req-b1");
+    }
 
     #[test]
     fn test_validate_chat_request_empty() {

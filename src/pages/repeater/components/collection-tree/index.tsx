@@ -1,5 +1,14 @@
 import React from 'react';
 import {
+  Button,
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@celestia-project/ui';
+import {
   DndContext,
   DragOverlay,
   closestCorners,
@@ -9,12 +18,15 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { FolderDashedIcon, MagnifyingGlassIcon, PlusIcon } from '@phosphor-icons/react';
 import { useCollectionsStore } from '@/stores/collections';
+import { cn } from '@/lib/utils';
 import { TreeNodeRow } from './tree-node-row';
 import { InlineCreate } from './inline-create';
 import { useCollectionsTree } from './use-collections-tree';
 import { CollectionDropZone } from './collection-drop-zone';
 import { TreeHeader } from './tree-header';
+import { TreeFilter } from './tree-filter';
 import { DragOverlayContent } from './drag-overlay-content';
 import { DeleteDialog } from './delete-dialog';
 import { ImportDialog } from './import-dialog';
@@ -23,6 +35,8 @@ export function CollectionsTree({ workspaceId }: Readonly<{ workspaceId: string 
   const selectedNodeId = useCollectionsStore((s) => s.selectedNodeId);
   const {
     expandedIds,
+    filterQuery,
+    isFiltering,
     inlineCreate,
     renameTarget,
     renameValue,
@@ -37,6 +51,8 @@ export function CollectionsTree({ workspaceId }: Readonly<{ workspaceId: string 
     flatNodeIds,
     nonEmptyStashIds,
     stashEndpointCounts,
+    deleteImpact,
+    importSummary,
     handleToggleExpand,
     handleSelectNode,
     handleAddChild,
@@ -59,18 +75,38 @@ export function CollectionsTree({ workspaceId }: Readonly<{ workspaceId: string 
     handleDragEnd,
     setDeleteTarget,
     setImportDialogOpen,
+    setFilterQuery,
   } = useCollectionsTree(workspaceId);
 
+  // Only endpoints count as results — the collections above them are the path to a result, not
+  // results in their own right, so counting them would inflate the number the user is reading.
+  const matchCount = flatNodes.filter((node) => node.kind === 'endpoint').length;
+
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div
+      className={cn(
+        // Layout & Positioning
+        'flex h-full min-h-0 flex-col'
+      )}
+    >
       <TreeHeader
         onExport={handleExport}
         onImportClick={handleImportClick}
         onCreateCollection={handleCreateCollection}
       />
 
+      <TreeFilter value={filterQuery} onChange={setFilterQuery} matchCount={matchCount} />
+
       {/* Tree */}
-      <div className="flex-1 min-h-0 overflow-auto pt-1 pb-2">
+      <div
+        className={cn(
+          // Layout & Positioning
+          'min-h-0 flex-1 overflow-auto',
+
+          // Sizing & Spacing
+          'px-1.5 py-1.5'
+        )}
+      >
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}
@@ -84,16 +120,68 @@ export function CollectionsTree({ workspaceId }: Readonly<{ workspaceId: string 
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={flatNodeIds}
+            items={isFiltering ? [] : flatNodeIds}
             strategy={verticalListSortingStrategy}
           >
             {flatNodes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                <p className="text-xs font-medium text-muted-foreground">No Collections</p>
-                <p className="text-[11px] text-muted-foreground mt-1">
-                  Create a collection to start organizing your API endpoints.
-                </p>
-              </div>
+              isFiltering ? (
+                <Empty className="h-full">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <MagnifyingGlassIcon />
+                    </EmptyMedia>
+                    <EmptyTitle>No matches</EmptyTitle>
+                    <EmptyDescription>
+                      No collection or endpoint matches “{filterQuery.trim()}”.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        // Sizing & Spacing
+                        'h-6 gap-1 px-2',
+
+                        // Typography
+                        'text-xs'
+                      )}
+                      onClick={() => setFilterQuery('')}
+                    >
+                      Clear filter
+                    </Button>
+                  </EmptyContent>
+                </Empty>
+              ) : (
+                <Empty className="h-full">
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                      <FolderDashedIcon />
+                    </EmptyMedia>
+                    <EmptyTitle>No collections</EmptyTitle>
+                    <EmptyDescription>
+                      Collections group related endpoints. Create one to start organising requests.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        // Sizing & Spacing
+                        'h-6 gap-1 px-2',
+
+                        // Typography
+                        'text-xs'
+                      )}
+                      onClick={handleCreateCollection}
+                    >
+                      <PlusIcon className="size-3.5" />
+                      New collection
+                    </Button>
+                  </EmptyContent>
+                </Empty>
+              )
             ) : (
               flatNodes.map((node) => {
                 const isInlineCreateParent = inlineCreate && inlineCreate.parentId === node.originalId;
@@ -107,6 +195,8 @@ export function CollectionsTree({ workspaceId }: Readonly<{ workspaceId: string 
                       isDragOver={false}
                       dropAction={null}
                       endpointCount={stashEndpointCounts.get(node.originalId) ?? 0}
+                      isFiltering={isFiltering}
+                      highlightQuery={filterQuery}
                       isRenaming={renameTarget?.id === node.id}
                       renameValue={renameValue}
                       onRenameValueChange={setRenameValue}
@@ -118,12 +208,16 @@ export function CollectionsTree({ workspaceId }: Readonly<{ workspaceId: string 
                       onRename={handleRename}
                       onDelete={handleDelete}
                     />
-                    {/* Drop zone for empty expanded collections */}
+                    {/* Drop zone for empty expanded collections. Suppressed while filtering: the
+                        rows on screen are a projection, so an insertion target drawn inside one
+                        would not correspond to a real position in the list. */}
                     {node.kind === 'collection' &&
+                      !isFiltering &&
                       expandedIds.has(node.id) &&
                       !nonEmptyStashIds.has(node.originalId) && (
                         <CollectionDropZone
                           stashId={node.originalId}
+                          depth={node.depth + 1}
                           isActive={
                             dragActiveId !== null &&
                             dragOverId === `dropzone-${node.originalId}`
@@ -133,7 +227,7 @@ export function CollectionsTree({ workspaceId }: Readonly<{ workspaceId: string 
                         />
                       )}
                     {/* Inline create input */}
-                    {isInlineCreateParent && (
+                    {isInlineCreateParent && !isFiltering && (
                       <InlineCreate
                         depth={node.depth + 1}
                         type={inlineCreate.type}
@@ -156,12 +250,14 @@ export function CollectionsTree({ workspaceId }: Readonly<{ workspaceId: string 
 
       <DeleteDialog
         deleteTarget={deleteTarget}
+        deleteImpact={deleteImpact}
         onClose={handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
       />
 
       <ImportDialog
         open={importDialogOpen}
+        summary={importSummary}
         onOpenChange={setImportDialogOpen}
         onConfirm={handleImportConfirm}
         onCancel={handleImportCancel}
