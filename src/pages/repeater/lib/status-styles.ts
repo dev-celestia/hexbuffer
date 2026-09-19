@@ -3,18 +3,37 @@
  *
  * The response tab badge, the meta strip and the test-result cards all render the same status
  * number, so they read their colours from here rather than repeating the thresholds.
+ *
+ * Every text colour here carries both a light and a dark value. That is not decoration: a bare
+ * `text-emerald-500` measures **2.56:1** on a light surface, under even the 3:1 floor for a
+ * non-text UI component, and this repo has already shipped one light-mode contrast regression that
+ * looked fine in dark mode (see `styles/globals.contrast.test.ts`). Call sites should take `.text`
+ * rather than picking a shade.
  */
 
 export interface StatusTreatment {
   /** Tinted pill with a hairline border — the compact badge. */
   pill: string;
-  /** Coloured text — inline status codes. */
+  /** Coloured text or icon. */
   text: string;
   /** Solid dot — the meta strip indicator. */
   dot: string;
   /** Human label for the status class. */
   label: string;
 }
+
+/** The colour halves, so a passing test and a 2xx cannot drift apart. */
+const GREEN = {
+  pill: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  text: 'text-emerald-600 dark:text-emerald-400',
+  dot: 'bg-emerald-500',
+} as const;
+
+const ROSE = {
+  pill: 'border-rose-500/25 bg-rose-500/10 text-rose-600 dark:text-rose-400',
+  text: 'text-rose-600 dark:text-rose-400',
+  dot: 'bg-rose-500',
+} as const;
 
 const UNKNOWN: StatusTreatment = {
   pill: 'border-border/60 bg-muted text-muted-foreground',
@@ -30,10 +49,8 @@ const INFORMATIONAL: StatusTreatment = {
   label: 'Informational',
 };
 
-const SUCCESS: StatusTreatment = {
-  pill: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-  text: 'text-emerald-600 dark:text-emerald-400',
-  dot: 'bg-emerald-500',
+export const SUCCESS: StatusTreatment = {
+  ...GREEN,
   label: 'Success',
 };
 
@@ -52,10 +69,19 @@ const CLIENT_ERROR: StatusTreatment = {
 };
 
 const SERVER_ERROR: StatusTreatment = {
-  pill: 'border-rose-500/25 bg-rose-500/10 text-rose-600 dark:text-rose-400',
-  text: 'text-rose-600 dark:text-rose-400',
-  dot: 'bg-rose-500',
+  ...ROSE,
   label: 'Server error',
+};
+
+/**
+ * A request that never produced a status at all — network failure, timeout or abort.
+ *
+ * Deliberately the same rose as a 5xx, because both mean "this did not work", but named separately
+ * so a call site does not have to pretend a failure has a status code.
+ */
+export const FAILURE: StatusTreatment = {
+  ...ROSE,
+  label: 'Failed',
 };
 
 export function getStatusTreatment(status?: number | null): StatusTreatment {

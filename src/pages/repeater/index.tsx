@@ -2,16 +2,7 @@ import { cn } from '@/lib/utils';
 import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 import { useRepeaterPage } from './hooks/use-repeater-page';
 import { WorkspacePanel } from './components/workspace-panel';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@celestia-project/ui';
+import { CloseWorkspaceDialog } from './components/close-workspace-dialog';
 
 export function RepeaterPage() {
   const page = useRepeaterPage();
@@ -29,20 +20,20 @@ export function RepeaterPage() {
         onCloseTabsToRight={page.onCloseTabsToRight}
         className={cn(
           // Layout & Positioning
-          "flex flex-col min-h-0",
+          'flex flex-col min-h-0',
 
           // Sizing & Spacing
-          "h-full"
+          'h-full'
         )}
         contentClassName={cn(
           // Layout & Positioning
-          "flex-1 min-h-0 overflow-hidden",
+          'flex-1 min-h-0 overflow-hidden',
 
           // Sizing & Spacing
-          "m-2",
+          'm-2',
 
           // Backgrounds & Borders
-          "border rounded-md"
+          'border rounded-md'
         )}
       >
         {page.activeWorkspaceId && (
@@ -50,24 +41,12 @@ export function RepeaterPage() {
         )}
       </TabbedPageLayout>
 
-      <AlertDialog
-        open={page.pendingCloseId !== null}
-        onOpenChange={(open) => { if (!open) page.cancelClose(); }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Close workspace?</AlertDialogTitle>
-            <AlertDialogDescription>
-              "{page.pendingCloseName}" and all its collections will be permanently deleted. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={page.cancelClose}>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={page.confirmClose}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CloseWorkspaceDialog
+        workspaceName={page.pendingCloseName}
+        impact={page.closeImpact}
+        onCancel={page.cancelClose}
+        onConfirm={page.confirmClose}
+      />
     </>
   );
 }
-

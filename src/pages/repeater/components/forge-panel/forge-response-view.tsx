@@ -11,6 +11,7 @@ import { useCollectionsStore, type ForgeResponse, type TestResult } from '@/stor
 import { useTheme } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
+import { FAILURE, SUCCESS } from '../../lib/status-styles';
 
 interface ForgeResponseViewProps {
   isLoading: boolean;
@@ -205,7 +206,7 @@ export function ForgeResponseView({
             'rounded-md border border-rose-500/30 bg-rose-500/10'
           )}
         >
-          <XCircleIcon className="mt-px size-4 shrink-0 text-rose-500" />
+          <XCircleIcon className={cn('mt-px size-4 shrink-0', FAILURE.text)} />
           <div
             className={cn(
               // Layout & Positioning
@@ -313,8 +314,8 @@ export function ForgeResponseView({
           >
             {isCopied ? (
               <>
-                <CheckIcon className="size-3.5 text-emerald-500" />
-                <span className="font-medium text-emerald-500">Copied</span>
+                <CheckIcon className={cn('size-3.5', SUCCESS.text)} />
+                <span className={cn('font-medium', SUCCESS.text)}>Copied</span>
               </>
             ) : (
               <>
@@ -545,14 +546,14 @@ export function ForgeResponseView({
                   )}
                 >
                   <span className="flex items-center gap-1.5">
-                    <CheckCircleIcon className="size-3.5 text-emerald-500" />
+                    <CheckCircleIcon className={cn('size-3.5', SUCCESS.text)} />
                     <span className="font-semibold tabular-nums text-foreground">
                       {passedCount}
                     </span>
                     <span className="text-muted-foreground">passed</span>
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <XCircleIcon className="size-3.5 text-rose-500" />
+                    <XCircleIcon className={cn('size-3.5', FAILURE.text)} />
                     <span className="font-semibold tabular-nums text-foreground">
                       {failedCount}
                     </span>
@@ -577,9 +578,9 @@ export function ForgeResponseView({
                     )}
                   >
                     {result.passed ? (
-                      <CheckCircleIcon className="mt-px size-4 shrink-0 text-emerald-500" />
+                      <CheckCircleIcon className={cn('mt-px size-4 shrink-0', SUCCESS.text)} />
                     ) : (
-                      <XCircleIcon className="mt-px size-4 shrink-0 text-rose-500" />
+                      <XCircleIcon className={cn('mt-px size-4 shrink-0', FAILURE.text)} />
                     )}
                     <div
                       className={cn(

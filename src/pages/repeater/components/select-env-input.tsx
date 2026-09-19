@@ -41,8 +41,8 @@ function renderHighlightedText(value: string, envVarKeys: string[]) {
             'font-semibold',
             // Backgrounds & Borders
             isKnown
-              ? 'text-sky-400 dark:text-sky-300 bg-sky-500/15'
-              : 'text-amber-500 dark:text-amber-400 bg-amber-500/15',
+              ? 'text-sky-600 dark:text-sky-300 bg-sky-500/15'
+              : 'text-amber-600 dark:text-amber-400 bg-amber-500/15',
           )}
         >
           {part}
@@ -275,7 +275,7 @@ export function EnvSuggestionDropdown({
               // Typography
               'text-[9px] font-mono lowercase',
               // Backgrounds & Borders
-              'bg-sky-500/10 text-sky-400',
+              'bg-sky-500/10 text-sky-600 dark:text-sky-400',
             )}
           >
             {activeContextName}
@@ -334,7 +334,7 @@ export function EnvSuggestionDropdown({
               <span
                 className={cn(
                   // Typography
-                  'text-sky-400 dark:text-sky-300 font-mono font-semibold',
+                  'text-sky-600 dark:text-sky-300 font-mono font-semibold',
                 )}
               >
                 {`{{${item.key}}}`}

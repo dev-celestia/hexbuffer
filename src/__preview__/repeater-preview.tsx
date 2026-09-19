@@ -12,11 +12,16 @@
  *   scenario  idle | response | loading | error | empty | no-contexts   (default: response)
  *   filter    text to type into the collections filter box
  *   dialog    contexts — open the Environments dialog from the request bar's gear
- *             delete-collection | delete-endpoint | import — mount that confirmation directly,
- *             because neither is reachable from this harness through the UI (see StandaloneDialog)
+ *             delete-collection | delete-endpoint | import | close-workspace — mount that
+ *             confirmation directly, because none is reachable from this harness through the UI
+ *             (see StandaloneDialog)
  *   click     click the first control whose text starts with this, once it appears
  *   clickNth  pick the Nth match (default 1) — reaches the response view's "Request" tab
  *             past the mode switcher's identically-labelled tab
+ *   theme     light | dark — forces the root theme class (default: dark). Every earlier
+ *             screenshot was taken in dark, which is exactly why the light-mode contrast
+ *             regressions this page has shipped stayed invisible; see
+ *             `pages/repeater/light-mode-shades.test.ts`
  *
  * `no-contexts` exists because the dialog's own empty state cannot be reached with `empty`: that
  * scenario also clears the endpoints, and without a selected endpoint the request bar — and with
@@ -34,11 +39,13 @@ import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 
 import '@/styles/globals.css';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider, useTheme } from '@/components/theme-provider';
+import { useAppSettingsStore } from '@/stores/app-settings-store';
 import { useCollectionsStore, type ActiveRequestState } from '@/stores/collections';
 import { WorkspacePanel } from '@/pages/repeater/components/workspace-panel';
 import { DeleteDialog } from '@/pages/repeater/components/collection-tree/delete-dialog';
 import { ImportDialog } from '@/pages/repeater/components/collection-tree/import-dialog';
+import { CloseWorkspaceDialog } from '@/pages/repeater/components/close-workspace-dialog';
 import { TooltipProvider } from '@celestia-project/ui';
 
 const WORKSPACE_ID = 'ws-default';
@@ -475,10 +482,21 @@ function AutoClick() {
  * never happens in a browser. They are rendered here with representative props purely to eyeball
  * layout — behaviour is covered by `dialogs.render.test.tsx`.
  *
- *   ?dialog=delete-collection | delete-endpoint | import
+ *   ?dialog=delete-collection | delete-endpoint | import | close-workspace
  */
 function StandaloneDialog() {
   const wanted = new URLSearchParams(window.location.search).get('dialog');
+
+  if (wanted === 'close-workspace') {
+    return (
+      <CloseWorkspaceDialog
+        workspaceName="Client Engagements"
+        impact={{ collections: 4, endpoints: 17 }}
+        onCancel={() => {}}
+        onConfirm={() => {}}
+      />
+    );
+  }
 
   if (wanted === 'import') {
     return (
@@ -533,10 +551,46 @@ function StandaloneDialog() {
   return null;
 }
 
+/** `?theme=light|dark`, or null when absent or unrecognised. */
+function readForcedTheme(): 'light' | 'dark' | null {
+  const value = new URLSearchParams(window.location.search).get('theme');
+  return value === 'light' || value === 'dark' ? value : null;
+}
+
+/**
+ * Forces `?theme=` **through the provider**, not by toggling the `dark` class on `<html>`.
+ *
+ * Toggling the class alone yields a hybrid render: the CSS goes light while every component that
+ * reads `useTheme()` stays dark. `forge-response-view` hands that value to the library's
+ * `TextEditor` at three call sites, so the response body kept its dark surface while everything
+ * around it turned light — and a screenshot of that would have "confirmed" a light theme the app
+ * never actually shows. The class is a consequence of the theme, not the theme itself.
+ *
+ * `setTheme` writes through to the persisted `hexbuffer-app-settings` store, so the prior value is
+ * restored on unmount. The preview is also opened by hand in a normal browser on the same origin
+ * as the dev-mode app, and a dev tool should not leave the app in a theme it did not choose.
+ * (Headless screenshot runs get a throwaway profile, so they are unaffected either way.)
+ */
+function ForceTheme({ theme }: Readonly<{ theme: 'light' | 'dark' | null }>) {
+  const { setTheme } = useTheme();
+
+  React.useEffect(() => {
+    if (!theme) return;
+    const previous = useAppSettingsStore.getState().theme;
+    setTheme(theme);
+    return () => setTheme(previous);
+  }, [theme, setTheme]);
+
+  return null;
+}
+
 function Preview() {
+  const forcedTheme = readForcedTheme();
+
   return (
     <PreviewBoundary>
-      <ThemeProvider defaultTheme="dark" defaultPrimaryColor="purple">
+      <ThemeProvider defaultTheme={forcedTheme ?? 'dark'} defaultPrimaryColor="purple">
+        <ForceTheme theme={forcedTheme} />
         <TooltipProvider>
           <div className="h-screen w-screen overflow-hidden bg-background text-foreground">
             {/* Mirrors RepeaterPage's TabbedPageLayout content geometry */}

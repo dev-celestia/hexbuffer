@@ -1,4 +1,5 @@
 import type { StashRecord, StashEndpointRecord } from '@/stores/collections';
+import { collectDescendantStashIds } from '../../lib/stash-tree';
 
 // ── Flat Node ──
 
@@ -59,24 +60,10 @@ export function computeDeleteImpact(
     return { endpoints: 1, nestedCollections: 0 };
   }
 
-  // Breadth-first rather than recursive so arbitrarily deep nesting is counted without depending
-  // on the stack, matching the store's own walk.
-  const seen = new Set([target.originalId]);
-  const queue = [target.originalId];
-  while (queue.length > 0) {
-    const parentId = queue.shift()!;
-    for (const stash of stashes) {
-      if (stash.parentId === parentId && !seen.has(stash.id)) {
-        seen.add(stash.id);
-        queue.push(stash.id);
-      }
-    }
-  }
-
   return {
     endpoints: endpointCounts.get(target.originalId) ?? 0,
-    // `seen` includes the target, which is not "nested" in itself.
-    nestedCollections: seen.size - 1,
+    // `collectDescendantStashIds` excludes the target itself, which is not "nested" in itself.
+    nestedCollections: collectDescendantStashIds(target.originalId, stashes).size,
   };
 }
 

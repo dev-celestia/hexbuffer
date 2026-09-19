@@ -87,7 +87,7 @@ export function ContextsEmptyState({ onStartCreate, onClose }: Readonly<Contexts
                   'size-3.5',
 
                   // Typography
-                  'text-sky-400'
+                  'text-sky-600 dark:text-sky-400'
                 )}
               />
               <span
@@ -103,7 +103,7 @@ export function ContextsEmptyState({ onStartCreate, onClose }: Readonly<Contexts
                     'rounded px-1 py-0.5',
 
                     // Typography
-                    'font-mono text-[10px] text-sky-400',
+                    'font-mono text-[10px] text-sky-600 dark:text-sky-400',
 
                     // Backgrounds & Borders
                     'bg-sky-500/10'
@@ -132,7 +132,7 @@ export function ContextsEmptyState({ onStartCreate, onClose }: Readonly<Contexts
                   'size-3.5',
 
                   // Typography
-                  'text-emerald-400'
+                  'text-emerald-600 dark:text-emerald-400'
                 )}
               />
               <span

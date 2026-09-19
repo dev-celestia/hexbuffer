@@ -100,22 +100,9 @@ export function AssistantHeader({
               // Sizing & Spacing
               'size-6 shrink-0',
               // Backgrounds & Borders
-              'rounded-full object-contain',
+              'rounded-md object-contain',
             )}
           />
-          <Badge
-            variant="secondary"
-            className={cn(
-              // Sizing & Spacing
-              'h-4 px-1.5 py-0',
-              // Typography
-              'text-[9px] font-mono font-semibold uppercase tracking-wider',
-              // Backgrounds & Borders
-              'text-warning bg-warning/10 border border-warning/20',
-            )}
-          >
-            Alpha
-          </Badge>
         </div>
       </div>
 

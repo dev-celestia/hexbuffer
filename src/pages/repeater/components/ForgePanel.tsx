@@ -2,7 +2,7 @@ import { Tabs, TabsList, TabsTrigger } from '@celestia-project/ui';
 import { useEffect, useState } from 'react';
 import { ArrowDownIcon, ArrowUpIcon, SpinnerIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
-import { getStatusTreatment } from '../lib/status-styles';
+import { getStatusTreatment, FAILURE } from '../lib/status-styles';
 import { useForgePanel } from './forge-panel/use-forge-panel';
 import { ForgeRequestBar } from './forge-panel/forge-request-bar';
 import { ForgeRequestTabs } from './forge-panel/forge-request-tabs';
@@ -128,7 +128,7 @@ export function ForgePanel() {
                     'font-mono text-[10px] leading-4 font-semibold',
 
                     // Backgrounds & Borders
-                    'border-rose-500/25 bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                    FAILURE.pill
                   )}
                 >
                   Failed

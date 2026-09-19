@@ -13,6 +13,7 @@ import { LinkSimpleIcon } from '@phosphor-icons/react';
 import folderIcon from '@/assets/explorer-icon/_folder.svg';
 import { cn } from '@/lib/utils';
 import { getMethodTreatment } from '../../lib/method-styles';
+import { describeCounts } from '../../lib/describe-counts';
 import type { DeleteImpact, FlatNode } from './utils';
 
 interface DeleteDialogProps {
@@ -21,26 +22,6 @@ interface DeleteDialogProps {
   deleteImpact: DeleteImpact | null;
   onClose: () => void;
   onConfirm: () => void;
-}
-
-/**
- * "3 nested collections · 12 endpoints", dropping whichever half is zero.
- *
- * The count matters more than the wording here: `deleteStash` cascades, so an empty-looking folder
- * can still take a dozen requests with it. An empty collection says so plainly rather than
- * rendering an empty string.
- */
-function describeImpact(impact: DeleteImpact): string {
-  const parts: string[] = [];
-
-  if (impact.nestedCollections > 0) {
-    parts.push(`${impact.nestedCollections} nested collection${impact.nestedCollections === 1 ? '' : 's'}`);
-  }
-  if (impact.endpoints > 0) {
-    parts.push(`${impact.endpoints} endpoint${impact.endpoints === 1 ? '' : 's'}`);
-  }
-
-  return parts.length > 0 ? parts.join(' · ') : 'Empty collection';
 }
 
 /**
@@ -162,7 +143,13 @@ export function DeleteDialog({
                     'text-[11px] text-muted-foreground'
                   )}
                 >
-                  {describeImpact(deleteImpact)}
+                  {describeCounts(
+                    [
+                      { count: deleteImpact.nestedCollections, noun: 'nested collection' },
+                      { count: deleteImpact.endpoints, noun: 'endpoint' },
+                    ],
+                    'Empty collection'
+                  )}
                 </p>
               )
             )}

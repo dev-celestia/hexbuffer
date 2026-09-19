@@ -11,6 +11,7 @@ import {
   closeWorkspacesToLeft,
   closeWorkspacesToRight,
 } from '@/triggers/repeater';
+import { computeWorkspaceImpact } from '@/pages/repeater/lib/stash-tree';
 import { toast } from 'sonner';
 
 export function useRepeaterPage() {
@@ -18,6 +19,7 @@ export function useRepeaterPage() {
   const activeWorkspaceId = useRepeaterStore((s) => s.activeWorkspaceId);
 
   const stashes = useCollectionsStore((s) => s.stashes);
+  const endpoints = useCollectionsStore((s) => s.endpoints);
   const isHydrated = useCollectionsStore((s) => s.isHydrated);
   const fetchFromDb = useCollectionsStore((s) => s.fetchFromDb);
 
@@ -138,9 +140,26 @@ export function useRepeaterPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  /**
+   * Name of the workspace pending removal, or null when none is.
+   *
+   * Null doubles as the dialog's open flag, so a `pendingCloseId` that no longer resolves to a
+   * workspace closes the dialog rather than opening it on a blank name.
+   */
   const pendingCloseName = React.useMemo(
-    () => workspaces.find((ws) => ws.id === pendingCloseId)?.name ?? '',
+    () => workspaces.find((ws) => ws.id === pendingCloseId)?.name ?? null,
     [workspaces, pendingCloseId],
+  );
+
+  /**
+   * What closing the pending workspace will actually remove.
+   *
+   * Counted here rather than in the dialog so the page entry stays declarative; the cascade itself
+   * lives in `computeWorkspaceImpact`, which is where it is unit tested.
+   */
+  const closeImpact = React.useMemo(
+    () => (pendingCloseId ? computeWorkspaceImpact(pendingCloseId, stashes, endpoints) : null),
+    [pendingCloseId, stashes, endpoints],
   );
 
   return {
@@ -154,6 +173,7 @@ export function useRepeaterPage() {
     onCloseTabsToRight,
     pendingCloseId,
     pendingCloseName,
+    closeImpact,
     confirmClose,
     cancelClose,
   };
