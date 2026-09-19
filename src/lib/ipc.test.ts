@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  DROPPED_REQUEST_MESSAGE,
   TAURI_UNAVAILABLE_MESSAGE,
   invokeTauri,
   isTauriAvailable,
@@ -136,5 +137,62 @@ describe('invokeTauri', () => {
     await expect(invokeTauri('save_regression_script')).rejects.toThrow(
       'Failed to run Tauri command: save_regression_script',
     );
+  });
+
+  // A dropped request is not the same as an opaque one, and saying so is the whole point: it is the
+  // only signal that the backend never ran the command. Tauri produces it by returning without
+  // responding on an invoke-key mismatch (`tauri/src/webview/mod.rs:1748`).
+  describe('a request the backend never answered', () => {
+    it('names the cause for an empty binary body rather than the generic fallback', async () => {
+      installFakeTauri(() => Promise.reject(new ArrayBuffer(0)));
+
+      const error = await invokeTauri('save_regression_script').catch((e: unknown) => e);
+
+      expect((error as Error).message).toContain(DROPPED_REQUEST_MESSAGE);
+      expect((error as Error).message).toContain('save_regression_script');
+      expect((error as Error).message).not.toContain('Failed to run Tauri command');
+    });
+
+    it('names the cause for an empty string body', async () => {
+      installFakeTauri(() => Promise.reject(''));
+
+      await expect(invokeTauri('save_regression_script')).rejects.toThrow(
+        DROPPED_REQUEST_MESSAGE,
+      );
+    });
+
+    it('names the cause for a whitespace-only body', async () => {
+      installFakeTauri(() => Promise.reject('   \n '));
+
+      await expect(invokeTauri('save_regression_script')).rejects.toThrow(
+        DROPPED_REQUEST_MESSAGE,
+      );
+    });
+
+    it('names the cause for a bare null rejection', async () => {
+      installFakeTauri(() => Promise.reject(null));
+
+      await expect(invokeTauri('save_regression_script')).rejects.toThrow(
+        DROPPED_REQUEST_MESSAGE,
+      );
+    });
+
+    it('names the cause for an undefined rejection', async () => {
+      installFakeTauri(() => Promise.reject(undefined));
+
+      await expect(invokeTauri('save_regression_script')).rejects.toThrow(
+        DROPPED_REQUEST_MESSAGE,
+      );
+    });
+
+    it('still reports a real message when one is present', async () => {
+      // Guards against over-eager matching: a readable failure must not be relabelled as dropped.
+      installFakeTauri(() => Promise.reject(arrayBufferOf('"database is locked"')));
+
+      const error = await invokeTauri('save_regression_script').catch((e: unknown) => e);
+
+      expect((error as Error).message).toBe('database is locked');
+      expect((error as Error).message).not.toContain(DROPPED_REQUEST_MESSAGE);
+    });
   });
 });

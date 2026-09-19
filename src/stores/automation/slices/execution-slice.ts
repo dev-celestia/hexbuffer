@@ -4,6 +4,7 @@ import type { WorkflowRun, WorkflowRunStep } from '@/pages/workflow/types';
 import { getWorkflowReadiness } from '@/pages/workflow/lib/workflow-readiness';
 import { AUTOMATION_LOG_UI_LIMIT, removeRunningWorkflowId, capExecutionLogs } from '../constants';
 import type { AutomationState, ExecutionLog, WorkflowContext } from '../types';
+import { toErrorMessage } from '@/lib/ipc';
 
 declare global {
   interface Window {
@@ -107,7 +108,7 @@ export const createExecutionSlice = (
         });
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error || 'FlowArrow failed');
+      const message = toErrorMessage(error, 'FlowArrow failed');
       toast.error(message);
       get().appendExecutionLog({ workflowId, level: 'error', message });
     }

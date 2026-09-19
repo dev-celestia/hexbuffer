@@ -3,6 +3,7 @@ import { useAutomationStore, type WorkflowContext } from '@/stores/automation';
 import type { CrawlPage } from '@/pages/browser/types';
 import type { TriggerConfig, WorkflowDef } from '@/pages/workflow/types';
 import { parseHostWhitelist } from '@/triggers/live-traffic/captured';
+import { toErrorMessage } from '@/lib/ipc';
 
 const PAGE_CRAWLED_TRIGGER_TYPE = 'trigger:browser-page-crawled';
 
@@ -143,7 +144,7 @@ export function startPageCrawledWatcher(): Promise<void> | null {
         });
       }
       void store.runWorkflow(workflow.id, context).catch((error) => {
-        const message = error instanceof Error ? error.message : String(error || 'FlowArrow failed');
+        const message = toErrorMessage(error, 'FlowArrow failed');
         if (triggerNode.id) {
           store.setNodeRuntimeStatus(triggerNode.id, {
             workflowId: workflow.id,

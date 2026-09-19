@@ -10,6 +10,18 @@ declare global {
 export const TAURI_UNAVAILABLE_MESSAGE =
   'Tauri backend is unavailable. Start the desktop app with `pnpm tauri`, not `pnpm dev`.';
 
+/**
+ * Shown when the request was dropped before the command ran, so there is no error text to show.
+ *
+ * Tauri rejects an IPC call whose invoke key does not match the running manager by returning
+ * **without responding** (`tauri/src/webview/mod.rs:1748`), which the transport surfaces as an empty
+ * body. The key is generated once per app process (`manager/mod.rs:779`), so this happens when the
+ * webview is from a different app session than the backend — typically after the Rust side restarts
+ * while the frontend keeps its old injected script. A restart refreshes both.
+ */
+export const DROPPED_REQUEST_MESSAGE =
+  'No response from the backend — the request was dropped before it ran. This usually means the app session is stale; restart the desktop app.';
+
 /** Keys a structured error body may use to carry the human-readable reason. */
 const ERROR_MESSAGE_KEYS = ['message', 'error', 'detail'] as const;
 
@@ -144,6 +156,24 @@ export function toErrorMessage(error: unknown, fallback: string): string {
 }
 
 /**
+ * True when a rejection carries no readable payload at all.
+ *
+ * Three shapes reach here, all meaning the same thing — the request was dropped rather than
+ * answered: a zero-length binary body, an empty string, and a bare `null`/`undefined`.
+ */
+function isDroppedRequest(error: unknown): boolean {
+  if (error === null || error === undefined) {
+    return true;
+  }
+
+  if (typeof error === 'string') {
+    return error.trim().length === 0;
+  }
+
+  return isBinaryBody(error) && decodeBinaryBody(error) === null;
+}
+
+/**
  * `invoke` with the desktop-shell guard and error normalization applied.
  *
  * Every command call should go through here so a transport-level rejection can never
@@ -160,6 +190,12 @@ export async function invokeTauri<T>(
   try {
     return await invoke<T>(command, args);
   } catch (error) {
+    // Tested before `toErrorMessage` because an empty payload would otherwise collapse into the
+    // generic `Failed to run Tauri command: X`, discarding the one detail that identifies the cause.
+    if (isDroppedRequest(error)) {
+      throw new Error(`${DROPPED_REQUEST_MESSAGE} (command: ${command})`);
+    }
+
     throw new Error(toErrorMessage(error, `Failed to run Tauri command: ${command}`));
   }
 }
