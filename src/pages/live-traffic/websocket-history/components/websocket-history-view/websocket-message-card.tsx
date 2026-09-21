@@ -274,7 +274,7 @@ export function WebSocketMessageCard({ message, formatDateTime }: Readonly<WebSo
             title="Copy payload"
           >
             {copied ? (
-              <CheckIcon className="size-3 text-emerald-500 font-bold" />
+              <CheckIcon className="size-3 text-emerald-600 dark:text-emerald-400 font-bold" />
             ) : (
               <CopyIcon className="size-3" />
             )}

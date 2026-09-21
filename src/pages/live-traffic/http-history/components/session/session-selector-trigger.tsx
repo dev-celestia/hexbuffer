@@ -113,7 +113,7 @@ export const SessionSelectorTrigger = React.forwardRef<
                   "inline-flex items-center justify-center shrink-0",
 
                   // Typography
-                  "text-amber-500"
+                  "text-amber-600 dark:text-amber-400"
                 )}
                 aria-label="Host filter not configured"
               >

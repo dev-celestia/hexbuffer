@@ -292,7 +292,7 @@ export function SessionFilterFields({
             <p
               className={cn(
                 // Typography
-                "text-[10px] text-amber-500/90 italic"
+                "text-[10px] text-amber-600/90 dark:text-amber-400/90 italic"
               )}
             >
               Add at least one host pattern (e.g. *.example.com) to capture traffic.

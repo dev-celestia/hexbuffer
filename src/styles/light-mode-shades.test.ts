@@ -32,7 +32,7 @@ import { describe, expect, it } from 'vitest';
  * Append a new page here when it is swept; the test will immediately start enforcing the
  * convention on it.
  */
-const SWEPT_PAGES = ['pages/repeater', 'pages/intercept'];
+const SWEPT_PAGES = ['pages/repeater', 'pages/intercept', 'pages/live-traffic'];
 
 const SRC_ROOT = new URL('../', import.meta.url);
 

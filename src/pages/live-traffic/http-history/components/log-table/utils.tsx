@@ -10,17 +10,6 @@ export const STATUS_FILTERS = [
   { label: '5xx', min: 500, max: 599 },
 ] as const;
 
-export const COOKIE_COLORS = [
-  { bg: 'bg-orange-500/10', text: 'text-orange-500', border: 'border-orange-500/30' },
-  { bg: 'bg-purple-500/10', text: 'text-purple-500', border: 'border-purple-500/30' },
-  { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/30' },
-  { bg: 'bg-green-500/10', text: 'text-green-500', border: 'border-green-500/30' },
-  { bg: 'bg-pink-500/10', text: 'text-pink-500', border: 'border-pink-500/30' },
-  { bg: 'bg-cyan-500/10', text: 'text-cyan-500', border: 'border-cyan-500/30' },
-  { bg: 'bg-yellow-500/10', text: 'text-yellow-500', border: 'border-yellow-500/30' },
-  { bg: 'bg-red-500/10', text: 'text-red-500', border: 'border-red-500/30' },
-] as const;
-
 export function formatTimestamp(timestamp: string | number) {
   const ms = typeof timestamp === 'string' ? parseInt(timestamp, 10) : timestamp;
   const date = new Date(ms);

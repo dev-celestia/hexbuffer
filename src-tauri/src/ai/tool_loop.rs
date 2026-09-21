@@ -2249,4 +2249,16 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn head_tail_window_bounds_oversized_results_and_marks_the_gap() {
+        let content: String = (0..100).map(|i| char::from(b'a' + (i % 26) as u8)).collect();
+        let windowed = head_tail_window(&content, 10, 10);
+        assert!(windowed.starts_with(&content[..10]));
+        assert!(windowed.ends_with(&content[90..]));
+        assert!(windowed.contains("80 characters omitted"));
+        assert!(windowed.contains("read_tool_output"));
+        // Content within the window passes through untouched.
+        assert_eq!(head_tail_window("short", 10, 10), "short");
+    }
 }

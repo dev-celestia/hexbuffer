@@ -100,7 +100,7 @@ export function useTrafficTableColumns({
             )}
             {call.content_decoded && (
               <span title="Request body was decoded from gzip/br/deflate">
-                <WarningCircleIcon className="h-3 w-3 text-yellow-500 shrink-0" />
+                <WarningCircleIcon className="h-3 w-3 text-yellow-600 dark:text-yellow-400 shrink-0" />
               </span>
             )}
           </div>
@@ -140,7 +140,7 @@ export function useTrafficTableColumns({
           return (
             <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
               {pinnedSet.has(call.id) && (
-                <PushPinSimpleIcon className="size-3 text-amber-500 shrink-0" />
+                <PushPinSimpleIcon className="size-3 text-amber-600 dark:text-amber-400 shrink-0" />
               )}
               {requestGroups.map((g: GroupDefinition) => (
                 <span
@@ -152,11 +152,11 @@ export function useTrafficTableColumns({
               ))}
               {isSecured ? (
                 <span title="HTTPS (Secured)">
-                  <LockIcon className="size-3 text-emerald-500 shrink-0" />
+                  <LockIcon className="size-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 </span>
               ) : (
                 <span title="HTTP (Not Secured)">
-                  <LockOpenIcon className="size-3 text-amber-500 shrink-0" />
+                  <LockOpenIcon className="size-3 text-amber-600 dark:text-amber-400 shrink-0" />
                 </span>
               )}
               <BrowserIcon userAgent={call.user_agent} />

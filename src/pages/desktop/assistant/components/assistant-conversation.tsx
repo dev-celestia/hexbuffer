@@ -15,7 +15,8 @@ import {
   Shimmer,
 } from '@celestia-project/ui';
 import { PaperclipIcon, PauseIcon, SpinnerGapIcon, XIcon } from '@phosphor-icons/react';
-import { Fragment, useMemo } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { memo, useEffect, useMemo, useReducer } from 'react';
 import type { DashboardChatMessage } from '../types';
 import { AssistantEmptyState } from './assistant-empty-state';
 import { ChatDateSeparator } from './chat-date-separator';
@@ -34,6 +35,154 @@ import { parseMessageOptions } from '../lib/option-parser';
 import { InteractiveOptionsCard } from './interactive-options-card';
 import { cn } from '@/lib/utils';
 
+interface ConversationMessageRowProps {
+  message: DashboardChatMessage;
+  previousMessage: DashboardChatMessage | null;
+  isLast: boolean;
+  isCurrentStreamingMessage: boolean;
+  isStreaming: boolean;
+  isPaused: boolean;
+  providerDisplay: string;
+  onSelectOption?: (prompt: string) => void;
+  onFocusInput?: () => void;
+}
+
+/**
+ * One transcript row (date separator + message bubble), memoized so a streaming
+ * delta — which only ever mutates the last message object — re-renders a single
+ * row instead of the whole list.
+ */
+const ConversationMessageRow = memo(function ConversationMessageRow({
+  message,
+  previousMessage,
+  isLast,
+  isCurrentStreamingMessage,
+  isStreaming,
+  isPaused,
+  providerDisplay,
+  onSelectOption,
+  onFocusInput,
+}: ConversationMessageRowProps) {
+  const label = providerLabel(message);
+  const reasoningParts = getReasoningParts(message);
+  const fileParts = getFileParts(message);
+  const rawText = getMessageText(message);
+  const attachedFiles = parseAttachedFilesFromMessage(fileParts, rawText);
+  const displayText = message.role === 'user' ? getUserPromptOnly(rawText) : rawText;
+  const agentInfo = getAgentInfo(message.metadata?.agentId);
+  const messageDate = getMessageDate(message);
+  const showDateSeparator =
+    !previousMessage || isDifferentDay(getMessageDate(previousMessage), messageDate);
+  const timeString = formatMessageTime(messageDate);
+
+  return (
+    <>
+      {showDateSeparator ? <ChatDateSeparator date={messageDate} /> : null}
+      <AiMessage from={message.role}>
+        <AiMessageContent
+          className={cn(
+            message.role === 'assistant'
+              ? 'w-full max-w-full group-[.is-assistant]:text-foreground'
+              : 'group-[.is-user]:bg-transparent group-[.is-user]:p-0',
+          )}
+        >
+          {message.role === 'assistant' ? (
+            <AgentBadgeHeader
+              agentId={message.metadata?.agentId}
+              agentName={message.metadata?.agentName}
+              providerDisplay={label ?? providerDisplay}
+              isStreaming={isCurrentStreamingMessage}
+              isPaused={isPaused}
+              timestamp={timeString}
+            />
+          ) : null}
+
+          {/* Attached files card list */}
+          {attachedFiles.length > 0 ? (
+            <div
+              className={cn(
+                // Layout & Positioning
+                'flex flex-col gap-1.5 w-full shrink-0',
+                // Sizing & Spacing
+                'mb-2 p-2.5',
+                // Typography
+                'text-xs',
+                // Backgrounds & Borders
+                'rounded-lg border border-border/80 bg-muted/40',
+              )}
+            >
+              <div
+                className={cn(
+                  // Layout & Positioning
+                  'flex items-center gap-1.5',
+                  // Typography
+                  'font-medium text-xs text-muted-foreground',
+                )}
+              >
+                <PaperclipIcon className="size-3.5 text-info shrink-0" />
+                <span>Attached file{attachedFiles.length > 1 ? 's' : ''} sent with prompt</span>
+              </div>
+              <Attachments variant="inline" className="flex flex-wrap gap-2">
+                {attachedFiles.map((file, fIdx) => (
+                  <AttachmentItem
+                    key={fIdx}
+                    data={{ id: `att-${fIdx}`, type: 'file', filename: file.filename, mediaType: 'text/plain', url: '' }}
+                    className="rounded-md border border-border bg-background shadow-2xs text-xs"
+                  >
+                    <AttachmentPreview />
+                    <span className="truncate max-w-[160px] text-xs font-medium">{file.filename}</span>
+                    <Badge variant="outline" className="text-[10px] py-0 px-1 font-mono uppercase shrink-0">
+                      {file.ext}
+                    </Badge>
+                  </AttachmentItem>
+                ))}
+              </Attachments>
+            </div>
+          ) : null}
+
+          {/* Reasoning / thinking blocks */}
+          {reasoningParts.map((part, i) => (
+            <Reasoning
+              key={i}
+              defaultOpen={false}
+              isStreaming={isStreaming && message.role === 'assistant'}
+            >
+              <ReasoningTrigger />
+              <ReasoningContent>{part.text}</ReasoningContent>
+            </Reasoning>
+          ))}
+
+          {/* Foldable text response in chat bubble with side copy icon */}
+          {displayText ? (
+            <FoldableChatBubble
+              role={message.role}
+              text={displayText}
+              timestamp={timeString}
+              borderClass={agentInfo.borderClass}
+              isStreaming={isStreaming && message.role === 'assistant'}
+            />
+          ) : null}
+
+          {/* Interactive Choice Options (Option A, Option B, Option 3) */}
+          {message.role === 'assistant' && isLast && !isStreaming && onSelectOption ? (
+            (() => {
+              const options = parseMessageOptions(displayText);
+              if (options.length === 0) return null;
+              return (
+                <InteractiveOptionsCard
+                  options={options}
+                  onSelectOption={onSelectOption}
+                  onFocusInput={onFocusInput}
+                />
+              );
+            })()
+          ) : null}
+        </AiMessageContent>
+      </AiMessage>
+    </>
+  );
+});
+
 interface AssistantConversationProps {
   messages: DashboardChatMessage[];
   isStreaming: boolean;
@@ -49,6 +198,12 @@ interface AssistantConversationProps {
   onSelectOption?: (prompt: string) => void;
   onFocusInput?: () => void;
 }
+
+// Settled messages keep object identity across streaming chunks (useChat clones only
+// the message being streamed), so the displayability decision — which scans the full
+// text for attachment markers — is cached per message object. Without this, every
+// streamed token re-scans every assistant message in the session.
+const displayableCache = new WeakMap<DashboardChatMessage, boolean>();
 
 export function AssistantConversation({
   messages,
@@ -75,12 +230,45 @@ export function AssistantConversation({
   const displayableMessages = useMemo(() => {
     return messages.filter((message) => {
       if (message.role === 'user') return true;
+      const cached = displayableCache.get(message);
+      if (cached !== undefined) {
+        return cached;
+      }
       const fileParts = getFileParts(message);
       const rawText = getMessageText(message);
       const attachedFiles = parseAttachedFilesFromMessage(fileParts, rawText);
-      return hasContent(message) || attachedFiles.length > 0;
+      const displayable = hasContent(message) || attachedFiles.length > 0;
+      // Never cache the message currently streaming: if the transport ever mutates it
+      // in place, a stale `false` would hide it for the rest of the session.
+      if (message !== lastMessage || !isStreaming) {
+        displayableCache.set(message, displayable);
+      }
+      return displayable;
     });
-  }, [messages]);
+  }, [messages, lastMessage, isStreaming]);
+
+  // Virtualize the transcript so only visible bubbles mount. The scroll element is
+  // owned by StickToBottom (exposed through the pane's contextRef), not by us, so the
+  // getter reads it lazily on every update cycle; bottom pinning during streaming
+  // stays StickToBottom's job, the virtualizer only windows the rows. Row heights are
+  // measured dynamically (measureElement) because bubbles fold, grow and stream.
+  //
+  // StickToBottom wires its scroll node in a mount effect — after our first render —
+  // so force exactly one re-render once effects have flushed. Without it, a transcript
+  // that arrives fully populated never gives the virtualizer a scroll element to
+  // window against and zero rows mount.
+  const [, rerenderAfterMount] = useReducer((epoch: number) => epoch + 1, 0);
+  useEffect(() => {
+    rerenderAfterMount();
+  }, []);
+
+  const rowVirtualizer = useVirtualizer({
+    count: displayableMessages.length,
+    getScrollElement: () => stickToBottomRef.current?.scrollRef?.current ?? null,
+    estimateSize: () => 140,
+    overscan: 6,
+    getItemKey: (index) => displayableMessages[index]?.id ?? index,
+  });
 
   return (
     <div
@@ -102,129 +290,47 @@ export function AssistantConversation({
             <AssistantEmptyState model={model} providerDisplay={providerDisplay} />
           ) : (
             <>
-              {displayableMessages.map((message, idx) => {
-                const label = providerLabel(message);
-                const reasoningParts = getReasoningParts(message);
-                const fileParts = getFileParts(message);
-                const rawText = getMessageText(message);
-                const attachedFiles = parseAttachedFilesFromMessage(fileParts, rawText);
-                const displayText = message.role === 'user' ? getUserPromptOnly(rawText) : rawText;
-                const agentInfo = getAgentInfo(message.metadata?.agentId);
-                const messageDate = getMessageDate(message);
-                const prevMessage = idx > 0 ? displayableMessages[idx - 1] : null;
-                const showDateSeparator = !prevMessage || isDifferentDay(getMessageDate(prevMessage), messageDate);
-                const timeString = formatMessageTime(messageDate);
-
-                return (
-                  <Fragment key={message.id}>
-                    {showDateSeparator ? <ChatDateSeparator date={messageDate} /> : null}
-                    <AiMessage from={message.role}>
-                      <AiMessageContent
+              {displayableMessages.length > 0 ? (
+                <div
+                  className={cn(
+                    // Layout & Positioning
+                    'relative w-full',
+                  )}
+                  style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+                >
+                  {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                    const message = displayableMessages[virtualRow.index];
+                    return (
+                      <div
+                        key={virtualRow.key}
+                        data-index={virtualRow.index}
+                        ref={rowVirtualizer.measureElement}
                         className={cn(
-                          message.role === 'assistant'
-                            ? 'w-full max-w-full group-[.is-assistant]:text-foreground'
-                            : 'group-[.is-user]:bg-transparent group-[.is-user]:p-0',
+                          // Layout & Positioning
+                          'absolute left-0 top-0 w-full flex flex-col gap-5',
+                          // Sizing & Spacing
+                          'pb-5',
                         )}
+                        style={{ transform: `translateY(${virtualRow.start}px)` }}
                       >
-                        {message.role === 'assistant' ? (
-                          <AgentBadgeHeader
-                            agentId={message.metadata?.agentId}
-                            agentName={message.metadata?.agentName}
-                            providerDisplay={label ?? providerDisplay}
-                            isStreaming={isStreaming && message.id === lastMessage?.id}
-                            isPaused={isPaused}
-                            timestamp={timeString}
-                          />
-                        ) : null}
-
-                        {/* Attached files card list */}
-                        {attachedFiles.length > 0 ? (
-                          <div
-                            className={cn(
-                              // Layout & Positioning
-                              'flex flex-col gap-1.5 w-full shrink-0',
-                              // Sizing & Spacing
-                              'mb-2 p-2.5',
-                              // Typography
-                              'text-xs',
-                              // Backgrounds & Borders
-                              'rounded-lg border border-border/80 bg-muted/40',
-                            )}
-                          >
-                            <div
-                              className={cn(
-                                // Layout & Positioning
-                                'flex items-center gap-1.5',
-                                // Typography
-                                'font-medium text-xs text-muted-foreground',
-                              )}
-                            >
-                              <PaperclipIcon className="size-3.5 text-info shrink-0" />
-                              <span>Attached file{attachedFiles.length > 1 ? 's' : ''} sent with prompt</span>
-                            </div>
-                            <Attachments variant="inline" className="flex flex-wrap gap-2">
-                              {attachedFiles.map((file, fIdx) => (
-                                <AttachmentItem
-                                  key={fIdx}
-                                  data={{ id: `att-${fIdx}`, type: 'file', filename: file.filename, mediaType: 'text/plain', url: '' }}
-                                  className="rounded-md border border-border bg-background shadow-2xs text-xs"
-                                >
-                                  <AttachmentPreview />
-                                  <span className="truncate max-w-[160px] text-xs font-medium">{file.filename}</span>
-                                  <Badge variant="outline" className="text-[10px] py-0 px-1 font-mono uppercase shrink-0">
-                                    {file.ext}
-                                  </Badge>
-                                </AttachmentItem>
-                              ))}
-                            </Attachments>
-                          </div>
-                        ) : null}
-
-                        {/* Reasoning / thinking blocks */}
-                        {reasoningParts.map((part, i) => (
-                          <Reasoning
-                            key={i}
-                            defaultOpen={false}
-                            isStreaming={isStreaming && message.role === 'assistant'}
-                          >
-                            <ReasoningTrigger />
-                            <ReasoningContent>{part.text}</ReasoningContent>
-                          </Reasoning>
-                        ))}
-
-                        {/* Foldable text response in chat bubble with side copy icon */}
-                        {displayText ? (
-                          <FoldableChatBubble
-                            role={message.role}
-                            text={displayText}
-                            timestamp={timeString}
-                            borderClass={agentInfo.borderClass}
-                            isStreaming={isStreaming && message.role === 'assistant'}
-                          />
-                        ) : null}
-
-                        {/* Interactive Choice Options (Option A, Option B, Option 3) */}
-                        {message.role === 'assistant' &&
-                        idx === displayableMessages.length - 1 &&
-                        !isStreaming &&
-                        onSelectOption ? (
-                          (() => {
-                            const options = parseMessageOptions(displayText);
-                            if (options.length === 0) return null;
-                            return (
-                              <InteractiveOptionsCard
-                                options={options}
-                                onSelectOption={onSelectOption}
-                                onFocusInput={onFocusInput}
-                              />
-                            );
-                          })()
-                        ) : null}
-                      </AiMessageContent>
-                    </AiMessage>
-                  </Fragment>
-                );
-              })}
+                        <ConversationMessageRow
+                          message={message}
+                          previousMessage={
+                            virtualRow.index > 0 ? displayableMessages[virtualRow.index - 1] : null
+                          }
+                          isLast={virtualRow.index === displayableMessages.length - 1}
+                          isCurrentStreamingMessage={isStreaming && message.id === lastMessage?.id}
+                          isStreaming={isStreaming}
+                          isPaused={isPaused}
+                          providerDisplay={providerDisplay}
+                          onSelectOption={onSelectOption}
+                          onFocusInput={onFocusInput}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
 
               {/* Tool confirmation cards */}
               {pendingToolConfirmations.map((confirmation) => (

@@ -1,25 +1,21 @@
-import * as React from "react";
+import * as React from 'react';
 import {
   Button,
   Card,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from '@celestia-project/ui';
-import { TabbedPageLayout } from "@/layout/tabs-layout/tabbed-page-layout";
+import { TabbedPageLayout } from '@/layout/tabs-layout/tabbed-page-layout';
 
-import { TargetSelectorDialog } from "@/pages/live-traffic/components/target-selector";
-import { useWebSocketHistoryPage } from "./hooks/use-websocket-history-page";
-import { useWebSocketHistoryQueryStore } from "@/stores/history";
-import { clearWebSocketAll } from "./api";
-import { toast } from "sonner";
+import { TargetSelectorDialog } from '@/pages/live-traffic/components/target-selector';
+import { useWebSocketHistoryPage } from './hooks/use-websocket-history-page';
+import { useWebSocketSearch } from './hooks/use-websocket-search';
+import { useWebSocketHistoryQueryStore } from '@/stores/history';
 import {
   TrashIcon,
   PlayIcon,
@@ -29,65 +25,22 @@ import {
   XIcon,
 } from '@phosphor-icons/react';
 
-import { SessionSelector } from "@/pages/live-traffic/http-history/components/session";
-import { openTargetSelector } from "@/triggers";
-import { cn } from "@/lib/utils";
+import { SessionSelector } from '@/pages/live-traffic/http-history/components/session';
+import { openTargetSelector } from '@/triggers';
+import { cn } from '@/lib/utils';
+import { ClearHistoryDialog } from './components/clear-history-dialog';
 
 export function WebSocketHistoryPage() {
   const page = useWebSocketHistoryPage();
+  const search = useWebSocketSearch();
   const isWsPaused = useWebSocketHistoryQueryStore((s) => s.isStreamManuallyPaused);
-  const search = useWebSocketHistoryQueryStore((s) => s.filter.search);
-  const setSearch = useWebSocketHistoryQueryStore((s) => s.setSearch);
-
-  const [localSearch, setLocalSearch] = React.useState(search || '');
   const [clearDialogOpen, setClearDialogOpen] = React.useState(false);
-  const [isClearing, setIsClearing] = React.useState(false);
-  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  React.useEffect(() => {
-    setLocalSearch(search || '');
-  }, [search]);
-
-  const handleSearchChange = (val: string) => {
-    setLocalSearch(val);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setSearch(val);
-    }, 200);
-  };
-
-  const handleClearSearch = () => {
-    setLocalSearch('');
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    setSearch('');
-  };
-
-  React.useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, []);
 
   const togglePause = () => {
     const store = useWebSocketHistoryQueryStore.getState();
     const wasPaused = store.isStreamManuallyPaused;
     store.setStreamManuallyPaused(!wasPaused);
     if (wasPaused) store.triggerRefresh();
-  };
-
-  const handleConfirmClearAll = async () => {
-    setIsClearing(true);
-    try {
-      await clearWebSocketAll();
-      useWebSocketHistoryQueryStore.getState().triggerRefresh();
-      useWebSocketHistoryQueryStore.getState().setSelectedConnectionId(null);
-      toast.success("WebSocket history cleared");
-      setClearDialogOpen(false);
-    } catch (err) {
-      toast.error("Failed to clear WebSocket history");
-    } finally {
-      setIsClearing(false);
-    }
   };
 
   return (
@@ -99,86 +52,86 @@ export function WebSocketHistoryPage() {
         onTabClose={page.removeTab}
         className={cn(
           // Layout & Positioning
-          "flex flex-col min-h-0",
+          'flex flex-col min-h-0',
 
           // Sizing & Spacing
-          "h-full"
+          'h-full'
         )}
         contentClassName={cn(
           // Layout & Positioning
-          "flex flex-col flex-1 min-h-0 overflow-hidden",
+          'flex flex-col flex-1 min-h-0 overflow-hidden',
 
           // Sizing & Spacing
-          "m-2",
+          'm-2',
 
           // Backgrounds & Borders
-          "border rounded-lg bg-background"
+          'border rounded-lg bg-background'
         )}
       >
         <div
           className={cn(
             // Layout & Positioning
-            "flex items-center justify-between shrink-0 select-none overflow-x-auto min-w-0",
+            'flex items-center justify-between shrink-0 select-none overflow-x-auto min-w-0',
 
             // Sizing & Spacing
-            "p-1 px-2 gap-2",
+            'p-1 px-2 gap-2',
 
             // Backgrounds & Borders
-            "border-b bg-muted/20"
+            'border-b bg-muted/20'
           )}
         >
           <div
             className={cn(
               // Layout & Positioning
-              "flex items-center",
+              'flex items-center',
 
               // Sizing & Spacing
-              "gap-2"
+              'gap-2'
             )}
           >
-            {/* Active Session Switcher Capsule */}
             <SessionSelector />
 
-            {/* Modern Search InputGroup */}
             <InputGroup
               className={cn(
                 // Sizing & Spacing
-                "w-48",
+                'w-48',
 
                 // Interactive & States
-                "transition-all duration-150 focus-within:w-64"
+                'transition-all duration-150 focus-within:w-64'
               )}
             >
               <InputGroupAddon align="inline-start">
                 <MagnifyingGlassIcon
                   className={cn(
                     // Sizing & Spacing
-                    "size-3.5",
+                    'size-3.5',
 
                     // Typography
-                    "text-muted-foreground"
+                    'text-muted-foreground'
                   )}
+                  aria-hidden="true"
                 />
               </InputGroupAddon>
               <InputGroupInput
-                type="text"
-                value={localSearch}
-                onChange={(e) => handleSearchChange(e.target.value)}
+                type="search"
+                value={search.localSearch}
+                onChange={(e) => search.handleSearchChange(e.target.value)}
                 placeholder="Search URL, host, path…"
+                aria-label="Search WebSocket connections"
                 className={cn(
                   // Sizing & Spacing
-                  "h-7 text-xs"
+                  'h-7 text-xs'
                 )}
               />
-              {localSearch && (
+              {search.localSearch && (
                 <InputGroupAddon align="inline-end">
                   <InputGroupButton
                     size="icon-xs"
                     variant="ghost"
-                    onClick={handleClearSearch}
+                    onClick={search.handleClearSearch}
                     aria-label="Clear search"
                   >
-                    <XIcon className="size-3" />
+                    <XIcon className="size-3" aria-hidden="true" />
                   </InputGroupButton>
                 </InputGroupAddon>
               )}
@@ -188,80 +141,116 @@ export function WebSocketHistoryPage() {
           <div
             className={cn(
               // Layout & Positioning
-              "flex items-center",
+              'flex items-center',
 
               // Sizing & Spacing
-              "gap-1"
+              'gap-1'
             )}
           >
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                // Layout & Positioning
-                "shrink-0",
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label={isWsPaused ? 'Resume stream' : 'Pause stream'}
+                    aria-pressed={isWsPaused}
+                    className={cn(
+                      // Layout & Positioning
+                      'shrink-0',
 
-                // Sizing & Spacing
-                "h-7 text-xs gap-1.5"
-              )}
-              onClick={togglePause}
-            >
-              {isWsPaused ? (
-                <>
-                  <PlayIcon className="size-3.5 text-amber-500" /> Resume
-                </>
-              ) : (
-                <>
-                  <PauseIcon className="size-3.5 text-muted-foreground" /> Pause
-                </>
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                // Layout & Positioning
-                "shrink-0",
+                      // Sizing & Spacing
+                      'h-7 text-xs gap-1.5',
 
-                // Sizing & Spacing
-                "h-7 text-xs gap-1.5"
-              )}
-              onClick={openTargetSelector}
-            >
-              <TargetIcon className="size-3.5 text-muted-foreground" />
-              Target
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setClearDialogOpen(true)}
-              className={cn(
-                // Layout & Positioning
-                "shrink-0",
+                      // Interactive & States
+                      isWsPaused && 'bg-amber-500/10 hover:bg-amber-500/15'
+                    )}
+                    onClick={togglePause}
+                  >
+                    {isWsPaused ? (
+                      <>
+                        <PlayIcon className="size-3.5 text-amber-600 dark:text-amber-400" /> Resume
+                      </>
+                    ) : (
+                      <>
+                        <PauseIcon className="size-3.5 text-muted-foreground" /> Pause
+                      </>
+                    )}
+                  </Button>
+                }
+              />
+              <TooltipContent side="bottom" sideOffset={6}>
+                {isWsPaused
+                  ? 'Live updates are paused. Click to resume capturing new messages.'
+                  : 'Freeze the view so incoming messages do not shift what you are reading.'}
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label="Configure capture targets"
+                    className={cn(
+                      // Layout & Positioning
+                      'shrink-0',
 
-                // Sizing & Spacing
-                "h-7 text-xs gap-1.5",
+                      // Sizing & Spacing
+                      'h-7 text-xs gap-1.5'
+                    )}
+                    onClick={openTargetSelector}
+                  >
+                    <TargetIcon className="size-3.5 text-muted-foreground" />
+                    Target
+                  </Button>
+                }
+              />
+              <TooltipContent side="bottom" sideOffset={6}>
+                Choose which hosts and scopes are captured.
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label="Clear all WebSocket history"
+                    onClick={() => setClearDialogOpen(true)}
+                    className={cn(
+                      // Layout & Positioning
+                      'shrink-0',
 
-                // Typography
-                "text-destructive hover:text-destructive hover:bg-destructive/10"
-              )}
-            >
-              <TrashIcon className="size-3.5" />
-              Clear All
-            </Button>
+                      // Sizing & Spacing
+                      'h-7 text-xs gap-1.5',
+
+                      // Typography
+                      'text-destructive hover:text-destructive hover:bg-destructive/10'
+                    )}
+                  >
+                    <TrashIcon className="size-3.5" />
+                    Clear All
+                  </Button>
+                }
+              />
+              <TooltipContent side="bottom" sideOffset={6}>
+                Permanently delete every captured connection and message.
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
 
         <Card
           className={cn(
             // Layout & Positioning
-            "flex flex-col flex-1 overflow-hidden",
+            'flex flex-col flex-1 overflow-hidden',
 
             // Sizing & Spacing
-            "!py-0",
+            '!py-0',
 
             // Backgrounds & Borders
-            "rounded-none border-0 shadow-none"
+            'rounded-none border-0 shadow-none'
           )}
         >
           {page.websocketView}
@@ -275,52 +264,7 @@ export function WebSocketHistoryPage() {
         }}
       />
 
-      {/* Modern Confirmation Dialog */}
-      <Dialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader>
-            <DialogTitle className="text-destructive">Clear WebSocket History</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to permanently delete all captured WebSocket connections and messages?
-            </DialogDescription>
-          </DialogHeader>
-          <div
-            className={cn(
-              // Layout & Positioning
-              "flex flex-col",
-
-              // Sizing & Spacing
-              "gap-1.5 p-3 my-1",
-
-              // Typography
-              "text-xs leading-relaxed",
-
-              // Backgrounds & Borders
-              "rounded-md border border-destructive/20 bg-destructive/5 text-muted-foreground"
-            )}
-          >
-            All connection handshakes and recorded frame payloads will be purged.
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setClearDialogOpen(false)}
-              disabled={isClearing}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleConfirmClearAll}
-              disabled={isClearing}
-            >
-              {isClearing ? 'Clearing…' : 'Clear All'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ClearHistoryDialog open={clearDialogOpen} onOpenChange={setClearDialogOpen} />
     </>
   );
 }

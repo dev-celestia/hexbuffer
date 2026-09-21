@@ -24,7 +24,7 @@ export function HttpHistoryPage() {
       page.tabs.map((tab) => {
         let indicator: React.ReactNode = undefined;
         if (tab.type === 'pinned') {
-          indicator = <PushPinSimpleIcon className="size-3 text-amber-500" />;
+          indicator = <PushPinSimpleIcon className="size-3 text-amber-600 dark:text-amber-400" />;
         } else if (tab.type === 'group' && tab.color) {
           indicator = <span className="size-2 rounded-full" style={{ backgroundColor: tab.color }} />;
         }

@@ -262,7 +262,7 @@ export function CreateSessionDialog({
                     "gap-1.5"
                   )}
                 >
-                  <LightningIcon className="size-3.5 text-amber-500" weight="fill" />
+                  <LightningIcon className="size-3.5 text-amber-600 dark:text-amber-400" weight="fill" />
                   <span
                     className={cn(
                       // Typography

@@ -137,7 +137,7 @@ export function SessionItemRow({
                 }}
                 title="Save Ephemeral Session to Disk"
               >
-                <FloppyDiskIcon className="size-4 text-amber-500" />
+                <FloppyDiskIcon className="size-4 text-amber-600 dark:text-amber-400" />
               </Button>
             )}
             <Button
@@ -191,7 +191,7 @@ export function SessionItemRow({
         )}
       >
         {isEphemeral ? (
-          <Badge variant="outline" className="h-4 px-1 text-[9px] text-amber-500 border-amber-500/30">
+          <Badge variant="outline" className="h-4 px-1 text-[9px] text-amber-600 dark:text-amber-400 border-amber-500/30">
             <LightningIcon className="size-2.5 mr-0.5" weight="fill" />
             Ephemeral (RAM)
           </Badge>
@@ -216,7 +216,7 @@ export function SessionItemRow({
             <TooltipTrigger
               render={
                 <Badge variant="secondary" className="h-4 px-1 text-[9px]">
-                  <WarningCircleIcon className="size-2.5 mr-0.5 text-amber-500" weight="fill" />
+                  <WarningCircleIcon className="size-2.5 mr-0.5 text-amber-600 dark:text-amber-400" weight="fill" />
                   All Traffic
                 </Badge>
               }
