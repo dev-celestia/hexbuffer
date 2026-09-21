@@ -7,6 +7,7 @@ import {
   listJobs,
   cancelJob,
 } from '@/pages/desktop/assistant/lib/jobs/job-registry';
+import { assertHostInScope } from '@/triggers/scope';
 
 export const INVOKER_AI_TOOL_DEFINITION = {
   name: 'start_invoker_attack',
@@ -58,6 +59,13 @@ export async function executeStartInvokerAttackAiTool(): Promise<string> {
   }
   if (tab.isRunning) {
     return `An Intruder attack is already running on tab ${tab.name}. Stop it (cancel_job or stop_invoker_attack) before launching another.`;
+  }
+
+  // Never fuzz an out-of-scope host, even if the active tab was populated off the
+  // model's critical path.
+  const baseUrl = tab.config?.base_request?.url;
+  if (baseUrl && /^https?:\/\//i.test(baseUrl)) {
+    assertHostInScope(baseUrl, 'launch an Intruder attack against');
   }
 
   // A stale startError from a previous failed launch would otherwise settle the

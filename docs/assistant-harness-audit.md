@@ -194,40 +194,72 @@ The assistant is split across three layers:
 
 ---
 
-## 3. Priority Recommendation
+## 3. Resolution Status
 
-1. **Fix silent-failure executors** (F1, F2) — correctness of agent reporting.
-2. **Enforce scope on tool args** + exact-match `deleteTarget` (F3) — safety.
+Tracked as fixes are applied. Last updated 2026-09-21.
+
+| ID | Status | Notes |
+|----|--------|-------|
+| F1 | ✅ Resolved | `await`ed store calls in AI tool executors so failures propagate — committed `53dd27c` |
+| F2 | ✅ Resolved | `engagement.rs`: `initialize_engagement` / `update_plan_item` with evidence-ref validation + persisted ledger |
+| F3 | ✅ Resolved | `src/triggers/scope.ts` `assertHostInScope` (fail-closed) enforced in `send_to_repeater`, `trigger_scan`, `start_invoker_attack`; `deleteTarget` exact-match. Tests: `scope.test.ts`, `targets.test.ts` |
+| F4 | 🔄 In progress | Building `query_http_history` frontend tool over `get_proxy_recent` |
+| F5 | 🟡 Partial | Large tool outputs spooled to `ai_tool_outputs` + `read_tool_output`; per-message tool-call metadata still absent |
+| F6 | 🔄 In progress | Building `get_http_request_detail` over `get_proxy_detail` |
+| F7 | ⬜ Open | Nuclei engine not yet exposed as an AI tool |
+| F8 | ✅ Resolved | Engagement plan + autonomous chaining + per-agent `max_tool_rounds` |
+| F9 | 🟡 Partial | Spool + engagement ledger persist tool state; `ai_chat_messages` still has no tool-call column |
+| F10 | ⬜ Open | Repeater header schema mismatch |
+| F11 | ✅ Resolved | `management.ts:116-117` guards with `|| ''` |
+| F12 | ⬜ Open | `createEndpoint` still ignores DB failure |
+| F13 | ⬜ Open | `send_repeater_request` still no target param |
+| F14 | ✅ Resolved | Job registry `MAX_SETTLED_JOBS=50` + `list_jobs`/`get_job_status`/`cancel_job` tools |
+| F15 | ⬜ Open | No `ai:abort-tool` on timeout |
+| F16 | ⬜ Open | `resolve_ai_tool_result` failure still swallowed |
+| F17 | ⬜ Open | `Math.random()` IDs |
+| F18 | ⬜ Open | Side effect in `useMemo` |
+| F19 | ⬜ Open | Raw request data in URL query strings |
+| F20 | ⬜ Open | Hardcoded proxy ports |
+| F21 | ⬜ Open | Policy not configurable |
+| F22 | ⬜ Open | Dead no-op exports |
+| F23 | 🟡 Partial | Added `executor.test.ts`, `assistant-conversation.test.tsx`, `intercept/ai-tool.test.ts`, `scope.test.ts`, `targets.test.ts` |
+
+---
+
+## 4. Priority Recommendation
+
+1. **Fix silent-failure executors** (F1, F2) — correctness of agent reporting. ✅
+2. **Enforce scope on tool args** + exact-match `deleteTarget` (F3) — safety. ✅
 3. **Add `query_http_history` + `save_finding` tools** (F4, F5) — the core pentest loop (read what happened, record what was found).
 4. **Persist tool calls in messages** (F9) and add a Nuclei tool (F7).
 5. **Add test coverage** (F23) for confirmation/executor/option-parser/trigger normalization.
 
 ---
 
-## 4. Summary Matrix
+## 5. Summary Matrix
 
-| ID | Gap | Severity | Category |
-|----|-----|----------|----------|
-| F1 | Silent-failure executors report false success | Critical | Correctness |
-| F2 | `sendToIntruder` silent return | Critical | Correctness |
-| F3 | No scope enforcement; fuzzy `deleteTarget` | Critical | Security |
-| F4 | No HTTP history query tool | High | Capability |
-| F5 | No structured finding tracker | High | Capability |
-| F6 | No response body/header inspection | High | Capability |
-| F7 | No Nuclei/scanner AI tool | High | Capability |
-| F8 | No plan/checklist tracking | High | Workflow |
-| F9 | Tool metadata not persisted | Medium | Persistence |
-| F10 | Repeater header schema mismatch | Medium | Data integrity |
-| F11 | Query params parse to `"undefined"` | Medium | Data integrity |
-| F12 | `createEndpoint` ignores DB failure | Medium | Data integrity |
-| F13 | `send_repeater_request` no target param | Medium | API design |
-| F14 | Unbounded pending tool map | Medium | Resource |
-| F15 | Frontend timeout doesn't abort ops | Medium | Reliability |
-| F16 | `resolve_ai_tool_result` failures swallowed | Medium | Error handling |
-| F17 | `Math.random()` IDs | Low | ID generation |
-| F18 | Side effect in `useMemo` | Low | React correctness |
-| F19 | Raw request data in URL query strings | Medium | Security |
-| F20 | Hardcoded proxy ports | Low | Config |
-| F21 | Policy not configurable | Low | Configurability |
-| F22 | Dead no-op exports | Low | Code quality |
-| F23 | Zero assistant/trigger tests | Medium | Testing |
+| ID | Gap | Severity | Category | Status |
+|----|-----|----------|----------|--------|
+| F1 | Silent-failure executors report false success | Critical | Correctness | ✅ |
+| F2 | `sendToIntruder` silent return | Critical | Correctness | ✅ |
+| F3 | No scope enforcement; fuzzy `deleteTarget` | Critical | Security | ✅ |
+| F4 | No HTTP history query tool | High | Capability | 🔄 |
+| F5 | No structured finding tracker | High | Capability | 🟡 |
+| F6 | No response body/header inspection | High | Capability | 🔄 |
+| F7 | No Nuclei/scanner AI tool | High | Capability | ⬜ |
+| F8 | No plan/checklist tracking | High | Workflow | ✅ |
+| F9 | Tool metadata not persisted | Medium | Persistence | 🟡 |
+| F10 | Repeater header schema mismatch | Medium | Data integrity | ⬜ |
+| F11 | Query params parse to `"undefined"` | Medium | Data integrity | ✅ |
+| F12 | `createEndpoint` ignores DB failure | Medium | Data integrity | ⬜ |
+| F13 | `send_repeater_request` no target param | Medium | API design | ⬜ |
+| F14 | Unbounded pending tool map | Medium | Resource | ✅ |
+| F15 | Frontend timeout doesn't abort ops | Medium | Reliability | ⬜ |
+| F16 | `resolve_ai_tool_result` failures swallowed | Medium | Error handling | ⬜ |
+| F17 | `Math.random()` IDs | Low | ID generation | ⬜ |
+| F18 | Side effect in `useMemo` | Low | React correctness | ⬜ |
+| F19 | Raw request data in URL query strings | Medium | Security | ⬜ |
+| F20 | Hardcoded proxy ports | Low | Config | ⬜ |
+| F21 | Policy not configurable | Low | Configurability | ⬜ |
+| F22 | Dead no-op exports | Low | Code quality | ⬜ |
+| F23 | Zero assistant/trigger tests | Medium | Testing | 🟡 |

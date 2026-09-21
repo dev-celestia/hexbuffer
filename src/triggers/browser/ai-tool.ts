@@ -2,6 +2,7 @@ import { triggerScan } from './crawl';
 import type { TriggerScanOptions } from './crawl';
 import { toggleBrowserCrawl, stopBrowserCrawl } from './ui';
 import { useBrowserAutomationStore } from '@/stores/browser-automation';
+import { assertHostInScope } from '@/triggers/scope';
 import {
   registerJob,
   nextJobId,
@@ -58,6 +59,8 @@ export async function executeTriggerScanAiTool(args: Record<string, any>) {
       `Invalid scan target: "${url || '(empty)'}" is not an absolute http(s) URL. Provide the full target origin, e.g. "https://example.com".`,
     );
   }
+
+  assertHostInScope(url, 'launch a browser scan against');
 
   const tabId = useBrowserAutomationStore.getState().activeTabId;
   const jobId = nextJobId('browser-crawl');

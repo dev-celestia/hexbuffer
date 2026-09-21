@@ -5,6 +5,7 @@ import { useCollectionsStore } from '@/stores/collections';
 import { createCollection, createFolder, createEndpoint, selectEndpoint } from './management';
 import { sendRawToRepeater } from './send-to';
 import { sendRequest } from './ui';
+import { assertHostInScope } from '@/triggers/scope';
 
 const HTTP_METHOD_PATTERN = /^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS|TRACE|CONNECT)$/;
 
@@ -194,6 +195,9 @@ export async function executeSendToRepeaterAiTool(args: Record<string, any>) {
 
   // A complete raw HTTP request is forwarded untouched.
   if (raw && looksLikeRawHttpRequest(raw)) {
+    if (/^https?:\/\//i.test(url)) {
+      assertHostInScope(url, 'send a request to');
+    }
     await sendRawToRepeater({ raw, url: url || undefined, name });
     return `Request sent to the Repeater tab${url ? ` (target: ${url})` : ''} for manual inspection.`;
   }
@@ -220,6 +224,12 @@ export async function executeSendToRepeaterAiTool(args: Record<string, any>) {
     throw new Error(
       `Unsupported URL scheme "${schemeMatch[1]}:" — only http(s) targets can be sent to Repeater.`,
     );
+  }
+
+  // Never target an out-of-scope host. Relative paths (no resolved origin) are
+  // allowed through — the concrete host is chosen later in Repeater by the user.
+  if (/^https?:\/\//i.test(url)) {
+    assertHostInScope(url, 'send a request to');
   }
 
   await sendRawToRepeater({
