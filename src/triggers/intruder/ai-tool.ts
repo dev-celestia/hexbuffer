@@ -111,7 +111,7 @@ export async function executeStartInvokerAttackAiTool(): Promise<string> {
     },
   });
 
-  startIntruderAttack();
+  await startIntruderAttack();
   return `Intruder attack launched as job ${jobId}. Poll get_job_status with jobId "${jobId}" for progress, or cancel_job to stop it.`;
 }
 
@@ -123,7 +123,12 @@ export async function executeStopInvokerAttackAiTool(): Promise<string> {
       ? `Stopped the running Intruder attack (job ${active.id}).`
       : `Failed to stop Intruder attack job ${active.id}: ${result.message}`;
   }
-  stopIntruderAttack();
+  const state = useIntruderStore.getState();
+  const tab = state.tabs.find((t) => t.id === state.activeTabId);
+  if (!tab?.attackId) {
+    return 'No running Intruder attack to stop.';
+  }
+  await stopIntruderAttack();
   return 'Stopped active Intruder attack.';
 }
 

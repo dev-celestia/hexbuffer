@@ -114,7 +114,7 @@ export async function executeTriggerScanAiTool(args: Record<string, any>) {
 }
 
 export async function executeToggleBrowserCrawlAiTool(): Promise<string> {
-  toggleBrowserCrawl();
+  await toggleBrowserCrawl();
   return 'Toggled browser crawl session state (pause/resume). Poll get_job_status for the crawl job to confirm.';
 }
 
@@ -126,6 +126,11 @@ export async function executeStopBrowserCrawlAiTool(): Promise<string> {
       ? `Stopped the running browser crawl (job ${active.id}).`
       : `Failed to stop browser crawl job ${active.id}: ${result.message}`;
   }
-  stopBrowserCrawl();
+  const state = useBrowserAutomationStore.getState();
+  const tab = state.tabs.find((t) => t.id === state.activeTabId);
+  if (!tab?.session) {
+    return 'No active browser crawl session to stop.';
+  }
+  await stopBrowserCrawl();
   return 'Stopped active browser crawl session.';
 }
