@@ -144,9 +144,6 @@ function Before() {
               variant="outline"
               size="sm"
               className={cn(
-                // Sizing & Spacing
-                'h-6',
-
                 // Typography / Visuals & Colors
                 'border-amber-300 text-amber-800 hover:bg-amber-100 dark:border-amber-500/50 dark:text-amber-300 dark:hover:bg-amber-500/20'
               )}
@@ -264,7 +261,7 @@ function IntruderBefore() {
           'flex items-center justify-between min-h-10',
 
           // Sizing & Spacing
-          'px-3 py-1.5 gap-3',
+          'px-3 gap-3',
 
           // Backgrounds & Borders
           'border-amber-500/30 bg-amber-500/5 text-amber-900 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-200 rounded-md'
@@ -306,7 +303,7 @@ function Label({ children }: { readonly children: React.ReactNode }) {
         'px-3 pt-4 pb-1',
 
         // Typography
-        'text-[10px] font-semibold uppercase tracking-wider text-muted-foreground'
+        'text-3xs font-semibold uppercase tracking-wider text-muted-foreground'
       )}
     >
       {children}

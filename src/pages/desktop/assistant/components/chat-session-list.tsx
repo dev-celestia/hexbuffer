@@ -99,7 +99,7 @@ export function ChatSessionList({
         <span
           className={cn(
             // Typography
-            'text-[11px] font-semibold text-muted-foreground uppercase tracking-widest',
+            'text-2xs font-semibold text-muted-foreground uppercase tracking-widest',
           )}
         >
           Chats
@@ -116,8 +116,6 @@ export function ChatSessionList({
             'size-7',
             // Backgrounds & Borders
             'rounded-md',
-            // Interactive & States
-            'hover:bg-accent hover:text-accent-foreground',
             'transition-colors duration-150',
           )}
         >
@@ -230,7 +228,7 @@ export function ChatSessionList({
                       size="icon"
                       className={cn(
                         // Sizing & Spacing
-                        'size-6 shrink-0',
+                        'size-6',
                         // Typography
                         'text-success',
                         // Backgrounds & Borders
@@ -249,7 +247,7 @@ export function ChatSessionList({
                       size="icon"
                       className={cn(
                         // Sizing & Spacing
-                        'size-6 shrink-0',
+                        'size-6',
                         // Typography
                         'text-muted-foreground',
                         // Backgrounds & Borders
@@ -341,7 +339,7 @@ export function ChatSessionList({
                           disabled={disabled}
                           className={cn(
                             // Sizing & Spacing
-                            'size-6 shrink-0',
+                            'size-6',
                             // Typography
                             'text-destructive',
                             // Backgrounds & Borders
@@ -365,7 +363,7 @@ export function ChatSessionList({
                           size="icon"
                           className={cn(
                             // Sizing & Spacing
-                            'size-6 shrink-0',
+                            'size-6',
                             // Typography
                             'text-muted-foreground',
                             // Backgrounds & Borders
@@ -390,7 +388,7 @@ export function ChatSessionList({
                         <span
                           className={cn(
                             // Typography
-                            'text-[10px] text-muted-foreground/60 tabular-nums',
+                            'text-3xs text-muted-foreground/60 tabular-nums',
                             // Interactive & States
                             'group-hover:hidden',
                             isActive && 'hidden',
@@ -415,13 +413,13 @@ export function ChatSessionList({
                               disabled={disabled}
                               className={cn(
                                 // Sizing & Spacing
-                                'size-6 shrink-0',
+                                'size-6',
                                 // Typography
                                 'text-muted-foreground',
                                 // Backgrounds & Borders
                                 'rounded-md',
                                 // Interactive & States
-                                'hover:bg-accent hover:text-foreground',
+                                'hover:text-foreground',
                                 'transition-colors duration-150',
                               )}
                               onClick={(e) => {
@@ -440,7 +438,7 @@ export function ChatSessionList({
                             disabled={disabled}
                             className={cn(
                               // Sizing & Spacing
-                              'size-6 shrink-0',
+                              'size-6',
                               // Typography
                               'text-muted-foreground',
                               // Backgrounds & Borders

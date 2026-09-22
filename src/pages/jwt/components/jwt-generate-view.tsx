@@ -76,11 +76,11 @@ export function JwtGenerateView({
     }
     return (
       <>
-        <span className="text-red-500">{parts[0]}</span>
+        <span className="text-red-600 dark:text-red-400">{parts[0]}</span>
         <span className="text-muted-foreground">.</span>
-        <span className="text-purple-500">{parts[1]}</span>
+        <span className="text-purple-600 dark:text-purple-400">{parts[1]}</span>
         <span className="text-muted-foreground">.</span>
-        <span className="text-cyan-400">{parts[2] ?? ''}</span>
+        <span className="text-cyan-600 dark:text-cyan-400">{parts[2] ?? ''}</span>
       </>
     );
   }, [generatedToken]);
@@ -134,7 +134,7 @@ export function JwtGenerateView({
                 <span
                   className={cn(
                     // Typography
-                    "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                    "text-2xs font-semibold uppercase tracking-wider text-muted-foreground"
                   )}
                 >
                   Configuration
@@ -145,7 +145,7 @@ export function JwtGenerateView({
                     "hidden sm:inline",
 
                     // Typography
-                    "text-[10px] text-muted-foreground"
+                    "text-3xs text-muted-foreground"
                   )}
                 >
                   Set keys & payload
@@ -206,9 +206,6 @@ export function JwtGenerateView({
                     onChange={(v) => setGenHeader(v ?? '')}
                     height={160}
                     className={cn(
-                      // Layout & Positioning
-                      "overflow-hidden",
-
                       // Backgrounds & Borders
                       "rounded-md border border-input"
                     )}
@@ -236,9 +233,6 @@ export function JwtGenerateView({
                     onChange={(v) => setGenPayload(v ?? '')}
                     height={180}
                     className={cn(
-                      // Layout & Positioning
-                      "overflow-hidden",
-
                       // Backgrounds & Borders
                       "rounded-md border border-input"
                     )}
@@ -294,10 +288,10 @@ export function JwtGenerateView({
                               size="xs"
                               className={cn(
                                 // Sizing & Spacing
-                                "h-5 px-1.5 gap-1",
+                                "px-1.5",
 
                                 // Typography
-                                "text-[11px] text-muted-foreground",
+                                "text-2xs text-muted-foreground",
 
                                 // Interactive & States
                                 "hover:text-foreground"
@@ -316,10 +310,10 @@ export function JwtGenerateView({
                               size="xs"
                               className={cn(
                                 // Sizing & Spacing
-                                "h-5 px-1.5 gap-1",
+                                "px-1.5",
 
                                 // Typography
-                                "text-[11px] text-muted-foreground",
+                                "text-2xs text-muted-foreground",
 
                                 // Interactive & States
                                 "hover:text-foreground"
@@ -340,10 +334,10 @@ export function JwtGenerateView({
                       )}
                     </div>
                     {isAsymmetric ? (
-                      <Textarea
+                      <Textarea mono
                         className={cn(
                           // Sizing & Spacing
-                          "h-24 font-mono text-xs p-2 resize-none",
+                          "h-24 text-xs p-2 resize-none",
 
                           // Backgrounds & Borders
                           "bg-muted/5",
@@ -362,10 +356,10 @@ export function JwtGenerateView({
                           "relative"
                         )}
                       >
-                        <Input
+                        <Input mono
                           className={cn(
                             // Sizing & Spacing
-                            "h-8 font-mono text-xs pr-8",
+                            "h-8 text-xs pr-8",
 
                             // Backgrounds & Borders
                             "bg-muted/5",
@@ -452,10 +446,10 @@ export function JwtGenerateView({
                             <SelectLabel
                               className={cn(
                                 // Sizing & Spacing
-                                "px-2 py-1",
+                                "py-1",
 
                                 // Typography
-                                "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+                                "text-3xs font-semibold uppercase tracking-wider"
                               )}
                             >
                               {category}
@@ -504,13 +498,13 @@ export function JwtGenerateView({
               )}
             >
               <Button
-                size="sm"
+                size="md"
                 className={cn(
                   // Sizing & Spacing
-                  "h-7 px-3 gap-1.5",
+                  "px-3 gap-1.5",
 
                   // Typography
-                  "text-xs font-medium"
+                  "text-xs"
                 )}
                 onClick={onGenerate}
                 disabled={generating || (!isNone && !genSecret.trim())}
@@ -562,7 +556,7 @@ export function JwtGenerateView({
                 <span
                   className={cn(
                     // Typography
-                    "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                    "text-2xs font-semibold uppercase tracking-wider text-muted-foreground"
                   )}
                 >
                   Generated Token
@@ -573,7 +567,7 @@ export function JwtGenerateView({
                     "hidden sm:inline",
 
                     // Typography
-                    "text-[10px] text-muted-foreground"
+                    "text-3xs text-muted-foreground"
                   )}
                 >
                   Signed output

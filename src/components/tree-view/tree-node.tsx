@@ -117,7 +117,7 @@ export function TreeNode<TMeta = unknown>({
             {node.badge}
           </div>
           {node.description && (
-            <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
+            <div className="mt-0.5 truncate text-2xs text-muted-foreground">
               {node.description}
             </div>
           )}

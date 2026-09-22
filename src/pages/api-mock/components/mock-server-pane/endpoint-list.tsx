@@ -88,7 +88,7 @@ export function EndpointList({
                 "h-3.5 w-3.5",
 
                 // Typography
-                "text-emerald-400"
+                "text-emerald-600 dark:text-emerald-400"
               )}
             />
             Endpoints ({filteredRoutes.length})
@@ -122,7 +122,7 @@ export function EndpointList({
             onChange={(e) => onSearchChange(e.target.value)}
             className={cn(
               // Sizing & Spacing
-              "pl-8 h-7",
+              "pl-8",
 
               // Typography
               "text-xs",
@@ -168,7 +168,7 @@ export function EndpointList({
                     "mt-2",
 
                     // Typography
-                    "text-xs font-medium text-muted-foreground"
+                    "text-xs text-muted-foreground"
                   )}
                 >
                   {searchQuery ? "No endpoints match search" : "No endpoints yet"}
@@ -256,26 +256,23 @@ export function EndpointList({
                         "mt-0.5",
 
                         // Typography
-                        "text-[10px] text-muted-foreground font-mono truncate"
+                        "text-3xs text-muted-foreground font-mono truncate"
                       )}
                     >
                       {baseUrl}{route.path}
                     </span>
                   </div>
 
-                  <Badge
+                  <Badge mono
                     variant="outline"
                     className={cn(
-                      // Layout & Positioning
-                      "shrink-0",
-
                       // Sizing & Spacing
-                      "text-[10px] font-mono px-1 py-0 h-4",
+                      "px-1 py-0 h-4",
 
                       // Backgrounds & Borders
                       route.statusCode < 300
-                        ? "text-green-400 border-green-500/30"
-                        : "text-yellow-400 border-yellow-500/30"
+                        ? "text-success border-success/30"
+                        : "text-warning border-warning/30"
                     )}
                   >
                     {route.statusCode}

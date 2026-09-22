@@ -34,9 +34,9 @@ export function Field({
 }>) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-[11px]">{label}</Label>
+      <Label className="text-2xs">{label}</Label>
       <Input
-        className="h-7 text-xs"
+        className="text-xs"
         type={type}
         value={value ?? ''}
         onChange={(event) => onChange(event.target.value)}
@@ -59,7 +59,7 @@ export function TextField({
 }>) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-[11px]">{label}</Label>
+      <Label className="text-2xs">{label}</Label>
       <Textarea
         className="min-h-20 resize-none text-xs"
         value={value ?? ''}
@@ -85,7 +85,7 @@ export function SelectField({
 }>) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-[11px]">{label}</Label>
+      <Label className="text-2xs">{label}</Label>
       <Select value={value || fallback} onValueChange={onChange}>
         <SelectTrigger className="h-7 text-xs">
           <SelectValue />

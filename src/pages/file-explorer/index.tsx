@@ -110,15 +110,15 @@ export function FileExplorerPage() {
               )}
             >
               <Button
-                size="sm"
+                size="md"
                 variant="default"
                 onClick={() => page.navigate('/settings?tab=r2')}
                 className={cn(
                   // Layout & Positioning
-                  "flex items-center",
+                  "flex",
 
                   // Sizing & Spacing
-                  "h-7 px-3 gap-1.5",
+                  "px-3 gap-1.5",
 
                   // Typography
                   "text-xs font-semibold"
@@ -259,11 +259,11 @@ export function FileExplorerPage() {
                         const cached = explorer.cacheStatus[item.id]?.isCached;
                         if (item.type === 'folder') return '—';
                         return cached ? (
-                          <span className="inline-flex items-center text-[10px] text-emerald-600 dark:text-emerald-400 font-sans gap-1 px-1.5 py-0.5 rounded border border-emerald-500/20 bg-emerald-500/10 font-semibold">
+                          <span className="inline-flex items-center text-3xs text-emerald-600 dark:text-emerald-400 font-sans gap-1 px-1.5 py-0.5 rounded border border-emerald-500/20 bg-emerald-500/10 font-semibold">
                             <CheckCircleIcon className="size-3" /> Local
                           </span>
                         ) : (
-                          <span className="inline-flex items-center text-[10px] text-muted-foreground font-sans gap-1 px-1.5 py-0.5 rounded border border-muted-foreground/10 bg-muted font-semibold">
+                          <span className="inline-flex items-center text-3xs text-muted-foreground font-sans gap-1 px-1.5 py-0.5 rounded border border-muted-foreground/10 bg-muted font-semibold">
                             <CloudArrowDownIcon className="size-3" /> R2
                           </span>
                         );
@@ -471,7 +471,7 @@ export function FileExplorerPage() {
               <span className="truncate pe-3 text-foreground">
                 {explorer.uploadProgress.fileName}
               </span>
-              <span className="shrink-0 text-primary font-mono text-[11px]">
+              <span className="shrink-0 text-primary font-mono text-2xs">
                 {explorer.uploadProgress.progress}%
               </span>
             </div>
@@ -512,7 +512,7 @@ export function FileExplorerPage() {
                 "gap-1.5",
 
                 // Typography
-                "text-[10px] text-muted-foreground"
+                "text-3xs text-muted-foreground"
               )}
             >
               <ShieldWarningIcon className="size-3.5 text-primary shrink-0" />

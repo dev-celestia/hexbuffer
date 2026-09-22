@@ -73,7 +73,7 @@ export function MatcherNode({
             // Layout & Positioning
             "px-1.5 py-0.5 rounded border uppercase shrink-0",
             // Typography
-            "text-[9px] font-mono font-bold",
+            "text-4xs font-mono font-bold",
             // Backgrounds & Borders
             "bg-emerald-500/15 text-emerald-500 border-emerald-500/30"
           )}
@@ -96,7 +96,7 @@ export function MatcherNode({
             // Sizing & Spacing
             "p-1.5 rounded",
             // Typography
-            "font-mono text-[10px] text-emerald-400 truncate select-all",
+            "font-mono text-3xs text-emerald-400 truncate select-all",
             // Backgrounds & Borders
             "bg-emerald-500/10 border border-emerald-500/20"
           )}
@@ -110,7 +110,7 @@ export function MatcherNode({
             // Layout & Positioning
             "flex items-center justify-between pt-1",
             // Typography
-            "text-[10px] text-muted-foreground font-mono"
+            "text-3xs text-muted-foreground font-mono"
           )}
         >
           <span>

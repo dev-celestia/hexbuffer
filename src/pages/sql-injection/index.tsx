@@ -103,7 +103,7 @@ export function SqlInjectionPage() {
                 "px-4 py-1",
 
                 // Typography
-                "text-[10px] font-mono text-muted-foreground"
+                "text-3xs font-mono text-muted-foreground"
               )}
             >
               <span>{page.progress.message}</span>
@@ -160,7 +160,7 @@ export function SqlInjectionPage() {
                 defaultValue="vulnerabilities"
                 className={cn(
                   // Layout & Positioning
-                  "flex flex-col min-h-0",
+                  "flex-col min-h-0",
 
                   // Sizing & Spacing
                   "h-full",
@@ -197,7 +197,7 @@ export function SqlInjectionPage() {
                         "h-6 px-3",
 
                         // Typography
-                        "text-[11px] font-medium",
+                        "text-2xs",
 
                         // Interactive & States
                         "transition-all"
@@ -212,10 +212,10 @@ export function SqlInjectionPage() {
                             "ml-1.5 px-1 py-0 h-4",
 
                             // Typography
-                            "text-[9px] font-bold",
+                            "text-4xs font-bold",
 
                             // Visuals & Colors
-                            "border-amber-500/20 text-amber-600 bg-amber-500/5"
+                            "border-warning/20 text-warning-foreground bg-warning/5"
                           )}
                         >
                           {page.vulnerabilities.length}
@@ -229,7 +229,7 @@ export function SqlInjectionPage() {
                         "h-6 px-3",
 
                         // Typography
-                        "text-[11px] font-medium",
+                        "text-2xs",
 
                         // Interactive & States
                         "transition-all"
@@ -244,7 +244,7 @@ export function SqlInjectionPage() {
                             "ml-1.5 px-1 py-0 h-4",
 
                             // Typography
-                            "text-[9px] font-bold"
+                            "text-4xs font-bold"
                           )}
                         >
                           {page.databases.length}
@@ -258,7 +258,7 @@ export function SqlInjectionPage() {
                   value="vulnerabilities"
                   className={cn(
                     // Layout & Positioning
-                    "flex flex-col flex-1 min-h-0 overflow-hidden",
+                    "flex flex-col min-h-0 overflow-hidden",
 
                     // Sizing & Spacing
                     "m-0"
@@ -277,7 +277,7 @@ export function SqlInjectionPage() {
                   value="extraction"
                   className={cn(
                     // Layout & Positioning
-                    "flex flex-col flex-1 min-h-0 overflow-hidden",
+                    "flex flex-col min-h-0 overflow-hidden",
 
                     // Sizing & Spacing
                     "m-0"

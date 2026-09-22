@@ -43,7 +43,7 @@ export function ListenerMetrics({ stats, isEnabled }: Readonly<ListenerMetricsPr
         <PulseIcon className="h-3.5 w-3.5" />
         <span className="font-semibold text-foreground">{stats.interactionsToday}</span>
         <span>interactions today</span>
-        <span className="text-[10px] text-muted-foreground/80">
+        <span className="text-3xs text-muted-foreground/80">
           (DNS: {stats.dnsEvents} · HTTP: {stats.httpEvents} · HTTPS: {stats.httpsEvents})
         </span>
       </div>

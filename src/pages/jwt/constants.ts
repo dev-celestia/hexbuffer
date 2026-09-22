@@ -12,10 +12,10 @@ export const SEVERITY_CONFIG: Record<
   JwtVulnerabilitySeverity,
   { color: string; icon: React.ElementType }
 > = {
-  critical: { color: 'text-red-500 border-red-500/20 bg-red-500/5', icon: ShieldWarningIcon },
-  high: { color: 'text-orange-500 border-orange-500/20 bg-orange-500/5', icon: ShieldIcon },
-  medium: { color: 'text-yellow-500 border-yellow-500/20 bg-yellow-500/5', icon: WarningCircleIcon },
-  low: { color: 'text-blue-500 border-blue-500/20 bg-blue-500/5', icon: Info },
+  critical: { color: 'text-red-600 dark:text-red-400 border-red-500/20 bg-red-500/5', icon: ShieldWarningIcon },
+  high: { color: 'text-orange-600 dark:text-orange-400 border-orange-500/20 bg-orange-500/5', icon: ShieldIcon },
+  medium: { color: 'text-yellow-600 dark:text-yellow-400 border-yellow-500/20 bg-yellow-500/5', icon: WarningCircleIcon },
+  low: { color: 'text-blue-600 dark:text-blue-400 border-blue-500/20 bg-blue-500/5', icon: Info },
   info: { color: 'text-muted-foreground border-border bg-muted/50', icon: Info },
 };
 

@@ -119,7 +119,7 @@ export function ContextsEditor({
           <div
             className={cn(
               // Typography
-              'text-center text-[10px] font-semibold tracking-wider text-muted-foreground uppercase'
+              'text-center text-3xs font-semibold tracking-wider text-muted-foreground uppercase'
             )}
           >
             On
@@ -127,7 +127,7 @@ export function ContextsEditor({
           <div
             className={cn(
               // Typography
-              'text-[10px] font-semibold tracking-wider text-muted-foreground uppercase'
+              'text-3xs font-semibold tracking-wider text-muted-foreground uppercase'
             )}
           >
             Key
@@ -135,7 +135,7 @@ export function ContextsEditor({
           <div
             className={cn(
               // Typography
-              'text-[10px] font-semibold tracking-wider text-muted-foreground uppercase'
+              'text-3xs font-semibold tracking-wider text-muted-foreground uppercase'
             )}
           >
             Value
@@ -175,7 +175,7 @@ export function ContextsEditor({
                 'rounded-md py-1',
 
                 // Typography
-                'text-[11px] text-muted-foreground',
+                'text-2xs text-muted-foreground',
 
                 // Interactive & States
                 'transition-colors',
@@ -206,7 +206,7 @@ export function ContextsEditor({
           'h-8 px-4',
 
           // Typography
-          'text-[10px] text-muted-foreground',
+          'text-3xs text-muted-foreground',
 
           // Backgrounds & Borders
           'border-t bg-muted/20'

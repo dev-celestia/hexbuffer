@@ -93,9 +93,6 @@ export function NotesEditorToolbar({
               }}
               autoFocus
               className={cn(
-                // Sizing & Spacing
-                "h-7 px-2",
-
                 // Typography
                 "text-xs font-medium"
               )}
@@ -106,10 +103,7 @@ export function NotesEditorToolbar({
               variant="default"
               className={cn(
                 // Sizing & Spacing
-                "size-7 p-0",
-
-                // Interactive & States
-                "cursor-pointer"
+                "size-7 p-0"
               )}
               title="Save"
             >
@@ -122,10 +116,7 @@ export function NotesEditorToolbar({
               onClick={onRenameCancel}
               className={cn(
                 // Sizing & Spacing
-                "size-7 p-0",
-
-                // Interactive & States
-                "cursor-pointer"
+                "size-7 p-0"
               )}
               title="Cancel"
             >
@@ -170,7 +161,7 @@ export function NotesEditorToolbar({
                 "hover:bg-muted",
 
                 // Interactive & States
-                "opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity cursor-pointer"
+                "opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
               )}
               title="Rename note"
             >
@@ -210,10 +201,7 @@ export function NotesEditorToolbar({
               "size-7 p-0",
 
               // Typography
-              "text-xs text-muted-foreground hover:text-foreground",
-
-              // Interactive & States
-              "cursor-pointer"
+              "text-xs text-muted-foreground hover:text-foreground"
             )}
             title="Select All Text (Cmd+A / Ctrl+A)"
           >
@@ -230,10 +218,7 @@ export function NotesEditorToolbar({
               "size-7 p-0",
 
               // Typography
-              "text-xs text-muted-foreground hover:text-foreground",
-
-              // Interactive & States
-              "cursor-pointer"
+              "text-xs text-muted-foreground hover:text-foreground"
             )}
             title="Copy Note Content to Clipboard"
           >
@@ -250,10 +235,7 @@ export function NotesEditorToolbar({
               "size-7 p-0",
 
               // Typography
-              "text-xs text-muted-foreground hover:text-foreground",
-
-              // Interactive & States
-              "cursor-pointer"
+              "text-xs text-muted-foreground hover:text-foreground"
             )}
             title="Export Note as Markdown (.md)"
           >
@@ -270,10 +252,7 @@ export function NotesEditorToolbar({
               "size-7 p-0",
 
               // Typography
-              "text-xs text-muted-foreground hover:text-foreground",
-
-              // Interactive & States
-              "cursor-pointer"
+              "text-xs text-muted-foreground hover:text-foreground"
             )}
             title="Promote to Memory (makes this note available to the AI as context)"
           >
@@ -291,7 +270,7 @@ export function NotesEditorToolbar({
             "gap-1 ps-2 border-s"
           )}
         >
-          <span className="text-[10px] text-muted-foreground">Save</span>
+          <span className="text-3xs text-muted-foreground">Save</span>
           <KbdGroup>
             <Kbd>{isMac ? '⌘' : 'Ctrl'}</Kbd>
             <Kbd>S</Kbd>

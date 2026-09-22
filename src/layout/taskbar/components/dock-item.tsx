@@ -117,7 +117,7 @@ export function DockItem({
         <span>{item.label}</span>
         {isNew && (
           <span className={cn(
-            "text-[9px] font-extrabold uppercase tracking-wider px-1 rounded-sm leading-none py-0.5",
+            "text-4xs font-extrabold uppercase tracking-wider px-1 rounded-sm leading-none py-0.5",
             "bg-purple-500/20 text-purple-600 dark:text-purple-400"
           )}>
             NEW
@@ -125,7 +125,7 @@ export function DockItem({
         )}
         {item.flag && item.flag !== 'release' && (
           <span className={cn(
-            "text-[9px] font-extrabold uppercase tracking-wider px-1 rounded-sm leading-none py-0.5",
+            "text-4xs font-extrabold uppercase tracking-wider px-1 rounded-sm leading-none py-0.5",
             item.flag === 'alpha'
               ? "bg-rose-500/20 text-rose-500 dark:text-rose-400"
               : "bg-amber-500/20 text-amber-600 dark:text-amber-400"

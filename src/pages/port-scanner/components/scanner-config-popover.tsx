@@ -48,10 +48,10 @@ export function ScannerConfigPopover({
         render={
           <Button
             variant="outline"
-            size="sm"
+            size="md"
             className={cn(
               // Sizing & Spacing
-              "h-7 px-2",
+              "px-2",
 
               // Typography
               "text-xs"
@@ -76,7 +76,7 @@ export function ScannerConfigPopover({
           <h4
             className={cn(
               // Typography
-              "text-[11px] font-semibold uppercase text-muted-foreground tracking-wider"
+              "text-2xs font-semibold uppercase text-muted-foreground tracking-wider"
             )}
           >
             Scan Configuration
@@ -89,7 +89,7 @@ export function ScannerConfigPopover({
               id="timeout-input"
               className={cn(
                 // Sizing & Spacing
-                "h-7 w-20 px-2",
+                "w-20",
 
                 // Typography
                 "text-right text-xs",
@@ -112,7 +112,7 @@ export function ScannerConfigPopover({
               id="concurrency-input"
               className={cn(
                 // Sizing & Spacing
-                "h-7 w-20 px-2",
+                "w-20",
 
                 // Typography
                 "text-right text-xs",
@@ -162,7 +162,7 @@ export function ScannerConfigPopover({
                 "gap-1",
 
                 // Typography
-                "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground",
+                "text-2xs font-semibold uppercase tracking-wider text-muted-foreground",
 
                 // Interactive & States
                 "hover:text-foreground transition-colors cursor-pointer"
@@ -208,7 +208,7 @@ export function ScannerConfigPopover({
                     id="delay-input"
                     className={cn(
                       // Sizing & Spacing
-                      "h-7 w-20 px-2",
+                      "w-20",
 
                       // Typography
                       "text-right text-xs",
@@ -246,7 +246,7 @@ export function ScannerConfigPopover({
                     id="jitter-input"
                     className={cn(
                       // Sizing & Spacing
-                      "h-7 w-20 px-2",
+                      "w-20",
 
                       // Typography
                       "text-right text-xs",

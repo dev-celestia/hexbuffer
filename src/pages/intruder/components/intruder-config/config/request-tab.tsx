@@ -134,7 +134,7 @@ export function RequestTab() {
             value={rawRequestDraft}
             onChange={handleEditorChange}
             onMount={setEditorRef}
-            className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
+            className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-3xs"
             theme={theme}
             disableValidation
           />

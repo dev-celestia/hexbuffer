@@ -20,7 +20,7 @@ export const FlowNodeFooter = React.memo(function FlowNodeFooter({
         // Sizing & Spacing
         'border-t px-2.5 py-1',
         // Typography
-        'text-[10px] text-muted-foreground',
+        'text-3xs text-muted-foreground',
         className,
       )}
     >

@@ -296,7 +296,7 @@ export function ActionConfigForm({ config, type, onChange }: Readonly<ActionConf
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
-        <Label className="text-[11px]">Action type</Label>
+        <Label className="text-2xs">Action type</Label>
         <p className="text-xs text-muted-foreground">
           {NODE_TYPE_REGISTRY[type]?.label ?? type}
         </p>

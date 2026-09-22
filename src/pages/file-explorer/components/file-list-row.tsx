@@ -164,7 +164,7 @@ export function FileListRow<T extends FileItem>({
             "px-3 py-1.5",
 
             // Typography
-            "text-[10px] font-sans text-muted-foreground"
+            "text-3xs font-sans text-muted-foreground"
           )}
         >
           {item.type}
@@ -180,7 +180,7 @@ export function FileListRow<T extends FileItem>({
             "px-3 py-1.5",
 
             // Typography
-            "font-mono text-[11px] text-muted-foreground"
+            "font-mono text-2xs text-muted-foreground"
           )}
         >
           {item.type === 'folder' ? '—' : formatBytes(item.size)}
@@ -196,7 +196,7 @@ export function FileListRow<T extends FileItem>({
             "px-3 py-1.5",
 
             // Typography
-            "font-sans text-[11px] text-muted-foreground"
+            "font-sans text-2xs text-muted-foreground"
           )}
         >
           {item.lastModified

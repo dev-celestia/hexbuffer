@@ -32,7 +32,7 @@ export function EndpointEmpty() {
               "mt-2",
 
               // Typography
-              "text-sm font-medium text-muted-foreground"
+              "text-muted-foreground"
             )}
           >
             Select an endpoint or create one

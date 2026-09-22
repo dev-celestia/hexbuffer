@@ -117,7 +117,7 @@ export function TemplatesDialog({ open, onOpenChange }: Readonly<TemplatesDialog
           {/* Template groups */}
           {grouped.map((group) => (
             <div key={group.category} className="mb-5">
-              <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <h3 className="mb-2 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {group.label}
               </h3>
               <div className="grid gap-2">
@@ -141,7 +141,7 @@ export function TemplatesDialog({ open, onOpenChange }: Readonly<TemplatesDialog
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {template.description}
                         </p>
-                        <p className="text-[10px] text-muted-foreground/60 mt-1">
+                        <p className="text-3xs text-muted-foreground/60 mt-1">
                           {template.nodes.length} nodes · {template.edges.length} connections
                         </p>
                       </div>

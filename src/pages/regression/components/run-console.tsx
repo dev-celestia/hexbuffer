@@ -25,7 +25,7 @@ export function RunConsole({ messages }: Readonly<RunConsoleProps>) {
           'px-3 py-2',
 
           // Typography
-          'font-mono text-[11px]'
+          'font-mono text-2xs'
         )}
       >
         {messages.length === 0 && (

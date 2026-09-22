@@ -87,7 +87,7 @@ export function NewRouteDialog({
       />
       <DialogContent className="sm:max-w-lg border-border bg-background">
         <DialogHeader>
-          <DialogTitle className="text-sm font-bold text-foreground">
+          <DialogTitle className="font-bold text-foreground">
             {dialogTitle ?? (isLocalMock ? 'New Local Mock Endpoint' : 'New Override Rule')}
           </DialogTitle>
         </DialogHeader>
@@ -96,12 +96,12 @@ export function NewRouteDialog({
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Target Host</Label>
               <Select value={domainId} onValueChange={(v) => setDomainId(v ?? '')}>
-                <SelectTrigger className="h-9 bg-muted/40 font-mono text-xs">
+                <SelectTrigger mono className="h-9 bg-muted/40 text-xs">
                   <SelectValue placeholder="Select target host" />
                 </SelectTrigger>
                 <SelectContent>
                   {domains.map((d) => (
-                    <SelectItem key={d.id} value={d.id} className="font-mono text-xs">
+                    <SelectItem mono key={d.id} value={d.id} className="text-xs">
                       {d.hostname}
                     </SelectItem>
                   ))}
@@ -114,44 +114,44 @@ export function NewRouteDialog({
             <div className="w-28 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Method</Label>
               <Select value={method} onValueChange={(v) => setMethod(v ?? 'GET')}>
-                <SelectTrigger className="h-9 bg-muted/40 font-mono text-xs">
+                <SelectTrigger mono className="h-9 bg-muted/40 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {METHOD_OPTIONS.map((m) => (
-                    <SelectItem key={m} value={m} className="font-mono text-xs">{m}</SelectItem>
+                    <SelectItem mono key={m} value={m} className="text-xs">{m}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="flex-1 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Path or Full URL</Label>
-              <Input
+              <Input mono
                 placeholder="/api/resource/:id or https://api.example.com/..."
                 value={path}
                 onChange={(e) => setPath(e.target.value)}
-                className="h-9 font-mono text-xs bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
+                className="h-9 text-xs bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
               />
             </div>
             <div className="w-20 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Status</Label>
-              <Input
+              <Input mono
                 value={statusCode}
                 onChange={(e) => setStatusCode(e.target.value)}
-                className="h-9 text-center font-mono text-xs bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
+                className="h-9 text-center text-xs bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
               />
             </div>
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Response Body (JSON)</Label>
-            <Textarea
+            <Textarea mono
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={5}
-              className="font-mono text-xs bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
+              className="text-xs bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
             />
           </div>
-          <Button size="sm" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-9 rounded-md mt-2 cursor-pointer" onClick={handleAdd}>
+          <Button size="sm" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-9 rounded-md mt-2" onClick={handleAdd}>
             {isLocalMock ? 'Create Endpoint' : 'Create Override Rule'}
           </Button>
         </div>

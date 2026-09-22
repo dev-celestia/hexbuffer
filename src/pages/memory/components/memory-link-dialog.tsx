@@ -76,10 +76,10 @@ export function MemoryLinkDialog({ state }: Readonly<MemoryLinkDialogProps>) {
               "flex items-center gap-2",
 
               // Typography
-              "text-sm font-semibold"
+              "font-semibold"
             )}
           >
-            <GitForkIcon className="size-4 text-indigo-400" />
+            <GitForkIcon className="size-4 text-indigo-600 dark:text-indigo-400" />
             <span>Link Memory Relationship</span>
           </DialogTitle>
         </DialogHeader>
@@ -93,7 +93,7 @@ export function MemoryLinkDialog({ state }: Readonly<MemoryLinkDialogProps>) {
           >
             {/* From Source */}
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs font-medium">Source Memory</Label>
+              <Label className="text-xs">Source Memory</Label>
               <div
                 className={cn(
                   // Sizing & Spacing
@@ -109,7 +109,7 @@ export function MemoryLinkDialog({ state }: Readonly<MemoryLinkDialogProps>) {
 
             {/* Relation Type */}
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs font-medium">Relationship</Label>
+              <Label className="text-xs">Relationship</Label>
               <Select
                 value={relation}
                 // Base UI reports a cleared selection as `null`; a link always has a relation.
@@ -132,7 +132,7 @@ export function MemoryLinkDialog({ state }: Readonly<MemoryLinkDialogProps>) {
 
             {/* Target Memory */}
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs font-medium">Target Memory</Label>
+              <Label className="text-xs">Target Memory</Label>
               {candidateEntries.length === 0 ? (
                 <div className="text-muted-foreground p-2 border border-dashed rounded text-xs">
                   No other memory entries available in store.

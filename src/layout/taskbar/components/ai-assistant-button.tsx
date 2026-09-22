@@ -15,20 +15,20 @@ export function AiAssistantButton() {
       title={isOpen ? 'Toggle AI Assistant' : 'Open AI Assistant'}
       className={cn(
         // Layout & Positioning
-        'flex items-center gap-1.5',
+        'flex gap-1.5',
       )}
     >
       <img src={celestiaIcon} alt="" className="size-3.5" />
       <span>ASSISTANT</span>
-      <Badge
+      <Badge mono
         variant="secondary"
         className={cn(
           // Sizing & Spacing
           'h-3.5 px-1 py-0',
           // Typography
-          'text-[8px] font-mono font-semibold uppercase tracking-wider',
+          'text-[8px] font-semibold uppercase tracking-wider',
           // Backgrounds & Borders
-          'text-amber-500 bg-amber-500/10 border border-amber-500/20',
+          'text-warning-foreground bg-warning/10 border-warning/20',
         )}
       >
         ALPHA

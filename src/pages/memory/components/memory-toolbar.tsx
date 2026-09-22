@@ -93,7 +93,7 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
             placeholder="Search memory (hybrid vector + text)…"
             className={cn(
               // Sizing & Spacing
-              "h-7 w-full ps-8 pe-7",
+              "ps-8 pe-7",
 
               // Typography
               "text-xs"
@@ -207,17 +207,17 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
               the trigger. `Badge` is itself built on `useRender`, so the trigger's props merge in. */}
           <TooltipTrigger
             render={
-              <Badge
+              <Badge mono
                 variant={engineStatus?.isReady ? 'secondary' : 'outline'}
                 className={cn(
                   // Layout & Positioning
-                  "flex items-center gap-1.5 cursor-default",
+                  "flex gap-1.5 cursor-default",
 
                   // Sizing & Spacing
-                  "h-6 px-2",
+                  "h-6",
 
                   // Typography
-                  "text-[11px] font-mono"
+                  "text-2xs"
                 )}
               />
             }
@@ -228,7 +228,7 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
                 "size-3.5",
 
                 // Typography
-                engineStatus?.isReady ? "text-emerald-500" : "text-amber-500"
+                engineStatus?.isReady ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"
               )}
             />
             <span>Uteke: {engineStatus?.totalMemories ?? 0} memories</span>
@@ -242,7 +242,7 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
               Embeddings & graph relationships run locally on device.
             </p>
             {engineStatus && !engineStatus.isReady && (
-              <p className="text-amber-500 mt-0.5">
+              <p className="text-amber-600 dark:text-amber-400 mt-0.5">
                 Embedding model not loaded yet — run the one-time setup to enable hybrid recall.
               </p>
             )}
@@ -253,16 +253,13 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
             Gated on a loaded status so an unknown engine does not flash the prompt. */}
         {engineStatus && !engineStatus.isReady && (
           <Button
-            size="sm"
+            size="md"
             variant="outline"
             onClick={() => void handleInitializeEngine()}
             disabled={isEngineInitializing}
             className={cn(
               // Layout & Positioning
-              "flex items-center gap-1.5",
-
-              // Sizing & Spacing
-              "h-7 px-2.5",
+              "flex gap-1.5",
 
               // Typography
               "text-xs"
@@ -286,7 +283,7 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
                   "size-3.5",
 
                   // Typography
-                  "text-emerald-500"
+                  "text-emerald-600 dark:text-emerald-400"
                 )}
               />
             )}
@@ -296,15 +293,12 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
 
         {/* Dream Cycle Button */}
         <Button
-          size="sm"
+          size="md"
           variant="outline"
           onClick={() => setIsDreamDialogOpen(true)}
           className={cn(
             // Layout & Positioning
-            "flex items-center gap-1.5",
-
-            // Sizing & Spacing
-            "h-7 px-2.5",
+            "flex gap-1.5",
 
             // Typography
             "text-xs"
@@ -317,7 +311,7 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
               "size-3.5",
 
               // Typography
-              "text-indigo-400"
+              "text-indigo-600 dark:text-indigo-400"
             )}
           />
           <span>Dream Cycle</span>
@@ -325,13 +319,13 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
 
         {/* Refresh */}
         <Button
-          size="sm"
+          size="md"
           variant="outline"
           onClick={handleRefresh}
           disabled={loading}
           className={cn(
             // Sizing & Spacing
-            "h-7 w-7 p-0"
+            "w-7 p-0"
           )}
           title="Refresh memory store"
         >
@@ -348,18 +342,15 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
 
         {/* Add Memory Note */}
         <Button
-          size="sm"
+          size="md"
           variant="default"
           onClick={handleOpenCreate}
           className={cn(
             // Layout & Positioning
-            "flex items-center gap-1.5",
-
-            // Sizing & Spacing
-            "h-7 px-2.5",
+            "flex gap-1.5",
 
             // Typography
-            "text-xs font-medium"
+            "text-xs"
           )}
         >
           <PlusIcon

@@ -34,7 +34,7 @@ export function FlowNodeHandle({
             // Layout & Positioning
             'pointer-events-none absolute z-10 select-none',
             // Typography
-            'text-[9px] font-medium leading-none text-muted-foreground',
+            'text-4xs font-medium leading-none text-muted-foreground',
             position === Position.Top && 'top-1',
             position === Position.Bottom && 'bottom-1',
             position === Position.Left && 'left-2',

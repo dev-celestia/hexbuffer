@@ -85,7 +85,7 @@ export function LogFilters(props: Readonly<LogFiltersProps>) {
             size="sm"
             variant="ghost"
             onClick={openTargetSelector}
-            className={"flex items-center"}
+            className={"flex"}
           >
             <TargetIcon className='size-3' />
             <p className='mt-[1px]'>Target</p>

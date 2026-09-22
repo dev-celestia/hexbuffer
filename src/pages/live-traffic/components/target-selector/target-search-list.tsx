@@ -138,7 +138,7 @@ export function TargetSearchList({
                 "mt-1",
 
                 // Typography
-                "text-[11px] text-muted-foreground/70"
+                "text-2xs text-muted-foreground/70"
               )}
             >
               {searchQuery
@@ -212,14 +212,11 @@ export function TargetSearchList({
                           <Badge
                             variant="outline"
                             className={cn(
-                              // Layout & Positioning
-                              "inline-flex items-center",
-
                               // Sizing & Spacing
-                              "gap-1 px-1.5 py-0",
+                              "px-1.5 py-0",
 
                               // Typography
-                              "text-[10px] text-primary font-normal",
+                              "text-primary font-normal",
 
                               // Backgrounds & Borders
                               "border-primary/30 bg-primary/10"
@@ -245,7 +242,7 @@ export function TargetSearchList({
                           "gap-1.5",
 
                           // Typography
-                          "text-[11px] text-muted-foreground"
+                          "text-2xs text-muted-foreground"
                         )}
                       >
                         {primaryScope ? (
@@ -284,7 +281,7 @@ export function TargetSearchList({
                               "shrink-0",
 
                               // Typography
-                              "text-[10px] font-medium text-muted-foreground/80"
+                              "text-3xs font-medium text-muted-foreground/80"
                             )}
                           >
                             +{extraScopeCount} more

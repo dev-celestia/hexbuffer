@@ -49,10 +49,10 @@ export function ParametersPanel({
       {/* Panel Header */}
       <div className="flex h-9 shrink-0 items-center justify-between border-b bg-muted/15 px-3">
         <div className="flex items-center gap-2 select-none">
-          <span className="text-[11px] font-bold uppercase text-muted-foreground tracking-wider">
+          <span className="text-2xs font-bold uppercase text-muted-foreground tracking-wider">
             Target Parameters
           </span>
-          <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 font-semibold border-muted bg-muted/20 text-muted-foreground">
+          <Badge variant="outline" className="text-4xs px-1.5 py-0 h-4 font-semibold border-muted bg-muted/20 text-muted-foreground">
             {injectCount} Active
           </Badge>
         </div>
@@ -64,7 +64,7 @@ export function ParametersPanel({
           {parameters.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 px-4 text-center select-none">
               <span className="text-xs text-muted-foreground font-medium">No parameters defined</span>
-              <span className="text-[10px] text-muted-foreground/60 mt-1 max-w-[180px]">
+              <span className="text-3xs text-muted-foreground/60 mt-1 max-w-[180px]">
                 Add HTTP parameters below to mark them for vulnerability testing.
               </span>
             </div>
@@ -101,8 +101,8 @@ export function ParametersPanel({
                     </Badge>
                   </div>
                   
-                  <Input
-                    className="h-6 text-xs bg-background mt-1 py-0 px-1.5 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-muted-foreground/30 font-mono"
+                  <Input mono
+                    className="h-6 text-xs bg-background mt-1 py-0 px-1.5 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-muted-foreground/30"
                     value={param.value}
                     onChange={e => onParamValueChange(param.name, e.target.value)}
                     placeholder="Value (optional)"
@@ -113,7 +113,7 @@ export function ParametersPanel({
                   variant="ghost"
                   size="icon"
                   onClick={() => onRemoveParameter(param.name)}
-                  className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded shrink-0 transition-colors"
+                  className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded transition-colors"
                 >
                   <TrashIcon className="h-3.5 w-3.5" />
                 </Button>
@@ -125,13 +125,13 @@ export function ParametersPanel({
 
       {/* Sticky Add Parameter Section */}
       <div className="p-2.5 border-t bg-muted/15 shrink-0 space-y-2">
-        <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider block select-none">
+        <span className="text-3xs font-bold uppercase text-muted-foreground tracking-wider block select-none">
           Add Custom Parameter
         </span>
         <div className="flex flex-col gap-1.5">
           <div className="flex gap-1.5">
             <Input
-              className="h-7 text-xs bg-background"
+              className="text-xs bg-background"
               placeholder="Name"
               value={newParamName}
               onChange={e => onNewParamNameChange(e.target.value)}
@@ -140,7 +140,7 @@ export function ParametersPanel({
               }}
             />
             <Input
-              className="h-7 text-xs bg-background"
+              className="text-xs bg-background"
               placeholder="Value"
               value={newParamValue}
               onChange={e => onNewParamValueChange(e.target.value)}
@@ -150,10 +150,10 @@ export function ParametersPanel({
             />
           </div>
           <Button 
-            size="sm" 
+            size="md" 
             onClick={onAddParameter} 
             disabled={!newParamName.trim()}
-            className="w-full h-7 text-xs gap-1 font-semibold"
+            className="w-full text-xs font-semibold"
           >
             <PlusIcon className="h-3 w-3" />
             Add Parameter

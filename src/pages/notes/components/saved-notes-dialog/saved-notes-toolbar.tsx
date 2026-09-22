@@ -137,7 +137,7 @@ export function SavedNotesToolbar({
                   "px-2.5 py-1 rounded-md gap-1.5",
 
                   // Typography
-                  "text-[11px] font-medium",
+                  "text-2xs font-medium",
 
                   // Interactive & States
                   "transition-all cursor-pointer",
@@ -153,7 +153,7 @@ export function SavedNotesToolbar({
                     "px-1 py-0.2 rounded-full",
 
                     // Typography
-                    "text-[9px] font-mono",
+                    "text-4xs font-mono",
 
                     // Backgrounds & Borders
                     isActive ? "bg-muted text-foreground" : "bg-muted/80 text-muted-foreground"

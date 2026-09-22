@@ -23,10 +23,7 @@ export function WorkspacePanel({ workspaceId }: Readonly<{ workspaceId: string }
       orientation="horizontal"
       className={cn(
         // Layout & Positioning
-        'h-full min-h-0',
-
-        // Sizing & Spacing
-        'w-full'
+        'min-h-0'
       )}
     >
       {/* Left: Collections Tree (filtered to this workspace) */}

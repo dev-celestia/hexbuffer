@@ -113,18 +113,18 @@ export function NotificationAlert() {
         )}
       >
         {/* Header */}
-        <PopoverHeader className={cn('p-3 pb-2 flex flex-col gap-1.5')}>
+        <PopoverHeader className={cn('p-3 pb-2 gap-1.5')}>
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 min-w-0">
               <PopoverTitle className="text-xs font-semibold text-foreground tracking-tight">
                 Alerts & Notifications
               </PopoverTitle>
               {unreadCount > 0 ? (
-                <Badge variant="destructive" className="h-4 px-1.5 text-[10px] font-semibold">
+                <Badge variant="destructive" className="h-4 px-1.5 font-semibold">
                   {unreadCount} new
                 </Badge>
               ) : totalCount > 0 ? (
-                <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
+                <Badge variant="secondary" className="h-4 px-1.5">
                   {totalCount}
                 </Badge>
               ) : null}
@@ -184,8 +184,8 @@ export function NotificationAlert() {
               <EmptyMedia variant="icon" className="mb-0">
                 <BellIcon className="size-4 text-muted-foreground" />
               </EmptyMedia>
-              <EmptyTitle className="text-xs font-medium">No alerts</EmptyTitle>
-              <EmptyDescription className="text-[11px] max-w-[200px]">
+              <EmptyTitle className="text-xs">No alerts</EmptyTitle>
+              <EmptyDescription className="text-2xs max-w-[200px]">
                 You are all caught up. New notifications and events will appear here.
               </EmptyDescription>
             </Empty>
@@ -224,17 +224,17 @@ export function NotificationAlert() {
                         </span>
 
                         {alert.source && (
-                          <Badge variant="outline" className="h-3.5 px-1 text-[9px] font-normal shrink-0">
+                          <Badge variant="outline" className="h-3.5 px-1 text-4xs font-normal">
                             {alert.source}
                           </Badge>
                         )}
                       </div>
 
-                      <p className="text-[11px] text-muted-foreground/90 leading-snug break-words">
+                      <p className="text-2xs text-muted-foreground/90 leading-snug break-words">
                         {alert.message}
                       </p>
 
-                      <span className="text-[10px] text-muted-foreground/60 mt-1 inline-block">
+                      <span className="text-3xs text-muted-foreground/60 mt-1 inline-block">
                         {formatRelativeTime(alert.timestamp)}
                       </span>
                     </div>

@@ -117,7 +117,7 @@ export function QueueRow({
               'h-5 px-1.5',
 
               // Typography
-              'text-[10px] font-mono font-semibold',
+              'text-3xs font-mono font-semibold',
 
               // Backgrounds & Borders
               'rounded border',
@@ -177,7 +177,7 @@ export function QueueRow({
               data-slot="queue-row-path"
               className={cn(
                 // Typography
-                'truncate font-mono text-[11px] text-muted-foreground'
+                'truncate font-mono text-2xs text-muted-foreground'
               )}
             >
               {path}
@@ -201,7 +201,7 @@ export function QueueRow({
               data-slot="queue-row-time"
               className={cn(
                 // Typography
-                'text-[11px] text-muted-foreground',
+                'text-2xs text-muted-foreground',
 
                 // Interactive & States
                 'transition-opacity duration-150 group-hover:opacity-0'

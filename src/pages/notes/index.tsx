@@ -61,7 +61,7 @@ export function NotesPage() {
             placeholder="Search open tabs & contents..."
             className={cn(
               // Sizing & Spacing
-              "h-7 pl-8 pr-7 w-full",
+              "pl-8 pr-7",
 
               // Typography
               "text-xs",
@@ -103,7 +103,7 @@ export function NotesPage() {
             size="sm"
             onClick={() => hook.setIsSavedNotesOpen(true)}
             title="Browse all saved notes library"
-            className="flex items-center gap-2"
+            className="flex gap-2"
           >
             <FolderSimpleIcon className="size-3.5 text-primary" />
             <span className="text-xs mt-0.5">Manage Saved Notes</span>
@@ -113,7 +113,7 @@ export function NotesPage() {
                 "px-1.5 py-0.2 rounded-full",
 
                 // Typography
-                "text-[10px] font-mono font-medium",
+                "text-3xs font-mono font-medium",
 
                 // Backgrounds & Borders
                 "bg-primary/10 text-primary"
@@ -128,10 +128,10 @@ export function NotesPage() {
             onClick={hook.onTabAdd}
             className={cn(
               // Layout & Positioning
-              "flex items-center",
+              "flex",
 
               // Typography
-              "text-xs font-medium cursor-pointer"
+              "text-xs"
             )}
             title="Create a new note"
           >

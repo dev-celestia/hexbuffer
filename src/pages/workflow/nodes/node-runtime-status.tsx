@@ -15,17 +15,17 @@ const statusStyles: Record<NodeRuntimeState['status'], { icon: Icon; className: 
   },
   success: {
     icon: CheckCircleIcon,
-    className: 'text-emerald-500',
+    className: 'text-emerald-600 dark:text-emerald-400',
     label: 'Completed',
   },
   error: {
     icon: WarningCircleIcon,
-    className: 'text-red-500',
+    className: 'text-red-600 dark:text-red-400',
     label: 'Error',
   },
   skipped: {
     icon: SkipForwardIcon,
-    className: 'text-amber-500',
+    className: 'text-amber-600 dark:text-amber-400',
     label: 'Skipped',
   },
 };
@@ -61,12 +61,12 @@ export function NodeRuntimeStatus({ runtime, accentClassName }: Readonly<NodeRun
 
   return (
     <div className={cn('border-t px-3 py-1.5', accentClassName)}>
-      <div className={cn('flex items-center gap-1.5 text-[10px] font-medium', item.className)}>
+      <div className={cn('flex items-center gap-1.5 text-3xs font-medium', item.className)}>
         <Icon className={cn('size-3', runtime.status === 'running' && 'animate-spin')} />
         <span>{item.label}</span>
       </div>
       {hasInputData && (
-        <div className="mt-1 flex items-center gap-1.5 text-[10px] text-muted-foreground">
+        <div className="mt-1 flex items-center gap-1.5 text-3xs text-muted-foreground">
           <DatabaseIcon className="size-3 shrink-0" />
           <span className="shrink-0 font-medium">Received</span>
           <span className="min-w-0 truncate font-mono">

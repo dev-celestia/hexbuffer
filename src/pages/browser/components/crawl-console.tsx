@@ -104,14 +104,14 @@ export function CrawlConsole({
           >
             Crawl Console
           </span>
-          <Badge
+          <Badge mono
             variant="outline"
             className={cn(
               // Sizing & Spacing
               "h-4 px-1.5",
 
               // Typography
-              "text-[10px] font-mono text-zinc-400",
+              "text-zinc-400",
 
               // Backgrounds & Borders
               "border-zinc-700"
@@ -151,7 +151,7 @@ export function CrawlConsole({
               placeholder="Filter logs..."
               className={cn(
                 // Sizing & Spacing
-                "h-6 w-full pl-7 text-[11px]",
+                "h-6 pl-7 text-2xs",
 
                 // Typography
                 "text-zinc-200 placeholder:text-zinc-500",
@@ -171,7 +171,7 @@ export function CrawlConsole({
               "gap-1.5",
 
               // Typography
-              "text-[11px] text-zinc-400"
+              "text-2xs text-zinc-400"
             )}
           >
             <Switch
@@ -197,7 +197,7 @@ export function CrawlConsole({
             aria-label="Clear console"
             className={cn(
               // Sizing & Spacing
-              "h-6 w-6 p-0",
+              "w-6 p-0",
 
               // Interactive & States
               "text-zinc-400 hover:text-red-400 hover:bg-zinc-800"
@@ -292,7 +292,7 @@ export function CrawlConsole({
                     "px-1 rounded shrink-0 select-none",
 
                     // Typography
-                    "text-[10px] uppercase font-bold",
+                    "text-3xs uppercase font-bold",
 
                     // Backgrounds & Borders
                     pillStyle

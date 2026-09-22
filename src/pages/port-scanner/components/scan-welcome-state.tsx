@@ -87,7 +87,7 @@ export function ScanWelcomeState({ onQuickStart }: Readonly<ScanWelcomeStateProp
               "mt-1",
 
               // Typography
-              "text-[10px] text-muted-foreground leading-snug"
+              "text-3xs text-muted-foreground leading-snug"
             )}
           >
             Scan top 18 common ports (web, ssh, db)
@@ -128,7 +128,7 @@ export function ScanWelcomeState({ onQuickStart }: Readonly<ScanWelcomeStateProp
               "mt-1",
 
               // Typography
-              "text-[10px] text-muted-foreground leading-snug"
+              "text-3xs text-muted-foreground leading-snug"
             )}
           >
             Scan common HTTP/HTTPS, proxies, and web services
@@ -169,7 +169,7 @@ export function ScanWelcomeState({ onQuickStart }: Readonly<ScanWelcomeStateProp
               "mt-1",
 
               // Typography
-              "text-[10px] text-muted-foreground leading-snug"
+              "text-3xs text-muted-foreground leading-snug"
             )}
           >
             Scan top 100 common network services

@@ -34,7 +34,7 @@ export function TrafficTablePagination({
         <span>
           Showing {showingStart} – {showingEnd} of {total} {itemLabel}{total === 1 ? '' : 's'}
         </span>
-        <span className="text-[10px] text-muted-foreground/60">
+        <span className="text-3xs text-muted-foreground/60">
           (Chunked at 60/page)
         </span>
       </div>
@@ -44,12 +44,12 @@ export function TrafficTablePagination({
           variant="outline"
           onClick={onPreviousPage}
           disabled={!hasPreviousPage || isLoading}
-          className="h-6 text-[11px] px-2"
+          className="text-2xs px-2"
         >
           <CaretLeftIcon className="size-3 mr-1" />
           Previous
         </Button>
-        <span className="text-[11px] font-medium text-muted-foreground px-1">
+        <span className="text-2xs font-medium text-muted-foreground px-1">
           Page {page} of {totalPages}
         </span>
         <Button
@@ -57,7 +57,7 @@ export function TrafficTablePagination({
           variant="outline"
           onClick={onNextPage}
           disabled={!hasNextPage || isLoading}
-          className="h-6 text-[11px] px-2"
+          className="text-2xs px-2"
         >
           Next
           <CaretRightIcon className="size-3 ml-1" />

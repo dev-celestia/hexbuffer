@@ -69,7 +69,7 @@ export const FlowNodeHeader = React.memo(function FlowNodeHeader({
           {badge}
         </div>
         {subtitle && (
-          <p className="truncate text-[10px] text-muted-foreground">{subtitle}</p>
+          <p className="truncate text-3xs text-muted-foreground">{subtitle}</p>
         )}
       </div>
 

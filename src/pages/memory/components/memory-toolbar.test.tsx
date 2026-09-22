@@ -97,7 +97,10 @@ describe('memory toolbar engine badge', () => {
   test('a non-ready engine renders the outline variant and a zero count', () => {
     const html = render(makeState({ engineStatus: null })).innerHTML;
     expect(html).toContain('Uteke: 0 memories');
-    expect(html).toContain('text-amber-500');
+    // The non-ready engine is a warning, so the icon carries the amber treatment. Asserted as the
+    // full paired form rather than a bare `text-amber-500`: amber-500 on the light surface is ~1.8:1,
+    // so this now doubles as a local guard for the light-mode fix (src/styles/light-mode-shades.test.ts).
+    expect(html).toContain('text-amber-600 dark:text-amber-400');
   });
 });
 

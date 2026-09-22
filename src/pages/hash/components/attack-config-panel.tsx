@@ -154,7 +154,7 @@ export function AttackConfigPanel({
         <span
           className={cn(
             // Typography
-            "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+            "text-2xs font-semibold text-muted-foreground uppercase tracking-wider"
           )}
         >
           Hash Algorithm
@@ -193,7 +193,7 @@ export function AttackConfigPanel({
         <span
           className={cn(
             // Typography
-            "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+            "text-2xs font-semibold text-muted-foreground uppercase tracking-wider"
           )}
         >
           Attack Mode
@@ -231,7 +231,7 @@ export function AttackConfigPanel({
               )}
             >
               <span className="text-xs font-semibold">{mode.label}</span>
-              <span className="text-[11px] opacity-75">{mode.description}</span>
+              <span className="text-2xs opacity-75">{mode.description}</span>
             </button>
           ))}
         </div>
@@ -271,7 +271,7 @@ export function AttackConfigPanel({
               <span
                 className={cn(
                   // Typography
-                  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+                  "text-2xs font-semibold text-muted-foreground uppercase tracking-wider"
                 )}
               >
                 Rule Preset
@@ -298,7 +298,7 @@ export function AttackConfigPanel({
                         )}
                       >
                         <span className="text-xs">{preset.name}</span>
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-3xs text-muted-foreground">
                           {preset.description} ({preset.rules.length} rules)
                         </span>
                       </div>
@@ -341,7 +341,7 @@ export function AttackConfigPanel({
               <span
                 className={cn(
                   // Typography
-                  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+                  "text-2xs font-semibold text-muted-foreground uppercase tracking-wider"
                 )}
               >
                 Mask Pattern
@@ -352,7 +352,7 @@ export function AttackConfigPanel({
                 placeholder="e.g. pin??? or ????????"
                 disabled={disabled}
               />
-              <span className="text-[10px] text-muted-foreground">
+              <span className="text-3xs text-muted-foreground">
                 Each ? is filled with one character from the selected charset.
               </span>
             </div>
@@ -369,7 +369,7 @@ export function AttackConfigPanel({
               <span
                 className={cn(
                   // Typography
-                  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+                  "text-2xs font-semibold text-muted-foreground uppercase tracking-wider"
                 )}
               >
                 Charset
@@ -412,7 +412,7 @@ export function AttackConfigPanel({
                       onCheckedChange={(checked) => updateMaskCharset({ [key]: checked === true })}
                       disabled={disabled}
                     />
-                    <span className="text-[11px]">{label}</span>
+                    <span className="text-2xs">{label}</span>
                   </label>
                 ))}
               </div>
@@ -446,7 +446,7 @@ export function AttackConfigPanel({
               <span
                 className={cn(
                   // Typography
-                  "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+                  "text-2xs font-semibold text-muted-foreground uppercase tracking-wider"
                 )}
               >
                 Digit Mask
@@ -457,7 +457,7 @@ export function AttackConfigPanel({
                 placeholder="e.g. ?? appends two digits"
                 disabled={disabled}
               />
-              <span className="text-[10px] text-muted-foreground">
+              <span className="text-3xs text-muted-foreground">
                 Each ? appends one digit (0-9) to every wordlist entry.
               </span>
             </div>
@@ -507,7 +507,7 @@ function WordlistPathPicker({ label, path, onPathChange, disabled }: Readonly<Wo
       <span
         className={cn(
           // Typography
-          "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+          "text-2xs font-semibold text-muted-foreground uppercase tracking-wider"
         )}
       >
         {label}

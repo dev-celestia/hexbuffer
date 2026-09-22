@@ -46,10 +46,10 @@ export function MemoryDreamDialog({ state }: Readonly<MemoryDreamDialogProps>) {
               "flex items-center gap-2",
 
               // Typography
-              "text-sm font-semibold"
+              "font-semibold"
             )}
           >
-            <MoonStarsIcon className="size-4 text-indigo-400" />
+            <MoonStarsIcon className="size-4 text-indigo-600 dark:text-indigo-400" />
             <span>Uteke Dream Cycle</span>
           </DialogTitle>
         </DialogHeader>
@@ -75,21 +75,21 @@ export function MemoryDreamDialog({ state }: Readonly<MemoryDreamDialogProps>) {
             )}
           >
             <div className="flex items-start gap-2">
-              <SparkleIcon className="size-3.5 text-amber-500 mt-0.5 shrink-0" />
+              <SparkleIcon className="size-3.5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
               <span>
                 <strong className="text-foreground">Deduplication:</strong> Identifies and merges
                 semantically duplicate memories.
               </span>
             </div>
             <div className="flex items-start gap-2">
-              <SparkleIcon className="size-3.5 text-rose-500 mt-0.5 shrink-0" />
+              <SparkleIcon className="size-3.5 text-rose-600 dark:text-rose-400 mt-0.5 shrink-0" />
               <span>
                 <strong className="text-foreground">Contradiction Detection:</strong> Flags
                 superseded or conflicting observations.
               </span>
             </div>
             <div className="flex items-start gap-2">
-              <SparkleIcon className="size-3.5 text-indigo-400 mt-0.5 shrink-0" />
+              <SparkleIcon className="size-3.5 text-indigo-600 dark:text-indigo-400 mt-0.5 shrink-0" />
               <span>
                 <strong className="text-foreground">Topology & Graph Reinforcement:</strong> Prunes
                 orphaned edges and reinforces associative recall pathways.
@@ -99,7 +99,7 @@ export function MemoryDreamDialog({ state }: Readonly<MemoryDreamDialogProps>) {
 
           <div className="flex items-center justify-between px-1">
             <span className="text-muted-foreground">Target Namespace:</span>
-            <Badge variant="secondary" className="font-mono text-[11px]">
+            <Badge mono variant="secondary" className="text-2xs">
               {selectedNamespace === 'all' ? 'All Namespaces' : selectedNamespace}
             </Badge>
           </div>
@@ -114,11 +114,11 @@ export function MemoryDreamDialog({ state }: Readonly<MemoryDreamDialogProps>) {
                 "bg-emerald-950/20"
               )}
             >
-              <div className="flex items-center gap-1.5 text-emerald-400 font-medium">
+              <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
                 <CheckCircleIcon className="size-4" />
                 <span>Dream Cycle Completed</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
+              <div className="grid grid-cols-2 gap-2 text-2xs pt-1">
                 <div>
                   <span className="text-muted-foreground">Deduplicated: </span>
                   <strong className="font-mono text-foreground">{dreamReport.deduplicated}</strong>
@@ -136,7 +136,7 @@ export function MemoryDreamDialog({ state }: Readonly<MemoryDreamDialogProps>) {
                   <strong className="font-mono text-foreground">{dreamReport.backlinksRebuilt}</strong>
                 </div>
               </div>
-              <p className="text-[11px] text-muted-foreground mt-1 border-t border-emerald-500/20 pt-1">
+              <p className="text-2xs text-muted-foreground mt-1 border-t border-emerald-500/20 pt-1">
                 {dreamReport.message}
               </p>
             </div>

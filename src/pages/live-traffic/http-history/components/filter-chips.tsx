@@ -54,7 +54,7 @@ export function FilterChips({
               "shrink-0",
 
               // Typography
-              "text-[10px] font-medium text-muted-foreground"
+              "text-3xs font-medium text-muted-foreground"
             )}
           >
             DB Recording:
@@ -94,7 +94,7 @@ export function FilterChips({
               "shrink-0",
 
               // Typography
-              "text-[10px] text-muted-foreground"
+              "text-3xs text-muted-foreground"
             )}
           >
             Hidden:
@@ -110,7 +110,7 @@ export function FilterChips({
                 "gap-1 rounded px-1.5 py-0.5",
 
                 // Typography
-                "text-[10px] text-red-600 dark:text-red-400",
+                "text-3xs text-red-600 dark:text-red-400",
 
                 // Backgrounds & Borders
                 "border border-red-500/20 bg-red-500/10"
@@ -171,7 +171,7 @@ export function FilterChips({
               "shrink-0",
 
               // Typography
-              "text-[10px] text-muted-foreground"
+              "text-3xs text-muted-foreground"
             )}
           >
             Highlights:
@@ -192,7 +192,7 @@ export function FilterChips({
                   "gap-1 rounded border px-1.5 py-0.5",
 
                   // Typography
-                  "text-[10px]"
+                  "text-3xs"
                 )}
                 style={{
                   backgroundColor: `${color}15`,

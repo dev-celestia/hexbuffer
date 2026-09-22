@@ -80,7 +80,7 @@ export function ExplorerSidebar({
         <span
           className={cn(
             // Typography
-            "text-[10px] font-mono text-muted-foreground"
+            "text-3xs font-mono text-muted-foreground"
           )}
         >
           {buckets.length}
@@ -215,9 +215,6 @@ export function ExplorerSidebar({
             onChange={(e) => setNewBucketName(e.target.value)}
             placeholder="Add bucket manually…"
             className={cn(
-              // Sizing & Spacing
-              "h-7 w-full",
-
               // Typography
               "text-xs font-sans bg-background"
             )}
@@ -227,9 +224,6 @@ export function ExplorerSidebar({
             size="sm"
             variant="outline"
             className={cn(
-              // Layout & Positioning
-              "shrink-0",
-
               // Sizing & Spacing
               "size-7 p-0"
             )}

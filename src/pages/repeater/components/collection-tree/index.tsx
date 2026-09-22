@@ -141,7 +141,7 @@ export function CollectionsTree({ workspaceId }: Readonly<{ workspaceId: string 
                       size="sm"
                       className={cn(
                         // Sizing & Spacing
-                        'h-6 gap-1 px-2',
+                        'px-2',
 
                         // Typography
                         'text-xs'
@@ -169,7 +169,7 @@ export function CollectionsTree({ workspaceId }: Readonly<{ workspaceId: string 
                       size="sm"
                       className={cn(
                         // Sizing & Spacing
-                        'h-6 gap-1 px-2',
+                        'px-2',
 
                         // Typography
                         'text-xs'

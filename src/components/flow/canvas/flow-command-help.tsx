@@ -27,7 +27,7 @@ export const FlowCommandHelp = React.memo(function FlowCommandHelp({
         // Sizing & Spacing
         'max-w-[calc(100%-1.5rem)] gap-2 px-2.5 py-1.5 rounded-md',
         // Typography
-        'text-[10px] text-muted-foreground',
+        'text-3xs text-muted-foreground',
         // Backgrounds & Borders
         'bg-background/90 backdrop-blur border border-border/40 shadow-xs',
         className,

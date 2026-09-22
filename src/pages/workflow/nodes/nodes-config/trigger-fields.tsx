@@ -26,7 +26,7 @@ export function HttpMethodFilter({
 }>) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-[11px]">Method</Label>
+      <Label className="text-2xs">Method</Label>
       <Select value={value?.trim() ? value.toUpperCase() : 'ANY'} onValueChange={(v) => onChange(v === 'ANY' ? undefined : (v ?? undefined))}>
         <SelectTrigger className="h-7 text-xs">
           <SelectValue />
@@ -52,7 +52,7 @@ export function HostWhitelistFilter({
 }>) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-[11px]">
+      <Label className="text-2xs">
         <GlobeIcon className="size-3 inline mr-1" />
         Host whitelist
       </Label>
@@ -62,7 +62,7 @@ export function HostWhitelistFilter({
         onChange={(e) => onChange(e.target.value)}
         placeholder={'example.com\nhttps://app.example.com\napi.example.com:443\n*.target.local'}
       />
-      <p className="text-[10px] text-muted-foreground">
+      <p className="text-3xs text-muted-foreground">
         Enter hostnames, full URLs, optional ports, or wildcard domains.
       </p>
     </div>
@@ -83,7 +83,7 @@ export function UrlPatternFilter({
   return (
     <>
       <div className="space-y-1.5">
-        <Label className="text-[11px]">Operator</Label>
+        <Label className="text-2xs">Operator</Label>
         <Select value={operator ?? 'contains'} onValueChange={onOperatorChange}>
           <SelectTrigger className="h-7 text-xs">
             <SelectValue />
@@ -98,9 +98,9 @@ export function UrlPatternFilter({
         </Select>
       </div>
       <div className="space-y-1.5">
-        <Label className="text-[11px]">Value</Label>
+        <Label className="text-2xs">Value</Label>
         <Input
-          className="h-7 text-xs"
+          className="text-xs"
           value={value ?? ''}
           onChange={(e) => onValueChange(e.target.value)}
           placeholder="e.g. /api/login (blank = match all)"
@@ -121,7 +121,7 @@ export function TriggerInfoPanel({
     <div className="flex items-start gap-2 rounded-md border bg-muted/30 px-3 py-2.5">
       <Info className="size-3.5 shrink-0 mt-0.5 text-muted-foreground" />
       <div className="min-w-0">
-        <p className="text-[11px] text-muted-foreground">{description}</p>
+        <p className="text-2xs text-muted-foreground">{description}</p>
       </div>
     </div>
   );

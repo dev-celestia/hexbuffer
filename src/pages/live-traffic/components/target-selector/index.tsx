@@ -134,7 +134,7 @@ export function TargetSelectorDialog({
             <DialogFooter
               className={cn(
                 // Layout & Positioning
-                "flex items-center justify-between sm:justify-between",
+                "items-center justify-between sm:justify-between",
 
                 // Sizing & Spacing
                 "pt-2",

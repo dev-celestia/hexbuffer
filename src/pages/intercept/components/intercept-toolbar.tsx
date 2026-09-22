@@ -64,7 +64,7 @@ export function InterceptToolbar({
             'shrink-0',
 
             // Typography
-            'text-[10px] font-mono text-muted-foreground'
+            'text-3xs font-mono text-muted-foreground'
           )}
         >
           Capture Hosts:
@@ -86,13 +86,13 @@ export function InterceptToolbar({
                 variant="secondary"
                 className={cn(
                   // Layout & Positioning
-                  'flex items-center whitespace-nowrap',
+                  'flex',
 
                   // Sizing & Spacing
-                  'h-5 px-2 pr-1 gap-1',
+                  'pr-1',
 
                   // Typography
-                  'text-[11px]',
+                  'text-2xs',
 
                   // Backgrounds & Borders
                   'rounded-sm',
@@ -126,7 +126,7 @@ export function InterceptToolbar({
               data-slot="capture-hosts-empty"
               className={cn(
                 // Typography
-                'text-[10px] text-muted-foreground/60 italic whitespace-nowrap'
+                'text-3xs text-muted-foreground/60 italic whitespace-nowrap'
               )}
             >
               none (capturing nothing)
@@ -142,7 +142,7 @@ export function InterceptToolbar({
             'gap-1'
           )}
         >
-          <Input
+          <Input mono
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -150,10 +150,10 @@ export function InterceptToolbar({
             aria-label="Add a capture host"
             className={cn(
               // Sizing & Spacing
-              'h-6 w-32 px-2',
+              'h-6 w-32',
 
               // Typography
-              'text-[11px] font-mono',
+              'text-2xs',
 
               // Backgrounds & Borders
               'rounded-sm'
@@ -164,7 +164,7 @@ export function InterceptToolbar({
             size="sm"
             className={cn(
               // Sizing & Spacing
-              'h-6 px-2'
+              'px-2'
             )}
             onClick={submit}
             disabled={!canAdd}
@@ -188,7 +188,7 @@ export function InterceptToolbar({
         <Button
           data-slot="intercept-toggle"
           variant={isEnabled ? 'default' : 'outline'}
-          size="sm"
+          size="md"
           onClick={() => onToggleIntercept(!isEnabled)}
           title={
             isEnabled
@@ -197,10 +197,10 @@ export function InterceptToolbar({
           }
           className={cn(
             // Sizing & Spacing
-            'h-7 px-2.5 gap-1.5',
+            'gap-1.5',
 
             // Typography
-            'text-xs font-medium'
+            'text-xs'
           )}
         >
           {isEnabled ? (
@@ -223,7 +223,7 @@ export function InterceptToolbar({
               'px-1.5 py-0.5',
 
               // Typography
-              'text-[10px] font-mono',
+              'text-3xs font-mono',
 
               // Backgrounds & Borders
               'text-muted-foreground bg-muted rounded border border-border/60'

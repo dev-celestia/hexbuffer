@@ -32,7 +32,7 @@ function ColumnLabel({ children }: Readonly<{ children: React.ReactNode }>) {
     <span
       className={cn(
         // Typography
-        'text-[10px] font-semibold tracking-wider text-muted-foreground/70 uppercase'
+        'text-3xs font-semibold tracking-wider text-muted-foreground/70 uppercase'
       )}
     >
       {children}
@@ -78,7 +78,7 @@ export function ForgeKeyValueEditor({
         <span
           className={cn(
             // Typography
-            'text-[11px] font-semibold text-muted-foreground'
+            'text-2xs font-semibold text-muted-foreground'
           )}
         >
           {noun}
@@ -88,7 +88,7 @@ export function ForgeKeyValueEditor({
           size="sm"
           className={cn(
             // Sizing & Spacing
-            'h-6 gap-1 px-2',
+            'px-2',
 
             // Typography
             'text-xs'
@@ -211,7 +211,7 @@ export function ForgeKeyValueEditor({
           >
             {emptyMessage}
           </p>
-          <Button variant="outline" size="sm" className="h-6 gap-1 px-2 text-xs" onClick={onAdd}>
+          <Button variant="outline" size="sm" className="px-2 text-xs" onClick={onAdd}>
             <PlusIcon className="size-3.5" />
             Add {noun.replace(/s$/, '').toLowerCase()}
           </Button>

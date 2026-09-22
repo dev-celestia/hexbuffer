@@ -54,49 +54,47 @@ export function NucleiFlowToolbar({
 
         {/* Validation Telemetry Pill */}
         {errors.length > 0 ? (
-          <Badge
+          <Badge mono
             variant="destructive"
             className={cn(
               // Layout & Positioning
-              "flex items-center gap-1",
+              "flex",
               // Sizing & Spacing
-              "h-5 px-1.5",
-              // Typography
-              "text-[10px] font-mono"
+              "px-1.5"
             )}
           >
             <WarningCircleIcon className="h-3 w-3" />
             {errors.length} Error{errors.length > 1 ? 's' : ''}
           </Badge>
         ) : warnings.length > 0 ? (
-          <Badge
+          <Badge mono
             variant="outline"
             className={cn(
               // Layout & Positioning
-              "flex items-center gap-1",
+              "flex",
               // Sizing & Spacing
-              "h-5 px-1.5",
+              "px-1.5",
               // Typography
-              "text-[10px] font-mono text-amber-500",
+              "text-warning",
               // Backgrounds & Borders
-              "border-amber-500/40"
+              "border-warning/40"
             )}
           >
             <WarningCircleIcon className="h-3 w-3" />
             {warnings.length} Warning{warnings.length > 1 ? 's' : ''}
           </Badge>
         ) : (
-          <Badge
+          <Badge mono
             variant="outline"
             className={cn(
               // Layout & Positioning
-              "flex items-center gap-1",
+              "flex",
               // Sizing & Spacing
-              "h-5 px-1.5",
+              "px-1.5",
               // Typography
-              "text-[10px] font-mono text-emerald-500",
+              "text-success",
               // Backgrounds & Borders
-              "border-emerald-500/40"
+              "border-success/40"
             )}
           >
             <CheckCircleIcon className="h-3 w-3" />
@@ -113,14 +111,14 @@ export function NucleiFlowToolbar({
         )}
       >
         <Button
-          size="sm"
+          size="md"
           variant="outline"
           onClick={onAutoLayout}
           className={cn(
             // Layout & Positioning
-            "flex items-center gap-1.5",
+            "flex gap-1.5",
             // Sizing & Spacing
-            "h-7 px-2.5 text-xs font-medium"
+            "text-xs"
           )}
           title="Hierarchical DAG Auto-Layout"
         >
@@ -129,14 +127,14 @@ export function NucleiFlowToolbar({
         </Button>
 
         <Button
-          size="sm"
+          size="md"
           variant="outline"
           onClick={onFitView}
           className={cn(
             // Layout & Positioning
-            "flex items-center gap-1.5",
+            "flex gap-1.5",
             // Sizing & Spacing
-            "h-7 px-2 text-xs"
+            "px-2 text-xs"
           )}
           title="Fit View to Canvas"
         >

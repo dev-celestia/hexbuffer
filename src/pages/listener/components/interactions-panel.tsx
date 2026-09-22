@@ -121,10 +121,7 @@ export function ListenerInteractions({
               placeholder="Search type, IP, method, path, payload…"
               className={cn(
                 // Sizing & Spacing
-                "h-7 w-52 pl-7 pr-7 text-xs bg-background",
-
-                // Backgrounds & Borders
-                "border-input",
+                "w-52 pl-7 pr-7 text-xs bg-background",
 
                 // Interactive & States
                 "focus:w-72 transition-all duration-150"
@@ -205,9 +202,9 @@ export function ListenerInteractions({
                               <CaretDownIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                             )}
                             <span className="text-xs font-semibold text-foreground truncate">{s.name}</span>
-                            <span className="text-[10px] font-mono text-muted-foreground truncate">({s.url})</span>
+                            <span className="text-3xs font-mono text-muted-foreground truncate">({s.url})</span>
                           </div>
-                          <Badge variant="secondary" className="text-[10px] font-mono shrink-0">
+                          <Badge mono variant="secondary">
                             {serverInteractions.length}
                           </Badge>
                         </div>
@@ -215,7 +212,7 @@ export function ListenerInteractions({
                         {!isCollapsed && (
                           <div className="min-w-0 overflow-x-auto">
                             {serverInteractions.length === 0 ? (
-                              <div className="text-[10px] text-muted-foreground italic p-3 text-center bg-card">
+                              <div className="text-3xs text-muted-foreground italic p-3 text-center bg-card">
                                 No interactions received on this host yet.
                               </div>
                             ) : (
@@ -237,25 +234,25 @@ export function ListenerInteractions({
                                         key={i.id}
                                         onClick={() => setSelectedInteractionId(i.id)}
                                         className={cn(
-                                          'cursor-pointer transition-colors hover:bg-muted/40',
+                                          'cursor-pointer hover:bg-muted/40',
                                           isSelected && 'bg-muted font-medium'
                                         )}
                                       >
                                         <TableCell className="px-3 py-1.5">
-                                          <Badge variant={TYPE_VARIANT[i.interactionType] ?? 'outline'} className="text-[10px] uppercase font-semibold">
+                                          <Badge variant={TYPE_VARIANT[i.interactionType] ?? 'outline'} className="uppercase font-semibold">
                                             {i.interactionType}
                                           </Badge>
                                         </TableCell>
-                                        <TableCell className="px-3 py-1.5 font-mono text-[10px]">
+                                        <TableCell mono className="px-3 py-1.5 text-3xs">
                                           {i.sourceIp}
                                         </TableCell>
-                                        <TableCell className="px-3 py-1.5 font-mono text-[11px] uppercase">
+                                        <TableCell mono className="px-3 py-1.5 text-2xs uppercase">
                                           {i.method ?? '-'}
                                         </TableCell>
-                                        <TableCell className="px-3 py-1.5 max-w-[200px] truncate font-mono text-[11px]">
+                                        <TableCell mono className="px-3 py-1.5 max-w-[200px] truncate text-2xs">
                                           {i.path ?? '-'}
                                         </TableCell>
-                                        <TableCell className="px-3 py-1.5 text-muted-foreground font-mono text-[10px]">
+                                        <TableCell mono className="px-3 py-1.5 text-muted-foreground text-3xs">
                                           {new Date(i.timestamp).toLocaleString()}
                                         </TableCell>
                                       </TableRow>
@@ -284,9 +281,9 @@ export function ListenerInteractions({
                             <CaretDownIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                           )}
                           <span className="text-xs font-semibold text-destructive">Orphaned Interactions</span>
-                          <span className="text-[10px] text-muted-foreground">(Hosts no longer registered)</span>
+                          <span className="text-3xs text-muted-foreground">(Hosts no longer registered)</span>
                         </div>
-                        <Badge variant="destructive" className="text-[10px] font-mono shrink-0">
+                        <Badge mono variant="destructive">
                           {orphanedInteractions.length}
                         </Badge>
                       </div>
@@ -311,25 +308,25 @@ export function ListenerInteractions({
                                     key={i.id}
                                     onClick={() => setSelectedInteractionId(i.id)}
                                     className={cn(
-                                      'cursor-pointer transition-colors hover:bg-muted/40',
+                                      'cursor-pointer hover:bg-muted/40',
                                       isSelected && 'bg-muted font-medium'
                                     )}
                                   >
                                     <TableCell className="px-3 py-1.5">
-                                      <Badge variant={TYPE_VARIANT[i.interactionType] ?? 'outline'} className="text-[10px] uppercase font-semibold">
+                                      <Badge variant={TYPE_VARIANT[i.interactionType] ?? 'outline'} className="uppercase font-semibold">
                                         {i.interactionType}
                                       </Badge>
                                     </TableCell>
-                                    <TableCell className="px-3 py-1.5 font-mono text-[10px]">
+                                    <TableCell mono className="px-3 py-1.5 text-3xs">
                                       {i.sourceIp}
                                     </TableCell>
-                                    <TableCell className="px-3 py-1.5 font-mono text-[11px] uppercase">
+                                    <TableCell mono className="px-3 py-1.5 text-2xs uppercase">
                                       {i.method ?? '-'}
                                     </TableCell>
-                                    <TableCell className="px-3 py-1.5 max-w-[200px] truncate font-mono text-[11px]">
+                                    <TableCell mono className="px-3 py-1.5 max-w-[200px] truncate text-2xs">
                                       {i.path ?? '-'}
                                     </TableCell>
-                                    <TableCell className="px-3 py-1.5 text-muted-foreground font-mono text-[10px]">
+                                    <TableCell mono className="px-3 py-1.5 text-muted-foreground text-3xs">
                                       {new Date(i.timestamp).toLocaleString()}
                                     </TableCell>
                                   </TableRow>

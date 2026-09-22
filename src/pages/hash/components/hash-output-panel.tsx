@@ -46,7 +46,7 @@ export function HashOutputPanel({ output, onCopy }: Readonly<HashOutputPanelProp
           <span
             className={cn(
               // Typography
-              "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+              "text-2xs font-semibold uppercase tracking-wider text-muted-foreground"
             )}
           >
             Hash Result
@@ -57,7 +57,7 @@ export function HashOutputPanel({ output, onCopy }: Readonly<HashOutputPanelProp
               "hidden sm:inline",
 
               // Typography
-              "text-[10px] text-muted-foreground/80"
+              "text-3xs text-muted-foreground/80"
             )}
           >
             Computed digest

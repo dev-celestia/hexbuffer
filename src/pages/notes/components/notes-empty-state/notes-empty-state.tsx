@@ -86,7 +86,7 @@ export function NotesEmptyState({ onOpenSavedNotes, onCreateNewNote }: Readonly<
             onClick={onCreateNewNote}
             className={cn(
               // Typography
-              "text-xs font-medium cursor-pointer"
+              "text-xs"
             )}
           >
             <PlusIcon className="size-3.5 mr-1.5" />
@@ -98,7 +98,7 @@ export function NotesEmptyState({ onOpenSavedNotes, onCreateNewNote }: Readonly<
             onClick={onOpenSavedNotes}
             className={cn(
               // Typography
-              "text-xs font-medium cursor-pointer"
+              "text-xs"
             )}
           >
             <FolderSimpleIcon className="size-3.5 mr-1.5" />

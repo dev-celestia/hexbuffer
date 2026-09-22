@@ -15,19 +15,19 @@ interface LogsProps {
 }
 
 function statusColor(code: number) {
-  if (code < 300) return 'text-green-400';
-  if (code < 400) return 'text-yellow-400';
-  return 'text-red-400';
+  if (code < 300) return 'text-success';
+  if (code < 400) return 'text-warning';
+  return 'text-destructive';
 }
 
 function methodColor(method: string) {
   const map: Record<string, string> = {
-    GET: 'bg-green-500/10 text-green-400 border-green-500/20',
-    POST: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    PUT: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-    DELETE: 'bg-red-500/10 text-red-400 border-red-500/20',
-    PATCH: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-    OPTIONS: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    GET: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
+    POST: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+    PUT: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20',
+    DELETE: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
+    PATCH: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
+    OPTIONS: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
   };
   return map[method] ?? 'bg-muted text-muted-foreground border-transparent';
 }
@@ -51,7 +51,7 @@ export function LogsPanel({ logs, domains, routes, selectedLogId, onSelect }: Re
               <ListIcon className="h-4 w-4 text-muted-foreground" />
               <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Mock API Logs</h3>
             </div>
-            <Badge variant="secondary" className="text-[10px] font-mono rounded px-1.5 py-0.5 leading-none bg-muted text-muted-foreground">
+            <Badge mono variant="secondary" className="rounded px-1.5 leading-none bg-muted text-muted-foreground">
               {filteredLogs.length} logs
             </Badge>
           </div>
@@ -86,7 +86,7 @@ export function LogsPanel({ logs, domains, routes, selectedLogId, onSelect }: Re
                     onClick={() => onSelect(log.id)}
                   >
                     <span
-                      className={`shrink-0 rounded-[3px] border px-1.5 py-0.5 text-[9px] font-bold leading-tight ${methodColor(log.method)}`}
+                      className={`shrink-0 rounded-[3px] border px-1.5 py-0.5 text-4xs font-bold leading-tight ${methodColor(log.method)}`}
                     >
                       {log.method}
                     </span>
@@ -96,7 +96,7 @@ export function LogsPanel({ logs, domains, routes, selectedLogId, onSelect }: Re
                     <span className={`shrink-0 font-mono text-xs font-bold ${statusColor(log.statusCode)}`}>
                       {log.statusCode}
                     </span>
-                    <span className="w-14 shrink-0 text-right font-mono text-[10px] text-muted-foreground">
+                    <span className="w-14 shrink-0 text-right font-mono text-3xs text-muted-foreground">
                       {log.latencyMs}ms
                     </span>
                   </div>
@@ -134,19 +134,19 @@ function LogDetailView({ log, domains, routes }: Readonly<{ log: RequestLog; dom
           {log.method}
         </span>
         <span className="font-mono text-xs font-medium text-foreground">{log.path}</span>
-        <Badge variant="outline" className="text-[10px] font-mono text-emerald-400 border-emerald-500/30">
+        <Badge mono variant="outline" className="text-success border-success/30">
           ⚡ Mock API
         </Badge>
         <span className={`font-mono text-xs font-bold ${statusColor(log.statusCode)}`}>
           HTTP {log.statusCode}
         </span>
         <span className="font-mono text-xs text-muted-foreground">{log.latencyMs}ms</span>
-        <span className="text-[10px] text-muted-foreground ml-auto">{formatTime(log.timestamp)}</span>
+        <span className="text-3xs text-muted-foreground ml-auto">{formatTime(log.timestamp)}</span>
 
         <Button
           variant="outline"
-          size="sm"
-          className="h-7 px-2 text-xs ml-2 cursor-pointer border-border"
+          size="md"
+          className="px-2 text-xs ml-2"
           onClick={handleSendToRepeater}
         >
           <ArrowSquareOutIcon className="mr-1 h-3.5 w-3.5" />
@@ -157,19 +157,19 @@ function LogDetailView({ log, domains, routes }: Readonly<{ log: RequestLog; dom
       {/* Meta grid */}
       <div className="grid grid-cols-3 gap-2 border-b p-3 bg-muted/5 text-xs">
         <div>
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Matched Endpoint</span>
+          <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider block">Matched Endpoint</span>
           <span className="font-mono text-xs text-foreground mt-0.5 block truncate">
             {route ? `${route.method} ${route.path}` : 'Default Mock Response'}
           </span>
         </div>
         <div>
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Latency</span>
+          <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider block">Latency</span>
           <span className="font-mono text-xs text-foreground mt-0.5 block truncate">
             {log.latencyMs} ms
           </span>
         </div>
         <div>
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Timestamp</span>
+          <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider block">Timestamp</span>
           <span className="font-mono text-xs text-foreground mt-0.5 block">
             {new Date(log.timestamp).toLocaleString()}
           </span>
@@ -181,17 +181,17 @@ function LogDetailView({ log, domains, routes }: Readonly<{ log: RequestLog; dom
         {/* Request */}
         <div className="flex flex-1 min-w-0 flex-col">
           <div className="flex items-center justify-between border-b px-3 py-1.5 bg-muted/20">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider">
               Request Payload & Headers
             </span>
           </div>
           <ScrollArea className="flex-1">
             <div className="p-3 space-y-3">
               <div>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">
+                <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider block mb-1">
                   Headers ({Object.keys(log.requestHeaders).length})
                 </span>
-                <div className="rounded border border-border/60 bg-muted/20 p-2 font-mono text-[10px] space-y-0.5">
+                <div className="rounded border border-border/60 bg-muted/20 p-2 font-mono text-3xs space-y-0.5">
                   {Object.entries(log.requestHeaders).map(([k, v]) => (
                     <div key={k} className="flex">
                       <span className="text-muted-foreground shrink-0 w-36 truncate">{k}:</span>
@@ -204,7 +204,7 @@ function LogDetailView({ log, domains, routes }: Readonly<{ log: RequestLog; dom
               <Separator />
 
               <div>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">
+                <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider block mb-1">
                   Body Payload
                 </span>
                 <div className="h-44 rounded border border-border overflow-hidden bg-code-bg">
@@ -225,14 +225,14 @@ function LogDetailView({ log, domains, routes }: Readonly<{ log: RequestLog; dom
         {/* Response */}
         <div className="flex flex-1 min-w-0 flex-col">
           <div className="flex items-center justify-between border-b px-3 py-1.5 bg-muted/20">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider">
               Mock Response Served
             </span>
           </div>
           <ScrollArea className="flex-1">
             <div className="p-3 space-y-3">
               <div>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">
+                <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider block mb-1">
                   Response Body
                 </span>
                 <div className="h-64 rounded border border-border overflow-hidden bg-code-bg">

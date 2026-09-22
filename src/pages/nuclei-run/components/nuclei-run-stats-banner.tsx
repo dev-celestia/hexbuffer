@@ -143,7 +143,7 @@ export function NucleiRunStatsBanner({
             <span
               className={cn(
                 // Typography
-                "font-mono text-[10px] text-muted-foreground w-8 text-right shrink-0"
+                "font-mono text-3xs text-muted-foreground w-8 text-right shrink-0"
               )}
             >
               {progress.percentage}%
@@ -158,7 +158,7 @@ export function NucleiRunStatsBanner({
               // Layout & Positioning
               "flex items-center gap-3 shrink-0",
               // Typography
-              "font-mono text-[10px] text-muted-foreground"
+              "font-mono text-3xs text-muted-foreground"
             )}
           >
             <div
@@ -205,7 +205,7 @@ export function NucleiRunStatsBanner({
               onClick={() => onToggleSeverityFilter(sev)}
               className={cn(
                 // Layout & Positioning
-                "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono transition-colors",
+                "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-3xs font-mono transition-colors",
                 // Backgrounds & Borders
                 conf.bg,
                 conf.text,

@@ -112,7 +112,7 @@ export function NucleiRunExportDialog({
               // Layout & Positioning
               "flex items-center gap-2",
               // Typography
-              "text-sm font-semibold"
+              "font-semibold"
             )}
           >
             <DownloadSimpleIcon className="h-4 w-4 text-primary" /> Export Scan Report
@@ -138,7 +138,7 @@ export function NucleiRunExportDialog({
               onClick={() => setFormat('sarif')}
               className={cn(
                 // Layout & Positioning
-                "flex items-center gap-1.5",
+                "flex gap-1.5",
                 // Sizing & Spacing
                 "h-8 text-xs",
                 // Typography
@@ -155,7 +155,7 @@ export function NucleiRunExportDialog({
               onClick={() => setFormat('jsonl')}
               className={cn(
                 // Layout & Positioning
-                "flex items-center gap-1.5",
+                "flex gap-1.5",
                 // Sizing & Spacing
                 "h-8 text-xs",
                 // Typography
@@ -172,7 +172,7 @@ export function NucleiRunExportDialog({
               onClick={() => setFormat('csv')}
               className={cn(
                 // Layout & Positioning
-                "flex items-center gap-1.5",
+                "flex gap-1.5",
                 // Sizing & Spacing
                 "h-8 text-xs",
                 // Typography
@@ -189,7 +189,7 @@ export function NucleiRunExportDialog({
               onClick={() => setFormat('markdown')}
               className={cn(
                 // Layout & Positioning
-                "flex items-center gap-1.5",
+                "flex gap-1.5",
                 // Sizing & Spacing
                 "h-8 text-xs",
                 // Typography
@@ -222,14 +222,14 @@ export function NucleiRunExportDialog({
         <DialogFooter
           className={cn(
             // Layout & Positioning
-            "flex items-center justify-between gap-2 border-t pt-3"
+            "items-center justify-between border-t pt-3"
           )}
         >
-          <Badge
+          <Badge mono
             variant="outline"
             className={cn(
               // Typography
-              "text-[11px] font-mono"
+              "text-2xs"
             )}
           >
             {findings.length} findings included
@@ -247,7 +247,7 @@ export function NucleiRunExportDialog({
               onClick={handleCopy}
               className={cn(
                 // Layout & Positioning
-                "flex items-center gap-1.5",
+                "flex gap-1.5",
                 // Sizing & Spacing
                 "text-xs"
               )}
@@ -262,7 +262,7 @@ export function NucleiRunExportDialog({
               onClick={handleDownload}
               className={cn(
                 // Layout & Positioning
-                "flex items-center gap-1.5",
+                "flex gap-1.5",
                 // Sizing & Spacing
                 "text-xs",
                 // Backgrounds & Borders

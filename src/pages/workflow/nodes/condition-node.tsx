@@ -74,11 +74,11 @@ function ConditionNodeComponent({
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs">{nodeData.label}</p>
-            <p className="truncate text-[10px] text-muted-foreground">Condition</p>
+            <p className="truncate text-3xs text-muted-foreground">Condition</p>
           </div>
           {warning && (
             <WarningCircleIcon
-              className="size-3.5 shrink-0 text-amber-500"
+              className="size-3.5 shrink-0 text-amber-600 dark:text-amber-400"
               aria-label={warning}
             />
           )}
@@ -91,10 +91,10 @@ function ConditionNodeComponent({
         {config && (
           <div className="border-t border-amber-500/20 px-3 py-1.5">
             <div className="flex items-center gap-1.5">
-              <code className="rounded bg-amber-500/10 px-1 py-0.5 text-[10px] font-mono">
+              <code className="rounded bg-amber-500/10 px-1 py-0.5 text-3xs font-mono">
                 {glyph}
               </code>
-              <span className="truncate text-[10px] text-muted-foreground">
+              <span className="truncate text-3xs text-muted-foreground">
                 {dataPath ? `${dataPath} ${glyph} ${config.value || '(not set)'}` : config.value || '(not set)'}
               </span>
             </div>
@@ -105,8 +105,8 @@ function ConditionNodeComponent({
 
         {/* True / False output labels */}
         <div className="flex items-center justify-between border-t border-amber-500/20 px-3 py-1">
-          <span className="text-[9px] font-medium text-emerald-500">True</span>
-          <span className="text-[9px] font-medium text-red-500">False</span>
+          <span className="text-4xs font-medium text-emerald-600 dark:text-emerald-400">True</span>
+          <span className="text-4xs font-medium text-red-600 dark:text-red-400">False</span>
         </div>
 
         <Handle
@@ -129,7 +129,7 @@ function ConditionNodeComponent({
       {description && (
         <TooltipContent side="right" sideOffset={12} className="max-w-52">
           <p className="font-medium">{nodeData.label}</p>
-          <p className="text-[11px] opacity-80">{description}</p>
+          <p className="text-2xs opacity-80">{description}</p>
         </TooltipContent>
       )}
     </Tooltip>

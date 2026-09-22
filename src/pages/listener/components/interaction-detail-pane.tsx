@@ -30,10 +30,10 @@ export function InteractionDetailPane({ interaction, onClose }: Readonly<Props>)
       {/* Header */}
       <div className="flex h-10 shrink-0 items-center justify-between border-b px-3">
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-[10px] font-semibold tracking-wider">
+          <Badge variant="outline" className="font-semibold tracking-wider">
             {interaction.interactionType.toUpperCase()}
           </Badge>
-          <span className="font-mono text-[11px] text-muted-foreground">
+          <span className="font-mono text-2xs text-muted-foreground">
             {interaction.sourceIp}
           </span>
         </div>
@@ -84,7 +84,7 @@ export function InteractionDetailPane({ interaction, onClose }: Readonly<Props>)
                 <div className="border-t border-border/40 mt-2 pt-2 space-y-1">
                   <p className="font-semibold text-muted-foreground mb-1.5">Query Parameters:</p>
                   {Object.entries(parsedQuery).map(([k, v]) => (
-                    <div key={k} className="flex gap-2 text-[11px]">
+                    <div key={k} className="flex gap-2 text-2xs">
                       <span className="w-24 shrink-0 text-right font-mono text-muted-foreground">{k}:</span>
                       <span className="break-all font-mono text-foreground">{v}</span>
                     </div>
@@ -99,10 +99,10 @@ export function InteractionDetailPane({ interaction, onClose }: Readonly<Props>)
               {parsedHeaders ? (
                 Object.entries(parsedHeaders).map(([k, v]) => (
                   <div key={k} className="flex gap-2">
-                    <span className="w-32 shrink-0 text-right font-mono text-[11px] text-muted-foreground font-medium">
+                    <span className="w-32 shrink-0 text-right font-mono text-2xs text-muted-foreground font-medium">
                       {k}:
                     </span>
-                    <span className="break-all font-mono text-[11px] text-foreground">{String(v)}</span>
+                    <span className="break-all font-mono text-2xs text-foreground">{String(v)}</span>
                   </div>
                 ))
               ) : (
@@ -150,14 +150,14 @@ function InfoBlock({ label, value, mono }: Readonly<{ label: string; value: stri
   return (
     <div className="flex items-start gap-2">
       <span className="w-24 shrink-0 text-right font-medium text-muted-foreground">{label}</span>
-      <span className={cn('break-all text-foreground', mono && 'font-mono text-[11px]')}>{value}</span>
+      <span className={cn('break-all text-foreground', mono && 'font-mono text-2xs')}>{value}</span>
     </div>
   );
 }
 
 function RawBlock({ content }: Readonly<{ content: string }>) {
   return (
-    <pre className="max-h-80 overflow-auto rounded-md border border-border bg-muted/50 p-2.5 font-mono text-[10px] leading-relaxed text-foreground select-text">
+    <pre className="max-h-80 overflow-auto rounded-md border border-border bg-muted/50 p-2.5 font-mono text-3xs leading-relaxed text-foreground select-text">
       {content}
     </pre>
   );

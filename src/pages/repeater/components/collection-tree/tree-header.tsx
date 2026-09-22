@@ -42,7 +42,7 @@ export function TreeHeader({
       <span
         className={cn(
           // Typography
-          'text-[11px] font-semibold tracking-wide text-muted-foreground uppercase'
+          'text-2xs font-semibold tracking-wide text-muted-foreground uppercase'
         )}
       >
         Collections

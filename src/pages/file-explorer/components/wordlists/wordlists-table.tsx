@@ -30,18 +30,18 @@ function WordlistStatus({ item }: Readonly<{ item: WordlistItemWithStatus }>) {
   switch (item.status) {
     case 'bundled':
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded font-semibold">
+        <span className="inline-flex items-center gap-1 text-3xs text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded font-semibold">
           <PackageIcon className="size-3" />
           <span>Bundled</span>
         </span>
       );
     case 'installed':
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded font-semibold">
+        <span className="inline-flex items-center gap-1 text-3xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded font-semibold">
           <CheckCircleIcon className="size-3" />
           <span>Ready</span>
           {item.fileSize && (
-            <span className="text-muted-foreground font-mono text-[9px]">
+            <span className="text-muted-foreground font-mono text-4xs">
               ({formatBytes(item.fileSize)})
             </span>
           )}
@@ -49,21 +49,21 @@ function WordlistStatus({ item }: Readonly<{ item: WordlistItemWithStatus }>) {
       );
     case 'downloading':
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded font-semibold animate-pulse">
+        <span className="inline-flex items-center gap-1 text-3xs text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded font-semibold animate-pulse">
           <CircleNotchIcon className="size-3 animate-spin" />
           <span>Downloading…</span>
         </span>
       );
     case 'error':
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] text-destructive bg-destructive/10 border border-destructive/20 px-1.5 py-0.5 rounded font-semibold">
+        <span className="inline-flex items-center gap-1 text-3xs text-destructive bg-destructive/10 border border-destructive/20 px-1.5 py-0.5 rounded font-semibold">
           <WarningCircleIcon className="size-3" />
           <span>Error</span>
         </span>
       );
     default:
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted border border-muted-foreground/10 px-1.5 py-0.5 rounded font-semibold">
+        <span className="inline-flex items-center gap-1 text-3xs text-muted-foreground bg-muted border border-muted-foreground/10 px-1.5 py-0.5 rounded font-semibold">
           <CloudArrowDownIcon className="size-3" />
           <span>Cloud</span>
         </span>
@@ -117,7 +117,7 @@ export function WordlistsTable({
       >
         <FileTextIcon className="size-10 text-muted-foreground/30 mb-1" />
         <p className="text-xs font-semibold text-foreground">No Wordlists Found</p>
-        <p className="text-[11px] text-muted-foreground max-w-xs">
+        <p className="text-2xs text-muted-foreground max-w-xs">
           No wordlists match the current search or category filter.
         </p>
       </div>
@@ -149,7 +149,7 @@ export function WordlistsTable({
             "bg-background border-b border-border text-muted-foreground",
 
             // Typography
-            "text-[10px] font-semibold uppercase tracking-wider"
+            "text-3xs font-semibold uppercase tracking-wider"
           )}
         >
           <tr>
@@ -215,7 +215,7 @@ export function WordlistsTable({
                       <span className="font-semibold text-foreground truncate text-xs">
                         {item.name}
                       </span>
-                      <span className="text-[10px] font-mono text-muted-foreground truncate">
+                      <span className="text-3xs font-mono text-muted-foreground truncate">
                         {item.href}
                       </span>
                     </div>
@@ -245,7 +245,7 @@ export function WordlistsTable({
                 </td>
 
                 {/* Lines */}
-                <td className="py-2 px-3 text-right font-mono text-[11px] text-muted-foreground whitespace-nowrap w-24">
+                <td className="py-2 px-3 text-right font-mono text-2xs text-muted-foreground whitespace-nowrap w-24">
                   {item.lines.toLocaleString()}
                 </td>
 
@@ -350,7 +350,7 @@ export function WordlistsTable({
                           e.stopPropagation();
                           onDownload(item);
                         }}
-                        className="h-6 px-2 text-[11px] gap-1 font-medium"
+                        className="px-2 text-2xs"
                       >
                         <CloudArrowDownIcon className="size-3" />
                         <span>Download</span>

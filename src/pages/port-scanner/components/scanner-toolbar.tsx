@@ -131,14 +131,14 @@ export function ScannerToolbar({
           )}
         >
           {/* Target Input */}
-          <Input
+          <Input mono
             id="target-input"
             className={cn(
               // Sizing & Spacing
-              "h-7 w-48 px-2",
+              "w-48",
 
               // Typography
-              "text-xs font-mono",
+              "text-xs",
 
               // Backgrounds & Borders
               "bg-background/50 border-muted-foreground/20",
@@ -159,15 +159,15 @@ export function ScannerToolbar({
           {/* Start / Stop */}
           {isRunning ? (
             <Button
-              size="sm"
+              size="md"
               variant="destructive"
               onClick={onStop}
               className={cn(
                 // Sizing & Spacing
-                "h-7 px-2.5 gap-1.5",
+                "gap-1.5",
 
                 // Typography
-                "text-xs font-medium"
+                "text-xs"
               )}
             >
               <SquareIcon className="size-3" weight="fill" />
@@ -175,15 +175,15 @@ export function ScannerToolbar({
             </Button>
           ) : (
             <Button
-              size="sm"
+              size="md"
               disabled={!canScan}
               onClick={onStart}
               className={cn(
                 // Sizing & Spacing
-                "h-7 px-2.5 gap-1.5",
+                "gap-1.5",
 
                 // Typography
-                "text-xs font-medium"
+                "text-xs"
               )}
             >
               <PlayIcon className="size-3" weight="fill" />
@@ -219,7 +219,7 @@ export function ScannerToolbar({
               id="preset-select"
               className={cn(
                 // Sizing & Spacing
-                "h-7 w-[105px] px-2",
+                "h-7 w-[105px]",
 
                 // Typography
                 "text-xs",
@@ -251,7 +251,7 @@ export function ScannerToolbar({
                     "text-xs",
 
                     // Interactive & States
-                    "focus:bg-accent focus:text-accent-foreground cursor-pointer"
+                    "cursor-pointer"
                   )}
                 >
                   {opt.label}
@@ -280,14 +280,14 @@ export function ScannerToolbar({
                   "relative flex items-center"
                 )}
               >
-                <Input
+                <Input mono
                   id="ports-input"
                   className={cn(
                     // Sizing & Spacing
-                    "h-7 w-44 sm:w-56 pl-2 pr-12",
+                    "w-44 sm:w-56 pl-2 pr-12",
 
                     // Typography
-                    "text-xs font-mono",
+                    "text-xs",
 
                     // Backgrounds & Borders
                     "bg-background/50 border-muted-foreground/20",
@@ -305,7 +305,7 @@ export function ScannerToolbar({
                     "absolute right-1.5 pointer-events-none select-none",
 
                     // Typography
-                    "text-[10px] font-mono text-muted-foreground font-medium"
+                    "text-3xs font-mono text-muted-foreground font-medium"
                   )}
                 >
                   {parsedCustomCount > 0 ? `${parsedCustomCount}p` : '0p'}
@@ -317,11 +317,11 @@ export function ScannerToolbar({
                   render={
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="md"
                       onClick={openCustomPortsDialog}
                       className={cn(
                         // Sizing & Spacing
-                        "h-7 px-2",
+                        "px-2",
 
                         // Typography
                         "text-xs",
@@ -416,9 +416,9 @@ export function ScannerToolbar({
             }
           >
             {stealthMode ? (
-              <EyeSlashIcon weight="fill" className="size-3.5 shrink-0 text-amber-500" />
+              <EyeSlashIcon weight="fill" className="size-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
             ) : (
-              <WarningCircleIcon weight="fill" className="size-3.5 shrink-0 text-red-500" />
+              <WarningCircleIcon weight="fill" className="size-3.5 shrink-0 text-red-600 dark:text-red-400" />
             )}
             <span>{stealthMode ? 'Stealth' : 'Noisy - High Performance'}</span>
             <Switch

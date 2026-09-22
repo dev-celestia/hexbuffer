@@ -74,7 +74,7 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: Readonly<SavedNotesDi
         <DialogHeader
           className={cn(
             // Layout & Positioning
-            "flex flex-row items-center justify-between shrink-0",
+            "flex-row items-center justify-between shrink-0",
 
             // Sizing & Spacing
             "px-6 py-4 border-b",
@@ -107,7 +107,7 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: Readonly<SavedNotesDi
                   "mt-0.5",
 
                   // Typography
-                  "text-xs text-muted-foreground"
+                  "text-xs"
                 )}
               >
                 Manage, search, and reopen all your saved notes ({counts.all} total)
@@ -129,13 +129,13 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: Readonly<SavedNotesDi
               onClick={handleCreateNewNote}
               className={cn(
                 // Layout & Positioning
-                "flex items-center",
+                "flex",
 
                 // Sizing & Spacing
                 "gap-1.5 h-8 px-3",
 
                 // Typography
-                "text-xs font-medium cursor-pointer"
+                "text-xs"
               )}
             >
               <PlusIcon className="size-3.5" />
@@ -213,7 +213,7 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: Readonly<SavedNotesDi
         <DialogFooter
           className={cn(
             // Layout & Positioning
-            "flex flex-row items-center justify-between shrink-0",
+            "flex-row items-center justify-between shrink-0",
 
             // Sizing & Spacing
             "px-6 py-3 border-t",
@@ -241,7 +241,7 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: Readonly<SavedNotesDi
               "h-8 px-4",
 
               // Typography
-              "text-xs font-medium cursor-pointer"
+              "text-xs"
             )}
           >
             Cancel

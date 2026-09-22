@@ -62,7 +62,7 @@ export function CollectionDropZone({
             isOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/25',
 
             // Typography
-            'text-[10px] text-muted-foreground'
+            'text-3xs text-muted-foreground'
           )}
         >
           Drop here
@@ -83,7 +83,7 @@ export function CollectionDropZone({
             'border-muted-foreground/20 hover:border-primary/40 hover:bg-primary/5',
 
             // Typography
-            'text-[11px] text-muted-foreground/70 hover:text-primary',
+            'text-2xs text-muted-foreground/70 hover:text-primary',
 
             // Interactive & States
             'transition-colors'

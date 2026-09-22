@@ -73,7 +73,7 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
-        <Label className="text-[11px]">Trigger type</Label>
+        <Label className="text-2xs">Trigger type</Label>
         <p className="text-xs text-muted-foreground">
           {NODE_TYPE_REGISTRY[tt]?.label ?? tt}
         </p>
@@ -81,11 +81,11 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
 
       {isScheduled && (
         <div className="space-y-1.5">
-          <Label className="text-[11px]">Cron schedule</Label>
+          <Label className="text-2xs">Cron schedule</Label>
           <div className="relative">
             <ClockIcon className="absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
             <Input
-              className="h-7 pl-7 text-xs"
+              className="pl-7 text-xs"
               value={config.schedule ?? ''}
               onChange={(e) => onChange({ schedule: e.target.value })}
               placeholder="0 */6 * * *"
@@ -101,8 +101,8 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
           </p>
           <Button
             variant="outline"
-            size="sm"
-            className="h-7 w-full text-xs"
+            size="md"
+            className="w-full text-xs"
             onClick={onRun}
           >
             <PlayIcon className="size-3 mr-1" />
@@ -114,7 +114,7 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
       {isLiveTraffic && (
         <>
           <div className="border-t pt-3 space-y-3">
-            <p className="text-[11px] font-medium text-muted-foreground">
+            <p className="text-2xs font-medium text-muted-foreground">
               <FunnelIcon className="size-3 inline mr-1" />
               Traffic filter
             </p>
@@ -130,7 +130,7 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
             )}
 
             <div className="space-y-1.5">
-              <Label className="text-[11px]">Method</Label>
+              <Label className="text-2xs">Method</Label>
               <Select
                 value={config.method?.trim() ? config.method.toUpperCase() : 'ANY'}
                 onValueChange={(v) => onChange({ method: v === 'ANY' ? undefined : (v ?? undefined) })}
@@ -149,7 +149,7 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-[11px]">
+              <Label className="text-2xs">
                 <GlobeIcon className="size-3 inline mr-1" />
                 Host whitelist <span className="text-warning">*</span>
               </Label>
@@ -159,13 +159,13 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
                 onChange={(e) => onChange({ host: e.target.value })}
                 placeholder={'https://app.example.com\napi.example.com:443\n*.target.local'}
               />
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-3xs text-muted-foreground">
                 Required. Enter hostnames, full URLs, optional ports, or wildcard domains. Separate with new lines, commas, semicolons, or spaces.
               </p>
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-[11px]">Operator</Label>
+              <Label className="text-2xs">Operator</Label>
               <Select
                 value={config.operator ?? 'contains'}
                 onValueChange={(v) => onChange({ operator: v as TriggerConfig['operator'] })}
@@ -184,9 +184,9 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-[11px]">Value</Label>
+              <Label className="text-2xs">Value</Label>
               <Input
-                className="h-7 text-xs"
+                className="text-xs"
                 value={config.value ?? ''}
                 onChange={(e) => onChange({ value: e.target.value })}
                 placeholder="e.g. /api/login (blank = match all URLs)"
@@ -205,7 +205,7 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
       {isHttpRequest && (
         <>
           <div className="border-t pt-3 space-y-3">
-            <p className="text-[11px] font-medium text-muted-foreground">
+            <p className="text-2xs font-medium text-muted-foreground">
               <FunnelIcon className="size-3 inline mr-1" />
               Request filter
             </p>
@@ -232,7 +232,7 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
       {isPageCrawled && (
         <>
           <div className="border-t pt-3 space-y-3">
-            <p className="text-[11px] font-medium text-muted-foreground">
+            <p className="text-2xs font-medium text-muted-foreground">
               <FunnelIcon className="size-3 inline mr-1" />
               Page filter
             </p>
@@ -255,14 +255,14 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
       {isPortScanResult && (
         <>
           <div className="border-t pt-3 space-y-3">
-            <p className="text-[11px] font-medium text-muted-foreground">
+            <p className="text-2xs font-medium text-muted-foreground">
               <NetworkIcon className="size-3 inline mr-1" />
               Port filter
             </p>
             <div className="space-y-1.5">
-              <Label className="text-[11px]">Port(s)</Label>
+              <Label className="text-2xs">Port(s)</Label>
               <Input
-                className="h-7 text-xs"
+                className="text-xs"
                 value={config.port ?? ''}
                 onChange={(e) => onChange({ port: e.target.value })}
                 placeholder="e.g. 80, 443, 8080 (blank = all ports)"
@@ -281,7 +281,7 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
       {isWebSocketMessage && (
         <>
           <div className="border-t pt-3 space-y-3">
-            <p className="text-[11px] font-medium text-muted-foreground">
+            <p className="text-2xs font-medium text-muted-foreground">
               <RadioIcon className="size-3 inline mr-1" />
               Message filter
             </p>
@@ -299,7 +299,7 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
               onChange={(v) => onChange({ host: v })}
             />
             <div className="space-y-1.5">
-              <Label className="text-[11px]">Direction</Label>
+              <Label className="text-2xs">Direction</Label>
               <Select
                 value={config.direction ?? ''}
                 onValueChange={(v) => onChange({ direction: v as TriggerConfig['direction'] })}
@@ -372,11 +372,11 @@ function LiveTrafficHostList({
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-[11px] font-medium text-muted-foreground">
+          <p className="text-2xs font-medium text-muted-foreground">
             <GlobeIcon className="size-3 inline mr-1" />
             {title}
           </p>
-          <p className="text-[10px] text-muted-foreground">
+          <p className="text-3xs text-muted-foreground">
             {stats ? stats.pending : items.length} {noun}{(stats ? stats.pending : items.length) === 1 ? '' : 's'}
             {stats && ` / cap ${stats.cap}`}
           </p>
@@ -385,7 +385,7 @@ function LiveTrafficHostList({
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 shrink-0 p-0"
+            className="w-6 p-0"
             onClick={onClear}
             title={clearTitle}
           >
@@ -406,7 +406,7 @@ function LiveTrafficHostList({
 
       {items.length === 0 ? (
         <div className="rounded-md border border-dashed px-3 py-4 text-center">
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-2xs text-muted-foreground">
             {emptyText}
           </p>
         </div>
@@ -418,11 +418,11 @@ function LiveTrafficHostList({
               className="rounded-md border bg-muted/30 px-2 py-1.5"
               title={`${item.method} ${item.host}${item.path}`}
             >
-              <div className="flex items-center gap-1.5 text-[10px]">
+              <div className="flex items-center gap-1.5 text-3xs">
                 <span className="shrink-0 text-muted-foreground/70">
                   {formatTime(item.matchedAt)}
                 </span>
-                <span className="shrink-0 font-medium text-cyan-500">{item.method}</span>
+                <span className="shrink-0 font-medium text-cyan-600 dark:text-cyan-400">{item.method}</span>
                 {item.status != null && (
                   <span className="shrink-0 text-muted-foreground">{item.status}</span>
                 )}
@@ -430,7 +430,7 @@ function LiveTrafficHostList({
                   {item.host}
                 </span>
               </div>
-              <p className="mt-0.5 truncate font-mono text-[10px] text-muted-foreground">
+              <p className="mt-0.5 truncate font-mono text-3xs text-muted-foreground">
                 {item.path || '/'}
               </p>
             </div>

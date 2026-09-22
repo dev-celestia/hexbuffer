@@ -89,7 +89,7 @@ export function ContextsSidebar({
         <span
           className={cn(
             // Typography
-            'text-[11px] font-semibold tracking-wide text-muted-foreground uppercase'
+            'text-2xs font-semibold tracking-wide text-muted-foreground uppercase'
           )}
         >
           Environments
@@ -208,7 +208,7 @@ export function ContextsSidebar({
                     size="sm"
                     className={cn(
                       // Sizing & Spacing
-                      'h-6 gap-1 px-2',
+                      'px-2',
 
                       // Typography
                       'text-xs'

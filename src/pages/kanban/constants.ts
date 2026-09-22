@@ -1,9 +1,9 @@
 import type { Priority, KanbanCard, KanbanColumn, GroupBy } from './types';
 
 export const PRIORITY_CONFIG: Record<Priority, { label: string; color: string; dot: string }> = {
-  critical: { label: 'Critical', color: 'text-red-500', dot: 'bg-red-500' },
-  high:     { label: 'High',     color: 'text-orange-400', dot: 'bg-orange-400' },
-  medium:   { label: 'Medium',   color: 'text-yellow-400', dot: 'bg-yellow-400' },
+  critical: { label: 'Critical', color: 'text-red-600 dark:text-red-400', dot: 'bg-red-500' },
+  high:     { label: 'High',     color: 'text-orange-600 dark:text-orange-400', dot: 'bg-orange-400' },
+  medium:   { label: 'Medium',   color: 'text-yellow-600 dark:text-yellow-400', dot: 'bg-yellow-400' },
   low:      { label: 'Low',      color: 'text-muted-foreground', dot: 'bg-muted-foreground' },
 };
 

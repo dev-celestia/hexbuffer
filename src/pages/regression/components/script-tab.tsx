@@ -33,7 +33,7 @@ interface ScriptTabProps {
 
 const FIELD_LABEL_CLASS = cn(
   // Typography
-  'text-[11px] font-semibold text-muted-foreground'
+  'text-2xs font-semibold text-muted-foreground'
 );
 
 export function ScriptTab({
@@ -93,12 +93,11 @@ export function ScriptTab({
           <label className={FIELD_LABEL_CLASS} htmlFor="regression-target">
             Target URL
           </label>
-          <Input
+          <Input mono
             id="regression-target"
             value={draft.targetUrl}
             onChange={(e) => onChange({ targetUrl: e.target.value })}
             placeholder="https://target.example.com"
-            className="font-mono"
           />
         </div>
         <div
@@ -169,7 +168,7 @@ export function ScriptTab({
               'p-2.5',
 
               // Typography
-              'font-mono text-[11px] text-red-600 dark:text-red-400'
+              'font-mono text-2xs text-red-600 dark:text-red-400'
             )}
           >
             {errors.map((error, i) => (
@@ -194,12 +193,12 @@ export function ScriptTab({
           )}
         >
           {validation.templates.map((template) => (
-            <Badge
+            <Badge mono
               key={template.id}
               variant="outline"
               className={cn(
                 // Typography
-                'font-mono text-[10px]',
+                'text-3xs',
 
                 // Backgrounds & Borders
                 'border',
@@ -229,7 +228,7 @@ export function ScriptTab({
               'flex items-center gap-1',
 
               // Typography
-              'text-[11px] font-semibold',
+              'text-2xs font-semibold',
               validation.valid
                 ? 'text-emerald-600 dark:text-emerald-400'
                 : 'text-red-600 dark:text-red-400'
@@ -246,7 +245,7 @@ export function ScriptTab({
           <span
             className={cn(
               // Typography
-              'text-[11px] text-muted-foreground'
+              'text-2xs text-muted-foreground'
             )}
           >
             Not validated yet
@@ -260,7 +259,7 @@ export function ScriptTab({
               'flex items-center gap-1',
 
               // Typography
-              'text-[11px] text-amber-600 dark:text-amber-400'
+              'text-2xs text-amber-600 dark:text-amber-400'
             )}
           >
             <WarningDiamondIcon className="size-3.5" />

@@ -98,7 +98,7 @@ export function RegressionSidebar({
             <span
               className={cn(
                 // Typography
-                'text-[11px] font-semibold uppercase tracking-widest text-muted-foreground'
+                'text-2xs font-semibold uppercase tracking-widest text-muted-foreground'
               )}
             >
               Test Cases
@@ -110,7 +110,7 @@ export function RegressionSidebar({
                 'h-4 px-1.5 py-0',
 
                 // Typography
-                'text-[10px] font-semibold tabular-nums'
+                'font-semibold tabular-nums'
               )}
             >
               {scripts.length}
@@ -261,7 +261,7 @@ export function RegressionSidebar({
                           'flex w-full items-center gap-1.5',
 
                           // Typography
-                          'font-mono text-[10px] text-muted-foreground'
+                          'font-mono text-3xs text-muted-foreground'
                         )}
                       >
                         <span className="truncate">{script.targetUrl || 'No target'}</span>

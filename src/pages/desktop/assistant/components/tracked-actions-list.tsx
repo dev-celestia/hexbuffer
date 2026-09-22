@@ -204,7 +204,7 @@ export function TrackedActionsList({ trackedActions, isStreaming }: Readonly<Tra
                       <div
                         className={cn(
                           // Layout & Positioning
-                          'flex items-center justify-between text-[11px]',
+                          'flex items-center justify-between text-2xs',
                         )}
                       >
                         <span
@@ -241,7 +241,7 @@ export function TrackedActionsList({ trackedActions, isStreaming }: Readonly<Tra
                                   // Sizing & Spacing
                                   'p-1.5',
                                   // Typography
-                                  'font-mono text-[11px] text-foreground',
+                                  'font-mono text-2xs text-foreground',
                                   // Backgrounds & Borders
                                   'rounded bg-background/80 border border-border/50',
                                 )}
@@ -250,7 +250,7 @@ export function TrackedActionsList({ trackedActions, isStreaming }: Readonly<Tra
                           >
                             {ta.detail}
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-md text-xs break-all font-mono">
+                          <TooltipContent mono side="top" className="max-w-md text-xs break-all">
                             {ta.detail}
                           </TooltipContent>
                         </Tooltip>

@@ -76,13 +76,13 @@ export function ScanToolbar({
         {/* Scan Actions & Progress Status */}
         <div className="flex items-center gap-2">
           {error && (
-            <span className="text-[10px] text-destructive font-mono bg-destructive/5 px-2 py-1 rounded border border-destructive/10 max-w-[240px] truncate" title={error}>
+            <span className="text-3xs text-destructive font-mono bg-destructive/5 px-2 py-1 rounded border border-destructive/10 max-w-[240px] truncate" title={error}>
               {error}
             </span>
           )}
 
           {isRunning && (
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 animate-pulse text-[10px] font-mono">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 animate-pulse text-3xs font-mono">
               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-ping" />
               <span>{progress.phase || 'Scanning'}</span>
             </div>
@@ -93,20 +93,20 @@ export function ScanToolbar({
           <div className="flex items-center gap-1.5">
             <Button
               variant="outline"
-              size="sm"
+              size="md"
               onClick={onExportJson}
               disabled={vulnerabilitiesCount === 0}
-              className="h-7 text-[11px] gap-1.5 px-2.5 transition-colors font-medium"
+              className="text-2xs gap-1.5 transition-colors"
             >
               <DownloadIcon className="h-3.5 w-3.5" />
               JSON
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="md"
               onClick={onExportCsv}
               disabled={vulnerabilitiesCount === 0}
-              className="h-7 text-[11px] gap-1.5 px-2.5 transition-colors font-medium"
+              className="text-2xs gap-1.5 transition-colors"
             >
               <DownloadIcon className="h-3.5 w-3.5" />
               CSV
@@ -129,7 +129,7 @@ export function ScanToolbar({
                 variant="destructive"
                 size="sm"
                 onClick={onStop}
-                className="h-8 text-[11px] gap-1.5 px-3.5 font-semibold shadow-sm"
+                className="h-8 text-2xs gap-1.5 px-3.5 font-semibold shadow-sm"
               >
                 <SquareIcon className="h-3 w-3 fill-current" />
                 Stop Scan
@@ -139,7 +139,7 @@ export function ScanToolbar({
                 size="sm"
                 onClick={onStart}
                 disabled={!hasUrlAndParams}
-                className="h-8 text-[11px] gap-1.5 px-3.5 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-sm disabled:bg-muted disabled:text-muted-foreground"
+                className="h-8 text-2xs gap-1.5 px-3.5 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-sm disabled:bg-muted disabled:text-muted-foreground"
               >
                 <PlayIcon className="h-3 w-3 fill-current" />
                 Start Scan
@@ -153,17 +153,17 @@ export function ScanToolbar({
       <div className="flex flex-wrap items-center gap-6 px-4 py-2 border-t bg-muted/20">
         <div className="flex items-center gap-2">
           <GearIcon className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider select-none">
+          <span className="text-3xs uppercase font-bold text-muted-foreground tracking-wider select-none">
             Scan Parameters
           </span>
         </div>
 
         <div className="flex items-center gap-1.5">
-          <Label className="text-[11px] text-muted-foreground select-none">
+          <Label className="text-2xs text-muted-foreground">
             Risk:
           </Label>
           <Select value={riskLevel} onValueChange={v => onRiskLevelChange(v as SqliRiskLevel)}>
-            <SelectTrigger className="h-6 text-[10px] w-24 bg-background py-0">
+            <SelectTrigger className="h-6 text-3xs w-24 bg-background py-0">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="text-xs">
@@ -175,7 +175,7 @@ export function ScanToolbar({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-[11px] text-muted-foreground select-none">
+          <span className="text-2xs text-muted-foreground select-none">
             Techniques:
           </span>
           <div className="flex items-center gap-1.5">
@@ -186,7 +186,7 @@ export function ScanToolbar({
                   key={tech}
                   type="button"
                   onClick={() => onToggleTechnique(tech)}
-                  className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-all ${
+                  className={`px-2 py-0.5 rounded text-3xs font-medium border transition-all ${
                     isSelected
                       ? 'bg-primary/10 border-primary/30 text-primary hover:bg-primary/15'
                       : 'bg-background border-border hover:bg-muted/50 text-muted-foreground'

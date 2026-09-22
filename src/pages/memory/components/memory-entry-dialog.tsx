@@ -107,7 +107,7 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
           <DialogTitle
             className={cn(
               // Typography
-              "text-sm font-semibold"
+              "font-semibold"
             )}
           >
             {editingItem ? 'Edit Memory Entry' : 'Add Memory Entry'}
@@ -126,7 +126,7 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
           >
             {/* Title */}
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs font-medium">
+              <Label className="text-xs">
                 Title <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -142,18 +142,18 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
             <div className="grid grid-cols-3 gap-2.5">
               {/* Namespace */}
               <div className="flex flex-col gap-1.5">
-                <Label className="text-xs font-medium">Namespace</Label>
-                <Input
+                <Label className="text-xs">Namespace</Label>
+                <Input mono
                   value={namespace}
                   onChange={(e) => setNamespace(e.target.value)}
                   placeholder="default"
-                  className="h-8 text-xs font-mono"
+                  className="h-8 text-xs"
                 />
               </div>
 
               {/* Memory Type */}
               <div className="flex flex-col gap-1.5">
-                <Label className="text-xs font-medium">Type</Label>
+                <Label className="text-xs">Type</Label>
                 <Select
                   value={memoryType}
                   // Base UI reports a cleared selection as `null`. `all` is filtered out of the
@@ -177,7 +177,7 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
 
               {/* Importance */}
               <div className="flex flex-col gap-1.5">
-                <Label className="text-xs font-medium">Priority</Label>
+                <Label className="text-xs">Priority</Label>
                 <Select
                   value={importance}
                   // As above — priority is always one of the four bands.
@@ -201,16 +201,16 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
             {/* Tags & Source */}
             <div className="grid grid-cols-2 gap-2.5">
               <div className="flex flex-col gap-1.5">
-                <Label className="text-xs font-medium">Tags (comma-separated)</Label>
-                <Input
+                <Label className="text-xs">Tags (comma-separated)</Label>
+                <Input mono
                   value={tagsInput}
                   onChange={(e) => setTagsInput(e.target.value)}
                   placeholder="vuln, auth, api, scope"
-                  className="h-8 text-xs font-mono"
+                  className="h-8 text-xs"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label className="text-xs font-medium">Source / URL (optional)</Label>
+                <Label className="text-xs">Source / URL (optional)</Label>
                 <Input
                   value={source}
                   onChange={(e) => setSource(e.target.value)}
@@ -222,15 +222,15 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
 
             {/* Content */}
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs font-medium">
+              <Label className="text-xs">
                 Content <span className="text-destructive">*</span>
               </Label>
-              <Textarea
+              <Textarea mono
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Detailed security observation, credential secret, reproduction steps, or context note..."
                 rows={6}
-                className="text-xs font-mono leading-relaxed resize-none"
+                className="text-xs leading-relaxed resize-none"
               />
             </div>
           </div>

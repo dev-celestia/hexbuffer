@@ -59,7 +59,7 @@ export function NucleiFlowEdgeView({
               // Layout & Positioning
               "flex items-center gap-1 rounded px-1.5 py-0.5",
               // Typography
-              "text-[9px] font-mono font-semibold",
+              "text-4xs font-mono font-semibold",
               // Backgrounds & Borders
               edgeType === 'condition-true'
                 ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"

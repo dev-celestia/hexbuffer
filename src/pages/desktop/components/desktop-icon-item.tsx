@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 const CONTAINER_SIZE = "size-20";
 const INNER_SIZE = "size-[56px]";
 const ICON_SIZE = "size-10";
-const TEXT_SIZE = "text-[10px]";
+const TEXT_SIZE = "text-3xs";
 
 interface DesktopIconItemProps {
   href: string;

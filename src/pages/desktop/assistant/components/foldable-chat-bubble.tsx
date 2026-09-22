@@ -194,7 +194,7 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
                 // Sizing & Spacing
                 'ml-1',
                 // Typography
-                'text-[10px] text-muted-foreground/70 shrink-0 font-mono',
+                'text-3xs text-muted-foreground/70 shrink-0 font-mono',
               )}
             >
               {timestamp}
@@ -206,19 +206,19 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
             align="end"
             className={cn(
               // Layout & Positioning
-              'max-w-[85%] min-w-0',
+              'max-w-[85%]',
             )}
           >
             <BubbleContent
               className={cn(
                 // Layout & Positioning
-                'flex flex-col min-w-0 max-w-full overflow-hidden break-words',
+                'flex flex-col break-words',
                 // Sizing & Spacing
-                'px-4 py-2.5 rounded-lg gap-1',
+                'px-4 py-2.5 gap-1',
                 // Typography
                 'text-sm text-foreground',
                 // Backgrounds & Borders
-                'bg-muted/70 border border-border/60 shadow-2xs',
+                'bg-muted/70 border-border/60 shadow-2xs',
               )}
             >
               <div
@@ -234,7 +234,7 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
                   // Layout & Positioning
                   'self-end',
                   // Typography
-                  'text-[10px] text-muted-foreground/70 font-mono select-none',
+                  'text-3xs text-muted-foreground/70 font-mono select-none',
                 )}
               >
                 {timestamp}
@@ -308,7 +308,7 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
           <span
             className={cn(
               // Typography
-              'text-[10px] text-muted-foreground/60 font-mono',
+              'text-3xs text-muted-foreground/60 font-mono',
             )}
           >
             {timestamp}
@@ -394,7 +394,7 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
         align="start"
         className={cn(
           // Layout & Positioning
-          'w-full max-w-full border-0 min-w-0',
+          'w-full max-w-full border-0',
         )}
       >
         <BubbleContent
@@ -437,7 +437,7 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
             <span
               className={cn(
                 // Typography
-                'text-[10px] text-muted-foreground/60 font-mono select-none',
+                'text-3xs text-muted-foreground/60 font-mono select-none',
               )}
             >
               {timestamp}
@@ -528,7 +528,7 @@ export const FoldableChatBubble = memo(function FoldableChatBubble({
                   // Sizing & Spacing
                   'px-2.5 py-1 rounded-md',
                   // Typography
-                  'text-[11px] font-medium text-muted-foreground',
+                  'text-2xs font-medium text-muted-foreground',
                   // Interactive & States
                   'hover:text-foreground hover:bg-muted/50 transition-colors cursor-pointer',
                 )}

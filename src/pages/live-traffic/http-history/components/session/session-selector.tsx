@@ -116,11 +116,8 @@ export function SessionSelector() {
             <DropdownMenuItem
               onClick={() => setCreateOpen(true)}
               className={cn(
-                // Layout & Positioning
-                "flex items-center",
-
                 // Sizing & Spacing
-                "gap-2 px-2 py-1.5",
+                "py-1.5",
 
                 // Typography
                 "text-xs font-medium text-primary",

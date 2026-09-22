@@ -70,7 +70,7 @@ export function ListenerHosts({
         <span className="text-xs font-mono font-medium text-muted-foreground">
           {servers.length} host{servers.length !== 1 ? 's' : ''} configured
         </span>
-        <Button size="sm" variant="outline" className="h-7 gap-1 text-xs" onClick={startAdd}>
+        <Button size="md" variant="outline" className="text-xs" onClick={startAdd}>
           <PlusIcon className="h-3.5 w-3.5" />
           Add Host
         </Button>
@@ -78,7 +78,7 @@ export function ListenerHosts({
         <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-sm font-semibold">
+              <DialogTitle className="font-semibold">
                 {editingServer ? 'Edit Listener Host' : 'Add Listener Host'}
               </DialogTitle>
             </DialogHeader>
@@ -196,14 +196,14 @@ export function ListenerHosts({
               const serverPayloads = payloads.filter((p) => p.serverId === s.id);
 
               return (
-                <Card key={s.id} className="border bg-card text-card-foreground shadow-sm">
+                <Card key={s.id} className="border shadow-sm">
                   <CardContent className="space-y-3 p-3">
                     {/* Header */}
                     <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-2">
                       <div className="min-w-0 flex-1">
                         <span className="truncate block text-xs font-semibold">{s.name}</span>
                         <p
-                          className="truncate font-mono text-[9px] text-muted-foreground mt-0.5"
+                          className="truncate font-mono text-4xs text-muted-foreground mt-0.5"
                           title={s.url}
                         >
                           {s.url}
@@ -211,14 +211,14 @@ export function ListenerHosts({
                       </div>
                       <Badge
                         variant={s.status === 'connected' ? 'default' : 'secondary'}
-                        className="text-[9px] uppercase font-semibold shrink-0"
+                        className="text-4xs uppercase font-semibold"
                       >
                         {s.status}
                       </Badge>
                     </div>
 
                     {/* API keys / server metadata */}
-                    <div className="flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground/80">
+                    <div className="flex items-center gap-1.5 font-mono text-3xs text-muted-foreground/80">
                       <span>API Key:</span>
                       <span className="select-all">
                         {showKeys[s.id] ? s.apiKey : `${s.apiKey.slice(0, 4)}••••••`}
@@ -253,7 +253,7 @@ export function ListenerHosts({
                     {/* Subdomains */}
                     <div className="border-t border-border/40 pt-2 space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-semibold text-muted-foreground">
+                        <span className="text-3xs font-semibold text-muted-foreground">
                           Subdomains
                           {serverPayloads.filter(p => p.status === 'active').length > 0 && (
                             <span className="ml-1 text-muted-foreground/60">
@@ -264,7 +264,7 @@ export function ListenerHosts({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-5 gap-1 px-1.5 text-[10px] text-muted-foreground hover:text-foreground"
+                          className="h-5 px-1.5 text-3xs text-muted-foreground hover:text-foreground"
                           onClick={() => handleGeneratePayload(s)}
                           disabled={generating === s.id}
                           title="Generate a new subdomain"
@@ -279,7 +279,7 @@ export function ListenerHosts({
                       </div>
 
                       {serverPayloads.filter(p => p.status === 'active').length === 0 ? (
-                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground italic pl-1">
+                        <div className="flex items-center gap-2 text-3xs text-muted-foreground italic pl-1">
                           <SpinnerGapIcon className="h-3 w-3 animate-spin text-primary" />
                           <span>Generating first subdomain...</span>
                         </div>
@@ -293,7 +293,7 @@ export function ListenerHosts({
                                 className="flex items-center gap-1 rounded bg-muted/40 border border-border/30 p-1 pl-2"
                               >
                                 <span
-                                  className="font-mono text-[9px] text-foreground truncate select-all flex-1"
+                                  className="font-mono text-4xs text-foreground truncate select-all flex-1"
                                   title={p.payloadUrl}
                                 >
                                   {p.payloadUrl}
@@ -301,7 +301,7 @@ export function ListenerHosts({
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-5 w-5 shrink-0 text-muted-foreground hover:text-foreground"
+                                  className="h-5 w-5 text-muted-foreground hover:text-foreground"
                                   onClick={() => {
                                     navigator.clipboard.writeText(p.payloadUrl);
                                     toast.success('Subdomain URL copied');
@@ -313,7 +313,7 @@ export function ListenerHosts({
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-5 w-5 shrink-0 text-muted-foreground hover:text-destructive"
+                                  className="h-5 w-5 text-muted-foreground hover:text-destructive"
                                   onClick={() => onDeletePayload(p.id)}
                                   title="Delete subdomain"
                                 >
@@ -330,7 +330,7 @@ export function ListenerHosts({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-6 flex-1 gap-1 text-[10px]"
+                        className="flex-1 text-3xs"
                         onClick={() => handleCheck(s.id)}
                         disabled={checking === s.id}
                       >
@@ -342,7 +342,7 @@ export function ListenerHosts({
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-6 flex-1 gap-1 text-[10px]"
+                        className="flex-1 text-3xs"
                         onClick={() => startEdit(s)}
                       >
                         <PencilSimpleIcon className="h-3 w-3" />
@@ -351,7 +351,7 @@ export function ListenerHosts({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 px-2 text-[10px] text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        className="px-2 text-3xs text-destructive hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => onDeleteServer(s.id)}
                       >
                         <TrashIcon className="h-3 w-3" />
@@ -422,7 +422,7 @@ function SetupGuide({ onAddHost }: Readonly<{ onAddHost: () => void }>) {
             >
               {/* Spine */}
               <div className="flex flex-col items-center">
-                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-3xs font-bold text-primary">
                   {step.n}
                 </div>
                 {i < STEPS.length - 1 && (
@@ -432,7 +432,7 @@ function SetupGuide({ onAddHost }: Readonly<{ onAddHost: () => void }>) {
               {/* Content */}
               <div className="pb-4">
                 <p className="text-xs font-semibold text-foreground">{step.title}</p>
-                <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">{step.body}</p>
+                <p className="mt-0.5 text-2xs leading-relaxed text-muted-foreground">{step.body}</p>
               </div>
             </div>
           ))}
@@ -441,11 +441,11 @@ function SetupGuide({ onAddHost }: Readonly<{ onAddHost: () => void }>) {
         {/* Example snippet */}
         <div className="mb-5 rounded-md border border-border/60 bg-muted/30">
           <div className="flex items-center gap-1.5 border-b border-border/40 px-3 py-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <span className="text-3xs font-semibold uppercase tracking-wider text-muted-foreground">
               Example — inject into a request
             </span>
           </div>
-          <pre className="overflow-x-auto px-3 py-2.5 font-mono text-[10px] leading-relaxed text-foreground">
+          <pre className="overflow-x-auto px-3 py-2.5 font-mono text-3xs leading-relaxed text-foreground">
 {`GET /api/fetch?url=https://YOUR_CALLBACK_URL HTTP/1.1
 Host: target.example.com
 

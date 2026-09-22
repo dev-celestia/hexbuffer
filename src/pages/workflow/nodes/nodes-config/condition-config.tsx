@@ -78,14 +78,14 @@ export function ConditionConfigForm({ config, onChange, inputData }: Readonly<Co
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
-        <Label className="text-[11px]">Condition type</Label>
+        <Label className="text-2xs">Condition type</Label>
         <p className="text-xs text-muted-foreground">
           {NODE_TYPE_REGISTRY[config.conditionType]?.label ?? config.conditionType}
         </p>
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-[11px]">Data key</Label>
+        <Label className="text-2xs">Data key</Label>
         <Select
           value={dataPathOptions.some((option) => option.value === dataPath) ? dataPath : undefined}
           onValueChange={(v) => onChange({ dataPath: v ?? undefined })}
@@ -95,14 +95,14 @@ export function ConditionConfigForm({ config, onChange, inputData }: Readonly<Co
           </SelectTrigger>
           <SelectContent>
             {dataPathOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value} className="text-xs font-mono">
+              <SelectItem mono key={option.value} value={option.value} className="text-xs">
                 {option.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Input
-          className="h-7 font-mono text-xs"
+        <Input mono
+          className="text-xs"
           value={dataPath}
           onChange={(e) => onChange({ dataPath: e.target.value })}
           placeholder="e.g. response.headers.content-type"
@@ -110,7 +110,7 @@ export function ConditionConfigForm({ config, onChange, inputData }: Readonly<Co
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-[11px]">Operator</Label>
+        <Label className="text-2xs">Operator</Label>
         <Select
           value={config.operator}
           onValueChange={(v) => onChange({ operator: v as ConditionConfig['operator'] })}
@@ -130,9 +130,9 @@ export function ConditionConfigForm({ config, onChange, inputData }: Readonly<Co
 
       {showValue && (
         <div className="space-y-1.5">
-          <Label className="text-[11px]">Value</Label>
+          <Label className="text-2xs">Value</Label>
           <Input
-            className="h-7 text-xs"
+            className="text-xs"
             value={config.value}
             onChange={(e) => onChange({ value: e.target.value })}
             placeholder={placeholderForCondition(config.conditionType)}

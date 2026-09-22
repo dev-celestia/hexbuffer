@@ -58,7 +58,7 @@ export function TemplateInfoNode({
             // Layout & Positioning
             "inline-flex items-center gap-1 px-1.5 py-0.5 rounded shrink-0",
             // Typography
-            "text-[9px] font-semibold uppercase",
+            "text-4xs font-semibold uppercase",
             // Backgrounds & Borders
             sevConfig.bg,
             sevConfig.text,
@@ -94,7 +94,7 @@ export function TemplateInfoNode({
           <span
             className={cn(
               // Typography
-              "font-mono text-[10px] text-muted-foreground block truncate"
+              "font-mono text-3xs text-muted-foreground block truncate"
             )}
           >
             {nodeData.id || 'unassigned-id'}
@@ -107,7 +107,7 @@ export function TemplateInfoNode({
               // Layout & Positioning
               "line-clamp-2",
               // Typography
-              "text-[11px] text-muted-foreground leading-relaxed"
+              "text-2xs text-muted-foreground leading-relaxed"
             )}
           >
             {nodeData.description}
@@ -117,7 +117,7 @@ export function TemplateInfoNode({
         <div
           className={cn(
             // Layout & Positioning
-            "flex flex-wrap items-center gap-1.5 pt-1 text-[10px] text-muted-foreground font-mono"
+            "flex flex-wrap items-center gap-1.5 pt-1 text-3xs text-muted-foreground font-mono"
           )}
         >
           {nodeData.author && (

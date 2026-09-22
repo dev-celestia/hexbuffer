@@ -111,7 +111,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             {/* Left side: Hexbuffer label on Linux/Windows; empty spacer on macOS to preserve native traffic lights */}
             <div className="flex items-center gap-1.5 pointer-events-none w-20">
               {!isMac && (
-                <span className="text-[11px] font-medium tracking-wider text-muted-foreground/60 select-none">
+                <span className="text-2xs font-medium tracking-wider text-muted-foreground/60 select-none">
                   Hexbuffer
                 </span>
               )}
@@ -163,7 +163,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           onClick={() => navigate('/settings')}
           className={cn(
             // Sizing & Spacing
-            "py-1 px-1.5 gap-2",
+            "px-1.5",
 
             // Typography
             "text-xs"
@@ -186,10 +186,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             id="ctx-appearance"
             className={cn(
               // Sizing & Spacing
-              "py-1 px-1.5 gap-2",
-
-              // Typography
-              "text-xs"
+              "px-1.5"
             )}
           >
             <MonitorIcon
@@ -215,7 +212,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               onClick={() => setTheme('light')}
               className={cn(
                 // Sizing & Spacing
-                "py-1 px-1.5 gap-2",
+                "px-1.5",
 
                 // Typography
                 "text-xs"
@@ -235,7 +232,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                     "ml-auto",
 
                     // Typography
-                    "text-[10px] text-primary font-medium"
+                    "text-3xs text-primary font-medium"
                   )}
                 >
                   ✓
@@ -247,7 +244,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               onClick={() => setTheme('dark')}
               className={cn(
                 // Sizing & Spacing
-                "py-1 px-1.5 gap-2",
+                "px-1.5",
 
                 // Typography
                 "text-xs"
@@ -267,7 +264,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                     "ml-auto",
 
                     // Typography
-                    "text-[10px] text-primary font-medium"
+                    "text-3xs text-primary font-medium"
                   )}
                 >
                   ✓
@@ -283,7 +280,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               onClick={() => navigate('/settings?tab=appearance')}
               className={cn(
                 // Sizing & Spacing
-                "py-1 px-1.5 gap-2",
+                "px-1.5",
 
                 // Typography
                 "text-xs"

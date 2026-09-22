@@ -155,7 +155,7 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
                 "px-1.5 py-0.5 rounded-md shrink-0 leading-none",
 
                 // Typography
-                "text-[9px] font-bold uppercase tracking-wider",
+                "text-4xs font-bold uppercase tracking-wider",
 
                 // Backgrounds & Borders
                 resolvedNavItem.flag === "alpha"
@@ -232,7 +232,7 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
                 "text-muted-foreground",
 
                 // Interactive & States
-                "hover:bg-muted/80 hover:text-foreground active:scale-95 transition-all cursor-pointer"
+                "hover:bg-muted/80 hover:text-foreground active:scale-95"
               )}
             >
               <GearSixIcon className="size-4" />
@@ -261,7 +261,7 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
                 "text-muted-foreground",
 
                 // Interactive & States
-                "hover:bg-muted/80 hover:text-foreground active:scale-95 transition-all cursor-pointer"
+                "hover:bg-muted/80 hover:text-foreground active:scale-95"
               )}
             >
               {theme === "dark" ? (

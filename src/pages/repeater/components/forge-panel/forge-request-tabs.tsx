@@ -60,7 +60,7 @@ function TabCount({ value }: Readonly<{ value: number }>) {
         'min-w-4 rounded-full px-1',
 
         // Typography
-        'text-[10px] leading-4 font-semibold tabular-nums',
+        'text-3xs leading-4 font-semibold tabular-nums',
 
         // Backgrounds & Borders
         'bg-muted text-muted-foreground'
@@ -398,8 +398,7 @@ export function ForgeRequestTabs({
                       >
                         <Button
                           variant="outline"
-                          size="sm"
-                          className="h-7"
+                          size="md"
                           onClick={() => fileInputRef.current?.click()}
                         >
                           <UploadSimpleIcon className="size-3.5" />
@@ -407,11 +406,8 @@ export function ForgeRequestTabs({
                         </Button>
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="md"
                           className={cn(
-                            // Sizing & Spacing
-                            'h-7',
-
                             // Interactive & States
                             'text-destructive hover:bg-destructive/10 hover:text-destructive'
                           )}
@@ -487,7 +483,7 @@ export function ForgeRequestTabs({
                           Drag a file here, or choose one below
                         </p>
                       </div>
-                      <Button size="sm" className="h-7" onClick={() => fileInputRef.current?.click()}>
+                      <Button size="md" onClick={() => fileInputRef.current?.click()}>
                         Choose file
                       </Button>
                     </div>

@@ -135,7 +135,7 @@ export function SettingsSidebar({ active, onSelect, categories }: Readonly<Setti
               'px-3 pb-1',
 
               // Typography
-              'text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70'
+              'text-3xs font-semibold uppercase tracking-wider text-muted-foreground/70'
             )}
           >
             {section.label}

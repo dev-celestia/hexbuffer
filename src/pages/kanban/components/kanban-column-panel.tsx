@@ -34,11 +34,11 @@ export function KanbanColumnPanel({
         {/* Card count + WIP limit */}
         <div className="flex items-center gap-1">
           {wipViolation && (
-            <WarningIcon className="h-3 w-3 text-orange-400" aria-label="WIP limit exceeded" />
+            <WarningIcon className="h-3 w-3 text-orange-600 dark:text-orange-400" aria-label="WIP limit exceeded" />
           )}
           <span
-            className={`text-[10px] font-mono tabular-nums ${
-              wipViolation ? 'text-orange-400' : 'text-muted-foreground'
+            className={`text-3xs font-mono tabular-nums ${
+              wipViolation ? 'text-orange-600 dark:text-orange-400' : 'text-muted-foreground'
             }`}
           >
             {cards.length}
@@ -71,7 +71,7 @@ export function KanbanColumnPanel({
 
         {cards.length === 0 && (
           <div className="flex h-20 items-center justify-center rounded border border-dashed border-border/30">
-            <span className="text-[11px] text-muted-foreground/50">Drop cards here</span>
+            <span className="text-2xs text-muted-foreground/50">Drop cards here</span>
           </div>
         )}
       </div>
@@ -79,7 +79,7 @@ export function KanbanColumnPanel({
       {/* Add-card area */}
       <button
         onClick={() => onAddCardClick(column.id)}
-        className="mt-2 flex w-full items-center gap-1.5 rounded border border-dashed border-border/20 px-2 py-1.5 text-[11px] text-muted-foreground/60 hover:bg-muted/40 hover:text-muted-foreground hover:border-border/50 transition-colors"
+        className="mt-2 flex w-full items-center gap-1.5 rounded border border-dashed border-border/20 px-2 py-1.5 text-2xs text-muted-foreground/60 hover:bg-muted/40 hover:text-muted-foreground hover:border-border/50 transition-colors"
       >
         <PlusIcon className="h-3.5 w-3.5" />
         Add card

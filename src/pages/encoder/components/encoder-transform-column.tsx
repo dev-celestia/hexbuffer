@@ -57,18 +57,18 @@ export function EncoderTransformColumn({
           <Button
             key={codec.id}
             variant="ghost"
-            size="sm"
+            size="md"
             onClick={() => onTypeChange(codec.id)}
             className={cn(
               // Sizing & Spacing
-              "h-7 w-full justify-between px-2",
+              "w-full justify-between px-2",
 
               // Typography
               "text-xs font-normal",
 
               // Interactive & States
               activeType === codec.id
-                ? "bg-accent text-accent-foreground hover:bg-accent"
+                ? "bg-accent text-accent-foreground"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -77,7 +77,7 @@ export function EncoderTransformColumn({
               <span
                 className={cn(
                   // Typography
-                  "text-[10px] text-muted-foreground"
+                  "text-3xs text-muted-foreground"
                 )}
               >
                 {codec.hint}
@@ -104,14 +104,14 @@ export function EncoderTransformColumn({
         >
           <Button
             variant="outline"
-            size="sm"
+            size="md"
             onClick={() => onModeChange('encode')}
             className={cn(
               // Layout & Positioning
               "flex-1",
 
               // Sizing & Spacing
-              "h-7 px-2",
+              "px-2",
 
               // Typography
               "text-xs",
@@ -124,14 +124,14 @@ export function EncoderTransformColumn({
           </Button>
           <Button
             variant="outline"
-            size="sm"
+            size="md"
             onClick={() => onModeChange('decode')}
             className={cn(
               // Layout & Positioning
               "flex-1",
 
               // Sizing & Spacing
-              "h-7 px-2",
+              "px-2",
 
               // Typography
               "text-xs",
@@ -155,12 +155,12 @@ export function EncoderTransformColumn({
         >
           <Button
             variant="outline"
-            size="sm"
+            size="md"
             onClick={onSwap}
             disabled={isEmpty}
             className={cn(
               // Sizing & Spacing
-              "h-7 w-full px-2 gap-1.5",
+              "w-full px-2 gap-1.5",
 
               // Typography
               "text-xs"
@@ -171,12 +171,12 @@ export function EncoderTransformColumn({
           </Button>
           <Button
             variant="outline"
-            size="sm"
+            size="md"
             onClick={onCopy}
             disabled={!output}
             className={cn(
               // Sizing & Spacing
-              "h-7 w-full px-2 gap-1.5",
+              "w-full px-2 gap-1.5",
 
               // Typography
               "text-xs"
@@ -187,12 +187,12 @@ export function EncoderTransformColumn({
           </Button>
           <Button
             variant="ghost"
-            size="sm"
+            size="md"
             onClick={onClear}
             disabled={isEmpty}
             className={cn(
               // Sizing & Spacing
-              "h-7 w-full px-2 gap-1.5",
+              "w-full px-2 gap-1.5",
 
               // Typography
               "text-xs text-muted-foreground",

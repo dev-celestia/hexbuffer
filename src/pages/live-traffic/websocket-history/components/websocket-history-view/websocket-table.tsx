@@ -51,7 +51,7 @@ function StatusIndicator({ state }: Readonly<{ state: string }>) {
         "gap-1 px-1.5 py-0.5",
 
         // Typography
-        "text-[10px] font-semibold tracking-wider uppercase font-mono",
+        "text-3xs font-semibold tracking-wider uppercase font-mono",
 
         // Backgrounds & Borders
         "rounded border",
@@ -161,7 +161,7 @@ export function WebSocketTable({ selectedConnectionId, onSelectConnection }: Rea
             "border-b bg-muted/40"
           )}
         >
-          <Button variant="outline" size="sm" onClick={handleRefresh} className="h-6 text-xs gap-1.5">
+          <Button variant="outline" size="sm" onClick={handleRefresh} className="text-xs gap-1.5">
             <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
             {newEventsCount} new connection{newEventsCount > 1 ? 's' : ''} · Click to refresh
           </Button>
@@ -182,7 +182,7 @@ export function WebSocketTable({ selectedConnectionId, onSelectConnection }: Rea
               "sticky top-0 z-10 select-none flex items-center shrink-0 w-full",
 
               // Typography
-              "text-[10px] font-semibold text-muted-foreground uppercase tracking-wider",
+              "text-3xs font-semibold text-muted-foreground uppercase tracking-wider",
 
               // Backgrounds & Borders
               "border-b bg-background"
@@ -210,6 +210,7 @@ export function WebSocketTable({ selectedConnectionId, onSelectConnection }: Rea
               return (
                 <div
                   key={connection.id}
+                  data-slot="websocket-table-row"
                   data-index={virtualRow.index}
                   ref={rowVirtualizer.measureElement}
                   style={{
@@ -246,30 +247,30 @@ export function WebSocketTable({ selectedConnectionId, onSelectConnection }: Rea
                       <div className="px-3 py-1.5 w-[80px]">
                         <StatusIndicator state={connection.state} />
                       </div>
-                      <div className="text-muted-foreground px-3 py-1.5 text-[11px] w-[90px]">
+                      <div className="text-muted-foreground px-3 py-1.5 text-2xs w-[90px]">
                         {formatTime(connection.timestamp)}
                       </div>
                       <div
-                        className="px-3 py-1.5 truncate w-[200px] font-medium text-foreground text-[11px]"
+                        className="px-3 py-1.5 truncate w-[200px] font-medium text-foreground text-2xs"
                         title={connection.url}
                       >
                         <HighlightedText text={connection.host} query={searchQuery} />
                       </div>
                       <div
-                        className="px-3 py-1.5 text-muted-foreground truncate flex-1 text-[11px]"
+                        className="px-3 py-1.5 text-muted-foreground truncate flex-1 text-2xs"
                         title={connection.url}
                       >
                         <HighlightedText text={connection.path} query={searchQuery} />
                       </div>
                       <div className="px-3 py-1.5 text-right w-[80px]">
-                        <Badge
+                        <Badge mono
                           variant="secondary"
                           className={cn(
                             // Sizing & Spacing
                             "h-4 px-1.5",
 
                             // Typography
-                            "font-mono text-[10px] font-normal",
+                            "font-normal",
 
                             // Backgrounds & Borders
                             "bg-muted/80 rounded"
@@ -278,7 +279,7 @@ export function WebSocketTable({ selectedConnectionId, onSelectConnection }: Rea
                           {connection.messageCount}
                         </Badge>
                       </div>
-                      <div className="text-muted-foreground px-3 py-1.5 text-[11px] w-[90px]">
+                      <div className="text-muted-foreground px-3 py-1.5 text-2xs w-[90px]">
                         {formatTime(connection.lastActivityAt)}
                       </div>
                     </div>

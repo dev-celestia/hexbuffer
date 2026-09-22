@@ -11,13 +11,13 @@ import {
 
 describe('getMethodColor', () => {
   it('maps known methods case-insensitively', () => {
-    expect(getMethodColor('GET')).toBe('text-green-500 dark:text-green-400');
-    expect(getMethodColor('post')).toBe('text-amber-500 dark:text-amber-400');
-    expect(getMethodColor('delete')).toBe('text-red-500 dark:text-red-400');
+    expect(getMethodColor('GET')).toBe('text-green-700 dark:text-green-400');
+    expect(getMethodColor('post')).toBe('text-amber-700 dark:text-amber-400');
+    expect(getMethodColor('delete')).toBe('text-red-700 dark:text-red-400');
   });
 
   it('falls back to gray for unknown methods', () => {
-    expect(getMethodColor('TRACE')).toBe('text-gray-500 dark:text-gray-400');
+    expect(getMethodColor('TRACE')).toBe('text-gray-700 dark:text-gray-400');
   });
 });
 
@@ -33,34 +33,34 @@ describe('getMethodBadgeColor', () => {
 
 describe('getStatusColor', () => {
   it.each([
-    [200, 'bg-green-500'],
-    [204, 'bg-green-500'],
-    [299, 'bg-green-500'],
-    [301, 'bg-blue-500'],
-    [404, 'bg-orange-500'],
-    [500, 'bg-red-500'],
-    [599, 'bg-red-500'],
+    [200, 'bg-success'],
+    [204, 'bg-success'],
+    [299, 'bg-success'],
+    [301, 'bg-info'],
+    [404, 'bg-warning'],
+    [500, 'bg-destructive'],
+    [599, 'bg-destructive'],
   ])('maps %i to the expected class', (status, expected) => {
     expect(getStatusColor(status)).toBe(expected);
   });
 
-  it('falls back to gray for 1xx and falsy statuses', () => {
-    expect(getStatusColor(100)).toBe('bg-gray-500');
-    expect(getStatusColor(null)).toBe('bg-gray-500');
-    expect(getStatusColor(undefined)).toBe('bg-gray-500');
-    expect(getStatusColor(0)).toBe('bg-gray-500');
+  it('falls back to the neutral token for 1xx and falsy statuses', () => {
+    expect(getStatusColor(100)).toBe('bg-muted-foreground');
+    expect(getStatusColor(null)).toBe('bg-muted-foreground');
+    expect(getStatusColor(undefined)).toBe('bg-muted-foreground');
+    expect(getStatusColor(0)).toBe('bg-muted-foreground');
   });
 });
 
 describe('getLevelColor', () => {
-  it('maps each level to its class', () => {
-    expect(getLevelColor('info')).toBe('bg-blue-600');
-    expect(getLevelColor('warning')).toBe('bg-orange-600');
-    expect(getLevelColor('error')).toBe('bg-red-600');
+  it('maps each level to its status token', () => {
+    expect(getLevelColor('info')).toBe('bg-info');
+    expect(getLevelColor('warning')).toBe('bg-warning');
+    expect(getLevelColor('error')).toBe('bg-destructive');
   });
 
-  it('falls back to gray for unknown levels', () => {
-    expect(getLevelColor('debug' as never)).toBe('bg-gray-600');
+  it('falls back to the neutral token for unknown levels', () => {
+    expect(getLevelColor('debug' as never)).toBe('bg-muted-foreground');
   });
 });
 
@@ -88,12 +88,12 @@ describe('getSeverityColor', () => {
 });
 
 describe('getCrawlStatusColor', () => {
-  it('maps known crawl statuses', () => {
-    expect(getCrawlStatusColor('running')).toBe('bg-emerald-600');
-    expect(getCrawlStatusColor('paused')).toBe('bg-amber-600');
-    expect(getCrawlStatusColor('completed')).toBe('bg-sky-600');
-    expect(getCrawlStatusColor('failed')).toBe('bg-red-600');
-    expect(getCrawlStatusColor('stopped')).toBe('bg-gray-500');
-    expect(getCrawlStatusColor('idle')).toBe('bg-gray-500');
+  it('maps known crawl statuses to status tokens', () => {
+    expect(getCrawlStatusColor('running')).toBe('bg-success');
+    expect(getCrawlStatusColor('paused')).toBe('bg-warning');
+    expect(getCrawlStatusColor('completed')).toBe('bg-info');
+    expect(getCrawlStatusColor('failed')).toBe('bg-destructive');
+    expect(getCrawlStatusColor('stopped')).toBe('bg-muted-foreground');
+    expect(getCrawlStatusColor('idle')).toBe('bg-muted-foreground');
   });
 });

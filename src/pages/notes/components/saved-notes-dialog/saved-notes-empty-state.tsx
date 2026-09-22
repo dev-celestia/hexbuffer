@@ -82,7 +82,7 @@ export function SavedNotesEmptyState({
           "mt-2",
 
           // Typography
-          "text-xs cursor-pointer"
+          "text-xs"
         )}
       >
         <PlusIcon className="size-3.5 mr-1.5" />

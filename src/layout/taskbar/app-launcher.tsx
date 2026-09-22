@@ -79,7 +79,7 @@ export function AppLauncher() {
         </TooltipTrigger>
         <TooltipContent side="top" sideOffset={12} className="flex items-center gap-1.5">
           <span>All Apps</span>
-          <Kbd className="text-[10px]">
+          <Kbd>
             {isMac ? '⌘ + P' : 'Ctrl + P'}
           </Kbd>
         </TooltipContent>
@@ -117,7 +117,7 @@ export function AppLauncher() {
                       }}
                       className={cn(
                         // Layout & Positioning
-                        "flex items-center justify-between gap-3",
+                        "justify-between gap-3",
                         // Sizing & Spacing
                         "py-2.5 px-3 rounded-lg my-0.5",
                         // Interactive & States
@@ -287,7 +287,7 @@ export function AppLauncher() {
             <span
               className={cn(
                 // Typography
-                "font-medium text-foreground shrink-0 tabular-nums text-[11px]"
+                "font-medium text-foreground shrink-0 tabular-nums text-2xs"
               )}
             >
               {pinnedCount}/{MAX_PINNED} pinned

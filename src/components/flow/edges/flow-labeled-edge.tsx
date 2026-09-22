@@ -50,7 +50,7 @@ export function FlowLabeledEdge({
                 // Sizing & Spacing
                 'px-1.5 py-0.5 rounded-sm',
                 // Typography
-                'text-[9px] font-mono font-medium',
+                'text-4xs font-mono font-medium',
                 // Backgrounds & Borders
                 'bg-background/95 border border-border text-foreground/80 shadow-xs backdrop-blur',
                 badgeClassName

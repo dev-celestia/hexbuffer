@@ -122,7 +122,7 @@ export function ContextsListItem({
           <span
             className={cn(
               // Typography
-              'text-[10px] font-semibold tracking-wider text-destructive uppercase'
+              'text-3xs font-semibold tracking-wider text-destructive uppercase'
             )}
           >
             Delete “{ctx.name}”?
@@ -224,7 +224,7 @@ export function ContextsListItem({
                 'min-w-0 flex-1 truncate',
 
                 // Typography
-                'text-[10px]',
+                'text-3xs',
                 'text-muted-foreground/70'
               )}
             >
@@ -232,7 +232,7 @@ export function ContextsListItem({
             </span>
 
             {isActive && (
-              <Badge variant="secondary" className={cn('shrink-0')}>
+              <Badge variant="secondary">
                 Active
               </Badge>
             )}

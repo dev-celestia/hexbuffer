@@ -86,7 +86,7 @@ export function ComparerToolbar({
           <span
             className={cn(
               // Typography
-              "text-[10px] font-medium text-muted-foreground uppercase"
+              "text-3xs font-medium text-muted-foreground uppercase"
             )}
           >
             Mode:
@@ -98,10 +98,10 @@ export function ComparerToolbar({
             <SelectTrigger
               className={cn(
                 // Sizing & Spacing
-                "h-6 w-20 px-2 py-0 [&_svg]:size-3",
+                "h-6 w-20 py-0 [&_svg]:size-3",
 
                 // Typography
-                "text-[11px]",
+                "text-2xs",
 
                 // Backgrounds & Borders
                 "bg-background"
@@ -116,7 +116,7 @@ export function ComparerToolbar({
                   value={opt.value}
                   className={cn(
                     // Typography
-                    "text-[11px]"
+                    "text-2xs"
                   )}
                 >
                   {opt.label}
@@ -143,10 +143,10 @@ export function ComparerToolbar({
           onClick={toggleShowInputs}
           className={cn(
             // Sizing & Spacing
-            "h-6 px-2 gap-1.5",
+            "px-2 gap-1.5",
 
             // Typography
-            "text-[11px]"
+            "text-2xs"
           )}
         >
           {showInputs ? <EyeSlashIcon className="h-3 w-3" /> : <EyeIcon className="h-3 w-3" />}
@@ -161,10 +161,10 @@ export function ComparerToolbar({
           disabled={!hasContent}
           className={cn(
             // Sizing & Spacing
-            "h-6 px-2 gap-1.5",
+            "px-2 gap-1.5",
 
             // Typography
-            "text-[11px]"
+            "text-2xs"
           )}
         >
           <ArrowsLeftRightIcon className="h-3 w-3" />
@@ -189,10 +189,10 @@ export function ComparerToolbar({
           disabled={!valueA}
           className={cn(
             // Sizing & Spacing
-            "h-6 px-2 gap-1.5",
+            "px-2 gap-1.5",
 
             // Typography
-            "text-[11px]"
+            "text-2xs"
           )}
         >
           <CopyIcon className="h-3 w-3" />
@@ -205,10 +205,10 @@ export function ComparerToolbar({
           disabled={!valueB}
           className={cn(
             // Sizing & Spacing
-            "h-6 px-2 gap-1.5",
+            "px-2 gap-1.5",
 
             // Typography
-            "text-[11px]"
+            "text-2xs"
           )}
         >
           <CopyIcon className="h-3 w-3" />
@@ -223,10 +223,10 @@ export function ComparerToolbar({
           disabled={!hasDiff}
           className={cn(
             // Sizing & Spacing
-            "h-6 px-2 gap-1.5",
+            "px-2 gap-1.5",
 
             // Typography
-            "text-[11px]"
+            "text-2xs"
           )}
         >
           <CopyIcon className="h-3 w-3" />
@@ -241,10 +241,10 @@ export function ComparerToolbar({
           disabled={!hasContent}
           className={cn(
             // Sizing & Spacing
-            "h-6 px-2 gap-1.5",
+            "px-2 gap-1.5",
 
             // Typography
-            "text-[11px] text-destructive",
+            "text-2xs text-destructive",
 
             // Interactive & States
             "hover:bg-destructive/10 hover:text-destructive"

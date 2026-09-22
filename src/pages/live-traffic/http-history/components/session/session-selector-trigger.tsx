@@ -35,7 +35,7 @@ export const SessionSelectorTrigger = React.forwardRef<
     <Button
       ref={ref}
       variant="outline"
-      size="sm"
+      size="md"
       className={cn(
         // Layout & Positioning
         "flex items-center",
@@ -44,7 +44,7 @@ export const SessionSelectorTrigger = React.forwardRef<
         "h-7 gap-1.5 px-2.5 max-w-[280px]",
 
         // Typography
-        "font-medium text-xs tracking-tight",
+        "text-xs tracking-tight",
 
         // Backgrounds & Borders
         "border-border/60 bg-background/80 hover:bg-accent/40 shadow-none",

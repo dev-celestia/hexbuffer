@@ -90,9 +90,9 @@ export function NucleiRunPage() {
 
           <div className="h-3.5 w-px bg-border shrink-0" />
 
-          <Badge
+          <Badge mono
             variant="outline"
-            className="h-5 px-1.5 text-[10px] font-mono border-primary/30 text-primary font-medium"
+            className="px-1.5 border-primary/30 text-primary"
           >
             {effectiveTab === 'hub' && 'Step 1: Explore Hub & Flow DAG'}
             {effectiveTab === 'selected' && `Step 2: Staging & On-Demand Scan (${selectedTemplateIds.length})`}
@@ -103,9 +103,9 @@ export function NucleiRunPage() {
         {/* Right: Quick Workflow Navigation & Actions */}
         <div className="flex items-center gap-2 shrink-0">
           {findings.length > 0 && (
-            <Badge
+            <Badge mono
               variant="outline"
-              className="h-5 px-2 text-[10px] font-mono border-rose-500/40 text-rose-400 font-semibold cursor-pointer"
+              className="border-destructive/40 text-destructive font-semibold cursor-pointer"
               onClick={() => setActiveTab('results')}
             >
               <BugIcon className="size-3 mr-1" />
@@ -118,7 +118,7 @@ export function NucleiRunPage() {
               size="xs"
               disabled={selectedTemplateIds.length === 0}
               onClick={() => setActiveTab('selected')}
-              className="h-7 px-2.5 text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
+              className="h-7 px-2.5 text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <span>Review Selected ({selectedTemplateIds.length})</span>
               <ArrowRightIcon className="size-3.5" />
@@ -129,7 +129,7 @@ export function NucleiRunPage() {
                 variant="outline"
                 size="xs"
                 onClick={() => setActiveTab('hub')}
-                className="h-7 px-2 text-xs gap-1 border-border hover:bg-muted/20"
+                className="h-7 text-xs hover:bg-muted/20"
               >
                 <ArrowLeftIcon className="size-3.5" />
                 <span>Add Templates</span>
@@ -150,7 +150,7 @@ export function NucleiRunPage() {
                 variant="outline"
                 size="xs"
                 onClick={() => setActiveTab('selected')}
-                className="h-7 px-2.5 text-xs gap-1.5 border-border hover:bg-muted/20"
+                className="h-7 px-2.5 text-xs gap-1.5 hover:bg-muted/20"
               >
                 <ArrowLeftIcon className="size-3.5" />
                 <span>Selected Templates ({selectedTemplateIds.length})</span>

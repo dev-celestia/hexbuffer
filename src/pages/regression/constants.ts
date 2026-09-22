@@ -15,9 +15,10 @@ http:
 `;
 
 /**
- * Severity palette. Every entry carries an explicit `dark:` text step — the 500-weight
- * shades fail contrast on the dark background, matching the convention in
- * `src/lib/status-colors.ts`.
+ * Severity palette — **categorical**: five distinguishable rungs. The design system's four
+ * status tokens cannot express an ordered five-step ladder without collapsing `medium` into
+ * `high`, so these keep explicit hues and pair every light step with a `dark:` one. See the
+ * semantic/categorical split documented in `src/lib/status-colors.ts`.
  */
 export const SEVERITY_CLASS: Record<string, string> = {
   critical: 'text-red-600 dark:text-red-400 bg-red-500/10 border-red-500/30',
@@ -31,8 +32,8 @@ export const CONDITION_STATUS_META: Record<
   string,
   { label: string; text: string }
 > = {
-  passed: { label: 'PASS', text: 'text-emerald-600 dark:text-emerald-400' },
-  failed: { label: 'FAIL', text: 'text-red-600 dark:text-red-400' },
+  passed: { label: 'PASS', text: 'text-success' },
+  failed: { label: 'FAIL', text: 'text-destructive' },
   pending: { label: 'WAIT', text: 'text-muted-foreground' },
 };
 
@@ -43,17 +44,17 @@ export const RUN_STATUS_META: Record<
   running: {
     label: 'Running',
     dotClass: 'bg-warning animate-pulse motion-reduce:animate-none',
-    textClass: 'text-amber-600 dark:text-amber-400',
+    textClass: 'text-warning',
   },
   completed: {
     label: 'Completed',
-    dotClass: 'bg-emerald-500',
-    textClass: 'text-emerald-600 dark:text-emerald-400',
+    dotClass: 'bg-success',
+    textClass: 'text-success',
   },
   failed: {
     label: 'Failed',
-    dotClass: 'bg-red-500',
-    textClass: 'text-red-600 dark:text-red-400',
+    dotClass: 'bg-destructive',
+    textClass: 'text-destructive',
   },
   aborted: {
     label: 'Aborted',

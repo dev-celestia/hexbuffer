@@ -90,7 +90,7 @@ export function NucleiRunFindingsTable({
             placeholder="Filter findings by CVE, template, keyword, or URL..."
             className={cn(
               // Sizing & Spacing
-              "pl-8 h-7 text-xs",
+              "pl-8 text-xs",
               // Backgrounds & Borders
               "bg-background/80 border-input/60"
             )}
@@ -107,7 +107,7 @@ export function NucleiRunFindingsTable({
           <span
             className={cn(
               // Typography
-              "text-[11px] text-muted-foreground mr-1"
+              "text-2xs text-muted-foreground mr-1"
             )}
           >
             Protocol:
@@ -123,7 +123,7 @@ export function NucleiRunFindingsTable({
                 onClick={() => onToggleProtocolFilter(proto)}
                 className={cn(
                   // Layout & Positioning
-                  "px-2 py-0.5 rounded text-[10px] font-mono uppercase transition-colors",
+                  "px-2 py-0.5 rounded text-3xs font-mono uppercase transition-colors",
                   // Backgrounds & Borders
                   badge.bg,
                   badge.text,
@@ -210,18 +210,18 @@ export function NucleiRunFindingsTable({
                     onClick={() => onSelectFinding(finding.id)}
                     className={cn(
                       // Interactive & States
-                      "cursor-pointer transition-colors",
+                      "cursor-pointer",
                       isSelected
                         ? "bg-primary/10 hover:bg-primary/15 border-l-2 border-l-primary"
                         : "hover:bg-muted/30"
                     )}
                   >
                     {/* Severity Badge */}
-                    <TableCell className="font-mono">
+                    <TableCell mono>
                       <span
                         className={cn(
                           // Layout & Positioning
-                          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold uppercase",
+                          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-2xs font-semibold uppercase",
                           // Backgrounds & Borders
                           sevConfig.bg,
                           sevConfig.text,
@@ -257,7 +257,7 @@ export function NucleiRunFindingsTable({
                             // Layout & Positioning
                             "flex items-center gap-1.5",
                             // Typography
-                            "font-mono text-[10px] text-muted-foreground"
+                            "font-mono text-3xs text-muted-foreground"
                           )}
                         >
                           <span>{finding.template_id}</span>
@@ -268,9 +268,9 @@ export function NucleiRunFindingsTable({
                                 // Sizing & Spacing
                                 "h-3.5 px-1",
                                 // Typography
-                                "text-[9px] font-bold text-amber-500",
+                                "text-4xs font-bold text-warning",
                                 // Backgrounds & Borders
-                                "border-amber-500/30"
+                                "border-warning/30"
                               )}
                             >
                               {finding.cve_id}
@@ -287,7 +287,7 @@ export function NucleiRunFindingsTable({
                           // Layout & Positioning
                           "px-1.5 py-0.5 rounded",
                           // Typography
-                          "text-[10px] font-mono uppercase",
+                          "text-3xs font-mono uppercase",
                           // Backgrounds & Borders
                           protoBadge.bg,
                           protoBadge.text
@@ -321,14 +321,14 @@ export function NucleiRunFindingsTable({
                           )}
                         >
                           {finding.extracted_results.map((res, i) => (
-                            <Badge
+                            <Badge mono
                               key={i}
                               variant="secondary"
                               className={cn(
                                 // Sizing & Spacing
                                 "h-4 px-1.5 max-w-[180px]",
                                 // Typography
-                                "text-[10px] font-mono truncate",
+                                "truncate",
                                 // Backgrounds & Borders
                                 "bg-muted/60"
                               )}
@@ -341,7 +341,7 @@ export function NucleiRunFindingsTable({
                         <span
                           className={cn(
                             // Typography
-                            "text-muted-foreground text-[11px]"
+                            "text-muted-foreground text-2xs"
                           )}
                         >
                           —
@@ -366,7 +366,7 @@ export function NucleiRunFindingsTable({
                               onClick={() => onSendToRepeater(finding)}
                               className={cn(
                                 // Sizing & Spacing
-                                "h-6 w-6 p-0",
+                                "w-6 p-0",
                                 // Interactive & States
                                 "text-muted-foreground hover:text-emerald-500"
                               )}
@@ -385,7 +385,7 @@ export function NucleiRunFindingsTable({
                               onClick={() => onCopyCurl(finding)}
                               className={cn(
                                 // Sizing & Spacing
-                                "h-6 w-6 p-0",
+                                "w-6 p-0",
                                 // Interactive & States
                                 "text-muted-foreground hover:text-foreground"
                               )}

@@ -164,7 +164,7 @@ export function ForgeRequestBar({
             variant="ghost"
             className={cn(
               // Sizing & Spacing
-              'size-7 shrink-0',
+              'size-7',
 
               // Interactive & States
               'text-muted-foreground hover:text-foreground'
@@ -203,12 +203,8 @@ export function ForgeRequestBar({
               {activeEndpoint.name}
             </span>
             <Button
-              size="sm"
+              size="md"
               variant="outline"
-              className={cn(
-                // Sizing & Spacing
-                'h-7 shrink-0'
-              )}
               onClick={() => {
                 void saveActiveEndpoint();
               }}
@@ -221,7 +217,7 @@ export function ForgeRequestBar({
               variant="ghost"
               className={cn(
                 // Sizing & Spacing
-                'size-7 shrink-0',
+                'size-7',
 
                 // Interactive & States
                 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'
@@ -246,13 +242,13 @@ export function ForgeRequestBar({
         )}
       >
         <Select value={method} onValueChange={onMethodChange}>
-          <SelectTrigger
+          <SelectTrigger mono
             className={cn(
               // Sizing & Spacing
               'w-[104px] shrink-0',
 
               // Typography
-              'font-mono font-semibold'
+              'font-semibold'
             )}
           >
             <SelectValue>
@@ -281,12 +277,12 @@ export function ForgeRequestBar({
           </SelectTrigger>
           <SelectContent>
             {METHODS.map((m) => (
-              <SelectItem
+              <SelectItem mono
                 key={m}
                 value={m}
                 className={cn(
                   // Typography
-                  'font-mono font-semibold',
+                  'font-semibold',
                   getMethodTreatment(m).text
                 )}
               >
@@ -310,7 +306,7 @@ export function ForgeRequestBar({
           size="default"
           className={cn(
             // Sizing & Spacing
-            'h-7 shrink-0 px-3'
+            'h-7'
           )}
           onClick={() => {
             void sendCraftRequest();

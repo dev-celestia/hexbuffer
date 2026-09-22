@@ -73,14 +73,14 @@ export function NucleiRunTemplateHub({
             return (
               <Button
                 key={cat.id}
-                size="sm"
+                size="md"
                 variant={isActive ? 'secondary' : 'ghost'}
                 onClick={() => onCategoryChange(cat.id)}
                 className={cn(
                   // Layout & Positioning
-                  "flex items-center",
+                  "flex",
                   // Sizing & Spacing
-                  "h-7 px-2.5 text-xs font-medium",
+                  "text-xs",
                   // Interactive & States
                   isActive && "bg-muted text-foreground font-semibold"
                 )}
@@ -110,12 +110,12 @@ export function NucleiRunTemplateHub({
           </span>
 
           <Button
-            size="sm"
+            size="md"
             variant="ghost"
             onClick={onSelectAll}
             className={cn(
               // Sizing & Spacing
-              "h-7 px-2 text-xs",
+              "px-2 text-xs",
               // Interactive & States
               "text-muted-foreground hover:text-foreground"
             )}
@@ -124,12 +124,12 @@ export function NucleiRunTemplateHub({
           </Button>
 
           <Button
-            size="sm"
+            size="md"
             variant="ghost"
             onClick={onDeselectAll}
             className={cn(
               // Sizing & Spacing
-              "h-7 px-2 text-xs",
+              "px-2 text-xs",
               // Interactive & States
               "text-muted-foreground hover:text-foreground"
             )}
@@ -138,12 +138,12 @@ export function NucleiRunTemplateHub({
           </Button>
 
           <Button
-            size="sm"
+            size="md"
             variant="outline"
             onClick={() => onSelectBySeverity(['critical', 'high'])}
             className={cn(
               // Sizing & Spacing
-              "h-7 px-2 text-xs",
+              "px-2 text-xs",
               // Typography
               "text-red-500 hover:text-red-600",
               // Backgrounds & Borders
@@ -184,7 +184,7 @@ export function NucleiRunTemplateHub({
             placeholder="Search templates by CVE, keyword, protocol, or tag..."
             className={cn(
               // Sizing & Spacing
-              "pl-8 h-7 text-xs w-full",
+              "pl-8 text-xs",
               // Backgrounds & Borders
               "bg-muted/20 border-input/60"
             )}
@@ -269,7 +269,7 @@ export function NucleiRunTemplateHub({
                         // Layout & Positioning
                         "line-clamp-1",
                         // Typography
-                        "font-mono text-[10px] text-muted-foreground"
+                        "font-mono text-3xs text-muted-foreground"
                       )}
                     >
                       {tmpl.id}
@@ -288,7 +288,7 @@ export function NucleiRunTemplateHub({
                       // Layout & Positioning
                       "inline-flex items-center gap-1 px-1.5 py-0.5 rounded",
                       // Typography
-                      "text-[10px] font-semibold uppercase",
+                      "text-3xs font-semibold uppercase",
                       // Backgrounds & Borders
                       sevConfig.bg,
                       sevConfig.text,
@@ -308,7 +308,7 @@ export function NucleiRunTemplateHub({
                   // Layout & Positioning
                   "line-clamp-2 my-2",
                   // Typography
-                  "text-[11px] text-muted-foreground leading-relaxed"
+                  "text-2xs text-muted-foreground leading-relaxed"
                 )}
               >
                 {tmpl.description}
@@ -332,7 +332,7 @@ export function NucleiRunTemplateHub({
                       // Layout & Positioning
                       "px-1.5 py-0.5 rounded",
                       // Typography
-                      "text-[9px] font-mono uppercase",
+                      "text-4xs font-mono uppercase",
                       // Backgrounds & Borders
                       protoBadge.bg,
                       protoBadge.text
@@ -348,9 +348,9 @@ export function NucleiRunTemplateHub({
                         // Sizing & Spacing
                         "h-4 px-1",
                         // Typography
-                        "text-[9px] font-bold text-amber-500 truncate",
+                        "text-4xs font-bold text-warning truncate",
                         // Backgrounds & Borders
-                        "border-amber-500/30"
+                        "border-warning/30"
                       )}
                     >
                       {tmpl.cve_id}
@@ -368,11 +368,11 @@ export function NucleiRunTemplateHub({
                   }}
                   className={cn(
                     // Layout & Positioning
-                    "flex items-center gap-1",
+                    "flex",
                     // Sizing & Spacing
-                    "h-6 px-2",
+                    "px-2",
                     // Typography
-                    "text-[10px]",
+                    "text-3xs",
                     // Interactive & States
                     "text-muted-foreground hover:text-primary"
                   )}

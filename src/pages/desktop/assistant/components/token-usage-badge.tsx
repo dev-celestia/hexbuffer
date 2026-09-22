@@ -28,7 +28,7 @@ export function TokenUsageBadge({ totals, loading, onClick }: Readonly<TokenUsag
         // Sizing & Spacing
         'h-6 px-2 rounded-md',
         // Typography
-        'text-[11px] font-mono',
+        'text-2xs font-mono',
         // Backgrounds & Borders
         'border border-border bg-muted/40 text-muted-foreground',
         // Interactive & States
@@ -42,7 +42,7 @@ export function TokenUsageBadge({ totals, loading, onClick }: Readonly<TokenUsag
             // Sizing & Spacing
             'py-0 px-1.5',
             // Typography
-            'text-[10px] text-muted-foreground/70',
+            'text-muted-foreground/70',
           )}
         >
           Loading…

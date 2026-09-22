@@ -59,7 +59,7 @@ export function useTrafficTableColumns({
         size: 105,
         cell: (call) => (
           <div className="flex items-center gap-1.5 shrink-0">
-            <Badge
+            <Badge mono
               className={cn(
                 // Layout & Positioning
                 "shrink-0",
@@ -68,7 +68,7 @@ export function useTrafficTableColumns({
                 "px-1 py-0.5",
 
                 // Typography
-                "text-[10px] font-mono font-semibold uppercase",
+                "text-3xs font-semibold uppercase",
 
                 // Backgrounds & Borders
                 "rounded shadow-none border",
@@ -79,13 +79,13 @@ export function useTrafficTableColumns({
               {call.method.toUpperCase()}
             </Badge>
             {call.response_status ? (
-              <Badge
+              <Badge mono
                 className={cn(
                   // Sizing & Spacing
                   "px-1 py-0.5",
 
                   // Typography
-                  "text-[10px] font-mono font-semibold text-white",
+                  "text-3xs font-semibold text-white",
 
                   // Backgrounds & Borders
                   "rounded shadow-none border-none",

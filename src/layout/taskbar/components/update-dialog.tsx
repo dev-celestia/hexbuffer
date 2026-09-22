@@ -65,10 +65,6 @@ export function UpdateDialog({
             )}
           />
           <AlertTitle
-            className={cn(
-              // Typography
-              "font-medium"
-            )}
           >
             Restart notice
           </AlertTitle>

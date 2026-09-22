@@ -107,7 +107,7 @@ export function NetworkMonitor({
             />
           </div>
 
-          <Button variant="outline" size="sm" onClick={clearNetwork} className="h-8 gap-1 px-2.5">
+          <Button variant="outline" size="sm" onClick={clearNetwork} className="h-8">
             <Trash className="size-3.5" />
             Clear
           </Button>
@@ -129,7 +129,7 @@ export function NetworkMonitor({
             <option value="offline">Offline</option>
           </select>
 
-          <Badge variant="secondary" className="h-7 px-2 font-mono text-[10px]">
+          <Badge mono variant="secondary" className="h-7">
             {filteredRequests.length} requests
           </Badge>
         </div>
@@ -142,7 +142,7 @@ export function NetworkMonitor({
           <ResizablePanel defaultSize="50" minSize="20" className="flex flex-col min-h-0">
             <div className="flex flex-col h-full min-h-0">
               {/* Header Columns */}
-              <div className="grid grid-cols-[80px_1fr_65px_80px_70px] px-3 py-1.5 border-b bg-muted/20 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider shrink-0 select-none">
+              <div className="grid grid-cols-[80px_1fr_65px_80px_70px] px-3 py-1.5 border-b bg-muted/20 text-3xs font-semibold text-muted-foreground uppercase tracking-wider shrink-0 select-none">
                 <span>Method</span>
                 <span>URL</span>
                 <span className="text-center">Status</span>
@@ -156,7 +156,7 @@ export function NetworkMonitor({
                   <div className="flex flex-col items-center justify-center h-full p-6 text-muted-foreground text-center">
                     <WifiHigh className="size-8 opacity-30 mb-2" />
                     <p className="text-xs font-semibold">No network activity</p>
-                    <p className="text-[10px] opacity-75 mt-0.5">
+                    <p className="text-3xs opacity-75 mt-0.5">
                       Waiting for requests from the connected browser tab...
                     </p>
                   </div>
@@ -199,10 +199,10 @@ export function NetworkMonitor({
                           <span
                             className={`font-bold ${
                               req.method === 'POST'
-                                ? 'text-amber-500'
+                                ? 'text-amber-600 dark:text-amber-400'
                                 : req.method === 'GET'
-                                ? 'text-emerald-500'
-                                : 'text-blue-500'
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : 'text-blue-600 dark:text-blue-400'
                             }`}
                           >
                             {req.method}
@@ -215,24 +215,24 @@ export function NetworkMonitor({
                               <span
                                 className={
                                   req.status >= 400
-                                    ? 'text-rose-500'
+                                    ? 'text-rose-600 dark:text-rose-400'
                                     : req.status >= 300
-                                    ? 'text-amber-500'
-                                    : 'text-emerald-500'
+                                    ? 'text-amber-600 dark:text-amber-400'
+                                    : 'text-emerald-600 dark:text-emerald-400'
                                 }
                               >
                                 {req.status}
                               </span>
                             ) : req.errorText ? (
-                              <span className="text-rose-500" title={req.errorText}>
+                              <span className="text-rose-600 dark:text-rose-400" title={req.errorText}>
                                 Failed
                               </span>
                             ) : (
                               <Hourglass className="size-3.5 animate-spin mx-auto text-muted-foreground" />
                             )}
                           </span>
-                          <span className="truncate text-muted-foreground text-[10px]">{req.type}</span>
-                          <span className="text-right text-muted-foreground/80 text-[10px]">
+                          <span className="truncate text-muted-foreground text-3xs">{req.type}</span>
+                          <span className="text-right text-muted-foreground/80 text-3xs">
                             {req.duration ? `${req.duration}ms` : '-'}
                           </span>
                         </button>
@@ -259,33 +259,33 @@ export function NetworkMonitor({
                     variant="ghost"
                     size="sm"
                     onClick={() => setSelectedRequestId(null)}
-                    className="h-6 w-6 p-0 hover:bg-muted"
+                    className="w-6 p-0 hover:bg-muted"
                   >
                     &times;
                   </Button>
                 </div>
 
                 {/* Sub-tabs list */}
-                <Tabs value={responseTab} onValueChange={(v) => setResponseTab(v as any)} className="flex-1 flex flex-col min-h-0">
+                <Tabs value={responseTab} onValueChange={(v) => setResponseTab(v as any)} className="flex-1 flex-col min-h-0">
                   <div className="px-2 pt-1.5 border-b bg-muted/10 shrink-0">
                     <TabsList className="h-8 bg-muted/40 p-0.5">
-                      <TabsTrigger value="headers" className="text-[10px] h-7 px-2.5">Headers</TabsTrigger>
-                      <TabsTrigger value="payload" className="text-[10px] h-7 px-2.5">Payload</TabsTrigger>
+                      <TabsTrigger value="headers" className="text-3xs h-7">Headers</TabsTrigger>
+                      <TabsTrigger value="payload" className="text-3xs h-7">Payload</TabsTrigger>
                       {(selectedRequest.type === 'WebSocket' || selectedRequest.type === 'websocket') ? (
-                        <TabsTrigger value="websocket" className="text-[10px] h-7 px-2.5">WebSocket</TabsTrigger>
+                        <TabsTrigger value="websocket" className="text-3xs h-7">WebSocket</TabsTrigger>
                       ) : (
-                        <TabsTrigger value="response" className="text-[10px] h-7 px-2.5">Response</TabsTrigger>
+                        <TabsTrigger value="response" className="text-3xs h-7">Response</TabsTrigger>
                       )}
                     </TabsList>
                   </div>
 
                   {/* Headers Tab Content */}
-                  <TabsContent value="headers" className="flex-1 min-h-0 m-0 outline-none">
+                  <TabsContent value="headers" className="min-h-0 m-0">
                     <ScrollArea className="h-full">
                       <div className="p-3.5 space-y-4">
                         {/* Summary */}
                         <div className="space-y-1 text-xs">
-                          <h4 className="font-semibold text-[11px] text-muted-foreground uppercase tracking-wider">General</h4>
+                          <h4 className="font-semibold text-2xs text-muted-foreground uppercase tracking-wider">General</h4>
                           <div className="grid grid-cols-[100px_1fr] gap-x-2 py-0.5 border-b border-border/40 font-mono">
                             <span className="text-muted-foreground">Request URL:</span>
                             <span className="break-all text-foreground">{selectedRequest.url}</span>
@@ -302,10 +302,10 @@ export function NetworkMonitor({
 
                         {/* Request Headers */}
                         <div className="space-y-1.5 text-xs">
-                          <h4 className="font-semibold text-[11px] text-muted-foreground uppercase tracking-wider">
+                          <h4 className="font-semibold text-2xs text-muted-foreground uppercase tracking-wider">
                             Request Headers ({Object.keys(selectedRequest.requestHeaders).length})
                           </h4>
-                          <div className="border border-border/60 rounded-lg overflow-hidden bg-background font-mono text-[11px]">
+                          <div className="border border-border/60 rounded-lg overflow-hidden bg-background font-mono text-2xs">
                             {Object.entries(selectedRequest.requestHeaders).map(([key, val]) => (
                               <div key={key} className="grid grid-cols-[150px_1fr] gap-x-3 px-3 py-1 border-b border-border/30 hover:bg-muted/10 last:border-none">
                                 <span className="font-semibold text-primary/85 truncate" title={key}>{key}</span>
@@ -317,13 +317,13 @@ export function NetworkMonitor({
 
                         {/* Response Headers */}
                         <div className="space-y-1.5 text-xs">
-                          <h4 className="font-semibold text-[11px] text-muted-foreground uppercase tracking-wider">
+                          <h4 className="font-semibold text-2xs text-muted-foreground uppercase tracking-wider">
                             Response Headers ({Object.keys(selectedRequest.responseHeaders).length})
                           </h4>
                           {Object.keys(selectedRequest.responseHeaders).length === 0 ? (
-                            <p className="text-[10px] text-muted-foreground italic pl-1">No response headers yet.</p>
+                            <p className="text-3xs text-muted-foreground italic pl-1">No response headers yet.</p>
                           ) : (
-                            <div className="border border-border/60 rounded-lg overflow-hidden bg-background font-mono text-[11px]">
+                            <div className="border border-border/60 rounded-lg overflow-hidden bg-background font-mono text-2xs">
                               {Object.entries(selectedRequest.responseHeaders).map(([key, val]) => (
                                 <div key={key} className="grid grid-cols-[150px_1fr] gap-x-3 px-3 py-1 border-b border-border/30 hover:bg-muted/10 last:border-none">
                                   <span className="font-semibold text-primary/85 truncate" title={key}>{key}</span>
@@ -338,19 +338,19 @@ export function NetworkMonitor({
                   </TabsContent>
 
                   {/* Payload Tab Content */}
-                  <TabsContent value="payload" className="flex-1 min-h-0 m-0 outline-none">
+                  <TabsContent value="payload" className="min-h-0 m-0">
                     <ScrollArea className="h-full">
                       <div className="p-3.5 space-y-4">
                         {/* Query String parameters */}
                         <div className="space-y-1.5 text-xs">
-                          <h4 className="font-semibold text-[11px] text-muted-foreground uppercase tracking-wider">Query String Parameters</h4>
+                          <h4 className="font-semibold text-2xs text-muted-foreground uppercase tracking-wider">Query String Parameters</h4>
                           {(() => {
                             try {
                               const urlObj = new URL(selectedRequest.url);
                               const params = Array.from(urlObj.searchParams.entries());
-                              if (params.length === 0) return <p className="text-[10px] text-muted-foreground italic pl-1">No query parameters.</p>;
+                              if (params.length === 0) return <p className="text-3xs text-muted-foreground italic pl-1">No query parameters.</p>;
                               return (
-                                <div className="border border-border/60 rounded-lg overflow-hidden bg-background font-mono text-[11px]">
+                                <div className="border border-border/60 rounded-lg overflow-hidden bg-background font-mono text-2xs">
                                   {params.map(([key, val]) => (
                                     <div key={key} className="grid grid-cols-[150px_1fr] gap-x-3 px-3 py-1 border-b border-border/30 hover:bg-muted/10 last:border-none">
                                       <span className="font-semibold text-primary/85 truncate" title={key}>{key}</span>
@@ -360,14 +360,14 @@ export function NetworkMonitor({
                                 </div>
                               );
                             } catch {
-                              return <p className="text-[10px] text-rose-500 pl-1">Failed to parse URL query parameters.</p>;
+                              return <p className="text-3xs text-rose-600 dark:text-rose-400 pl-1">Failed to parse URL query parameters.</p>;
                             }
                           })()}
                         </div>
 
                         {/* Request POST Body */}
                         <div className="space-y-1.5 text-xs">
-                          <h4 className="font-semibold text-[11px] text-muted-foreground uppercase tracking-wider">Request Post Body</h4>
+                          <h4 className="font-semibold text-2xs text-muted-foreground uppercase tracking-wider">Request Post Body</h4>
                           {selectedRequest.postData ? (
                             (() => {
                               try {
@@ -379,14 +379,14 @@ export function NetworkMonitor({
                                 );
                               } catch {
                                 return (
-                                  <pre className="p-3 bg-muted/20 border rounded-lg font-mono text-[11px] whitespace-pre-wrap break-all text-foreground/80 max-h-[300px] overflow-y-auto leading-relaxed">
+                                  <pre className="p-3 bg-muted/20 border rounded-lg font-mono text-2xs whitespace-pre-wrap break-all text-foreground/80 max-h-[300px] overflow-y-auto leading-relaxed">
                                     {selectedRequest.postData}
                                   </pre>
                                 );
                               }
                             })()
                           ) : (
-                            <p className="text-[10px] text-muted-foreground italic pl-1">No post body payload.</p>
+                            <p className="text-3xs text-muted-foreground italic pl-1">No post body payload.</p>
                           )}
                         </div>
                       </div>
@@ -394,7 +394,7 @@ export function NetworkMonitor({
                   </TabsContent>
 
                   {/* Response Tab Content */}
-                  <TabsContent value="response" className="flex-1 min-h-0 m-0 outline-none flex flex-col">
+                  <TabsContent value="response" className="min-h-0 m-0 flex flex-col">
                     {loadingBodyId === selectedRequestId ? (
                       <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-6">
                         <Hourglass className="size-8 animate-spin mb-2" />
@@ -402,12 +402,12 @@ export function NetworkMonitor({
                       </div>
                     ) : bodyData ? (
                       <div className="flex-1 min-h-0 flex flex-col">
-                        <div className="px-3 py-1 bg-muted/20 border-b text-[10px] text-muted-foreground flex items-center justify-between shrink-0">
+                        <div className="px-3 py-1 bg-muted/20 border-b text-3xs text-muted-foreground flex items-center justify-between shrink-0">
                           <span>
                             {bodyData.base64Encoded ? 'Base64 Encoded Binary Data' : 'Formatted Text Response'}
                           </span>
                           {bodyData.body.length > 100000 && (
-                            <span className="text-rose-500 font-semibold">Large body ({Math.round(bodyData.body.length / 1024)} KB)</span>
+                            <span className="text-rose-600 dark:text-rose-400 font-semibold">Large body ({Math.round(bodyData.body.length / 1024)} KB)</span>
                           )}
                         </div>
                         <div className="flex-1 min-h-0">
@@ -432,7 +432,7 @@ export function NetworkMonitor({
                               // Plain text fall back
                               const text = bodyData.base64Encoded ? atob(bodyData.body) : bodyData.body;
                               return (
-                                <ScrollArea className="h-full bg-background font-mono text-[11px] text-foreground/85">
+                                <ScrollArea mono className="h-full bg-background text-2xs text-foreground/85">
                                   <pre className="p-3 whitespace-pre-wrap break-all leading-relaxed">
                                     {text || <span className="text-muted-foreground italic">(Empty Response Body)</span>}
                                   </pre>
@@ -451,10 +451,10 @@ export function NetworkMonitor({
                   </TabsContent>
 
                   {/* WebSocket Frame Ledger */}
-                  <TabsContent value="websocket" className="flex-1 min-h-0 m-0 outline-none flex flex-col">
+                  <TabsContent value="websocket" className="min-h-0 m-0 flex flex-col">
                     <div className="flex-1 min-h-0 flex flex-col">
                       {/* Frame columns header */}
-                      <div className="grid grid-cols-[24px_60px_60px_1fr_60px] px-3 py-1.5 border-b bg-muted/20 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider shrink-0 select-none">
+                      <div className="grid grid-cols-[24px_60px_60px_1fr_60px] px-3 py-1.5 border-b bg-muted/20 text-3xs font-semibold text-muted-foreground uppercase tracking-wider shrink-0 select-none">
                         <span></span>
                         <span>Opcode</span>
                         <span className="text-right">Size</span>
@@ -502,12 +502,12 @@ export function NetworkMonitor({
                                       <ArrowUpRight className="size-3.5" />
                                     )}
                                   </span>
-                                  <span className="font-semibold text-[10px] uppercase">{opcodeText}</span>
-                                  <span className="text-right text-[10px] opacity-75">{frame.size} B</span>
+                                  <span className="font-semibold text-3xs uppercase">{opcodeText}</span>
+                                  <span className="text-right text-3xs opacity-75">{frame.size} B</span>
                                   <span className="truncate pl-3 text-foreground/90 font-mono" title={frame.payloadData}>
                                     {frame.payloadData}
                                   </span>
-                                  <span className="text-right text-[10px] text-muted-foreground/80">{timeStr}</span>
+                                  <span className="text-right text-3xs text-muted-foreground/80">{timeStr}</span>
                                 </div>
                               );
                             })}
@@ -522,7 +522,7 @@ export function NetworkMonitor({
               <div className="flex flex-col items-center justify-center h-full p-6 text-muted-foreground text-center">
                 <WifiHigh className="size-8 opacity-30 mb-2" />
                 <p className="text-xs font-semibold">No request selected</p>
-                <p className="text-[10px] opacity-75 mt-0.5">Select a row on the left ledger to audit transaction details</p>
+                <p className="text-3xs opacity-75 mt-0.5">Select a row on the left ledger to audit transaction details</p>
               </div>
             )}
           </ResizablePanel>

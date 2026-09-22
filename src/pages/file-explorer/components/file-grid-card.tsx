@@ -130,7 +130,7 @@ export function FileGridCard<T extends FileItem>({
                 "px-1 py-0.5 rounded",
 
                 // Typography
-                "text-[11px] font-sans text-foreground",
+                "text-2xs font-sans text-foreground",
 
                 // Backgrounds & Borders
                 "bg-background border border-primary/60",
@@ -147,7 +147,7 @@ export function FileGridCard<T extends FileItem>({
                 "truncate w-full px-1 block",
 
                 // Typography
-                "text-[11px] font-sans",
+                "text-2xs font-sans",
                 item.type === 'folder'
                   ? "font-semibold text-foreground"
                   : "text-muted-foreground group-hover:text-foreground",

@@ -127,10 +127,10 @@ export function IntruderResultsPanel() {
               placeholder="Search status, payload, URL…"
               className={cn(
                 // Sizing & Spacing
-                "h-7 w-44 pl-7 pr-7 text-xs",
+                "w-44 pl-7 pr-7 text-xs",
 
                 // Backgrounds & Borders
-                "bg-background border-input",
+                "bg-background",
 
                 // Interactive & States
                 "focus:w-56 transition-all duration-150"
@@ -187,7 +187,7 @@ export function IntruderResultsPanel() {
                       "text-xs",
 
                       // Interactive & States
-                      hasStatusFilters && "text-primary font-medium"
+                      hasStatusFilters && "text-primary"
                     )}
                   >
                     <FunnelSimpleIcon
@@ -271,7 +271,7 @@ export function IntruderResultsPanel() {
                   "text-xs",
 
                   // Interactive & States
-                  filterOnlyGrepMatch && "text-emerald-500 font-medium"
+                  filterOnlyGrepMatch && "text-emerald-600 dark:text-emerald-400"
                 )}
                 title="Show only grep keyword match results"
               >
@@ -281,7 +281,7 @@ export function IntruderResultsPanel() {
                     "size-3.5 mr-1",
 
                     // Typography
-                    filterOnlyGrepMatch ? "text-emerald-500" : "text-muted-foreground"
+                    filterOnlyGrepMatch ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
                   )}
                 />
                 <span>Match{grepMatchCount > 0 ? ` (${grepMatchCount})` : ''}</span>
@@ -300,7 +300,7 @@ export function IntruderResultsPanel() {
                   "text-xs",
 
                   // Interactive & States
-                  filterOnlyErrors && "text-destructive font-medium"
+                  filterOnlyErrors && "text-destructive"
                 )}
                 title="Show only failed / error requests"
               >
@@ -322,11 +322,11 @@ export function IntruderResultsPanel() {
           {hasActiveFilters && (
             <Button
               variant="ghost"
-              size="sm"
+              size="md"
               onClick={clearAllFilters}
               className={cn(
                 // Sizing & Spacing
-                "h-7 px-2",
+                "px-2",
 
                 // Typography
                 "text-xs text-muted-foreground",
@@ -349,12 +349,12 @@ export function IntruderResultsPanel() {
           {/* Layout Toggle: Wider / Full-width Layout */}
           <Button
             variant="outline"
-            size="sm"
+            size="md"
             onClick={toggleFullWidthResults}
             data-state={isFullWidthResults ? 'on' : 'off'}
             className={cn(
               // Sizing & Spacing
-              "h-7 px-2",
+              "px-2",
 
               // Typography
               "text-xs",
@@ -387,12 +387,12 @@ export function IntruderResultsPanel() {
           {/* Clear Results */}
           <Button
             variant="outline"
-            size="sm"
+            size="md"
             onClick={clearResults}
             disabled={resultsCount === 0}
             className={cn(
               // Sizing & Spacing
-              "h-7 px-2",
+              "px-2",
 
               // Typography
               "text-xs"
@@ -611,7 +611,7 @@ export function IntruderResultsPanel() {
                           "px-1.5 py-0.5",
 
                           // Typography
-                          "text-[10px] font-semibold",
+                          "text-3xs font-semibold",
 
                           // Backgrounds & Borders
                           "rounded border",
@@ -630,7 +630,7 @@ export function IntruderResultsPanel() {
                           "px-1.5 py-0.5",
 
                           // Typography
-                          "text-[10px] font-semibold text-destructive",
+                          "text-3xs font-semibold text-destructive",
 
                           // Backgrounds & Borders
                           "rounded border bg-destructive/15 border-destructive/20"
@@ -689,16 +689,13 @@ export function IntruderResultsPanel() {
                     >
                       {result.grep_match ? (
                         <Badge
-                          variant="outline"
+                          variant="success"
                           className={cn(
                             // Sizing & Spacing
                             "px-1.5 py-0.2",
 
                             // Typography
-                            "text-[10px] font-semibold text-emerald-600 dark:text-emerald-400",
-
-                            // Backgrounds & Borders
-                            "border-emerald-500/30 bg-emerald-500/10"
+                            "font-semibold"
                           )}
                         >
                           Match

@@ -31,7 +31,7 @@ export function ExtractionTab({
       <div className="h-full flex flex-col items-center justify-center gap-2 text-muted-foreground select-none">
         <DatabaseIcon className="h-10 w-10 text-muted-foreground/35 animate-pulse" />
         <span className="text-xs font-semibold">No databases extracted</span>
-        <span className="text-[10px] text-muted-foreground/60 text-center max-w-[240px]">
+        <span className="text-3xs text-muted-foreground/60 text-center max-w-[240px]">
           Successful SQL injection exploits will enable full schema mapping and database dump features.
         </span>
       </div>
@@ -44,10 +44,10 @@ export function ExtractionTab({
         {/* Databases Column Panel */}
         <ResizablePanel defaultSize="20" minSize="15" className="flex flex-col h-full">
           <div className="p-2 border-b bg-muted/10 shrink-0 flex items-center justify-between h-9 select-none">
-            <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
+            <span className="text-3xs font-bold uppercase text-muted-foreground tracking-wider">
               Databases
             </span>
-            <Badge variant="secondary" className="text-[9px] font-mono h-4 px-1 py-0">
+            <Badge mono variant="secondary" className="text-4xs h-4 px-1 py-0">
               {databases.length}
             </Badge>
           </div>
@@ -80,11 +80,11 @@ export function ExtractionTab({
         {/* Tables Column Panel */}
         <ResizablePanel defaultSize="20" minSize="15" className="flex flex-col h-full border-r-0">
           <div className="p-2 border-b bg-muted/10 shrink-0 flex items-center justify-between h-9 select-none">
-            <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
+            <span className="text-3xs font-bold uppercase text-muted-foreground tracking-wider">
               Tables
             </span>
             {selectedDbData && (
-              <Badge variant="secondary" className="text-[9px] font-mono h-4 px-1 py-0">
+              <Badge mono variant="secondary" className="text-4xs h-4 px-1 py-0">
                 {selectedDbData.tables.length}
               </Badge>
             )}
@@ -104,9 +104,9 @@ export function ExtractionTab({
                     >
                       <TableIcon className={`h-3.5 w-3.5 mr-2 shrink-0 ${isSelected ? 'text-primary' : 'text-muted-foreground/60'}`} />
                       <span className="truncate flex-1">{table.name}</span>
-                      <Badge
+                      <Badge mono
                         variant="outline"
-                        className="ml-1 text-[9px] font-mono px-1 py-0 h-4 font-normal bg-background/50 text-muted-foreground shrink-0"
+                        className="ml-1 text-4xs px-1 py-0 h-4 font-normal bg-background/50 text-muted-foreground"
                       >
                         {table.rows.length}
                       </Badge>
@@ -114,7 +114,7 @@ export function ExtractionTab({
                   );
                 })
               ) : (
-                <div className="p-3 text-[11px] text-muted-foreground/60 text-center select-none">
+                <div className="p-3 text-2xs text-muted-foreground/60 text-center select-none">
                   Select database
                 </div>
               )}
@@ -127,11 +127,11 @@ export function ExtractionTab({
         {/* Data Rows Column Panel */}
         <ResizablePanel defaultSize="60" minSize="30" className="flex flex-col h-full">
           <div className="p-2 border-b bg-muted/10 flex items-center justify-between shrink-0 h-9 select-none">
-            <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider truncate">
+            <span className="text-3xs font-bold uppercase text-muted-foreground tracking-wider truncate">
               Data: {selectedTable || 'Select Table'}
             </span>
             {tableData && (
-              <Badge variant="outline" className="text-[9px] font-mono h-4 px-1.5 font-semibold bg-primary/5 text-primary border-primary/20">
+              <Badge mono variant="outline" className="text-4xs h-4 px-1.5 font-semibold bg-primary/5 text-primary border-primary/20">
                 {tableData.rows.length} rows loaded
               </Badge>
             )}
@@ -143,17 +143,17 @@ export function ExtractionTab({
                   <TableHeader className="sticky top-0 z-10 bg-muted/95 backdrop-blur-sm shadow-sm select-none border-b">
                     <TableRow className="hover:bg-transparent">
                       {tableData.columns.map((col, i) => (
-                        <TableHead key={i} className="h-8 py-0 font-bold text-muted-foreground text-[10px] uppercase tracking-wider">
-                          {col.name} <span className="text-[9px] font-normal text-muted-foreground/50 lowercase font-mono">({col.data_type})</span>
+                        <TableHead key={i} className="h-8 py-0 font-bold text-muted-foreground text-3xs uppercase tracking-wider">
+                          {col.name} <span className="text-4xs font-normal text-muted-foreground/50 lowercase font-mono">({col.data_type})</span>
                         </TableHead>
                       ))}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {tableData.rows.slice(0, 100).map((row, rowIdx) => (
-                      <TableRow key={rowIdx} className="hover:bg-muted/30 border-b">
+                      <TableRow key={rowIdx} className="hover:bg-muted/30">
                         {row.map((cell, cellIdx) => (
-                          <TableCell key={cellIdx} className="font-mono py-1.5 text-[11px] text-foreground">
+                          <TableCell mono key={cellIdx} className="py-1.5 text-2xs text-foreground">
                             {cell === null || cell === undefined || cell === '' ? (
                               <span className="text-muted-foreground/40 italic select-none">NULL</span>
                             ) : (

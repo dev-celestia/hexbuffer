@@ -39,7 +39,7 @@ export function RouteItem({ route, isSelected, onSelect, onUpdate }: RouteItemPr
           "mt-0.5",
 
           // Typography
-          "text-[10px]",
+          "text-3xs",
           METHOD_COLORS[route.method] ?? ""
         )}
       >
@@ -60,7 +60,7 @@ export function RouteItem({ route, isSelected, onSelect, onUpdate }: RouteItemPr
             "truncate",
 
             // Typography
-            "text-[11px] font-medium text-foreground"
+            "text-2xs font-medium text-foreground"
           )}
         >
           {route.path}
@@ -71,9 +71,6 @@ export function RouteItem({ route, isSelected, onSelect, onUpdate }: RouteItemPr
         onCheckedChange={(v) => onUpdate(route.id, { enabled: v })}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          // Layout & Positioning
-          "shrink-0",
-
           // Sizing & Spacing
           "mt-0.5 scale-75",
 

@@ -87,7 +87,7 @@ export function RunTab({
               'flex items-center gap-1.5',
 
               // Typography
-              'text-[10px] text-muted-foreground'
+              'text-3xs text-muted-foreground'
             )}
           >
             {statusMeta ? (
@@ -144,33 +144,21 @@ export function RunTab({
           )}
         >
           <Badge
-            variant="outline"
-            className={cn(
-              // Typography
-              'text-[10px] font-semibold',
-
-              // Backgrounds & Borders
-              'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-            )}
+            variant="success"
+            className="font-semibold"
           >
             {passed} passed
           </Badge>
           <Badge
-            variant="outline"
-            className={cn(
-              // Typography
-              'text-[10px] font-semibold',
-
-              // Backgrounds & Borders
-              'border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400'
-            )}
+            variant="destructive"
+            className="font-semibold"
           >
             {failed} failed
           </Badge>
-          <Badge variant="secondary" className="text-[10px]">
+          <Badge variant="secondary">
             {findings.length} matches
           </Badge>
-          <Badge variant="secondary" className="text-[10px] tabular-nums">
+          <Badge variant="secondary" className="tabular-nums">
             {formatDuration(elapsedMillis)}
           </Badge>
           {isRunning && <Spinner className="size-3" />}
@@ -238,7 +226,7 @@ export function RunTab({
               <span
                 className={cn(
                   // Typography
-                  'text-[10px] text-muted-foreground'
+                  'text-3xs text-muted-foreground'
                 )}
               >
                 No runs yet.
@@ -254,7 +242,7 @@ export function RunTab({
                     'flex items-center gap-2',
 
                     // Typography
-                    'font-mono text-[10px] text-muted-foreground'
+                    'font-mono text-3xs text-muted-foreground'
                   )}
                 >
                   <span

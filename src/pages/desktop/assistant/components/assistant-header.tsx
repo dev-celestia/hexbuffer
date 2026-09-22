@@ -162,14 +162,14 @@ export function AssistantHeader({
             <DropdownMenuGroup>
               <DropdownMenuItem
                 onClick={onOpenConfig}
-                className="flex items-center gap-2 px-2 py-1.5 text-xs cursor-pointer rounded-md"
+                className="py-1.5 text-xs cursor-pointer"
               >
                 <GearSixIcon className="size-3.5 text-muted-foreground" />
                 <span>AI Settings</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={onOpenDebug}
-                className="flex items-center gap-2 px-2 py-1.5 text-xs cursor-pointer rounded-md"
+                className="py-1.5 text-xs cursor-pointer"
               >
                 <BugIcon className="size-3.5 text-muted-foreground" />
                 <span>AI Debug Inspector</span>

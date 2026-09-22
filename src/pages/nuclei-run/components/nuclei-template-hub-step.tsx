@@ -336,32 +336,33 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
             )}
           >
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase font-mono">
+              <span className="text-2xs font-semibold tracking-wider text-muted-foreground uppercase font-mono">
                 Official Nuclei Hub
               </span>
               <Badge
                 variant="outline"
-                className="h-4 px-1.5 text-[9px] font-mono border-emerald-500/30 text-emerald-400 font-medium"
+                mono
+                className="h-4 px-1.5 text-4xs border-success/30 text-success"
               >
                 Community v3
               </Badge>
             </div>
 
-            <p className="text-[11px] text-muted-foreground leading-snug">
+            <p className="text-2xs text-muted-foreground leading-snug">
               Sync community templates directly from{' '}
               <span className="font-mono text-foreground font-medium">projectdiscovery</span>.
             </p>
 
             <Button
               variant="outline"
-              size="sm"
+              size="md"
               disabled={syncStatus.isSyncing}
               onClick={() => syncFromGitHub(false)}
               className={cn(
                 // Sizing & Spacing
-                "h-7 px-2.5 w-full text-xs font-medium justify-between",
+                "w-full text-xs justify-between",
                 // Backgrounds & Borders
-                "bg-background hover:bg-muted/30 border-border"
+                "hover:bg-muted/30"
               )}
             >
               <div className="flex items-center gap-1.5 min-w-0">
@@ -373,13 +374,13 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                 />
                 <span className="truncate">{syncStatus.isSyncing ? 'Syncing...' : 'Sync GitHub Templates'}</span>
               </div>
-              <span className="text-[10px] font-mono text-muted-foreground shrink-0">
+              <span className="text-3xs font-mono text-muted-foreground shrink-0">
                 {templates.length} loaded
               </span>
             </Button>
 
             {syncStatus.progressMessage && (
-              <p className="text-[10px] text-muted-foreground font-mono truncate">
+              <p className="text-3xs text-muted-foreground font-mono truncate">
                 {syncStatus.progressMessage}
               </p>
             )}
@@ -391,7 +392,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
               type="button"
               onClick={() => setActiveTaxonomyTab('directories')}
               className={cn(
-                "px-2 py-1 text-[11px] font-medium rounded transition-colors",
+                "px-2 py-1 text-2xs font-medium rounded transition-colors",
                 activeTaxonomyTab === 'directories'
                   ? "bg-primary/20 text-primary font-semibold"
                   : "text-muted-foreground hover:text-foreground"
@@ -403,7 +404,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
               type="button"
               onClick={() => setActiveTaxonomyTab('tags')}
               className={cn(
-                "px-2 py-1 text-[11px] font-medium rounded transition-colors",
+                "px-2 py-1 text-2xs font-medium rounded transition-colors",
                 activeTaxonomyTab === 'tags'
                   ? "bg-primary/20 text-primary font-semibold"
                   : "text-muted-foreground hover:text-foreground"
@@ -415,7 +416,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
               type="button"
               onClick={() => setActiveTaxonomyTab('tech')}
               className={cn(
-                "px-2 py-1 text-[11px] font-medium rounded transition-colors",
+                "px-2 py-1 text-2xs font-medium rounded transition-colors",
                 activeTaxonomyTab === 'tech'
                   ? "bg-primary/20 text-primary font-semibold"
                   : "text-muted-foreground hover:text-foreground"
@@ -427,7 +428,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
               type="button"
               onClick={() => setActiveTaxonomyTab('severities')}
               className={cn(
-                "px-2 py-1 text-[11px] font-medium rounded transition-colors",
+                "px-2 py-1 text-2xs font-medium rounded transition-colors",
                 activeTaxonomyTab === 'severities'
                   ? "bg-primary/20 text-primary font-semibold"
                   : "text-muted-foreground hover:text-foreground"
@@ -439,7 +440,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
               type="button"
               onClick={() => setActiveTaxonomyTab('protocols')}
               className={cn(
-                "px-2 py-1 text-[11px] font-medium rounded transition-colors",
+                "px-2 py-1 text-2xs font-medium rounded transition-colors",
                 activeTaxonomyTab === 'protocols'
                   ? "bg-primary/20 text-primary font-semibold"
                   : "text-muted-foreground hover:text-foreground"
@@ -451,7 +452,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
               type="button"
               onClick={() => setActiveTaxonomyTab('authors')}
               className={cn(
-                "px-2 py-1 text-[11px] font-medium rounded transition-colors",
+                "px-2 py-1 text-2xs font-medium rounded transition-colors",
                 activeTaxonomyTab === 'authors'
                   ? "bg-primary/20 text-primary font-semibold"
                   : "text-muted-foreground hover:text-foreground"
@@ -462,12 +463,12 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
           </div>
 
           {/* Taxonomy Items Scroll Area */}
-          <ScrollArea className="flex-1 min-h-0">
+          <ScrollArea fill>
             <div className="p-2 flex flex-col gap-1">
               {/* Directory Taxonomy Tab */}
               {activeTaxonomyTab === 'directories' && (
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono px-2 py-0.5">
+                  <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider font-mono px-2 py-0.5">
                     Standard Nuclei Directories
                   </span>
                   {NUCLEI_DIRECTORIES.map((dir) => {
@@ -489,7 +490,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                           <FoldersIcon className="size-3.5 shrink-0 opacity-70" />
                           <span className="truncate">{dir.label}</span>
                         </div>
-                        <span className="text-[10px] font-mono text-muted-foreground ml-1 shrink-0">
+                        <span className="text-3xs font-mono text-muted-foreground ml-1 shrink-0">
                           {count}
                         </span>
                       </button>
@@ -502,14 +503,14 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
               {activeTaxonomyTab === 'tags' && (
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center justify-between px-2 py-0.5">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
+                    <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider font-mono">
                       Popular Nuclei Tags
                     </span>
                     {selectedTag && (
                       <button
                         type="button"
                         onClick={() => setSelectedTag(null)}
-                        className="text-[10px] text-primary hover:underline"
+                        className="text-3xs text-primary hover:underline"
                       >
                         Clear
                       </button>
@@ -534,7 +535,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                           <TagIcon className="size-3.5 shrink-0 opacity-70" />
                           <span className="truncate">{tag.label}</span>
                         </div>
-                        <span className="text-[10px] font-mono text-muted-foreground ml-1 shrink-0">
+                        <span className="text-3xs font-mono text-muted-foreground ml-1 shrink-0">
                           {count}
                         </span>
                       </button>
@@ -547,14 +548,14 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
               {activeTaxonomyTab === 'tech' && (
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center justify-between px-2 py-0.5">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
+                    <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider font-mono">
                       Contextual Tech Stacks
                     </span>
                     {activeCategory !== 'all' && (
                       <button
                         type="button"
                         onClick={() => setActiveCategory('all')}
-                        className="text-[10px] text-primary hover:underline"
+                        className="text-3xs text-primary hover:underline"
                       >
                         Clear
                       </button>
@@ -576,9 +577,9 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                       >
                         <div className="flex items-center justify-between w-full">
                           <span className="text-xs font-medium text-foreground">{tech.name}</span>
-                          <span className="text-[9px] font-mono text-muted-foreground">{tech.tags[0]}</span>
+                          <span className="text-4xs font-mono text-muted-foreground">{tech.tags[0]}</span>
                         </div>
-                        <span className="text-[10px] text-muted-foreground line-clamp-1">
+                        <span className="text-3xs text-muted-foreground line-clamp-1">
                           {tech.description}
                         </span>
                       </button>
@@ -590,7 +591,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
               {/* Severity Taxonomy Tab */}
               {activeTaxonomyTab === 'severities' && (
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono px-2 py-0.5">
+                  <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider font-mono px-2 py-0.5">
                     Severity Thresholds
                   </span>
                   {(['critical', 'high', 'medium', 'low', 'info'] as Severity[]).map((sev) => {
@@ -613,7 +614,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                           <span className={cn("size-2 rounded-full", cfg.dotColor)} />
                           <span className="capitalize font-mono">{sev}</span>
                         </div>
-                        <span className="text-[10px] font-mono text-muted-foreground">
+                        <span className="text-3xs font-mono text-muted-foreground">
                           {count}
                         </span>
                       </button>
@@ -625,7 +626,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
               {/* Protocol Taxonomy Tab */}
               {activeTaxonomyTab === 'protocols' && (
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono px-2 py-0.5">
+                  <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider font-mono px-2 py-0.5">
                     Protocols & Types
                   </span>
                   {PROTOCOL_TYPES.map((proto) => {
@@ -644,7 +645,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                         )}
                       >
                         <span className="truncate">{proto.label}</span>
-                        <span className="text-[10px] font-mono text-muted-foreground">
+                        <span className="text-3xs font-mono text-muted-foreground">
                           {count}
                         </span>
                       </button>
@@ -657,14 +658,14 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
               {activeTaxonomyTab === 'authors' && (
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center justify-between px-2 py-0.5">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
+                    <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider font-mono">
                       Top Community Authors
                     </span>
                     {selectedAuthor && (
                       <button
                         type="button"
                         onClick={() => setSelectedAuthor(null)}
-                        className="text-[10px] text-primary hover:underline"
+                        className="text-3xs text-primary hover:underline"
                       >
                         Clear
                       </button>
@@ -689,7 +690,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                           <UserIcon className="size-3.5 shrink-0 opacity-70" />
                           <span className="truncate">{auth.label}</span>
                         </div>
-                        <span className="text-[10px] font-mono text-muted-foreground">
+                        <span className="text-3xs font-mono text-muted-foreground">
                           {count}
                         </span>
                       </button>
@@ -719,7 +720,8 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search templates by ID, CVE, name, or tags..."
-                className="pl-8 h-8 text-xs font-mono bg-muted/20 border-border"
+                mono
+                className="pl-8 h-8 text-xs bg-muted/20 border-border"
               />
               {searchQuery && (
                 <button
@@ -739,7 +741,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                   variant="ghost"
                   size="xs"
                   onClick={handleClearFilters}
-                  className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                  className="h-7 text-xs text-muted-foreground hover:text-foreground"
                 >
                   Clear Filters
                 </Button>
@@ -749,7 +751,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                 variant="outline"
                 size="xs"
                 onClick={handleSelectAllFiltered}
-                className="h-7 px-2 text-xs gap-1"
+                className="h-7 text-xs"
               >
                 <CheckSquareIcon className="size-3.5 text-primary" />
                 <span>Select All ({filteredTemplates.length})</span>
@@ -760,7 +762,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                 size="xs"
                 onClick={deselectAllTemplates}
                 disabled={selectedTemplateIds.length === 0}
-                className="h-7 px-2 text-xs gap-1 text-muted-foreground hover:text-destructive"
+                className="h-7 text-xs text-muted-foreground hover:text-destructive"
               >
                 <TrashIcon className="size-3.5" />
                 <span>Deselect All</span>
@@ -776,7 +778,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                     setActiveTab('selected');
                   }
                 }}
-                className="h-7 px-3 text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
+                className="h-7 px-3 text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <span>Review Selected ({selectedTemplateIds.length})</span>
                 <ArrowRightIcon className="size-3.5" />
@@ -785,42 +787,42 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
           </div>
 
           {/* Active Filter Chips Strip */}
-          <div className="px-3 py-1.5 border-b border-border bg-muted/5 flex items-center justify-between gap-2 text-[11px] shrink-0">
+          <div className="px-3 py-1.5 border-b border-border bg-muted/5 flex items-center justify-between gap-2 text-2xs shrink-0">
             <div className="flex items-center gap-2 overflow-x-auto py-0.5">
               <span className="text-muted-foreground font-mono shrink-0">
                 Showing {filteredTemplates.length} of {templates.length} templates
               </span>
 
               {selectedDirectory !== 'all' && (
-                <Badge variant="outline" className="h-4 px-1.5 text-[10px] font-mono gap-1">
+                <Badge variant="outline" mono className="h-4 px-1.5">
                   <span>Dir: {selectedDirectory}</span>
                   <span className="cursor-pointer" onClick={() => setSelectedDirectory('all')}>✕</span>
                 </Badge>
               )}
 
               {selectedTag && (
-                <Badge variant="outline" className="h-4 px-1.5 text-[10px] font-mono gap-1">
+                <Badge variant="outline" mono className="h-4 px-1.5">
                   <span>Tag: {selectedTag}</span>
                   <span className="cursor-pointer" onClick={() => setSelectedTag(null)}>✕</span>
                 </Badge>
               )}
 
               {selectedAuthor && (
-                <Badge variant="outline" className="h-4 px-1.5 text-[10px] font-mono gap-1">
+                <Badge variant="outline" mono className="h-4 px-1.5">
                   <span>Author: {selectedAuthor}</span>
                   <span className="cursor-pointer" onClick={() => setSelectedAuthor(null)}>✕</span>
                 </Badge>
               )}
 
               {selectedProtocol !== 'all' && (
-                <Badge variant="outline" className="h-4 px-1.5 text-[10px] font-mono gap-1">
+                <Badge variant="outline" mono className="h-4 px-1.5">
                   <span>Proto: {selectedProtocol}</span>
                   <span className="cursor-pointer" onClick={() => setSelectedProtocol('all')}>✕</span>
                 </Badge>
               )}
 
               {selectedSeverities.map((sev) => (
-                <Badge key={sev} variant="outline" className="h-4 px-1.5 text-[10px] font-mono capitalize gap-1">
+                <Badge key={sev} variant="outline" mono className="h-4 px-1.5 capitalize">
                   <span>{sev}</span>
                   <span className="cursor-pointer" onClick={() => toggleSeverity(sev)}>✕</span>
                 </Badge>
@@ -897,7 +899,6 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                           <Checkbox
                             checked={isSelected}
                             onCheckedChange={() => toggleTemplateSelection(template.id)}
-                            className="size-4"
                           />
                         </div>
 
@@ -905,8 +906,9 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                           <div className="flex items-center gap-2">
                             <Badge
                               variant="outline"
+                              mono
                               className={cn(
-                                "h-4 px-1 text-[9px] font-mono capitalize shrink-0 font-medium",
+                                "h-4 px-1 text-4xs capitalize shrink-0",
                                 sevCfg.bg,
                                 sevCfg.text,
                                 sevCfg.border
@@ -920,16 +922,16 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                             </span>
 
                             {template.directory && (
-                              <span className="text-[10px] font-mono text-muted-foreground px-1 bg-muted/40 rounded shrink-0">
+                              <span className="text-3xs font-mono text-muted-foreground px-1 bg-muted/40 rounded shrink-0">
                                 {template.directory}
                               </span>
                             )}
                           </div>
 
-                          <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                          <div className="flex items-center gap-2 text-2xs text-muted-foreground">
                             <span className="truncate text-foreground/80">{template.name}</span>
                             <span className="text-muted-foreground/60">•</span>
-                            <span className="font-mono text-[10px] shrink-0">by {template.author}</span>
+                            <span className="font-mono text-3xs shrink-0">by {template.author}</span>
                           </div>
                         </div>
                       </div>
@@ -940,13 +942,13 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                           {template.tags.slice(0, 3).map((t) => (
                             <span
                               key={t}
-                              className="text-[9px] font-mono text-muted-foreground px-1.5 py-0.5 bg-muted/30 rounded"
+                              className="text-4xs font-mono text-muted-foreground px-1.5 py-0.5 bg-muted/30 rounded"
                             >
                               {t}
                             </span>
                           ))}
                           {template.tags.length > 3 && (
-                            <span className="text-[9px] font-mono text-muted-foreground">
+                            <span className="text-4xs font-mono text-muted-foreground">
                               +{template.tags.length - 3}
                             </span>
                           )}
@@ -955,12 +957,13 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                         <Button
                           variant={isSelected ? 'default' : 'outline'}
                           size="xs"
+                          mono
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleTemplateSelection(template.id);
                           }}
                           className={cn(
-                            "h-6 px-2 text-[11px] font-mono font-medium",
+                            "h-6 text-2xs",
                             isSelected && "bg-primary text-primary-foreground"
                           )}
                         >
@@ -999,8 +1002,9 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                   <div className="flex items-center gap-1.5">
                     <Badge
                       variant="outline"
+                      mono
                       className={cn(
-                        "h-4 px-1.5 text-[9px] font-mono capitalize shrink-0 font-medium",
+                        "h-4 px-1.5 text-4xs capitalize shrink-0",
                         SEVERITY_CONFIG[activeTemplate.severity]?.bg,
                         SEVERITY_CONFIG[activeTemplate.severity]?.text,
                         SEVERITY_CONFIG[activeTemplate.severity]?.border
@@ -1033,7 +1037,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                     type="button"
                     onClick={() => setInspectorMode('yaml')}
                     className={cn(
-                      "flex items-center gap-1 px-2 py-1 text-[11px] font-mono rounded transition-colors",
+                      "flex items-center gap-1 px-2 py-1 text-2xs font-mono rounded transition-colors",
                       inspectorMode === 'yaml'
                         ? "bg-background text-foreground font-semibold shadow-sm"
                         : "text-muted-foreground hover:text-foreground"
@@ -1047,7 +1051,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                     type="button"
                     onClick={() => setInspectorMode('flow')}
                     className={cn(
-                      "flex items-center gap-1 px-2 py-1 text-[11px] font-mono rounded transition-colors",
+                      "flex items-center gap-1 px-2 py-1 text-2xs font-mono rounded transition-colors",
                       inspectorMode === 'flow'
                         ? "bg-background text-foreground font-semibold shadow-sm"
                         : "text-muted-foreground hover:text-foreground"
@@ -1062,8 +1066,9 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                   <Button
                     variant="ghost"
                     size="xs"
+                    mono
                     onClick={handleCopyYaml}
-                    className="h-6 px-2 text-[10px] font-mono gap-1 text-muted-foreground hover:text-foreground"
+                    className="h-6 text-muted-foreground hover:text-foreground"
                   >
                     <CopyIcon className="size-3" />
                     <span>{copiedYaml ? 'Copied!' : 'Copy YAML'}</span>
@@ -1095,7 +1100,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
 
             {/* Inspector Footer: Metadata & Select Toggle */}
             <div className="p-3 border-t border-border bg-muted/10 shrink-0 flex items-center justify-between gap-3">
-              <div className="flex flex-col gap-0.5 text-[10px] font-mono text-muted-foreground min-w-0">
+              <div className="flex flex-col gap-0.5 text-3xs font-mono text-muted-foreground min-w-0">
                 <span className="truncate">Author: {activeTemplate.author}</span>
                 <span className="truncate">Proto: {activeTemplate.protocol} • Dir: {activeTemplate.directory || 'http'}</span>
               </div>
@@ -1105,7 +1110,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                 variant={selectedTemplateIds.includes(activeTemplate.id) ? 'outline' : 'default'}
                 onClick={() => toggleTemplateSelection(activeTemplate.id)}
                 className={cn(
-                  "h-7 px-3 text-xs gap-1.5 font-medium shrink-0",
+                  "h-7 px-3 text-xs gap-1.5",
                   !selectedTemplateIds.includes(activeTemplate.id) && "bg-primary text-primary-foreground hover:bg-primary/90"
                 )}
               >

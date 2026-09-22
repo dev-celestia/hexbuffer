@@ -64,7 +64,7 @@ export function ComparerInputs({
           <span
             className={cn(
               // Typography
-              "text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"
+              "text-3xs font-semibold text-muted-foreground uppercase tracking-wider"
             )}
           >
             Original Text (A)
@@ -84,10 +84,10 @@ export function ComparerInputs({
               onClick={handlePasteA}
               className={cn(
                 // Sizing & Spacing
-                "h-5 px-1.5 gap-1",
+                "h-5 px-1.5",
 
                 // Typography
-                "text-[10px]"
+                "text-3xs"
               )}
             >
               <ClipboardIcon className="h-3.5 w-3.5" />
@@ -103,7 +103,7 @@ export function ComparerInputs({
                 "h-5 px-1.5",
 
                 // Typography
-                "text-[10px] text-destructive",
+                "text-3xs text-destructive",
 
                 // Interactive & States
                 "hover:bg-destructive/10 hover:text-destructive"
@@ -164,7 +164,7 @@ export function ComparerInputs({
           <span
             className={cn(
               // Typography
-              "text-[10px] font-semibold text-muted-foreground uppercase tracking-wider"
+              "text-3xs font-semibold text-muted-foreground uppercase tracking-wider"
             )}
           >
             Modified Text (B)
@@ -184,10 +184,10 @@ export function ComparerInputs({
               onClick={handlePasteB}
               className={cn(
                 // Sizing & Spacing
-                "h-5 px-1.5 gap-1",
+                "h-5 px-1.5",
 
                 // Typography
-                "text-[10px]"
+                "text-3xs"
               )}
             >
               <ClipboardIcon className="h-3.5 w-3.5" />
@@ -203,7 +203,7 @@ export function ComparerInputs({
                 "h-5 px-1.5",
 
                 // Typography
-                "text-[10px] text-destructive",
+                "text-3xs text-destructive",
 
                 // Interactive & States
                 "hover:bg-destructive/10 hover:text-destructive"

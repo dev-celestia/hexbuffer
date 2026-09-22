@@ -115,7 +115,7 @@ export function IntruderPayloadPresetDialog({
                       {selectedPayload.description}
                     </p>
                   </div>
-                  <Badge variant="secondary" className="shrink-0">
+                  <Badge variant="secondary">
                     {selectedMetaLabel}
                   </Badge>
                 </div>

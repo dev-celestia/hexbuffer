@@ -92,7 +92,7 @@ export function RequestNode({
             // Layout & Positioning
             "px-1.5 py-0.5 rounded border uppercase shrink-0",
             // Typography
-            "text-[9px] font-mono font-bold",
+            "text-4xs font-mono font-bold",
             // Backgrounds & Borders
             methodClass
           )}
@@ -115,7 +115,7 @@ export function RequestNode({
             // Sizing & Spacing
             "p-1.5 rounded",
             // Typography
-            "font-mono text-[11px] truncate select-all",
+            "font-mono text-2xs truncate select-all",
             // Backgrounds & Borders
             "bg-muted/40 border border-border/50 text-foreground"
           )}
@@ -130,7 +130,7 @@ export function RequestNode({
             // Layout & Positioning
             "flex items-center justify-between pt-1",
             // Typography
-            "text-[10px] text-muted-foreground font-mono"
+            "text-3xs text-muted-foreground font-mono"
           )}
         >
           <span>

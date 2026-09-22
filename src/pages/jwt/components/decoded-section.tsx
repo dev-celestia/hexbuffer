@@ -15,11 +15,11 @@ function valueType(value: unknown): 'string' | 'number' | 'boolean' | 'null' | '
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  string: 'text-green-400 dark:text-green-300',
-  number: 'text-amber-400 dark:text-amber-300',
-  boolean: 'text-purple-400 dark:text-purple-300',
-  null: 'text-gray-400 dark:text-gray-500',
-  object: 'text-cyan-400 dark:text-cyan-300',
+  string: 'text-green-700 dark:text-green-300',
+  number: 'text-amber-700 dark:text-amber-300',
+  boolean: 'text-purple-700 dark:text-purple-300',
+  null: 'text-gray-500 dark:text-gray-400',
+  object: 'text-cyan-700 dark:text-cyan-300',
 };
 
 function ColorizedValue({ value }: Readonly<{ value: unknown }>) {
@@ -30,7 +30,7 @@ function ColorizedValue({ value }: Readonly<{ value: unknown }>) {
       <span
         className={cn(
           // Typography
-          "font-mono break-all text-[11px] opacity-85"
+          "font-mono break-all text-2xs opacity-85"
         )}
       >
         {JSON.stringify(value)}
@@ -90,7 +90,7 @@ export function DecodedSection({ title, data }: Readonly<DecodedSectionProps>) {
       <Label
         className={cn(
           // Typography
-          "text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
+          "text-3xs font-bold uppercase tracking-wider text-muted-foreground"
         )}
       >
         {title}
@@ -126,7 +126,7 @@ export function DecodedSection({ title, data }: Readonly<DecodedSectionProps>) {
                   "shrink-0",
 
                   // Typography
-                  "font-mono text-blue-400 dark:text-blue-300"
+                  "font-mono text-blue-700 dark:text-blue-300"
                 )}
               >
                 {key}

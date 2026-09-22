@@ -373,7 +373,7 @@ export function LogDetailView() {
           <DialogHeader
             className={cn(
               // Layout & Positioning
-              "flex flex-row items-center justify-between shrink-0",
+              "flex-row items-center justify-between shrink-0",
 
               // Sizing & Spacing
               "pb-2",
@@ -399,13 +399,10 @@ export function LogDetailView() {
               >
                 {call.method}
               </span>
-              <DialogTitle
+              <DialogTitle mono
                 className={cn(
                   // Layout & Positioning
-                  "truncate",
-
-                  // Typography
-                  "font-mono text-sm"
+                  "truncate"
                 )}
               >
                 {call.url || call.path}
@@ -420,7 +417,7 @@ export function LogDetailView() {
                     "px-1.5 py-0.5",
 
                     // Typography
-                    "font-mono text-[10px] font-semibold",
+                    "font-mono text-3xs font-semibold",
 
                     // Backgrounds & Borders
                     "rounded border",

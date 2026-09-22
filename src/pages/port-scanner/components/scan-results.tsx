@@ -78,7 +78,7 @@ export function ScanResults({
             "px-3 py-1.5",
 
             // Typography
-            "font-mono text-[11px]",
+            "font-mono text-2xs",
 
             // Backgrounds & Borders
             "border-b bg-destructive/10 text-destructive"
@@ -89,7 +89,7 @@ export function ScanResults({
             variant="ghost"
             size="sm"
             onClick={onClear}
-            className="h-5 px-1.5 text-[10px] text-destructive hover:bg-destructive/10"
+            className="h-5 px-1.5 text-3xs text-destructive hover:bg-destructive/10"
           >
             Dismiss
           </Button>

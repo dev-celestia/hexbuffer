@@ -95,7 +95,7 @@ export function NotesSearchEmpty({
             onClick={onClearSearch}
             className={cn(
               // Typography
-              "text-xs font-medium cursor-pointer"
+              "text-xs"
             )}
           >
             <XIcon className="size-3.5 me-1.5" />
@@ -107,7 +107,7 @@ export function NotesSearchEmpty({
             onClick={onOpenSavedNotes}
             className={cn(
               // Typography
-              "text-xs font-medium cursor-pointer"
+              "text-xs"
             )}
           >
             <FolderSimpleIcon className="size-3.5 me-1.5" />

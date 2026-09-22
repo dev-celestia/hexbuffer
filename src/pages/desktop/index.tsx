@@ -150,13 +150,13 @@ export function DesktopPage() {
                       variant="ghost"
                       className={cn(
                         // Sizing & Spacing
-                        "h-6 px-2 gap-1.5",
+                        "px-2 gap-1.5",
 
                         // Typography
-                        "text-[11px] text-muted-foreground",
+                        "text-2xs text-muted-foreground",
 
                         // Interactive & States
-                        "hover:text-foreground hover:bg-muted/60 cursor-pointer"
+                        "hover:text-foreground hover:bg-muted/60"
                       )}
                     >
                       <GearSixIcon className="size-3.5" />
@@ -188,7 +188,7 @@ export function DesktopPage() {
                 <p
                   className={cn(
                     // Typography
-                    "text-[11px] font-mono font-bold tracking-wider uppercase text-muted-foreground"
+                    "text-2xs font-mono font-bold tracking-wider uppercase text-muted-foreground"
                   )}
                 >
                   Shortcuts
@@ -220,10 +220,10 @@ export function DesktopPage() {
                   placeholder="Search features…"
                   className={cn(
                     // Sizing & Spacing
-                    "h-7 w-44 pl-7 pr-7 text-xs",
+                    "w-44 pl-7 pr-7 text-xs",
 
                     // Backgrounds & Borders
-                    "bg-background/80 border-input",
+                    "bg-background/80",
 
                     // Interactive & States
                     "focus:w-56 transition-[width] duration-150"
@@ -320,10 +320,7 @@ export function DesktopPage() {
                   "h-auto p-0 mt-2",
 
                   // Typography
-                  "text-xs font-semibold text-primary",
-
-                  // Interactive & States
-                  "hover:underline"
+                  "text-xs font-semibold"
                 )}
               >
                 Clear search query

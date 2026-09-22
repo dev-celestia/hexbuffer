@@ -172,7 +172,7 @@ export function NucleiRunTemplateStudio({
               // Sizing & Spacing
               "mr-1 shrink-0",
               // Typography
-              "text-[11px] text-muted-foreground"
+              "text-2xs text-muted-foreground"
             )}
           >
             Insert:
@@ -186,7 +186,7 @@ export function NucleiRunTemplateStudio({
                 // Layout & Positioning
                 "px-1.5 py-0.5 rounded shrink-0 transition-colors",
                 // Typography
-                "text-[10px] font-mono",
+                "text-3xs font-mono",
                 // Backgrounds & Borders
                 "bg-muted/40 text-muted-foreground border border-border/60 hover:bg-muted hover:text-foreground",
                 // Interactive & States
@@ -242,7 +242,7 @@ export function NucleiRunTemplateStudio({
                     // Layout & Positioning
                     "px-1 py-0.2 rounded",
                     // Typography
-                    "font-bold uppercase text-[10px]",
+                    "font-bold uppercase text-3xs",
                     // Backgrounds & Borders
                     "bg-muted/40"
                   )}
@@ -300,13 +300,13 @@ export function NucleiRunTemplateStudio({
               "flex items-center gap-2"
             )}
           >
-            <Input
+            <Input mono
               value={target}
               onChange={(e) => onTargetChange(e.target.value)}
               placeholder="Target URL (e.g. https://example.com)"
               className={cn(
                 // Sizing & Spacing
-                "h-8 text-xs font-mono",
+                "h-8 text-xs",
                 // Backgrounds & Borders
                 "bg-muted/20 border-input/60"
               )}
@@ -318,7 +318,7 @@ export function NucleiRunTemplateStudio({
               disabled={isTesting || hasErrors || !target.trim()}
               className={cn(
                 // Sizing & Spacing
-                "h-8 px-3 text-xs shrink-0",
+                "h-8 px-3 text-xs",
                 // Backgrounds & Borders
                 "bg-emerald-600 hover:bg-emerald-500 text-white"
               )}
@@ -365,7 +365,7 @@ export function NucleiRunTemplateStudio({
                   // Sizing & Spacing
                   "mt-1 max-w-xs",
                   // Typography
-                  "text-[11px]"
+                  "text-2xs"
                 )}
               >
                 Enter a target URL and click Test to verify request probes and matchers.
@@ -435,7 +435,7 @@ export function NucleiRunTemplateStudio({
                     <span
                       className={cn(
                         // Typography
-                        "text-[10px] opacity-80"
+                        "text-3xs opacity-80"
                       )}
                     >
                       {testResult.matched
@@ -448,7 +448,7 @@ export function NucleiRunTemplateStudio({
                 <div
                   className={cn(
                     // Typography
-                    "text-right font-mono text-[11px]"
+                    "text-right font-mono text-2xs"
                   )}
                 >
                   <span>{testResult.elapsed_ms} ms</span>
@@ -466,7 +466,7 @@ export function NucleiRunTemplateStudio({
                   <span
                     className={cn(
                       // Typography
-                      "font-semibold text-muted-foreground text-[11px] uppercase tracking-wider"
+                      "font-semibold text-muted-foreground text-2xs uppercase tracking-wider"
                     )}
                   >
                     Extracted Values
@@ -484,7 +484,7 @@ export function NucleiRunTemplateStudio({
                           // Sizing & Spacing
                           "p-1.5 rounded",
                           // Typography
-                          "font-mono text-[10px] text-amber-500",
+                          "font-mono text-3xs text-amber-500",
                           // Backgrounds & Borders
                           "bg-amber-500/10 border border-amber-500/20"
                         )}
@@ -507,7 +507,7 @@ export function NucleiRunTemplateStudio({
                   <span
                     className={cn(
                       // Typography
-                      "font-semibold text-muted-foreground text-[11px] uppercase tracking-wider"
+                      "font-semibold text-muted-foreground text-2xs uppercase tracking-wider"
                     )}
                   >
                     Request Probe
@@ -541,7 +541,7 @@ export function NucleiRunTemplateStudio({
                   <span
                     className={cn(
                       // Typography
-                      "font-semibold text-muted-foreground text-[11px] uppercase tracking-wider"
+                      "font-semibold text-muted-foreground text-2xs uppercase tracking-wider"
                     )}
                   >
                     Response Payload

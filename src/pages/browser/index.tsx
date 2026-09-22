@@ -199,10 +199,10 @@ export function BrowserAutomationPage() {
               placeholder="Search logs and findings…"
               className={cn(
                 // Sizing & Spacing
-                "h-7 w-48 pl-7 pr-7 text-xs",
+                "w-48 pl-7 pr-7 text-xs",
 
                 // Backgrounds & Borders
-                "bg-background border-input",
+                "bg-background",
 
                 // Interactive & States
                 "focus:w-64 transition-all duration-150"
@@ -247,14 +247,14 @@ export function BrowserAutomationPage() {
                 "gap-2"
               )}
             >
-              <Badge
+              <Badge mono
                 variant="outline"
                 className={cn(
                   // Sizing & Spacing
                   "px-1.5 py-0.5",
 
                   // Typography
-                  "text-[10px] font-mono font-semibold text-white",
+                  "text-3xs font-semibold text-white",
 
                   // Backgrounds & Borders
                   "rounded shadow-none border-none",
@@ -268,14 +268,14 @@ export function BrowserAutomationPage() {
               {/* Start/Stop/Pause/Resume */}
               {(page.status === 'idle' || page.status === 'completed' || page.status === 'failed' || page.status === 'stopped') && (
                 <Button
-                  size="sm"
+                  size="md"
                   onClick={startBrowserCrawl}
                   className={cn(
                     // Sizing & Spacing
-                    "h-7 px-2.5 gap-1.5",
+                    "gap-1.5",
 
                     // Typography
-                    "text-xs font-medium"
+                    "text-xs"
                   )}
                 >
                   <PlayIcon className="size-3" weight="fill" />
@@ -285,30 +285,30 @@ export function BrowserAutomationPage() {
               {page.status === 'running' && (
                 <>
                   <Button
-                    size="sm"
+                    size="md"
                     variant="outline"
                     onClick={toggleBrowserCrawl}
                     className={cn(
                       // Sizing & Spacing
-                      "h-7 px-2.5 gap-1.5",
+                      "gap-1.5",
 
                       // Typography
-                      "text-xs font-medium"
+                      "text-xs"
                     )}
                   >
                     <PauseIcon className="size-3" weight="fill" />
                     <span>Pause</span>
                   </Button>
                   <Button
-                    size="sm"
+                    size="md"
                     variant="destructive"
                     onClick={stopBrowserCrawl}
                     className={cn(
                       // Sizing & Spacing
-                      "h-7 px-2.5 gap-1.5",
+                      "gap-1.5",
 
                       // Typography
-                      "text-xs font-medium"
+                      "text-xs"
                     )}
                   >
                     <SquareIcon className="size-3" weight="fill" />
@@ -319,30 +319,30 @@ export function BrowserAutomationPage() {
               {page.status === 'paused' && (
                 <>
                   <Button
-                    size="sm"
+                    size="md"
                     variant="outline"
                     onClick={toggleBrowserCrawl}
                     className={cn(
                       // Sizing & Spacing
-                      "h-7 px-2.5 gap-1.5",
+                      "gap-1.5",
 
                       // Typography
-                      "text-xs font-medium"
+                      "text-xs"
                     )}
                   >
                     <ArrowCounterClockwiseIcon className="size-3" />
                     <span>Resume</span>
                   </Button>
                   <Button
-                    size="sm"
+                    size="md"
                     variant="destructive"
                     onClick={stopBrowserCrawl}
                     className={cn(
                       // Sizing & Spacing
-                      "h-7 px-2.5 gap-1.5",
+                      "gap-1.5",
 
                       // Typography
-                      "text-xs font-medium"
+                      "text-xs"
                     )}
                   >
                     <SquareIcon className="size-3" weight="fill" />
@@ -366,7 +366,7 @@ export function BrowserAutomationPage() {
           onValueChange={(value) => page.setViewTab(value as CrawlViewTab)}
           className={cn(
             // Layout & Positioning
-            "flex flex-col flex-1 min-h-0"
+            "flex-col flex-1 min-h-0"
           )}
         >
           <div

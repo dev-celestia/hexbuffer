@@ -27,7 +27,7 @@ export function PaneHeader({ label, meta }: Readonly<PaneHeaderProps>) {
       <span
         className={cn(
           // Typography
-          'text-[10px] font-semibold uppercase tracking-widest text-muted-foreground'
+          'text-3xs font-semibold uppercase tracking-widest text-muted-foreground'
         )}
       >
         {label}
@@ -36,7 +36,7 @@ export function PaneHeader({ label, meta }: Readonly<PaneHeaderProps>) {
         <span
           className={cn(
             // Typography
-            'truncate text-[10px] tabular-nums text-muted-foreground/80'
+            'truncate text-3xs tabular-nums text-muted-foreground/80'
           )}
         >
           {meta}

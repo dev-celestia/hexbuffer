@@ -6,11 +6,11 @@ import { getNodeDataSchema, type DataSchemaField } from '../lib/node-capabilitie
 
 function typeColor(type: DataSchemaField['type']): string {
   switch (type) {
-    case 'string': return 'text-emerald-400';
-    case 'number': return 'text-amber-400';
-    case 'boolean': return 'text-violet-400';
-    case 'object': return 'text-sky-400';
-    case 'array': return 'text-rose-400';
+    case 'string': return 'text-emerald-600 dark:text-emerald-400';
+    case 'number': return 'text-amber-600 dark:text-amber-400';
+    case 'boolean': return 'text-violet-600 dark:text-violet-400';
+    case 'object': return 'text-sky-600 dark:text-sky-400';
+    case 'array': return 'text-rose-600 dark:text-rose-400';
   }
 }
 
@@ -27,12 +27,12 @@ function typeLabel(type: DataSchemaField['type']): string {
 function FieldRow({ field }: Readonly<{ field: DataSchemaField }>) {
   return (
     <div className="flex items-start gap-2 py-1.5 border-b  last:border-b-0">
-      <span className={`shrink-0 rounded px-1 py-px text-[9px] font-mono font-medium ${typeColor(field.type)} bg-muted/60`}>
+      <span className={`shrink-0 rounded px-1 py-px text-4xs font-mono font-medium ${typeColor(field.type)} bg-muted/60`}>
         {typeLabel(field.type)}
       </span>
       <div className="min-w-0 flex-1">
-        <span className="text-[11px] font-mono font-medium">{field.key}</span>
-        <p className="text-[10px] text-muted-foreground/70 leading-tight truncate">
+        <span className="text-2xs font-mono font-medium">{field.key}</span>
+        <p className="text-3xs text-muted-foreground/70 leading-tight truncate">
           {field.description}
         </p>
       </div>
@@ -78,15 +78,15 @@ function RuntimeDataBlock({ title, data }: Readonly<{ title: string; data: unkno
         ) : (
           <CaretRightIcon className="size-3 text-muted-foreground/60" />
         )}
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+        <span className="text-3xs font-semibold uppercase tracking-wider text-muted-foreground/80">
           {title}
         </span>
-        <span className="ml-auto min-w-0 truncate text-[10px] text-muted-foreground/60">
+        <span className="ml-auto min-w-0 truncate text-3xs text-muted-foreground/60">
           {compactDataSummary(data)}
         </span>
       </button>
       {expanded && (
-        <pre className="max-h-48 overflow-auto rounded-md border bg-muted/30 px-2.5 py-2 text-[10px] leading-relaxed text-muted-foreground whitespace-pre-wrap break-all">
+        <pre className="max-h-48 overflow-auto rounded-md border bg-muted/30 px-2.5 py-2 text-3xs leading-relaxed text-muted-foreground whitespace-pre-wrap break-all">
           {json}
         </pre>
       )}
@@ -110,7 +110,7 @@ export function NodeDataFlow({ nodeType, runtime }: Readonly<NodeDataFlowProps>)
       <RuntimeDataBlock title="Received Data" data={runtime?.inputData} />
       <RuntimeDataBlock title="Output Data" data={runtime?.outputData} />
       {runtime?.inputData == null && runtime?.outputData == null && (
-        <p className="rounded-md border bg-muted/20 px-2.5 py-2 text-[11px] text-muted-foreground/70">
+        <p className="rounded-md border bg-muted/20 px-2.5 py-2 text-2xs text-muted-foreground/70">
           Run the workflow to see the latest data received by this node.
         </p>
       )}
@@ -119,10 +119,10 @@ export function NodeDataFlow({ nodeType, runtime }: Readonly<NodeDataFlowProps>)
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
             <ArrowRightIcon className="size-3 text-muted-foreground/60" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+            <span className="text-3xs font-semibold uppercase tracking-wider text-muted-foreground/80">
               Input
             </span>
-            <span className="text-[10px] text-muted-foreground/50 ml-auto">
+            <span className="text-3xs text-muted-foreground/50 ml-auto">
               {schema.input.length} field{schema.input.length !== 1 ? 's' : ''}
             </span>
           </div>
@@ -142,10 +142,10 @@ export function NodeDataFlow({ nodeType, runtime }: Readonly<NodeDataFlowProps>)
             ) : (
               <ArrowDownIcon className="size-3 text-muted-foreground/60" />
             )}
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+            <span className="text-3xs font-semibold uppercase tracking-wider text-muted-foreground/80">
               Output
             </span>
-            <span className="text-[10px] text-muted-foreground/50 ml-auto">
+            <span className="text-3xs text-muted-foreground/50 ml-auto">
               {schema.output.length} field{schema.output.length !== 1 ? 's' : ''}
             </span>
           </div>
@@ -158,7 +158,7 @@ export function NodeDataFlow({ nodeType, runtime }: Readonly<NodeDataFlowProps>)
       )}
 
       {!hasInput && !hasOutput && (
-        <p className="text-[11px] text-muted-foreground/60 italic">
+        <p className="text-2xs text-muted-foreground/60 italic">
           No data schema defined for this node type.
         </p>
       )}

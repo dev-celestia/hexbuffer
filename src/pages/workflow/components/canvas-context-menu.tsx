@@ -160,7 +160,7 @@ export function CanvasContextMenu({ state, onClose, onAddNode, hasTriggerNode, o
           <MagnifyingGlassIcon className="absolute left-2 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
           <Input
             ref={searchRef}
-            className="h-7 pl-7 text-xs"
+            className="pl-7 text-xs"
             placeholder="MagnifyingGlassIcon nodes..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -174,14 +174,13 @@ export function CanvasContextMenu({ state, onClose, onAddNode, hasTriggerNode, o
         {!hasResults ? (
           <div className="flex flex-col items-center gap-1 py-4 text-muted-foreground">
             <MagnifyingGlassIcon className="size-3.5 opacity-40" />
-            <p className="text-[10px]">No nodes match "{search}"</p>
+            <p className="text-3xs">No nodes match "{search}"</p>
           </div>
         ) : (
           <Accordion
             multiple
             defaultValue={query ? openItems : undefined}
             key={query ? 'search' : 'default'}
-            className="w-full"
           >
             {filteredByCategory.map((group) => {
               if (group.nodes.length === 0) return null;
@@ -196,7 +195,7 @@ export function CanvasContextMenu({ state, onClose, onAddNode, hasTriggerNode, o
                   <AccordionTrigger className="px-3 py-1 hover:no-underline [&>svg]:size-3 [&>svg]:text-muted-foreground/60">
                     <div className="flex items-center gap-1.5">
                       <CategoryIcon className="size-3 text-muted-foreground" />
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      <span className="text-3xs font-semibold uppercase tracking-wider text-muted-foreground">
                         {group.label}
                       </span>
                     </div>
@@ -249,7 +248,7 @@ export function CanvasContextMenu({ state, onClose, onAddNode, hasTriggerNode, o
                           </TooltipTrigger>
                           <TooltipContent side="right" sideOffset={8} className="max-w-48">
                             <p className="font-medium">{def.label}</p>
-                            <p className="text-[11px] opacity-80">{def.description}</p>
+                            <p className="text-2xs opacity-80">{def.description}</p>
                           </TooltipContent>
                         </Tooltip>
                       );

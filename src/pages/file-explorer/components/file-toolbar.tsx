@@ -107,9 +107,6 @@ export function FileToolbar({
           onClick={onNavigateUp}
           disabled={isAtRoot || loading}
           className={cn(
-            // Layout & Positioning
-            "shrink-0",
-
             // Sizing & Spacing
             "size-7 p-0",
 
@@ -117,7 +114,7 @@ export function FileToolbar({
             "text-muted-foreground",
 
             // Interactive & States
-            "hover:text-foreground active:scale-[0.97] transition-all"
+            "hover:text-foreground active:scale-[0.97]"
           )}
           title="Navigate up"
         >
@@ -216,7 +213,7 @@ export function FileToolbar({
               placeholder="Folder name"
               className={cn(
                 // Sizing & Spacing
-                "w-32 h-7",
+                "w-32",
 
                 // Typography
                 "text-xs bg-background"
@@ -229,9 +226,6 @@ export function FileToolbar({
               size="sm"
               variant="outline"
               className={cn(
-                // Layout & Positioning
-                "shrink-0",
-
                 // Sizing & Spacing
                 "size-7 p-0"
               )}
@@ -342,13 +336,10 @@ export function FileToolbar({
             placeholder="Search files…"
             className={cn(
               // Sizing & Spacing
-              "h-7 w-full ps-7 pe-7",
+              "ps-7 pe-7",
 
               // Typography
-              "text-xs font-sans bg-background",
-
-              // Backgrounds & Borders
-              "border-input"
+              "text-xs font-sans bg-background"
             )}
             disabled={actionDisabled}
           />

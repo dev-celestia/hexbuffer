@@ -160,7 +160,7 @@ export const TrafficTable = memo(function TrafficTable(props: TrafficTableProps)
                         "px-3 py-1.5",
 
                         // Typography
-                        "uppercase tracking-wider text-[10px]",
+                        "uppercase tracking-wider text-3xs",
 
                         // Interactive & States
                         isRightAligned && "text-right",

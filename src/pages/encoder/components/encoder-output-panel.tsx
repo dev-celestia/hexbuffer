@@ -36,7 +36,7 @@ export function EncoderOutputPanel({
         <span
           className={cn(
             // Typography
-            "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+            "text-2xs font-semibold uppercase tracking-wider text-muted-foreground"
           )}
         >
           {headerLabel} · {codecLabel}
@@ -45,7 +45,7 @@ export function EncoderOutputPanel({
           <span
             className={cn(
               // Typography
-              "text-[10px] text-muted-foreground"
+              "text-3xs text-muted-foreground"
             )}
           >
             {output.length.toLocaleString()} chars
@@ -71,7 +71,7 @@ export function EncoderOutputPanel({
           {error}
         </div>
       ) : (
-        <Textarea
+        <Textarea mono
           className={cn(
             // Layout & Positioning
             "flex-1 min-h-0 resize-none",
@@ -80,7 +80,7 @@ export function EncoderOutputPanel({
             "p-3",
 
             // Typography
-            "font-mono text-xs text-foreground",
+            "text-xs text-foreground",
 
             // Backgrounds & Borders
             "border-0 rounded-none bg-transparent shadow-none",

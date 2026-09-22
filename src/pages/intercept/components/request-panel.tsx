@@ -55,10 +55,10 @@ export function InterceptRequestPanel() {
           disabled={!selectedRequestId || !rawRequest.trim()}
           className={cn(
             // Layout & Positioning
-            'flex items-center gap-1',
+            'flex',
 
             // Sizing & Spacing
-            'h-6 px-2 text-xs'
+            'px-2 text-xs'
           )}
         >
           <CodeIcon className="size-3.5" />

@@ -105,12 +105,12 @@ export function NucleiScanCockpit() {
           {/* Target URL Input */}
           <div className="relative flex-1 max-w-sm">
             <GlobeIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-            <Input
+            <Input mono
               value={targetInput}
               onChange={(e) => setTargetInput(e.target.value)}
               placeholder="Target URL (e.g. https://example.com)..."
               disabled={status === 'running'}
-              className="h-7 pl-8 pr-3 text-xs font-mono w-full bg-background"
+              className="pl-8 pr-3 text-xs bg-background"
             />
           </div>
 
@@ -126,17 +126,17 @@ export function NucleiScanCockpit() {
           >
             <span className="font-semibold text-primary">{selectedTemplateIds.length}</span>
             <span className="text-muted-foreground">Templates</span>
-            <span className="text-[10px] text-muted-foreground hover:underline ml-1">
+            <span className="text-3xs text-muted-foreground hover:underline ml-1">
               (Change)
             </span>
           </button>
 
           {/* Engine Parameters Pills */}
-          <div className="hidden lg:flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground">
-            <Badge variant="outline" className="h-5 px-1.5 border-border/70 text-muted-foreground">
+          <div className="hidden lg:flex items-center gap-1.5 text-3xs font-mono text-muted-foreground">
+            <Badge variant="outline" className="px-1.5 border-border/70 text-muted-foreground">
               Rate: {config.rate_limit_rps} RPS
             </Badge>
-            <Badge variant="outline" className="h-5 px-1.5 border-border/70 text-muted-foreground">
+            <Badge variant="outline" className="px-1.5 border-border/70 text-muted-foreground">
               Threads: {config.concurrency}
             </Badge>
           </div>
@@ -145,17 +145,17 @@ export function NucleiScanCockpit() {
         {/* Right: Primary Scan Execution Buttons */}
         <div className="flex items-center gap-2 shrink-0">
           {/* Scan Status Badge */}
-          <Badge
+          <Badge mono
             variant="outline"
             className={cn(
               // Layout & Positioning
-              "h-6 px-2 text-[11px] font-mono capitalize hidden sm:inline-flex",
+              "h-6 text-2xs capitalize hidden sm:inline-flex",
               // Interactive & States
-              status === 'running' && "border-sky-500/40 text-sky-400 animate-pulse",
-              status === 'paused' && "border-amber-500/40 text-amber-400",
-              status === 'completed' && "border-emerald-500/40 text-emerald-400",
-              status === 'cancelled' && "border-zinc-500/40 text-zinc-400",
-              status === 'error' && "border-rose-500/40 text-rose-400"
+              status === 'running' && "border-info/40 text-info animate-pulse",
+              status === 'paused' && "border-warning/40 text-warning",
+              status === 'completed' && "border-success/40 text-success",
+              status === 'cancelled' && "border-muted-foreground/40 text-muted-foreground",
+              status === 'error' && "border-destructive/40 text-destructive"
             )}
           >
             {status}
@@ -168,7 +168,7 @@ export function NucleiScanCockpit() {
                 variant="outline"
                 size="xs"
                 onClick={pauseScan}
-                className="h-7 px-2.5 text-xs gap-1"
+                className="h-7 px-2.5 text-xs"
               >
                 <PauseIcon className="size-3.5 text-amber-400" />
                 <span>Pause</span>
@@ -177,7 +177,7 @@ export function NucleiScanCockpit() {
                 variant="destructive"
                 size="xs"
                 onClick={stopScan}
-                className="h-7 px-2.5 text-xs gap-1"
+                className="h-7 px-2.5 text-xs"
               >
                 <StopIcon className="size-3.5" />
                 <span>Stop</span>
@@ -188,7 +188,7 @@ export function NucleiScanCockpit() {
               <Button
                 size="xs"
                 onClick={resumeScan}
-                className="h-7 px-2.5 text-xs gap-1 bg-sky-600 hover:bg-sky-500 text-white"
+                className="h-7 px-2.5 text-xs bg-sky-600 hover:bg-sky-500 text-white"
               >
                 <PlayIcon className="size-3.5" />
                 <span>Resume</span>
@@ -197,7 +197,7 @@ export function NucleiScanCockpit() {
                 variant="destructive"
                 size="xs"
                 onClick={stopScan}
-                className="h-7 px-2.5 text-xs gap-1"
+                className="h-7 px-2.5 text-xs"
               >
                 <StopIcon className="size-3.5" />
                 <span>Stop</span>
@@ -208,7 +208,7 @@ export function NucleiScanCockpit() {
               size="xs"
               onClick={() => startScan()}
               disabled={selectedTemplateIds.length === 0}
-              className="h-7 px-3 text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
+              className="h-7 px-3 text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <PlayIcon className="size-3.5" />
               <span>Run Scan</span>
@@ -232,7 +232,7 @@ export function NucleiScanCockpit() {
             <span className="font-semibold text-foreground">
               {progress.percentage}%
             </span>
-            <span className="text-muted-foreground text-[11px]">
+            <span className="text-muted-foreground text-2xs">
               ({progress.completed_requests} / {progress.total_requests} reqs)
             </span>
           </div>
@@ -246,7 +246,7 @@ export function NucleiScanCockpit() {
           </div>
 
           {/* RPS & Time */}
-          <div className="hidden sm:flex items-center gap-3 text-[11px] text-muted-foreground">
+          <div className="hidden sm:flex items-center gap-3 text-2xs text-muted-foreground">
             <span>RPS: <span className="text-foreground">{progress.rps}</span></span>
             <span>Elapsed: <span className="text-foreground">{progress.elapsed_seconds}s</span></span>
           </div>
@@ -254,11 +254,11 @@ export function NucleiScanCockpit() {
 
         {/* Vulnerabilities Discovered Pill */}
         <div className="flex items-center gap-1.5 shrink-0">
-          <Badge
+          <Badge mono
             variant="outline"
             className={cn(
-              "h-5 px-1.5 text-[10px] font-mono font-bold",
-              findings.length > 0 ? "border-rose-500/40 text-rose-400" : "text-muted-foreground"
+              "px-1.5 font-bold",
+              findings.length > 0 ? "border-destructive/40 text-destructive" : "text-muted-foreground"
             )}
           >
             <BugIcon className="size-3 mr-1" />
@@ -341,7 +341,7 @@ export function NucleiScanCockpit() {
             <button
               type="button"
               onClick={() => setIsBottomOpen(!isBottomOpen)}
-              className="text-[11px] font-mono text-muted-foreground hover:text-foreground"
+              className="text-2xs font-mono text-muted-foreground hover:text-foreground"
             >
               {isBottomOpen ? 'Minimize ▾' : 'Expand ▴'}
             </button>

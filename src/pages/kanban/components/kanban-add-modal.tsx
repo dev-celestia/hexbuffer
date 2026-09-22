@@ -262,10 +262,10 @@ export function KanbanAddModal({ isOpen, onClose, defaultColumnId, onAdd }: Read
                 }}
                 placeholder="Add subtask title..."
               />
-              <Button size="sm"
+              <Button size="md"
                 type="button"
                 variant="outline"
-                className="h-7 w-7 p-0 shrink-0"
+                className="w-7 p-0"
                 onClick={handleAddSubtask}
               >
                 <PlusIcon className="h-3.5 w-3.5" />

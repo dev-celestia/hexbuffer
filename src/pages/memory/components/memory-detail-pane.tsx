@@ -110,7 +110,7 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
                 "size-4",
 
                 // Typography
-                selectedEntry.pinned ? "text-amber-500" : "text-muted-foreground"
+                selectedEntry.pinned ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"
               )}
             />
           </button>
@@ -136,12 +136,12 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
           )}
         >
           <Button
-            size="sm"
+            size="md"
             variant="ghost"
             onClick={() => handleCopyContent(selectedEntry.content)}
             className={cn(
               // Sizing & Spacing
-              "h-7 px-2",
+              "px-2",
 
               // Typography
               "text-xs"
@@ -158,12 +158,12 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
           </Button>
 
           <Button
-            size="sm"
+            size="md"
             variant="ghost"
             onClick={() => handleSaveAsNote(selectedEntry)}
             className={cn(
               // Sizing & Spacing
-              "h-7 px-2",
+              "px-2",
 
               // Typography
               "text-xs"
@@ -180,12 +180,12 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
           </Button>
 
           <Button
-            size="sm"
+            size="md"
             variant="ghost"
             onClick={() => handleOpenEdit(selectedEntry)}
             className={cn(
               // Sizing & Spacing
-              "h-7 w-7 p-0"
+              "w-7 p-0"
             )}
             title="Edit memory"
           >
@@ -198,12 +198,12 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
           </Button>
 
           <Button
-            size="sm"
+            size="md"
             variant="ghost"
             onClick={() => void handleDeleteEntry(selectedEntry.id)}
             className={cn(
               // Sizing & Spacing
-              "h-7 w-7 p-0",
+              "w-7 p-0",
 
               // Interactive & States
               "hover:text-destructive"
@@ -219,12 +219,12 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
           </Button>
 
           <Button
-            size="sm"
+            size="md"
             variant="ghost"
             onClick={() => setSelectedId(null)}
             className={cn(
               // Sizing & Spacing
-              "h-7 w-7 p-0"
+              "w-7 p-0"
             )}
             title="Close pane"
           >
@@ -268,19 +268,19 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
             )}
           >
             <div>
-              <span className="text-muted-foreground block text-[10px] uppercase font-semibold tracking-wider">
+              <span className="text-muted-foreground block text-3xs uppercase font-semibold tracking-wider">
                 Type
               </span>
               <Badge
                 variant={getMemoryTypeBadgeVariant(selectedEntry.memoryType)}
-                className="mt-1 capitalize text-[10px] px-1.5 py-0"
+                className="mt-1 capitalize px-1.5 py-0"
               >
                 {selectedEntry.memoryType}
               </Badge>
             </div>
 
             <div>
-              <span className="text-muted-foreground block text-[10px] uppercase font-semibold tracking-wider">
+              <span className="text-muted-foreground block text-3xs uppercase font-semibold tracking-wider">
                 Namespace
               </span>
               <span className="font-mono text-xs text-foreground block mt-1">
@@ -289,7 +289,7 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
             </div>
 
             <div>
-              <span className="text-muted-foreground block text-[10px] uppercase font-semibold tracking-wider">
+              <span className="text-muted-foreground block text-3xs uppercase font-semibold tracking-wider">
                 Importance
               </span>
               <span className="text-xs text-foreground block mt-1">
@@ -298,7 +298,7 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
             </div>
 
             <div>
-              <span className="text-muted-foreground block text-[10px] uppercase font-semibold tracking-wider">
+              <span className="text-muted-foreground block text-3xs uppercase font-semibold tracking-wider">
                 Source
               </span>
               <span className="text-xs text-muted-foreground block mt-1 truncate" title={selectedEntry.source ?? 'user'}>
@@ -320,9 +320,6 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
                   key={tag}
                   variant="outline"
                   className={cn(
-                    // Sizing & Spacing
-                    "text-[10px] px-2 py-0.5",
-
                     // Backgrounds & Borders
                     "bg-muted/30"
                   )}
@@ -343,7 +340,7 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
             <span
               className={cn(
                 // Typography
-                "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                "text-2xs font-semibold uppercase tracking-wider text-muted-foreground"
               )}
             >
               Content
@@ -383,10 +380,10 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
                   "flex items-center gap-1.5",
 
                   // Typography
-                  "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                  "text-2xs font-semibold uppercase tracking-wider text-muted-foreground"
                 )}
               >
-                <GitForkIcon className="size-3.5 text-indigo-400" />
+                <GitForkIcon className="size-3.5 text-indigo-600 dark:text-indigo-400" />
                 <span>Associated Findings & Links ({edges.length})</span>
               </div>
               <Button
@@ -395,10 +392,10 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
                 onClick={() => setIsLinkDialogOpen(true)}
                 className={cn(
                   // Layout & Positioning
-                  "flex items-center gap-1",
+                  "flex",
 
                   // Sizing & Spacing
-                  "h-6 px-2 text-[11px]"
+                  "px-2 text-2xs"
                 )}
               >
                 <PlusIcon className="size-3" />
@@ -445,9 +442,9 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
                       )}
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <Badge
+                        <Badge mono
                           variant="secondary"
-                          className="text-[10px] px-1.5 py-0 font-mono capitalize shrink-0"
+                          className="px-1.5 py-0 capitalize"
                         >
                           {edge.edgeType.replace('_', ' ')}
                         </Badge>
@@ -455,7 +452,7 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
                           {targetEntry ? targetEntry.title : `Entry ID: ${edge.targetId.slice(0, 8)}…`}
                         </span>
                       </div>
-                      <span className="text-[10px] text-muted-foreground font-mono shrink-0">
+                      <span className="text-3xs text-muted-foreground font-mono shrink-0">
                         {targetEntry ? targetEntry.memoryType : ''}
                       </span>
                     </div>
@@ -469,7 +466,7 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
           <div
             className={cn(
               // Layout & Positioning
-              "flex items-center justify-between text-[11px] text-muted-foreground pt-2 border-t border-border/30"
+              "flex items-center justify-between text-2xs text-muted-foreground pt-2 border-t border-border/30"
             )}
           >
             <span>Created {formatRelativeTime(selectedEntry.createdAt)}</span>

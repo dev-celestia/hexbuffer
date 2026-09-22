@@ -184,7 +184,7 @@ export function TargetHashPanel({
           <span
             className={cn(
               // Typography
-              "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+              "text-2xs font-semibold uppercase tracking-wider text-muted-foreground"
             )}
           >
             Target Hashes
@@ -192,7 +192,7 @@ export function TargetHashPanel({
           <span
             className={cn(
               // Typography
-              "text-[10px] text-muted-foreground font-mono"
+              "text-3xs text-muted-foreground font-mono"
             )}
           >
             {crackedCount > 0 ? `${crackedCount}/${totalCount} cracked` : `${totalCount} loaded`}
@@ -401,7 +401,7 @@ export function TargetHashPanel({
             <span
               className={cn(
                 // Typography
-                "text-[11px] text-muted-foreground/70"
+                "text-2xs text-muted-foreground/70"
               )}
             >
               Add hashes individually, bulk paste, or import from wordlist file
@@ -438,7 +438,7 @@ export function TargetHashPanel({
                 )}
               >
                 {target.cracked ? (
-                  <Check className="h-4 w-4 text-emerald-500 shrink-0" />
+                  <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 ) : (
                   <X className="h-4 w-4 text-muted-foreground/40 shrink-0" />
                 )}
@@ -477,7 +477,7 @@ export function TargetHashPanel({
                   <div
                     className={cn(
                       // Typography
-                      "text-[10px] text-muted-foreground/70 uppercase"
+                      "text-3xs text-muted-foreground/70 uppercase"
                     )}
                   >
                     {HASH_OPTIONS.find((h) => h.value === target.algorithm)?.label ||
@@ -529,7 +529,7 @@ export function TargetHashPanel({
             "border-t border-border/40 bg-muted/10",
 
             // Typography
-            "text-[11px] text-muted-foreground"
+            "text-2xs text-muted-foreground"
           )}
         >
           <span>Total: {totalCount}</span>

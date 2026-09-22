@@ -44,7 +44,7 @@ export function ClipboardWidget() {
         <span
           className={cn(
             // Typography
-            "text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase"
+            "text-3xs font-mono font-bold tracking-wider text-muted-foreground uppercase"
           )}
         >
           Clipboard History
@@ -104,7 +104,7 @@ export function ClipboardWidget() {
                   "gap-2 p-1.5",
 
                   // Typography
-                  "text-[11px] font-mono text-muted-foreground",
+                  "text-2xs font-mono text-muted-foreground",
 
                   // Backgrounds & Borders
                   "rounded-sm",
@@ -166,7 +166,7 @@ export function ClipboardWidget() {
             )}
           >
             <CopyIcon className="size-4 text-muted-foreground/60 mb-1" />
-            <span className="text-[9px] text-muted-foreground font-mono">No items in clipboard</span>
+            <span className="text-4xs text-muted-foreground font-mono">No items in clipboard</span>
           </motion.div>
         )}
       </div>

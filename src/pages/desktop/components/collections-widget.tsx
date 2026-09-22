@@ -125,7 +125,7 @@ export function CollectionsWidget() {
       <span
         className={cn(
           // Typography
-          "text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase"
+          "text-3xs font-mono font-bold tracking-wider text-muted-foreground uppercase"
         )}
       >
         API Collections
@@ -138,7 +138,7 @@ export function CollectionsWidget() {
             "px-0.5",
 
             // Typography
-            "text-[11px] text-muted-foreground italic"
+            "text-2xs text-muted-foreground italic"
           )}
         >
           {isHydrated ? 'No workspaces yet' : 'Loading…'}
@@ -216,7 +216,7 @@ export function CollectionsWidget() {
                       alt="workspace"
                       className="size-3.5 shrink-0"
                     />
-                    <span className="text-[11px] font-semibold truncate">
+                    <span className="text-2xs font-semibold truncate">
                       {ws.name}
                     </span>
                     {isActive && (
@@ -229,7 +229,7 @@ export function CollectionsWidget() {
                           "px-1 py-px",
 
                           // Typography
-                          "text-[8px] font-mono font-bold text-blue-500",
+                          "text-[8px] font-mono font-bold text-blue-600 dark:text-blue-400",
 
                           // Backgrounds & Borders
                           "bg-blue-500/10 rounded"
@@ -251,7 +251,7 @@ export function CollectionsWidget() {
                       "gap-0.5 pl-1",
 
                       // Typography
-                      "text-[10px] font-medium text-blue-500",
+                      "text-3xs font-medium text-blue-600 dark:text-blue-400",
 
                       // Interactive & States
                       "transition-opacity hover:underline"
@@ -271,7 +271,7 @@ export function CollectionsWidget() {
                           "py-0.5 pl-6",
 
                           // Typography
-                          "text-[10px] text-muted-foreground/60 italic"
+                          "text-3xs text-muted-foreground/60 italic"
                         )}
                       >
                         No collections
@@ -328,7 +328,7 @@ export function CollectionsWidget() {
                                       "truncate",
 
                                       // Typography
-                                      "text-[11px] font-medium text-muted-foreground",
+                                      "text-2xs font-medium text-muted-foreground",
 
                                       // Interactive & States
                                       "hover:text-foreground transition-colors"
@@ -337,7 +337,7 @@ export function CollectionsWidget() {
                                     {s.name}
                                   </span>
                                   {epCount > 0 && (
-                                    <span className="text-[9px] text-muted-foreground/50 tabular-nums shrink-0">
+                                    <span className="text-4xs text-muted-foreground/50 tabular-nums shrink-0">
                                       ({epCount})
                                     </span>
                                   )}
@@ -370,11 +370,11 @@ export function CollectionsWidget() {
                                       )}
                                     >
                                       {ep.method && (
-                                        <span className={cn('text-[9px] font-bold font-mono uppercase shrink-0', getMethodColor(ep.method))}>
+                                        <span className={cn('text-4xs font-bold font-mono uppercase shrink-0', getMethodColor(ep.method))}>
                                           {ep.method}
                                         </span>
                                       )}
-                                      <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors truncate flex-1">
+                                      <span className="text-3xs text-muted-foreground group-hover:text-foreground transition-colors truncate flex-1">
                                         {ep.name || ep.url || 'Untitled Request'}
                                       </span>
                                       <ArrowRightIcon className="size-2.5 text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
@@ -382,7 +382,7 @@ export function CollectionsWidget() {
                                   ))}
 
                                   {childStashes.length === 0 && stashEndpoints.length === 0 && (
-                                    <span className="text-[10px] text-muted-foreground/50 italic py-0.5 pl-6">
+                                    <span className="text-3xs text-muted-foreground/50 italic py-0.5 pl-6">
                                       No contents
                                     </span>
                                   )}

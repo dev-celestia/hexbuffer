@@ -117,7 +117,7 @@ export function FileGrid<T extends FileItem>({
       >
         <FolderIcon className="size-10 text-muted-foreground/30 mb-1" />
         <p className="text-xs font-semibold text-foreground">Empty folder</p>
-        <p className="text-[11px] text-muted-foreground max-w-xs">{emptyMessage}</p>
+        <p className="text-2xs text-muted-foreground max-w-xs">{emptyMessage}</p>
       </div>
     );
   }
@@ -208,7 +208,7 @@ export function FileGrid<T extends FileItem>({
                 "bg-muted/50 border-b border-border text-muted-foreground",
 
                 // Typography
-                "text-[10px] font-semibold uppercase tracking-wider"
+                "text-3xs font-semibold uppercase tracking-wider"
               )}
             >
               <tr>

@@ -157,7 +157,7 @@ export function IntruderPage() {
                 <span
                   className={cn(
                     // Typography
-                    "text-[11px] text-muted-foreground font-semibold uppercase tracking-wider"
+                    "text-2xs text-muted-foreground font-semibold uppercase tracking-wider"
                   )}
                 >
                   {page.isRunning ? 'Running' : 'Ready'}
@@ -172,7 +172,7 @@ export function IntruderPage() {
                     "px-2 py-0.5",
 
                     // Typography
-                    "text-[10px] font-medium",
+                    "text-3xs font-medium",
 
                     // Backgrounds & Borders
                     "text-amber-600 dark:text-amber-400 bg-amber-500/10 rounded border border-amber-500/20"
@@ -186,15 +186,15 @@ export function IntruderPage() {
 
                {page.isRunning ? (
                 <Button 
-                  size="sm" 
+                  size="md" 
                   variant="destructive" 
                   onClick={stopIntruderUiAttack}
                   className={cn(
                     // Sizing & Spacing
-                    "h-7 px-2.5 gap-1.5",
+                    "gap-1.5",
 
                     // Typography
-                    "text-xs font-medium"
+                    "text-xs"
                   )}
                 >
                   <SquareIcon className="size-3" weight="fill" />
@@ -202,16 +202,16 @@ export function IntruderPage() {
                 </Button>
               ) : (
                 <Button 
-                  size="sm" 
+                  size="md" 
                   variant="default"
                   onClick={page.handleStartAttack} 
                   disabled={!!page.startBlockedReason}
                   className={cn(
                     // Sizing & Spacing
-                    "h-7 px-2.5 gap-1.5",
+                    "gap-1.5",
 
                     // Typography
-                    "text-xs font-medium"
+                    "text-xs"
                   )}
                 >
                   <PlayIcon className="size-3" weight="fill" />

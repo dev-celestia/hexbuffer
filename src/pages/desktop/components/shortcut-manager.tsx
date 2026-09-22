@@ -102,7 +102,7 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
                       "block cursor-pointer",
 
                       // Typography
-                      "text-xs font-medium"
+                      "text-xs"
                     )}
                   >
                     {widget.label}
@@ -110,7 +110,7 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
                   <span
                     className={cn(
                       // Typography
-                      "text-[10px] text-muted-foreground line-clamp-1"
+                      "text-3xs text-muted-foreground line-clamp-1"
                     )}
                   >
                     {widget.description}
@@ -140,7 +140,7 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
         >
           <div className="space-y-0.5">
             <p className="text-xs font-medium">Reset customized state</p>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-3xs text-muted-foreground">
               Restore default visibility of desktop widgets.
             </p>
           </div>
@@ -171,10 +171,6 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
       <Accordion
         multiple
         defaultValue={['shortcuts', 'widgets']}
-        className={cn(
-          // Sizing & Spacing
-          "w-full"
-        )}
       >
         <AccordionItem
           value="shortcuts"
@@ -212,7 +208,7 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
               <span
                 className={cn(
                   // Typography
-                  "text-[10px] text-muted-foreground font-mono font-normal normal-case"
+                  "text-3xs text-muted-foreground font-mono font-normal normal-case"
                 )}
               >
                 {filteredItems.length} available
@@ -344,7 +340,7 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
                               "block truncate cursor-pointer",
 
                               // Typography
-                              "text-xs font-medium"
+                              "text-xs"
                             )}
                           >
                             {item.label}
@@ -353,7 +349,7 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
                             <span
                               className={cn(
                                 // Typography
-                                "text-[10px] text-muted-foreground line-clamp-1"
+                                "text-3xs text-muted-foreground line-clamp-1"
                               )}
                             >
                               {item.description}
@@ -450,7 +446,7 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
                           "block cursor-pointer",
 
                           // Typography
-                          "text-xs font-medium"
+                          "text-xs"
                         )}
                       >
                         {widget.label}
@@ -458,7 +454,7 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
                       <span
                         className={cn(
                           // Typography
-                          "text-[10px] text-muted-foreground line-clamp-1"
+                          "text-3xs text-muted-foreground line-clamp-1"
                         )}
                       >
                         {widget.description}
@@ -491,7 +487,7 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
       >
         <div className="space-y-0.5">
           <p className="text-xs font-medium">Reset customized state</p>
-          <p className="text-[10px] text-muted-foreground">
+          <p className="text-3xs text-muted-foreground">
             Restore default visibility of all items.
           </p>
         </div>

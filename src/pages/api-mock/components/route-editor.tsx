@@ -30,15 +30,9 @@ import {
   generateSamplePath,
   renderTemplatePreview,
 } from '../lib/route-template';
-
-const METHOD_COLORS: Record<string, string> = {
-  GET: 'text-green-500 font-bold',
-  POST: 'text-blue-500 font-bold',
-  PUT: 'text-yellow-500 font-bold',
-  DELETE: 'text-red-500 font-bold',
-  PATCH: 'text-orange-500 font-bold',
-  OPTIONS: 'text-purple-500 font-bold',
-};
+// Imported rather than redefined: this was a byte-identical copy of the `mock-server-pane` map, and
+// duplicated colour tables are how the shades drift apart in the first place.
+import { METHOD_COLORS } from './mock-server-pane/constants';
 
 interface RouteEditorProps {
   route: MockRoute;
@@ -174,13 +168,13 @@ export function RouteEditor({
                 if (v) setEditMethod(v as MockRoute['method']);
               }}
             >
-              <SelectTrigger
+              <SelectTrigger mono
                 className={cn(
                   // Sizing & Spacing
                   "h-7 w-24",
 
                   // Typography
-                  "text-xs font-mono font-semibold",
+                  "text-xs font-semibold",
 
                   // Backgrounds & Borders
                   "bg-muted/40 border-border"
@@ -190,12 +184,12 @@ export function RouteEditor({
               </SelectTrigger>
               <SelectContent>
                 {HTTP_METHODS.map((m) => (
-                  <SelectItem
+                  <SelectItem mono
                     key={m}
                     value={m}
                     className={cn(
                       // Typography
-                      "text-xs font-mono",
+                      "text-xs",
                       METHOD_COLORS[m] ?? ""
                     )}
                   >
@@ -204,7 +198,7 @@ export function RouteEditor({
                 ))}
               </SelectContent>
             </Select>
-            <Input
+            <Input mono
               value={editPath}
               onChange={(e) => setEditPath(e.target.value)}
               onKeyDown={(e) => {
@@ -219,10 +213,10 @@ export function RouteEditor({
               placeholder="/api/resource/:id"
               className={cn(
                 // Sizing & Spacing
-                "h-7 flex-1",
+                "flex-1",
 
                 // Typography
-                "font-mono text-xs",
+                "text-xs",
 
                 // Backgrounds & Borders
                 "bg-muted/40",
@@ -265,15 +259,12 @@ export function RouteEditor({
               {route.path}
             </span>
             {dynamicParams.map((p) => (
-              <Badge
+              <Badge mono
                 key={p}
                 variant="secondary"
                 className={cn(
-                  // Layout & Positioning
-                  "shrink-0",
-
                   // Typography
-                  "font-mono text-[10px] text-primary"
+                  "text-primary"
                 )}
                 title={`Dynamic route parameter :${p}. Use {{${p}}} in template.`}
               >
@@ -285,17 +276,11 @@ export function RouteEditor({
               size="icon"
               onClick={() => setEditingHeader(true)}
               className={cn(
-                // Layout & Positioning
-                "shrink-0",
-
                 // Sizing & Spacing
                 "h-6 w-6 p-0",
 
                 // Typography
-                "text-muted-foreground hover:text-foreground",
-
-                // Interactive & States
-                "cursor-pointer"
+                "text-muted-foreground hover:text-foreground"
               )}
               title="Edit method & path"
             >
@@ -389,12 +374,12 @@ export function RouteEditor({
               <span
                 className={cn(
                   // Typography
-                  "text-[11px] text-muted-foreground font-mono"
+                  "text-2xs text-muted-foreground font-mono"
                 )}
               >
                 Status:
               </span>
-              <Input
+              <Input mono
                 value={statusCodeStr}
                 onChange={(e) => setStatusCodeStr(e.target.value)}
                 onBlur={() => {
@@ -409,7 +394,7 @@ export function RouteEditor({
                   "h-6.5 w-16 px-1.5",
 
                   // Typography
-                  "text-xs font-mono font-bold text-center",
+                  "text-xs font-bold text-center",
 
                   // Backgrounds & Borders
                   "bg-muted/40"
@@ -436,7 +421,7 @@ export function RouteEditor({
               <span
                 className={cn(
                   // Typography
-                  "text-[11px] text-muted-foreground font-mono"
+                  "text-2xs text-muted-foreground font-mono"
                 )}
               >
                 Tags:
@@ -454,7 +439,7 @@ export function RouteEditor({
                     "px-1.5 py-0.5 rounded",
 
                     // Typography
-                    "font-mono text-[10px] font-semibold text-primary",
+                    "font-mono text-3xs font-semibold text-primary",
 
                     // Backgrounds & Borders
                     "bg-primary/10 border border-primary/30 hover:bg-primary/20",
@@ -526,21 +511,21 @@ export function RouteEditor({
                 "shrink-0",
 
                 // Typography
-                "font-mono text-[11px] text-muted-foreground"
+                "font-mono text-2xs text-muted-foreground"
               )}
             >
               Simulate:
             </span>
-            <Input
+            <Input mono
               value={testPath}
               onChange={(e) => setTestPath(e.target.value)}
               placeholder="/api/resource/12"
               className={cn(
                 // Sizing & Spacing
-                "h-6.5 max-w-xs px-2",
+                "h-6.5 max-w-xs",
 
                 // Typography
-                "font-mono text-xs",
+                "text-xs",
 
                 // Backgrounds & Borders
                 "bg-muted/40"
@@ -552,15 +537,15 @@ export function RouteEditor({
                 "truncate",
 
                 // Typography
-                "text-[11px] font-mono"
+                "text-2xs font-mono"
               )}
             >
               {testExtractedParams ? (
-                <span className="text-green-500 font-semibold">
+                <span className="text-green-600 dark:text-green-400 font-semibold">
                   ✓ {JSON.stringify(testExtractedParams)}
                 </span>
               ) : (
-                <span className="text-amber-500 font-semibold">
+                <span className="text-amber-600 dark:text-amber-400 font-semibold">
                   ⚠ No match
                 </span>
               )}
@@ -601,7 +586,7 @@ export function RouteEditor({
                   "border-b border-border bg-muted/20",
 
                   // Typography
-                  "text-[11px] font-mono text-muted-foreground"
+                  "text-2xs font-mono text-muted-foreground"
                 )}
               >
                 <span>Template Editor</span>
@@ -640,11 +625,11 @@ export function RouteEditor({
                   "border-b border-border bg-muted/20",
 
                   // Typography
-                  "text-[11px] font-mono text-muted-foreground"
+                  "text-2xs font-mono text-muted-foreground"
                 )}
               >
                 <span>Rendered Output ({testPath})</span>
-                <span className="text-green-500 font-semibold">Live</span>
+                <span className="text-green-600 dark:text-green-400 font-semibold">Live</span>
               </div>
               <div className="flex-1 min-h-0">
                 <TextEditor

@@ -152,15 +152,12 @@ export function WebSocketHistoryPage() {
                 render={
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="md"
                     aria-label={isWsPaused ? 'Resume stream' : 'Pause stream'}
                     aria-pressed={isWsPaused}
                     className={cn(
-                      // Layout & Positioning
-                      'shrink-0',
-
                       // Sizing & Spacing
-                      'h-7 text-xs gap-1.5',
+                      'text-xs gap-1.5',
 
                       // Interactive & States
                       isWsPaused && 'bg-amber-500/10 hover:bg-amber-500/15'
@@ -190,14 +187,11 @@ export function WebSocketHistoryPage() {
                 render={
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="md"
                     aria-label="Configure capture targets"
                     className={cn(
-                      // Layout & Positioning
-                      'shrink-0',
-
                       // Sizing & Spacing
-                      'h-7 text-xs gap-1.5'
+                      'text-xs gap-1.5'
                     )}
                     onClick={openTargetSelector}
                   >
@@ -215,15 +209,12 @@ export function WebSocketHistoryPage() {
                 render={
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="md"
                     aria-label="Clear all WebSocket history"
                     onClick={() => setClearDialogOpen(true)}
                     className={cn(
-                      // Layout & Positioning
-                      'shrink-0',
-
                       // Sizing & Spacing
-                      'h-7 text-xs gap-1.5',
+                      'text-xs gap-1.5',
 
                       // Typography
                       'text-destructive hover:text-destructive hover:bg-destructive/10'
@@ -244,7 +235,7 @@ export function WebSocketHistoryPage() {
         <Card
           className={cn(
             // Layout & Positioning
-            'flex flex-col flex-1 overflow-hidden',
+            'flex-1',
 
             // Sizing & Spacing
             '!py-0',

@@ -76,7 +76,7 @@ export function ConditionsTable({ conditions }: Readonly<ConditionsTableProps>) 
                     'flex items-center gap-1',
 
                     // Typography
-                    'text-[11px] font-bold',
+                    'text-2xs font-bold',
 
                     // Interactive & States
                     meta.text
@@ -104,18 +104,18 @@ export function ConditionsTable({ conditions }: Readonly<ConditionsTableProps>) 
                 <div
                   className={cn(
                     // Typography
-                    'font-mono text-[10px] text-muted-foreground'
+                    'font-mono text-3xs text-muted-foreground'
                   )}
                 >
                   {condition.id}
                 </div>
               </TableCell>
               <TableCell>
-                <Badge
+                <Badge mono
                   variant="outline"
                   className={cn(
                     // Typography
-                    'font-mono text-[10px]',
+                    'text-3xs',
 
                     // Backgrounds & Borders
                     'border',
@@ -129,7 +129,7 @@ export function ConditionsTable({ conditions }: Readonly<ConditionsTableProps>) 
                 <span
                   className={cn(
                     // Typography
-                    'font-mono text-[11px] break-all text-muted-foreground'
+                    'font-mono text-2xs break-all text-muted-foreground'
                   )}
                 >
                   {condition.matchedUrl ?? '—'}
