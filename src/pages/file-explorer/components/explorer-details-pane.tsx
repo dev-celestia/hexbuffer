@@ -246,10 +246,10 @@ export function ExplorerDetailsPane({
                         </p>
                       </div>
                     </div>
-                    <Button
+                    <Button leading="tight"
                       size="md"
                       variant="outline"
-                      className="w-full text-xs gap-1.5"
+                      className="w-full gap-1.5"
                       onClick={() => onOpenFile(item)}
                     >
                       Open Local File
@@ -266,10 +266,10 @@ export function ExplorerDetailsPane({
                         </p>
                       </div>
                     </div>
-                    <Button
+                    <Button leading="tight"
                       size="md"
                       variant="default"
-                      className="w-full text-xs gap-1.5"
+                      className="w-full gap-1.5"
                       onClick={() => onOpenFile(item)}
                     >
                       Stream & Open File
@@ -301,7 +301,7 @@ export function ExplorerDetailsPane({
                 </span>
                 <div className="flex items-center gap-2">
                   <Select value={expiration} onValueChange={(val) => { if (val) setExpiration(val); }}>
-                    <SelectTrigger className="h-7 text-xs font-sans">
+                    <SelectTrigger leading="tight" className="h-7 font-sans">
                       <SelectValue placeholder="Expiration" />
                     </SelectTrigger>
                     <SelectContent className="font-sans text-xs">
@@ -312,10 +312,9 @@ export function ExplorerDetailsPane({
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button
+                  <Button leading="tight"
                     size="md"
                     variant="outline"
-                    className="text-xs"
                     onClick={() => onCopyPresignedUrl(item, parseInt(expiration, 10))}
                   >
                     <LinkSimpleIcon className="size-3.5" />
@@ -325,10 +324,10 @@ export function ExplorerDetailsPane({
               </div>
 
               {/* Public URL copy action */}
-              <Button
+              <Button leading="tight"
                 variant="outline"
                 size="md"
-                className="w-full text-xs gap-1.5"
+                className="w-full gap-1.5"
                 onClick={() => onCopyPublicUrl(item)}
               >
                 <CopyIcon className="size-3.5" />

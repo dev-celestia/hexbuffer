@@ -109,13 +109,11 @@ export function NucleiFlowInspector({
 
         <Button
           size="md"
-          variant="ghost"
+          variant="quiet"
           onClick={onClose}
           className={cn(
             // Sizing & Spacing
-            "w-7 p-0",
-            // Interactive & States
-            "text-muted-foreground hover:text-foreground"
+            "w-7 p-0"
           )}
         >
           <XIcon className="h-4 w-4" />

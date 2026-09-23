@@ -57,7 +57,33 @@ function walk(dir, out = []) {
   return out
 }
 
-const setOf = (s) => new Set(twMerge(s).split(/\s+/).filter(Boolean).map(canon))
+/**
+ * Box canonicalisation, the second alias family. `size-7` and `w-7 h-7` emit
+ * identical declarations, but `twMerge` does not collapse `size-*` against
+ * `w-*`/`h-*` (separate conflict groups), so a set comparison reads two
+ * spellings of the same box as a difference. Only the EFFECTIVE width and height
+ * matter, so all `size-*`/`w-*`/`h-*` collapse to the last of each, and a
+ * matching pair collapses to `size-N`. `min-h-*`/`max-w-*` do not match and are
+ * left alone. Like the font-size aliases, this cannot mask a real change: a
+ * genuinely different box (w-9 h-7) still canonicalises to a different set.
+ */
+const boxN = (t) => t.replace(/^(size|w|h)-/, "")
+function canonBox(merged) {
+  const toks = merged.split(/\s+/).filter(Boolean)
+  let w = null
+  let h = null
+  for (const t of toks) {
+    if (/^size-/.test(t)) { w = t; h = t }
+    else if (/^w-/.test(t)) w = t
+    else if (/^h-/.test(t)) h = t
+  }
+  const rest = toks.filter((t) => !/^(size|w|h)-/.test(t))
+  const box = []
+  if (w && h && boxN(w) === boxN(h)) box.push(`size-${boxN(w)}`)
+  else { if (w) box.push(w); if (h) box.push(h) }
+  return [...rest, ...box].join(" ")
+}
+const setOf = (s) => new Set(canonBox(twMerge(s)).split(/\s+/).filter(Boolean).map(canon))
 
 /**
  * Tokens that denote the SAME CSS, so the audit compares rendered output rather

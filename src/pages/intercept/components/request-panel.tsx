@@ -37,18 +37,18 @@ export function InterceptRequestPanel() {
           'mb-1'
         )}
       >
-        <Label
+        <Label leading="tight"
           className={cn(
             // Layout & Positioning
             'block',
 
             // Typography
-            'text-xs text-muted-foreground'
+            'text-muted-foreground'
           )}
         >
           Raw {messageLabel}
         </Label>
-        <Button
+        <Button leading="tight"
           size="sm"
           variant="ghost"
           onClick={handleFormat}
@@ -58,7 +58,7 @@ export function InterceptRequestPanel() {
             'flex',
 
             // Sizing & Spacing
-            'px-2 text-xs'
+            'px-2'
           )}
         >
           <CodeIcon className="size-3.5" />

@@ -437,6 +437,13 @@ function scanSource(file, text, registry, cvaMap) {
   const edits = []
   const hits = []
   const skipped = []
+  // Source-order index of each component's elements in this file. `line` cannot
+  // be used to re-find an element after the fact: the fixpoint loop below
+  // re-scans already-shifted text, so a pass>=1 line is relative to a text that
+  // no longer exists, and even a pass-0 line drifts for every element below an
+  // earlier removal. Element ORDER is invariant under className edits, so the
+  // ordinal is what `audit-redundant-utility.mjs` matches on.
+  const ordinals = new Map()
 
   const visit = (node) => {
     const isOpening = ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)
@@ -444,6 +451,8 @@ function scanSource(file, text, registry, cvaMap) {
       const imported = importMap.get(node.tagName.getText())
       const component = imported ? registry.components.get(imported) : undefined
       if (component && !component.unknown && component.usable) {
+        const ordinal = ordinals.get(imported) ?? 0
+        ordinals.set(imported, ordinal + 1)
         const attr = [...node.attributes.properties].find(
           (a) => ts.isJsxAttribute(a) && a.name.getText() === "className" && a.initializer
         )
@@ -476,6 +485,7 @@ function scanSource(file, text, registry, cvaMap) {
               hits.push({
                 file,
                 line: line(sf, attr),
+                ordinal,
                 component: imported,
                 removed: res.removed,
                 kept: res.kept,

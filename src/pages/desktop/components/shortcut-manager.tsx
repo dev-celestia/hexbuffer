@@ -95,14 +95,11 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
                 )}
               >
                 <div className="min-w-0">
-                  <Label
+                  <Label leading="tight"
                     htmlFor={`widget-toggle-${widget.id}`}
                     className={cn(
                       // Layout & Positioning
-                      "block cursor-pointer",
-
-                      // Typography
-                      "text-xs"
+                      "block cursor-pointer"
                     )}
                   >
                     {widget.label}
@@ -239,7 +236,7 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
                   "text-muted-foreground"
                 )}
               />
-              <Input
+              <Input textSize="xs"
                 type="text"
                 placeholder="Filter shortcuts..."
                 value={searchQuery}
@@ -247,9 +244,6 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
                 className={cn(
                   // Sizing & Spacing
                   "pl-8 h-8",
-
-                  // Typography
-                  "text-xs",
 
                   // Backgrounds & Borders
                   "bg-muted/40"
@@ -333,14 +327,11 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
                           )}
                         </div>
                         <div className="min-w-0">
-                          <Label
+                          <Label leading="tight"
                             htmlFor={`shortcut-toggle-${item.href}`}
                             className={cn(
                               // Layout & Positioning
-                              "block truncate cursor-pointer",
-
-                              // Typography
-                              "text-xs"
+                              "block truncate cursor-pointer"
                             )}
                           >
                             {item.label}
@@ -439,14 +430,11 @@ export function ShortcutManager({ mode = 'all' }: Readonly<ShortcutManagerProps>
                     )}
                   >
                     <div className="min-w-0">
-                      <Label
+                      <Label leading="tight"
                         htmlFor={`widget-toggle-${widget.id}`}
                         className={cn(
                           // Layout & Positioning
-                          "block cursor-pointer",
-
-                          // Typography
-                          "text-xs"
+                          "block cursor-pointer"
                         )}
                       >
                         {widget.label}

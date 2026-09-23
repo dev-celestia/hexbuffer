@@ -34,9 +34,8 @@ export function Field({
 }>) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-2xs">{label}</Label>
-      <Input
-        className="text-xs"
+      <Label size="2xs">{label}</Label>
+      <Input textSize="xs"
         type={type}
         value={value ?? ''}
         onChange={(event) => onChange(event.target.value)}
@@ -59,7 +58,7 @@ export function TextField({
 }>) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-2xs">{label}</Label>
+      <Label size="2xs">{label}</Label>
       <Textarea
         className="min-h-20 resize-none text-xs"
         value={value ?? ''}
@@ -85,14 +84,14 @@ export function SelectField({
 }>) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-2xs">{label}</Label>
+      <Label size="2xs">{label}</Label>
       <Select value={value || fallback} onValueChange={onChange}>
-        <SelectTrigger className="h-7 text-xs">
+        <SelectTrigger leading="tight" className="h-7">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (
-            <SelectItem key={option.value} value={option.value} className="text-xs">
+            <SelectItem leading="tight" key={option.value} value={option.value}>
               {option.label}
             </SelectItem>
           ))}

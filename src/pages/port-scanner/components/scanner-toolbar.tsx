@@ -131,14 +131,11 @@ export function ScannerToolbar({
           )}
         >
           {/* Target Input */}
-          <Input mono
+          <Input textSize="xs" mono
             id="target-input"
             className={cn(
               // Sizing & Spacing
               "w-48",
-
-              // Typography
-              "text-xs",
 
               // Backgrounds & Borders
               "bg-background/50 border-muted-foreground/20",
@@ -158,32 +155,26 @@ export function ScannerToolbar({
 
           {/* Start / Stop */}
           {isRunning ? (
-            <Button
+            <Button leading="tight"
               size="md"
               variant="destructive"
               onClick={onStop}
               className={cn(
                 // Sizing & Spacing
-                "gap-1.5",
-
-                // Typography
-                "text-xs"
+                "gap-1.5"
               )}
             >
               <SquareIcon className="size-3" weight="fill" />
               <span>Stop Scan</span>
             </Button>
           ) : (
-            <Button
+            <Button leading="tight"
               size="md"
               disabled={!canScan}
               onClick={onStart}
               className={cn(
                 // Sizing & Spacing
-                "gap-1.5",
-
-                // Typography
-                "text-xs"
+                "gap-1.5"
               )}
             >
               <PlayIcon className="size-3" weight="fill" />
@@ -215,14 +206,11 @@ export function ScannerToolbar({
         >
           {/* Preset Select */}
           <Select value={preset} onValueChange={onPresetChange}>
-            <SelectTrigger
+            <SelectTrigger leading="tight"
               id="preset-select"
               className={cn(
                 // Sizing & Spacing
                 "h-7 w-[105px]",
-
-                // Typography
-                "text-xs",
 
                 // Backgrounds & Borders
                 "bg-background/50 border-muted-foreground/20",
@@ -243,13 +231,10 @@ export function ScannerToolbar({
               )}
             >
               {PRESET_OPTIONS.map((opt) => (
-                <SelectItem
+                <SelectItem leading="tight"
                   key={opt.value}
                   value={opt.value}
                   className={cn(
-                    // Typography
-                    "text-xs",
-
                     // Interactive & States
                     "cursor-pointer"
                   )}
@@ -280,14 +265,11 @@ export function ScannerToolbar({
                   "relative flex items-center"
                 )}
               >
-                <Input mono
+                <Input textSize="xs" mono
                   id="ports-input"
                   className={cn(
                     // Sizing & Spacing
                     "w-44 sm:w-56 pl-2 pr-12",
-
-                    // Typography
-                    "text-xs",
 
                     // Backgrounds & Borders
                     "bg-background/50 border-muted-foreground/20",
@@ -315,16 +297,13 @@ export function ScannerToolbar({
               <Tooltip>
                 <TooltipTrigger
                   render={
-                    <Button
+                    <Button leading="tight"
                       variant="outline"
                       size="md"
                       onClick={openCustomPortsDialog}
                       className={cn(
                         // Sizing & Spacing
                         "px-2",
-
-                        // Typography
-                        "text-xs",
 
                         // Backgrounds & Borders
                         "bg-background/50 border-muted-foreground/20 hover:bg-muted/60"

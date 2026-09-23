@@ -142,13 +142,11 @@ export function NucleiRunFindingDetailDrawer({
 
         <Button
           size="md"
-          variant="ghost"
+          variant="quiet"
           onClick={onClose}
           className={cn(
             // Sizing & Spacing
-            "w-7 p-0",
-            // Interactive & States
-            "text-muted-foreground hover:text-foreground"
+            "w-7 p-0"
           )}
         >
           <XIcon className="h-4 w-4" />
@@ -164,15 +162,13 @@ export function NucleiRunFindingDetailDrawer({
           "border-b bg-muted/5"
         )}
       >
-        <Button
+        <Button leading="tight"
           size="md"
           variant="outline"
           onClick={() => onSendToRepeater(finding)}
           className={cn(
             // Layout & Positioning
             "flex-1 flex gap-1.5",
-            // Sizing & Spacing
-            "text-xs",
             // Interactive & States
             "hover:text-emerald-500 hover:border-emerald-500/40"
           )}
@@ -181,15 +177,13 @@ export function NucleiRunFindingDetailDrawer({
           <span>Repeater</span>
         </Button>
 
-        <Button
+        <Button leading="tight"
           size="md"
           variant="outline"
           onClick={() => onSendToComparer(finding)}
           className={cn(
             // Layout & Positioning
             "flex-1 flex gap-1.5",
-            // Sizing & Spacing
-            "text-xs",
             // Interactive & States
             "hover:text-sky-500 hover:border-sky-500/40"
           )}
@@ -198,15 +192,13 @@ export function NucleiRunFindingDetailDrawer({
           <span>Comparer</span>
         </Button>
 
-        <Button
+        <Button leading="tight"
           size="md"
           variant="outline"
           onClick={() => onCopyCurl(finding)}
           className={cn(
             // Layout & Positioning
-            "flex gap-1.5",
-            // Sizing & Spacing
-            "text-xs"
+            "flex gap-1.5"
           )}
         >
           <CopyIcon className="h-3.5 w-3.5" />

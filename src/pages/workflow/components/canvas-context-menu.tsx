@@ -158,9 +158,9 @@ export function CanvasContextMenu({ state, onClose, onAddNode, hasTriggerNode, o
       <div className="border-b px-2 py-1.5">
         <div className="relative">
           <MagnifyingGlassIcon className="absolute left-2 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
-          <Input
+          <Input textSize="xs"
             ref={searchRef}
-            className="pl-7 text-xs"
+            className="pl-7"
             placeholder="MagnifyingGlassIcon nodes..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}

@@ -192,14 +192,14 @@ export function BrowserAutomationPage() {
                 "text-muted-foreground"
               )}
             />
-            <Input
+            <Input textSize="xs"
               type="text"
               value={localSearch}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search logs and findings…"
               className={cn(
                 // Sizing & Spacing
-                "w-48 pl-7 pr-7 text-xs",
+                "w-48 pl-7 pr-7",
 
                 // Backgrounds & Borders
                 "bg-background",
@@ -267,15 +267,12 @@ export function BrowserAutomationPage() {
 
               {/* Start/Stop/Pause/Resume */}
               {(page.status === 'idle' || page.status === 'completed' || page.status === 'failed' || page.status === 'stopped') && (
-                <Button
+                <Button leading="tight"
                   size="md"
                   onClick={startBrowserCrawl}
                   className={cn(
                     // Sizing & Spacing
-                    "gap-1.5",
-
-                    // Typography
-                    "text-xs"
+                    "gap-1.5"
                   )}
                 >
                   <PlayIcon className="size-3" weight="fill" />
@@ -284,31 +281,25 @@ export function BrowserAutomationPage() {
               )}
               {page.status === 'running' && (
                 <>
-                  <Button
+                  <Button leading="tight"
                     size="md"
                     variant="outline"
                     onClick={toggleBrowserCrawl}
                     className={cn(
                       // Sizing & Spacing
-                      "gap-1.5",
-
-                      // Typography
-                      "text-xs"
+                      "gap-1.5"
                     )}
                   >
                     <PauseIcon className="size-3" weight="fill" />
                     <span>Pause</span>
                   </Button>
-                  <Button
+                  <Button leading="tight"
                     size="md"
                     variant="destructive"
                     onClick={stopBrowserCrawl}
                     className={cn(
                       // Sizing & Spacing
-                      "gap-1.5",
-
-                      // Typography
-                      "text-xs"
+                      "gap-1.5"
                     )}
                   >
                     <SquareIcon className="size-3" weight="fill" />
@@ -318,31 +309,25 @@ export function BrowserAutomationPage() {
               )}
               {page.status === 'paused' && (
                 <>
-                  <Button
+                  <Button leading="tight"
                     size="md"
                     variant="outline"
                     onClick={toggleBrowserCrawl}
                     className={cn(
                       // Sizing & Spacing
-                      "gap-1.5",
-
-                      // Typography
-                      "text-xs"
+                      "gap-1.5"
                     )}
                   >
                     <ArrowCounterClockwiseIcon className="size-3" />
                     <span>Resume</span>
                   </Button>
-                  <Button
+                  <Button leading="tight"
                     size="md"
                     variant="destructive"
                     onClick={stopBrowserCrawl}
                     className={cn(
                       // Sizing & Spacing
-                      "gap-1.5",
-
-                      // Typography
-                      "text-xs"
+                      "gap-1.5"
                     )}
                   >
                     <SquareIcon className="size-3" weight="fill" />

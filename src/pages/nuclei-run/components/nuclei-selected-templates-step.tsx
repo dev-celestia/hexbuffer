@@ -209,11 +209,11 @@ export function NucleiSelectedTemplatesStep({
         <div className="flex items-center gap-2 flex-1 min-w-[280px] max-w-xl">
           <GlobeIcon className="size-4 text-primary shrink-0" />
           <div className="flex-1 relative">
-            <Input mono
+            <Input textSize="xs" mono
               value={targetInput}
               onChange={(e) => setTargetInput(e.target.value)}
               placeholder="https://example.com or http://localhost:3000 (comma/newline separated)"
-              className="h-8 text-xs bg-background border-border"
+              className="h-8 bg-background border-border"
             />
           </div>
         </div>
@@ -230,24 +230,24 @@ export function NucleiSelectedTemplatesStep({
 
         {/* Right: Primary Scan All & Step Actions */}
         <div className="flex items-center gap-2 shrink-0">
-          <Button
+          <Button leading="tight"
             variant="outline"
             size="xs"
             onClick={() => {
               if (onBackToHub) onBackToHub();
               else setActiveTab('hub');
             }}
-            className="h-7 px-2.5 text-xs hover:bg-muted/30"
+            className="h-7 px-2.5 hover:bg-muted/30"
           >
             <ArrowLeftIcon className="size-3.5" />
             <span>Add More Templates</span>
           </Button>
 
-          <Button
+          <Button leading="tight"
             size="xs"
             disabled={selectedTemplateIds.length === 0}
             onClick={handleScanAll}
-            className="h-7 px-3.5 text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-sm"
+            className="h-7 px-3.5 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-sm"
           >
             <PlayIcon className="size-3.5" />
             <span>Scan All ({selectedTemplateIds.length})</span>
@@ -325,48 +325,48 @@ export function NucleiSelectedTemplatesStep({
         <div className="flex items-center gap-2 shrink-0">
           {isSavingGroup ? (
             <div className="flex items-center gap-1.5">
-              <Input mono
+              <Input textSize="xs" mono
                 value={newGroupName}
                 onChange={(e) => setNewGroupName(e.target.value)}
                 placeholder="e.g. Critical CVEs Set"
-                className="w-44 text-xs bg-background"
+                className="w-44 bg-background"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleSaveGroup();
                   if (e.key === 'Escape') setIsSavingGroup(false);
                 }}
               />
-              <Button size="xs" onClick={handleSaveGroup} className="h-7 text-xs">
+              <Button leading="tight" size="xs" onClick={handleSaveGroup} className="h-7">
                 Save
               </Button>
-              <Button
+              <Button leading="tight"
                 variant="ghost"
                 size="xs"
                 onClick={() => setIsSavingGroup(false)}
-                className="h-7 px-1.5 text-xs text-muted-foreground"
+                className="h-7 px-1.5 text-muted-foreground"
               >
                 ✕
               </Button>
             </div>
           ) : (
-            <Button
+            <Button leading="tight"
               variant="outline"
               size="xs"
               onClick={() => setIsSavingGroup(true)}
               disabled={selectedTemplateIds.length === 0}
-              className="h-7 text-xs"
+              className="h-7"
             >
               <BookmarkSimpleIcon className="size-3.5 text-amber-400" />
               <span>Save Set for Reuse</span>
             </Button>
           )}
 
-          <Button
+          <Button leading="tight"
             variant="ghost"
             size="xs"
             onClick={deselectAllTemplates}
             disabled={selectedTemplateIds.length === 0}
-            className="h-7 text-xs text-muted-foreground hover:text-destructive"
+            className="h-7 text-muted-foreground hover:text-destructive"
           >
             <TrashIcon className="size-3.5" />
             <span>Clear Staging</span>
@@ -384,13 +384,13 @@ export function NucleiSelectedTemplatesStep({
               <p className="text-xs text-muted-foreground mt-1 max-w-sm">
                 Explore the Template Hub in Step 1 to add high-impact CVEs, recon fingerprints, or tech stack checks.
               </p>
-              <Button
+              <Button leading="tight"
                 size="sm"
                 onClick={() => {
                   if (onBackToHub) onBackToHub();
                   else setActiveTab('hub');
                 }}
-                className="mt-4 h-8 text-xs gap-1.5 bg-primary text-primary-foreground"
+                className="mt-4 h-8 gap-1.5 bg-primary text-primary-foreground"
               >
                 <ArrowLeftIcon className="size-3.5" />
                 <span>Go to Step 1: Template Hub</span>
@@ -437,30 +437,30 @@ export function NucleiSelectedTemplatesStep({
 
                       <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
                         <div className="flex items-center gap-1.5">
-                          <Button
+                          <Button leading="tight"
                             size="xs"
                             onClick={() => loadSavedGroup(group.id)}
-                            className="h-6 text-xs bg-primary text-primary-foreground"
+                            className="h-6 bg-primary text-primary-foreground"
                           >
                             <FolderOpenIcon className="size-3" />
                             <span>Load into Staging</span>
                           </Button>
-                          <Button
+                          <Button leading="tight"
                             variant="outline"
                             size="xs"
                             onClick={() => handleScanGroup(group.templateIds)}
-                            className="h-6 text-xs text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+                            className="h-6 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
                           >
                             <PlayIcon className="size-3" />
                             <span>Scan Set</span>
                           </Button>
                         </div>
 
-                        <Button
+                        <Button leading="tight"
                           variant="ghost"
                           size="xs"
                           onClick={() => deleteSavedGroup(group.id)}
-                          className="h-6 px-1.5 text-xs text-muted-foreground hover:text-destructive"
+                          className="h-6 px-1.5 text-muted-foreground hover:text-destructive"
                         >
                           <TrashIcon className="size-3" />
                         </Button>

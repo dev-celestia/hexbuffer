@@ -231,14 +231,14 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
               <span className="font-mono text-foreground font-medium">projectdiscovery</span>.
             </p>
 
-            <Button
+            <Button leading="tight"
               variant="outline"
               size="md"
               disabled={syncStatus.isSyncing}
               onClick={() => syncFromGitHub(false)}
               className={cn(
                 // Sizing & Spacing
-                "w-full text-xs justify-between",
+                "w-full justify-between",
                 // Backgrounds & Borders
                 "hover:bg-muted/30"
               )}
@@ -388,40 +388,40 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
               {/* Search Bar */}
               <div className="relative flex-1 min-w-[200px] max-w-md">
                 <MagnifyingGlassIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-                <Input
+                <Input textSize="xs"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Filter templates by name, CVE ID, tag, or technology..."
-                  className="pl-8 pr-3 text-xs bg-background"
+                  className="pl-8 pr-3 bg-background"
                 />
               </div>
 
               {/* Action Buttons */}
               <div className="flex items-center gap-1.5 shrink-0">
-                <Button
+                <Button leading="tight"
                   variant="outline"
                   size="xs"
                   onClick={() => selectCategoryTemplates(activeCategory)}
-                  className="h-7 text-xs border-primary/40 text-primary hover:bg-primary/10"
+                  className="h-7 border-primary/40 text-primary hover:bg-primary/10"
                 >
                   <CheckSquareIcon className="size-3.5" />
                   <span>Select Suite</span>
                 </Button>
 
-                <Button
+                <Button leading="tight"
                   variant="outline"
                   size="xs"
                   onClick={handleSelectFiltered}
-                  className="h-7 text-xs"
+                  className="h-7"
                 >
                   <span>Select Filtered</span>
                 </Button>
 
-                <Button
+                <Button leading="tight"
                   variant="outline"
                   size="xs"
                   onClick={handleDeselectFiltered}
-                  className="h-7 text-xs text-muted-foreground"
+                  className="h-7 text-muted-foreground"
                 >
                   <TrashIcon className="size-3.5" />
                   <span>Deselect</span>
@@ -636,13 +636,13 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
               </span>
             </div>
 
-            <Button
+            <Button leading="tight"
               size="sm"
               disabled={selectedTemplateIds.length === 0}
               onClick={handleProceed}
               className={cn(
                 // Sizing & Spacing
-                "h-8 px-4 text-xs gap-1.5",
+                "h-8 px-4 gap-1.5",
                 // Interactive & States
                 selectedTemplateIds.length > 0
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"

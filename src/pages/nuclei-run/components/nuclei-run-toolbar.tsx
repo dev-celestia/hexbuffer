@@ -56,16 +56,13 @@ export function NucleiRunToolbar({
           "gap-2"
         )}
       >
-        <Button
+        <Button leading="tight"
           variant={activeTab === 'templates' ? 'default' : 'outline'}
           size="md"
           onClick={() => onActiveTabChange('templates')}
           className={cn(
             // Sizing & Spacing
-            "gap-1.5",
-
-            // Typography
-            "text-xs"
+            "gap-1.5"
           )}
         >
           <FilesIcon className="size-3.5" />
@@ -81,16 +78,13 @@ export function NucleiRunToolbar({
           </Badge>
         </Button>
 
-        <Button
+        <Button leading="tight"
           variant={activeTab === 'flow' ? 'default' : 'outline'}
           size="md"
           onClick={() => onActiveTabChange('flow')}
           className={cn(
             // Sizing & Spacing
-            "gap-1.5",
-
-            // Typography
-            "text-xs"
+            "gap-1.5"
           )}
         >
           <TreeStructureIcon className="size-3.5" />

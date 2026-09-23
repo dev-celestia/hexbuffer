@@ -296,18 +296,12 @@ export function ForgeResponseView({
         </Tabs>
 
         {response && (
-          <Button
-            variant="ghost"
+          <Button leading="tight"
+            variant="quiet"
             size="sm"
             className={cn(
               // Sizing & Spacing
-              'gap-1.5 px-2',
-
-              // Typography
-              'text-xs',
-
-              // Interactive & States
-              'text-muted-foreground hover:text-foreground'
+              'gap-1.5 px-2'
             )}
             onClick={handleCopy}
             title="Copy response body"

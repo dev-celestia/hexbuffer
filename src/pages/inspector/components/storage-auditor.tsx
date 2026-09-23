@@ -158,8 +158,8 @@ export function StorageAuditor({
           <div className="flex items-center gap-2">
             <div className="relative w-60">
               <MagnifyingGlass className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                className="pl-8 h-8 text-xs bg-background"
+              <Input textSize="xs"
+                className="pl-8 h-8 bg-background"
                 placeholder={`Search keys, values...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

@@ -66,14 +66,11 @@ export function CrawlSetupScreen({
             )}
           >
             <ButtonGroup>
-              <Button
+              <Button leading="tight"
                 size="md"
                 type="button"
                 variant="outline"
                 className={cn(
-                  // Typography
-                  "text-xs",
-
                   // Interactive & States
                   "hover:text-green-600 dark:hover:text-green-400",
                   activeTab === 'general' && "text-green-600 dark:text-green-400"
@@ -83,14 +80,11 @@ export function CrawlSetupScreen({
               >
                 General
               </Button>
-              <Button
+              <Button leading="tight"
                 size="md"
                 type="button"
                 variant="outline"
                 className={cn(
-                  // Typography
-                  "text-xs",
-
                   // Interactive & States
                   "hover:text-green-600 dark:hover:text-green-400",
                   activeTab === 'limits' && "text-green-600 dark:text-green-400"
@@ -100,14 +94,11 @@ export function CrawlSetupScreen({
               >
                 Limits & Timing
               </Button>
-              <Button
+              <Button leading="tight"
                 size="md"
                 type="button"
                 variant="outline"
                 className={cn(
-                  // Typography
-                  "text-xs",
-
                   // Interactive & States
                   "hover:text-green-600 dark:hover:text-green-400",
                   activeTab === 'artifacts' && "text-green-600 dark:text-green-400"

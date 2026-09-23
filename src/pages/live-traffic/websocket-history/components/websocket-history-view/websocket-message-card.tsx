@@ -262,12 +262,8 @@ export function WebSocketMessageCard({ message, formatDateTime }: Readonly<WebSo
 
           <Button
             size="icon-xs"
-            variant="ghost"
+            variant="quiet"
             onClick={handleCopy}
-            className={cn(
-              // Typography
-              "text-muted-foreground hover:text-foreground"
-            )}
             title="Copy payload"
           >
             {copied ? (

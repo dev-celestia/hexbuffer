@@ -103,18 +103,15 @@ export function FileToolbar({
       >
         <Button
           size="sm"
-          variant="ghost"
+          variant="quiet"
           onClick={onNavigateUp}
           disabled={isAtRoot || loading}
           className={cn(
             // Sizing & Spacing
             "size-7 p-0",
 
-            // Typography & Colors
-            "text-muted-foreground",
-
             // Interactive & States
-            "hover:text-foreground active:scale-[0.97]"
+            "active:scale-[0.97]"
           )}
           title="Navigate up"
         >
@@ -207,7 +204,7 @@ export function FileToolbar({
               "gap-1"
             )}
           >
-            <Input
+            <Input textSize="xs"
               value={folderNameInput}
               onChange={(e) => setFolderNameInput(e.target.value)}
               placeholder="Folder name"
@@ -216,7 +213,7 @@ export function FileToolbar({
                 "w-32",
 
                 // Typography
-                "text-xs bg-background"
+                "bg-background"
               )}
               disabled={creating}
               autoFocus
@@ -330,7 +327,7 @@ export function FileToolbar({
               "text-muted-foreground"
             )}
           />
-          <Input
+          <Input textSize="xs"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search files…"
@@ -339,7 +336,7 @@ export function FileToolbar({
               "ps-7 pe-7",
 
               // Typography
-              "text-xs font-sans bg-background"
+              "font-sans bg-background"
             )}
             disabled={actionDisabled}
           />

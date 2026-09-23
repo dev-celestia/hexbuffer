@@ -71,7 +71,7 @@ export function NucleiRunTemplateHub({
           {TEMPLATE_CATEGORIES.map((cat) => {
             const isActive = category === cat.id;
             return (
-              <Button
+              <Button leading="tight"
                 key={cat.id}
                 size="md"
                 variant={isActive ? 'secondary' : 'ghost'}
@@ -79,8 +79,6 @@ export function NucleiRunTemplateHub({
                 className={cn(
                   // Layout & Positioning
                   "flex",
-                  // Sizing & Spacing
-                  "text-xs",
                   // Interactive & States
                   isActive && "bg-muted text-foreground font-semibold"
                 )}
@@ -109,41 +107,37 @@ export function NucleiRunTemplateHub({
             <strong className="text-foreground">{selectedCount}</strong>/{templates.length} selected
           </span>
 
-          <Button
+          <Button leading="tight"
             size="md"
-            variant="ghost"
+            variant="quiet"
             onClick={onSelectAll}
             className={cn(
               // Sizing & Spacing
-              "px-2 text-xs",
-              // Interactive & States
-              "text-muted-foreground hover:text-foreground"
+              "px-2"
             )}
           >
             All
           </Button>
 
-          <Button
+          <Button leading="tight"
             size="md"
-            variant="ghost"
+            variant="quiet"
             onClick={onDeselectAll}
             className={cn(
               // Sizing & Spacing
-              "px-2 text-xs",
-              // Interactive & States
-              "text-muted-foreground hover:text-foreground"
+              "px-2"
             )}
           >
             None
           </Button>
 
-          <Button
+          <Button leading="tight"
             size="md"
             variant="outline"
             onClick={() => onSelectBySeverity(['critical', 'high'])}
             className={cn(
               // Sizing & Spacing
-              "px-2 text-xs",
+              "px-2",
               // Typography
               "text-red-500 hover:text-red-600",
               // Backgrounds & Borders
@@ -178,13 +172,13 @@ export function NucleiRunTemplateHub({
           >
             <MagnifyingGlassIcon className="h-3.5 w-3.5" />
           </div>
-          <Input
+          <Input textSize="xs"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search templates by CVE, keyword, protocol, or tag..."
             className={cn(
               // Sizing & Spacing
-              "pl-8 text-xs",
+              "pl-8",
               // Backgrounds & Borders
               "bg-muted/20 border-input/60"
             )}

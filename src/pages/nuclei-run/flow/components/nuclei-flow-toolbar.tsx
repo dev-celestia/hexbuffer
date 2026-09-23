@@ -110,15 +110,13 @@ export function NucleiFlowToolbar({
           "flex items-center gap-1.5 shrink-0"
         )}
       >
-        <Button
+        <Button leading="tight"
           size="md"
           variant="outline"
           onClick={onAutoLayout}
           className={cn(
             // Layout & Positioning
-            "flex gap-1.5",
-            // Sizing & Spacing
-            "text-xs"
+            "flex gap-1.5"
           )}
           title="Hierarchical DAG Auto-Layout"
         >
@@ -126,7 +124,7 @@ export function NucleiFlowToolbar({
           <span>Auto Layout</span>
         </Button>
 
-        <Button
+        <Button leading="tight"
           size="md"
           variant="outline"
           onClick={onFitView}
@@ -134,7 +132,7 @@ export function NucleiFlowToolbar({
             // Layout & Positioning
             "flex gap-1.5",
             // Sizing & Spacing
-            "px-2 text-xs"
+            "px-2"
           )}
           title="Fit View to Canvas"
         >

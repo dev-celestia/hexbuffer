@@ -135,16 +135,13 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
             "flex items-center gap-1 shrink-0"
           )}
         >
-          <Button
+          <Button leading="tight"
             size="md"
             variant="ghost"
             onClick={() => handleCopyContent(selectedEntry.content)}
             className={cn(
               // Sizing & Spacing
-              "px-2",
-
-              // Typography
-              "text-xs"
+              "px-2"
             )}
             title="Copy content"
           >
@@ -157,16 +154,13 @@ export function MemoryDetailPane({ state }: Readonly<MemoryDetailPaneProps>) {
             <span>Copy</span>
           </Button>
 
-          <Button
+          <Button leading="tight"
             size="md"
             variant="ghost"
             onClick={() => handleSaveAsNote(selectedEntry)}
             className={cn(
               // Sizing & Spacing
-              "px-2",
-
-              // Typography
-              "text-xs"
+              "px-2"
             )}
             title="Save into Notes scratchpad"
           >

@@ -212,14 +212,14 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
               Required
             </span>
           </label>
-          <Input
+          <Input textSize="xs"
             id="name"
             placeholder="e.g., Production API & Web"
             value={values.name}
             onChange={updateValue('name')}
             className={cn(
               // Sizing & Spacing
-              "h-8 text-xs"
+              "h-8"
             )}
           />
           {errors.name && (
@@ -266,14 +266,14 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
               Optional
             </span>
           </label>
-          <Input
+          <Input textSize="xs"
             id="description"
             placeholder="e.g., Main customer portal scope definition"
             value={values.description}
             onChange={updateValue('description')}
             className={cn(
               // Sizing & Spacing
-              "h-8 text-xs"
+              "h-8"
             )}
           />
         </div>

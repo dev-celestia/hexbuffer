@@ -185,33 +185,27 @@ export function IntruderPage() {
               
 
                {page.isRunning ? (
-                <Button 
+                <Button leading="tight" 
                   size="md" 
                   variant="destructive" 
                   onClick={stopIntruderUiAttack}
                   className={cn(
                     // Sizing & Spacing
-                    "gap-1.5",
-
-                    // Typography
-                    "text-xs"
+                    "gap-1.5"
                   )}
                 >
                   <SquareIcon className="size-3" weight="fill" />
                   <span>Stop</span>
                 </Button>
               ) : (
-                <Button 
+                <Button leading="tight" 
                   size="md" 
                   variant="default"
                   onClick={page.handleStartAttack} 
                   disabled={!!page.startBlockedReason}
                   className={cn(
                     // Sizing & Spacing
-                    "gap-1.5",
-
-                    // Typography
-                    "text-xs"
+                    "gap-1.5"
                   )}
                 >
                   <PlayIcon className="size-3" weight="fill" />

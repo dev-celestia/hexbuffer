@@ -70,7 +70,7 @@ export function ListenerHosts({
         <span className="text-xs font-mono font-medium text-muted-foreground">
           {servers.length} host{servers.length !== 1 ? 's' : ''} configured
         </span>
-        <Button size="md" variant="outline" className="text-xs" onClick={startAdd}>
+        <Button leading="tight" size="md" variant="outline" onClick={startAdd}>
           <PlusIcon className="h-3.5 w-3.5" />
           Add Host
         </Button>
@@ -91,10 +91,10 @@ export function ListenerHosts({
                     <FormItem className="space-y-1">
                       <FormLabel className="text-xs text-muted-foreground">Name</FormLabel>
                       <FormControl>
-                        <Input
+                        <Input textSize="xs"
                           {...field}
                           placeholder="My Listener Server"
-                          className="h-8 text-xs"
+                          className="h-8"
                         />
                       </FormControl>
                       <FormMessage className="text-xs" />
@@ -108,10 +108,10 @@ export function ListenerHosts({
                     <FormItem className="space-y-1">
                       <FormLabel className="text-xs text-muted-foreground">Host URL / IP Address</FormLabel>
                       <FormControl>
-                        <Input
+                        <Input textSize="xs"
                           {...field}
                           placeholder="https://collab.example.com"
-                          className="h-8 text-xs"
+                          className="h-8"
                         />
                       </FormControl>
                       <FormMessage className="text-xs" />
@@ -126,11 +126,11 @@ export function ListenerHosts({
                       <FormLabel className="text-xs text-muted-foreground">API / Secret Key</FormLabel>
                       <div className="flex gap-1.5">
                         <FormControl>
-                          <Input
+                          <Input textSize="xs"
                             {...field}
                             type={showFormKey ? 'text' : 'password'}
                             placeholder="••••••••"
-                            className="h-8 text-xs flex-1"
+                            className="h-8 flex-1"
                           />
                         </FormControl>
                         <Button size="sm"
@@ -169,10 +169,10 @@ export function ListenerHosts({
                     {form.formState.errors.root.message}
                   </p>
                 )}
-                <Button size="sm"
+                <Button leading="tight" size="sm"
                   type="submit"
                   disabled={form.formState.isSubmitting}
-                  className="h-8 w-full text-xs mt-2"
+                  className="h-8 w-full mt-2"
                 >
                   {form.formState.isSubmitting
                     ? 'Connecting...'
@@ -224,9 +224,9 @@ export function ListenerHosts({
                         {showKeys[s.id] ? s.apiKey : `${s.apiKey.slice(0, 4)}••••••`}
                       </span>
                       <Button
-                        variant="ghost"
+                        variant="quiet"
                         size="icon"
-                        className="h-4.5 w-4.5 text-muted-foreground hover:text-foreground ml-auto"
+                        className="h-4.5 w-4.5 ml-auto"
                         onClick={() => toggleShowKey(s.id)}
                         title={showKeys[s.id] ? 'Hide Key' : 'Show Key'}
                       >
@@ -237,9 +237,9 @@ export function ListenerHosts({
                         )}
                       </Button>
                       <Button
-                        variant="ghost"
+                        variant="quiet"
                         size="icon"
-                        className="h-4.5 w-4.5 text-muted-foreground hover:text-foreground"
+                        className="h-4.5 w-4.5"
                         onClick={() => {
                           navigator.clipboard.writeText(s.apiKey);
                           toast.success('Key copied to clipboard');
@@ -262,9 +262,9 @@ export function ListenerHosts({
                           )}
                         </span>
                         <Button
-                          variant="ghost"
+                          variant="quiet"
                           size="sm"
-                          className="h-5 px-1.5 text-3xs text-muted-foreground hover:text-foreground"
+                          className="h-5 px-1.5 text-3xs"
                           onClick={() => handleGeneratePayload(s)}
                           disabled={generating === s.id}
                           title="Generate a new subdomain"
@@ -299,9 +299,9 @@ export function ListenerHosts({
                                   {p.payloadUrl}
                                 </span>
                                 <Button
-                                  variant="ghost"
+                                  variant="quiet"
                                   size="icon"
-                                  className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                                  className="h-5 w-5"
                                   onClick={() => {
                                     navigator.clipboard.writeText(p.payloadUrl);
                                     toast.success('Subdomain URL copied');
@@ -457,7 +457,7 @@ X-Forwarded-For: https://YOUR_CALLBACK_URL
           </pre>
         </div>
 
-        <Button size="sm" className="h-8 w-full gap-1.5 text-xs" onClick={onAddHost}>
+        <Button leading="tight" size="sm" className="h-8 w-full gap-1.5" onClick={onAddHost}>
           <PlusIcon className="h-3.5 w-3.5" />
           Add your first host
         </Button>

@@ -120,14 +120,14 @@ export function IntruderResultsPanel() {
                 "text-muted-foreground"
               )}
             />
-            <Input
+            <Input textSize="xs"
               type="text"
               value={localSearch}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search status, payload, URL…"
               className={cn(
                 // Sizing & Spacing
-                "w-44 pl-7 pr-7 text-xs",
+                "w-44 pl-7 pr-7",
 
                 // Backgrounds & Borders
                 "bg-background",
@@ -178,14 +178,11 @@ export function IntruderResultsPanel() {
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Button
+                  <Button leading="tight"
                     variant="outline"
                     size="sm"
                     data-state={hasStatusFilters ? 'on' : 'off'}
                     className={cn(
-                      // Typography
-                      "text-xs",
-
                       // Interactive & States
                       hasStatusFilters && "text-primary"
                     )}
@@ -261,15 +258,12 @@ export function IntruderResultsPanel() {
 
             {/* Grep Match Filter (if grep match configured or matches exist) */}
             {(isGrepMatchConfigured || grepMatchCount > 0) && (
-              <Button
+              <Button leading="tight"
                 variant="outline"
                 size="sm"
                 data-state={filterOnlyGrepMatch ? 'on' : 'off'}
                 onClick={() => setFilterOnlyGrepMatch(!filterOnlyGrepMatch)}
                 className={cn(
-                  // Typography
-                  "text-xs",
-
                   // Interactive & States
                   filterOnlyGrepMatch && "text-emerald-600 dark:text-emerald-400"
                 )}
@@ -290,15 +284,12 @@ export function IntruderResultsPanel() {
 
             {/* Errors Only Quick Toggle */}
             {statusCounts.errors > 0 && (
-              <Button
+              <Button leading="tight"
                 variant="outline"
                 size="sm"
                 data-state={filterOnlyErrors ? 'on' : 'off'}
                 onClick={() => setFilterOnlyErrors(!filterOnlyErrors)}
                 className={cn(
-                  // Typography
-                  "text-xs",
-
                   // Interactive & States
                   filterOnlyErrors && "text-destructive"
                 )}
@@ -320,19 +311,13 @@ export function IntruderResultsPanel() {
 
           {/* Reset all filters button */}
           {hasActiveFilters && (
-            <Button
-              variant="ghost"
+            <Button leading="tight"
+              variant="quiet"
               size="md"
               onClick={clearAllFilters}
               className={cn(
                 // Sizing & Spacing
-                "px-2",
-
-                // Typography
-                "text-xs text-muted-foreground",
-
-                // Interactive & States
-                "hover:text-foreground"
+                "px-2"
               )}
               title="Reset all active filters"
             >
@@ -347,7 +332,7 @@ export function IntruderResultsPanel() {
           )}
 
           {/* Layout Toggle: Wider / Full-width Layout */}
-          <Button
+          <Button leading="tight"
             variant="outline"
             size="md"
             onClick={toggleFullWidthResults}
@@ -355,9 +340,6 @@ export function IntruderResultsPanel() {
             className={cn(
               // Sizing & Spacing
               "px-2",
-
-              // Typography
-              "text-xs",
 
               // Interactive & States
               isFullWidthResults && "text-primary"
@@ -385,17 +367,14 @@ export function IntruderResultsPanel() {
           </Button>
 
           {/* Clear Results */}
-          <Button
+          <Button leading="tight"
             variant="outline"
             size="md"
             onClick={clearResults}
             disabled={resultsCount === 0}
             className={cn(
               // Sizing & Spacing
-              "px-2",
-
-              // Typography
-              "text-xs"
+              "px-2"
             )}
             title="Clear all results"
           >

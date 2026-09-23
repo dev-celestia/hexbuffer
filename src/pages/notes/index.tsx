@@ -55,16 +55,13 @@ export function NotesPage() {
               "text-muted-foreground"
             )}
           />
-          <Input
+          <Input textSize="xs"
             value={hook.searchQuery}
             onChange={(e) => hook.setSearchQuery(e.target.value)}
             placeholder="Search open tabs & contents..."
             className={cn(
               // Sizing & Spacing
               "pl-8 pr-7",
-
-              // Typography
-              "text-xs",
 
               // Backgrounds & Borders
               "bg-background"
@@ -123,15 +120,12 @@ export function NotesPage() {
             </span>
           </Button>
 
-          <Button
+          <Button leading="tight"
             size="xs"
             onClick={hook.onTabAdd}
             className={cn(
               // Layout & Positioning
-              "flex",
-
-              // Typography
-              "text-xs"
+              "flex"
             )}
             title="Create a new note"
           >

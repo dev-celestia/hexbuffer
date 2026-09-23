@@ -171,18 +171,11 @@ export function ThemeSwitchCard({
         {isFront && canCycle && onCycle && (
           <Button
             type="button"
-            variant="ghost"
+            variant="quiet"
             size="xs"
             onClick={handleCycle}
             aria-label="Next card"
             title="Next card"
-            className={cn(
-              // Typography
-              "text-muted-foreground",
-
-              // Interactive & States
-              "hover:text-foreground"
-            )}
           >
             <StackIcon className="size-3.5" aria-hidden="true" />
           </Button>

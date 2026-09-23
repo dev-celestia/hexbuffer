@@ -126,7 +126,7 @@ export function DrawingCanvasDialog({
                 "bg-popover border-primary/40"
               )}
             >
-              <Input
+              <Input textSize="xs"
                 autoFocus
                 placeholder="Enter node label or text..."
                 value={textInputVal}
@@ -141,9 +141,6 @@ export function DrawingCanvasDialog({
                 className={cn(
                   // Sizing & Spacing
                   "py-0",
-
-                  // Typography
-                  "text-xs",
 
                   // Backgrounds & Borders
                   "bg-background"
@@ -160,9 +157,9 @@ export function DrawingCanvasDialog({
               </Button>
               <Button
                 size="md"
-                variant="ghost"
+                variant="quiet"
                 onClick={hook.handleCancelText}
-                className="w-7 p-0 text-muted-foreground hover:text-foreground"
+                className="w-7 p-0"
                 title="Cancel"
               >
                 <XIcon className="size-3.5" />
@@ -209,16 +206,13 @@ export function DrawingCanvasDialog({
               "gap-2"
             )}
           >
-            <Button
+            <Button leading="tight"
               variant="outline"
               size="sm"
               onClick={hook.handleExportPng}
               className={cn(
                 // Sizing & Spacing
-                "h-8 px-3",
-
-                // Typography
-                "text-xs"
+                "h-8 px-3"
               )}
               title="Download canvas as PNG file"
             >
@@ -226,22 +220,19 @@ export function DrawingCanvasDialog({
               <span>Export PNG</span>
             </Button>
 
-            <Button
+            <Button leading="tight"
               variant="outline"
               size="sm"
               onClick={() => onOpenChange(false)}
               className={cn(
                 // Sizing & Spacing
-                "h-8 px-3",
-
-                // Typography
-                "text-xs"
+                "h-8 px-3"
               )}
             >
               Cancel
             </Button>
 
-            <Button
+            <Button leading="tight"
               variant="default"
               size="sm"
               onClick={hook.handleInsertIntoNote}
@@ -253,7 +244,7 @@ export function DrawingCanvasDialog({
                 "gap-1.5 h-8 px-4",
 
                 // Typography
-                "text-xs font-semibold"
+                "font-semibold"
               )}
             >
               <PlusCircleIcon className="size-4" />

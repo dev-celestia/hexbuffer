@@ -142,7 +142,7 @@ export function LogDetailView() {
                 "h-full p-2 mt-3"
               )}
             >
-              <Label
+              <Label leading="tight"
                 className={cn(
                   // Layout & Positioning
                   "block",
@@ -151,7 +151,7 @@ export function LogDetailView() {
                   "mb-1",
 
                   // Typography
-                  "text-xs text-muted-foreground"
+                  "text-muted-foreground"
                 )}
               >
                 Raw Request
@@ -513,10 +513,10 @@ export function LogDetailView() {
                   "border-b bg-muted/40"
                 )}
               >
-                <Label
+                <Label leading="tight"
                   className={cn(
                     // Typography
-                    "text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                    "font-semibold text-muted-foreground uppercase tracking-wider"
                   )}
                 >
                   Request
@@ -600,10 +600,10 @@ export function LogDetailView() {
                   "border-b bg-muted/40"
                 )}
               >
-                <Label
+                <Label leading="tight"
                   className={cn(
                     // Typography
-                    "text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                    "font-semibold text-muted-foreground uppercase tracking-wider"
                   )}
                 >
                   Response

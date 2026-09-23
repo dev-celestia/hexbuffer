@@ -90,25 +90,17 @@ export function NotesSearchEmpty({
             "gap-3 mt-2"
           )}
         >
-          <Button
+          <Button leading="tight"
             variant="outline"
             onClick={onClearSearch}
-            className={cn(
-              // Typography
-              "text-xs"
-            )}
           >
             <XIcon className="size-3.5 me-1.5" />
             Clear Search
           </Button>
 
-          <Button
+          <Button leading="tight"
             variant="default"
             onClick={onOpenSavedNotes}
-            className={cn(
-              // Typography
-              "text-xs"
-            )}
           >
             <FolderSimpleIcon className="size-3.5 me-1.5" />
             Saved Notes Library ({totalNotesCount})

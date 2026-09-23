@@ -81,7 +81,7 @@ export function ResponsePanel({
             >
               Status:
             </span>
-            <Input mono
+            <Input textSize="xs" mono
               value={statusCodeStr}
               onChange={(e) => onStatusCodeChange(e.target.value)}
               onBlur={onStatusCodeBlur}
@@ -91,7 +91,7 @@ export function ResponsePanel({
                 "h-6.5 w-16 px-1.5",
 
                 // Typography
-                "text-xs font-bold text-center",
+                "font-bold text-center",
 
                 // Backgrounds & Borders
                 "bg-muted/40"

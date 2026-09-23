@@ -220,7 +220,7 @@ export function WordlistsSidebar({
           "border-border bg-muted/20"
         )}
       >
-        <Button
+        <Button leading="tight"
           size="md"
           variant="outline"
           disabled={bundleDownloading}
@@ -230,10 +230,7 @@ export function WordlistsSidebar({
             "w-full flex",
 
             // Sizing & Spacing
-            "gap-1.5 px-2",
-
-            // Typography
-            "text-xs"
+            "gap-1.5 px-2"
           )}
         >
           {bundleDownloading ? (

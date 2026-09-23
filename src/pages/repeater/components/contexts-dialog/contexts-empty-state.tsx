@@ -147,14 +147,11 @@ export function ContextsEmptyState({ onStartCreate, onClose }: Readonly<Contexts
           </ul>
 
           <EmptyContent>
-            <Button
+            <Button leading="tight"
               size="sm"
               className={cn(
                 // Sizing & Spacing
-                'px-2',
-
-                // Typography
-                'text-xs'
+                'px-2'
               )}
               onClick={onStartCreate}
             >

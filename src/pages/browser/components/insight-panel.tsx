@@ -160,16 +160,13 @@ function AiInsightsPanelComponent({
             </div>
           </div>
           <Select value={severityFilter} onValueChange={(value) => setSeverityFilter(value as SeverityFilter)}>
-            <SelectTrigger
+            <SelectTrigger leading="tight"
               className={cn(
                 // Layout & Positioning
                 "max-w-full basis-32",
 
                 // Sizing & Spacing
-                "h-7",
-
-                // Typography
-                "text-xs"
+                "h-7"
               )}
             >
               <SelectValue placeholder="Severity" />
@@ -504,15 +501,12 @@ function AiInsightsPanelComponent({
                           "flex flex-wrap items-center gap-1 mt-1"
                         )}
                       >
-                        <Button
+                        <Button leading="tight"
                           size="sm"
                           variant="ghost"
                           className={cn(
                             // Sizing & Spacing
-                            "px-2",
-
-                            // Typography
-                            "text-xs"
+                            "px-2"
                           )}
                           onKeyDown={(event) => event.stopPropagation()}
                           onClick={(event) => {
@@ -523,15 +517,12 @@ function AiInsightsPanelComponent({
                           <CheckCircleIcon className="h-3.5 w-3.5" />
                           {insight.reviewed ? 'Unreview' : 'Review'}
                         </Button>
-                        <Button
+                        <Button leading="tight"
                           size="sm"
                           variant="ghost"
                           className={cn(
                             // Sizing & Spacing
-                            "px-2",
-
-                            // Typography
-                            "text-xs"
+                            "px-2"
                           )}
                           onKeyDown={(event) => event.stopPropagation()}
                           onClick={(event) => {

@@ -85,7 +85,7 @@ export function NotesEditorToolbar({
               "gap-1"
             )}
           >
-            <Input
+            <Input textSize="xs"
               value={renameValue}
               onChange={(e) => onRenameValueChange(e.target.value)}
               onKeyDown={(e) => {
@@ -94,7 +94,7 @@ export function NotesEditorToolbar({
               autoFocus
               className={cn(
                 // Typography
-                "text-xs font-medium"
+                "font-medium"
               )}
             />
             <Button
@@ -147,15 +147,12 @@ export function NotesEditorToolbar({
               {activeNote?.name || 'Untitled'}
             </span>
             <Button
-              variant="ghost"
+              variant="quiet"
               size="xs"
               onClick={() => activeNote && onStartRename(activeNote.id, activeNote.name)}
               className={cn(
                 // Sizing & Spacing
                 "size-5 p-0",
-
-                // Typography
-                "text-muted-foreground hover:text-foreground",
 
                 // Backgrounds & Borders
                 "hover:bg-muted",
@@ -192,16 +189,13 @@ export function NotesEditorToolbar({
           )}
         >
           {/* Select All */}
-          <Button
-            variant="ghost"
+          <Button leading="tight"
+            variant="quiet"
             size="sm"
             onClick={onSelectAll}
             className={cn(
               // Sizing & Spacing
-              "size-7 p-0",
-
-              // Typography
-              "text-xs text-muted-foreground hover:text-foreground"
+              "size-7 p-0"
             )}
             title="Select All Text (Cmd+A / Ctrl+A)"
           >
@@ -209,16 +203,13 @@ export function NotesEditorToolbar({
           </Button>
 
           {/* Copy Note */}
-          <Button
-            variant="ghost"
+          <Button leading="tight"
+            variant="quiet"
             size="sm"
             onClick={onCopyNote}
             className={cn(
               // Sizing & Spacing
-              "size-7 p-0",
-
-              // Typography
-              "text-xs text-muted-foreground hover:text-foreground"
+              "size-7 p-0"
             )}
             title="Copy Note Content to Clipboard"
           >
@@ -226,16 +217,13 @@ export function NotesEditorToolbar({
           </Button>
 
           {/* Export Note */}
-          <Button
-            variant="ghost"
+          <Button leading="tight"
+            variant="quiet"
             size="sm"
             onClick={onExportNote}
             className={cn(
               // Sizing & Spacing
-              "size-7 p-0",
-
-              // Typography
-              "text-xs text-muted-foreground hover:text-foreground"
+              "size-7 p-0"
             )}
             title="Export Note as Markdown (.md)"
           >
@@ -243,16 +231,13 @@ export function NotesEditorToolbar({
           </Button>
 
           {/* Promote to Memory */}
-          <Button
-            variant="ghost"
+          <Button leading="tight"
+            variant="quiet"
             size="sm"
             onClick={onPromoteNote}
             className={cn(
               // Sizing & Spacing
-              "size-7 p-0",
-
-              // Typography
-              "text-xs text-muted-foreground hover:text-foreground"
+              "size-7 p-0"
             )}
             title="Promote to Memory (makes this note available to the AI as context)"
           >

@@ -160,14 +160,10 @@ export function InspectorPage() {
           </div>
 
           {cdp.connectionStatus === 'connected' && cdp.selectedTarget ? (
-            <Button
+            <Button leading="tight"
               size="md"
               variant="outline"
               onClick={cdp.disconnect}
-              className={cn(
-                // Typography
-                "text-xs"
-              )}
             >
               Disconnect
             </Button>
@@ -198,14 +194,11 @@ export function InspectorPage() {
                 >
                   Port:
                 </span>
-                <Input mono
+                <Input textSize="xs" mono
                   type="number"
                   className={cn(
                     // Sizing & Spacing
-                    "w-16",
-
-                    // Typography
-                    "text-xs"
+                    "w-16"
                   )}
                   value={cdp.port}
                   onChange={(e) => cdp.setPort(e.target.value === '' ? '' : Number(e.target.value))}
@@ -213,34 +206,28 @@ export function InspectorPage() {
                 />
               </div>
 
-              <Button
+              <Button leading="tight"
                 size="md"
                 variant="outline"
                 onClick={cdp.openBrowser}
                 disabled={cdp.connectionStatus === 'connecting'}
                 className={cn(
                   // Sizing & Spacing
-                  "gap-1.5",
-
-                  // Typography
-                  "text-xs"
+                  "gap-1.5"
                 )}
               >
                 <Browser />
                 <span>Open Browser</span>
               </Button>
 
-              <Button
+              <Button leading="tight"
                 size="md"
                 variant="outline"
                 onClick={cdp.fetchTargets}
                 disabled={cdp.connectionStatus === 'connecting'}
                 className={cn(
                   // Sizing & Spacing
-                  "gap-1.5",
-
-                  // Typography
-                  "text-xs"
+                  "gap-1.5"
                 )}
               >
                 <ArrowClockwise />
@@ -254,7 +241,7 @@ export function InspectorPage() {
                 }}
                 disabled={cdp.connectionStatus === 'connecting' || cdp.targets.length === 0}
               >
-                <SelectTrigger className="w-[200px] h-7 text-xs">
+                <SelectTrigger leading="tight" className="w-[200px] h-7">
                   <SelectValue placeholder={cdp.targets.length === 0 ? "No active tabs" : "Select target..."} />
                 </SelectTrigger>
                 <SelectContent>
@@ -376,14 +363,11 @@ export function InspectorPage() {
                 >
                   Console logs
                 </span>
-                <Button
+                <Button leading="tight"
                   variant="outline"
                   size="md"
                   onClick={cdp.clearConsole}
                   className={cn(
-                    // Typography
-                    "text-xs",
-
                     // Interactive & States
                     "active:scale-[0.97] transition-transform duration-100 ease-out"
                   )}

@@ -99,23 +99,58 @@ function constsOf(sf) {
   return m
 }
 
-/* Size-owned property buckets. `text-*` is split into font-size vs colour:
-   font-size is a scale name or a bracket length; anything else is a colour. */
+/* --------------------------------------------------------- resolved profile */
+
 const FONT_SIZES = /^text-(2xs|3xs|4xs|xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl)(\/(.+))?$|^text-\[[^\]]*(px|rem|em)[^\]]*\](\/.+)?$/
-const PROPS = [
-  ["h", /^(h-\S+|size-\S+|min-h-\S+)$/],
-  ["gap", /^gap-\S+$/],
-  ["px", /^px-\S+$/],
-  ["p", /^p-\S+$/],
-  ["text", FONT_SIZES],
-]
+
+/* Utilities in the bg-/border- namespaces that are NOT paints, so a clip or a
+   border width is not mistaken for a colour. */
+const NOT_COLOUR = /^(bg-(clip|gradient|repeat|cover|contain|center|fixed|local|scroll|none|origin|blend|auto)|border-(collapse|separate|spacing)|border-[0-9]|border-(solid|dashed|dotted|double|hidden|none)$)/
+
+/* Variant prefixes are part of the bucket name: `text-muted-foreground` and
+   `hover:text-foreground` are different properties that BOTH survive the merge,
+   and they are the two halves of the same "quiet control" pattern. Collapsing
+   them would hide exactly the signal we are looking for. */
+const SIMPLE_PREFIX = /^(?:(?:hover|focus|focus-visible|active|disabled|dark|group-hover|peer-hover):)+/
+function splitPrefix(t) {
+  let prefix = ""
+  let rest = t
+  for (;;) {
+    const m = rest.match(SIMPLE_PREFIX)
+    if (!m) break
+    prefix += m[0]
+    rest = rest.slice(m[0].length)
+  }
+  return { prefix: prefix.replace(/:$/, ""), rest }
+}
+
+/** The property bucket a utility wins, or null if it owns nothing we profile. */
+function bucketOf(token) {
+  const { prefix, rest } = splitPrefix(token)
+  const q = (b) => (prefix ? `${b}@${prefix}` : b)
+  if (/^(h-|size-|min-h-)/.test(rest)) return prefix ? null : "h"
+  if (/^gap-/.test(rest)) return prefix ? null : "gap"
+  if (/^px-/.test(rest)) return prefix ? null : "px"
+  if (/^p-/.test(rest)) return prefix ? null : "p"
+  if (FONT_SIZES.test(rest)) return prefix ? null : "text"
+  if (NOT_COLOUR.test(rest)) return null
+  if (/^text-/.test(rest)) return q("fg")
+  if (/^bg-/.test(rest)) return q("bg")
+  if (/^border-/.test(rest)) return q("bd")
+  return null
+}
+
+/** Winning token per bucket, in source order (later wins, as in the cascade). */
 function profileOf(merged) {
   const out = {}
   for (const t of merged.split(/\s+/).filter(Boolean)) {
-    for (const [k, re] of PROPS) if (re.test(t)) out[k] = t
+    const b = bucketOf(t)
+    if (b) out[b] = t
   }
   return out
 }
+
+const PROFILE_KEYS = ["h", "gap", "px", "p", "text", "fg", "bg", "bd", "fg@hover", "bg@hover", "fg@dark", "bg@dark"]
 
 const profiles = new Map()
 const sitesByProfile = new Map()
@@ -169,7 +204,7 @@ for (const file of walk(ROOT)) {
             const base = parts.filter((p) => p.text !== null).map((p) => p.text).join(" ")
             const merged = twMerge(`${base} ${lit}`)
             const p = profileOf(merged)
-            const key = ["h", "gap", "px", "p", "text"].map((k) => `${k}=${p[k] ?? "–"}`).join("  ")
+            const key = PROFILE_KEYS.map((k) => `${k}=${p[k] ?? "–"}`).join("  ")
             profiles.set(key, (profiles.get(key) ?? 0) + 1)
             seen++
             const arr = sitesByProfile.get(key) ?? []
@@ -193,7 +228,7 @@ for (const [k, n] of [...profiles.entries()].sort((a, b) => b[1] - a[1]).slice(0
 }
 
 /* Per-property winner census — where the mass actually sits. */
-for (const prop of ["h", "gap", "px", "p", "text"]) {
+for (const prop of PROFILE_KEYS) {
   const c = new Map()
   for (const [k, n] of profiles) {
     const m = k.match(new RegExp(`(?:^|\\s)${prop}=([^\\s]+)`))

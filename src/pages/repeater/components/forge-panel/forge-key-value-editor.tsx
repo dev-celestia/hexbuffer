@@ -83,15 +83,12 @@ export function ForgeKeyValueEditor({
         >
           {noun}
         </span>
-        <Button
+        <Button leading="tight"
           variant="ghost"
           size="sm"
           className={cn(
             // Sizing & Spacing
-            'px-2',
-
-            // Typography
-            'text-xs'
+            'px-2'
           )}
           onClick={onAdd}
         >
@@ -211,7 +208,7 @@ export function ForgeKeyValueEditor({
           >
             {emptyMessage}
           </p>
-          <Button variant="outline" size="sm" className="px-2 text-xs" onClick={onAdd}>
+          <Button leading="tight" variant="outline" size="sm" className="px-2" onClick={onAdd}>
             <PlusIcon className="size-3.5" />
             Add {noun.replace(/s$/, '').toLowerCase()}
           </Button>

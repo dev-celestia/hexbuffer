@@ -132,7 +132,7 @@ export function NucleiRunExportDialog({
               "flex items-center gap-2"
             )}
           >
-            <Button
+            <Button leading="tight"
               size="sm"
               variant={format === 'sarif' ? 'secondary' : 'outline'}
               onClick={() => setFormat('sarif')}
@@ -140,7 +140,7 @@ export function NucleiRunExportDialog({
                 // Layout & Positioning
                 "flex gap-1.5",
                 // Sizing & Spacing
-                "h-8 text-xs",
+                "h-8",
                 // Typography
                 format === 'sarif' && "font-semibold"
               )}
@@ -149,7 +149,7 @@ export function NucleiRunExportDialog({
               <span>SARIF v2.1.0</span>
             </Button>
 
-            <Button
+            <Button leading="tight"
               size="sm"
               variant={format === 'jsonl' ? 'secondary' : 'outline'}
               onClick={() => setFormat('jsonl')}
@@ -157,7 +157,7 @@ export function NucleiRunExportDialog({
                 // Layout & Positioning
                 "flex gap-1.5",
                 // Sizing & Spacing
-                "h-8 text-xs",
+                "h-8",
                 // Typography
                 format === 'jsonl' && "font-semibold"
               )}
@@ -166,7 +166,7 @@ export function NucleiRunExportDialog({
               <span>JSONL</span>
             </Button>
 
-            <Button
+            <Button leading="tight"
               size="sm"
               variant={format === 'csv' ? 'secondary' : 'outline'}
               onClick={() => setFormat('csv')}
@@ -174,7 +174,7 @@ export function NucleiRunExportDialog({
                 // Layout & Positioning
                 "flex gap-1.5",
                 // Sizing & Spacing
-                "h-8 text-xs",
+                "h-8",
                 // Typography
                 format === 'csv' && "font-semibold"
               )}
@@ -183,7 +183,7 @@ export function NucleiRunExportDialog({
               <span>CSV</span>
             </Button>
 
-            <Button
+            <Button leading="tight"
               size="sm"
               variant={format === 'markdown' ? 'secondary' : 'outline'}
               onClick={() => setFormat('markdown')}
@@ -191,7 +191,7 @@ export function NucleiRunExportDialog({
                 // Layout & Positioning
                 "flex gap-1.5",
                 // Sizing & Spacing
-                "h-8 text-xs",
+                "h-8",
                 // Typography
                 format === 'markdown' && "font-semibold"
               )}
@@ -241,30 +241,26 @@ export function NucleiRunExportDialog({
               "flex items-center gap-2"
             )}
           >
-            <Button
+            <Button leading="tight"
               size="sm"
               variant="outline"
               onClick={handleCopy}
               className={cn(
                 // Layout & Positioning
-                "flex gap-1.5",
-                // Sizing & Spacing
-                "text-xs"
+                "flex gap-1.5"
               )}
             >
               {copied ? <CheckIcon className="h-3.5 w-3.5 text-emerald-500" /> : <CopyIcon className="h-3.5 w-3.5" />}
               <span>{copied ? 'Copied!' : 'Copy'}</span>
             </Button>
 
-            <Button
+            <Button leading="tight"
               size="sm"
               variant="default"
               onClick={handleDownload}
               className={cn(
                 // Layout & Positioning
                 "flex gap-1.5",
-                // Sizing & Spacing
-                "text-xs",
                 // Backgrounds & Borders
                 "bg-emerald-600 hover:bg-emerald-500 text-white"
               )}

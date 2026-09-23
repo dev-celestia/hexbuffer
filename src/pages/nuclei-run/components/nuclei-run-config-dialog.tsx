@@ -99,8 +99,8 @@ export function NucleiRunConfigDialog({
                 "flex flex-col gap-1.5"
               )}
             >
-              <Label className="text-xs">Concurrency Workers (-c)</Label>
-              <Input mono
+              <Label leading="tight">Concurrency Workers (-c)</Label>
+              <Input textSize="xs" mono
                 type="number"
                 value={concurrency}
                 onChange={(e) => setConcurrency(e.target.value)}
@@ -108,7 +108,7 @@ export function NucleiRunConfigDialog({
                 max="200"
                 className={cn(
                   // Sizing & Spacing
-                  "h-8 text-xs"
+                  "h-8"
                 )}
               />
               <span className="text-3xs text-muted-foreground">Parallel async workers</span>
@@ -120,8 +120,8 @@ export function NucleiRunConfigDialog({
                 "flex flex-col gap-1.5"
               )}
             >
-              <Label className="text-xs">Rate Limit RPS (-rl)</Label>
-              <Input mono
+              <Label leading="tight">Rate Limit RPS (-rl)</Label>
+              <Input textSize="xs" mono
                 type="number"
                 value={rateLimit}
                 onChange={(e) => setRateLimit(e.target.value)}
@@ -129,7 +129,7 @@ export function NucleiRunConfigDialog({
                 max="1000"
                 className={cn(
                   // Sizing & Spacing
-                  "h-8 text-xs"
+                  "h-8"
                 )}
               />
               <span className="text-3xs text-muted-foreground">Max requests per second</span>
@@ -149,8 +149,8 @@ export function NucleiRunConfigDialog({
                 "flex flex-col gap-1.5"
               )}
             >
-              <Label className="text-xs">Timeout (seconds)</Label>
-              <Input mono
+              <Label leading="tight">Timeout (seconds)</Label>
+              <Input textSize="xs" mono
                 type="number"
                 value={timeout}
                 onChange={(e) => setTimeoutVal(e.target.value)}
@@ -158,7 +158,7 @@ export function NucleiRunConfigDialog({
                 max="120"
                 className={cn(
                   // Sizing & Spacing
-                  "h-8 text-xs"
+                  "h-8"
                 )}
               />
               <span className="text-3xs text-muted-foreground">HTTP request timeout duration</span>
@@ -170,8 +170,8 @@ export function NucleiRunConfigDialog({
                 "flex flex-col gap-1.5"
               )}
             >
-              <Label className="text-xs">Failure Retries</Label>
-              <Input mono
+              <Label leading="tight">Failure Retries</Label>
+              <Input textSize="xs" mono
                 type="number"
                 value={retries}
                 onChange={(e) => setRetries(e.target.value)}
@@ -179,7 +179,7 @@ export function NucleiRunConfigDialog({
                 max="5"
                 className={cn(
                   // Sizing & Spacing
-                  "h-8 text-xs"
+                  "h-8"
                 )}
               />
               <span className="text-3xs text-muted-foreground">Retry count for failed probes</span>
@@ -193,16 +193,16 @@ export function NucleiRunConfigDialog({
               "flex flex-col gap-1.5"
             )}
           >
-            <Label className="text-xs gap-1.5">
+            <Label leading="tight" className="gap-1.5">
               <NetworkIcon className="h-3.5 w-3.5 text-sky-500" /> Upstream Proxy URL
             </Label>
-            <Input mono
+            <Input textSize="xs" mono
               value={proxyUrl}
               onChange={(e) => setProxyUrl(e.target.value)}
               placeholder="http://127.0.0.1:8080"
               className={cn(
                 // Sizing & Spacing
-                "h-8 text-xs"
+                "h-8"
               )}
             />
             <span className="text-3xs text-muted-foreground">
@@ -217,7 +217,7 @@ export function NucleiRunConfigDialog({
               "flex flex-col gap-1.5"
             )}
           >
-            <Label className="text-xs gap-1.5">
+            <Label leading="tight" className="gap-1.5">
               <ShieldSlashIcon className="h-3.5 w-3.5 text-red-500" /> Exclusions (Blacklist)
             </Label>
             <Textarea mono
@@ -269,13 +269,13 @@ export function NucleiRunConfigDialog({
             "items-center justify-between border-t pt-3"
           )}
         >
-          <Button
+          <Button leading="tight"
             size="sm"
             variant="ghost"
             onClick={onResetDefaults}
             className={cn(
               // Typography
-              "text-xs text-muted-foreground"
+              "text-muted-foreground"
             )}
           >
             Reset
@@ -287,21 +287,18 @@ export function NucleiRunConfigDialog({
               "flex items-center gap-2"
             )}
           >
-            <Button
+            <Button leading="tight"
               size="sm"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="text-xs"
             >
               Cancel
             </Button>
-            <Button
+            <Button leading="tight"
               size="sm"
               variant="default"
               onClick={handleSave}
               className={cn(
-                // Typography
-                "text-xs",
                 // Backgrounds & Borders
                 "bg-emerald-600 hover:bg-emerald-500 text-white"
               )}

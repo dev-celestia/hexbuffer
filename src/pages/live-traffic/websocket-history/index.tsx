@@ -150,14 +150,14 @@ export function WebSocketHistoryPage() {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <Button
+                  <Button leading="tight"
                     variant="ghost"
                     size="md"
                     aria-label={isWsPaused ? 'Resume stream' : 'Pause stream'}
                     aria-pressed={isWsPaused}
                     className={cn(
                       // Sizing & Spacing
-                      'text-xs gap-1.5',
+                      'gap-1.5',
 
                       // Interactive & States
                       isWsPaused && 'bg-amber-500/10 hover:bg-amber-500/15'
@@ -185,13 +185,13 @@ export function WebSocketHistoryPage() {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <Button
+                  <Button leading="tight"
                     variant="ghost"
                     size="md"
                     aria-label="Configure capture targets"
                     className={cn(
                       // Sizing & Spacing
-                      'text-xs gap-1.5'
+                      'gap-1.5'
                     )}
                     onClick={openTargetSelector}
                   >
@@ -207,14 +207,14 @@ export function WebSocketHistoryPage() {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <Button
+                  <Button leading="tight"
                     variant="ghost"
                     size="md"
                     aria-label="Clear all WebSocket history"
                     onClick={() => setClearDialogOpen(true)}
                     className={cn(
                       // Sizing & Spacing
-                      'text-xs gap-1.5',
+                      'gap-1.5',
 
                       // Typography
                       'text-destructive hover:text-destructive hover:bg-destructive/10'

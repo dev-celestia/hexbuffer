@@ -420,17 +420,11 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                     {/* Edit */}
                     <Button
                       size="sm"
-                      variant="ghost"
+                      variant="quiet"
                       onClick={() => handleOpenEdit(entry)}
                       className={cn(
                         // Sizing & Spacing
-                        "w-6 p-0",
-
-                        // Typography
-                        "text-muted-foreground",
-
-                        // Interactive & States
-                        "hover:text-foreground"
+                        "w-6 p-0"
                       )}
                       title="Edit memory"
                     >

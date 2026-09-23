@@ -185,7 +185,7 @@ export function InterceptToolbar({
           'gap-3'
         )}
       >
-        <Button
+        <Button leading="tight"
           data-slot="intercept-toggle"
           variant={isEnabled ? 'default' : 'outline'}
           size="md"
@@ -197,10 +197,7 @@ export function InterceptToolbar({
           }
           className={cn(
             // Sizing & Spacing
-            'gap-1.5',
-
-            // Typography
-            'text-xs'
+            'gap-1.5'
           )}
         >
           {isEnabled ? (

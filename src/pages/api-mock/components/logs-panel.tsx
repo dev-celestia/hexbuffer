@@ -58,11 +58,11 @@ export function LogsPanel({ logs, domains, routes, selectedLogId, onSelect }: Re
 
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-2.5 top-2.5 h-3 w-3 text-muted-foreground" />
-            <Input
+            <Input textSize="xs"
               placeholder="Search logs by path, method, status..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-7.5 h-7.5 text-xs bg-muted/30 focus-visible:ring-primary focus-visible:ring-1 border-border"
+              className="pl-7.5 h-7.5 bg-muted/30 focus-visible:ring-primary focus-visible:ring-1 border-border"
             />
           </div>
         </div>
@@ -143,10 +143,10 @@ function LogDetailView({ log, domains, routes }: Readonly<{ log: RequestLog; dom
         <span className="font-mono text-xs text-muted-foreground">{log.latencyMs}ms</span>
         <span className="text-3xs text-muted-foreground ml-auto">{formatTime(log.timestamp)}</span>
 
-        <Button
+        <Button leading="tight"
           variant="outline"
           size="md"
-          className="px-2 text-xs ml-2"
+          className="px-2 ml-2"
           onClick={handleSendToRepeater}
         >
           <ArrowSquareOutIcon className="mr-1 h-3.5 w-3.5" />

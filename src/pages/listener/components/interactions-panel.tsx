@@ -114,14 +114,14 @@ export function ListenerInteractions({
                 "text-muted-foreground"
               )}
             />
-            <Input
+            <Input textSize="xs"
               type="text"
               value={localSearch}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search type, IP, method, path, payload…"
               className={cn(
                 // Sizing & Spacing
-                "w-52 pl-7 pr-7 text-xs bg-background",
+                "w-52 pl-7 pr-7 bg-background",
 
                 // Interactive & States
                 "focus:w-72 transition-all duration-150"
@@ -151,7 +151,7 @@ export function ListenerInteractions({
             value={selectedTypeFilter ?? 'all'}
             onValueChange={(v) => setSelectedTypeFilter(v === 'all' ? null : v)}
           >
-            <SelectTrigger className="h-7 w-32 text-xs">
+            <SelectTrigger leading="tight" className="h-7 w-32">
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>

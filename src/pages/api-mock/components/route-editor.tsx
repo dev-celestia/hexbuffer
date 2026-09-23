@@ -168,13 +168,13 @@ export function RouteEditor({
                 if (v) setEditMethod(v as MockRoute['method']);
               }}
             >
-              <SelectTrigger mono
+              <SelectTrigger leading="tight" mono
                 className={cn(
                   // Sizing & Spacing
                   "h-7 w-24",
 
                   // Typography
-                  "text-xs font-semibold",
+                  "font-semibold",
 
                   // Backgrounds & Borders
                   "bg-muted/40 border-border"
@@ -198,7 +198,7 @@ export function RouteEditor({
                 ))}
               </SelectContent>
             </Select>
-            <Input mono
+            <Input textSize="xs" mono
               value={editPath}
               onChange={(e) => setEditPath(e.target.value)}
               onKeyDown={(e) => {
@@ -214,9 +214,6 @@ export function RouteEditor({
               className={cn(
                 // Sizing & Spacing
                 "flex-1",
-
-                // Typography
-                "text-xs",
 
                 // Backgrounds & Borders
                 "bg-muted/40",
@@ -272,15 +269,12 @@ export function RouteEditor({
               </Badge>
             ))}
             <Button
-              variant="ghost"
+              variant="quiet"
               size="icon"
               onClick={() => setEditingHeader(true)}
               className={cn(
                 // Sizing & Spacing
-                "h-6 w-6 p-0",
-
-                // Typography
-                "text-muted-foreground hover:text-foreground"
+                "h-6 w-6 p-0"
               )}
               title="Edit method & path"
             >
@@ -379,7 +373,7 @@ export function RouteEditor({
               >
                 Status:
               </span>
-              <Input mono
+              <Input textSize="xs" mono
                 value={statusCodeStr}
                 onChange={(e) => setStatusCodeStr(e.target.value)}
                 onBlur={() => {
@@ -394,7 +388,7 @@ export function RouteEditor({
                   "h-6.5 w-16 px-1.5",
 
                   // Typography
-                  "text-xs font-bold text-center",
+                  "font-bold text-center",
 
                   // Backgrounds & Borders
                   "bg-muted/40"
@@ -516,16 +510,13 @@ export function RouteEditor({
             >
               Simulate:
             </span>
-            <Input mono
+            <Input textSize="xs" mono
               value={testPath}
               onChange={(e) => setTestPath(e.target.value)}
               placeholder="/api/resource/12"
               className={cn(
                 // Sizing & Spacing
                 "h-6.5 max-w-xs",
-
-                // Typography
-                "text-xs",
 
                 // Backgrounds & Borders
                 "bg-muted/40"

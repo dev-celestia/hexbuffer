@@ -353,14 +353,14 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
               <span className="font-mono text-foreground font-medium">projectdiscovery</span>.
             </p>
 
-            <Button
+            <Button leading="tight"
               variant="outline"
               size="md"
               disabled={syncStatus.isSyncing}
               onClick={() => syncFromGitHub(false)}
               className={cn(
                 // Sizing & Spacing
-                "w-full text-xs justify-between",
+                "w-full justify-between",
                 // Backgrounds & Borders
                 "hover:bg-muted/30"
               )}
@@ -716,12 +716,12 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
             {/* Search Input */}
             <div className="flex items-center gap-2 flex-1 min-w-[240px] max-w-md relative">
               <MagnifyingGlassIcon className="size-4 text-muted-foreground absolute left-2.5 pointer-events-none" />
-              <Input
+              <Input textSize="xs"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search templates by ID, CVE, name, or tags..."
                 mono
-                className="pl-8 h-8 text-xs bg-muted/20 border-border"
+                className="pl-8 h-8 bg-muted/20 border-border"
               />
               {searchQuery && (
                 <button
@@ -737,38 +737,38 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
             {/* Batch Selection Controls & Transition Button */}
             <div className="flex items-center gap-2 shrink-0">
               {hasActiveFilters && (
-                <Button
-                  variant="ghost"
+                <Button leading="tight"
+                  variant="quiet"
                   size="xs"
                   onClick={handleClearFilters}
-                  className="h-7 text-xs text-muted-foreground hover:text-foreground"
+                  className="h-7"
                 >
                   Clear Filters
                 </Button>
               )}
 
-              <Button
+              <Button leading="tight"
                 variant="outline"
                 size="xs"
                 onClick={handleSelectAllFiltered}
-                className="h-7 text-xs"
+                className="h-7"
               >
                 <CheckSquareIcon className="size-3.5 text-primary" />
                 <span>Select All ({filteredTemplates.length})</span>
               </Button>
 
-              <Button
+              <Button leading="tight"
                 variant="outline"
                 size="xs"
                 onClick={deselectAllTemplates}
                 disabled={selectedTemplateIds.length === 0}
-                className="h-7 text-xs text-muted-foreground hover:text-destructive"
+                className="h-7 text-muted-foreground hover:text-destructive"
               >
                 <TrashIcon className="size-3.5" />
                 <span>Deselect All</span>
               </Button>
 
-              <Button
+              <Button leading="tight"
                 size="xs"
                 disabled={selectedTemplateIds.length === 0}
                 onClick={() => {
@@ -778,7 +778,7 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                     setActiveTab('selected');
                   }
                 }}
-                className="h-7 px-3 text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+                className="h-7 px-3 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <span>Review Selected ({selectedTemplateIds.length})</span>
                 <ArrowRightIcon className="size-3.5" />
@@ -841,11 +841,11 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
                 <CirclesFourIcon className="size-8 text-muted-foreground/50 mb-2" />
                 <p className="text-sm font-medium text-muted-foreground">No templates match the active filter criteria.</p>
                 <p className="text-xs text-muted-foreground/70 mt-1">Try resetting tags or searching for a different keyword.</p>
-                <Button
+                <Button leading="tight"
                   variant="outline"
                   size="xs"
                   onClick={handleClearFilters}
-                  className="mt-3 h-7 text-xs"
+                  className="mt-3 h-7"
                 >
                   Reset All Filters
                 </Button>
@@ -1064,11 +1064,11 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
 
                 {inspectorMode === 'yaml' && (
                   <Button
-                    variant="ghost"
+                    variant="quiet"
                     size="xs"
                     mono
                     onClick={handleCopyYaml}
-                    className="h-6 text-muted-foreground hover:text-foreground"
+                    className="h-6"
                   >
                     <CopyIcon className="size-3" />
                     <span>{copiedYaml ? 'Copied!' : 'Copy YAML'}</span>

@@ -181,19 +181,13 @@ export function JwtDecodeView({
                 </div>
                 {onClear && (
                   <Button
-                    variant="ghost"
+                    variant="quiet"
                     size="icon"
                     onClick={onClear}
                     disabled={!tokenInput}
                     className={cn(
                       // Sizing & Spacing
-                      "h-6 w-6",
-
-                      // Typography
-                      "text-muted-foreground",
-
-                      // Interactive & States
-                      "hover:text-foreground"
+                      "h-6 w-6"
                     )}
                     title="Clear token"
                   >
@@ -291,7 +285,7 @@ export function JwtDecodeView({
                   )}
                 </div>
                 <Button
-                  variant="ghost"
+                  variant="quiet"
                   size="icon"
                   onClick={() =>
                     onCopy(
@@ -303,13 +297,7 @@ export function JwtDecodeView({
                   disabled={!decoded}
                   className={cn(
                     // Sizing & Spacing
-                    "h-6 w-6",
-
-                    // Typography
-                    "text-muted-foreground",
-
-                    // Interactive & States
-                    "hover:text-foreground"
+                    "h-6 w-6"
                   )}
                   title="Copy JSON"
                 >

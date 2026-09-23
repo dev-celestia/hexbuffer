@@ -147,16 +147,16 @@ export function DesktopPage() {
                   <DialogTrigger>
                     <Button
                       size="sm"
-                      variant="ghost"
+                      variant="quiet"
                       className={cn(
                         // Sizing & Spacing
                         "px-2 gap-1.5",
 
                         // Typography
-                        "text-2xs text-muted-foreground",
+                        "text-2xs",
 
                         // Interactive & States
-                        "hover:text-foreground hover:bg-muted/60"
+                        "hover:bg-muted/60"
                       )}
                     >
                       <GearSixIcon className="size-3.5" />
@@ -213,14 +213,14 @@ export function DesktopPage() {
                     "text-muted-foreground"
                   )}
                 />
-                <Input
+                <Input textSize="xs"
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search features…"
                   className={cn(
                     // Sizing & Spacing
-                    "w-44 pl-7 pr-7 text-xs",
+                    "w-44 pl-7 pr-7",
 
                     // Backgrounds & Borders
                     "bg-background/80",
@@ -312,7 +312,7 @@ export function DesktopPage() {
               >
                 Try searching for another keyword or clear the search input.
               </p>
-              <Button size="sm"
+              <Button leading="tight" size="sm"
                 variant="link"
                 onClick={handleClearSearch}
                 className={cn(
@@ -320,7 +320,7 @@ export function DesktopPage() {
                   "h-auto p-0 mt-2",
 
                   // Typography
-                  "text-xs font-semibold"
+                  "font-semibold"
                 )}
               >
                 Clear search query

@@ -153,19 +153,13 @@ export function JwtGenerateView({
               </div>
               {onClear && (
                 <Button
-                  variant="ghost"
+                  variant="quiet"
                   size="icon"
                   onClick={onClear}
                   disabled={isEmpty}
                   className={cn(
                     // Sizing & Spacing
-                    "h-6 w-6",
-
-                    // Typography
-                    "text-muted-foreground",
-
-                    // Interactive & States
-                    "hover:text-foreground"
+                    "h-6 w-6"
                   )}
                   title="Clear generate form"
                 >
@@ -192,10 +186,10 @@ export function JwtGenerateView({
                     "space-y-1"
                   )}
                 >
-                  <Label
+                  <Label leading="tight"
                     className={cn(
                       // Typography
-                      "text-xs font-semibold text-muted-foreground"
+                      "font-semibold text-muted-foreground"
                     )}
                   >
                     Header (JSON)
@@ -219,10 +213,10 @@ export function JwtGenerateView({
                     "space-y-1"
                   )}
                 >
-                  <Label
+                  <Label leading="tight"
                     className={cn(
                       // Typography
-                      "text-xs font-semibold text-muted-foreground"
+                      "font-semibold text-muted-foreground"
                     )}
                   >
                     Payload (JSON)
@@ -264,10 +258,10 @@ export function JwtGenerateView({
                         "flex items-center justify-between"
                       )}
                     >
-                      <Label
+                      <Label leading="tight"
                         className={cn(
                           // Typography
-                          "text-xs font-semibold text-muted-foreground"
+                          "font-semibold text-muted-foreground"
                         )}
                       >
                         {isNone ? 'Key' : isAsymmetric ? 'Private Key (PEM)' : 'Secret Key'}
@@ -284,17 +278,14 @@ export function JwtGenerateView({
                         >
                           {genSecret && (
                             <Button
-                              variant="ghost"
+                              variant="quiet"
                               size="xs"
                               className={cn(
                                 // Sizing & Spacing
                                 "px-1.5",
 
                                 // Typography
-                                "text-2xs text-muted-foreground",
-
-                                // Interactive & States
-                                "hover:text-foreground"
+                                "text-2xs"
                               )}
                               onClick={() => onCopy(genSecret)}
                               type="button"
@@ -306,17 +297,14 @@ export function JwtGenerateView({
                           )}
                           {onGenerateKey && (
                             <Button
-                              variant="ghost"
+                              variant="quiet"
                               size="xs"
                               className={cn(
                                 // Sizing & Spacing
                                 "px-1.5",
 
                                 // Typography
-                                "text-2xs text-muted-foreground",
-
-                                // Interactive & States
-                                "hover:text-foreground"
+                                "text-2xs"
                               )}
                               onClick={onGenerateKey}
                               disabled={generatingKey}
@@ -356,10 +344,10 @@ export function JwtGenerateView({
                           "relative"
                         )}
                       >
-                        <Input mono
+                        <Input textSize="xs" mono
                           className={cn(
                             // Sizing & Spacing
-                            "h-8 text-xs pr-8",
+                            "h-8 pr-8",
 
                             // Backgrounds & Borders
                             "bg-muted/5",
@@ -414,10 +402,10 @@ export function JwtGenerateView({
                       "w-[105px] space-y-1"
                     )}
                   >
-                    <Label
+                    <Label leading="tight"
                       className={cn(
                         // Typography
-                        "text-xs font-semibold text-muted-foreground"
+                        "font-semibold text-muted-foreground"
                       )}
                     >
                       Algorithm
@@ -426,13 +414,10 @@ export function JwtGenerateView({
                       value={genAlgorithm}
                       onValueChange={(v) => setGenAlgorithm(v as JwtAlgorithm)}
                     >
-                      <SelectTrigger
+                      <SelectTrigger leading="tight"
                         className={cn(
                           // Sizing & Spacing
                           "h-8",
-
-                          // Typography
-                          "text-xs",
 
                           // Backgrounds & Borders
                           "bg-background"
@@ -455,7 +440,7 @@ export function JwtGenerateView({
                               {category}
                             </SelectLabel>
                             {items.map((opt) => (
-                              <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                              <SelectItem leading="tight" key={opt.value} value={opt.value}>
                                 {opt.label}
                               </SelectItem>
                             ))}
@@ -497,14 +482,11 @@ export function JwtGenerateView({
                 "border-t bg-muted/10"
               )}
             >
-              <Button
+              <Button leading="tight"
                 size="md"
                 className={cn(
                   // Sizing & Spacing
-                  "px-3 gap-1.5",
-
-                  // Typography
-                  "text-xs"
+                  "px-3 gap-1.5"
                 )}
                 onClick={onGenerate}
                 disabled={generating || (!isNone && !genSecret.trim())}
@@ -574,19 +556,13 @@ export function JwtGenerateView({
                 </span>
               </div>
               <Button
-                variant="ghost"
+                variant="quiet"
                 size="icon"
                 onClick={() => onCopy(generatedToken)}
                 disabled={!generatedToken}
                 className={cn(
                   // Sizing & Spacing
-                  "h-6 w-6",
-
-                  // Typography
-                  "text-muted-foreground",
-
-                  // Interactive & States
-                  "hover:text-foreground"
+                  "h-6 w-6"
                 )}
                 title="Copy generated token"
               >

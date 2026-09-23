@@ -62,19 +62,66 @@ for (const hit of report.hits) {
   }
   const sf = ts.createSourceFile(abs, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
 
-  // Find the JSX element on the reported line whose className mentions the
-  // removed tokens.
-  let opening
+  // Identify the element by CONTENT, not by line alone.
+  //
+  // The report's line numbers are PRE-edit, but this reads the POST-edit tree. A
+  // file with several hits shifts every later line upward as earlier removals
+  // delete lines, so a recorded line can land on a completely different element.
+  // Measured: `drawing-canvas-toolbar.tsx` has four ghost -> quiet sites; the
+  // first two removals shift the rest up by 6 lines, and the report's line 820
+  // then points at the *clear* button — a button that was correctly left alone,
+  // because it says `hover:text-destructive` rather than `hover:text-foreground`.
+  // That produced a false SUSPECT whose className did not even contain the
+  // removed token.
+  //
+  // The stable identity is the className the element is LEFT with: the recorded
+  // className minus the removed tokens.
+  const expected = (hit.className ?? "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter((t) => !hit.removed.includes(t))
+    .sort()
+    .join(" ")
+
+  const classNameOf = (n) => {
+    const attr = n.attributes.properties.find(
+      (a) => ts.isJsxAttribute(a) && a.name.getText() === "className"
+    )
+    if (!attr || !attr.initializer) return ""
+    const out = []
+    const collect = (x) => {
+      if (!x) return
+      if (ts.isStringLiteral(x) || ts.isNoSubstitutionTemplateLiteral(x)) { out.push(x.text); return }
+      if (ts.isJsxExpression(x)) { collect(x.expression); return }
+      if (ts.isCallExpression(x)) { for (const a of x.arguments) collect(a); return }
+      if (ts.isParenthesizedExpression(x) || ts.isAsExpression(x)) { collect(x.expression); return }
+      if (ts.isArrayLiteralExpression(x)) { for (const el of x.elements) collect(el); return }
+      if (ts.isBinaryExpression(x)) { collect(x.left); collect(x.right); return }
+      if (ts.isConditionalExpression(x)) { collect(x.whenTrue); collect(x.whenFalse); return }
+    }
+    collect(attr.initializer)
+    return out.join(" ").split(/\s+/).filter(Boolean).sort().join(" ")
+  }
+
+  const candidates = []
   const visit = (n) => {
-    if (opening) return
     const isEl = ts.isJsxOpeningElement(n) || ts.isJsxSelfClosingElement(n)
     if (isEl && n.tagName.getText() === hit.component) {
       const line = sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1
-      if (line === hit.line) opening = n
+      candidates.push({ node: n, line, cls: classNameOf(n) })
     }
     ts.forEachChild(n, visit)
   }
   visit(sf)
+
+  // Prefer the ordinal — it is the only identity that survives both the
+  // fixpoint re-scan and the line drift. Content and line are kept as fallbacks
+  // so an older report (written before `ordinal` existed) still audits.
+  let opening =
+    (hit.ordinal !== undefined ? candidates[hit.ordinal]?.node : undefined) ??
+    candidates.find((c) => c.line === hit.line && c.cls === expected)?.node ??
+    candidates.find((c) => c.cls === expected)?.node ??
+    candidates.find((c) => c.line === hit.line)?.node
   if (!opening) {
     rows.push({ ...hit, note: "ELEMENT NOT FOUND" })
     continue

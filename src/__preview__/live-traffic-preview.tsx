@@ -442,14 +442,14 @@ function PreviewToolbar({ isWsPaused }: Readonly<{ isWsPaused: boolean }>) {
         <Tooltip>
           <TooltipTrigger
             render={
-              <Button
+              <Button leading="tight"
                 variant="ghost"
                 size="md"
                 aria-label={isWsPaused ? 'Resume stream' : 'Pause stream'}
                 aria-pressed={isWsPaused}
                 className={cn(
                   // Sizing & Spacing
-                  'text-xs gap-1.5',
+                  'gap-1.5',
 
                   // Interactive & States
                   isWsPaused && 'bg-amber-500/10 hover:bg-amber-500/15'
@@ -476,13 +476,13 @@ function PreviewToolbar({ isWsPaused }: Readonly<{ isWsPaused: boolean }>) {
         <Tooltip>
           <TooltipTrigger
             render={
-              <Button
+              <Button leading="tight"
                 variant="ghost"
                 size="md"
                 aria-label="Configure capture targets"
                 className={cn(
                   // Sizing & Spacing
-                  'text-xs gap-1.5'
+                  'gap-1.5'
                 )}
               >
                 <TargetIcon className="size-3.5 text-muted-foreground" />
@@ -497,13 +497,13 @@ function PreviewToolbar({ isWsPaused }: Readonly<{ isWsPaused: boolean }>) {
         <Tooltip>
           <TooltipTrigger
             render={
-              <Button
+              <Button leading="tight"
                 variant="ghost"
                 size="md"
                 aria-label="Clear all WebSocket history"
                 className={cn(
                   // Sizing & Spacing
-                  'text-xs gap-1.5',
+                  'gap-1.5',
 
                   // Typography
                   'text-destructive hover:text-destructive hover:bg-destructive/10'

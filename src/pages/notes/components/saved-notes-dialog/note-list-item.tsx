@@ -120,7 +120,7 @@ export function NoteListItem({
                 "gap-1.5"
               )}
             >
-              <Input
+              <Input textSize="xs"
                 autoFocus
                 value={editingName}
                 onChange={(e) => onSetEditingName(e.target.value)}
@@ -129,10 +129,7 @@ export function NoteListItem({
                 }}
                 className={cn(
                   // Sizing & Spacing
-                  "h-6.5 py-0",
-
-                  // Typography
-                  "text-xs"
+                  "h-6.5 py-0"
                 )}
               />
               <Button
@@ -273,16 +270,13 @@ export function NoteListItem({
             </Badge>
           )}
 
-          <Button
+          <Button leading="tight"
             size="sm"
             variant={isOpenInTab ? 'secondary' : 'default'}
             onClick={onOpen}
             className={cn(
               // Sizing & Spacing
-              "h-6.5",
-
-              // Typography
-              "text-xs"
+              "h-6.5"
             )}
           >
             <ArrowSquareOutIcon className="size-3 mr-1" />
@@ -367,7 +361,7 @@ export function NoteListItem({
           <>
             {isOpenInTab && (
               <Button
-                variant="ghost"
+                variant="quiet"
                 size="sm"
                 onClick={onCloseTab}
                 className={cn(
@@ -375,7 +369,7 @@ export function NoteListItem({
                   "px-1.5",
 
                   // Typography
-                  "text-3xs text-muted-foreground hover:text-foreground"
+                  "text-3xs"
                 )}
                 title="Close tab (keeps note saved in library)"
               >

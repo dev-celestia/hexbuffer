@@ -84,13 +84,13 @@ export function NucleiRunFindingsTable({
           >
             <MagnifyingGlassIcon className="h-3.5 w-3.5" />
           </div>
-          <Input
+          <Input textSize="xs"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Filter findings by CVE, template, keyword, or URL..."
             className={cn(
               // Sizing & Spacing
-              "pl-8 text-xs",
+              "pl-8",
               // Backgrounds & Borders
               "bg-background/80 border-input/60"
             )}
@@ -381,13 +381,11 @@ export function NucleiRunFindingsTable({
                           <TooltipTrigger>
                             <Button
                               size="sm"
-                              variant="ghost"
+                              variant="quiet"
                               onClick={() => onCopyCurl(finding)}
                               className={cn(
                                 // Sizing & Spacing
-                                "w-6 p-0",
-                                // Interactive & States
-                                "text-muted-foreground hover:text-foreground"
+                                "w-6 p-0"
                               )}
                             >
                               <CopyIcon className="h-3.5 w-3.5" />

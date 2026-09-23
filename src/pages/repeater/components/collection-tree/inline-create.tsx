@@ -55,14 +55,11 @@ export function InlineCreate({ depth, type, onSubmit, onCancel }: Readonly<Inlin
           handleSubmit();
         }}
       >
-        <Input
+        <Input textSize="xs"
           ref={inputRef}
           className={cn(
             // Sizing & Spacing
-            'h-6',
-
-            // Typography
-            'text-xs'
+            'h-6'
           )}
           placeholder={placeholder}
           onBlur={() => {

@@ -128,7 +128,7 @@ export function NewRouteDialog({
                 "w-28 gap-1.5"
               )}
             >
-              <Label className="text-xs text-muted-foreground">Method</Label>
+              <Label leading="tight" className="text-muted-foreground">Method</Label>
               <Select value={method} onValueChange={(v) => setMethod(v as MockRoute['method'])}>
                 <SelectTrigger className="h-9 bg-muted/40">
                   <SelectValue />
@@ -150,7 +150,7 @@ export function NewRouteDialog({
                 "gap-1.5"
               )}
             >
-              <Label className="text-xs text-muted-foreground">Path</Label>
+              <Label leading="tight" className="text-muted-foreground">Path</Label>
               <Input mono
                 placeholder="/api/resource/:id"
                 value={path}
@@ -168,7 +168,7 @@ export function NewRouteDialog({
                 "w-20 gap-1.5"
               )}
             >
-              <Label className="text-xs text-muted-foreground">Status</Label>
+              <Label leading="tight" className="text-muted-foreground">Status</Label>
               <Input mono
                 value={statusCode}
                 onChange={(e) => setStatusCode(e.target.value)}
@@ -322,7 +322,7 @@ export function NewRouteDialog({
                 "flex items-center justify-between"
               )}
             >
-              <Label className="text-xs text-muted-foreground">Response Body (JSON Template)</Label>
+              <Label leading="tight" className="text-muted-foreground">Response Body (JSON Template)</Label>
               {detectedParams.length > 0 && (
                 <span className="text-3xs text-muted-foreground font-mono">
                   Supports {`{{param}}`} or {`\${param}`}

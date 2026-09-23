@@ -116,16 +116,13 @@ export function EndpointList({
               "text-muted-foreground"
             )}
           />
-          <Input
+          <Input textSize="xs"
             placeholder="Filter endpoints..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className={cn(
               // Sizing & Spacing
               "pl-8",
-
-              // Typography
-              "text-xs",
 
               // Backgrounds & Borders
               "bg-muted/40 border-border",

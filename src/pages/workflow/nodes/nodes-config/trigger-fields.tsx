@@ -26,14 +26,14 @@ export function HttpMethodFilter({
 }>) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-2xs">Method</Label>
+      <Label size="2xs">Method</Label>
       <Select value={value?.trim() ? value.toUpperCase() : 'ANY'} onValueChange={(v) => onChange(v === 'ANY' ? undefined : (v ?? undefined))}>
-        <SelectTrigger className="h-7 text-xs">
+        <SelectTrigger leading="tight" className="h-7">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           {METHOD_OPTIONS.map((method) => (
-            <SelectItem key={method} value={method} className="text-xs">
+            <SelectItem leading="tight" key={method} value={method}>
               {method}
             </SelectItem>
           ))}
@@ -52,7 +52,7 @@ export function HostWhitelistFilter({
 }>) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-2xs">
+      <Label size="2xs">
         <GlobeIcon className="size-3 inline mr-1" />
         Host whitelist
       </Label>
@@ -83,14 +83,14 @@ export function UrlPatternFilter({
   return (
     <>
       <div className="space-y-1.5">
-        <Label className="text-2xs">Operator</Label>
+        <Label size="2xs">Operator</Label>
         <Select value={operator ?? 'contains'} onValueChange={onOperatorChange}>
-          <SelectTrigger className="h-7 text-xs">
+          <SelectTrigger leading="tight" className="h-7">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {OPERATOR_OPTIONS.map((op) => (
-              <SelectItem key={op.value} value={op.value} className="text-xs">
+              <SelectItem leading="tight" key={op.value} value={op.value}>
                 {op.label}
               </SelectItem>
             ))}
@@ -98,9 +98,8 @@ export function UrlPatternFilter({
         </Select>
       </div>
       <div className="space-y-1.5">
-        <Label className="text-2xs">Value</Label>
-        <Input
-          className="text-xs"
+        <Label size="2xs">Value</Label>
+        <Input textSize="xs"
           value={value ?? ''}
           onChange={(e) => onValueChange(e.target.value)}
           placeholder="e.g. /api/login (blank = match all)"

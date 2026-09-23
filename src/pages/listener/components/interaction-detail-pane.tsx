@@ -38,9 +38,9 @@ export function InteractionDetailPane({ interaction, onClose }: Readonly<Props>)
           </span>
         </div>
         <Button
-          variant="ghost"
+          variant="quiet"
           size="icon"
-          className="h-6 w-6 text-muted-foreground hover:text-foreground"
+          className="h-6 w-6"
           onClick={onClose}
         >
           <XIcon className="h-4 w-4" />

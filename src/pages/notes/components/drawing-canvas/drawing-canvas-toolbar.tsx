@@ -160,16 +160,13 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
               "gap-0.5 border-l pl-1 ml-0.5 border-border/60"
             )}
           >
-            <Button
-              variant="ghost"
+            <Button leading="tight"
+              variant="quiet"
               size="md"
               onClick={handleDuplicateSelected}
               className={cn(
                 // Sizing & Spacing
-                "px-2",
-
-                // Typography
-                "text-xs text-muted-foreground hover:text-foreground"
+                "px-2"
               )}
               title="Duplicate (Ctrl+D / Cmd+D)"
             >
@@ -177,23 +174,20 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
               <span>Duplicate</span>
             </Button>
 
-            <Button
-              variant="ghost"
+            <Button leading="tight"
+              variant="quiet"
               size="md"
               onClick={handleBringToFront}
               className={cn(
                 // Sizing & Spacing
-                "w-7 p-0",
-
-                // Typography
-                "text-xs text-muted-foreground hover:text-foreground"
+                "w-7 p-0"
               )}
               title="Bring to Front"
             >
               <StackIcon className="size-3.5" />
             </Button>
 
-            <Button
+            <Button leading="tight"
               variant="ghost"
               size="md"
               onClick={handleDeleteSelected}
@@ -202,7 +196,7 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
                 "w-7 p-0",
 
                 // Typography
-                "text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                "text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               )}
               title="Delete (Delete / Backspace)"
             >
@@ -230,7 +224,7 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
             const ShapeIcon = st.icon;
             const isSelected = activeTool === st.id;
             return (
-              <Button
+              <Button leading="tight"
                 key={st.id}
                 variant={isSelected ? 'default' : 'ghost'}
                 size="sm"
@@ -241,9 +235,6 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
                 className={cn(
                   // Sizing & Spacing
                   "h-8 gap-1.5",
-
-                  // Typography
-                  "text-xs",
 
                   // Interactive & States
                   isSelected ? "shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground"
@@ -398,7 +389,7 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
               >
                 Fill Mode
               </span>
-              <Button
+              <Button leading="tight"
                 variant="outline"
                 size="md"
                 onClick={() => {
@@ -410,7 +401,7 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
                   "w-full px-2",
 
                   // Typography
-                  "text-xs capitalize"
+                  "capitalize"
                 )}
               >
                 {fillMode}
@@ -486,7 +477,7 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
                 <MagnifyingGlassMinusIcon className="size-4" />
               </Button>
 
-              <Button mono
+              <Button leading="tight" mono
                 variant="ghost"
                 size="md"
                 onClick={handleResetZoom}
@@ -495,7 +486,7 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
                   "px-2",
 
                   // Typography
-                  "text-xs font-semibold text-foreground"
+                  "font-semibold text-foreground"
                 )}
                 title="Reset Zoom to 100%"
               >
@@ -513,16 +504,13 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
                 <MagnifyingGlassPlusIcon className="size-4" />
               </Button>
 
-              <Button
+              <Button leading="tight"
                 variant="ghost"
                 size="md"
                 onClick={handleFitToScreen}
                 className={cn(
                   // Sizing & Spacing
-                  "px-2 border-l ml-1",
-
-                  // Typography
-                  "text-xs"
+                  "px-2 border-l ml-1"
                 )}
                 title="Fit to Screen"
               >
@@ -739,7 +727,7 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
           )}
         >
           {/* Style & Colors Category Button */}
-          <Button
+          <Button leading="tight"
             variant={activeSubmenu === 'style' ? 'secondary' : 'ghost'}
             size="sm"
             onClick={() => toggleSubmenu('style')}
@@ -749,9 +737,6 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
 
               // Sizing & Spacing
               "h-8 px-2 gap-1.5",
-
-              // Typography
-              "text-xs",
 
               // Interactive & States
               activeSubmenu === 'style' ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
@@ -771,7 +756,7 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
           </Button>
 
           {/* View & Zoom Category Button */}
-          <Button
+          <Button leading="tight"
             variant={activeSubmenu === 'view' ? 'secondary' : 'ghost'}
             size="sm"
             onClick={() => toggleSubmenu('view')}
@@ -781,9 +766,6 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
 
               // Sizing & Spacing
               "h-8 px-2 gap-1.5",
-
-              // Typography
-              "text-xs",
 
               // Interactive & States
               activeSubmenu === 'view' ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground"
@@ -814,22 +796,22 @@ export function DrawingCanvasToolbar({ hook }: Readonly<DrawingCanvasToolbarProp
           )}
         >
           <Button
-            variant="ghost"
+            variant="quiet"
             size="sm"
             disabled={!canUndo}
             onClick={handleUndo}
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground disabled:opacity-30"
+            className="h-8 w-8 p-0 disabled:opacity-30"
             title="Undo (Ctrl+Z / Cmd+Z)"
           >
             <ArrowCounterClockwiseIcon className="size-4" />
           </Button>
 
           <Button
-            variant="ghost"
+            variant="quiet"
             size="sm"
             disabled={!canRedo}
             onClick={handleRedo}
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground disabled:opacity-30"
+            className="h-8 w-8 p-0 disabled:opacity-30"
             title="Redo (Ctrl+Y / Cmd+Shift+Z)"
           >
             <ArrowClockwiseIcon className="size-4" />

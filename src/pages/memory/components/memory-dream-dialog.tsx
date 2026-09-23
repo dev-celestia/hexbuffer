@@ -144,22 +144,21 @@ export function MemoryDreamDialog({ state }: Readonly<MemoryDreamDialogProps>) {
         </div>
 
         <DialogFooter className="pt-2">
-          <Button
+          <Button leading="tight"
             type="button"
             variant="outline"
             size="sm"
             onClick={() => setIsDreamDialogOpen(false)}
-            className="text-xs"
           >
             Close
           </Button>
-          <Button
+          <Button leading="tight"
             type="button"
             variant="default"
             size="sm"
             onClick={() => void handleRunDreamCycle()}
             disabled={isDreamRunning}
-            className="text-xs gap-1.5"
+            className="gap-1.5"
           >
             {isDreamRunning ? (
               <>

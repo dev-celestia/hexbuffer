@@ -210,13 +210,13 @@ export function ExplorerSidebar({
         )}
       >
         <form onSubmit={handleSubmit} className="flex gap-1">
-          <Input
+          <Input textSize="xs"
             value={newBucketName}
             onChange={(e) => setNewBucketName(e.target.value)}
             placeholder="Add bucket manually…"
             className={cn(
               // Typography
-              "text-xs font-sans bg-background"
+              "font-sans bg-background"
             )}
           />
           <Button

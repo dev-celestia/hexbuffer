@@ -124,7 +124,7 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: Readonly<SavedNotesDi
               "gap-2"
             )}
           >
-            <Button
+            <Button leading="tight"
               size="sm"
               onClick={handleCreateNewNote}
               className={cn(
@@ -132,10 +132,7 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: Readonly<SavedNotesDi
                 "flex",
 
                 // Sizing & Spacing
-                "gap-1.5 h-8 px-3",
-
-                // Typography
-                "text-xs"
+                "gap-1.5 h-8 px-3"
               )}
             >
               <PlusIcon className="size-3.5" />
@@ -232,16 +229,13 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: Readonly<SavedNotesDi
             <span className="font-medium text-foreground">{counts.all}</span> saved notes
           </div>
 
-          <Button
+          <Button leading="tight"
             variant="outline"
             size="sm"
             onClick={() => onOpenChange(false)}
             className={cn(
               // Sizing & Spacing
-              "h-8 px-4",
-
-              // Typography
-              "text-xs"
+              "h-8 px-4"
             )}
           >
             Cancel

@@ -82,24 +82,16 @@ export function NotesEmptyState({ onOpenSavedNotes, onCreateNewNote }: Readonly<
             "gap-3 mt-2"
           )}
         >
-          <Button
+          <Button leading="tight"
             onClick={onCreateNewNote}
-            className={cn(
-              // Typography
-              "text-xs"
-            )}
           >
             <PlusIcon className="size-3.5 mr-1.5" />
             New Note
           </Button>
 
-          <Button
+          <Button leading="tight"
             variant="outline"
             onClick={onOpenSavedNotes}
-            className={cn(
-              // Typography
-              "text-xs"
-            )}
           >
             <FolderSimpleIcon className="size-3.5 mr-1.5" />
             Saved Notes Library ({notes.length})

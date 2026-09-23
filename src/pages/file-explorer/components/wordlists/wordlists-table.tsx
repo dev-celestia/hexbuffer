@@ -268,17 +268,14 @@ export function WordlistsTable({
                     {isBundled ? (
                       <Button
                         size="sm"
-                        variant="ghost"
+                        variant="quiet"
                         onClick={(e) => {
                           e.stopPropagation();
                           onPreview(item);
                         }}
                         className={cn(
                           // Sizing & Spacing
-                          "size-6 p-0",
-
-                          // Typography & Colors
-                          "text-muted-foreground hover:text-foreground"
+                          "size-6 p-0"
                         )}
                         title="Preview wordlist"
                       >
@@ -288,17 +285,14 @@ export function WordlistsTable({
                       <>
                         <Button
                           size="sm"
-                          variant="ghost"
+                          variant="quiet"
                           onClick={(e) => {
                             e.stopPropagation();
                             onPreview(item);
                           }}
                           className={cn(
                             // Sizing & Spacing
-                            "size-6 p-0",
-
-                            // Typography & Colors
-                            "text-muted-foreground hover:text-foreground"
+                            "size-6 p-0"
                           )}
                           title="Preview wordlist"
                         >
@@ -306,17 +300,14 @@ export function WordlistsTable({
                         </Button>
                         <Button
                           size="sm"
-                          variant="ghost"
+                          variant="quiet"
                           onClick={(e) => {
                             e.stopPropagation();
                             onOpen(item);
                           }}
                           className={cn(
                             // Sizing & Spacing
-                            "size-6 p-0",
-
-                            // Typography & Colors
-                            "text-muted-foreground hover:text-foreground"
+                            "size-6 p-0"
                           )}
                           title="Reveal in System"
                         >

@@ -155,18 +155,12 @@ export function ScanResultsHeader({
           </div>
         )}
         <Button
-          variant="ghost"
+          variant="quiet"
           size="icon"
           onClick={onClear}
           className={cn(
             // Sizing & Spacing
-            "h-6 w-6",
-
-            // Typography
-            "text-muted-foreground",
-
-            // Interactive & States
-            "hover:text-foreground"
+            "h-6 w-6"
           )}
           title="Clear results"
         >

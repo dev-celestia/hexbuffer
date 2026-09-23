@@ -110,13 +110,13 @@ export function ForgeRequestBar({
               useCollectionsStore.getState().setActiveContextId(val === 'no-context' ? null : val);
             }}
           >
-            <SelectTrigger
+            <SelectTrigger leading="tight"
               className={cn(
                 // Sizing & Spacing
                 'w-44',
 
                 // Typography
-                'text-xs font-medium'
+                'font-medium'
               )}
               title="Active environment"
             >
@@ -161,13 +161,10 @@ export function ForgeRequestBar({
 
           <Button
             size="icon"
-            variant="ghost"
+            variant="quiet"
             className={cn(
               // Sizing & Spacing
-              'size-7',
-
-              // Interactive & States
-              'text-muted-foreground hover:text-foreground'
+              'size-7'
             )}
             title="Manage environments"
             aria-label="Manage environments"

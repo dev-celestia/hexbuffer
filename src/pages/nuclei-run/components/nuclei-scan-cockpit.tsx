@@ -105,12 +105,12 @@ export function NucleiScanCockpit() {
           {/* Target URL Input */}
           <div className="relative flex-1 max-w-sm">
             <GlobeIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-            <Input mono
+            <Input textSize="xs" mono
               value={targetInput}
               onChange={(e) => setTargetInput(e.target.value)}
               placeholder="Target URL (e.g. https://example.com)..."
               disabled={status === 'running'}
-              className="pl-8 pr-3 text-xs bg-background"
+              className="pl-8 pr-3 bg-background"
             />
           </div>
 
@@ -164,20 +164,20 @@ export function NucleiScanCockpit() {
           {/* Controls */}
           {status === 'running' ? (
             <div className="flex items-center gap-1.5">
-              <Button
+              <Button leading="tight"
                 variant="outline"
                 size="xs"
                 onClick={pauseScan}
-                className="h-7 px-2.5 text-xs"
+                className="h-7 px-2.5"
               >
                 <PauseIcon className="size-3.5 text-amber-400" />
                 <span>Pause</span>
               </Button>
-              <Button
+              <Button leading="tight"
                 variant="destructive"
                 size="xs"
                 onClick={stopScan}
-                className="h-7 px-2.5 text-xs"
+                className="h-7 px-2.5"
               >
                 <StopIcon className="size-3.5" />
                 <span>Stop</span>
@@ -185,30 +185,30 @@ export function NucleiScanCockpit() {
             </div>
           ) : status === 'paused' ? (
             <div className="flex items-center gap-1.5">
-              <Button
+              <Button leading="tight"
                 size="xs"
                 onClick={resumeScan}
-                className="h-7 px-2.5 text-xs bg-sky-600 hover:bg-sky-500 text-white"
+                className="h-7 px-2.5 bg-sky-600 hover:bg-sky-500 text-white"
               >
                 <PlayIcon className="size-3.5" />
                 <span>Resume</span>
               </Button>
-              <Button
+              <Button leading="tight"
                 variant="destructive"
                 size="xs"
                 onClick={stopScan}
-                className="h-7 px-2.5 text-xs"
+                className="h-7 px-2.5"
               >
                 <StopIcon className="size-3.5" />
                 <span>Stop</span>
               </Button>
             </div>
           ) : (
-            <Button
+            <Button leading="tight"
               size="xs"
               onClick={() => startScan()}
               disabled={selectedTemplateIds.length === 0}
-              className="h-7 px-3 text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+              className="h-7 px-3 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <PlayIcon className="size-3.5" />
               <span>Run Scan</span>

@@ -60,12 +60,8 @@ export function TreeHeader({
         {actions.map(({ key, title, icon: Icon, onClick }) => (
           <Button
             key={key}
-            variant="ghost"
+            variant="quiet"
             size="icon-sm"
-            className={cn(
-              // Interactive & States
-              'text-muted-foreground hover:text-foreground'
-            )}
             title={title}
             onClick={onClick}
           >

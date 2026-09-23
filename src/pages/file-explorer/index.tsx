@@ -109,7 +109,7 @@ export function FileExplorerPage() {
                 "flex justify-center pt-2"
               )}
             >
-              <Button
+              <Button leading="tight"
                 size="md"
                 variant="default"
                 onClick={() => page.navigate('/settings?tab=r2')}
@@ -121,7 +121,7 @@ export function FileExplorerPage() {
                   "px-3 gap-1.5",
 
                   // Typography
-                  "text-xs font-semibold"
+                  "font-semibold"
                 )}
               >
                 <GearSixIcon className="size-3.5" />

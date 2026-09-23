@@ -54,7 +54,7 @@ export function EncoderTransformColumn({
         )}
       >
         {CODECS.map((codec) => (
-          <Button
+          <Button leading="tight"
             key={codec.id}
             variant="ghost"
             size="md"
@@ -64,7 +64,7 @@ export function EncoderTransformColumn({
               "w-full justify-between px-2",
 
               // Typography
-              "text-xs font-normal",
+              "font-normal",
 
               // Interactive & States
               activeType === codec.id
@@ -102,7 +102,7 @@ export function EncoderTransformColumn({
             "w-full"
           )}
         >
-          <Button
+          <Button leading="tight"
             variant="outline"
             size="md"
             onClick={() => onModeChange('encode')}
@@ -113,16 +113,13 @@ export function EncoderTransformColumn({
               // Sizing & Spacing
               "px-2",
 
-              // Typography
-              "text-xs",
-
               // Interactive & States
               mode === 'decode' && "text-muted-foreground"
             )}
           >
             Encode
           </Button>
-          <Button
+          <Button leading="tight"
             variant="outline"
             size="md"
             onClick={() => onModeChange('decode')}
@@ -132,9 +129,6 @@ export function EncoderTransformColumn({
 
               // Sizing & Spacing
               "px-2",
-
-              // Typography
-              "text-xs",
 
               // Interactive & States
               mode === 'encode' && "text-muted-foreground"
@@ -153,52 +147,40 @@ export function EncoderTransformColumn({
             "gap-1"
           )}
         >
-          <Button
+          <Button leading="tight"
             variant="outline"
             size="md"
             onClick={onSwap}
             disabled={isEmpty}
             className={cn(
               // Sizing & Spacing
-              "w-full px-2 gap-1.5",
-
-              // Typography
-              "text-xs"
+              "w-full px-2 gap-1.5"
             )}
           >
             <ArrowsLeftRightIcon className="h-3 w-3" />
             Swap
           </Button>
-          <Button
+          <Button leading="tight"
             variant="outline"
             size="md"
             onClick={onCopy}
             disabled={!output}
             className={cn(
               // Sizing & Spacing
-              "w-full px-2 gap-1.5",
-
-              // Typography
-              "text-xs"
+              "w-full px-2 gap-1.5"
             )}
           >
             <CopyIcon className="h-3 w-3" />
             Copy output
           </Button>
-          <Button
-            variant="ghost"
+          <Button leading="tight"
+            variant="quiet"
             size="md"
             onClick={onClear}
             disabled={isEmpty}
             className={cn(
               // Sizing & Spacing
-              "w-full px-2 gap-1.5",
-
-              // Typography
-              "text-xs text-muted-foreground",
-
-              // Interactive & States
-              "hover:text-foreground"
+              "w-full px-2 gap-1.5"
             )}
           >
             <TrashIcon className="h-3 w-3" />

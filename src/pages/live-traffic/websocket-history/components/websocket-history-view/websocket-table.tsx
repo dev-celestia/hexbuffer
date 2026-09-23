@@ -161,7 +161,7 @@ export function WebSocketTable({ selectedConnectionId, onSelectConnection }: Rea
             "border-b bg-muted/40"
           )}
         >
-          <Button variant="outline" size="sm" onClick={handleRefresh} className="text-xs gap-1.5">
+          <Button leading="tight" variant="outline" size="sm" onClick={handleRefresh} className="gap-1.5">
             <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
             {newEventsCount} new connection{newEventsCount > 1 ? 's' : ''} · Click to refresh
           </Button>

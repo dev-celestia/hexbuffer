@@ -72,10 +72,10 @@ export function WorkflowToolbar() {
     <div className="flex h-10 items-center gap-2 border-b bg-muted px-3">
       {editing ? (
         <div className="flex items-center gap-1.5">
-          <Input
+          <Input textSize="xs"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
-            className="h-6 w-48 text-xs"
+            className="h-6 w-48"
             autoFocus
             onKeyDown={(e) => {
               if (e.key === 'Enter') confirmEdit();

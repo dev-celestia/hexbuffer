@@ -43,15 +43,12 @@ export function ContextsVariablesEmpty({ onAddVar }: Readonly<ContextsVariablesE
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button
+        <Button leading="tight"
           variant="outline"
           size="sm"
           className={cn(
             // Sizing & Spacing
-            'px-2',
-
-            // Typography
-            'text-xs'
+            'px-2'
           )}
           onClick={onAddVar}
         >

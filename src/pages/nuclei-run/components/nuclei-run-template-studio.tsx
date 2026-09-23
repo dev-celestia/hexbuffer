@@ -100,10 +100,10 @@ export function NucleiRunTemplateStudio({
               )}
             >
               <Select value={selectedExampleId} onValueChange={onLoadExample}>
-                <SelectTrigger
+                <SelectTrigger leading="tight"
                   className={cn(
                     // Sizing & Spacing
-                    "h-7 text-xs",
+                    "h-7",
                     // Backgrounds & Borders
                     "bg-muted/20 border-input/60"
                   )}
@@ -300,25 +300,25 @@ export function NucleiRunTemplateStudio({
               "flex items-center gap-2"
             )}
           >
-            <Input mono
+            <Input textSize="xs" mono
               value={target}
               onChange={(e) => onTargetChange(e.target.value)}
               placeholder="Target URL (e.g. https://example.com)"
               className={cn(
                 // Sizing & Spacing
-                "h-8 text-xs",
+                "h-8",
                 // Backgrounds & Borders
                 "bg-muted/20 border-input/60"
               )}
             />
-            <Button
+            <Button leading="tight"
               size="sm"
               variant="default"
               onClick={onRunTest}
               disabled={isTesting || hasErrors || !target.trim()}
               className={cn(
                 // Sizing & Spacing
-                "h-8 px-3 text-xs",
+                "h-8 px-3",
                 // Backgrounds & Borders
                 "bg-emerald-600 hover:bg-emerald-500 text-white"
               )}

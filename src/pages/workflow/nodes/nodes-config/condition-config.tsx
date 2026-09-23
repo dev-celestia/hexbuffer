@@ -78,31 +78,30 @@ export function ConditionConfigForm({ config, onChange, inputData }: Readonly<Co
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
-        <Label className="text-2xs">Condition type</Label>
+        <Label size="2xs">Condition type</Label>
         <p className="text-xs text-muted-foreground">
           {NODE_TYPE_REGISTRY[config.conditionType]?.label ?? config.conditionType}
         </p>
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-2xs">Data key</Label>
+        <Label size="2xs">Data key</Label>
         <Select
           value={dataPathOptions.some((option) => option.value === dataPath) ? dataPath : undefined}
           onValueChange={(v) => onChange({ dataPath: v ?? undefined })}
         >
-          <SelectTrigger className="h-7 text-xs">
+          <SelectTrigger leading="tight" className="h-7">
             <SelectValue placeholder="Select JSON key" />
           </SelectTrigger>
           <SelectContent>
             {dataPathOptions.map((option) => (
-              <SelectItem mono key={option.value} value={option.value} className="text-xs">
+              <SelectItem leading="tight" mono key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Input mono
-          className="text-xs"
+        <Input textSize="xs" mono
           value={dataPath}
           onChange={(e) => onChange({ dataPath: e.target.value })}
           placeholder="e.g. response.headers.content-type"
@@ -110,17 +109,17 @@ export function ConditionConfigForm({ config, onChange, inputData }: Readonly<Co
       </div>
 
       <div className="space-y-1.5">
-        <Label className="text-2xs">Operator</Label>
+        <Label size="2xs">Operator</Label>
         <Select
           value={config.operator}
           onValueChange={(v) => onChange({ operator: v as ConditionConfig['operator'] })}
         >
-          <SelectTrigger className="h-7 text-xs">
+          <SelectTrigger leading="tight" className="h-7">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {Object.entries(OPERATOR_LABELS).map(([key, label]) => (
-              <SelectItem key={key} value={key} className="text-xs">
+              <SelectItem leading="tight" key={key} value={key}>
                 {label}
               </SelectItem>
             ))}
@@ -130,9 +129,8 @@ export function ConditionConfigForm({ config, onChange, inputData }: Readonly<Co
 
       {showValue && (
         <div className="space-y-1.5">
-          <Label className="text-2xs">Value</Label>
-          <Input
-            className="text-xs"
+          <Label size="2xs">Value</Label>
+          <Input textSize="xs"
             value={config.value}
             onChange={(e) => onChange({ value: e.target.value })}
             placeholder={placeholderForCondition(config.conditionType)}

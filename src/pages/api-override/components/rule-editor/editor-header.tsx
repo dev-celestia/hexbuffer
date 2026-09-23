@@ -74,13 +74,13 @@ export function EditorHeader({
             value={editMethod}
             onValueChange={(v) => { if (v) onSetEditMethod(v); }}
           >
-            <SelectTrigger mono
+            <SelectTrigger leading="tight" mono
               className={cn(
                 // Sizing & Spacing
                 "h-7 w-24",
 
                 // Typography
-                "text-xs font-semibold",
+                "font-semibold",
 
                 // Backgrounds & Borders
                 "bg-muted/40 border-border"
@@ -104,7 +104,7 @@ export function EditorHeader({
               ))}
             </SelectContent>
           </Select>
-          <Input mono
+          <Input textSize="xs" mono
             value={editPath}
             onChange={(e) => onSetEditPath(e.target.value)}
             onKeyDown={(e) => {
@@ -115,9 +115,6 @@ export function EditorHeader({
             className={cn(
               // Sizing & Spacing
               "flex-1",
-
-              // Typography
-              "text-xs",
 
               // Backgrounds & Borders
               "bg-muted/40",
@@ -174,15 +171,12 @@ export function EditorHeader({
             </Badge>
           ))}
           <Button
-            variant="ghost"
+            variant="quiet"
             size="icon"
             onClick={() => onSetEditingHeader(true)}
             className={cn(
               // Sizing & Spacing
-              "h-6 w-6 p-0",
-
-              // Typography
-              "text-muted-foreground hover:text-foreground"
+              "h-6 w-6 p-0"
             )}
             title="Edit method & path"
           >

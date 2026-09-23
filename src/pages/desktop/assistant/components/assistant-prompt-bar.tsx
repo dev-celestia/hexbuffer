@@ -81,14 +81,14 @@ function PromptInputAttachmentsBar() {
         </div>
         <Button
           type="button"
-          variant="ghost"
+          variant="quiet"
           size="sm"
           onClick={attachments.clear}
           className={cn(
             // Sizing & Spacing
             'h-5 px-1.5',
             // Typography
-            'text-2xs text-muted-foreground hover:text-foreground',
+            'text-2xs',
             // Interactive & States
             'transition-colors',
           )}
@@ -339,7 +339,7 @@ export function AssistantPromptBar({
                 {/* Specialist Agent Selector Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger>
-                    <Button
+                    <Button leading="tight"
                       type="button"
                       variant="ghost"
                       size="sm"
@@ -351,7 +351,7 @@ export function AssistantPromptBar({
                         // Sizing & Spacing
                         'h-8 px-2 max-w-[125px] xs:max-w-[145px] sm:max-w-[170px]',
                         // Typography
-                        'text-xs font-normal',
+                        'font-normal',
                         // Backgrounds & Borders
                         'rounded-md border-border bg-background',
                         // Interactive & States

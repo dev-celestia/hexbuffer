@@ -73,7 +73,7 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
-        <Label className="text-2xs">Trigger type</Label>
+        <Label size="2xs">Trigger type</Label>
         <p className="text-xs text-muted-foreground">
           {NODE_TYPE_REGISTRY[tt]?.label ?? tt}
         </p>
@@ -81,11 +81,11 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
 
       {isScheduled && (
         <div className="space-y-1.5">
-          <Label className="text-2xs">Cron schedule</Label>
+          <Label size="2xs">Cron schedule</Label>
           <div className="relative">
             <ClockIcon className="absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              className="pl-7 text-xs"
+            <Input textSize="xs"
+              className="pl-7"
               value={config.schedule ?? ''}
               onChange={(e) => onChange({ schedule: e.target.value })}
               placeholder="0 */6 * * *"
@@ -99,10 +99,10 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
           <p className="text-xs text-muted-foreground">
             Trigger the workflow manually from this panel.
           </p>
-          <Button
+          <Button leading="tight"
             variant="outline"
             size="md"
-            className="w-full text-xs"
+            className="w-full"
             onClick={onRun}
           >
             <PlayIcon className="size-3 mr-1" />
@@ -130,17 +130,17 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
             )}
 
             <div className="space-y-1.5">
-              <Label className="text-2xs">Method</Label>
+              <Label size="2xs">Method</Label>
               <Select
                 value={config.method?.trim() ? config.method.toUpperCase() : 'ANY'}
                 onValueChange={(v) => onChange({ method: v === 'ANY' ? undefined : (v ?? undefined) })}
               >
-                <SelectTrigger className="h-7 text-xs">
+                <SelectTrigger leading="tight" className="h-7">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {METHOD_OPTIONS.map((method) => (
-                    <SelectItem key={method} value={method} className="text-xs">
+                    <SelectItem leading="tight" key={method} value={method}>
                       {method}
                     </SelectItem>
                   ))}
@@ -149,7 +149,7 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-2xs">
+              <Label size="2xs">
                 <GlobeIcon className="size-3 inline mr-1" />
                 Host whitelist <span className="text-warning">*</span>
               </Label>
@@ -165,17 +165,17 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-2xs">Operator</Label>
+              <Label size="2xs">Operator</Label>
               <Select
                 value={config.operator ?? 'contains'}
                 onValueChange={(v) => onChange({ operator: v as TriggerConfig['operator'] })}
               >
-                <SelectTrigger className="h-7 text-xs">
+                <SelectTrigger leading="tight" className="h-7">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {OPERATOR_OPTIONS.map((op) => (
-                    <SelectItem key={op.value} value={op.value} className="text-xs">
+                    <SelectItem leading="tight" key={op.value} value={op.value}>
                       {op.label}
                     </SelectItem>
                   ))}
@@ -184,9 +184,8 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-2xs">Value</Label>
-              <Input
-                className="text-xs"
+              <Label size="2xs">Value</Label>
+              <Input textSize="xs"
                 value={config.value ?? ''}
                 onChange={(e) => onChange({ value: e.target.value })}
                 placeholder="e.g. /api/login (blank = match all URLs)"
@@ -260,9 +259,8 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
               Port filter
             </p>
             <div className="space-y-1.5">
-              <Label className="text-2xs">Port(s)</Label>
-              <Input
-                className="text-xs"
+              <Label size="2xs">Port(s)</Label>
+              <Input textSize="xs"
                 value={config.port ?? ''}
                 onChange={(e) => onChange({ port: e.target.value })}
                 placeholder="e.g. 80, 443, 8080 (blank = all ports)"
@@ -299,18 +297,18 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
               onChange={(v) => onChange({ host: v })}
             />
             <div className="space-y-1.5">
-              <Label className="text-2xs">Direction</Label>
+              <Label size="2xs">Direction</Label>
               <Select
                 value={config.direction ?? ''}
                 onValueChange={(v) => onChange({ direction: v as TriggerConfig['direction'] })}
               >
-                <SelectTrigger className="h-7 text-xs">
+                <SelectTrigger leading="tight" className="h-7">
                   <SelectValue placeholder="Both directions" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="" className="text-xs">Both</SelectItem>
+                  <SelectItem leading="tight" value="">Both</SelectItem>
                   {DIRECTION_OPTIONS.map((d) => (
-                    <SelectItem key={d.value} value={d.value} className="text-xs">
+                    <SelectItem leading="tight" key={d.value} value={d.value}>
                       {d.label}
                     </SelectItem>
                   ))}

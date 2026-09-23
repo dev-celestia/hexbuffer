@@ -120,14 +120,11 @@ export function ServerToolbar({
         >
           <span>{baseUrl}</span>
           <Button
-            variant="ghost"
+            variant="quiet"
             size="icon"
             className={cn(
               // Sizing & Spacing
               "h-5 w-5",
-
-              // Typography
-              "text-muted-foreground hover:text-foreground",
 
               // Backgrounds & Borders
               "rounded"
@@ -185,7 +182,7 @@ export function ServerToolbar({
           >
             Port:
           </span>
-          <Input mono
+          <Input textSize="xs" mono
             value={portInput}
             onChange={(e) => setPortInput(e.target.value)}
             onBlur={handlePortBlur}
@@ -195,7 +192,7 @@ export function ServerToolbar({
               "w-20",
 
               // Typography
-              "text-xs text-center",
+              "text-center",
 
               // Backgrounds & Borders
               "bg-muted/40 border-border"

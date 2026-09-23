@@ -65,16 +65,13 @@ export function SavedNotesToolbar({
             "text-muted-foreground pointer-events-none"
           )}
         />
-        <Input
+        <Input textSize="xs"
           placeholder="Search note titles and contents..."
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
           className={cn(
             // Sizing & Spacing
             "h-8 pl-8 pr-7",
-
-            // Typography
-            "text-xs",
 
             // Backgrounds & Borders
             "bg-background"
@@ -168,13 +165,10 @@ export function SavedNotesToolbar({
 
         {/* Sort Select */}
         <Select value={sortOption} onValueChange={(val) => onSortOptionChange(val as NoteSortOption)}>
-          <SelectTrigger
+          <SelectTrigger leading="tight"
             className={cn(
               // Sizing & Spacing
               "h-8 w-40",
-
-              // Typography
-              "text-xs",
 
               // Backgrounds & Borders
               "bg-background"
@@ -184,7 +178,7 @@ export function SavedNotesToolbar({
           </SelectTrigger>
           <SelectContent>
             {NOTE_SORT_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value} className="text-xs">
+              <SelectItem leading="tight" key={opt.value} value={opt.value}>
                 {opt.label}
               </SelectItem>
             ))}

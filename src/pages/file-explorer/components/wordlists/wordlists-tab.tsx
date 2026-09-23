@@ -89,7 +89,7 @@ export function WordlistsTab() {
                     "text-muted-foreground"
                   )}
                 />
-                <Input
+                <Input textSize="xs"
                   value={hub.searchQuery}
                   onChange={(e) => hub.setSearchQuery(e.target.value)}
                   placeholder="Search wordlists…"
@@ -98,7 +98,7 @@ export function WordlistsTab() {
                     "ps-8 pe-7",
 
                     // Typography
-                    "text-xs font-sans bg-background"
+                    "font-sans bg-background"
                   )}
                 />
                 {hub.searchQuery && (

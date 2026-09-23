@@ -56,16 +56,16 @@ export function ScanToolbar({
         <div className="flex flex-1 items-center min-w-[280px] max-w-xl">
           <div className="flex w-full items-center -space-x-px">
             <Select value={method} onValueChange={v => onMethodChange(v as 'GET' | 'POST')}>
-              <SelectTrigger className="h-8 text-xs w-20 bg-muted/20 rounded-r-none focus:ring-0 focus:ring-offset-0 select-none">
+              <SelectTrigger leading="tight" className="h-8 w-20 bg-muted/20 rounded-r-none focus:ring-0 focus:ring-offset-0 select-none">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="text-xs">
-                <SelectItem value="GET" className="text-xs">GET</SelectItem>
-                <SelectItem value="POST" className="text-xs">POST</SelectItem>
+                <SelectItem leading="tight" value="GET">GET</SelectItem>
+                <SelectItem leading="tight" value="POST">POST</SelectItem>
               </SelectContent>
             </Select>
-            <Input
-              className="h-8 text-xs bg-background rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary/50"
+            <Input textSize="xs"
+              className="h-8 bg-background rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary/50"
               placeholder="http://target.com/search?q="
               value={url}
               onChange={e => onUrlChange(e.target.value)}
@@ -112,11 +112,11 @@ export function ScanToolbar({
               CSV
             </Button>
             <Button
-              variant="ghost"
+              variant="quiet"
               size="icon"
               onClick={onClear}
               disabled={vulnerabilitiesCount === 0 && databasesCount === 0}
-              className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded transition-colors"
+              className="h-7 w-7 hover:bg-muted/50 rounded transition-colors"
               title="Clear results"
             >
               <TrashIcon className="h-4 w-4" />
@@ -159,7 +159,7 @@ export function ScanToolbar({
         </div>
 
         <div className="flex items-center gap-1.5">
-          <Label className="text-2xs text-muted-foreground">
+          <Label size="2xs" className="text-muted-foreground">
             Risk:
           </Label>
           <Select value={riskLevel} onValueChange={v => onRiskLevelChange(v as SqliRiskLevel)}>
@@ -167,9 +167,9 @@ export function ScanToolbar({
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="text-xs">
-              <SelectItem value="low" className="text-xs">Low (Few)</SelectItem>
-              <SelectItem value="medium" className="text-xs">Medium</SelectItem>
-              <SelectItem value="high" className="text-xs">High (All)</SelectItem>
+              <SelectItem leading="tight" value="low">Low (Few)</SelectItem>
+              <SelectItem leading="tight" value="medium">Medium</SelectItem>
+              <SelectItem leading="tight" value="high">High (All)</SelectItem>
             </SelectContent>
           </Select>
         </div>

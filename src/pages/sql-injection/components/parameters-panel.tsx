@@ -101,8 +101,8 @@ export function ParametersPanel({
                     </Badge>
                   </div>
                   
-                  <Input mono
-                    className="h-6 text-xs bg-background mt-1 py-0 px-1.5 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-muted-foreground/30"
+                  <Input textSize="xs" mono
+                    className="h-6 bg-background mt-1 py-0 px-1.5 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-muted-foreground/30"
                     value={param.value}
                     onChange={e => onParamValueChange(param.name, e.target.value)}
                     placeholder="Value (optional)"
@@ -130,8 +130,8 @@ export function ParametersPanel({
         </span>
         <div className="flex flex-col gap-1.5">
           <div className="flex gap-1.5">
-            <Input
-              className="text-xs bg-background"
+            <Input textSize="xs"
+              className="bg-background"
               placeholder="Name"
               value={newParamName}
               onChange={e => onNewParamNameChange(e.target.value)}
@@ -139,8 +139,8 @@ export function ParametersPanel({
                 if (e.key === 'Enter') onAddParameter();
               }}
             />
-            <Input
-              className="text-xs bg-background"
+            <Input textSize="xs"
+              className="bg-background"
               placeholder="Value"
               value={newParamValue}
               onChange={e => onNewParamValueChange(e.target.value)}
@@ -149,11 +149,11 @@ export function ParametersPanel({
               }}
             />
           </div>
-          <Button 
+          <Button leading="tight" 
             size="md" 
             onClick={onAddParameter} 
             disabled={!newParamName.trim()}
-            className="w-full text-xs font-semibold"
+            className="w-full font-semibold"
           >
             <PlusIcon className="h-3 w-3" />
             Add Parameter

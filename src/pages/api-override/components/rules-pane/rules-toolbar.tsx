@@ -151,16 +151,13 @@ export function RulesToolbar({ domains, onAdd, searchQuery, onSearchChange }: Ru
             "text-muted-foreground"
           )}
         />
-        <Input
+        <Input textSize="xs"
           placeholder="Filter hosts and rules..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           className={cn(
             // Sizing & Spacing
             "h-7.5 pl-7.5",
-
-            // Typography
-            "text-xs",
 
             // Backgrounds & Borders
             "border-border bg-muted/30",

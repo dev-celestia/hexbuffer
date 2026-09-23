@@ -243,17 +243,15 @@ export function ChatSessionList({
                       <CheckIcon className="size-3.5" weight="bold" />
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="quiet"
                       size="icon"
                       className={cn(
                         // Sizing & Spacing
                         'size-6',
-                        // Typography
-                        'text-muted-foreground',
                         // Backgrounds & Borders
                         'rounded-md',
                         // Interactive & States
-                        'hover:bg-muted hover:text-foreground',
+                        'hover:bg-muted',
                         'transition-colors duration-150',
                       )}
                       onClick={handleCancelRename}
@@ -359,17 +357,15 @@ export function ChatSessionList({
                           <CheckIcon className="size-3.5" weight="bold" />
                         </Button>
                         <Button
-                          variant="ghost"
+                          variant="quiet"
                           size="icon"
                           className={cn(
                             // Sizing & Spacing
                             'size-6',
-                            // Typography
-                            'text-muted-foreground',
                             // Backgrounds & Borders
                             'rounded-md',
                             // Interactive & States
-                            'hover:bg-muted hover:text-foreground',
+                            'hover:bg-muted',
                             'transition-colors duration-150',
                           )}
                           onClick={(e) => {
@@ -408,18 +404,14 @@ export function ChatSessionList({
                         >
                           {onRename && (
                             <Button
-                              variant="ghost"
+                              variant="quiet"
                               size="icon"
                               disabled={disabled}
                               className={cn(
                                 // Sizing & Spacing
                                 'size-6',
-                                // Typography
-                                'text-muted-foreground',
                                 // Backgrounds & Borders
                                 'rounded-md',
-                                // Interactive & States
-                                'hover:text-foreground',
                                 'transition-colors duration-150',
                               )}
                               onClick={(e) => {

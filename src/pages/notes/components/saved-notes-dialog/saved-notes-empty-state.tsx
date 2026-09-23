@@ -73,16 +73,13 @@ export function SavedNotesEmptyState({
               : 'Create your first note to get started'}
         </p>
       </div>
-      <Button
+      <Button leading="tight"
         variant="outline"
         size="sm"
         onClick={onCreateNewNote}
         className={cn(
           // Sizing & Spacing
-          "mt-2",
-
-          // Typography
-          "text-xs"
+          "mt-2"
         )}
       >
         <PlusIcon className="size-3.5 mr-1.5" />

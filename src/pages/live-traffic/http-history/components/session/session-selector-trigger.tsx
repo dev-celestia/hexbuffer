@@ -32,7 +32,7 @@ export const SessionSelectorTrigger = React.forwardRef<
   ref
 ) {
   return (
-    <Button
+    <Button leading="tight"
       ref={ref}
       variant="outline"
       size="md"

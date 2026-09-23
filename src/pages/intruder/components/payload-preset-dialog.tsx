@@ -68,11 +68,11 @@ export function IntruderPayloadPresetDialog({
           <div className="border-r p-2">
             <div className="relative mb-2">
               <MagnifyingGlassIcon className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input
+              <Input textSize="xs"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search presets"
-                className="h-8 pl-7 text-xs"
+                className="h-8 pl-7"
               />
             </div>
             <ScrollArea className="h-[480px]">

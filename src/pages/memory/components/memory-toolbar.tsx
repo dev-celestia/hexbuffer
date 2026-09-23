@@ -87,16 +87,13 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
               "text-muted-foreground"
             )}
           />
-          <Input
+          <Input textSize="xs"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search memory (hybrid vector + text)…"
             className={cn(
               // Sizing & Spacing
-              "ps-8 pe-7",
-
-              // Typography
-              "text-xs"
+              "ps-8 pe-7"
             )}
           />
           {searchQuery.length > 0 && (
@@ -143,17 +140,17 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
               if (v !== null) setSelectedNamespace(v);
             }}
           >
-            <SelectTrigger
+            <SelectTrigger leading="tight"
               className={cn(
                 // Sizing & Spacing
-                "h-7 text-xs"
+                "h-7"
               )}
             >
               <SelectValue placeholder="Namespace" />
             </SelectTrigger>
             <SelectContent>
               {namespaces.map((ns) => (
-                <SelectItem key={ns} value={ns} className="text-xs">
+                <SelectItem leading="tight" key={ns} value={ns}>
                   {ns === 'default' ? 'Default Space' : ns}
                 </SelectItem>
               ))}
@@ -175,17 +172,17 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
               if (v !== null) setSelectedType(v);
             }}
           >
-            <SelectTrigger
+            <SelectTrigger leading="tight"
               className={cn(
                 // Sizing & Spacing
-                "h-7 text-xs"
+                "h-7"
               )}
             >
               <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
               {MEMORY_TYPES.map((type) => (
-                <SelectItem key={type.id} value={type.id} className="text-xs">
+                <SelectItem leading="tight" key={type.id} value={type.id}>
                   {type.label}
                 </SelectItem>
               ))}
@@ -252,17 +249,14 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
         {/* First-run engine setup: initializes ONNX Runtime and downloads the local model.
             Gated on a loaded status so an unknown engine does not flash the prompt. */}
         {engineStatus && !engineStatus.isReady && (
-          <Button
+          <Button leading="tight"
             size="md"
             variant="outline"
             onClick={() => void handleInitializeEngine()}
             disabled={isEngineInitializing}
             className={cn(
               // Layout & Positioning
-              "flex gap-1.5",
-
-              // Typography
-              "text-xs"
+              "flex gap-1.5"
             )}
             title="Initialize ONNX Runtime and download the local embedding model (~200MB, one-time)"
           >
@@ -292,16 +286,13 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
         )}
 
         {/* Dream Cycle Button */}
-        <Button
+        <Button leading="tight"
           size="md"
           variant="outline"
           onClick={() => setIsDreamDialogOpen(true)}
           className={cn(
             // Layout & Positioning
-            "flex gap-1.5",
-
-            // Typography
-            "text-xs"
+            "flex gap-1.5"
           )}
           title="Run Uteke Dream maintenance cycle (deduplication, contradiction check, link reinforcement)"
         >
@@ -341,16 +332,13 @@ export function MemoryToolbar({ state }: Readonly<MemoryToolbarProps>) {
         </Button>
 
         {/* Add Memory Note */}
-        <Button
+        <Button leading="tight"
           size="md"
           variant="default"
           onClick={handleOpenCreate}
           className={cn(
             // Layout & Positioning
-            "flex gap-1.5",
-
-            // Typography
-            "text-xs"
+            "flex gap-1.5"
           )}
         >
           <PlusIcon
