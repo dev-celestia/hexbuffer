@@ -1,5 +1,6 @@
 import { useTargetStore } from '@/stores/target';
 import { useNavStore } from '@/stores/nav';
+import { normalizeHost } from '@/triggers/scope';
 
 export interface AddTargetParams {
   host: string;
@@ -78,18 +79,17 @@ export function deleteTarget(params: DeleteTargetParams): void {
   if (!targetId) return;
 
   const store = useTargetStore.getState();
-  const needle = targetId.trim().toLowerCase();
-  const resolved = store.targets.find(
-    (t) =>
-      t.name.toLowerCase() === needle ||
-      t.id === targetId ||
-      t.scope.some(
-        (s) =>
-          s.toLowerCase() === needle ||
-          s.toLowerCase().includes(needle) ||
-          needle.includes(s.toLowerCase()),
-      ),
-  );
+  const needle = normalizeHost(targetId);
+
+  const resolved = store.targets.find((t) => {
+    // Prefer the unique id, then an exact name match.
+    if (t.id === targetId || t.name.toLowerCase() === needle) return true;
+    // Fall back to an exact normalized-host match against the scope entries. Only
+    // exact matches are accepted: a partial host like "api" must never delete a
+    // target whose scope contains "api.example.com".
+    return t.scope.some((s) => normalizeHost(s) === needle);
+  });
+
   if (resolved) {
     store.removeTarget(resolved.id);
     useNavStore.getState().triggerNavBlink('/');
