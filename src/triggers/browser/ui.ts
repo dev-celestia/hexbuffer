@@ -4,25 +4,33 @@ export function setBrowserSearch(search: string): void {
   useBrowserAutomationStore.getState().setSearch(search);
 }
 
-export function toggleBrowserCrawl(): void {
+export async function toggleBrowserCrawl(): Promise<void> {
   const store = useBrowserAutomationStore.getState();
   const tab = store.tabs.find((t) => t.id === store.activeTabId);
-  if (!tab) return;
-  const status = tab.session?.status;
+  const status = tab?.session?.status;
   if (status === 'running') {
-    void store.pauseCrawl();
+    await store.pauseCrawl();
   } else if (status === 'paused') {
-    void store.resumeCrawl();
+    await store.resumeCrawl();
+  } else {
+    throw new Error('No running or paused browser crawl to toggle.');
   }
 }
 
-export function stopBrowserCrawl(): void {
-  void useBrowserAutomationStore.getState().stopCrawl();
-}
-
-export function startBrowserCrawl(): void {
+export async function stopBrowserCrawl(): Promise<void> {
   const store = useBrowserAutomationStore.getState();
   const tab = store.tabs.find((t) => t.id === store.activeTabId);
-  if (!tab?.setup?.targetUrl?.trim()) return;
-  void store.startCrawl(true);
+  if (!tab?.session) {
+    return;
+  }
+  await store.stopCrawl();
+}
+
+export async function startBrowserCrawl(): Promise<void> {
+  const store = useBrowserAutomationStore.getState();
+  const tab = store.tabs.find((t) => t.id === store.activeTabId);
+  if (!tab?.setup?.targetUrl?.trim()) {
+    return;
+  }
+  await store.startCrawl(true);
 }
