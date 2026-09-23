@@ -4,6 +4,61 @@ use rusqlite::{params, Result as SqlResult};
 use super::Database;
 
 impl Database {
+    /// Persists the tool actions executed during one AI run for a chat session.
+    /// The run may be anonymous (no session), in which case nothing is written.
+    pub fn insert_chat_tool_actions(
+        &self,
+        session_id: &str,
+        run_id: &str,
+        actions: &[crate::ai::types::AiChatAction],
+    ) -> SqlResult<()> {
+        if session_id.trim().is_empty() || actions.is_empty() {
+            return Ok(());
+        }
+        let conn = self.conn.lock();
+        let now = chrono::Utc::now().to_rfc3339();
+        for action in actions {
+            conn.execute(
+                "INSERT OR IGNORE INTO ai_chat_tool_actions \
+                 (id, session_id, run_id, action, payload_json, result, created_at) \
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                params![
+                    uuid::Uuid::new_v4().to_string(),
+                    session_id,
+                    run_id,
+                    action.action,
+                    serde_json::to_string(&action.payload).unwrap_or_else(|_| "{}".to_string()),
+                    action.result,
+                    now,
+                ],
+            )?;
+        }
+        Ok(())
+    }
+
+    /// Returns the persisted tool actions for a session, newest first.
+    pub fn list_chat_tool_actions(
+        &self,
+        session_id: &str,
+        limit: usize,
+    ) -> SqlResult<Vec<crate::ai::types::AiChatAction>> {
+        let conn = self.conn.lock();
+        let mut stmt = conn.prepare(
+            "SELECT action, payload_json, result, created_at FROM ai_chat_tool_actions \
+             WHERE session_id = ?1 ORDER BY created_at DESC LIMIT ?2",
+        )?;
+        let rows = stmt.query_map(params![session_id, limit as i64], |row| {
+            let payload_json: String = row.get(1)?;
+            Ok(crate::ai::types::AiChatAction {
+                action: row.get(0)?,
+                payload: serde_json::from_str(&payload_json).unwrap_or_else(|_| serde_json::json!({})),
+                result: row.get(2)?,
+                created_at: row.get(3)?,
+            })
+        })?;
+        rows.collect()
+    }
+
     pub fn create_chat_session(&self, title: &str) -> SqlResult<ChatSessionRecord> {
         let conn = self.conn.lock();
         let id = uuid::Uuid::new_v4().to_string();
@@ -225,5 +280,55 @@ fn truncate_chars(value: &str, max: usize) -> String {
         let mut truncated: String = value.chars().take(max).collect();
         truncated.push('…');
         truncated
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    fn test_db() -> Database {
+        let db = Database::new(std::path::PathBuf::from(":memory:")).expect("in-memory database");
+        db.init().expect("schema init");
+        db
+    }
+
+    fn action(name: &str, result: Option<&str>) -> crate::ai::types::AiChatAction {
+        crate::ai::types::AiChatAction {
+            action: name.to_string(),
+            payload: json!({ "url": "https://example.com" }),
+            result: result.map(|s| s.to_string()),
+            created_at: chrono::Utc::now().to_rfc3339(),
+        }
+    }
+
+    #[test]
+    fn test_insert_and_list_chat_tool_actions() {
+        let db = test_db();
+        let session = db.create_chat_session("Test").expect("create session");
+
+        db.insert_chat_tool_actions(
+            &session.id,
+            "run-1",
+            &[action("send_to_repeater", Some("ok"))],
+        )
+        .expect("insert actions");
+
+        let listed = db.list_chat_tool_actions(&session.id, 10).expect("list");
+        assert_eq!(listed.len(), 1);
+        assert_eq!(listed[0].action, "send_to_repeater");
+        assert_eq!(listed[0].result.as_deref(), Some("ok"));
+        assert_eq!(listed[0].payload["url"], "https://example.com");
+    }
+
+    #[test]
+    fn test_tool_actions_are_empty_without_session_or_actions() {
+        let db = test_db();
+        db.insert_chat_tool_actions("", "run-1", &[action("send_to_repeater", None)])
+            .expect("no-op with empty session");
+        db.insert_chat_tool_actions("sess", "run-1", &[])
+            .expect("no-op with no actions");
+        assert_eq!(db.list_chat_tool_actions("sess", 10).expect("list").len(), 0);
     }
 }

@@ -293,15 +293,33 @@ export async function executeCreateEndpointAiTool(args: Record<string, any>) {
 
 export const SEND_REPEATER_REQUEST_AI_TOOL_DEFINITION = {
   name: 'send_repeater_request',
-  description: 'Issue and execute the active HTTP request in the Repeater Forge panel, and inspect the live response.',
+  description: 'Issue and execute an HTTP request in the Repeater Forge panel, and inspect the live response. Without an endpoint id this sends the currently active request; pass an endpoint_id to target a specific saved endpoint.',
   parameters: {
     type: 'object',
-    properties: {},
+    properties: {
+      endpoint_id: {
+        type: 'string',
+        description: 'Optional endpoint id to load and send. When omitted, the currently active request is sent.',
+      },
+    },
+    required: [],
   },
 };
 
-export async function executeSendRepeaterRequestAiTool(): Promise<string> {
+export async function executeSendRepeaterRequestAiTool(args: Record<string, any> = {}): Promise<string> {
+  const endpointId = typeof args?.endpoint_id === 'string' ? args.endpoint_id.trim() : '';
+  if (endpointId) {
+    const endpoint = useCollectionsStore
+      .getState()
+      .endpoints.find((e) => e.id === endpointId);
+    if (!endpoint) {
+      throw new Error(`No endpoint with id "${endpointId}" was found in the Repeater collections.`);
+    }
+    selectEndpoint(endpointId);
+  }
   await sendRequest();
   useNavStore.getState().triggerNavBlink('/repeater');
-  return 'Executed active Repeater request. The live response is now loaded in the Repeater inspector.';
+  return endpointId
+    ? `Executed Repeater request for endpoint ${endpointId}. The live response is now loaded in the Repeater inspector.`
+    : 'Executed active Repeater request. The live response is now loaded in the Repeater inspector.';
 }

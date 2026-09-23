@@ -11,5 +11,7 @@ export * from './browser';
 export * from './navigation';
 export * from './live-traffic';
 export * from './jobs';
+export * from './http-history';
+export * from './nuclei';
 export * from '../jobs/job-registry';
 

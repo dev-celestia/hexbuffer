@@ -142,6 +142,7 @@ fn main() {
             hexbuffer::ai::get_token_usage_summary,
             hexbuffer::ai::get_global_token_usage,
             hexbuffer::ai::get_token_usage_history,
+            hexbuffer::ai::get_chat_tool_actions,
             hexbuffer::commands::memory::list_memory_entries,
             hexbuffer::commands::memory::save_memory_entry,
             hexbuffer::commands::memory::delete_memory_entry,

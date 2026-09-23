@@ -194,7 +194,14 @@ export function useCollectionsTree(workspaceId: string) {
         return;
       }
       if (inlineCreate.type === 'endpoint') {
-        await createEndpoint(inlineCreate.parentId, name.trim());
+        try {
+          await createEndpoint(inlineCreate.parentId, name.trim());
+        } catch (error) {
+          // The endpoint was not persisted (e.g. DB write failed); keep the inline
+          // form open so the user can retry rather than silently dropping it.
+          setInlineCreate((current) => (current ? { ...current } : current));
+          return;
+        }
       } else if (inlineCreate.type === 'collection') {
         await createFolder(inlineCreate.parentId, name.trim());
       }

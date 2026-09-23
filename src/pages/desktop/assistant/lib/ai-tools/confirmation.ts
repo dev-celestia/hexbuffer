@@ -82,7 +82,7 @@ export function addPendingToolConfirmation(confirmation: PendingToolConfirmation
   notifyConfirmationListeners();
 }
 
-function removePendingToolConfirmation(id: string): void {
+export function removePendingToolConfirmation(id: string): void {
   pendingConfirmations = pendingConfirmations.filter((item) => item.id !== id);
   notifyConfirmationListeners();
 }
@@ -130,7 +130,9 @@ export async function approveToolConfirmation(id: string): Promise<void> {
       token: confirmation.token,
       success: false,
       message: 'The confirmation expired before it was approved.',
-    }).catch(() => {});
+    }).catch((error) => {
+      console.error(`[AI Tool Confirmation] Failed to report expiry for ${id}:`, error);
+    });
     return;
   }
 
@@ -144,14 +146,19 @@ export async function approveToolConfirmation(id: string): Promise<void> {
       message: describeToolResult(result),
     });
   } catch (error) {
-    const message = toErrorMessage(error, 'Unknown error');
+    const message = error instanceof Error ? error.message : String(error);
     console.error(`[AI Tool Confirmation] Error executing ${confirmation.toolName}:`, error);
     await invoke('resolve_ai_tool_result', {
       id,
       token: confirmation.token,
       success: false,
       message,
-    }).catch(() => {});
+    }).catch((resolveError) => {
+      console.error(
+        `[AI Tool Confirmation] Failed to report result for ${confirmation.toolName} (${id}):`,
+        resolveError,
+      );
+    });
   }
 }
 
@@ -166,5 +173,7 @@ export async function denyToolConfirmation(id: string): Promise<void> {
     token: confirmation.token,
     success: false,
     message: 'The user denied this tool execution.',
-  }).catch(() => {});
+  }).catch((error) => {
+    console.error(`[AI Tool Confirmation] Failed to report denial for ${id}:`, error);
+  });
 }

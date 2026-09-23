@@ -1,9 +1,15 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { addPendingToolConfirmation, clearPendingToolConfirmations, describeToolResult } from './confirmation';
+import {
+  addPendingToolConfirmation,
+  clearPendingToolConfirmations,
+  removePendingToolConfirmation,
+  describeToolResult,
+} from './confirmation';
 import { executeAiToolCall } from './executor';
 import type { AppAiToolCallPayload } from './types';
+import { cancelJob, listJobs } from '../jobs/job-registry';
 import { toErrorMessage } from '@/lib/ipc';
 
 // Matches CONFIRMATION_TIMEOUT_SECS in src-tauri/src/ai/tool_loop.rs so the card stops
@@ -50,7 +56,14 @@ export async function setupAiToolEventListener(): Promise<UnlistenFn> {
         const message = toErrorMessage(err, 'Unknown error');
         console.error(`[AI Tool Dispatcher] Error executing ${tool_name}:`, err);
         await invoke('resolve_ai_tool_result', { id, token, success: false, message }).catch(
-          () => {},
+          (resolveError) => {
+            // If the result cannot be reported back, the backend will wait until its own
+            // timeout. Log it loudly rather than hiding the failure.
+            console.error(
+              `[AI Tool Dispatcher] Failed to report tool result for ${tool_name} (${id}):`,
+              resolveError,
+            );
+          },
         );
       }
     },
@@ -65,8 +78,32 @@ export async function setupAiToolEventListener(): Promise<UnlistenFn> {
     { target: { kind: 'AnyLabel', label: currentLabel } },
   );
 
+  // Backend stops waiting for a tool result after its timeout and asks us to cancel
+  // the still-running operation so it doesn't keep firing in the background.
+  const unlistenAbortTool = await listen<{ id?: string; tool_name?: string }>(
+    'ai:abort-tool',
+    (event) => {
+      const { id, tool_name } = event.payload;
+      if (id) removePendingToolConfirmation(id);
+      const kind =
+        tool_name === 'start_invoker_attack' || tool_name === 'stop_invoker_attack'
+          ? 'intruder-attack'
+          : tool_name === 'trigger_scan' ||
+              tool_name === 'toggle_browser_crawl' ||
+              tool_name === 'stop_browser_crawl'
+            ? 'browser-crawl'
+            : null;
+      if (kind) {
+        const active = listJobs({ activeOnly: true }).find((job) => job.kind === kind);
+        if (active) cancelJob(active.id);
+      }
+    },
+    { target: { kind: 'AnyLabel', label: currentLabel } },
+  );
+
   return () => {
     unlistenExecute();
     unlistenAborted();
+    unlistenAbortTool();
   };
 }

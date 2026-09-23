@@ -198,6 +198,7 @@ impl Database {
         conn.execute_batch(crate::db::schema::CREATE_MOCK_FORGE_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_NOTES_TABLES)?;
         conn.execute_batch(crate::db::schema::CREATE_AI_TOOL_OUTPUTS_TABLE)?;
+        conn.execute_batch(crate::db::schema::CREATE_AI_CHAT_TOOL_ACTIONS_TABLE)?;
         conn.execute_batch(crate::db::schema::CREATE_ENGAGEMENT_STATE_TABLE)?;
         Ok(())
     }

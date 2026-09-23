@@ -170,6 +170,7 @@ export async function createEndpoint(
     await invoke('save_stash_endpoint', { record: endpoint });
   } catch (e) {
     console.error('Failed to save endpoint:', e);
+    throw new Error('Failed to save the endpoint. It was not added to the collection.');
   }
 
   useCollectionsStore.setState((s) => {
