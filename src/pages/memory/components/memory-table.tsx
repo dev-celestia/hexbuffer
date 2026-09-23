@@ -183,10 +183,10 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                 )}
               >
                 {/* Pin toggle */}
-                <TableCell
+                <TableCell size="sm"
                   className={cn(
                     // Sizing & Spacing
-                    "px-2 py-1.5 text-center"
+                    "px-2 text-center"
                   )}
                   onClick={(e) => void handleTogglePin(entry, e)}
                 >
@@ -215,10 +215,10 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                 </TableCell>
 
                 {/* Title & Preview */}
-                <TableCell
+                <TableCell size="sm"
                   className={cn(
                     // Sizing & Spacing
-                    "px-3 py-1.5 font-medium"
+                    "px-3 font-medium"
                   )}
                 >
                   <div
@@ -271,10 +271,10 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                 </TableCell>
 
                 {/* Namespace */}
-                <TableCell
+                <TableCell size="sm"
                   className={cn(
                     // Sizing & Spacing
-                    "px-3 py-1.5"
+                    "px-3"
                   )}
                 >
                   <span
@@ -288,10 +288,10 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                 </TableCell>
 
                 {/* Memory Type */}
-                <TableCell
+                <TableCell size="sm"
                   className={cn(
                     // Sizing & Spacing
-                    "px-3 py-1.5"
+                    "px-3"
                   )}
                 >
                   <Badge
@@ -306,10 +306,10 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                 </TableCell>
 
                 {/* Importance / Priority */}
-                <TableCell
+                <TableCell size="sm"
                   className={cn(
                     // Sizing & Spacing
-                    "px-3 py-1.5"
+                    "px-3"
                   )}
                 >
                   <span
@@ -323,10 +323,10 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                 </TableCell>
 
                 {/* Graph Edges / Connections */}
-                <TableCell
+                <TableCell size="sm"
                   className={cn(
                     // Sizing & Spacing
-                    "px-3 py-1.5 text-center"
+                    "px-3 text-center"
                   )}
                 >
                   {entry.edgesCount > 0 ? (
@@ -358,10 +358,10 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                 </TableCell>
 
                 {/* Updated relative time */}
-                <TableCell
+                <TableCell size="sm"
                   className={cn(
                     // Sizing & Spacing
-                    "px-3 py-1.5"
+                    "px-3"
                   )}
                 >
                   <span
@@ -376,10 +376,10 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                 </TableCell>
 
                 {/* Row actions */}
-                <TableCell
+                <TableCell size="sm"
                   className={cn(
                     // Sizing & Spacing
-                    "px-2 py-1.5 text-right"
+                    "px-2 text-right"
                   )}
                   onClick={(e) => e.stopPropagation()}
                 >

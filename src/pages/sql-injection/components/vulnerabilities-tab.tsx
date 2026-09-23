@@ -71,13 +71,13 @@ export function VulnerabilitiesTab({
                       }`}
                       onClick={() => onSelectVuln(vuln.id)}
                     >
-                      <TableCell mono className="py-1.5 font-semibold text-foreground max-w-[120px] truncate">{vuln.param_name}</TableCell>
-                      <TableCell className="py-1.5 text-muted-foreground uppercase text-3xs font-bold">{vuln.param_location}</TableCell>
-                      <TableCell className="py-1.5 text-muted-foreground">
+                      <TableCell size="sm" mono className="font-semibold text-foreground max-w-[120px] truncate">{vuln.param_name}</TableCell>
+                      <TableCell size="sm" className="text-muted-foreground uppercase text-3xs font-bold">{vuln.param_location}</TableCell>
+                      <TableCell size="sm" className="text-muted-foreground">
                         {TECHNIQUE_LABELS[vuln.technique as SqliTechnique] || vuln.technique.replace('_', ' ')}
                       </TableCell>
-                      <TableCell className="py-1.5 font-medium">{vuln.dbms}</TableCell>
-                      <TableCell className="py-1.5">
+                      <TableCell size="sm" className="font-medium">{vuln.dbms}</TableCell>
+                      <TableCell size="sm">
                         <Badge
                           variant="outline"
                           className={`text-4xs font-extrabold tracking-wide uppercase px-1.5 py-0 h-4 rounded-full select-none ${
@@ -87,8 +87,8 @@ export function VulnerabilitiesTab({
                           {vuln.severity}
                         </Badge>
                       </TableCell>
-                      <TableCell mono
-                        className="text-3xs py-1.5 truncate max-w-[160px] text-muted-foreground"
+                      <TableCell size="sm" mono
+                        className="text-3xs truncate max-w-[160px] text-muted-foreground"
                         title={vuln.poc_request}
                       >
                         {vuln.poc_request}
