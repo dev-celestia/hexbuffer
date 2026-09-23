@@ -260,11 +260,11 @@ export function EndpointList({
                     </span>
                   </div>
 
-                  <Badge mono
+                  <Badge size="sm" mono
                     variant="outline"
                     className={cn(
                       // Sizing & Spacing
-                      "px-1 py-0 h-4",
+                      "px-1 py-0",
 
                       // Backgrounds & Borders
                       route.statusCode < 300

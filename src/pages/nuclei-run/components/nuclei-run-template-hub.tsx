@@ -336,11 +336,11 @@ export function NucleiRunTemplateHub({
                   </span>
 
                   {tmpl.cve_id && (
-                    <Badge
+                    <Badge size="sm"
                       variant="outline"
                       className={cn(
                         // Sizing & Spacing
-                        "h-4 px-1",
+                        "px-1",
                         // Typography
                         "text-4xs font-bold text-warning truncate",
                         // Backgrounds & Borders

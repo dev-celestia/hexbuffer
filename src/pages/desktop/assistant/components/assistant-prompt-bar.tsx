@@ -372,9 +372,9 @@ export function AssistantPromptBar({
                       <DropdownMenuLabel className="px-2 py-1 text-3xs font-semibold tracking-wider uppercase text-muted-foreground">
                         Specialist Agents
                       </DropdownMenuLabel>
-                      <DropdownMenuItem
+                      <DropdownMenuItem leading="tight"
                         onClick={() => onSelectAgent?.('all')}
-                        className="justify-between py-1.5 text-xs cursor-pointer"
+                        className="justify-between py-1.5 cursor-pointer"
                       >
                         <div className="flex items-center gap-2">
                           <img
@@ -392,10 +392,10 @@ export function AssistantPromptBar({
                       {ALL_AGENTS_LIST.filter((a) => a.id !== 'orchestrator').map((agent) => {
                         const isSelected = selectedAgent === agent.id;
                         return (
-                          <DropdownMenuItem
+                          <DropdownMenuItem leading="tight"
                             key={agent.id}
                             onClick={() => onSelectAgent?.(agent.id)}
-                            className="justify-between py-1.5 text-xs cursor-pointer"
+                            className="justify-between py-1.5 cursor-pointer"
                           >
                             <div className="flex items-center gap-2">
                               <img

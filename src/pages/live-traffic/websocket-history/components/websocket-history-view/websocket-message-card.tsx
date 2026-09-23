@@ -224,11 +224,11 @@ export function WebSocketMessageCard({ message, formatDateTime }: Readonly<WebSo
           </div>
 
           {jsonPayload && (
-            <Badge mono
+            <Badge size="sm" mono
               variant="secondary"
               className={cn(
                 // Sizing & Spacing
-                "h-4 px-1",
+                "px-1",
 
                 // Typography
                 "text-4xs",

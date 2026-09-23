@@ -155,15 +155,11 @@ export function CustomPortsDialog({
 
         {/* Textarea Input */}
         <div>
-          <Textarea mono
+          <Textarea leading="tight" mono
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={`Examples:\n80, 443, 8080\n1 - 4\n3000..3010\n80/tcp\nweb, db`}
             rows={7}
-            className={cn(
-              // Typography
-              "text-xs"
-            )}
           />
         </div>
 

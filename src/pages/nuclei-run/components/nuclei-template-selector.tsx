@@ -218,9 +218,9 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
               <span className="text-2xs font-semibold tracking-wider text-muted-foreground uppercase font-mono">
                 Official Hub
               </span>
-              <Badge mono
+              <Badge size="sm" mono
                 variant="outline"
-                className="h-4 px-1.5 text-4xs border-success/30 text-success"
+                className="px-1.5 text-4xs border-success/30 text-success"
               >
                 GitHub v3
               </Badge>
@@ -316,9 +316,9 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
                           </span>
                         </div>
 
-                        <Badge mono
+                        <Badge size="sm" mono
                           variant="outline"
-                          className="h-4 px-1 text-4xs"
+                          className="px-1 text-4xs"
                         >
                           {strat.badge}
                         </Badge>
@@ -560,9 +560,9 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
                                 {t.name}
                               </span>
                               {t.cve_id && (
-                                <Badge mono
+                                <Badge size="sm" mono
                                   variant="outline"
-                                  className="h-4 px-1 text-4xs text-warning border-warning/30"
+                                  className="px-1 text-4xs text-warning border-warning/30"
                                 >
                                   {t.cve_id}
                                 </Badge>

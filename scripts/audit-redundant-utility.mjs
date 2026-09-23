@@ -123,7 +123,14 @@ for (const hit of report.hits) {
     candidates.find((c) => c.cls === expected)?.node ??
     candidates.find((c) => c.line === hit.line)?.node
   if (!opening) {
-    rows.push({ ...hit, note: "ELEMENT NOT FOUND" })
+    // A hit that matches no element is NOT a clean hit — it is an audit that
+    // could not run. Counting it as suspicious is what keeps `suspicious: 0`
+    // meaningful: otherwise a report whose ordinals have gone stale (the file
+    // was edited after the report was written) audits nothing and still reports
+    // a clean zero. That is the "verification that reports zero because it can
+    // no longer find anything" failure, and it is silent by construction.
+    suspicious++
+    rows.push({ ...hit, note: "ELEMENT NOT FOUND", bad: ["element not found — report is stale or ordinal drifted"] })
     continue
   }
 

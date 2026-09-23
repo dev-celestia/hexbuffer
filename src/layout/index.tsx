@@ -158,15 +158,12 @@ export function AppLayout({ children }: AppLayoutProps) {
           "text-xs font-sans"
         )}
       >
-        <ContextMenuItem
+        <ContextMenuItem leading="tight"
           id="ctx-settings"
           onClick={() => navigate('/settings')}
           className={cn(
             // Sizing & Spacing
-            "px-1.5",
-
-            // Typography
-            "text-xs"
+            "px-1.5"
           )}
         >
           <GearSixIcon
@@ -207,15 +204,12 @@ export function AppLayout({ children }: AppLayoutProps) {
             )}
           >
             {/* Dark / Light mode */}
-            <ContextMenuItem
+            <ContextMenuItem leading="tight"
               id="ctx-theme-light"
               onClick={() => setTheme('light')}
               className={cn(
                 // Sizing & Spacing
-                "px-1.5",
-
-                // Typography
-                "text-xs"
+                "px-1.5"
               )}
             >
               <SunIcon
@@ -239,15 +233,12 @@ export function AppLayout({ children }: AppLayoutProps) {
                 </span>
               )}
             </ContextMenuItem>
-            <ContextMenuItem
+            <ContextMenuItem leading="tight"
               id="ctx-theme-dark"
               onClick={() => setTheme('dark')}
               className={cn(
                 // Sizing & Spacing
-                "px-1.5",
-
-                // Typography
-                "text-xs"
+                "px-1.5"
               )}
             >
               <MoonIcon
@@ -275,15 +266,12 @@ export function AppLayout({ children }: AppLayoutProps) {
             <ContextMenuSeparator />
 
             {/* Background */}
-            <ContextMenuItem
+            <ContextMenuItem leading="tight"
               id="ctx-change-background"
               onClick={() => navigate('/settings?tab=appearance')}
               className={cn(
                 // Sizing & Spacing
-                "px-1.5",
-
-                // Typography
-                "text-xs"
+                "px-1.5"
               )}
             >
               <ImageIcon

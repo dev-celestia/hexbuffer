@@ -220,13 +220,13 @@ export function NucleiRunConfigDialog({
             <Label leading="tight" className="gap-1.5">
               <ShieldSlashIcon className="h-3.5 w-3.5 text-red-500" /> Exclusions (Blacklist)
             </Label>
-            <Textarea mono
+            <Textarea leading="tight" mono
               value={exclusions}
               onChange={(e) => setExclusions(e.target.value)}
               placeholder="admin.prod.corp&#10;192.168.1.1&#10;*.internal.net"
               className={cn(
                 // Sizing & Spacing
-                "h-16 text-xs resize-none leading-relaxed"
+                "h-16 resize-none leading-relaxed"
               )}
             />
           </div>

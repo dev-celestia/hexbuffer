@@ -339,10 +339,10 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
               <span className="text-2xs font-semibold tracking-wider text-muted-foreground uppercase font-mono">
                 Official Nuclei Hub
               </span>
-              <Badge
+              <Badge size="sm"
                 variant="outline"
                 mono
-                className="h-4 px-1.5 text-4xs border-success/30 text-success"
+                className="px-1.5 text-4xs border-success/30 text-success"
               >
                 Community v3
               </Badge>
@@ -794,35 +794,35 @@ export function NucleiTemplateHubStep({ onContinueToSelected }: Readonly<NucleiT
               </span>
 
               {selectedDirectory !== 'all' && (
-                <Badge variant="outline" mono className="h-4 px-1.5">
+                <Badge size="sm" variant="outline" mono className="px-1.5">
                   <span>Dir: {selectedDirectory}</span>
                   <span className="cursor-pointer" onClick={() => setSelectedDirectory('all')}>✕</span>
                 </Badge>
               )}
 
               {selectedTag && (
-                <Badge variant="outline" mono className="h-4 px-1.5">
+                <Badge size="sm" variant="outline" mono className="px-1.5">
                   <span>Tag: {selectedTag}</span>
                   <span className="cursor-pointer" onClick={() => setSelectedTag(null)}>✕</span>
                 </Badge>
               )}
 
               {selectedAuthor && (
-                <Badge variant="outline" mono className="h-4 px-1.5">
+                <Badge size="sm" variant="outline" mono className="px-1.5">
                   <span>Author: {selectedAuthor}</span>
                   <span className="cursor-pointer" onClick={() => setSelectedAuthor(null)}>✕</span>
                 </Badge>
               )}
 
               {selectedProtocol !== 'all' && (
-                <Badge variant="outline" mono className="h-4 px-1.5">
+                <Badge size="sm" variant="outline" mono className="px-1.5">
                   <span>Proto: {selectedProtocol}</span>
                   <span className="cursor-pointer" onClick={() => setSelectedProtocol('all')}>✕</span>
                 </Badge>
               )}
 
               {selectedSeverities.map((sev) => (
-                <Badge key={sev} variant="outline" mono className="h-4 px-1.5 capitalize">
+                <Badge size="sm" key={sev} variant="outline" mono className="px-1.5 capitalize">
                   <span>{sev}</span>
                   <span className="cursor-pointer" onClick={() => toggleSeverity(sev)}>✕</span>
                 </Badge>

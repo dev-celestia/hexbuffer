@@ -256,26 +256,26 @@ export function QueueRow({
       </ContextMenuTrigger>
 
       <ContextMenuContent className="w-52">
-        <ContextMenuItem onClick={onSendToRepeater} className="text-xs">
+        <ContextMenuItem leading="tight" onClick={onSendToRepeater}>
           <PaperPlaneTiltIcon className="size-3.5" />
           Send to Repeater
         </ContextMenuItem>
         <ContextMenuSeparator />
         {!isResponse && (
           <>
-            <ContextMenuItem onClick={onInterceptResponse} className="text-xs">
+            <ContextMenuItem leading="tight" onClick={onInterceptResponse}>
               <FlagIcon className="size-3.5" />
               Intercept response
             </ContextMenuItem>
             <ContextMenuSeparator />
           </>
         )}
-        <ContextMenuItem onClick={onDrop} variant="destructive" className="text-xs">
+        <ContextMenuItem leading="tight" onClick={onDrop} variant="destructive">
           <TrashIcon className="size-3.5" />
           Drop
         </ContextMenuItem>
         <ContextMenuSeparator />
-        <ContextMenuItem onClick={onDontCapture} className="text-xs">
+        <ContextMenuItem leading="tight" onClick={onDontCapture}>
           <ShieldSlashIcon className="size-3.5" />
           Don't capture this host
         </ContextMenuItem>

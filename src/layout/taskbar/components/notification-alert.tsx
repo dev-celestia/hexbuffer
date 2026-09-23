@@ -120,11 +120,11 @@ export function NotificationAlert() {
                 Alerts & Notifications
               </PopoverTitle>
               {unreadCount > 0 ? (
-                <Badge variant="destructive" className="h-4 px-1.5 font-semibold">
+                <Badge size="sm" variant="destructive" className="px-1.5 font-semibold">
                   {unreadCount} new
                 </Badge>
               ) : totalCount > 0 ? (
-                <Badge variant="secondary" className="h-4 px-1.5">
+                <Badge size="sm" variant="secondary" className="px-1.5">
                   {totalCount}
                 </Badge>
               ) : null}

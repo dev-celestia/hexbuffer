@@ -50,7 +50,7 @@ export function EncoderInputPanel({
           </span>
         )}
       </div>
-      <Textarea mono
+      <Textarea leading="tight" mono
         className={cn(
           // Layout & Positioning
           "flex-1 min-h-0 resize-none",
@@ -59,7 +59,7 @@ export function EncoderInputPanel({
           "p-3",
 
           // Typography
-          "text-xs text-foreground",
+          "text-foreground",
 
           // Backgrounds & Borders
           "border-0 rounded-none bg-transparent shadow-none",

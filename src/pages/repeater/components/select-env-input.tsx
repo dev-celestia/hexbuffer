@@ -505,7 +505,7 @@ export function ColorizedUrlInput({
         )}
       </div>
 
-      <Textarea mono
+      <Textarea leading="tight" mono
         ref={textareaRef}
         rows={1}
         value={value}

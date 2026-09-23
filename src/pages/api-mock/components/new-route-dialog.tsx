@@ -329,11 +329,11 @@ export function NewRouteDialog({
                 </span>
               )}
             </div>
-            <Textarea mono
+            <Textarea leading="tight" mono
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={6}
-              className="text-xs bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
+              className="bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
             />
           </div>
 

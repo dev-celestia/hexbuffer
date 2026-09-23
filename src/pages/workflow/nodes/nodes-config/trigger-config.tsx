@@ -153,8 +153,8 @@ export function TriggerConfigForm({ config, onChange, onRun }: Readonly<TriggerC
                 <GlobeIcon className="size-3 inline mr-1" />
                 Host whitelist <span className="text-warning">*</span>
               </Label>
-              <Textarea
-                className="min-h-20 resize-none text-xs"
+              <Textarea leading="tight"
+                className="min-h-20 resize-none"
                 value={config.host ?? ''}
                 onChange={(e) => onChange({ host: e.target.value })}
                 placeholder={'https://app.example.com\napi.example.com:443\n*.target.local'}

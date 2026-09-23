@@ -160,16 +160,16 @@ export function AssistantHeader({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 p-1">
             <DropdownMenuGroup>
-              <DropdownMenuItem
+              <DropdownMenuItem leading="tight"
                 onClick={onOpenConfig}
-                className="py-1.5 text-xs cursor-pointer"
+                className="py-1.5 cursor-pointer"
               >
                 <GearSixIcon className="size-3.5 text-muted-foreground" />
                 <span>AI Settings</span>
               </DropdownMenuItem>
-              <DropdownMenuItem
+              <DropdownMenuItem leading="tight"
                 onClick={onOpenDebug}
-                className="py-1.5 text-xs cursor-pointer"
+                className="py-1.5 cursor-pointer"
               >
                 <BugIcon className="size-3.5 text-muted-foreground" />
                 <span>AI Debug Inspector</span>

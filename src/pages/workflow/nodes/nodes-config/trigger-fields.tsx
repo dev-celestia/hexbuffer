@@ -56,8 +56,8 @@ export function HostWhitelistFilter({
         <GlobeIcon className="size-3 inline mr-1" />
         Host whitelist
       </Label>
-      <Textarea
-        className="min-h-20 resize-none text-xs"
+      <Textarea leading="tight"
+        className="min-h-20 resize-none"
         value={value ?? ''}
         onChange={(e) => onChange(e.target.value)}
         placeholder={'example.com\nhttps://app.example.com\napi.example.com:443\n*.target.local'}

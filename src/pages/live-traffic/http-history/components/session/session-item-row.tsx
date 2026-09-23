@@ -191,21 +191,21 @@ export function SessionItemRow({
         )}
       >
         {isEphemeral ? (
-          <Badge variant="outline" className="h-4 px-1 text-4xs text-warning border-warning/30">
+          <Badge size="sm" variant="outline" className="px-1 text-4xs text-warning border-warning/30">
             <LightningIcon className="size-2.5 mr-0.5" weight="fill" />
             Ephemeral (RAM)
           </Badge>
         ) : null}
 
         {mode === 'target_scope' && (
-          <Badge variant="secondary" className="h-4 px-1 text-4xs">
+          <Badge size="sm" variant="secondary" className="px-1 text-4xs">
             <TargetIcon className="size-2.5 mr-0.5" />
             Scope
           </Badge>
         )}
 
         {mode === 'custom' && (
-          <Badge variant="secondary" className="h-4 px-1 text-4xs">
+          <Badge size="sm" variant="secondary" className="px-1 text-4xs">
             <FunnelIcon className="size-2.5 mr-0.5" />
             Custom ({customHostsList.length})
           </Badge>
@@ -215,7 +215,7 @@ export function SessionItemRow({
           <Tooltip>
             <TooltipTrigger
               render={
-                <Badge variant="secondary" className="h-4 px-1 text-4xs">
+                <Badge size="sm" variant="secondary" className="px-1 text-4xs">
                   <WarningCircleIcon className="size-2.5 mr-0.5 text-amber-600 dark:text-amber-400" weight="fill" />
                   All Traffic
                 </Badge>

@@ -144,11 +144,11 @@ export function NewRouteDialog({
           </div>
           <div className="space-y-1.5">
             <Label leading="tight" className="text-muted-foreground">Response Body (JSON)</Label>
-            <Textarea mono
+            <Textarea leading="tight" mono
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={5}
-              className="text-xs bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
+              className="bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
             />
           </div>
           <Button size="sm" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-9 rounded-md mt-2" onClick={handleAdd}>

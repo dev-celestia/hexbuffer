@@ -317,11 +317,11 @@ export function SessionFilterFields({
             <span>{showAdvancedExclude ? '▼' : '▶'}</span>
             <span>Exclude Host Patterns (Optional)</span>
             {excludeHosts.length > 0 && (
-              <Badge
+              <Badge size="sm"
                 variant="outline"
                 className={cn(
                   // Sizing & Spacing
-                  "h-4 px-1 text-4xs"
+                  "px-1 text-4xs"
                 )}
               >
                 {excludeHosts.length}

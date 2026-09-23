@@ -134,6 +134,7 @@ function constsOf(sf) {
 
 const overrideByFamily = new Map()
 const overrideByComponentToken = new Map()
+const overrideByFamilyShape = new Map()
 const redundantLeft = new Map()
 const skipReasons = new Map()
 let elementsSeen = 0
@@ -214,6 +215,20 @@ for (const file of walk(ROOT)) {
                     overrideByFamily.set(fam, (overrideByFamily.get(fam) ?? 0) + 1)
                     const k = `${imported}|${t}`
                     overrideByComponentToken.set(k, (overrideByComponentToken.get(k) ?? 0) + 1)
+                    // Also keep the token SHAPE per family. The component|token
+                    // table tops out at 35 rows and is dominated by whichever
+                    // component is biggest, so it cannot answer "what is the
+                    // `layout` family actually made of" — and `layout` is the
+                    // largest family by a wide margin. Shape folds `h-7`/`h-8`
+                    // and `flex-1`/`flex-none` together, which is the level at
+                    // which a missing prop becomes visible.
+                    const shape = t
+                      .split(":")
+                      .pop()
+                      .replace(/\[[^\]]*\]/g, "*")
+                      .replace(/\d+(\.\d+)?/g, "*")
+                      .replace(/\/\d+/g, "/#")
+                    overrideByFamilyShape.set(`${fam}|${shape}`, (overrideByFamilyShape.get(`${fam}|${shape}`) ?? 0) + 1)
                   }
                 }
               }
@@ -244,6 +259,29 @@ for (const [f, n] of [...overrideByFamily.entries()].sort((a, b) => b[1] - a[1])
 console.log("\n--- top override tokens (component|token) ---")
 for (const [k, n] of [...overrideByComponentToken.entries()].sort((a, b) => b[1] - a[1]).slice(0, 35)) {
   console.log(`  ${String(n).padStart(5)}  ${k}`)
+}
+
+// `FAMILY=layout` (or any family name) drills into the largest families, which
+// the component|token table cannot reach: that table is dominated by whichever
+// component happens to be biggest, and the question for a big family is "what
+// SHAPE is it made of", not "which single component owns the most of it".
+const wantFamily = process.env.FAMILY
+if (wantFamily) {
+  console.log(`\n--- top token shapes in family "${wantFamily}" ---`)
+  for (const [k, n] of [...overrideByFamilyShape.entries()]
+    .filter(([k]) => k.startsWith(`${wantFamily}|`))
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 30)) {
+    console.log(`  ${String(n).padStart(5)}  ${k.slice(wantFamily.length + 1)}`)
+  }
+  console.log(`\n--- top component|token in family "${wantFamily}" ---`)
+  const inFam = []
+  for (const [k, n] of overrideByComponentToken) {
+    if (familyOf(k.split("|")[1]) === wantFamily) inFam.push([k, n])
+  }
+  for (const [k, n] of inFam.sort((a, b) => b[1] - a[1]).slice(0, 30)) {
+    console.log(`  ${String(n).padStart(5)}  ${k}`)
+  }
 }
 
 if (redundantLeft.size) {

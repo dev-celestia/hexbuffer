@@ -76,11 +76,11 @@ export function NucleiRunConsoleStream({
           >
             Telemetry Stream
           </span>
-          <Badge mono
+          <Badge size="sm" mono
             variant="outline"
             className={cn(
               // Sizing & Spacing
-              "h-4 px-1.5",
+              "px-1.5",
               // Typography
               "text-zinc-400",
               // Backgrounds & Borders

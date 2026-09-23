@@ -205,11 +205,11 @@ export function SqlInjectionPage() {
                     >
                       <span>Vulnerabilities</span>
                       {page.vulnerabilities.length > 0 && (
-                        <Badge
+                        <Badge size="sm"
                           variant="outline"
                           className={cn(
                             // Sizing & Spacing
-                            "ml-1.5 px-1 py-0 h-4",
+                            "ml-1.5 px-1 py-0",
 
                             // Typography
                             "text-4xs font-bold",
@@ -237,11 +237,11 @@ export function SqlInjectionPage() {
                     >
                       <span>Data Extraction</span>
                       {page.databases.length > 0 && (
-                        <Badge
+                        <Badge size="sm"
                           variant="outline"
                           className={cn(
                             // Sizing & Spacing
-                            "ml-1.5 px-1 py-0 h-4",
+                            "ml-1.5 px-1 py-0",
 
                             // Typography
                             "text-4xs font-bold"

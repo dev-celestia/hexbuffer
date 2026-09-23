@@ -47,7 +47,7 @@ export function ExtractionTab({
             <span className="text-3xs font-bold uppercase text-muted-foreground tracking-wider">
               Databases
             </span>
-            <Badge mono variant="secondary" className="text-4xs h-4 px-1 py-0">
+            <Badge size="sm" mono variant="secondary" className="text-4xs px-1 py-0">
               {databases.length}
             </Badge>
           </div>
@@ -84,7 +84,7 @@ export function ExtractionTab({
               Tables
             </span>
             {selectedDbData && (
-              <Badge mono variant="secondary" className="text-4xs h-4 px-1 py-0">
+              <Badge size="sm" mono variant="secondary" className="text-4xs px-1 py-0">
                 {selectedDbData.tables.length}
               </Badge>
             )}
@@ -104,9 +104,9 @@ export function ExtractionTab({
                     >
                       <TableIcon className={`h-3.5 w-3.5 mr-2 shrink-0 ${isSelected ? 'text-primary' : 'text-muted-foreground/60'}`} />
                       <span className="truncate flex-1">{table.name}</span>
-                      <Badge mono
+                      <Badge size="sm" mono
                         variant="outline"
-                        className="ml-1 text-4xs px-1 py-0 h-4 font-normal bg-background/50 text-muted-foreground"
+                        className="ml-1 text-4xs px-1 py-0 font-normal bg-background/50 text-muted-foreground"
                       >
                         {table.rows.length}
                       </Badge>
@@ -131,7 +131,7 @@ export function ExtractionTab({
               Data: {selectedTable || 'Select Table'}
             </span>
             {tableData && (
-              <Badge mono variant="outline" className="text-4xs h-4 px-1.5 font-semibold bg-primary/5 text-primary border-primary/20">
+              <Badge size="sm" mono variant="outline" className="text-4xs px-1.5 font-semibold bg-primary/5 text-primary border-primary/20">
                 {tableData.rows.length} rows loaded
               </Badge>
             )}

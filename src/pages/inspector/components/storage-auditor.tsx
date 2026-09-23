@@ -109,7 +109,7 @@ export function StorageAuditor({
                 <CookieIcon className="size-4 shrink-0" />
                 <span>Cookies</span>
               </span>
-              <Badge mono variant="secondary" className="px-1.5 py-0 h-4 text-4xs">
+              <Badge size="sm" mono variant="secondary" className="px-1.5 py-0 text-4xs">
                 {cookies.length}
               </Badge>
             </button>
@@ -126,7 +126,7 @@ export function StorageAuditor({
                 <HardDrive className="size-4 shrink-0" />
                 <span>Local Storage</span>
               </span>
-              <Badge mono variant="secondary" className="px-1.5 py-0 h-4 text-4xs">
+              <Badge size="sm" mono variant="secondary" className="px-1.5 py-0 text-4xs">
                 {localStorageItems.length}
               </Badge>
             </button>
@@ -143,7 +143,7 @@ export function StorageAuditor({
                 <HardDrive className="size-4 shrink-0" />
                 <span>Session Storage</span>
               </span>
-              <Badge mono variant="secondary" className="px-1.5 py-0 h-4 text-4xs">
+              <Badge size="sm" mono variant="secondary" className="px-1.5 py-0 text-4xs">
                 {sessionStorageItems.length}
               </Badge>
             </button>

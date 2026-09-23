@@ -322,10 +322,10 @@ export function JwtGenerateView({
                       )}
                     </div>
                     {isAsymmetric ? (
-                      <Textarea mono
+                      <Textarea leading="tight" mono
                         className={cn(
                           // Sizing & Spacing
-                          "h-24 text-xs p-2 resize-none",
+                          "h-24 p-2 resize-none",
 
                           // Backgrounds & Borders
                           "bg-muted/5",

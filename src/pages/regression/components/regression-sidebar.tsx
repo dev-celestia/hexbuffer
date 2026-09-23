@@ -103,11 +103,11 @@ export function RegressionSidebar({
             >
               Test Cases
             </span>
-            <Badge
+            <Badge size="sm"
               variant="secondary"
               className={cn(
                 // Sizing & Spacing
-                'h-4 px-1.5 py-0',
+                'px-1.5 py-0',
 
                 // Typography
                 'font-semibold tabular-nums'

@@ -90,11 +90,11 @@ export function RegressionPage() {
                     {page.activeScript.name}
                   </span>
                   {page.isDirty && (
-                    <Badge
+                    <Badge size="sm"
                       variant="secondary"
                       className={cn(
                         // Sizing & Spacing
-                        'h-4 px-1.5 py-0',
+                        'px-1.5 py-0',
 
                         // Typography
                         'font-semibold',

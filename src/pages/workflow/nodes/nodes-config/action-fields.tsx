@@ -59,8 +59,8 @@ export function TextField({
   return (
     <div className="space-y-1.5">
       <Label size="2xs">{label}</Label>
-      <Textarea
-        className="min-h-20 resize-none text-xs"
+      <Textarea leading="tight"
+        className="min-h-20 resize-none"
         value={value ?? ''}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}

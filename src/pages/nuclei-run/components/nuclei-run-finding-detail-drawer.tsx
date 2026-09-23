@@ -104,11 +104,11 @@ export function NucleiRunFindingDetailDrawer({
             </span>
 
             {finding.cve_id && (
-              <Badge
+              <Badge size="sm"
                 variant="outline"
                 className={cn(
                   // Sizing & Spacing
-                  "h-4 px-1.5",
+                  "px-1.5",
                   // Typography
                   "font-bold text-warning",
                   // Backgrounds & Borders
@@ -370,12 +370,12 @@ export function NucleiRunFindingDetailDrawer({
               )}
             >
               {finding.tags.map((tag) => (
-                <Badge mono
+                <Badge size="sm" mono
                   key={tag}
                   variant="secondary"
                   className={cn(
                     // Sizing & Spacing
-                    "h-4 px-1.5",
+                    "px-1.5",
                     // Backgrounds & Borders
                     "bg-muted/60"
                   )}

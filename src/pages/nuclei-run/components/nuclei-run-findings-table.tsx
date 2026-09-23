@@ -321,12 +321,12 @@ export function NucleiRunFindingsTable({
                           )}
                         >
                           {finding.extracted_results.map((res, i) => (
-                            <Badge mono
+                            <Badge size="sm" mono
                               key={i}
                               variant="secondary"
                               className={cn(
                                 // Sizing & Spacing
-                                "h-4 px-1.5 max-w-[180px]",
+                                "px-1.5 max-w-[180px]",
                                 // Typography
                                 "truncate",
                                 // Backgrounds & Borders

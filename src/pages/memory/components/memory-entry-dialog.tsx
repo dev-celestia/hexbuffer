@@ -225,12 +225,12 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
               <Label leading="tight">
                 Content <span className="text-destructive">*</span>
               </Label>
-              <Textarea mono
+              <Textarea leading="tight" mono
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Detailed security observation, credential secret, reproduction steps, or context note..."
                 rows={6}
-                className="text-xs leading-relaxed resize-none"
+                className="leading-relaxed resize-none"
               />
             </div>
           </div>

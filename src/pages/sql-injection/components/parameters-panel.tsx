@@ -52,7 +52,7 @@ export function ParametersPanel({
           <span className="text-2xs font-bold uppercase text-muted-foreground tracking-wider">
             Target Parameters
           </span>
-          <Badge variant="outline" className="text-4xs px-1.5 py-0 h-4 font-semibold border-muted bg-muted/20 text-muted-foreground">
+          <Badge size="sm" variant="outline" className="text-4xs px-1.5 py-0 font-semibold border-muted bg-muted/20 text-muted-foreground">
             {injectCount} Active
           </Badge>
         </div>

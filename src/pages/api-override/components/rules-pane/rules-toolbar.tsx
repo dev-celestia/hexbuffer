@@ -48,11 +48,11 @@ export function RulesToolbar({ domains, onAdd, searchQuery, onSearchChange }: Ru
           >
             Target Hosts &amp; Rules
           </h3>
-          <Badge mono
+          <Badge size="sm" mono
             variant="secondary"
             className={cn(
               // Sizing & Spacing
-              "h-4 px-1.5",
+              "px-1.5",
 
               // Typography
               "text-4xs text-muted-foreground"

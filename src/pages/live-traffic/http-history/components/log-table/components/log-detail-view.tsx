@@ -247,16 +247,14 @@ export function LogDetailView() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem
+                  <DropdownMenuItem leading="tight"
                     onClick={toggleExpanded}
-                    className="text-xs"
                   >
                     <ArrowsOutIcon className="mr-2 size-4" /> Expand Editor
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
+                  <DropdownMenuItem leading="tight"
                     onClick={toggleViewMode}
-                    className="text-xs"
                   >
                     {viewMode === "table" ? (
                       <>
@@ -273,9 +271,8 @@ export function LogDetailView() {
                     variant="dropdown"
                     onSelect={handleSendToCollection}
                   />
-                  <DropdownMenuItem
+                  <DropdownMenuItem leading="tight"
                     onClick={handleSendToInvoker}
-                    className="text-xs"
                   >
                     <CrosshairIcon className="mr-2 size-4" /> Send to Intruder
                   </DropdownMenuItem>
@@ -452,9 +449,8 @@ export function LogDetailView() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem
+                  <DropdownMenuItem leading="tight"
                     onClick={toggleViewMode}
-                    className="text-xs"
                   >
                     {viewMode === "table" ? (
                       <>
@@ -471,9 +467,8 @@ export function LogDetailView() {
                     variant="dropdown"
                     onSelect={handleSendToCollection}
                   />
-                  <DropdownMenuItem
+                  <DropdownMenuItem leading="tight"
                     onClick={handleSendToInvoker}
-                    className="text-xs"
                   >
                     <CrosshairIcon className="mr-2 size-4" /> Send to Intruder
                   </DropdownMenuItem>

@@ -189,11 +189,11 @@ export function AiDebugDialog({
             >
               <BugIcon className="h-4 w-4 text-muted-foreground" />
               <DialogTitle>AI Debug Inspector</DialogTitle>
-              <Badge mono
+              <Badge size="sm" mono
                 variant="secondary"
                 className={cn(
                   // Sizing & Spacing
-                  'h-4 px-1.5 py-0',
+                  'px-1.5 py-0',
                   // Typography
                   'text-4xs font-semibold uppercase tracking-wider',
                   // Backgrounds & Borders

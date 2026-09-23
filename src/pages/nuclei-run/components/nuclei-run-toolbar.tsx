@@ -67,11 +67,11 @@ export function NucleiRunToolbar({
         >
           <FilesIcon className="size-3.5" />
           <span>Templates</span>
-          <Badge mono
+          <Badge size="sm" mono
             variant={activeTab === 'templates' ? 'secondary' : 'outline'}
             className={cn(
               // Sizing & Spacing
-              "h-4 px-1 ml-0.5"
+              "px-1 ml-0.5"
             )}
           >
             {selectedTemplatesCount}

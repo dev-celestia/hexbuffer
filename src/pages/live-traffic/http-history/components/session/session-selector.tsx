@@ -113,14 +113,14 @@ export function SessionSelector() {
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem
+            <DropdownMenuItem leading="tight"
               onClick={() => setCreateOpen(true)}
               className={cn(
                 // Sizing & Spacing
                 "py-1.5",
 
                 // Typography
-                "text-xs font-medium text-primary",
+                "font-medium text-primary",
 
                 // Interactive & States
                 "cursor-pointer"

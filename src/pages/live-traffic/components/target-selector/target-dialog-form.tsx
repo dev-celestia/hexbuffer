@@ -335,7 +335,7 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
               </Badge>
             )}
           </div>
-          <Textarea mono
+          <Textarea leading="tight" mono
             id="scope"
             placeholder="*.example.com&#10;api.example.com"
             rows={3}
@@ -343,10 +343,7 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
             onChange={updateValue('scope')}
             className={cn(
               // Sizing & Spacing
-              "resize-none",
-
-              // Typography
-              "text-xs"
+              "resize-none"
             )}
           />
           {errors.scope ? (

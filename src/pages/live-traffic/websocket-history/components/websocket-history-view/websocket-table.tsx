@@ -263,11 +263,11 @@ export function WebSocketTable({ selectedConnectionId, onSelectConnection }: Rea
                         <HighlightedText text={connection.path} query={searchQuery} />
                       </div>
                       <div className="px-3 py-1.5 text-right w-[80px]">
-                        <Badge mono
+                        <Badge size="sm" mono
                           variant="secondary"
                           className={cn(
                             // Sizing & Spacing
-                            "h-4 px-1.5",
+                            "px-1.5",
 
                             // Typography
                             "font-normal",

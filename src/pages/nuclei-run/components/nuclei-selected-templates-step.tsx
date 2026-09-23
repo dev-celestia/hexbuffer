@@ -423,7 +423,7 @@ export function NucleiSelectedTemplatesStep({
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold text-foreground font-mono">{group.name}</span>
-                          <Badge mono variant="outline" className="h-4 px-1.5 text-4xs text-primary">
+                          <Badge size="sm" mono variant="outline" className="px-1.5 text-4xs text-primary">
                             {group.templateIds.length} templates
                           </Badge>
                         </div>
@@ -485,7 +485,7 @@ export function NucleiSelectedTemplatesStep({
                       <span className="text-xs font-mono font-bold text-foreground truncate">
                         {groupName}
                       </span>
-                      <Badge mono variant="outline" className="h-4 px-1.5 text-4xs text-muted-foreground">
+                      <Badge size="sm" mono variant="outline" className="px-1.5 text-4xs text-muted-foreground">
                         {items.length} {items.length === 1 ? 'template' : 'templates'}
                       </Badge>
                     </div>
