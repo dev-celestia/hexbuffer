@@ -238,21 +238,21 @@ export function ListenerInteractions({
                                           isSelected && 'bg-muted font-medium'
                                         )}
                                       >
-                                        <TableCell className="px-3 py-1.5">
+                                        <TableCell size="sm" className="px-3">
                                           <Badge variant={TYPE_VARIANT[i.interactionType] ?? 'outline'} className="uppercase font-semibold">
                                             {i.interactionType}
                                           </Badge>
                                         </TableCell>
-                                        <TableCell mono className="px-3 py-1.5 text-3xs">
+                                        <TableCell size="sm" mono className="px-3 text-3xs">
                                           {i.sourceIp}
                                         </TableCell>
-                                        <TableCell mono className="px-3 py-1.5 text-2xs uppercase">
+                                        <TableCell size="sm" mono className="px-3 text-2xs uppercase">
                                           {i.method ?? '-'}
                                         </TableCell>
-                                        <TableCell mono className="px-3 py-1.5 max-w-[200px] truncate text-2xs">
+                                        <TableCell size="sm" mono className="px-3 max-w-[200px] truncate text-2xs">
                                           {i.path ?? '-'}
                                         </TableCell>
-                                        <TableCell mono className="px-3 py-1.5 text-muted-foreground text-3xs">
+                                        <TableCell size="sm" mono className="px-3 text-muted-foreground text-3xs">
                                           {new Date(i.timestamp).toLocaleString()}
                                         </TableCell>
                                       </TableRow>
@@ -312,21 +312,21 @@ export function ListenerInteractions({
                                       isSelected && 'bg-muted font-medium'
                                     )}
                                   >
-                                    <TableCell className="px-3 py-1.5">
+                                    <TableCell size="sm" className="px-3">
                                       <Badge variant={TYPE_VARIANT[i.interactionType] ?? 'outline'} className="uppercase font-semibold">
                                         {i.interactionType}
                                       </Badge>
                                     </TableCell>
-                                    <TableCell mono className="px-3 py-1.5 text-3xs">
+                                    <TableCell size="sm" mono className="px-3 text-3xs">
                                       {i.sourceIp}
                                     </TableCell>
-                                    <TableCell mono className="px-3 py-1.5 text-2xs uppercase">
+                                    <TableCell size="sm" mono className="px-3 text-2xs uppercase">
                                       {i.method ?? '-'}
                                     </TableCell>
-                                    <TableCell mono className="px-3 py-1.5 max-w-[200px] truncate text-2xs">
+                                    <TableCell size="sm" mono className="px-3 max-w-[200px] truncate text-2xs">
                                       {i.path ?? '-'}
                                     </TableCell>
-                                    <TableCell mono className="px-3 py-1.5 text-muted-foreground text-3xs">
+                                    <TableCell size="sm" mono className="px-3 text-muted-foreground text-3xs">
                                       {new Date(i.timestamp).toLocaleString()}
                                     </TableCell>
                                   </TableRow>

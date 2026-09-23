@@ -100,33 +100,23 @@ export function ScanResultsTable({
                   "hover:bg-muted/20"
                 )}
               >
-                <TableCell mono
+                <TableCell size="sm" mono
                   className={cn(
-                    // Sizing & Spacing
-                    "py-1.5",
-
                     // Typography
                     "font-medium"
                   )}
                 >
                   {result.host}
                 </TableCell>
-                <TableCell mono
+                <TableCell size="sm" mono
                   className={cn(
-                    // Sizing & Spacing
-                    "py-1.5",
-
                     // Typography
                     "font-semibold text-primary"
                   )}
                 >
                   {result.port}
                 </TableCell>
-                <TableCell
-                  className={cn(
-                    // Sizing & Spacing
-                    "py-1.5"
-                  )}
+                <TableCell size="sm"
                 >
                   <Badge
                     variant="outline"
@@ -134,22 +124,16 @@ export function ScanResultsTable({
                     {result.state}
                   </Badge>
                 </TableCell>
-                <TableCell
+                <TableCell size="sm"
                   className={cn(
-                    // Sizing & Spacing
-                    "py-1.5",
-
                     // Typography
                     "font-medium capitalize text-muted-foreground"
                   )}
                 >
                   {result.service || 'unknown'}
                 </TableCell>
-                <TableCell mono
+                <TableCell size="sm" mono
                   className={cn(
-                    // Sizing & Spacing
-                    "py-1.5",
-
                     // Typography
                     "text-muted-foreground"
                   )}
@@ -205,10 +189,10 @@ export function ScanResultsTable({
                     )}
                   </div>
                 </TableCell>
-                <TableCell mono
+                <TableCell size="sm" mono
                   className={cn(
                     // Sizing & Spacing
-                    "max-w-[400px] py-1.5",
+                    "max-w-[400px]",
 
                     // Typography
                     "truncate text-2xs text-foreground/80"

@@ -153,7 +153,7 @@ export function ExtractionTab({
                     {tableData.rows.slice(0, 100).map((row, rowIdx) => (
                       <TableRow key={rowIdx} className="hover:bg-muted/30">
                         {row.map((cell, cellIdx) => (
-                          <TableCell mono key={cellIdx} className="py-1.5 text-2xs text-foreground">
+                          <TableCell size="sm" mono key={cellIdx} className="text-2xs text-foreground">
                             {cell === null || cell === undefined || cell === '' ? (
                               <span className="text-muted-foreground/40 italic select-none">NULL</span>
                             ) : (
