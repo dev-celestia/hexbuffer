@@ -763,10 +763,32 @@ impl HistoryBridge {
             .map_err(|e| e.to_string())
     }
 
+    // ── Chat Tool Actions ─────────────────────────────────────────
+
+    pub fn insert_chat_tool_actions(
+        &self,
+        session_id: &str,
+        run_id: &str,
+        actions: &[crate::ai::types::AiChatAction],
+    ) -> Result<(), String> {
+        self.db
+            .insert_chat_tool_actions(session_id, run_id, actions)
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn list_chat_tool_actions(
+        &self,
+        session_id: &str,
+        limit: usize,
+    ) -> Result<Vec<crate::ai::types::AiChatAction>, String> {
+        self.db
+            .list_chat_tool_actions(session_id, limit)
+            .map_err(|e| e.to_string())
+    }
+
     // ── Token Usage ────────────────────────────────────────────────
 
-    pub fn insert_token_usage(&self, record: &TokenUsageRecord) -> Result<(), String> {
-        self.db
+    pub fn insert_token_usage(&self, record: &TokenUsageRecord) -> Result<(), String> {        self.db
             .insert_token_usage(record)
             .map_err(|e| e.to_string())
     }

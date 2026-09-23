@@ -280,6 +280,12 @@ fn fallback_heuristic_route(prompt: &str) -> RoutingDecision {
             requires_proxy_context: false,
         };
     }
+    if lower.contains("nuclei") || lower.contains("vulnerability scan") {
+        return RoutingDecision::ExecuteAction {
+            agent: get_agent_spec(AgentId::PortScanner),
+            requires_proxy_context: false,
+        };
+    }
     if lower.contains("fuzz")
         || lower.contains("intruder")
         || lower.contains("invoker")

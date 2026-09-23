@@ -38,9 +38,14 @@ export async function sendToCollection(options: SendToCollectionOptions): Promis
 
   // Create the endpoint record
   const now = timestampNow();
-  const headersJson = Object.keys(endpointData.headers).length > 0
-    ? JSON.stringify(endpointData.headers)
-    : null;
+  // Store headers in the canonical KeyValuePair[] shape ({key,value,enabled}),
+  // matching `createEndpoint` in management.ts and the Forge editor's own save path.
+  const headersList = Object.entries(endpointData.headers).map(([key, value]) => ({
+    key,
+    value,
+    enabled: true,
+  }));
+  const headersJson = headersList.length > 0 ? JSON.stringify(headersList) : null;
 
   const endpoint: StashEndpointRecord = {
     id: generateId(),

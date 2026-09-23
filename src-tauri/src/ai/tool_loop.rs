@@ -34,6 +34,9 @@ const DEFAULT_MAX_TOKENS: u64 = 8192;
 const AUTO_TOOL_TIMEOUT_SECS: u64 = 120;
 /// Tools requiring explicit user confirmation wait longer — the user may be away.
 const CONFIRMATION_TIMEOUT_SECS: u64 = 600;
+/// Ceiling on concurrent frontend tool calls awaiting resolution. Without a cap the
+/// pending-result map could grow without bound under heavy concurrent use.
+const MAX_PENDING_TOOL_CALLS: usize = 64;
 /// Upper bound for tool results fed back into the conversation, limiting how much
 /// untrusted content can ride along in a single result.
 const TOOL_RESULT_MAX_CHARS: usize = 4000;
@@ -75,6 +78,10 @@ const AUTO_APPROVED_TOOLS: &[&str] = &[
     "toggle_browser_crawl",
     "list_jobs",
     "get_job_status",
+    "query_http_history",
+    "get_http_request_detail",
+    "get_nuclei_status",
+    "get_nuclei_findings",
     super::engagement::INITIALIZE_ENGAGEMENT_TOOL,
     super::engagement::GET_ENGAGEMENT_PLAN_TOOL,
     super::engagement::UPDATE_PLAN_ITEM_TOOL,
@@ -101,6 +108,8 @@ const CONFIRMATION_TOOLS: &[&str] = &[
     "remove_scope_target",
     "stop_browser_crawl",
     "cancel_job",
+    "trigger_nuclei_scan",
+    "stop_nuclei_scan",
 ];
 
 enum ToolAuthorization {
@@ -300,11 +309,13 @@ fn frontend_tool_definitions() -> Vec<ToolDefinition> {
         crate::tools::SendToRepeaterTool.definition(),
         ToolDefinition {
             name: "send_repeater_request".to_string(),
-            description: "Execute the active HTTP request in Repeater Forge and view the live response."
+            description: "Issue and execute an HTTP request in the Repeater Forge panel, and inspect the live response. Without an endpoint id this sends the currently active request; pass an endpoint_id to target a specific saved endpoint."
                 .to_string(),
             parameters: json!({
                 "type": "object",
-                "properties": {},
+                "properties": {
+                    "endpoint_id": { "type": "string", "description": "Optional endpoint id to load and send. When omitted, the currently active request is sent." }
+                },
                 "required": []
             }),
         },
@@ -445,6 +456,73 @@ fn frontend_tool_definitions() -> Vec<ToolDefinition> {
                     "jobId": { "type": "string", "description": "Job id of a running job." }
                 },
                 "required": ["jobId"]
+            }),
+        },
+        ToolDefinition {
+            name: "query_http_history".to_string(),
+            description: "Query the captured HTTP proxy history. Returns a bounded list of requests with method, status, URL, content type and log id. Filter by method, status code, url/host/path search, then call get_http_request_detail with a log id to inspect full headers and bodies."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "method": { "type": "string", "description": "HTTP method to filter by, e.g. GET, POST, PUT." },
+                    "status": { "type": "number", "description": "Response status code to filter by, e.g. 200, 403, 500." },
+                    "search": { "type": "string", "description": "Substring to match against the URL or path." },
+                    "host": { "type": "string", "description": "Host/domain to filter captured requests by." },
+                    "limit": { "type": "number", "description": "Max results to return (default 25, max 100)." }
+                }
+            }),
+        },
+        ToolDefinition {
+            name: "get_http_request_detail".to_string(),
+            description: "Inspect one captured HTTP request/response pair by log id (returned by query_http_history). Returns method, URL, request headers and body, response status, headers and body (bounded). Use this to analyze security headers, cookies, response bodies or sensitive parameters."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "logId": { "type": "string", "description": "Proxy history log id, e.g. from query_http_history." }
+                },
+                "required": ["logId"]
+            }),
+        },
+        ToolDefinition {
+            name: "trigger_nuclei_scan".to_string(),
+            description: "Launch a Nuclei vulnerability scan against a single target URL. Requires confirmation. The scan runs in the background; poll get_nuclei_status for the engine state and get_nuclei_findings for results."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "url": { "type": "string", "description": "Target URL to scan, e.g. https://example.com. Must be in the authorized scope." },
+                    "severity": { "type": "string", "description": "Optional severity filter, e.g. critical, high, medium, low, info." },
+                    "concurrency": { "type": "number", "description": "Concurrent requests (default 10)." },
+                    "rateLimit": { "type": "number", "description": "Requests per second cap (default 150)." },
+                    "timeout": { "type": "number", "description": "Per-request timeout in seconds (default 10)." }
+                },
+                "required": ["url"]
+            }),
+        },
+        ToolDefinition {
+            name: "stop_nuclei_scan".to_string(),
+            description: "Stop the active Nuclei scan session."
+                .to_string(),
+            parameters: json!({ "type": "object", "properties": {}, "required": [] }),
+        },
+        ToolDefinition {
+            name: "get_nuclei_status".to_string(),
+            description: "Return whether a Nuclei scan is currently active or idle."
+                .to_string(),
+            parameters: json!({ "type": "object", "properties": {}, "required": [] }),
+        },
+        ToolDefinition {
+            name: "get_nuclei_findings".to_string(),
+            description: "Return Nuclei findings collected during the current session (bounded). Findings are cleared when a new scan starts. Use this to summarize what a scan discovered."
+                .to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "limit": { "type": "number", "description": "Max findings to return (default 50)." }
+                },
+                "required": []
             }),
         },
     ]
@@ -1006,16 +1084,31 @@ async fn execute_tool_call(
     let call_id = next_call_id();
     let token = uuid::Uuid::new_v4().to_string();
     let (sender, receiver) = tokio::sync::oneshot::channel::<ToolExecutionOutcome>();
-    pending_map()
-        .lock()
-        .expect("tool result map poisoned")
-        .insert(
+    {
+        let mut map = pending_map()
+            .lock()
+            .expect("tool result map poisoned");
+        if map.len() >= MAX_PENDING_TOOL_CALLS {
+            let message = format!(
+                "Tool execution refused: too many concurrent frontend tool calls \
+                 ({MAX_PENDING_TOOL_CALLS}). Wait for existing calls to resolve before launching more."
+            );
+            actions.push(AiChatAction {
+                action: tool_name.to_string(),
+                payload: args,
+                result: Some(message.clone()),
+                created_at: chrono::Utc::now().to_rfc3339(),
+            });
+            return message;
+        }
+        map.insert(
             call_id.clone(),
             PendingToolCall {
                 sender,
                 token: token.clone(),
             },
         );
+    }
 
     let timeout_secs = if requires_confirmation {
         CONFIRMATION_TIMEOUT_SECS
@@ -1068,6 +1161,13 @@ async fn execute_tool_call(
                             .lock()
                             .expect("tool result map poisoned")
                             .remove(&call_id);
+                        // Tell the frontend the backend stopped waiting so it can cancel the
+                        // in-flight operation (crawl/attack) instead of leaving it running.
+                        let _ = app.emit_to(
+                            window_label,
+                            "ai:abort-tool",
+                            json!({ "id": call_id, "tool_name": tool_name }),
+                        );
                         ToolExecutionOutcome {
                             success: false,
                             message: if requires_confirmation {
@@ -1143,13 +1243,21 @@ pub fn get_agent_for_tool(tool_name: &str) -> Option<&'static super::agents::Age
         | "drop_paused_request"
         | "add_scope_target"
         | "remove_scope_target"
-        | "get_crawl_context"
+        |         "get_crawl_context"
         | "trigger_scan"
         | "toggle_browser_crawl"
-        | "stop_browser_crawl" => Some(super::agents::get_agent_spec(
+        | "stop_browser_crawl"
+        | "query_http_history"
+        | "get_http_request_detail" => Some(super::agents::get_agent_spec(
             super::agents::AgentId::HttpTraffic,
         )),
         "trigger_port_scan" => Some(super::agents::get_agent_spec(
+            super::agents::AgentId::PortScanner,
+        )),
+        "trigger_nuclei_scan"
+        | "stop_nuclei_scan"
+        | "get_nuclei_status"
+        | "get_nuclei_findings" => Some(super::agents::get_agent_spec(
             super::agents::AgentId::PortScanner,
         )),
         super::agents::jwt_tools::DECODE_JWT_TOOL

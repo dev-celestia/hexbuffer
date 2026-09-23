@@ -133,10 +133,23 @@ pub async fn get_ai_debug_snapshot(
     chat::get_ai_debug_snapshot_impl(app, window.label().to_string(), session_id, history).await
 }
 
+/// Returns the durable tool-action record for a chat session, newest first.
+#[tauri::command]
+pub async fn get_chat_tool_actions(
+    history: State<'_, crate::HistoryBridge>,
+    session_id: String,
+    limit: Option<usize>,
+) -> Result<Vec<types::AiChatAction>, String> {
+    let history = history.inner().clone();
+    let cap = limit.unwrap_or(100).min(500);
+    tauri::async_runtime::spawn_blocking(move || history.list_chat_tool_actions(&session_id, cap))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
 /// Aggregated token usage for one chat session (requests + tokens).
 #[tauri::command]
-pub async fn get_token_usage_summary(
-    history: State<'_, crate::HistoryBridge>,
+pub async fn get_token_usage_summary(    history: State<'_, crate::HistoryBridge>,
     session_id: String,
 ) -> Result<token_usage::TokenUsageTotals, String> {
     let history = history.inner().clone();

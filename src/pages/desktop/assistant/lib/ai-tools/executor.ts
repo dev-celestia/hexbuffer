@@ -30,6 +30,16 @@ import {
   executeGetJobStatusAiTool,
   executeCancelJobAiTool,
 } from './jobs';
+import {
+  executeQueryHttpHistoryAiTool,
+  executeGetHttpRequestDetailAiTool,
+} from './http-history';
+import {
+  executeTriggerNucleiScanAiTool,
+  executeStopNucleiScanAiTool,
+  executeGetNucleiStatusAiTool,
+  executeGetNucleiFindingsAiTool,
+} from './nuclei';
 import { addTrackedAction, completeTrackedAction } from './tracker';
 
 async function dispatchToolExecution(toolName: string, args: Record<string, any>): Promise<any> {
@@ -99,6 +109,26 @@ async function dispatchToolExecution(toolName: string, args: Record<string, any>
 
     case 'cancel_job':
       return executeCancelJobAiTool(args);
+
+    // HTTP History Tools
+    case 'query_http_history':
+      return executeQueryHttpHistoryAiTool(args);
+
+    case 'get_http_request_detail':
+      return executeGetHttpRequestDetailAiTool(args);
+
+    // Nuclei Scanner Tools
+    case 'trigger_nuclei_scan':
+      return executeTriggerNucleiScanAiTool(args);
+
+    case 'stop_nuclei_scan':
+      return executeStopNucleiScanAiTool();
+
+    case 'get_nuclei_status':
+      return executeGetNucleiStatusAiTool();
+
+    case 'get_nuclei_findings':
+      return executeGetNucleiFindingsAiTool(args);
 
     default:
       throw new Error(`Unknown AI Tool capability: ${toolName}`);

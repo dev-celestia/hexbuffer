@@ -275,6 +275,22 @@ CREATE TABLE IF NOT EXISTS ai_tool_outputs (
 CREATE INDEX IF NOT EXISTS idx_ai_tool_outputs_created ON ai_tool_outputs(created_at);
 "#;
 
+pub const CREATE_AI_CHAT_TOOL_ACTIONS_TABLE: &str = r#"
+CREATE TABLE IF NOT EXISTS ai_chat_tool_actions (
+    id TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL,
+    run_id TEXT NOT NULL DEFAULT '',
+    action TEXT NOT NULL,
+    payload_json TEXT NOT NULL DEFAULT '{}',
+    result TEXT,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY(session_id) REFERENCES ai_chat_sessions(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_ai_chat_tool_actions_session ON ai_chat_tool_actions(session_id);
+CREATE INDEX IF NOT EXISTS idx_ai_chat_tool_actions_created ON ai_chat_tool_actions(created_at);
+"#;
+
 pub const CREATE_ENGAGEMENT_STATE_TABLE: &str = r#"
 CREATE TABLE IF NOT EXISTS ai_engagement_state (
     session_id TEXT PRIMARY KEY,

@@ -768,6 +768,18 @@ pub async fn send_ai_chat_message_impl(
             }
         }
 
+        // Persist every tool action executed this run so the session keeps a durable,
+        // queryable record of what the assistant did (independent of the LLM text).
+        if let Some(ref sid) = session_id {
+            if !sid.trim().is_empty() {
+                if let Err(error) =
+                    history_bridge.insert_chat_tool_actions(sid, &request_id, &output.actions)
+                {
+                    eprintln!("[tool-actions] failed to persist actions: {error}");
+                }
+            }
+        }
+
         let response = AiChatResponse {
             provider: settings.provider.clone(),
             model: settings.model.clone(),
