@@ -130,12 +130,15 @@ const sameCSS = (a, b) => {
  * legitimately supply nothing box-shaped (`leading: { relaxed: "" }`), and
  * because the axis may not be `size` at all.
  */
-const SUPPLIES = (() => {
-  const src = registry.cva.get(`${WANT_COMPONENT[0].toLowerCase()}${WANT_COMPONENT.slice(1)}Variants`)
-    ?.variants?.[AXIS]?.[TARGET] ?? ""
-  const m = src.match(/(?:^|\s)(size-[\w.]+|h-[\w.]+|text-[\w./]+)(?:\s|$)/)
-  return m ? m[1] : null
-})()
+/*
+ * `SUPPLIES` used to live here: a single-token display heuristic that only
+ * recognised `size-*`, `h-*` and `text-*`. On a candidate whose value is
+ * `py-1.5` it matched nothing and the report printed
+ * "the variant supplies: (nothing token-shaped)" — for a candidate that supplies
+ * exactly one token. That reads as "the candidate is empty", which is the one
+ * thing a reader must not conclude, so the report now prints the authoritative
+ * list below instead of a heuristic.
+ */
 
 /** Every token the candidate value supplies, in order. */
 const SUPPLIED = (registry.cva.get(`${WANT_COMPONENT[0].toLowerCase()}${WANT_COMPONENT.slice(1)}Variants`)
@@ -407,7 +410,7 @@ const overClaimed = hits.filter((h) => (h.dead ?? []).length > 0).length
 
 console.log(`${APPLY ? "applied" : "dry-run"}: ${hits.length} ${WANT_COMPONENT} sites -> ${AXIS}="${TARGET}" across ${new Set(hits.map((h) => h.file)).size} files`)
 console.log(`  ${WANT_COMPONENT}s seen: ${seen} (already ${AXIS}="${TARGET}": ${alreadyTarget})`)
-console.log(`  the variant supplies: ${SUPPLIES ?? "(nothing token-shaped)"}`)
+console.log(`  the variant supplies: ${SUPPLIED.length ? SUPPLIED.join(" ") : "(nothing token-shaped)"}`)
 console.log(`  candidate ${AXIS}.${TARGET} = ${CANDIDATE ?? "(read from source)"}`)
 console.log(`  overrides freed by step 2: ${freedAll.length} tokens${noFreed ? ` — ${noFreed} migrated site(s) free nothing` : ""}`)
 if (overClaimed) {

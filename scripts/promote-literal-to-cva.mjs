@@ -56,6 +56,8 @@ const TARGETS = [
     typeAnchor: `  mono?: boolean\n}) {`,
     typeNew: (v) => `  mono?: boolean\n} & VariantProps<typeof ${v}>) {`,
     cnCall: (v) => `className={cn(${v}({ leading }), mono && "font-mono", className)}`,
+    axis: { leading: { relaxed: "", tight: "text-xs" } },
+    defaults: { leading: "relaxed" },
     doc: `/**
  * Leading, as a first-class choice — the same axis Button, Label and the Select
  * parts carry.
@@ -73,12 +75,39 @@ const TARGETS = [
  * extracted, so an element that does not ask for \`tight\` renders exactly as before.
  */`,
   },
+  {
+    file: `${UI}/table.tsx`,
+    fn: "TableCell",
+    literalRe: /"(p-2 align-middle whitespace-nowrap[^"]*)"/,
+    destructure: `  mono = false,\n  ...props\n}: `,
+    destructureNew: `  mono = false,\n  size = "default",\n  ...props\n}: `,
+    typeAnchor: `  mono?: boolean\n}) {`,
+    typeNew: (v) => `  mono?: boolean\n} & VariantProps<typeof ${v}>) {`,
+    cnCall: (v) => `className={cn(${v}({ size }), mono && "font-mono", className)}`,
+    axis: { size: { default: "", sm: "py-1.5" } },
+    defaults: { size: "default" },
+    doc: `/**
+ * Row density, as a first-class choice.
+ *
+ * The base sets \`p-2\` — 8px on both axes. Dense data tables want 6px of vertical
+ * padding while keeping the 8px horizontal, and the app wrote \`py-1.5\` at 31 of
+ * its 48 cells to get it. That is a majority but not a mandate: the other 17 are
+ * happy at \`p-2\`, so this is a step and not a correction to the base.
+ *
+ * Only the vertical axis moves. \`p-2\` already supplies the horizontal, so \`sm\` is
+ * a height step and nothing else — the same shape as Badge's \`size="sm"\` (\`h-4\`)
+ * and Button's \`md\` (one height step over \`sm\`).
+ *
+ * The base string is unchanged from the literal it replaced; only the axis was
+ * extracted, so a cell that does not ask for \`sm\` renders exactly as before.
+ */`,
+  },
 ]
 
 let failures = 0
 
 for (const t of TARGETS) {
-  const { file, fn, literalRe, destructure, destructureNew, typeAnchor, typeNew, cnCall, doc } = t
+  const { file, fn, literalRe, destructure, destructureNew, typeAnchor, typeNew, cnCall, doc, axis, defaults } = t
   const variantsName = `${fn.replace(/^./, (c) => c.toLowerCase())}Variants`
   const before = fs.readFileSync(file, "utf8")
 
@@ -95,17 +124,28 @@ for (const t of TARGETS) {
   }
   const base = lit[1]
 
+  // The axis is per-target. The extraction mechanism is identical for every
+  // component, but a size step and a leading step are different decisions with
+  // different values and different justifications — so only the mechanism is
+  // shared, not the content.
+  const [axisName, axisValues] = Object.entries(axis)[0]
+  const axisBody = Object.entries(axisValues)
+    .map(([value, cls]) => `        ${value}: ${JSON.stringify(cls)},`)
+    .join("\n")
+  const defaultsBody = Object.entries(defaults)
+    .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
+    .join(", ")
+
   const cvaConst = `${doc}
 const ${variantsName} = cva(
   "${base}",
   {
     variants: {
-      leading: {
-        relaxed: "",
-        tight: "text-xs",
+      ${axisName}: {
+${axisBody}
       },
     },
-    defaultVariants: { leading: "relaxed" },
+    defaultVariants: { ${defaultsBody} },
   }
 )
 
