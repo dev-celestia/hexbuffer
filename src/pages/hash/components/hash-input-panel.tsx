@@ -48,7 +48,7 @@ export function HashInputPanel({ input, isEmpty, onInputChange, onClear }: Reado
           <span
             className={cn(
               // Typography
-              "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+              "text-2xs font-semibold uppercase tracking-wider text-muted-foreground"
             )}
           >
             Input Text
@@ -59,7 +59,7 @@ export function HashInputPanel({ input, isEmpty, onInputChange, onClear }: Reado
               "hidden sm:inline",
 
               // Typography
-              "text-[10px] text-muted-foreground/80"
+              "text-3xs text-muted-foreground/80"
             )}
           >
             Enter plaintext to hash

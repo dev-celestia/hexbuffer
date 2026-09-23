@@ -6,9 +6,6 @@ export function NoHostsEmpty() {
   return (
     <Empty
       className={cn(
-        // Layout & Positioning
-        "flex flex-col items-center justify-center text-center",
-
         // Sizing & Spacing
         "py-16 px-4",
 
@@ -20,10 +17,6 @@ export function NoHostsEmpty() {
       )}
     >
       <EmptyMedia
-        className={cn(
-          // Layout & Positioning
-          "flex items-center justify-center"
-        )}
       >
         <GlobeIcon
           className={cn(
@@ -50,7 +43,7 @@ export function NoHostsEmpty() {
             "mt-1",
 
             // Typography
-            "text-[11px] text-muted-foreground leading-relaxed"
+            "text-2xs text-muted-foreground leading-relaxed"
           )}
         >
           Go to{" "}
@@ -67,9 +60,6 @@ export function NoSearchResultsEmpty() {
   return (
     <Empty
       className={cn(
-        // Layout & Positioning
-        "flex flex-col items-center justify-center",
-
         // Sizing & Spacing
         "py-16",
 
@@ -84,7 +74,7 @@ export function NoSearchResultsEmpty() {
         <EmptyTitle
           className={cn(
             // Typography
-            "text-xs font-medium"
+            "text-xs"
           )}
         >
           No matching hosts or rules
@@ -99,23 +89,16 @@ export function NoRouteSelectedEmpty() {
     <Empty
       className={cn(
         // Layout & Positioning
-        "flex h-full items-center justify-center text-center",
+        "h-full",
 
         // Backgrounds & Borders
         "border-none bg-muted/5",
-
-        // Sizing & Spacing
-        "p-6",
 
         // Typography
         "text-muted-foreground"
       )}
     >
       <EmptyMedia
-        className={cn(
-          // Layout & Positioning
-          "flex items-center justify-center"
-        )}
       >
         <PencilSimpleIcon
           className={cn(
@@ -134,7 +117,7 @@ export function NoRouteSelectedEmpty() {
         <EmptyTitle
           className={cn(
             // Typography
-            "text-sm font-semibold text-foreground"
+            "font-semibold text-foreground"
           )}
         >
           Select an override rule to configure

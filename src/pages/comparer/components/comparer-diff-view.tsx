@@ -117,7 +117,7 @@ export function ComparerDiffView({ diffResult, diffMode }: Readonly<ComparerDiff
                 "w-12 px-2 py-1",
 
                 // Typography
-                "text-left text-[10px] font-semibold text-muted-foreground uppercase tracking-wider",
+                "text-left text-3xs font-semibold text-muted-foreground uppercase tracking-wider",
 
                 // Backgrounds & Borders
                 "border-r border-b"
@@ -131,7 +131,7 @@ export function ComparerDiffView({ diffResult, diffMode }: Readonly<ComparerDiff
                 "px-2 py-1",
 
                 // Typography
-                "text-left text-[10px] font-semibold text-muted-foreground uppercase tracking-wider",
+                "text-left text-3xs font-semibold text-muted-foreground uppercase tracking-wider",
 
                 // Backgrounds & Borders
                 "border-b"
@@ -145,7 +145,7 @@ export function ComparerDiffView({ diffResult, diffMode }: Readonly<ComparerDiff
                 "w-12 px-2 py-1",
 
                 // Typography
-                "text-left text-[10px] font-semibold text-muted-foreground uppercase tracking-wider",
+                "text-left text-3xs font-semibold text-muted-foreground uppercase tracking-wider",
 
                 // Backgrounds & Borders
                 "border-x border-b"
@@ -159,7 +159,7 @@ export function ComparerDiffView({ diffResult, diffMode }: Readonly<ComparerDiff
                 "px-2 py-1",
 
                 // Typography
-                "text-left text-[10px] font-semibold text-muted-foreground uppercase tracking-wider",
+                "text-left text-3xs font-semibold text-muted-foreground uppercase tracking-wider",
 
                 // Backgrounds & Borders
                 "border-b"
@@ -203,7 +203,7 @@ export function ComparerDiffView({ diffResult, diffMode }: Readonly<ComparerDiff
                     "w-12 px-2 py-0.5",
 
                     // Typography
-                    "text-right text-[10px] leading-[1.4] text-muted-foreground/60",
+                    "text-right text-3xs leading-[1.4] text-muted-foreground/60",
 
                     // Backgrounds & Borders
                     "border-r"
@@ -245,7 +245,7 @@ export function ComparerDiffView({ diffResult, diffMode }: Readonly<ComparerDiff
                     "w-12 px-2 py-0.5",
 
                     // Typography
-                    "text-right text-[10px] leading-[1.4] text-muted-foreground/60",
+                    "text-right text-3xs leading-[1.4] text-muted-foreground/60",
 
                     // Backgrounds & Borders
                     "border-x"

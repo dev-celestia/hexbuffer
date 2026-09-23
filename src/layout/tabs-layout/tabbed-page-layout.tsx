@@ -50,7 +50,7 @@ export function TabbedPageLayout({
         />
       </div>
       <div className={cn('flex-1 min-h-0 overflow-hidden', contentClassName ?? 'm-2 border rounded-md bg-background')}>
-        <Tabs value={activeTabId} onValueChange={onTabChange} className="gap-0 h-full w-full flex flex-col min-w-0">
+        <Tabs value={activeTabId} onValueChange={onTabChange} className="gap-0 h-full w-full flex-col min-w-0">
           {children}
         </Tabs>
       </div>

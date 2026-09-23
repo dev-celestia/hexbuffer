@@ -79,7 +79,7 @@ export const FlowNodeShell = React.memo(function FlowNodeShell({
       <TooltipTrigger render={content} />
       <TooltipContent side="right" sideOffset={12} className="max-w-56">
         {tooltipTitle && <p className="font-medium text-xs">{tooltipTitle}</p>}
-        {tooltip && <p className="text-[11px] opacity-80">{tooltip}</p>}
+        {tooltip && <p className="text-2xs opacity-80">{tooltip}</p>}
       </TooltipContent>
     </Tooltip>
   );

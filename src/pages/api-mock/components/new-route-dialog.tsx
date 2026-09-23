@@ -95,7 +95,7 @@ export function NewRouteDialog({
       />
       <DialogContent className="sm:max-w-lg border-border bg-background">
         <DialogHeader>
-          <DialogTitle className="text-sm font-bold text-foreground">
+          <DialogTitle className="font-bold text-foreground">
             {dialogTitle}
           </DialogTitle>
         </DialogHeader>
@@ -128,7 +128,7 @@ export function NewRouteDialog({
                 "w-28 gap-1.5"
               )}
             >
-              <Label className="text-xs text-muted-foreground">Method</Label>
+              <Label leading="tight" className="text-muted-foreground">Method</Label>
               <Select value={method} onValueChange={(v) => setMethod(v as MockRoute['method'])}>
                 <SelectTrigger className="h-9 bg-muted/40">
                   <SelectValue />
@@ -150,12 +150,12 @@ export function NewRouteDialog({
                 "gap-1.5"
               )}
             >
-              <Label className="text-xs text-muted-foreground">Path</Label>
-              <Input
+              <Label leading="tight" className="text-muted-foreground">Path</Label>
+              <Input mono
                 placeholder="/api/resource/:id"
                 value={path}
                 onChange={(e) => setPath(e.target.value)}
-                className="h-9 font-mono text-sm bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
+                className="h-9 bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
               />
             </div>
 
@@ -168,11 +168,11 @@ export function NewRouteDialog({
                 "w-20 gap-1.5"
               )}
             >
-              <Label className="text-xs text-muted-foreground">Status</Label>
-              <Input
+              <Label leading="tight" className="text-muted-foreground">Status</Label>
+              <Input mono
                 value={statusCode}
                 onChange={(e) => setStatusCode(e.target.value)}
-                className="h-9 text-center font-mono text-sm bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
+                className="h-9 text-center bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
               />
             </div>
           </div>
@@ -214,10 +214,10 @@ export function NewRouteDialog({
                     Dynamic Params
                   </span>
                   {detectedParams.map((p) => (
-                    <Badge
+                    <Badge mono
                       key={p}
                       variant="secondary"
-                      className="font-mono text-[10px] text-primary"
+                      className="text-primary"
                     >
                       :{p}
                     </Badge>
@@ -243,7 +243,7 @@ export function NewRouteDialog({
                   "gap-x-2 gap-y-1"
                 )}
               >
-                <span className="text-[11px] text-muted-foreground">
+                <span className="text-2xs text-muted-foreground">
                   Matches e.g.
                 </span>
                 <code
@@ -252,7 +252,7 @@ export function NewRouteDialog({
                     "px-1.5 py-0.5 rounded",
 
                     // Typography
-                    "font-mono text-[11px] font-semibold text-foreground",
+                    "font-mono text-2xs font-semibold text-foreground",
 
                     // Backgrounds & Borders
                     "bg-muted/50"
@@ -272,7 +272,7 @@ export function NewRouteDialog({
                   "gap-1.5"
                 )}
               >
-                <span className="text-[11px] text-muted-foreground">Insert tag:</span>
+                <span className="text-2xs text-muted-foreground">Insert tag:</span>
                 {detectedParams.map((p) => (
                   <button
                     key={p}
@@ -289,7 +289,7 @@ export function NewRouteDialog({
                       "px-1.5 py-0.5 rounded",
 
                       // Typography
-                      "font-mono text-[10px] font-semibold text-primary",
+                      "font-mono text-3xs font-semibold text-primary",
 
                       // Backgrounds & Borders
                       "bg-primary/10 border border-primary/30 hover:bg-primary/20",
@@ -322,25 +322,25 @@ export function NewRouteDialog({
                 "flex items-center justify-between"
               )}
             >
-              <Label className="text-xs text-muted-foreground">Response Body (JSON Template)</Label>
+              <Label leading="tight" className="text-muted-foreground">Response Body (JSON Template)</Label>
               {detectedParams.length > 0 && (
-                <span className="text-[10px] text-muted-foreground font-mono">
+                <span className="text-3xs text-muted-foreground font-mono">
                   Supports {`{{param}}`} or {`\${param}`}
                 </span>
               )}
             </div>
-            <Textarea
+            <Textarea leading="tight" mono
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={6}
-              className="font-mono text-xs bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
+              className="bg-muted/40 focus-visible:ring-primary focus-visible:ring-1"
             />
           </div>
 
           {/* Submit */}
           <Button
             size="sm"
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-9 rounded-md cursor-pointer"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-9 rounded-md"
             onClick={handleAdd}
             disabled={isSubmitting}
           >

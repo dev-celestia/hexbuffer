@@ -155,7 +155,7 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
                 "px-1.5 py-0.5 rounded-md shrink-0 leading-none",
 
                 // Typography
-                "text-[9px] font-bold uppercase tracking-wider",
+                "text-4xs font-bold uppercase tracking-wider",
 
                 // Backgrounds & Borders
                 resolvedNavItem.flag === "alpha"
@@ -219,7 +219,7 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
             )}
           >
             <Button
-              variant="ghost"
+              variant="quiet"
               size="icon-xs"
               onClick={() => setIsSettingsOpen(true)}
               title="Settings"
@@ -228,11 +228,8 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
                 // Sizing & Spacing
                 "size-7 rounded-md",
 
-                // Typography
-                "text-muted-foreground",
-
                 // Interactive & States
-                "hover:bg-muted/80 hover:text-foreground active:scale-95 transition-all cursor-pointer"
+                "hover:bg-muted/80 active:scale-95"
               )}
             >
               <GearSixIcon className="size-4" />
@@ -248,7 +245,7 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
             )}
           >
             <Button
-              variant="ghost"
+              variant="quiet"
               size="icon-xs"
               onClick={toggleTheme}
               title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
@@ -257,11 +254,8 @@ function StandaloneHeader({ id, title, navItem }: StandaloneHeaderProps) {
                 // Sizing & Spacing
                 "size-7 rounded-md",
 
-                // Typography
-                "text-muted-foreground",
-
                 // Interactive & States
-                "hover:bg-muted/80 hover:text-foreground active:scale-95 transition-all cursor-pointer"
+                "hover:bg-muted/80 active:scale-95"
               )}
             >
               {theme === "dark" ? (

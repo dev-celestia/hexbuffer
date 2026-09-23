@@ -34,7 +34,7 @@ export function InteractiveOptionsCard({
       <span
         className={cn(
           // Typography
-          'text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80',
+          'text-2xs font-semibold uppercase tracking-wider text-muted-foreground/80',
         )}
       >
         Choose an option to proceed:
@@ -74,15 +74,15 @@ export function InteractiveOptionsCard({
                 'flex items-start gap-2.5 min-w-0 flex-1',
               )}
             >
-              <Badge
+              <Badge mono
                 variant="outline"
                 className={cn(
                   // Sizing & Spacing
-                  'size-5 px-0 mt-0.5 shrink-0 justify-center',
+                  'size-5 px-0 mt-0.5',
                   // Typography
-                  'font-mono text-[11px] font-bold',
+                  'text-2xs font-bold',
                   // Backgrounds & Borders
-                  'rounded-sm bg-muted text-foreground border-border',
+                  'rounded-sm bg-muted',
                 )}
               >
                 {opt.label}
@@ -109,7 +109,7 @@ export function InteractiveOptionsCard({
                       // Sizing & Spacing
                       'mt-0.5',
                       // Typography
-                      'text-[11px] text-muted-foreground leading-relaxed line-clamp-2',
+                      'text-2xs text-muted-foreground leading-relaxed line-clamp-2',
                     )}
                   >
                     {opt.description}
@@ -156,7 +156,7 @@ export function InteractiveOptionsCard({
                 // Layout & Positioning
                 'shrink-0',
                 // Typography
-                'text-[10px] text-muted-foreground/60 font-mono group-hover:text-muted-foreground',
+                'text-3xs text-muted-foreground/60 font-mono group-hover:text-muted-foreground',
               )}
             >
               Custom

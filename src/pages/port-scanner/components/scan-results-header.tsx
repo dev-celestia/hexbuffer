@@ -49,19 +49,16 @@ export function ScanResultsHeader({
         <span
           className={cn(
             // Typography
-            "text-[11px] font-semibold text-muted-foreground"
+            "text-2xs font-semibold text-muted-foreground"
           )}
         >
-          Scanned <code className="font-mono text-[11px] text-foreground font-normal">{target}</code>
+          Scanned <code className="font-mono text-2xs text-foreground font-normal">{target}</code>
         </span>
         <Badge
           variant="outline"
           className={cn(
             // Sizing & Spacing
-            "h-5 px-1.5",
-
-            // Typography
-            "text-[10px] font-medium"
+            "px-1.5"
           )}
         >
           {openCount} open
@@ -94,15 +91,15 @@ export function ScanResultsHeader({
               onClick={onCopy}
               className={cn(
                 // Sizing & Spacing
-                "h-6 px-2 gap-1",
+                "px-2",
 
                 // Typography
-                "text-[11px]"
+                "text-2xs"
               )}
             >
               {copied ? (
                 <>
-                  <CheckIcon className="size-3 text-emerald-500" />
+                  <CheckIcon className="size-3 text-emerald-600 dark:text-emerald-400" />
                   <span>Copied</span>
                 </>
               ) : (
@@ -119,10 +116,10 @@ export function ScanResultsHeader({
                 onClick={onExportJson}
                 className={cn(
                   // Sizing & Spacing
-                  "h-6 px-2 gap-1",
+                  "px-2",
 
                   // Typography
-                  "text-[11px]"
+                  "text-2xs"
                 )}
               >
                 <DownloadSimpleIcon className="size-3" />
@@ -136,10 +133,10 @@ export function ScanResultsHeader({
                 onClick={onExportCsv}
                 className={cn(
                   // Sizing & Spacing
-                  "h-6 px-2 gap-1",
+                  "px-2",
 
                   // Typography
-                  "text-[11px]"
+                  "text-2xs"
                 )}
               >
                 <FileCsvIcon className="size-3" />
@@ -158,18 +155,12 @@ export function ScanResultsHeader({
           </div>
         )}
         <Button
-          variant="ghost"
+          variant="quiet"
           size="icon"
           onClick={onClear}
           className={cn(
             // Sizing & Spacing
-            "h-6 w-6",
-
-            // Typography
-            "text-muted-foreground",
-
-            // Interactive & States
-            "hover:text-foreground"
+            "h-6 w-6"
           )}
           title="Clear results"
         >

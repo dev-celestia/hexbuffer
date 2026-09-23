@@ -41,13 +41,13 @@ export function TelemetryPanel({ telemetry, status }: Readonly<TelemetryPanelPro
   const statusColor = useMemo(() => {
     switch (status) {
       case 'running':
-        return 'text-emerald-500';
+        return 'text-emerald-600 dark:text-emerald-400';
       case 'paused':
-        return 'text-amber-500';
+        return 'text-amber-600 dark:text-amber-400';
       case 'error':
-        return 'text-red-500';
+        return 'text-red-600 dark:text-red-400';
       case 'completed':
-        return 'text-blue-500';
+        return 'text-blue-600 dark:text-blue-400';
       default:
         return 'text-muted-foreground';
     }
@@ -133,7 +133,7 @@ export function TelemetryPanel({ telemetry, status }: Readonly<TelemetryPanelPro
               "gap-1",
 
               // Typography
-              "text-[11px] text-muted-foreground font-mono"
+              "text-2xs text-muted-foreground font-mono"
             )}
           >
             <Clock className="h-3.5 w-3.5" />
@@ -156,7 +156,7 @@ export function TelemetryPanel({ telemetry, status }: Readonly<TelemetryPanelPro
           icon={<Lightning className="h-3.5 w-3.5" />}
           label="Hash Rate"
           value={formatHashRate(telemetry.hashRate)}
-          color="text-cyan-400"
+          color="text-cyan-600 dark:text-cyan-400"
           bgColor="bg-cyan-500/10"
         />
 
@@ -164,7 +164,7 @@ export function TelemetryPanel({ telemetry, status }: Readonly<TelemetryPanelPro
           icon={<CheckCircle className="h-3.5 w-3.5" />}
           label="Matches"
           value={telemetry.matchesFound.toString()}
-          color="text-emerald-400"
+          color="text-emerald-600 dark:text-emerald-400"
           bgColor="bg-emerald-500/10"
         />
 
@@ -172,7 +172,7 @@ export function TelemetryPanel({ telemetry, status }: Readonly<TelemetryPanelPro
           icon={<Percent className="h-3.5 w-3.5" />}
           label="Progress"
           value={`${telemetry.progressPercent.toFixed(1)}%`}
-          color="text-blue-400"
+          color="text-blue-600 dark:text-blue-400"
           bgColor="bg-blue-500/10"
         />
 
@@ -180,7 +180,7 @@ export function TelemetryPanel({ telemetry, status }: Readonly<TelemetryPanelPro
           icon={<Clock className="h-3.5 w-3.5" />}
           label="Elapsed"
           value={formatTime(telemetry.elapsedSeconds)}
-          color="text-purple-400"
+          color="text-purple-600 dark:text-purple-400"
           bgColor="bg-purple-500/10"
         />
       </div>
@@ -283,7 +283,7 @@ function MetricCard({ icon, label, value, color, bgColor }: Readonly<MetricCardP
         <span
           className={cn(
             // Typography
-            "text-[9px] uppercase tracking-wider text-muted-foreground font-semibold"
+            "text-4xs uppercase tracking-wider text-muted-foreground font-semibold"
           )}
         >
           {label}
@@ -333,7 +333,7 @@ function StatItem({ icon, label, value }: Readonly<StatItemProps>) {
         <span
           className={cn(
             // Typography
-            "text-[10px] uppercase tracking-wider text-muted-foreground"
+            "text-3xs uppercase tracking-wider text-muted-foreground"
           )}
         >
           {label}:
@@ -341,7 +341,7 @@ function StatItem({ icon, label, value }: Readonly<StatItemProps>) {
         <span
           className={cn(
             // Typography
-            "text-[11px] font-mono font-semibold text-foreground"
+            "text-2xs font-mono font-semibold text-foreground"
           )}
         >
           {value}

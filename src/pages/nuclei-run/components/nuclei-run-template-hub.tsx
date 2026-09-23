@@ -71,16 +71,14 @@ export function NucleiRunTemplateHub({
           {TEMPLATE_CATEGORIES.map((cat) => {
             const isActive = category === cat.id;
             return (
-              <Button
+              <Button leading="tight"
                 key={cat.id}
-                size="sm"
+                size="md"
                 variant={isActive ? 'secondary' : 'ghost'}
                 onClick={() => onCategoryChange(cat.id)}
                 className={cn(
                   // Layout & Positioning
-                  "flex items-center",
-                  // Sizing & Spacing
-                  "h-7 px-2.5 text-xs font-medium",
+                  "flex",
                   // Interactive & States
                   isActive && "bg-muted text-foreground font-semibold"
                 )}
@@ -109,41 +107,37 @@ export function NucleiRunTemplateHub({
             <strong className="text-foreground">{selectedCount}</strong>/{templates.length} selected
           </span>
 
-          <Button
-            size="sm"
-            variant="ghost"
+          <Button leading="tight"
+            size="md"
+            variant="quiet"
             onClick={onSelectAll}
             className={cn(
               // Sizing & Spacing
-              "h-7 px-2 text-xs",
-              // Interactive & States
-              "text-muted-foreground hover:text-foreground"
+              "px-2"
             )}
           >
             All
           </Button>
 
-          <Button
-            size="sm"
-            variant="ghost"
+          <Button leading="tight"
+            size="md"
+            variant="quiet"
             onClick={onDeselectAll}
             className={cn(
               // Sizing & Spacing
-              "h-7 px-2 text-xs",
-              // Interactive & States
-              "text-muted-foreground hover:text-foreground"
+              "px-2"
             )}
           >
             None
           </Button>
 
-          <Button
-            size="sm"
+          <Button leading="tight"
+            size="md"
             variant="outline"
             onClick={() => onSelectBySeverity(['critical', 'high'])}
             className={cn(
               // Sizing & Spacing
-              "h-7 px-2 text-xs",
+              "px-2",
               // Typography
               "text-red-500 hover:text-red-600",
               // Backgrounds & Borders
@@ -178,13 +172,13 @@ export function NucleiRunTemplateHub({
           >
             <MagnifyingGlassIcon className="h-3.5 w-3.5" />
           </div>
-          <Input
+          <Input textSize="xs"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search templates by CVE, keyword, protocol, or tag..."
             className={cn(
               // Sizing & Spacing
-              "pl-8 h-7 text-xs w-full",
+              "pl-8",
               // Backgrounds & Borders
               "bg-muted/20 border-input/60"
             )}
@@ -269,7 +263,7 @@ export function NucleiRunTemplateHub({
                         // Layout & Positioning
                         "line-clamp-1",
                         // Typography
-                        "font-mono text-[10px] text-muted-foreground"
+                        "font-mono text-3xs text-muted-foreground"
                       )}
                     >
                       {tmpl.id}
@@ -288,7 +282,7 @@ export function NucleiRunTemplateHub({
                       // Layout & Positioning
                       "inline-flex items-center gap-1 px-1.5 py-0.5 rounded",
                       // Typography
-                      "text-[10px] font-semibold uppercase",
+                      "text-3xs font-semibold uppercase",
                       // Backgrounds & Borders
                       sevConfig.bg,
                       sevConfig.text,
@@ -308,7 +302,7 @@ export function NucleiRunTemplateHub({
                   // Layout & Positioning
                   "line-clamp-2 my-2",
                   // Typography
-                  "text-[11px] text-muted-foreground leading-relaxed"
+                  "text-2xs text-muted-foreground leading-relaxed"
                 )}
               >
                 {tmpl.description}
@@ -332,7 +326,7 @@ export function NucleiRunTemplateHub({
                       // Layout & Positioning
                       "px-1.5 py-0.5 rounded",
                       // Typography
-                      "text-[9px] font-mono uppercase",
+                      "text-4xs font-mono uppercase",
                       // Backgrounds & Borders
                       protoBadge.bg,
                       protoBadge.text
@@ -342,15 +336,15 @@ export function NucleiRunTemplateHub({
                   </span>
 
                   {tmpl.cve_id && (
-                    <Badge
+                    <Badge size="sm"
                       variant="outline"
                       className={cn(
                         // Sizing & Spacing
-                        "h-4 px-1",
+                        "px-1",
                         // Typography
-                        "text-[9px] font-bold text-amber-500 truncate",
+                        "text-4xs font-bold text-warning truncate",
                         // Backgrounds & Borders
-                        "border-amber-500/30"
+                        "border-warning/30"
                       )}
                     >
                       {tmpl.cve_id}
@@ -368,11 +362,11 @@ export function NucleiRunTemplateHub({
                   }}
                   className={cn(
                     // Layout & Positioning
-                    "flex items-center gap-1",
+                    "flex",
                     // Sizing & Spacing
-                    "h-6 px-2",
+                    "px-2",
                     // Typography
-                    "text-[10px]",
+                    "text-3xs",
                     // Interactive & States
                     "text-muted-foreground hover:text-primary"
                   )}

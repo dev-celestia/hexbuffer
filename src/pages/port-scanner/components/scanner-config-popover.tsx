@@ -46,15 +46,12 @@ export function ScannerConfigPopover({
     <Popover>
       <PopoverTrigger
         render={
-          <Button
+          <Button leading="tight"
             variant="outline"
-            size="sm"
+            size="md"
             className={cn(
               // Sizing & Spacing
-              "h-7 px-2",
-
-              // Typography
-              "text-xs"
+              "px-2"
             )}
           />
         }
@@ -76,7 +73,7 @@ export function ScannerConfigPopover({
           <h4
             className={cn(
               // Typography
-              "text-[11px] font-semibold uppercase text-muted-foreground tracking-wider"
+              "text-2xs font-semibold uppercase text-muted-foreground tracking-wider"
             )}
           >
             Scan Configuration
@@ -85,14 +82,14 @@ export function ScannerConfigPopover({
           {/* Timeout */}
           <div className="flex items-center justify-between gap-4">
             <span className="text-xs text-muted-foreground">Timeout (ms)</span>
-            <Input
+            <Input textSize="xs"
               id="timeout-input"
               className={cn(
                 // Sizing & Spacing
-                "h-7 w-20 px-2",
+                "w-20",
 
                 // Typography
-                "text-right text-xs",
+                "text-right",
 
                 // Backgrounds & Borders
                 "bg-background/50 border-muted-foreground/20",
@@ -108,14 +105,14 @@ export function ScannerConfigPopover({
           {/* Concurrency */}
           <div className="flex items-center justify-between gap-4">
             <span className="text-xs text-muted-foreground">Concurrency</span>
-            <Input
+            <Input textSize="xs"
               id="concurrency-input"
               className={cn(
                 // Sizing & Spacing
-                "h-7 w-20 px-2",
+                "w-20",
 
                 // Typography
-                "text-right text-xs",
+                "text-right",
 
                 // Backgrounds & Borders
                 "bg-background/50 border-muted-foreground/20",
@@ -162,7 +159,7 @@ export function ScannerConfigPopover({
                 "gap-1",
 
                 // Typography
-                "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground",
+                "text-2xs font-semibold uppercase tracking-wider text-muted-foreground",
 
                 // Interactive & States
                 "hover:text-foreground transition-colors cursor-pointer"
@@ -204,14 +201,14 @@ export function ScannerConfigPopover({
                   >
                     Delay (ms)
                   </span>
-                  <Input
+                  <Input textSize="xs"
                     id="delay-input"
                     className={cn(
                       // Sizing & Spacing
-                      "h-7 w-20 px-2",
+                      "w-20",
 
                       // Typography
-                      "text-right text-xs",
+                      "text-right",
 
                       // Backgrounds & Borders
                       "bg-background/50 border-muted-foreground/20",
@@ -242,14 +239,14 @@ export function ScannerConfigPopover({
                   >
                     Jitter (ms)
                   </span>
-                  <Input
+                  <Input textSize="xs"
                     id="jitter-input"
                     className={cn(
                       // Sizing & Spacing
-                      "h-7 w-20 px-2",
+                      "w-20",
 
                       // Typography
-                      "text-right text-xs",
+                      "text-right",
 
                       // Backgrounds & Borders
                       "bg-background/50 border-muted-foreground/20",

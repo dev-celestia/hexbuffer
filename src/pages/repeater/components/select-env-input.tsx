@@ -261,7 +261,7 @@ export function EnvSuggestionDropdown({
           // Sizing & Spacing
           'px-2.5 py-1.5',
           // Typography
-          'text-[10px] font-semibold text-muted-foreground uppercase tracking-wider',
+          'text-3xs font-semibold text-muted-foreground uppercase tracking-wider',
           // Backgrounds & Borders
           'bg-muted/30',
         )}
@@ -273,7 +273,7 @@ export function EnvSuggestionDropdown({
               // Sizing & Spacing
               'px-1.5 py-0.5 rounded',
               // Typography
-              'text-[9px] font-mono lowercase',
+              'text-4xs font-mono lowercase',
               // Backgrounds & Borders
               'bg-sky-500/10 text-sky-600 dark:text-sky-400',
             )}
@@ -345,7 +345,7 @@ export function EnvSuggestionDropdown({
                     // Layout & Positioning
                     'truncate max-w-[120px]',
                     // Typography
-                    'text-[10px] text-muted-foreground/70 font-mono',
+                    'text-3xs text-muted-foreground/70 font-mono',
                   )}
                   title={item.value}
                 >
@@ -505,7 +505,7 @@ export function ColorizedUrlInput({
         )}
       </div>
 
-      <Textarea
+      <Textarea leading="tight" mono
         ref={textareaRef}
         rows={1}
         value={value}
@@ -527,7 +527,7 @@ export function ColorizedUrlInput({
           'pl-2 py-1 min-w-0',
           expandable ? 'pr-6' : 'pr-2',
           // Typography
-          'font-mono text-xs leading-normal text-transparent caret-foreground selection:bg-primary/30 selection:text-foreground placeholder:text-muted-foreground',
+          'text-xs leading-normal text-transparent caret-foreground selection:bg-primary/30 selection:text-foreground placeholder:text-muted-foreground',
           // Backgrounds & Borders
           'bg-transparent',
           className,

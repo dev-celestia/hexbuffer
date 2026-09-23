@@ -165,7 +165,7 @@ export function WebSocketEntryView({ selectedConnectionId }: Readonly<WebSocketE
                 "px-1.5 py-0.5",
 
                 // Typography
-                "text-[10px] font-mono font-semibold uppercase tracking-wider",
+                "text-3xs font-mono font-semibold uppercase tracking-wider",
 
                 // Backgrounds & Borders
                 "rounded border",
@@ -194,7 +194,7 @@ export function WebSocketEntryView({ selectedConnectionId }: Readonly<WebSocketE
               "gap-x-3 gap-y-1",
 
               // Typography
-              "text-[11px] font-mono text-muted-foreground"
+              "text-2xs font-mono text-muted-foreground"
             )}
           >
             <span>{formatDateTime(connection.timestamp)}</span>
@@ -270,7 +270,7 @@ export function WebSocketEntryView({ selectedConnectionId }: Readonly<WebSocketE
             <div
               className={cn(
                 // Typography
-                "text-[11px] font-mono text-muted-foreground"
+                "text-2xs font-mono text-muted-foreground"
               )}
             >
               {filteredMessages.length !== messages.length
@@ -328,7 +328,7 @@ export function WebSocketEntryView({ selectedConnectionId }: Readonly<WebSocketE
                   "px-2 py-0.5",
 
                   // Typography
-                  "text-[10px] uppercase font-semibold font-mono transition-colors rounded-xs",
+                  "text-3xs uppercase font-semibold font-mono transition-colors rounded-xs",
                   directionFilter === 'all'
                     ? "bg-background text-foreground shadow-xs"
                     : "text-muted-foreground hover:text-foreground"
@@ -344,7 +344,7 @@ export function WebSocketEntryView({ selectedConnectionId }: Readonly<WebSocketE
                   "px-2 py-0.5",
 
                   // Typography
-                  "text-[10px] uppercase font-semibold font-mono transition-colors rounded-xs",
+                  "text-3xs uppercase font-semibold font-mono transition-colors rounded-xs",
                   directionFilter === 'outbound'
                     ? "bg-background text-blue-600 dark:text-blue-400 shadow-xs"
                     : "text-muted-foreground hover:text-foreground"
@@ -360,7 +360,7 @@ export function WebSocketEntryView({ selectedConnectionId }: Readonly<WebSocketE
                   "px-2 py-0.5",
 
                   // Typography
-                  "text-[10px] uppercase font-semibold font-mono transition-colors rounded-xs",
+                  "text-3xs uppercase font-semibold font-mono transition-colors rounded-xs",
                   directionFilter === 'inbound'
                     ? "bg-background text-emerald-600 dark:text-emerald-400 shadow-xs"
                     : "text-muted-foreground hover:text-foreground"
@@ -390,7 +390,7 @@ export function WebSocketEntryView({ selectedConnectionId }: Readonly<WebSocketE
                 htmlFor="hide-heartbeats"
                 className={cn(
                   // Typography
-                  "text-[11px] text-muted-foreground select-none cursor-pointer"
+                  "text-2xs text-muted-foreground select-none cursor-pointer"
                 )}
               >
                 Hide heartbeats
@@ -417,7 +417,7 @@ export function WebSocketEntryView({ selectedConnectionId }: Readonly<WebSocketE
                 htmlFor="auto-scroll"
                 className={cn(
                   // Typography
-                  "text-[11px] text-muted-foreground select-none cursor-pointer"
+                  "text-2xs text-muted-foreground select-none cursor-pointer"
                 )}
               >
                 Auto-scroll

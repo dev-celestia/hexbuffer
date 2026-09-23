@@ -142,7 +142,7 @@ export function LogDetailView() {
                 "h-full p-2 mt-3"
               )}
             >
-              <Label
+              <Label leading="tight"
                 className={cn(
                   // Layout & Positioning
                   "block",
@@ -151,7 +151,7 @@ export function LogDetailView() {
                   "mb-1",
 
                   // Typography
-                  "text-xs text-muted-foreground"
+                  "text-muted-foreground"
                 )}
               >
                 Raw Request
@@ -247,16 +247,14 @@ export function LogDetailView() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem
+                  <DropdownMenuItem leading="tight"
                     onClick={toggleExpanded}
-                    className="text-xs"
                   >
                     <ArrowsOutIcon className="mr-2 size-4" /> Expand Editor
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
+                  <DropdownMenuItem leading="tight"
                     onClick={toggleViewMode}
-                    className="text-xs"
                   >
                     {viewMode === "table" ? (
                       <>
@@ -273,9 +271,8 @@ export function LogDetailView() {
                     variant="dropdown"
                     onSelect={handleSendToCollection}
                   />
-                  <DropdownMenuItem
+                  <DropdownMenuItem leading="tight"
                     onClick={handleSendToInvoker}
-                    className="text-xs"
                   >
                     <CrosshairIcon className="mr-2 size-4" /> Send to Intruder
                   </DropdownMenuItem>
@@ -373,7 +370,7 @@ export function LogDetailView() {
           <DialogHeader
             className={cn(
               // Layout & Positioning
-              "flex flex-row items-center justify-between shrink-0",
+              "flex-row items-center justify-between shrink-0",
 
               // Sizing & Spacing
               "pb-2",
@@ -399,13 +396,10 @@ export function LogDetailView() {
               >
                 {call.method}
               </span>
-              <DialogTitle
+              <DialogTitle mono
                 className={cn(
                   // Layout & Positioning
-                  "truncate",
-
-                  // Typography
-                  "font-mono text-sm"
+                  "truncate"
                 )}
               >
                 {call.url || call.path}
@@ -420,7 +414,7 @@ export function LogDetailView() {
                     "px-1.5 py-0.5",
 
                     // Typography
-                    "font-mono text-[10px] font-semibold",
+                    "font-mono text-3xs font-semibold",
 
                     // Backgrounds & Borders
                     "rounded border",
@@ -455,9 +449,8 @@ export function LogDetailView() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem
+                  <DropdownMenuItem leading="tight"
                     onClick={toggleViewMode}
-                    className="text-xs"
                   >
                     {viewMode === "table" ? (
                       <>
@@ -474,9 +467,8 @@ export function LogDetailView() {
                     variant="dropdown"
                     onSelect={handleSendToCollection}
                   />
-                  <DropdownMenuItem
+                  <DropdownMenuItem leading="tight"
                     onClick={handleSendToInvoker}
-                    className="text-xs"
                   >
                     <CrosshairIcon className="mr-2 size-4" /> Send to Intruder
                   </DropdownMenuItem>
@@ -516,10 +508,10 @@ export function LogDetailView() {
                   "border-b bg-muted/40"
                 )}
               >
-                <Label
+                <Label leading="tight"
                   className={cn(
                     // Typography
-                    "text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                    "font-semibold text-muted-foreground uppercase tracking-wider"
                   )}
                 >
                   Request
@@ -603,10 +595,10 @@ export function LogDetailView() {
                   "border-b bg-muted/40"
                 )}
               >
-                <Label
+                <Label leading="tight"
                   className={cn(
                     // Typography
-                    "text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+                    "font-semibold text-muted-foreground uppercase tracking-wider"
                   )}
                 >
                   Response

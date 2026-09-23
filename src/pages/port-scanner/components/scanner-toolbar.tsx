@@ -131,14 +131,11 @@ export function ScannerToolbar({
           )}
         >
           {/* Target Input */}
-          <Input
+          <Input textSize="xs" mono
             id="target-input"
             className={cn(
               // Sizing & Spacing
-              "h-7 w-48 px-2",
-
-              // Typography
-              "text-xs font-mono",
+              "w-48",
 
               // Backgrounds & Borders
               "bg-background/50 border-muted-foreground/20",
@@ -158,32 +155,26 @@ export function ScannerToolbar({
 
           {/* Start / Stop */}
           {isRunning ? (
-            <Button
-              size="sm"
+            <Button leading="tight"
+              size="md"
               variant="destructive"
               onClick={onStop}
               className={cn(
                 // Sizing & Spacing
-                "h-7 px-2.5 gap-1.5",
-
-                // Typography
-                "text-xs font-medium"
+                "gap-1.5"
               )}
             >
               <SquareIcon className="size-3" weight="fill" />
               <span>Stop Scan</span>
             </Button>
           ) : (
-            <Button
-              size="sm"
+            <Button leading="tight"
+              size="md"
               disabled={!canScan}
               onClick={onStart}
               className={cn(
                 // Sizing & Spacing
-                "h-7 px-2.5 gap-1.5",
-
-                // Typography
-                "text-xs font-medium"
+                "gap-1.5"
               )}
             >
               <PlayIcon className="size-3" weight="fill" />
@@ -215,14 +206,11 @@ export function ScannerToolbar({
         >
           {/* Preset Select */}
           <Select value={preset} onValueChange={onPresetChange}>
-            <SelectTrigger
+            <SelectTrigger leading="tight"
               id="preset-select"
               className={cn(
                 // Sizing & Spacing
-                "h-7 w-[105px] px-2",
-
-                // Typography
-                "text-xs",
+                "h-7 w-[105px]",
 
                 // Backgrounds & Borders
                 "bg-background/50 border-muted-foreground/20",
@@ -243,15 +231,12 @@ export function ScannerToolbar({
               )}
             >
               {PRESET_OPTIONS.map((opt) => (
-                <SelectItem
+                <SelectItem leading="tight"
                   key={opt.value}
                   value={opt.value}
                   className={cn(
-                    // Typography
-                    "text-xs",
-
                     // Interactive & States
-                    "focus:bg-accent focus:text-accent-foreground cursor-pointer"
+                    "cursor-pointer"
                   )}
                 >
                   {opt.label}
@@ -280,14 +265,11 @@ export function ScannerToolbar({
                   "relative flex items-center"
                 )}
               >
-                <Input
+                <Input textSize="xs" mono
                   id="ports-input"
                   className={cn(
                     // Sizing & Spacing
-                    "h-7 w-44 sm:w-56 pl-2 pr-12",
-
-                    // Typography
-                    "text-xs font-mono",
+                    "w-44 sm:w-56 pl-2 pr-12",
 
                     // Backgrounds & Borders
                     "bg-background/50 border-muted-foreground/20",
@@ -305,7 +287,7 @@ export function ScannerToolbar({
                     "absolute right-1.5 pointer-events-none select-none",
 
                     // Typography
-                    "text-[10px] font-mono text-muted-foreground font-medium"
+                    "text-3xs font-mono text-muted-foreground font-medium"
                   )}
                 >
                   {parsedCustomCount > 0 ? `${parsedCustomCount}p` : '0p'}
@@ -315,16 +297,13 @@ export function ScannerToolbar({
               <Tooltip>
                 <TooltipTrigger
                   render={
-                    <Button
+                    <Button leading="tight"
                       variant="outline"
-                      size="sm"
+                      size="md"
                       onClick={openCustomPortsDialog}
                       className={cn(
                         // Sizing & Spacing
-                        "h-7 px-2",
-
-                        // Typography
-                        "text-xs",
+                        "px-2",
 
                         // Backgrounds & Borders
                         "bg-background/50 border-muted-foreground/20 hover:bg-muted/60"
@@ -416,9 +395,9 @@ export function ScannerToolbar({
             }
           >
             {stealthMode ? (
-              <EyeSlashIcon weight="fill" className="size-3.5 shrink-0 text-amber-500" />
+              <EyeSlashIcon weight="fill" className="size-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
             ) : (
-              <WarningCircleIcon weight="fill" className="size-3.5 shrink-0 text-red-500" />
+              <WarningCircleIcon weight="fill" className="size-3.5 shrink-0 text-red-600 dark:text-red-400" />
             )}
             <span>{stealthMode ? 'Stealth' : 'Noisy - High Performance'}</span>
             <Switch

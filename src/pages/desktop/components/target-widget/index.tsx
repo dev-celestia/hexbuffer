@@ -65,7 +65,7 @@ export function TargetWidget() {
           <span
             className={cn(
               // Typography
-              'text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase'
+              'text-3xs font-mono font-bold tracking-wider text-muted-foreground uppercase'
             )}
           >
             Target Scope
@@ -87,7 +87,7 @@ export function TargetWidget() {
               variant="outline"
               className={cn(
                 // Typography
-                'text-[10px] font-normal',
+                'font-normal',
 
                 // Backgrounds & Borders
                 'border-border/50'
@@ -128,7 +128,7 @@ export function TargetWidget() {
           <p
             className={cn(
               // Typography
-              'text-[10px] text-muted-foreground font-medium uppercase font-mono tracking-tight leading-none mb-0.5'
+              'text-3xs text-muted-foreground font-medium uppercase font-mono tracking-tight leading-none mb-0.5'
             )}
           >
             Active Target
@@ -171,7 +171,7 @@ export function TargetWidget() {
                 'max-w-[80px]',
 
                 // Typography
-                'text-[9px] font-mono text-muted-foreground/70 truncate'
+                'text-4xs font-mono text-muted-foreground/70 truncate'
               )}
             >
               {activeTarget.scope[0]}
@@ -217,7 +217,7 @@ export function TargetWidget() {
               'gap-1.5',
 
               // Typography
-              'text-[10px] uppercase font-mono font-bold text-muted-foreground'
+              'text-3xs uppercase font-mono font-bold text-muted-foreground'
             )}
           >
             <GearIcon className="size-3.5" />
@@ -279,7 +279,7 @@ export function TargetWidget() {
                   <span
                     className={cn(
                       // Typography
-                      'text-[10px] text-muted-foreground font-mono uppercase font-semibold'
+                      'text-3xs text-muted-foreground font-mono uppercase font-semibold'
                     )}
                   >
                     {editingTarget ? 'Edit Target' : 'Create Target'}
@@ -321,7 +321,7 @@ export function TargetWidget() {
                   <span
                     className={cn(
                       // Typography
-                      'text-[10px] text-muted-foreground'
+                      'text-3xs text-muted-foreground'
                     )}
                   >
                     <span className="font-semibold text-foreground">{filteredCount}</span> of {targetCount}

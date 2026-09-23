@@ -30,7 +30,7 @@ export function ContextsVariablesEmpty({ onAddVar }: Readonly<ContextsVariablesE
         // Backgrounds & Borders
         // `rounded-md`, not the primitive's `rounded-xl`, so the block matches the radius of the
         // variable rows it stands in for.
-        'rounded-md border border-dashed bg-muted/5'
+        'rounded-md border bg-muted/5'
       )}
     >
       <EmptyHeader>
@@ -43,15 +43,12 @@ export function ContextsVariablesEmpty({ onAddVar }: Readonly<ContextsVariablesE
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button
+        <Button leading="tight"
           variant="outline"
           size="sm"
           className={cn(
             // Sizing & Spacing
-            'h-6 gap-1 px-2',
-
-            // Typography
-            'text-xs'
+            'px-2'
           )}
           onClick={onAddVar}
         >

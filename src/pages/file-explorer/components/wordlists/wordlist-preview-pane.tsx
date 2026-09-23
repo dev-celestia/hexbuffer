@@ -75,7 +75,7 @@ export function WordlistPreviewPane({
       >
         <FileTextIcon className="size-8 text-muted-foreground/35 mb-1" />
         <p className="text-xs font-medium text-foreground">No Wordlist Selected</p>
-        <p className="text-[11px] text-muted-foreground max-w-xs leading-relaxed">
+        <p className="text-2xs text-muted-foreground max-w-xs leading-relaxed">
           Select any wordlist from the catalog to inspect details, preview entries, or download to your local storage.
         </p>
       </div>
@@ -118,17 +118,17 @@ export function WordlistPreviewPane({
           Wordlist Preview
         </span>
         {isBundled ? (
-          <span className="inline-flex items-center gap-1 text-[10px] text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded font-semibold">
+          <span className="inline-flex items-center gap-1 text-3xs text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded font-semibold">
             <CheckCircleIcon className="size-3" />
             Bundled
           </span>
         ) : isInstalled ? (
-          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded font-semibold">
+          <span className="inline-flex items-center gap-1 text-3xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded font-semibold">
             <CheckCircleIcon className="size-3" />
             Ready
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-muted border border-muted-foreground/10 px-1.5 py-0.5 rounded font-semibold">
+          <span className="inline-flex items-center gap-1 text-3xs text-muted-foreground bg-muted border border-muted-foreground/10 px-1.5 py-0.5 rounded font-semibold">
             <CloudArrowDownIcon className="size-3" />
             Cloud
           </span>
@@ -166,7 +166,7 @@ export function WordlistPreviewPane({
           >
             <div className="min-w-0 flex-1">
               <h3 className="text-xs font-semibold text-foreground truncate">{item.name}</h3>
-              <p className="text-[10px] font-mono text-muted-foreground truncate mt-0.5">
+              <p className="text-3xs font-mono text-muted-foreground truncate mt-0.5">
                 {item.href}
               </p>
             </div>
@@ -188,8 +188,8 @@ export function WordlistPreviewPane({
             <div className="flex items-center gap-1.5 min-w-0">
               <RowsIcon className="size-3.5 text-muted-foreground shrink-0" />
               <div className="min-w-0">
-                <span className="text-[9px] text-muted-foreground block">Lines</span>
-                <span className="text-[11px] font-mono font-medium text-foreground">
+                <span className="text-4xs text-muted-foreground block">Lines</span>
+                <span className="text-2xs font-mono font-medium text-foreground">
                   {item.lines.toLocaleString()}
                 </span>
               </div>
@@ -198,8 +198,8 @@ export function WordlistPreviewPane({
             <div className="flex items-center gap-1.5 min-w-0">
               <HardDriveIcon className="size-3.5 text-muted-foreground shrink-0" />
               <div className="min-w-0">
-                <span className="text-[9px] text-muted-foreground block">File Size</span>
-                <span className="text-[11px] font-mono font-medium text-foreground">
+                <span className="text-4xs text-muted-foreground block">File Size</span>
+                <span className="text-2xs font-mono font-medium text-foreground">
                   {isBundled ? 'Built-in' : formatBytes(item.fileSize)}
                 </span>
               </div>
@@ -222,19 +222,19 @@ export function WordlistPreviewPane({
             {isInstalled ? (
               <>
                 <Button
-                  size="sm"
+                  size="md"
                   variant="outline"
                   onClick={() => onOpen(item)}
-                  className="flex-1 text-[11px] gap-1 h-7 px-2 font-medium"
+                  className="flex-1 text-2xs px-2"
                 >
                   <FolderOpenIcon className="size-3.5" />
                   <span>Reveal in Files</span>
                 </Button>
                 <Button
-                  size="sm"
+                  size="md"
                   variant="ghost"
                   onClick={() => onDelete(item)}
-                  className="text-[11px] text-destructive hover:bg-destructive/10 h-7 px-2 shrink-0"
+                  className="text-2xs text-destructive hover:bg-destructive/10 px-2"
                   title="Delete from local files"
                 >
                   <TrashIcon className="size-3.5" />
@@ -242,11 +242,11 @@ export function WordlistPreviewPane({
               </>
             ) : (
               <Button
-                size="sm"
+                size="md"
                 variant="default"
                 disabled={isDownloading}
                 onClick={() => onDownload(item)}
-                className="flex-1 text-[11px] gap-1.5 h-7 px-2 font-medium"
+                className="flex-1 text-2xs gap-1.5 px-2"
               >
                 {isDownloading ? (
                   <>
@@ -263,10 +263,10 @@ export function WordlistPreviewPane({
             )}
 
             <Button
-              size="sm"
+              size="md"
               variant="outline"
               onClick={handleCopyUrl}
-              className="text-[11px] h-7 px-2 shrink-0"
+              className="text-2xs px-2"
               title="Copy Raw GitHub URL"
             >
               <GlobeIcon className="size-3.5" />
@@ -294,7 +294,7 @@ export function WordlistPreviewPane({
             <span
               className={cn(
                 // Typography
-                "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+                "text-3xs font-semibold uppercase tracking-wider text-muted-foreground"
               )}
             >
               Preview (First 100 Lines)
@@ -311,7 +311,7 @@ export function WordlistPreviewPane({
                   "gap-1",
 
                   // Typography & Colors
-                  "text-[10px] text-muted-foreground hover:text-foreground",
+                  "text-3xs text-muted-foreground hover:text-foreground",
 
                   // Interactive & States
                   "transition-colors"
@@ -335,7 +335,7 @@ export function WordlistPreviewPane({
               "bg-muted/20 border border-border/60",
 
               // Typography
-              "font-mono text-[11px] leading-relaxed text-muted-foreground"
+              "font-mono text-2xs leading-relaxed text-muted-foreground"
             )}
           >
             {loading ? (
@@ -344,7 +344,7 @@ export function WordlistPreviewPane({
                 <span>Loading preview…</span>
               </div>
             ) : previewContent ? (
-              <pre className="whitespace-pre-wrap break-all font-mono text-[11px]">
+              <pre className="whitespace-pre-wrap break-all font-mono text-2xs">
                 {previewContent}
               </pre>
             ) : (

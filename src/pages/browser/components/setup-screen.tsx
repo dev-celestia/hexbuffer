@@ -66,60 +66,42 @@ export function CrawlSetupScreen({
             )}
           >
             <ButtonGroup>
-              <Button
-                size="sm"
+              <Button leading="tight"
+                size="md"
                 type="button"
                 variant="outline"
                 className={cn(
-                  // Sizing & Spacing
-                  "h-7 px-2.5",
-
-                  // Typography
-                  "text-xs",
-
                   // Interactive & States
-                  "hover:text-green-500",
-                  activeTab === 'general' && "text-green-500"
+                  "hover:text-green-600 dark:hover:text-green-400",
+                  activeTab === 'general' && "text-green-600 dark:text-green-400"
                 )}
                 data-state={activeTab === 'general' ? 'on' : 'off'}
                 onClick={() => setActiveTab('general')}
               >
                 General
               </Button>
-              <Button
-                size="sm"
+              <Button leading="tight"
+                size="md"
                 type="button"
                 variant="outline"
                 className={cn(
-                  // Sizing & Spacing
-                  "h-7 px-2.5",
-
-                  // Typography
-                  "text-xs",
-
                   // Interactive & States
-                  "hover:text-green-500",
-                  activeTab === 'limits' && "text-green-500"
+                  "hover:text-green-600 dark:hover:text-green-400",
+                  activeTab === 'limits' && "text-green-600 dark:text-green-400"
                 )}
                 data-state={activeTab === 'limits' ? 'on' : 'off'}
                 onClick={() => setActiveTab('limits')}
               >
                 Limits & Timing
               </Button>
-              <Button
-                size="sm"
+              <Button leading="tight"
+                size="md"
                 type="button"
                 variant="outline"
                 className={cn(
-                  // Sizing & Spacing
-                  "h-7 px-2.5",
-
-                  // Typography
-                  "text-xs",
-
                   // Interactive & States
-                  "hover:text-green-500",
-                  activeTab === 'artifacts' && "text-green-500"
+                  "hover:text-green-600 dark:hover:text-green-400",
+                  activeTab === 'artifacts' && "text-green-600 dark:text-green-400"
                 )}
                 data-state={activeTab === 'artifacts' ? 'on' : 'off'}
                 onClick={() => setActiveTab('artifacts')}
@@ -154,12 +136,8 @@ export function CrawlSetupScreen({
                   )}
                 >
                   <Label htmlFor="target-url">Target URL</Label>
-                  <Input
+                  <Input mono
                     id="target-url"
-                    className={cn(
-                      // Typography
-                      "font-mono"
-                    )}
                     placeholder="https://target.com"
                     disabled={disabled}
                     {...register('targetUrl')}
@@ -184,12 +162,8 @@ export function CrawlSetupScreen({
                   )}
                 >
                   <Label htmlFor="exclude-paths">Exclude Paths</Label>
-                  <Input
+                  <Input mono
                     id="exclude-paths"
-                    className={cn(
-                      // Typography
-                      "font-mono"
-                    )}
                     placeholder="/logout, /delete, /billing"
                     disabled={disabled}
                     {...register('excludePaths')}

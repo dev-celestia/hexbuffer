@@ -103,7 +103,7 @@ export function ImportDialog({
                   'truncate',
 
                   // Typography
-                  'font-mono text-[11px]'
+                  'font-mono text-2xs'
                 )}
               >
                 {summary.fileName ?? 'Selected file'}
@@ -117,7 +117,7 @@ export function ImportDialog({
                 'ps-[22px]',
 
                 // Typography
-                'text-[11px] text-muted-foreground'
+                'text-2xs text-muted-foreground'
               )}
             >
               {describeContents(summary)}

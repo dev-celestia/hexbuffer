@@ -72,10 +72,10 @@ export function WorkflowToolbar() {
     <div className="flex h-10 items-center gap-2 border-b bg-muted px-3">
       {editing ? (
         <div className="flex items-center gap-1.5">
-          <Input
+          <Input textSize="xs"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
-            className="h-6 w-48 text-xs"
+            className="h-6 w-48"
             autoFocus
             onKeyDown={(e) => {
               if (e.key === 'Enter') confirmEdit();
@@ -94,7 +94,7 @@ export function WorkflowToolbar() {
           <span className="truncate text-xs font-medium max-w-[200px]">
             {workflow.name}
           </span>
-          <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={startEdit}>
+          <Button size="sm" variant="ghost" className="w-6 p-0" onClick={startEdit}>
             <PencilIcon className="size-3" />
           </Button>
         </div>
@@ -102,24 +102,24 @@ export function WorkflowToolbar() {
 
       <div className="ml-auto flex items-center gap-2">
         {hasLiveTrafficTrigger && !workflow.enabled ? (
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-            <PauseCircleIcon className="size-3 text-amber-500" />
-            <span className="font-medium text-amber-500">Listening Paused</span>
+          <div className="flex items-center gap-1.5 text-3xs text-muted-foreground">
+            <PauseCircleIcon className="size-3 text-amber-600 dark:text-amber-400" />
+            <span className="font-medium text-amber-600 dark:text-amber-400">Listening Paused</span>
           </div>
         ) : isThisWorkflowRunning ? (
-          <div className="flex items-center gap-1.5 text-[10px]">
-            <SpinnerGapIcon className="size-3 animate-spin text-emerald-400" />
-            <span className="text-emerald-400 font-medium">Running</span>
+          <div className="flex items-center gap-1.5 text-3xs">
+            <SpinnerGapIcon className="size-3 animate-spin text-emerald-600 dark:text-emerald-400" />
+            <span className="text-emerald-600 dark:text-emerald-400 font-medium">Running</span>
           </div>
         ) : !readiness.ready ? (
-          <div className="flex min-w-0 items-center gap-1.5 text-[10px]" title={readiness.reason ?? undefined}>
-            <WarningCircleIcon className="size-3 shrink-0 text-amber-500" />
-            <span className="max-w-56 truncate font-medium text-amber-500">
+          <div className="flex min-w-0 items-center gap-1.5 text-3xs" title={readiness.reason ?? undefined}>
+            <WarningCircleIcon className="size-3 shrink-0 text-amber-600 dark:text-amber-400" />
+            <span className="max-w-56 truncate font-medium text-amber-600 dark:text-amber-400">
               {readiness.reason ?? 'Needs action'}
             </span>
           </div>
         ) : (
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-3xs text-muted-foreground">
             <div className="size-1.5 rounded-full bg-emerald-500/70" />
             <span>Ready</span>
           </div>
@@ -127,8 +127,8 @@ export function WorkflowToolbar() {
         {isThisWorkflowRunning && (
           <Button
             variant="outline"
-            size="sm"
-            className="h-7 border-amber-500/30 text-amber-600 hover:text-amber-700 dark:text-amber-300"
+            size="md"
+            className="border-amber-500/30 text-amber-600 hover:text-amber-700 dark:text-amber-300"
             onClick={handleAbort}
             title="Abort this workflow run"
           >
@@ -139,8 +139,7 @@ export function WorkflowToolbar() {
         {hasLiveTrafficTrigger && (
           <Button
             variant="outline"
-            size="sm"
-            className="h-7"
+            size="md"
             onClick={handleToggleListening}
             title={workflow.enabled ? 'PauseIcon live-traffic listening' : 'Start live-traffic listening'}
           >
@@ -154,8 +153,8 @@ export function WorkflowToolbar() {
         )}
         <Button
           variant="ghost"
-          size="sm"
-          className="h-7 text-destructive hover:text-destructive"
+          size="md"
+          className="text-destructive hover:text-destructive"
           onClick={handleDelete}
         >
           <TrashIcon className="size-3.5" />

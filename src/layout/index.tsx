@@ -111,7 +111,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             {/* Left side: Hexbuffer label on Linux/Windows; empty spacer on macOS to preserve native traffic lights */}
             <div className="flex items-center gap-1.5 pointer-events-none w-20">
               {!isMac && (
-                <span className="text-[11px] font-medium tracking-wider text-muted-foreground/60 select-none">
+                <span className="text-2xs font-medium tracking-wider text-muted-foreground/60 select-none">
                   Hexbuffer
                 </span>
               )}
@@ -158,15 +158,12 @@ export function AppLayout({ children }: AppLayoutProps) {
           "text-xs font-sans"
         )}
       >
-        <ContextMenuItem
+        <ContextMenuItem leading="tight"
           id="ctx-settings"
           onClick={() => navigate('/settings')}
           className={cn(
             // Sizing & Spacing
-            "py-1 px-1.5 gap-2",
-
-            // Typography
-            "text-xs"
+            "px-1.5"
           )}
         >
           <GearSixIcon
@@ -186,10 +183,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             id="ctx-appearance"
             className={cn(
               // Sizing & Spacing
-              "py-1 px-1.5 gap-2",
-
-              // Typography
-              "text-xs"
+              "px-1.5"
             )}
           >
             <MonitorIcon
@@ -210,15 +204,12 @@ export function AppLayout({ children }: AppLayoutProps) {
             )}
           >
             {/* Dark / Light mode */}
-            <ContextMenuItem
+            <ContextMenuItem leading="tight"
               id="ctx-theme-light"
               onClick={() => setTheme('light')}
               className={cn(
                 // Sizing & Spacing
-                "py-1 px-1.5 gap-2",
-
-                // Typography
-                "text-xs"
+                "px-1.5"
               )}
             >
               <SunIcon
@@ -235,22 +226,19 @@ export function AppLayout({ children }: AppLayoutProps) {
                     "ml-auto",
 
                     // Typography
-                    "text-[10px] text-primary font-medium"
+                    "text-3xs text-primary font-medium"
                   )}
                 >
                   ✓
                 </span>
               )}
             </ContextMenuItem>
-            <ContextMenuItem
+            <ContextMenuItem leading="tight"
               id="ctx-theme-dark"
               onClick={() => setTheme('dark')}
               className={cn(
                 // Sizing & Spacing
-                "py-1 px-1.5 gap-2",
-
-                // Typography
-                "text-xs"
+                "px-1.5"
               )}
             >
               <MoonIcon
@@ -267,7 +255,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                     "ml-auto",
 
                     // Typography
-                    "text-[10px] text-primary font-medium"
+                    "text-3xs text-primary font-medium"
                   )}
                 >
                   ✓
@@ -278,15 +266,12 @@ export function AppLayout({ children }: AppLayoutProps) {
             <ContextMenuSeparator />
 
             {/* Background */}
-            <ContextMenuItem
+            <ContextMenuItem leading="tight"
               id="ctx-change-background"
               onClick={() => navigate('/settings?tab=appearance')}
               className={cn(
                 // Sizing & Spacing
-                "py-1 px-1.5 gap-2",
-
-                // Typography
-                "text-xs"
+                "px-1.5"
               )}
             >
               <ImageIcon

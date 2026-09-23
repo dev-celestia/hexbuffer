@@ -78,7 +78,7 @@ export function AppearanceSettingsTab() {
                 // Sizing & Spacing
                 "size-4",
                 // Typography & Colors
-                theme === 'light' ? 'text-amber-500' : 'text-muted-foreground'
+                theme === 'light' ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'
               )}
             />
             <Switch
@@ -91,7 +91,7 @@ export function AppearanceSettingsTab() {
                 // Sizing & Spacing
                 "size-4",
                 // Typography & Colors
-                theme === 'dark' ? 'text-blue-400' : 'text-muted-foreground'
+                theme === 'dark' ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'
               )}
             />
           </div>

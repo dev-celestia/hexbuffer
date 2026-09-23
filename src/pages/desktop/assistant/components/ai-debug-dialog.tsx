@@ -52,7 +52,7 @@ function CopyButton({ text }: Readonly<{ text: string }>) {
             // Sizing & Spacing
             'mt-1 px-1.5 py-0.5',
             // Typography
-            'text-[10px] whitespace-nowrap',
+            'text-3xs whitespace-nowrap',
             // Backgrounds & Borders
             'rounded bg-popover border border-border shadow-sm',
           )}
@@ -73,7 +73,7 @@ function MonoBlock({ children, className }: Readonly<{ children: string; classNa
         // Sizing & Spacing
         'p-3',
         // Typography
-        'text-[11px] font-mono leading-relaxed',
+        'text-2xs font-mono leading-relaxed',
         // Backgrounds & Borders
         'rounded-md bg-muted/60 border border-border/60',
         className,
@@ -97,7 +97,7 @@ function SectionHeader({ label, copyText }: Readonly<{ label: string; copyText?:
       <span
         className={cn(
           // Typography
-          'text-[11px] font-semibold uppercase tracking-wider text-muted-foreground',
+          'text-2xs font-semibold uppercase tracking-wider text-muted-foreground',
         )}
       >
         {label}
@@ -189,15 +189,15 @@ export function AiDebugDialog({
             >
               <BugIcon className="h-4 w-4 text-muted-foreground" />
               <DialogTitle>AI Debug Inspector</DialogTitle>
-              <Badge
+              <Badge size="sm" mono
                 variant="secondary"
                 className={cn(
                   // Sizing & Spacing
-                  'h-4 px-1.5 py-0',
+                  'px-1.5 py-0',
                   // Typography
-                  'text-[9px] font-mono font-semibold uppercase tracking-wider',
+                  'text-4xs font-semibold uppercase tracking-wider',
                   // Backgrounds & Borders
-                    'text-warning bg-warning/10 border border-warning/20',
+                    'text-warning bg-warning/10 border-warning/20',
                 )}
               >
                 Alpha
@@ -236,13 +236,11 @@ export function AiDebugDialog({
                 {snapshot.provider} / {snapshot.model}
               </Badge>
               {(sessionTitle || snapshot.sessionId || sessionId) && (
-                <Badge
+                <Badge mono
                   variant="secondary"
                   className={cn(
                     // Sizing & Spacing
-                    'max-w-[200px] truncate',
-                    // Typography
-                    'font-mono text-[10px]',
+                    'max-w-[200px] truncate'
                   )}
                   title={sessionTitle || snapshot.sessionId || sessionId || undefined}
                 >
@@ -250,11 +248,11 @@ export function AiDebugDialog({
                 </Badge>
               )}
               {snapshot.lastRequestId && (
-                <Badge variant="secondary" className="font-mono text-[10px]">
+                <Badge mono variant="secondary">
                   req: {snapshot.lastRequestId}
                 </Badge>
               )}
-              <span className="text-[10px] text-muted-foreground">
+              <span className="text-3xs text-muted-foreground">
                 {new Date(snapshot.timestamp).toLocaleTimeString()}
               </span>
             </div>
@@ -292,7 +290,7 @@ export function AiDebugDialog({
         )}
 
         {snapshot && (
-          <Tabs defaultValue="system-prompt" className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          <Tabs defaultValue="system-prompt" className="flex-col flex-1 min-h-0 overflow-hidden">
             <TabsList
               className={cn(
                 // Layout & Positioning
@@ -304,7 +302,7 @@ export function AiDebugDialog({
               <TabsTrigger value="memory">
                 Memory
                 {snapshot.memoryEntries.length > 0 && (
-                  <Badge variant="secondary" className="ms-1 text-[10px]">
+                  <Badge variant="secondary" className="ms-1">
                     {snapshot.memoryEntries.length}
                   </Badge>
                 )}
@@ -312,7 +310,7 @@ export function AiDebugDialog({
               <TabsTrigger value="messages">
                 Messages
                 {snapshot.lastMessages.length > 0 && (
-                  <Badge variant="secondary" className="ms-1 text-[10px]">
+                  <Badge variant="secondary" className="ms-1">
                     {snapshot.lastMessages.length}
                   </Badge>
                 )}
@@ -320,14 +318,14 @@ export function AiDebugDialog({
               <TabsTrigger value="reasoning">
                 Thinking
                 {snapshot.lastReasoning && (
-                  <Badge variant="secondary" className="ms-1 text-[10px]">
+                  <Badge variant="secondary" className="ms-1">
                     {snapshot.lastReasoning.length}
                   </Badge>
                 )}
               </TabsTrigger>
               <TabsTrigger value="tools">
                 Tools
-                <Badge variant="secondary" className="ms-1 text-[10px]">
+                <Badge variant="secondary" className="ms-1">
                   {snapshot.tools.length}
                 </Badge>
               </TabsTrigger>
@@ -338,7 +336,7 @@ export function AiDebugDialog({
               value="system-prompt"
               className={cn(
                 // Layout & Positioning
-                'flex flex-col flex-1 min-h-0 overflow-hidden',
+                'flex flex-col min-h-0 overflow-hidden',
                 // Sizing & Spacing
                 'mt-3',
               )}
@@ -361,7 +359,7 @@ export function AiDebugDialog({
               value="app-context"
               className={cn(
                 // Layout & Positioning
-                'flex flex-col flex-1 min-h-0 overflow-hidden',
+                'flex flex-col min-h-0 overflow-hidden',
                 // Sizing & Spacing
                 'mt-3',
               )}
@@ -397,7 +395,7 @@ export function AiDebugDialog({
               value="memory"
               className={cn(
                 // Layout & Positioning
-                'flex flex-col flex-1 min-h-0 overflow-hidden',
+                'flex flex-col min-h-0 overflow-hidden',
                 // Sizing & Spacing
                 'mt-3',
               )}
@@ -454,16 +452,16 @@ export function AiDebugDialog({
                           >
                             {entry.title}
                           </span>
-                          <Badge variant="outline" className="text-[10px]">
+                          <Badge variant="outline">
                             {entry.sourceType}
                           </Badge>
                           {entry.pinned && (
-                            <Badge variant="secondary" className="text-[10px]">
+                            <Badge variant="secondary">
                               pinned
                             </Badge>
                           )}
                           {entry.tags.map((tag) => (
-                            <Badge key={tag} variant="outline" className="text-[10px]">
+                            <Badge key={tag} variant="outline">
                               {tag}
                             </Badge>
                           ))}
@@ -471,7 +469,7 @@ export function AiDebugDialog({
                         <p
                           className={cn(
                             // Typography
-                            'text-[11px] font-mono text-muted-foreground whitespace-pre-wrap break-words',
+                            'text-2xs font-mono text-muted-foreground whitespace-pre-wrap break-words',
                           )}
                         >
                           {entry.content.slice(0, 600)}
@@ -489,7 +487,7 @@ export function AiDebugDialog({
               value="messages"
               className={cn(
                 // Layout & Positioning
-                'flex flex-col flex-1 min-h-0 overflow-hidden',
+                'flex flex-col min-h-0 overflow-hidden',
                 // Sizing & Spacing
                 'mt-3',
               )}
@@ -560,7 +558,6 @@ export function AiDebugDialog({
                         >
                           <Badge
                             variant={msg.role === 'user' ? 'default' : 'secondary'}
-                            className="text-[10px]"
                           >
                             [{idx}] {msg.role}
                           </Badge>
@@ -569,7 +566,7 @@ export function AiDebugDialog({
                         <p
                           className={cn(
                             // Typography
-                            'text-[11px] font-mono text-muted-foreground whitespace-pre-wrap break-words',
+                            'text-2xs font-mono text-muted-foreground whitespace-pre-wrap break-words',
                           )}
                         >
                           {msg.content.slice(0, 1200)}
@@ -587,7 +584,7 @@ export function AiDebugDialog({
               value="reasoning"
               className={cn(
                 // Layout & Positioning
-                'flex flex-col flex-1 min-h-0 overflow-hidden',
+                'flex flex-col min-h-0 overflow-hidden',
                 // Sizing & Spacing
                 'mt-3',
               )}
@@ -627,7 +624,7 @@ export function AiDebugDialog({
               value="tools"
               className={cn(
                 // Layout & Positioning
-                'flex flex-col flex-1 min-h-0 overflow-hidden',
+                'flex flex-col min-h-0 overflow-hidden',
                 // Sizing & Spacing
                 'mt-3',
               )}
@@ -679,7 +676,7 @@ export function AiDebugDialog({
                         <span
                           className={cn(
                             // Typography
-                            'text-[11px] text-muted-foreground break-words',
+                            'text-2xs text-muted-foreground break-words',
                           )}
                         >
                           {tool.description}
@@ -687,7 +684,6 @@ export function AiDebugDialog({
                       </div>
                       <Badge
                         variant={tool.tier === 'auto_approved' ? 'secondary' : 'default'}
-                        className="shrink-0 text-[10px]"
                       >
                         {tool.tier === 'auto_approved' ? 'auto' : 'confirm'}
                       </Badge>

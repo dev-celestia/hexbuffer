@@ -112,7 +112,7 @@ function SectionLabel({ children }: Readonly<{ children: React.ReactNode }>) {
     <span
       className={cn(
         // Typography
-        'text-[10px] font-semibold tracking-wider text-muted-foreground/70 uppercase'
+        'text-3xs font-semibold tracking-wider text-muted-foreground/70 uppercase'
       )}
     >
       {children}
@@ -281,7 +281,7 @@ export function ForgeResponseView({
                       'min-w-4 rounded-full px-1',
 
                       // Typography
-                      'text-[10px] leading-4 font-semibold tabular-nums',
+                      'text-3xs leading-4 font-semibold tabular-nums',
 
                       // Backgrounds & Borders
                       'bg-rose-500/15 text-rose-600 dark:text-rose-400'
@@ -296,18 +296,12 @@ export function ForgeResponseView({
         </Tabs>
 
         {response && (
-          <Button
-            variant="ghost"
+          <Button leading="tight"
+            variant="quiet"
             size="sm"
             className={cn(
               // Sizing & Spacing
-              'h-6 shrink-0 gap-1.5 px-2',
-
-              // Typography
-              'text-xs',
-
-              // Interactive & States
-              'text-muted-foreground hover:text-foreground'
+              'gap-1.5 px-2'
             )}
             onClick={handleCopy}
             title="Copy response body"
@@ -456,7 +450,7 @@ export function ForgeResponseView({
                   <span
                     className={cn(
                       // Typography
-                      'text-[10px] tabular-nums text-muted-foreground'
+                      'text-3xs tabular-nums text-muted-foreground'
                     )}
                   >
                     {enabledHeaders.length} sent
@@ -603,7 +597,7 @@ export function ForgeResponseView({
                         <span
                           className={cn(
                             // Typography
-                            'font-mono text-[11px] break-all text-rose-600 dark:text-rose-400'
+                            'font-mono text-2xs break-all text-rose-600 dark:text-rose-400'
                           )}
                         >
                           {result.message}

@@ -65,16 +65,13 @@ export function SavedNotesToolbar({
             "text-muted-foreground pointer-events-none"
           )}
         />
-        <Input
+        <Input textSize="xs"
           placeholder="Search note titles and contents..."
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
           className={cn(
             // Sizing & Spacing
             "h-8 pl-8 pr-7",
-
-            // Typography
-            "text-xs",
 
             // Backgrounds & Borders
             "bg-background"
@@ -137,7 +134,7 @@ export function SavedNotesToolbar({
                   "px-2.5 py-1 rounded-md gap-1.5",
 
                   // Typography
-                  "text-[11px] font-medium",
+                  "text-2xs font-medium",
 
                   // Interactive & States
                   "transition-all cursor-pointer",
@@ -153,7 +150,7 @@ export function SavedNotesToolbar({
                     "px-1 py-0.2 rounded-full",
 
                     // Typography
-                    "text-[9px] font-mono",
+                    "text-4xs font-mono",
 
                     // Backgrounds & Borders
                     isActive ? "bg-muted text-foreground" : "bg-muted/80 text-muted-foreground"
@@ -168,13 +165,10 @@ export function SavedNotesToolbar({
 
         {/* Sort Select */}
         <Select value={sortOption} onValueChange={(val) => onSortOptionChange(val as NoteSortOption)}>
-          <SelectTrigger
+          <SelectTrigger leading="tight"
             className={cn(
               // Sizing & Spacing
               "h-8 w-40",
-
-              // Typography
-              "text-xs",
 
               // Backgrounds & Borders
               "bg-background"
@@ -184,7 +178,7 @@ export function SavedNotesToolbar({
           </SelectTrigger>
           <SelectContent>
             {NOTE_SORT_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value} className="text-xs">
+              <SelectItem leading="tight" key={opt.value} value={opt.value}>
                 {opt.label}
               </SelectItem>
             ))}

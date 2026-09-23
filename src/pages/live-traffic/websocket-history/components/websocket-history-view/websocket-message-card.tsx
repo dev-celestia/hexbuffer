@@ -115,7 +115,7 @@ export function WebSocketMessageCard({ message, formatDateTime }: Readonly<WebSo
               "gap-1 px-1.5 py-0.5",
 
               // Typography
-              "font-mono text-[10px] font-semibold uppercase tracking-wider",
+              "font-mono text-3xs font-semibold uppercase tracking-wider",
 
               // Backgrounds & Borders
               "rounded border",
@@ -138,7 +138,7 @@ export function WebSocketMessageCard({ message, formatDateTime }: Readonly<WebSo
               "px-1.5 py-0.5",
 
               // Typography
-              "font-mono text-[10px] uppercase text-muted-foreground",
+              "font-mono text-3xs uppercase text-muted-foreground",
 
               // Backgrounds & Borders
               "bg-muted/70 rounded border border-border/40"
@@ -150,7 +150,7 @@ export function WebSocketMessageCard({ message, formatDateTime }: Readonly<WebSo
           <span
             className={cn(
               // Typography
-              "font-mono text-[10px] text-muted-foreground"
+              "font-mono text-3xs text-muted-foreground"
             )}
           >
             {formatBytes(message.size)}
@@ -177,7 +177,7 @@ export function WebSocketMessageCard({ message, formatDateTime }: Readonly<WebSo
                 "px-1.5 py-0.5",
 
                 // Typography
-                "text-[10px] transition-colors rounded-xs",
+                "text-3xs transition-colors rounded-xs",
                 viewMode === 'text'
                   ? "bg-muted text-foreground font-medium"
                   : "text-muted-foreground hover:text-foreground"
@@ -194,7 +194,7 @@ export function WebSocketMessageCard({ message, formatDateTime }: Readonly<WebSo
                   "px-1.5 py-0.5",
 
                   // Typography
-                  "text-[10px] transition-colors rounded-xs",
+                  "text-3xs transition-colors rounded-xs",
                   viewMode === 'json'
                     ? "bg-muted text-foreground font-medium"
                     : "text-muted-foreground hover:text-foreground"
@@ -212,7 +212,7 @@ export function WebSocketMessageCard({ message, formatDateTime }: Readonly<WebSo
                   "px-1.5 py-0.5",
 
                   // Typography
-                  "text-[10px] transition-colors rounded-xs",
+                  "text-3xs transition-colors rounded-xs",
                   viewMode === 'hex'
                     ? "bg-muted text-foreground font-medium"
                     : "text-muted-foreground hover:text-foreground"
@@ -224,14 +224,14 @@ export function WebSocketMessageCard({ message, formatDateTime }: Readonly<WebSo
           </div>
 
           {jsonPayload && (
-            <Badge
+            <Badge size="sm" mono
               variant="secondary"
               className={cn(
                 // Sizing & Spacing
-                "h-4 px-1",
+                "px-1",
 
                 // Typography
-                "font-mono text-[9px]",
+                "text-4xs",
 
                 // Backgrounds & Borders
                 "bg-primary/10 text-primary border-primary/20"
@@ -254,7 +254,7 @@ export function WebSocketMessageCard({ message, formatDateTime }: Readonly<WebSo
           <span
             className={cn(
               // Typography
-              "font-mono text-[10px] text-muted-foreground"
+              "font-mono text-3xs text-muted-foreground"
             )}
           >
             {formatDateTime(message.timestamp)}
@@ -262,15 +262,8 @@ export function WebSocketMessageCard({ message, formatDateTime }: Readonly<WebSo
 
           <Button
             size="icon-xs"
-            variant="ghost"
+            variant="quiet"
             onClick={handleCopy}
-            className={cn(
-              // Sizing & Spacing
-              "size-5",
-
-              // Typography
-              "text-muted-foreground hover:text-foreground"
-            )}
             title="Copy payload"
           >
             {copied ? (
@@ -288,7 +281,7 @@ export function WebSocketMessageCard({ message, formatDateTime }: Readonly<WebSo
           "p-2.5 max-h-60 overflow-auto",
 
           // Typography
-          "text-[11px] font-mono whitespace-pre-wrap break-all leading-relaxed",
+          "text-2xs font-mono whitespace-pre-wrap break-all leading-relaxed",
 
           // Backgrounds & Borders
           "bg-muted/5 text-foreground selection:bg-primary/20"

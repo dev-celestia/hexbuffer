@@ -63,7 +63,7 @@ export function TreeFilter({ value, onChange, matchCount }: Readonly<TreeFilterP
             <span
               className={cn(
                 // Typography
-                'text-[10px] leading-none tabular-nums',
+                'text-3xs leading-none tabular-nums',
                 'text-muted-foreground'
               )}
             >

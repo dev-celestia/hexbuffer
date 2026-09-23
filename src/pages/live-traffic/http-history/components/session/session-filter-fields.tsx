@@ -68,10 +68,7 @@ export function SessionFilterFields({
         onValueChange={(val) => onCaptureModeChange(val as SessionCaptureMode)}
         className={cn(
           // Layout & Positioning
-          "w-full flex flex-col",
-
-          // Sizing & Spacing
-          "gap-2"
+          "w-full flex-col"
         )}
       >
         <TabsList
@@ -90,13 +87,10 @@ export function SessionFilterFields({
             value="all"
             className={cn(
               // Layout & Positioning
-              "flex items-center justify-center",
+              "flex",
 
               // Sizing & Spacing
-              "gap-1.5 h-7 px-2",
-
-              // Typography
-              "text-xs font-medium",
+              "h-7 px-2",
 
               // Interactive & States
               "transition-all"
@@ -110,13 +104,10 @@ export function SessionFilterFields({
             value="target_scope"
             className={cn(
               // Layout & Positioning
-              "flex items-center justify-center",
+              "flex",
 
               // Sizing & Spacing
-              "gap-1.5 h-7 px-2",
-
-              // Typography
-              "text-xs font-medium",
+              "h-7 px-2",
 
               // Interactive & States
               "transition-all"
@@ -130,13 +121,10 @@ export function SessionFilterFields({
             value="custom"
             className={cn(
               // Layout & Positioning
-              "flex items-center justify-center",
+              "flex",
 
               // Sizing & Spacing
-              "gap-1.5 h-7 px-2",
-
-              // Typography
-              "text-xs font-medium",
+              "h-7 px-2",
 
               // Interactive & States
               "transition-all"
@@ -152,7 +140,7 @@ export function SessionFilterFields({
         <p
           className={cn(
             // Typography
-            "text-[11px] text-muted-foreground leading-normal"
+            "text-2xs text-muted-foreground leading-normal"
           )}
         >
           All traffic passing through the proxy will be saved into this session.
@@ -163,7 +151,7 @@ export function SessionFilterFields({
         <p
           className={cn(
             // Typography
-            "text-[11px] text-muted-foreground leading-normal",
+            "text-2xs text-muted-foreground leading-normal",
 
             // Backgrounds & Borders
             "p-2 rounded bg-muted/40 border border-border/40"
@@ -195,7 +183,7 @@ export function SessionFilterFields({
             <span
               className={cn(
                 // Typography
-                "text-[11px] font-medium text-foreground"
+                "text-2xs font-medium text-foreground"
               )}
             >
               Whitelist Host / URL Patterns
@@ -203,7 +191,7 @@ export function SessionFilterFields({
             <span
               className={cn(
                 // Typography
-                "text-[10px] text-muted-foreground"
+                "text-3xs text-muted-foreground"
               )}
             >
               Enter to add
@@ -254,21 +242,18 @@ export function SessionFilterFields({
               )}
             >
               {customHosts.map((h) => (
-                <Badge
+                <Badge mono
                   key={h}
                   variant="secondary"
                   className={cn(
                     // Layout & Positioning
-                    "flex items-center",
+                    "flex",
 
                     // Sizing & Spacing
-                    "gap-1 px-1.5 py-0.5",
-
-                    // Typography
-                    "text-[10px] font-mono",
+                    "px-1.5",
 
                     // Backgrounds & Borders
-                    "border border-primary/20 bg-primary/10 text-primary"
+                    "border-primary/20 bg-primary/10 text-primary"
                   )}
                 >
                   <span className="truncate max-w-[200px]">{h}</span>
@@ -292,7 +277,7 @@ export function SessionFilterFields({
             <p
               className={cn(
                 // Typography
-                "text-[10px] text-amber-600/90 dark:text-amber-400/90 italic"
+                "text-3xs text-amber-600/90 dark:text-amber-400/90 italic"
               )}
             >
               Add at least one host pattern (e.g. *.example.com) to capture traffic.
@@ -323,7 +308,7 @@ export function SessionFilterFields({
               "gap-1",
 
               // Typography
-              "text-[11px] text-muted-foreground hover:text-foreground",
+              "text-2xs text-muted-foreground hover:text-foreground",
 
               // Interactive & States
               "transition-colors"
@@ -332,11 +317,11 @@ export function SessionFilterFields({
             <span>{showAdvancedExclude ? '▼' : '▶'}</span>
             <span>Exclude Host Patterns (Optional)</span>
             {excludeHosts.length > 0 && (
-              <Badge
+              <Badge size="sm"
                 variant="outline"
                 className={cn(
                   // Sizing & Spacing
-                  "h-4 px-1 text-[9px]"
+                  "px-1 text-4xs"
                 )}
               >
                 {excludeHosts.length}
@@ -347,7 +332,7 @@ export function SessionFilterFields({
           <span
             className={cn(
               // Typography
-              "text-[11px] font-medium text-muted-foreground"
+              "text-2xs font-medium text-muted-foreground"
             )}
           >
             Excluded Host Patterns (Optional)
@@ -409,21 +394,18 @@ export function SessionFilterFields({
                 )}
               >
                 {excludeHosts.map((h) => (
-                  <Badge
+                  <Badge mono
                     key={h}
                     variant="secondary"
                     className={cn(
                       // Layout & Positioning
-                      "flex items-center",
+                      "flex",
 
                       // Sizing & Spacing
-                      "gap-1 px-1.5 py-0.5",
-
-                      // Typography
-                      "text-[10px] font-mono",
+                      "px-1.5",
 
                       // Backgrounds & Borders
-                      "border border-destructive/20 bg-destructive/10 text-destructive"
+                      "border-destructive/20 bg-destructive/10 text-destructive"
                     )}
                   >
                     <span className="truncate max-w-[200px]">{h}</span>

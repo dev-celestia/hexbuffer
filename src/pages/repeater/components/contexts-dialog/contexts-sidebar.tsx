@@ -89,7 +89,7 @@ export function ContextsSidebar({
         <span
           className={cn(
             // Typography
-            'text-[11px] font-semibold tracking-wide text-muted-foreground uppercase'
+            'text-2xs font-semibold tracking-wide text-muted-foreground uppercase'
           )}
         >
           Environments
@@ -97,14 +97,10 @@ export function ContextsSidebar({
 
         <Button
           size="icon-sm"
-          variant="ghost"
+          variant="quiet"
           onClick={onStartCreate}
           title="New environment"
           aria-label="New environment"
-          className={cn(
-            // Interactive & States
-            'text-muted-foreground hover:text-foreground'
-          )}
         >
           <PlusIcon className="size-3.5" />
         </Button>
@@ -203,15 +199,12 @@ export function ContextsSidebar({
               </EmptyHeader>
               {!isSearching && (
                 <EmptyContent>
-                  <Button
+                  <Button leading="tight"
                     variant="outline"
                     size="sm"
                     className={cn(
                       // Sizing & Spacing
-                      'h-6 gap-1 px-2',
-
-                      // Typography
-                      'text-xs'
+                      'px-2'
                     )}
                     onClick={onStartCreate}
                   >

@@ -147,16 +147,16 @@ export function DesktopPage() {
                   <DialogTrigger>
                     <Button
                       size="sm"
-                      variant="ghost"
+                      variant="quiet"
                       className={cn(
                         // Sizing & Spacing
-                        "h-6 px-2 gap-1.5",
+                        "px-2 gap-1.5",
 
                         // Typography
-                        "text-[11px] text-muted-foreground",
+                        "text-2xs",
 
                         // Interactive & States
-                        "hover:text-foreground hover:bg-muted/60 cursor-pointer"
+                        "hover:bg-muted/60"
                       )}
                     >
                       <GearSixIcon className="size-3.5" />
@@ -188,7 +188,7 @@ export function DesktopPage() {
                 <p
                   className={cn(
                     // Typography
-                    "text-[11px] font-mono font-bold tracking-wider uppercase text-muted-foreground"
+                    "text-2xs font-mono font-bold tracking-wider uppercase text-muted-foreground"
                   )}
                 >
                   Shortcuts
@@ -213,17 +213,17 @@ export function DesktopPage() {
                     "text-muted-foreground"
                   )}
                 />
-                <Input
+                <Input textSize="xs"
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search features…"
                   className={cn(
                     // Sizing & Spacing
-                    "h-7 w-44 pl-7 pr-7 text-xs",
+                    "w-44 pl-7 pr-7",
 
                     // Backgrounds & Borders
-                    "bg-background/80 border-input",
+                    "bg-background/80",
 
                     // Interactive & States
                     "focus:w-56 transition-[width] duration-150"
@@ -312,7 +312,7 @@ export function DesktopPage() {
               >
                 Try searching for another keyword or clear the search input.
               </p>
-              <Button size="sm"
+              <Button leading="tight" size="sm"
                 variant="link"
                 onClick={handleClearSearch}
                 className={cn(
@@ -320,10 +320,7 @@ export function DesktopPage() {
                   "h-auto p-0 mt-2",
 
                   // Typography
-                  "text-xs font-semibold text-primary",
-
-                  // Interactive & States
-                  "hover:underline"
+                  "font-semibold"
                 )}
               >
                 Clear search query

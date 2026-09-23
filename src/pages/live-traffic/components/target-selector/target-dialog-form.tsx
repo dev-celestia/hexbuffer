@@ -206,20 +206,20 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
             <span
               className={cn(
                 // Typography
-                "text-[10px] font-normal text-muted-foreground"
+                "text-3xs font-normal text-muted-foreground"
               )}
             >
               Required
             </span>
           </label>
-          <Input
+          <Input textSize="xs"
             id="name"
             placeholder="e.g., Production API & Web"
             value={values.name}
             onChange={updateValue('name')}
             className={cn(
               // Sizing & Spacing
-              "h-8 text-xs"
+              "h-8"
             )}
           />
           {errors.name && (
@@ -229,7 +229,7 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
                 "mt-1",
 
                 // Typography
-                "text-[11px] font-medium text-destructive"
+                "text-2xs font-medium text-destructive"
               )}
             >
               {errors.name}
@@ -260,20 +260,20 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
             <span
               className={cn(
                 // Typography
-                "text-[10px] font-normal text-muted-foreground"
+                "text-3xs font-normal text-muted-foreground"
               )}
             >
               Optional
             </span>
           </label>
-          <Input
+          <Input textSize="xs"
             id="description"
             placeholder="e.g., Main customer portal scope definition"
             value={values.description}
             onChange={updateValue('description')}
             className={cn(
               // Sizing & Spacing
-              "h-8 text-xs"
+              "h-8"
             )}
           />
         </div>
@@ -322,10 +322,10 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
                 variant="outline"
                 className={cn(
                   // Sizing & Spacing
-                  "px-1.5 py-0.5",
+                  "px-1.5",
 
                   // Typography
-                  "text-[10px] font-medium text-primary",
+                  "text-primary",
 
                   // Backgrounds & Borders
                   "border-primary/20 bg-primary/10"
@@ -335,7 +335,7 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
               </Badge>
             )}
           </div>
-          <Textarea
+          <Textarea leading="tight" mono
             id="scope"
             placeholder="*.example.com&#10;api.example.com"
             rows={3}
@@ -343,17 +343,14 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
             onChange={updateValue('scope')}
             className={cn(
               // Sizing & Spacing
-              "resize-none",
-
-              // Typography
-              "font-mono text-xs"
+              "resize-none"
             )}
           />
           {errors.scope ? (
             <p
               className={cn(
                 // Typography
-                "text-[11px] font-medium text-destructive"
+                "text-2xs font-medium text-destructive"
               )}
             >
               {errors.scope}
@@ -362,7 +359,7 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
             <p
               className={cn(
                 // Typography
-                "text-[11px] text-muted-foreground/80"
+                "text-2xs text-muted-foreground/80"
               )}
             >
               Separate multiple wildcard patterns or domain names with new lines or commas.
@@ -391,7 +388,7 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
                   "gap-1",
 
                   // Typography
-                  "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+                  "text-3xs font-semibold uppercase tracking-wider text-muted-foreground"
                 )}
               >
                 <TagIcon
@@ -412,7 +409,7 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
                 )}
               >
                 {parsedPatterns.map((pattern, i) => (
-                  <Badge
+                  <Badge mono
                     key={i}
                     variant="secondary"
                     className={cn(
@@ -420,7 +417,7 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
                       "px-1.5 py-0",
 
                       // Typography
-                      "font-mono text-[10px] text-foreground"
+                      "text-foreground"
                     )}
                   >
                     {pattern}
@@ -435,7 +432,7 @@ export function TargetDialogForm({ target, onCancel, onSaved }: Readonly<TargetD
       <DialogFooter
         className={cn(
           // Layout & Positioning
-          "flex items-center justify-between sm:justify-between",
+          "items-center justify-between sm:justify-between",
 
           // Sizing & Spacing
           "pt-2",

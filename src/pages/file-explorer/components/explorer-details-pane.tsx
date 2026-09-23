@@ -58,7 +58,7 @@ export function ExplorerDetailsPane({
       >
         <FileIcon className="size-8 text-muted-foreground/35 mb-2" />
         <p className="text-xs font-medium text-foreground">No item selected</p>
-        <p className="text-[11px] text-muted-foreground mt-0.5 max-w-xs leading-relaxed">
+        <p className="text-2xs text-muted-foreground mt-0.5 max-w-xs leading-relaxed">
           Select a file or folder to view its properties, cache status, and access URLs.
         </p>
       </div>
@@ -101,10 +101,6 @@ export function ExplorerDetailsPane({
         </span>
         <Badge
           variant={cached ? 'outline' : 'secondary'}
-          className={cn(
-            // Typography
-            "text-[10px]"
-          )}
         >
           {item.type}
         </Badge>
@@ -131,7 +127,7 @@ export function ExplorerDetailsPane({
           )}
         >
           {item.type === 'folder' ? (
-            <FolderIcon className="size-8 text-amber-500/80" />
+            <FolderIcon className="size-8 text-amber-600/80 dark:text-amber-400/80" />
           ) : (
             <FileIcon className="size-8 text-muted-foreground/70" />
           )}
@@ -147,7 +143,7 @@ export function ExplorerDetailsPane({
                     "px-1.5 py-0.5 rounded",
 
                     // Typography
-                    "text-[10px] font-semibold",
+                    "text-3xs font-semibold",
 
                     // Backgrounds & Borders
                     cached
@@ -178,25 +174,25 @@ export function ExplorerDetailsPane({
           <span
             className={cn(
               // Typography
-              "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+              "text-3xs font-semibold uppercase tracking-wider text-muted-foreground"
             )}
           >
             File Details
           </span>
           <div className="space-y-2 text-xs">
             <div>
-              <span className="text-[10px] text-muted-foreground block">Key / Path</span>
-              <span className="font-mono text-[11px] text-foreground break-all">{item.key}</span>
+              <span className="text-3xs text-muted-foreground block">Key / Path</span>
+              <span className="font-mono text-2xs text-foreground break-all">{item.key}</span>
             </div>
             {item.type === 'file' && (
               <>
                 <div>
-                  <span className="text-[10px] text-muted-foreground block">Size</span>
-                  <span className="font-mono text-[11px] text-foreground">{formatBytes(item.size)}</span>
+                  <span className="text-3xs text-muted-foreground block">Size</span>
+                  <span className="font-mono text-2xs text-foreground">{formatBytes(item.size)}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-muted-foreground block">Last Modified</span>
-                  <span className="text-[11px] text-foreground">
+                  <span className="text-3xs text-muted-foreground block">Last Modified</span>
+                  <span className="text-2xs text-foreground">
                     {item.lastModified ? new Date(item.lastModified).toLocaleString() : '—'}
                   </span>
                 </div>
@@ -233,7 +229,7 @@ export function ExplorerDetailsPane({
                 <span
                   className={cn(
                     // Typography
-                    "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+                    "text-3xs font-semibold uppercase tracking-wider text-muted-foreground"
                   )}
                 >
                   Cache Synchronization
@@ -245,15 +241,15 @@ export function ExplorerDetailsPane({
                       <CheckCircleIcon className="size-4 mt-0.5 shrink-0" />
                       <div className="min-w-0">
                         <p className="font-semibold">Local Cached Sync</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed break-all font-mono">
+                        <p className="text-3xs text-muted-foreground mt-0.5 leading-relaxed break-all font-mono">
                           {localPath}
                         </p>
                       </div>
                     </div>
-                    <Button
-                      size="sm"
+                    <Button leading="tight"
+                      size="md"
                       variant="outline"
-                      className="w-full text-xs h-7 gap-1.5 font-medium"
+                      className="w-full gap-1.5"
                       onClick={() => onOpenFile(item)}
                     >
                       Open Local File
@@ -265,15 +261,15 @@ export function ExplorerDetailsPane({
                       <CloudArrowDownIcon className="size-4 mt-0.5 shrink-0" />
                       <div>
                         <p className="font-medium text-foreground">Remote Object Only</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+                        <p className="text-3xs text-muted-foreground mt-0.5 leading-relaxed">
                           File is not cached locally. Click below to stream & download.
                         </p>
                       </div>
                     </div>
-                    <Button
-                      size="sm"
+                    <Button leading="tight"
+                      size="md"
                       variant="default"
-                      className="w-full text-xs h-7 gap-1.5 font-medium"
+                      className="w-full gap-1.5"
                       onClick={() => onOpenFile(item)}
                     >
                       Stream & Open File
@@ -298,14 +294,14 @@ export function ExplorerDetailsPane({
                 <span
                   className={cn(
                     // Typography
-                    "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+                    "text-3xs font-semibold uppercase tracking-wider text-muted-foreground"
                   )}
                 >
                   Temporary URL Access
                 </span>
                 <div className="flex items-center gap-2">
                   <Select value={expiration} onValueChange={(val) => { if (val) setExpiration(val); }}>
-                    <SelectTrigger className="h-7 text-xs font-sans">
+                    <SelectTrigger leading="tight" className="h-7 font-sans">
                       <SelectValue placeholder="Expiration" />
                     </SelectTrigger>
                     <SelectContent className="font-sans text-xs">
@@ -316,10 +312,9 @@ export function ExplorerDetailsPane({
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button
-                    size="sm"
+                  <Button leading="tight"
+                    size="md"
                     variant="outline"
-                    className="h-7 gap-1 shrink-0 text-xs font-medium"
                     onClick={() => onCopyPresignedUrl(item, parseInt(expiration, 10))}
                   >
                     <LinkSimpleIcon className="size-3.5" />
@@ -329,10 +324,10 @@ export function ExplorerDetailsPane({
               </div>
 
               {/* Public URL copy action */}
-              <Button
+              <Button leading="tight"
                 variant="outline"
-                size="sm"
-                className="w-full text-xs h-7 gap-1.5 font-medium"
+                size="md"
+                className="w-full gap-1.5"
                 onClick={() => onCopyPublicUrl(item)}
               >
                 <CopyIcon className="size-3.5" />
@@ -354,9 +349,9 @@ export function ExplorerDetailsPane({
                 "text-muted-foreground"
               )}
             >
-              <FolderIcon className="size-8 text-amber-500/60" />
+              <FolderIcon className="size-8 text-amber-600/60 dark:text-amber-400/60" />
               <p className="text-xs font-medium text-foreground">Selected Folder</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5 font-mono break-all leading-normal">
+              <p className="text-3xs text-muted-foreground mt-0.5 font-mono break-all leading-normal">
                 {item.key}
               </p>
             </div>

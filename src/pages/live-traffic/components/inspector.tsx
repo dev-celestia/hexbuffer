@@ -41,7 +41,7 @@ function ExpandableValue({ value }: Readonly<{ value: string }>) {
       {shouldCollapse && (
         <button
           type="button"
-          className="ml-1 text-[11px] font-sans font-medium text-primary hover:underline"
+          className="ml-1 text-2xs font-sans font-medium text-primary hover:underline"
           onClick={() => setIsExpanded((current) => !current)}
         >
           {isExpanded ? 'Show less' : 'Show more'}
@@ -88,7 +88,7 @@ export const InspectorSection = memo(function InspectorSection({
   const { theme } = useTheme();
 
   return (
-    <Accordion defaultValue={defaultOpen ? [title] : undefined} className="border rounded-md mb-2 min-w-0 overflow-hidden">
+    <Accordion defaultValue={defaultOpen ? [title] : undefined} className="mb-2 min-w-0">
       <AccordionItem value={title} className="last:border-b-0">
         <AccordionTrigger className="px-2 py-1.5 text-xs font-semibold hover:bg-muted/50 transition-colors">
           <span className="flex min-w-0 items-center gap-1">
@@ -113,13 +113,13 @@ export const InspectorSection = memo(function InspectorSection({
                 <Table className="text-xs table-fixed max-w-full">
                   <TableHeader>
                     <TableRow className="h-7 hover:bg-transparent">
-                      <TableHead className="py-1 px-2 font-semibold">Name</TableHead>
-                      <TableHead className="py-1 px-2 font-semibold">Value</TableHead>
+                      <TableHead className="py-1 font-semibold">Name</TableHead>
+                      <TableHead className="py-1 font-semibold">Value</TableHead>
                       {items[0]?.domain !== undefined && (
-                        <TableHead className="py-1 px-2 font-semibold">Domain</TableHead>
+                        <TableHead className="py-1 font-semibold">Domain</TableHead>
                       )}
                       {items[0]?.path !== undefined && (
-                        <TableHead className="py-1 px-2 font-semibold">Path</TableHead>
+                        <TableHead className="py-1 font-semibold">Path</TableHead>
                       )}
                     </TableRow>
                   </TableHeader>

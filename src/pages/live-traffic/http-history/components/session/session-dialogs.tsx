@@ -226,7 +226,7 @@ export function CreateSessionDialog({
                 <span
                   className={cn(
                     // Typography
-                    "text-[10px] text-muted-foreground/80 mt-0.5"
+                    "text-3xs text-muted-foreground/80 mt-0.5"
                   )}
                 >
                   Saved to disk, survives restarts
@@ -276,7 +276,7 @@ export function CreateSessionDialog({
                 <span
                   className={cn(
                     // Typography
-                    "text-[10px] text-muted-foreground/80 mt-0.5"
+                    "text-3xs text-muted-foreground/80 mt-0.5"
                   )}
                 >
                   RAM only, sliding window
@@ -486,7 +486,7 @@ export function EditSessionDialog({
                 <span
                   className={cn(
                     // Typography
-                    "text-[11px] text-muted-foreground"
+                    "text-2xs text-muted-foreground"
                   )}
                 >
                   Permanently remove this session and all {session.request_count.toLocaleString()} requests.

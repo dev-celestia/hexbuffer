@@ -89,16 +89,16 @@ export function WordlistsTab() {
                     "text-muted-foreground"
                   )}
                 />
-                <Input
+                <Input textSize="xs"
                   value={hub.searchQuery}
                   onChange={(e) => hub.setSearchQuery(e.target.value)}
                   placeholder="Search wordlists…"
                   className={cn(
                     // Sizing & Spacing
-                    "h-7 w-full ps-8 pe-7",
+                    "ps-8 pe-7",
 
                     // Typography
-                    "text-xs font-sans bg-background"
+                    "font-sans bg-background"
                   )}
                 />
                 {hub.searchQuery && (
@@ -131,7 +131,7 @@ export function WordlistsTab() {
                 <span
                   className={cn(
                     // Typography
-                    "text-[10px] text-muted-foreground font-mono"
+                    "text-3xs text-muted-foreground font-mono"
                   )}
                 >
                   {hub.items.length} of {totalWordlists} wordlists
@@ -144,13 +144,13 @@ export function WordlistsTab() {
                   onClick={() => hub.fetchManifest(true)}
                   className={cn(
                     // Layout & Positioning
-                    "flex items-center",
+                    "flex",
 
                     // Sizing & Spacing
-                    "h-6 px-2 gap-1",
+                    "px-2",
 
                     // Typography
-                    "text-[11px] font-medium"
+                    "text-2xs"
                   )}
                   title="Refresh Wordlists Catalog from GitHub"
                 >

@@ -90,7 +90,7 @@ export function StorageAuditor({
       {/* Sidebar Tree View */}
       <div className="w-60 border-r flex flex-col shrink-0 bg-muted/20">
         <div className="px-3 py-2.5 border-b shrink-0">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+          <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider">
             Storage Domains
           </span>
         </div>
@@ -109,7 +109,7 @@ export function StorageAuditor({
                 <CookieIcon className="size-4 shrink-0" />
                 <span>Cookies</span>
               </span>
-              <Badge variant="secondary" className="px-1.5 py-0 h-4 font-mono text-[9px]">
+              <Badge size="sm" mono variant="secondary" className="px-1.5 py-0 text-4xs">
                 {cookies.length}
               </Badge>
             </button>
@@ -126,7 +126,7 @@ export function StorageAuditor({
                 <HardDrive className="size-4 shrink-0" />
                 <span>Local Storage</span>
               </span>
-              <Badge variant="secondary" className="px-1.5 py-0 h-4 font-mono text-[9px]">
+              <Badge size="sm" mono variant="secondary" className="px-1.5 py-0 text-4xs">
                 {localStorageItems.length}
               </Badge>
             </button>
@@ -143,7 +143,7 @@ export function StorageAuditor({
                 <HardDrive className="size-4 shrink-0" />
                 <span>Session Storage</span>
               </span>
-              <Badge variant="secondary" className="px-1.5 py-0 h-4 font-mono text-[9px]">
+              <Badge size="sm" mono variant="secondary" className="px-1.5 py-0 text-4xs">
                 {sessionStorageItems.length}
               </Badge>
             </button>
@@ -158,26 +158,26 @@ export function StorageAuditor({
           <div className="flex items-center gap-2">
             <div className="relative w-60">
               <MagnifyingGlass className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                className="pl-8 h-8 text-xs bg-background"
+              <Input textSize="xs"
+                className="pl-8 h-8 bg-background"
                 placeholder={`Search keys, values...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
-            <Button variant="outline" size="sm" onClick={refreshStorage} className="h-8 gap-1 px-2.5">
+            <Button variant="outline" size="sm" onClick={refreshStorage} className="h-8">
               <ArrowsClockwise className="size-3.5" />
               Refresh
             </Button>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded border">
+            <span className="text-3xs font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded border">
               Origin: {origin}
             </span>
 
-            <Button variant="outline" size="sm" onClick={clearStorage} className="h-8 gap-1.5 border-rose-500/30 text-rose-500 hover:bg-rose-500/5 px-2.5">
+            <Button variant="outline" size="sm" onClick={clearStorage} className="h-8 gap-1.5 border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-500/5">
               <Trash className="size-3.5" />
               Wipe Origin Storage
             </Button>
@@ -191,7 +191,7 @@ export function StorageAuditor({
             {selectedSection === 'cookies' ? (
               // Cookies List
               <div className="flex-1 min-h-0 flex flex-col">
-                <div className="grid grid-cols-[180px_1fr_120px_100px_60px_60px_45px] px-3 py-1.5 border-b bg-muted/20 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider shrink-0 select-none">
+                <div className="grid grid-cols-[180px_1fr_120px_100px_60px_60px_45px] px-3 py-1.5 border-b bg-muted/20 text-3xs font-semibold text-muted-foreground uppercase tracking-wider shrink-0 select-none">
                   <span>Name</span>
                   <span>Value</span>
                   <span>Domain</span>
@@ -214,14 +214,14 @@ export function StorageAuditor({
                         <span className="truncate pr-4 text-muted-foreground" title={cookie.value}>{cookie.value}</span>
                         <span className="truncate text-muted-foreground" title={cookie.domain}>{cookie.domain}</span>
                         <span className="truncate text-muted-foreground" title={cookie.path}>{cookie.path}</span>
-                        <span className="text-center text-[10px]">{cookie.httpOnly ? '✓' : '-'}</span>
-                        <span className="text-center text-[10px]">{cookie.secure ? '✓' : '-'}</span>
+                        <span className="text-center text-3xs">{cookie.httpOnly ? '✓' : '-'}</span>
+                        <span className="text-center text-3xs">{cookie.secure ? '✓' : '-'}</span>
                         <div className="text-right">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => deleteCookie(cookie.name, cookie.domain)}
-                            className="h-6 w-6 p-0 text-muted-foreground hover:text-rose-500"
+                            className="w-6 p-0 text-muted-foreground hover:text-rose-600 dark:hover:text-rose-400"
                           >
                             <Trash className="size-3.5" />
                           </Button>
@@ -234,7 +234,7 @@ export function StorageAuditor({
             ) : (
               // Local or Session Storage key-value list
               <div className="flex-1 min-h-0 flex flex-col">
-                <div className="grid grid-cols-[200px_1fr_45px] px-3 py-1.5 border-b bg-muted/20 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider shrink-0 select-none">
+                <div className="grid grid-cols-[200px_1fr_45px] px-3 py-1.5 border-b bg-muted/20 text-3xs font-semibold text-muted-foreground uppercase tracking-wider shrink-0 select-none">
                   <span>Key</span>
                   <span>Value</span>
                   <span></span>
@@ -263,7 +263,7 @@ export function StorageAuditor({
                               variant="ghost"
                               size="sm"
                               onClick={() => deleteStorageItem(item.key, selectedSection === 'local')}
-                              className="h-6 w-6 p-0 text-muted-foreground hover:text-rose-500"
+                              className="w-6 p-0 text-muted-foreground hover:text-rose-600 dark:hover:text-rose-400"
                             >
                               <Trash className="size-3.5" />
                             </Button>
@@ -286,7 +286,7 @@ export function StorageAuditor({
                     <span className="text-xs font-semibold truncate text-foreground pr-2" title={selectedItem.key}>
                       Inspector: {selectedItem.key}
                     </span>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setSelectedItem(null)}>
+                    <Button variant="ghost" size="sm" className="w-6 p-0" onClick={() => setSelectedItem(null)}>
                       &times;
                     </Button>
                   </div>
@@ -299,7 +299,7 @@ export function StorageAuditor({
                         return <JsonViewer data={parsed} />;
                       } catch {
                         return (
-                          <ScrollArea className="h-full font-mono text-xs">
+                          <ScrollArea mono className="h-full text-xs">
                             <pre className="p-3.5 text-muted-foreground whitespace-pre-wrap break-all leading-relaxed">
                               {selectedItem.value}
                             </pre>
@@ -313,7 +313,7 @@ export function StorageAuditor({
                 <div className="flex-1 flex flex-col items-center justify-center p-6 text-muted-foreground text-center">
                   <HardDrive className="size-8 opacity-30 mb-2" />
                   <p className="text-xs font-semibold">No storage item selected</p>
-                  <p className="text-[10px] opacity-75 mt-0.5">Click a key-value row to inspect parsed or nested data structure</p>
+                  <p className="text-3xs opacity-75 mt-0.5">Click a key-value row to inspect parsed or nested data structure</p>
                 </div>
               )}
             </div>

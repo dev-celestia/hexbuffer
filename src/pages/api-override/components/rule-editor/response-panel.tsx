@@ -76,12 +76,12 @@ export function ResponsePanel({
             <span
               className={cn(
                 // Typography
-                "text-[11px] text-muted-foreground font-mono"
+                "text-2xs text-muted-foreground font-mono"
               )}
             >
               Status:
             </span>
-            <Input
+            <Input textSize="xs" mono
               value={statusCodeStr}
               onChange={(e) => onStatusCodeChange(e.target.value)}
               onBlur={onStatusCodeBlur}
@@ -91,7 +91,7 @@ export function ResponsePanel({
                 "h-6.5 w-16 px-1.5",
 
                 // Typography
-                "text-xs font-mono font-bold text-center",
+                "font-bold text-center",
 
                 // Backgrounds & Borders
                 "bg-muted/40"
@@ -113,7 +113,7 @@ export function ResponsePanel({
               <span
                 className={cn(
                   // Typography
-                  "text-[11px] text-muted-foreground font-mono"
+                  "text-2xs text-muted-foreground font-mono"
                 )}
               >
                 Tags:
@@ -131,7 +131,7 @@ export function ResponsePanel({
                     "px-1.5 py-0.5 rounded",
 
                     // Typography
-                    "font-mono text-[10px] font-semibold text-primary",
+                    "font-mono text-3xs font-semibold text-primary",
 
                     // Backgrounds & Borders
                     "bg-primary/10 border border-primary/30 hover:bg-primary/20",

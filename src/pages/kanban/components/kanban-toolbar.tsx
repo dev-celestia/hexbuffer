@@ -16,7 +16,7 @@ export function KanbanToolbar({ groupBy, onGroupByChange, totalCards, doneCards,
     <div className="flex h-10 shrink-0 items-center justify-between border-b bg-muted/40 px-3">
       {/* Left: Stats */}
       <div className="flex items-center gap-3">
-        <span className="text-[10px] font-mono text-muted-foreground">
+        <span className="text-3xs font-mono text-muted-foreground">
           {doneCards}/{totalCards} done
         </span>
         {/* Overall progress mini-bar */}
@@ -32,7 +32,7 @@ export function KanbanToolbar({ groupBy, onGroupByChange, totalCards, doneCards,
       <div className="flex items-center gap-4">
         {/* Group by toggle */}
         <div className="flex items-center gap-1 border-r border-border/60 pr-4">
-          <span className="text-[10px] font-mono text-muted-foreground mr-2">Group by:</span>
+          <span className="text-3xs font-mono text-muted-foreground mr-2">Group by:</span>
           <Tabs value={groupBy} onValueChange={(val) => onGroupByChange(val as GroupBy)}>
             <TabsList>
               {GROUP_OPTIONS.map((opt) => (
@@ -45,9 +45,8 @@ export function KanbanToolbar({ groupBy, onGroupByChange, totalCards, doneCards,
         </div>
 
         {/* Add Card Primary Button */}
-        <Button size="sm"
+        <Button size="md"
           onClick={onAddCardClick}
-          className="h-7"
         >
           <PlusIcon className="h-3.5 w-3.5" weight="bold" />
           Add card

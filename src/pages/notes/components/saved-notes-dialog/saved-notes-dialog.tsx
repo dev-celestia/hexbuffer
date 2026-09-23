@@ -74,7 +74,7 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: Readonly<SavedNotesDi
         <DialogHeader
           className={cn(
             // Layout & Positioning
-            "flex flex-row items-center justify-between shrink-0",
+            "flex-row items-center justify-between shrink-0",
 
             // Sizing & Spacing
             "px-6 py-4 border-b",
@@ -107,7 +107,7 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: Readonly<SavedNotesDi
                   "mt-0.5",
 
                   // Typography
-                  "text-xs text-muted-foreground"
+                  "text-xs"
                 )}
               >
                 Manage, search, and reopen all your saved notes ({counts.all} total)
@@ -124,18 +124,15 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: Readonly<SavedNotesDi
               "gap-2"
             )}
           >
-            <Button
+            <Button leading="tight"
               size="sm"
               onClick={handleCreateNewNote}
               className={cn(
                 // Layout & Positioning
-                "flex items-center",
+                "flex",
 
                 // Sizing & Spacing
-                "gap-1.5 h-8 px-3",
-
-                // Typography
-                "text-xs font-medium cursor-pointer"
+                "gap-1.5 h-8 px-3"
               )}
             >
               <PlusIcon className="size-3.5" />
@@ -213,7 +210,7 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: Readonly<SavedNotesDi
         <DialogFooter
           className={cn(
             // Layout & Positioning
-            "flex flex-row items-center justify-between shrink-0",
+            "flex-row items-center justify-between shrink-0",
 
             // Sizing & Spacing
             "px-6 py-3 border-t",
@@ -232,16 +229,13 @@ export function SavedNotesDialog({ isOpen, onOpenChange }: Readonly<SavedNotesDi
             <span className="font-medium text-foreground">{counts.all}</span> saved notes
           </div>
 
-          <Button
+          <Button leading="tight"
             variant="outline"
             size="sm"
             onClick={() => onOpenChange(false)}
             className={cn(
               // Sizing & Spacing
-              "h-8 px-4",
-
-              // Typography
-              "text-xs font-medium cursor-pointer"
+              "h-8 px-4"
             )}
           >
             Cancel

@@ -215,32 +215,32 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
             )}
           >
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase font-mono">
+              <span className="text-2xs font-semibold tracking-wider text-muted-foreground uppercase font-mono">
                 Official Hub
               </span>
-              <Badge
+              <Badge size="sm" mono
                 variant="outline"
-                className="h-4 px-1.5 text-[9px] font-mono border-emerald-500/30 text-emerald-400"
+                className="px-1.5 text-4xs border-success/30 text-success"
               >
                 GitHub v3
               </Badge>
             </div>
 
-            <p className="text-[11px] text-muted-foreground leading-snug">
+            <p className="text-2xs text-muted-foreground leading-snug">
               Sync thousands of public community templates directly from{' '}
               <span className="font-mono text-foreground font-medium">projectdiscovery</span>.
             </p>
 
-            <Button
+            <Button leading="tight"
               variant="outline"
-              size="sm"
+              size="md"
               disabled={syncStatus.isSyncing}
               onClick={() => syncFromGitHub(false)}
               className={cn(
                 // Sizing & Spacing
-                "h-7 px-2.5 w-full text-xs font-medium justify-between",
+                "w-full justify-between",
                 // Backgrounds & Borders
-                "bg-background hover:bg-muted/30 border-border"
+                "hover:bg-muted/30"
               )}
             >
               <div className="flex items-center gap-1.5">
@@ -252,13 +252,13 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
                 />
                 <span>{syncStatus.isSyncing ? 'Syncing...' : 'Sync Official Templates'}</span>
               </div>
-              <span className="text-[10px] font-mono text-muted-foreground">
+              <span className="text-3xs font-mono text-muted-foreground">
                 {syncStatus.totalTemplates} loaded
               </span>
             </Button>
 
             {syncStatus.progressMessage && (
-              <p className="text-[10px] text-muted-foreground font-mono truncate">
+              <p className="text-3xs text-muted-foreground font-mono truncate">
                 {syncStatus.progressMessage}
               </p>
             )}
@@ -269,14 +269,14 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
               {/* Category Group 1: Curated Phases */}
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between px-1">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
+                  <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider font-mono">
                     Phased Scanning
                   </span>
                   <button
                     type="button"
                     onClick={() => setActiveCategory('all')}
                     className={cn(
-                      "text-[10px] font-mono hover:underline",
+                      "text-3xs font-mono hover:underline",
                       activeCategory === 'all' ? "text-primary font-bold" : "text-muted-foreground"
                     )}
                   >
@@ -311,14 +311,14 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
                               {strat.name}
                             </span>
                           </div>
-                          <span className="text-[10px] text-muted-foreground line-clamp-1">
+                          <span className="text-3xs text-muted-foreground line-clamp-1">
                             {strat.description}
                           </span>
                         </div>
 
-                        <Badge
+                        <Badge size="sm" mono
                           variant="outline"
-                          className="h-4 px-1 text-[9px] font-mono shrink-0"
+                          className="px-1 text-4xs"
                         >
                           {strat.badge}
                         </Badge>
@@ -330,7 +330,7 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
 
               {/* Category Group 2: Tech Stacks */}
               <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono px-1">
+                <span className="text-3xs font-bold text-muted-foreground uppercase tracking-wider font-mono px-1">
                   Contextual Tech Stacks
                 </span>
                 <div className="flex flex-col gap-1">
@@ -356,7 +356,7 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
                             {tech.name}
                           </span>
                         </div>
-                        <span className="text-[10px] font-mono text-muted-foreground">
+                        <span className="text-3xs font-mono text-muted-foreground">
                           {tech.tags[0]}
                         </span>
                       </button>
@@ -388,40 +388,40 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
               {/* Search Bar */}
               <div className="relative flex-1 min-w-[200px] max-w-md">
                 <MagnifyingGlassIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-                <Input
+                <Input textSize="xs"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Filter templates by name, CVE ID, tag, or technology..."
-                  className="h-7 pl-8 pr-3 text-xs w-full bg-background"
+                  className="pl-8 pr-3 bg-background"
                 />
               </div>
 
               {/* Action Buttons */}
               <div className="flex items-center gap-1.5 shrink-0">
-                <Button
+                <Button leading="tight"
                   variant="outline"
                   size="xs"
                   onClick={() => selectCategoryTemplates(activeCategory)}
-                  className="h-7 px-2 text-xs gap-1 border-primary/40 text-primary hover:bg-primary/10"
+                  className="h-7 border-primary/40 text-primary hover:bg-primary/10"
                 >
                   <CheckSquareIcon className="size-3.5" />
                   <span>Select Suite</span>
                 </Button>
 
-                <Button
+                <Button leading="tight"
                   variant="outline"
                   size="xs"
                   onClick={handleSelectFiltered}
-                  className="h-7 px-2 text-xs gap-1"
+                  className="h-7"
                 >
                   <span>Select Filtered</span>
                 </Button>
 
-                <Button
+                <Button leading="tight"
                   variant="outline"
                   size="xs"
                   onClick={handleDeselectFiltered}
-                  className="h-7 px-2 text-xs gap-1 text-muted-foreground"
+                  className="h-7 text-muted-foreground"
                 >
                   <TrashIcon className="size-3.5" />
                   <span>Deselect</span>
@@ -432,7 +432,7 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
             {/* Severity Filter Pills & Strategy Context Header */}
             <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-border/40">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[10px] font-mono text-muted-foreground uppercase mr-1">
+                <span className="text-3xs font-mono text-muted-foreground uppercase mr-1">
                   Severity:
                 </span>
                 {(['critical', 'high', 'medium', 'low', 'info'] as Severity[]).map((sev) => {
@@ -444,7 +444,7 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
                       onClick={() => toggleSeverity(sev)}
                       className={cn(
                         // Sizing & Spacing
-                        "h-5 px-2 rounded text-[10px] font-mono uppercase font-semibold transition-all border",
+                        "h-5 px-2 rounded text-3xs font-mono uppercase font-semibold transition-all border",
                         isSelected
                           ? cn(SEVERITY_CONFIG[sev]?.bg, SEVERITY_CONFIG[sev]?.text, "border-current shadow-xs")
                           : "border-border text-muted-foreground hover:bg-muted/30"
@@ -458,7 +458,7 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
                   <button
                     type="button"
                     onClick={() => setSelectedSeverities([])}
-                    className="text-[10px] text-muted-foreground hover:underline ml-1 font-mono"
+                    className="text-3xs text-muted-foreground hover:underline ml-1 font-mono"
                   >
                     Clear
                   </button>
@@ -477,14 +477,14 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
           {activeStrategy && (
             <div className="px-3.5 py-2 bg-primary/5 border-b border-primary/20 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="h-5 px-1.5 text-[10px] font-mono border-primary/30 text-primary">
+                <Badge mono variant="outline" className="px-1.5 border-primary/30 text-primary">
                   {activeStrategy.badge}
                 </Badge>
                 <span className="text-xs text-muted-foreground">
                   {activeStrategy.description}
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-muted-foreground uppercase hidden md:inline">
+              <span className="text-3xs font-mono text-muted-foreground uppercase hidden md:inline">
                 Noise Profile: <span className="text-foreground font-medium">{activeStrategy.recommendedNoise}</span>
               </span>
             </div>
@@ -560,9 +560,9 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
                                 {t.name}
                               </span>
                               {t.cve_id && (
-                                <Badge
+                                <Badge size="sm" mono
                                   variant="outline"
-                                  className="h-4 px-1 text-[9px] font-mono text-amber-500 border-amber-500/30"
+                                  className="px-1 text-4xs text-warning border-warning/30"
                                 >
                                   {t.cve_id}
                                 </Badge>
@@ -572,7 +572,7 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
                             <div className="flex items-center gap-1.5 shrink-0">
                               <span
                                 className={cn(
-                                  "text-[9px] font-mono uppercase px-1.5 py-0.5 rounded border font-semibold",
+                                  "text-4xs font-mono uppercase px-1.5 py-0.5 rounded border font-semibold",
                                   SEVERITY_CONFIG[t.severity]?.bg,
                                   SEVERITY_CONFIG[t.severity]?.text
                                 )}
@@ -582,26 +582,26 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
                             </div>
                           </div>
 
-                          <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
+                          <p className="text-2xs text-muted-foreground line-clamp-2 leading-relaxed">
                             {t.description || 'No detailed description available for this template.'}
                           </p>
 
                           <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                            <span className="text-[9px] font-mono text-muted-foreground">
+                            <span className="text-4xs font-mono text-muted-foreground">
                               id: {t.id}
                             </span>
                             <span className="text-muted-foreground/40">•</span>
                             {t.tags.slice(0, 5).map((tag) => (
-                              <Badge
+                              <Badge mono
                                 key={tag}
                                 variant="outline"
-                                className="h-3.5 px-1 text-[8px] font-mono text-muted-foreground border-border/60"
+                                className="h-3.5 px-1 text-[8px] text-muted-foreground border-border/60"
                               >
                                 {tag}
                               </Badge>
                             ))}
                             {t.tags.length > 5 && (
-                              <span className="text-[9px] font-mono text-muted-foreground">
+                              <span className="text-4xs font-mono text-muted-foreground">
                                 +{t.tags.length - 5}
                               </span>
                             )}
@@ -625,9 +625,9 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
             )}
           >
             <div className="flex items-center gap-2">
-              <Badge
+              <Badge mono
                 variant="outline"
-                className="h-6 px-2 text-xs font-mono border-primary/30 text-primary font-semibold"
+                className="h-6 text-xs border-primary/30 text-primary font-semibold"
               >
                 {selectedTemplateIds.length} Selected
               </Badge>
@@ -636,13 +636,13 @@ export function NucleiTemplateSelector({ onContinueToScan }: Readonly<NucleiTemp
               </span>
             </div>
 
-            <Button
+            <Button leading="tight"
               size="sm"
               disabled={selectedTemplateIds.length === 0}
               onClick={handleProceed}
               className={cn(
                 // Sizing & Spacing
-                "h-8 px-4 text-xs font-medium gap-1.5",
+                "h-8 px-4 gap-1.5",
                 // Interactive & States
                 selectedTemplateIds.length > 0
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"

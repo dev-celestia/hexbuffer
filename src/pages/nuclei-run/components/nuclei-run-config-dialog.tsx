@@ -71,7 +71,7 @@ export function NucleiRunConfigDialog({
               // Layout & Positioning
               "flex items-center gap-2",
               // Typography
-              "text-sm font-semibold"
+              "font-semibold"
             )}
           >
             <GearIcon className="h-4 w-4 text-primary" /> Nuclei Scan Configuration
@@ -99,8 +99,8 @@ export function NucleiRunConfigDialog({
                 "flex flex-col gap-1.5"
               )}
             >
-              <Label className="text-xs font-medium">Concurrency Workers (-c)</Label>
-              <Input
+              <Label leading="tight">Concurrency Workers (-c)</Label>
+              <Input textSize="xs" mono
                 type="number"
                 value={concurrency}
                 onChange={(e) => setConcurrency(e.target.value)}
@@ -108,10 +108,10 @@ export function NucleiRunConfigDialog({
                 max="200"
                 className={cn(
                   // Sizing & Spacing
-                  "h-8 text-xs font-mono"
+                  "h-8"
                 )}
               />
-              <span className="text-[10px] text-muted-foreground">Parallel async workers</span>
+              <span className="text-3xs text-muted-foreground">Parallel async workers</span>
             </div>
 
             <div
@@ -120,8 +120,8 @@ export function NucleiRunConfigDialog({
                 "flex flex-col gap-1.5"
               )}
             >
-              <Label className="text-xs font-medium">Rate Limit RPS (-rl)</Label>
-              <Input
+              <Label leading="tight">Rate Limit RPS (-rl)</Label>
+              <Input textSize="xs" mono
                 type="number"
                 value={rateLimit}
                 onChange={(e) => setRateLimit(e.target.value)}
@@ -129,10 +129,10 @@ export function NucleiRunConfigDialog({
                 max="1000"
                 className={cn(
                   // Sizing & Spacing
-                  "h-8 text-xs font-mono"
+                  "h-8"
                 )}
               />
-              <span className="text-[10px] text-muted-foreground">Max requests per second</span>
+              <span className="text-3xs text-muted-foreground">Max requests per second</span>
             </div>
           </div>
 
@@ -149,8 +149,8 @@ export function NucleiRunConfigDialog({
                 "flex flex-col gap-1.5"
               )}
             >
-              <Label className="text-xs font-medium">Timeout (seconds)</Label>
-              <Input
+              <Label leading="tight">Timeout (seconds)</Label>
+              <Input textSize="xs" mono
                 type="number"
                 value={timeout}
                 onChange={(e) => setTimeoutVal(e.target.value)}
@@ -158,10 +158,10 @@ export function NucleiRunConfigDialog({
                 max="120"
                 className={cn(
                   // Sizing & Spacing
-                  "h-8 text-xs font-mono"
+                  "h-8"
                 )}
               />
-              <span className="text-[10px] text-muted-foreground">HTTP request timeout duration</span>
+              <span className="text-3xs text-muted-foreground">HTTP request timeout duration</span>
             </div>
 
             <div
@@ -170,8 +170,8 @@ export function NucleiRunConfigDialog({
                 "flex flex-col gap-1.5"
               )}
             >
-              <Label className="text-xs font-medium">Failure Retries</Label>
-              <Input
+              <Label leading="tight">Failure Retries</Label>
+              <Input textSize="xs" mono
                 type="number"
                 value={retries}
                 onChange={(e) => setRetries(e.target.value)}
@@ -179,10 +179,10 @@ export function NucleiRunConfigDialog({
                 max="5"
                 className={cn(
                   // Sizing & Spacing
-                  "h-8 text-xs font-mono"
+                  "h-8"
                 )}
               />
-              <span className="text-[10px] text-muted-foreground">Retry count for failed probes</span>
+              <span className="text-3xs text-muted-foreground">Retry count for failed probes</span>
             </div>
           </div>
 
@@ -193,19 +193,19 @@ export function NucleiRunConfigDialog({
               "flex flex-col gap-1.5"
             )}
           >
-            <Label className="text-xs font-medium flex items-center gap-1.5">
+            <Label leading="tight" className="gap-1.5">
               <NetworkIcon className="h-3.5 w-3.5 text-sky-500" /> Upstream Proxy URL
             </Label>
-            <Input
+            <Input textSize="xs" mono
               value={proxyUrl}
               onChange={(e) => setProxyUrl(e.target.value)}
               placeholder="http://127.0.0.1:8080"
               className={cn(
                 // Sizing & Spacing
-                "h-8 text-xs font-mono"
+                "h-8"
               )}
             />
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-3xs text-muted-foreground">
               Route probe traffic through Burp Suite or SOCKS5 upstream.
             </span>
           </div>
@@ -217,16 +217,16 @@ export function NucleiRunConfigDialog({
               "flex flex-col gap-1.5"
             )}
           >
-            <Label className="text-xs font-medium flex items-center gap-1.5">
+            <Label leading="tight" className="gap-1.5">
               <ShieldSlashIcon className="h-3.5 w-3.5 text-red-500" /> Exclusions (Blacklist)
             </Label>
-            <Textarea
+            <Textarea leading="tight" mono
               value={exclusions}
               onChange={(e) => setExclusions(e.target.value)}
               placeholder="admin.prod.corp&#10;192.168.1.1&#10;*.internal.net"
               className={cn(
                 // Sizing & Spacing
-                "h-16 text-xs font-mono resize-none leading-relaxed"
+                "h-16 resize-none leading-relaxed"
               )}
             />
           </div>
@@ -242,7 +242,7 @@ export function NucleiRunConfigDialog({
           >
             <div className="flex flex-col">
               <span className="text-xs font-medium">Headless Browser Mode</span>
-              <span className="text-[10px] text-muted-foreground">Chromium DOM execution for headless templates</span>
+              <span className="text-3xs text-muted-foreground">Chromium DOM execution for headless templates</span>
             </div>
             <Switch checked={headless} onCheckedChange={setHeadless} />
           </div>
@@ -257,7 +257,7 @@ export function NucleiRunConfigDialog({
           >
             <div className="flex flex-col">
               <span className="text-xs font-medium">Follow HTTP Redirects</span>
-              <span className="text-[10px] text-muted-foreground">Automatically follow 301/302 redirects</span>
+              <span className="text-3xs text-muted-foreground">Automatically follow 301/302 redirects</span>
             </div>
             <Switch checked={followRedirects} onCheckedChange={setFollowRedirects} />
           </div>
@@ -266,16 +266,16 @@ export function NucleiRunConfigDialog({
         <DialogFooter
           className={cn(
             // Layout & Positioning
-            "flex items-center justify-between gap-2 border-t pt-3"
+            "items-center justify-between border-t pt-3"
           )}
         >
-          <Button
+          <Button leading="tight"
             size="sm"
             variant="ghost"
             onClick={onResetDefaults}
             className={cn(
               // Typography
-              "text-xs text-muted-foreground"
+              "text-muted-foreground"
             )}
           >
             Reset
@@ -287,21 +287,18 @@ export function NucleiRunConfigDialog({
               "flex items-center gap-2"
             )}
           >
-            <Button
+            <Button leading="tight"
               size="sm"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="text-xs"
             >
               Cancel
             </Button>
-            <Button
+            <Button leading="tight"
               size="sm"
               variant="default"
               onClick={handleSave}
               className={cn(
-                // Typography
-                "text-xs",
                 // Backgrounds & Borders
                 "bg-emerald-600 hover:bg-emerald-500 text-white"
               )}

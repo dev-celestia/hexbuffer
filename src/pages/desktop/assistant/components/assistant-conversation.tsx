@@ -131,7 +131,7 @@ const ConversationMessageRow = memo(function ConversationMessageRow({
                   >
                     <AttachmentPreview />
                     <span className="truncate max-w-[160px] text-xs font-medium">{file.filename}</span>
-                    <Badge variant="outline" className="text-[10px] py-0 px-1 font-mono uppercase shrink-0">
+                    <Badge mono variant="outline" className="py-0 px-1 uppercase">
                       {file.ext}
                     </Badge>
                   </AttachmentItem>

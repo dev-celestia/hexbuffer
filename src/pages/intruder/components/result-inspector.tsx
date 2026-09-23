@@ -93,7 +93,7 @@ export function IntruderResultInspector({
                 "px-1.5 py-0.5",
 
                 // Typography
-                "font-mono text-[10px] font-semibold",
+                "font-mono text-3xs font-semibold",
 
                 // Backgrounds & Borders
                 "rounded border",
@@ -112,7 +112,7 @@ export function IntruderResultInspector({
                 "px-1.5 py-0.5",
 
                 // Typography
-                "font-mono text-[10px] font-semibold text-destructive",
+                "font-mono text-3xs font-semibold text-destructive",
 
                 // Backgrounds & Borders
                 "rounded border bg-destructive/15 border-destructive/20"
@@ -133,7 +133,7 @@ export function IntruderResultInspector({
                 "px-1.5 py-0.5 gap-1",
 
                 // Typography
-                "text-[10px] font-semibold text-emerald-600 dark:text-emerald-400",
+                "text-3xs font-semibold text-emerald-600 dark:text-emerald-400",
 
                 // Backgrounds & Borders
                 "rounded border border-emerald-500/30 bg-emerald-500/10"
@@ -319,7 +319,7 @@ export function IntruderResultInspector({
             <span
               className={cn(
                 // Typography
-                "text-[11px] font-medium text-muted-foreground"
+                "text-2xs font-medium text-muted-foreground"
               )}
             >
               Modified Request
@@ -337,7 +337,7 @@ export function IntruderResultInspector({
               language="markdown"
               className={cn(
                 // Typography
-                "text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
+                "text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-3xs"
               )}
               theme={theme}
               disableValidation
@@ -367,7 +367,7 @@ export function IntruderResultInspector({
             <span
               className={cn(
                 // Typography
-                "text-[11px] font-medium text-muted-foreground"
+                "text-2xs font-medium text-muted-foreground"
               )}
             >
               Captured Response
@@ -376,7 +376,7 @@ export function IntruderResultInspector({
               <span
                 className={cn(
                   // Typography
-                  "font-mono text-[10px] text-muted-foreground"
+                  "font-mono text-3xs text-muted-foreground"
                 )}
               >
                 {selectedResult.response_length.toLocaleString()} bytes
@@ -395,7 +395,7 @@ export function IntruderResultInspector({
               language="markdown"
               className={cn(
                 // Typography
-                "text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
+                "text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-3xs"
               )}
               theme={theme}
               disableValidation

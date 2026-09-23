@@ -59,16 +59,12 @@ export function ContextsVariableRow({
         />
       </div>
 
-      <Input
+      <Input textSize="xs" mono
         placeholder="VARIABLE_KEY"
         value={item.key}
         spellCheck={false}
         autoComplete="off"
         onChange={(e) => onVarChange(index, 'key', e.target.value)}
-        className={cn(
-          // Typography
-          'font-mono text-xs'
-        )}
       />
 
       <Input

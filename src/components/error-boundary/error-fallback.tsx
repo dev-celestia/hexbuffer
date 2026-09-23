@@ -15,9 +15,10 @@ interface ErrorFallbackProps {
  * provider. That is safe because `ThemeProvider` puts the theme class on `<html>`, so the Tailwind
  * tokens below still resolve against the active theme.
  *
- * The accent text is `text-red-600 dark:text-red-400` rather than `text-destructive`: in dark theme
- * `--destructive` resolves to a very dark red (~1.7:1 on the app background) and would make the one
- * piece of text that matters unreadable.
+ * The accent text is `text-destructive`. That token used to be unusable here — the dark theme value
+ * was a very dark red (~1.5:1 on the app background) — so this panel hard-coded
+ * `text-red-600 dark:text-red-400`. Now that `--destructive` carries the package's canonical pair it
+ * measures 4.76:1 (light) / 5.30:1 (dark), so the workaround is gone.
  */
 export function ErrorFallback({ message, details, onReload }: Readonly<ErrorFallbackProps>) {
   return (
@@ -39,7 +40,7 @@ export function ErrorFallback({ message, details, onReload }: Readonly<ErrorFall
           'rounded-full border border-destructive/30 bg-destructive/10',
         )}
       >
-        <WarningOctagonIcon className="size-6 text-red-600 dark:text-red-400" weight="duotone" />
+        <WarningOctagonIcon className="size-6 text-destructive" weight="duotone" />
       </div>
 
       <div className={cn('flex flex-col gap-1')}>
@@ -54,7 +55,7 @@ export function ErrorFallback({ message, details, onReload }: Readonly<ErrorFall
 
       {details && (
         <details className={cn('w-full max-w-lg')}>
-          <summary className={cn('cursor-pointer text-[10px] text-muted-foreground')}>
+          <summary className={cn('cursor-pointer text-3xs text-muted-foreground')}>
             Technical details
           </summary>
           <pre
@@ -62,7 +63,7 @@ export function ErrorFallback({ message, details, onReload }: Readonly<ErrorFall
               // Sizing & Spacing
               'mt-2 max-h-64 overflow-auto p-3',
               // Typography
-              'text-left text-[10px] leading-relaxed',
+              'text-left text-3xs leading-relaxed',
               // Backgrounds & Borders
               'rounded-md border border-border/60 bg-muted/30',
             )}

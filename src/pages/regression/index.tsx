@@ -59,7 +59,7 @@ export function RegressionPage() {
               onValueChange={(value) => page.setActiveTab(value as 'script' | 'run')}
               className={cn(
                 // Layout & Positioning
-                'flex h-full min-h-0 flex-col'
+                'h-full min-h-0 flex-col'
               )}
             >
               {/* Context band: which test case the tabs below are editing */}
@@ -90,17 +90,17 @@ export function RegressionPage() {
                     {page.activeScript.name}
                   </span>
                   {page.isDirty && (
-                    <Badge
+                    <Badge size="sm"
                       variant="secondary"
                       className={cn(
                         // Sizing & Spacing
-                        'h-4 shrink-0 px-1.5 py-0',
+                        'px-1.5 py-0',
 
                         // Typography
-                        'text-[10px] font-semibold',
+                        'font-semibold',
 
                         // Backgrounds & Borders
-                        'border border-warning/40 bg-warning/10 text-warning-foreground'
+                        'border-warning/40 bg-warning/10 text-warning-foreground'
                       )}
                     >
                       Unsaved
@@ -113,7 +113,7 @@ export function RegressionPage() {
                     'min-w-0 shrink truncate',
 
                     // Typography
-                    'font-mono text-[10px] text-muted-foreground'
+                    'font-mono text-3xs text-muted-foreground'
                   )}
                   title={page.activeScript.targetUrl}
                 >

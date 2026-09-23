@@ -56,44 +56,35 @@ export function NucleiRunToolbar({
           "gap-2"
         )}
       >
-        <Button
+        <Button leading="tight"
           variant={activeTab === 'templates' ? 'default' : 'outline'}
-          size="sm"
+          size="md"
           onClick={() => onActiveTabChange('templates')}
           className={cn(
             // Sizing & Spacing
-            "h-7 px-2.5 gap-1.5",
-
-            // Typography
-            "text-xs font-medium"
+            "gap-1.5"
           )}
         >
           <FilesIcon className="size-3.5" />
           <span>Templates</span>
-          <Badge
+          <Badge size="sm" mono
             variant={activeTab === 'templates' ? 'secondary' : 'outline'}
             className={cn(
               // Sizing & Spacing
-              "h-4 px-1 ml-0.5",
-
-              // Typography
-              "text-[10px] font-mono"
+              "px-1 ml-0.5"
             )}
           >
             {selectedTemplatesCount}
           </Badge>
         </Button>
 
-        <Button
+        <Button leading="tight"
           variant={activeTab === 'flow' ? 'default' : 'outline'}
-          size="sm"
+          size="md"
           onClick={() => onActiveTabChange('flow')}
           className={cn(
             // Sizing & Spacing
-            "h-7 px-2.5 gap-1.5",
-
-            // Typography
-            "text-xs font-medium"
+            "gap-1.5"
           )}
         >
           <TreeStructureIcon className="size-3.5" />
@@ -123,22 +114,22 @@ export function NucleiRunToolbar({
           <span
             className={cn(
               // Typography
-              "text-[10px] font-mono text-muted-foreground shrink-0"
+              "text-3xs font-mono text-muted-foreground shrink-0"
             )}
           >
             Target:
           </span>
-          <Input
+          <Input mono
             value={target}
             onChange={(e) => onTargetChange(e.target.value)}
             placeholder="https://example.com"
             disabled={isScanning}
             className={cn(
               // Sizing & Spacing
-              "h-6 w-48 px-2 py-1",
+              "h-6 w-48 py-1",
 
               // Typography
-              "text-[11px] font-mono",
+              "text-2xs",
 
               // Backgrounds & Borders
               "rounded-sm"
@@ -152,10 +143,10 @@ export function NucleiRunToolbar({
           onClick={isScanning ? onStop : onStart}
           className={cn(
             // Sizing & Spacing
-            "h-7 px-2.5 gap-1.5",
+            "h-7 gap-1.5",
 
             // Typography
-            "text-xs font-medium",
+            "text-xs",
 
             // Interactive & States
             !isScanning && "hover:border-emerald-500/50 hover:text-emerald-500"

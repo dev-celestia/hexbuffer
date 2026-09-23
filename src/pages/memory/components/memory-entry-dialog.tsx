@@ -107,7 +107,7 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
           <DialogTitle
             className={cn(
               // Typography
-              "text-sm font-semibold"
+              "font-semibold"
             )}
           >
             {editingItem ? 'Edit Memory Entry' : 'Add Memory Entry'}
@@ -126,14 +126,14 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
           >
             {/* Title */}
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs font-medium">
+              <Label leading="tight">
                 Title <span className="text-destructive">*</span>
               </Label>
-              <Input
+              <Input textSize="xs"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., Target GraphQL Introspection Enabled, API Token, Admin URL"
-                className="h-8 text-xs"
+                className="h-8"
                 autoFocus
               />
             </div>
@@ -142,18 +142,18 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
             <div className="grid grid-cols-3 gap-2.5">
               {/* Namespace */}
               <div className="flex flex-col gap-1.5">
-                <Label className="text-xs font-medium">Namespace</Label>
-                <Input
+                <Label leading="tight">Namespace</Label>
+                <Input textSize="xs" mono
                   value={namespace}
                   onChange={(e) => setNamespace(e.target.value)}
                   placeholder="default"
-                  className="h-8 text-xs font-mono"
+                  className="h-8"
                 />
               </div>
 
               {/* Memory Type */}
               <div className="flex flex-col gap-1.5">
-                <Label className="text-xs font-medium">Type</Label>
+                <Label leading="tight">Type</Label>
                 <Select
                   value={memoryType}
                   // Base UI reports a cleared selection as `null`. `all` is filtered out of the
@@ -162,12 +162,12 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
                     if (v !== null) setMemoryType(v);
                   }}
                 >
-                  <SelectTrigger className="h-8 text-xs capitalize">
+                  <SelectTrigger leading="tight" className="h-8 capitalize">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {MEMORY_TYPES.filter((t) => t.id !== 'all').map((t) => (
-                      <SelectItem key={t.id} value={t.id} className="text-xs capitalize">
+                      <SelectItem leading="tight" key={t.id} value={t.id} className="capitalize">
                         {t.label}
                       </SelectItem>
                     ))}
@@ -177,7 +177,7 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
 
               {/* Importance */}
               <div className="flex flex-col gap-1.5">
-                <Label className="text-xs font-medium">Priority</Label>
+                <Label leading="tight">Priority</Label>
                 <Select
                   value={importance}
                   // As above — priority is always one of the four bands.
@@ -185,14 +185,14 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
                     if (v !== null) setImportance(v);
                   }}
                 >
-                  <SelectTrigger className="h-8 text-xs">
+                  <SelectTrigger leading="tight" className="h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="0.2" className="text-xs">Low (20%)</SelectItem>
-                    <SelectItem value="0.5" className="text-xs">Normal (50%)</SelectItem>
-                    <SelectItem value="0.8" className="text-xs">High (80%)</SelectItem>
-                    <SelectItem value="1.0" className="text-xs">Critical (100%)</SelectItem>
+                    <SelectItem leading="tight" value="0.2">Low (20%)</SelectItem>
+                    <SelectItem leading="tight" value="0.5">Normal (50%)</SelectItem>
+                    <SelectItem leading="tight" value="0.8">High (80%)</SelectItem>
+                    <SelectItem leading="tight" value="1.0">Critical (100%)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -201,57 +201,55 @@ export function MemoryEntryDialog({ state }: Readonly<MemoryEntryDialogProps>) {
             {/* Tags & Source */}
             <div className="grid grid-cols-2 gap-2.5">
               <div className="flex flex-col gap-1.5">
-                <Label className="text-xs font-medium">Tags (comma-separated)</Label>
-                <Input
+                <Label leading="tight">Tags (comma-separated)</Label>
+                <Input textSize="xs" mono
                   value={tagsInput}
                   onChange={(e) => setTagsInput(e.target.value)}
                   placeholder="vuln, auth, api, scope"
-                  className="h-8 text-xs font-mono"
+                  className="h-8"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label className="text-xs font-medium">Source / URL (optional)</Label>
-                <Input
+                <Label leading="tight">Source / URL (optional)</Label>
+                <Input textSize="xs"
                   value={source}
                   onChange={(e) => setSource(e.target.value)}
                   placeholder="https://example.com/api"
-                  className="h-8 text-xs"
+                  className="h-8"
                 />
               </div>
             </div>
 
             {/* Content */}
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs font-medium">
+              <Label leading="tight">
                 Content <span className="text-destructive">*</span>
               </Label>
-              <Textarea
+              <Textarea leading="tight" mono
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Detailed security observation, credential secret, reproduction steps, or context note..."
                 rows={6}
-                className="text-xs font-mono leading-relaxed resize-none"
+                className="leading-relaxed resize-none"
               />
             </div>
           </div>
 
           <DialogFooter className="pt-2">
-            <Button
+            <Button leading="tight"
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setIsEntryDialogOpen(false)}
               disabled={saving}
-              className="text-xs"
             >
               Cancel
             </Button>
-            <Button
+            <Button leading="tight"
               type="submit"
               variant="default"
               size="sm"
               disabled={!canSave || saving}
-              className="text-xs"
             >
               {saving ? 'Saving…' : editingItem ? 'Update Memory' : 'Save Memory'}
             </Button>

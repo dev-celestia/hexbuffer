@@ -103,21 +103,15 @@ export function FileToolbar({
       >
         <Button
           size="sm"
-          variant="ghost"
+          variant="quiet"
           onClick={onNavigateUp}
           disabled={isAtRoot || loading}
           className={cn(
-            // Layout & Positioning
-            "shrink-0",
-
             // Sizing & Spacing
             "size-7 p-0",
 
-            // Typography & Colors
-            "text-muted-foreground",
-
             // Interactive & States
-            "hover:text-foreground active:scale-[0.97] transition-all"
+            "active:scale-[0.97]"
           )}
           title="Navigate up"
         >
@@ -210,16 +204,16 @@ export function FileToolbar({
               "gap-1"
             )}
           >
-            <Input
+            <Input textSize="xs"
               value={folderNameInput}
               onChange={(e) => setFolderNameInput(e.target.value)}
               placeholder="Folder name"
               className={cn(
                 // Sizing & Spacing
-                "w-32 h-7",
+                "w-32",
 
                 // Typography
-                "text-xs bg-background"
+                "bg-background"
               )}
               disabled={creating}
               autoFocus
@@ -229,9 +223,6 @@ export function FileToolbar({
               size="sm"
               variant="outline"
               className={cn(
-                // Layout & Positioning
-                "shrink-0",
-
                 // Sizing & Spacing
                 "size-7 p-0"
               )}
@@ -336,19 +327,16 @@ export function FileToolbar({
               "text-muted-foreground"
             )}
           />
-          <Input
+          <Input textSize="xs"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search files…"
             className={cn(
               // Sizing & Spacing
-              "h-7 w-full ps-7 pe-7",
+              "ps-7 pe-7",
 
               // Typography
-              "text-xs font-sans bg-background",
-
-              // Backgrounds & Borders
-              "border-input"
+              "font-sans bg-background"
             )}
             disabled={actionDisabled}
           />

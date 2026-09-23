@@ -74,13 +74,13 @@ export function EditorHeader({
             value={editMethod}
             onValueChange={(v) => { if (v) onSetEditMethod(v); }}
           >
-            <SelectTrigger
+            <SelectTrigger leading="tight" mono
               className={cn(
                 // Sizing & Spacing
                 "h-7 w-24",
 
                 // Typography
-                "text-xs font-mono font-semibold",
+                "font-semibold",
 
                 // Backgrounds & Borders
                 "bg-muted/40 border-border"
@@ -90,12 +90,12 @@ export function EditorHeader({
             </SelectTrigger>
             <SelectContent>
               {ALL_METHODS.map((m) => (
-                <SelectItem
+                <SelectItem mono
                   key={m}
                   value={m}
                   className={cn(
                     // Typography
-                    "text-xs font-mono",
+                    "text-xs",
                     METHOD_COLORS[m] ?? ""
                   )}
                 >
@@ -104,7 +104,7 @@ export function EditorHeader({
               ))}
             </SelectContent>
           </Select>
-          <Input
+          <Input textSize="xs" mono
             value={editPath}
             onChange={(e) => onSetEditPath(e.target.value)}
             onKeyDown={(e) => {
@@ -114,10 +114,7 @@ export function EditorHeader({
             placeholder="/path or https://api.example.com/path"
             className={cn(
               // Sizing & Spacing
-              "h-7 flex-1",
-
-              // Typography
-              "font-mono text-xs",
+              "flex-1",
 
               // Backgrounds & Borders
               "bg-muted/40",
@@ -161,12 +158,12 @@ export function EditorHeader({
             {displayMatchSummary()}
           </span>
           {dynamicParams.map((p) => (
-            <Badge
+            <Badge mono
               key={p}
               variant="secondary"
               className={cn(
                 // Typography
-                "font-mono text-[10px] text-primary"
+                "text-primary"
               )}
               title={`Dynamic route parameter :${p}. Use {{${p}}} in template.`}
             >
@@ -174,21 +171,12 @@ export function EditorHeader({
             </Badge>
           ))}
           <Button
-            variant="ghost"
+            variant="quiet"
             size="icon"
             onClick={() => onSetEditingHeader(true)}
             className={cn(
-              // Layout & Positioning
-              "shrink-0",
-
               // Sizing & Spacing
-              "h-6 w-6 p-0",
-
-              // Typography
-              "text-muted-foreground hover:text-foreground",
-
-              // Interactive & States
-              "cursor-pointer"
+              "h-6 w-6 p-0"
             )}
             title="Edit method & path"
           >

@@ -114,26 +114,20 @@ export function ServerToolbar({
 
             // Backgrounds & Borders
             serverStatus.running
-              ? "bg-green-500/10 border border-green-500/20 text-green-400"
+              ? "bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400"
               : "bg-muted/40 text-muted-foreground border border-border"
           )}
         >
           <span>{baseUrl}</span>
           <Button
-            variant="ghost"
+            variant="quiet"
             size="icon"
             className={cn(
               // Sizing & Spacing
               "h-5 w-5",
 
-              // Typography
-              "text-muted-foreground hover:text-foreground",
-
               // Backgrounds & Borders
-              "rounded",
-
-              // Interactive & States
-              "cursor-pointer"
+              "rounded"
             )}
             onClick={handleCopyBaseUrl}
             title="Copy Server URL"
@@ -145,7 +139,7 @@ export function ServerToolbar({
                   "h-3 w-3",
 
                   // Typography
-                  "text-green-400"
+                  "text-green-600 dark:text-green-400"
                 )}
               />
             ) : (
@@ -188,17 +182,17 @@ export function ServerToolbar({
           >
             Port:
           </span>
-          <Input
+          <Input textSize="xs" mono
             value={portInput}
             onChange={(e) => setPortInput(e.target.value)}
             onBlur={handlePortBlur}
             disabled={serverStatus.running}
             className={cn(
               // Sizing & Spacing
-              "h-7 w-20",
+              "w-20",
 
               // Typography
-              "text-xs font-mono text-center",
+              "text-center",
 
               // Backgrounds & Borders
               "bg-muted/40 border-border"
@@ -245,10 +239,6 @@ export function ServerToolbar({
         ) : (
           <Button
             size="sm"
-            className={cn(
-              // Interactive & States
-              "cursor-pointer"
-            )}
             onClick={() => onStartServer(parseInt(portInput, 10) || 4000)}
             disabled={isStartingServer}
           >

@@ -42,7 +42,7 @@ export function TreeHeader({
       <span
         className={cn(
           // Typography
-          'text-[11px] font-semibold tracking-wide text-muted-foreground uppercase'
+          'text-2xs font-semibold tracking-wide text-muted-foreground uppercase'
         )}
       >
         Collections
@@ -60,12 +60,8 @@ export function TreeHeader({
         {actions.map(({ key, title, icon: Icon, onClick }) => (
           <Button
             key={key}
-            variant="ghost"
+            variant="quiet"
             size="icon-sm"
-            className={cn(
-              // Interactive & States
-              'text-muted-foreground hover:text-foreground'
-            )}
             title={title}
             onClick={onClick}
           >

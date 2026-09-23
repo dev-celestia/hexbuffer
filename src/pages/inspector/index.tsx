@@ -113,37 +113,37 @@ export function InspectorPage() {
                 </span>
                 {cdp.connectionStatus === 'connected' && cdp.selectedTarget ? (
                   <>
-                    <Badge variant="default" className="gap-1 bg-emerald-600 hover:bg-emerald-600 text-white dark:bg-emerald-500">
+                    <Badge variant="default" className="bg-success text-success-foreground hover:bg-success">
                       <PlugsConnected className="size-3" />
                       Session: Connected
                     </Badge>
-                    <Badge variant="outline" className="gap-1 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    <Badge variant="success">
+                      <span className="h-1.5 w-1.5 rounded-full bg-success" />
                       CDP Browser: Active
                     </Badge>
                   </>
                 ) : cdp.connectionStatus === 'connecting' ? (
                   <>
-                    <Badge variant="outline" className="gap-1 animate-pulse border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/5">
+                    <Badge variant="warning" className="animate-pulse">
                       Connecting...
                     </Badge>
-                    <Badge variant="outline" className="gap-1 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <Badge variant="success">
+                      <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
                       CDP Browser: Active
                     </Badge>
                   </>
                 ) : (
                   <>
-                    <Badge variant="secondary" className="gap-1">
+                    <Badge variant="secondary">
                       Session: Disconnected
                     </Badge>
                     {cdp.isBrowserRunning ? (
-                      <Badge variant="outline" className="gap-1 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      <Badge variant="success">
+                        <span className="h-1.5 w-1.5 rounded-full bg-success" />
                         CDP Browser: Active
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="gap-1 border-muted-foreground/30 text-muted-foreground bg-muted-foreground/5">
+                      <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground bg-muted-foreground/5">
                         <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/45" />
                         CDP Browser: Offline
                       </Badge>
@@ -152,7 +152,7 @@ export function InspectorPage() {
                 )}
               </div>
               {cdp.connectionStatus === 'connected' && cdp.selectedTarget && (
-                <p className="text-[11px] text-muted-foreground font-mono truncate max-w-xl">
+                <p className="text-2xs text-muted-foreground font-mono truncate max-w-xl">
                   {cdp.selectedTarget.title || 'Untitled Page'} — {cdp.selectedTarget.url}
                 </p>
               )}
@@ -160,17 +160,10 @@ export function InspectorPage() {
           </div>
 
           {cdp.connectionStatus === 'connected' && cdp.selectedTarget ? (
-            <Button
-              size="sm"
+            <Button leading="tight"
+              size="md"
               variant="outline"
               onClick={cdp.disconnect}
-              className={cn(
-                // Sizing & Spacing
-                "h-7 px-2.5",
-
-                // Typography
-                "text-xs font-medium"
-              )}
             >
               Disconnect
             </Button>
@@ -196,19 +189,16 @@ export function InspectorPage() {
                 <span
                   className={cn(
                     // Typography
-                    "text-[11px] font-semibold text-muted-foreground uppercase tracking-wider"
+                    "text-2xs font-semibold text-muted-foreground uppercase tracking-wider"
                   )}
                 >
                   Port:
                 </span>
-                <Input
+                <Input textSize="xs" mono
                   type="number"
                   className={cn(
                     // Sizing & Spacing
-                    "h-7 w-16 px-2",
-
-                    // Typography
-                    "font-mono text-xs"
+                    "w-16"
                   )}
                   value={cdp.port}
                   onChange={(e) => cdp.setPort(e.target.value === '' ? '' : Number(e.target.value))}
@@ -216,34 +206,28 @@ export function InspectorPage() {
                 />
               </div>
 
-              <Button
-                size="sm"
+              <Button leading="tight"
+                size="md"
                 variant="outline"
                 onClick={cdp.openBrowser}
                 disabled={cdp.connectionStatus === 'connecting'}
                 className={cn(
                   // Sizing & Spacing
-                  "h-7 px-2.5 gap-1.5",
-
-                  // Typography
-                  "text-xs font-medium"
+                  "gap-1.5"
                 )}
               >
                 <Browser />
                 <span>Open Browser</span>
               </Button>
 
-              <Button
-                size="sm"
+              <Button leading="tight"
+                size="md"
                 variant="outline"
                 onClick={cdp.fetchTargets}
                 disabled={cdp.connectionStatus === 'connecting'}
                 className={cn(
                   // Sizing & Spacing
-                  "h-7 px-2.5 gap-1.5",
-
-                  // Typography
-                  "text-xs font-medium"
+                  "gap-1.5"
                 )}
               >
                 <ArrowClockwise />
@@ -257,7 +241,7 @@ export function InspectorPage() {
                 }}
                 disabled={cdp.connectionStatus === 'connecting' || cdp.targets.length === 0}
               >
-                <SelectTrigger className="w-[200px] h-7 text-xs">
+                <SelectTrigger leading="tight" className="w-[200px] h-7">
                   <SelectValue placeholder={cdp.targets.length === 0 ? "No active tabs" : "Select target..."} />
                 </SelectTrigger>
                 <SelectContent>
@@ -294,7 +278,7 @@ export function InspectorPage() {
                 <EmptyTitle>Disconnected from debugger target</EmptyTitle>
                 <EmptyDescription>
                   {cdp.scanCount > 0 && cdp.targets.length === 0 ? (
-                    <span className="text-amber-600 dark:text-amber-500 font-medium block mt-1">
+                    <span className="text-warning font-medium block mt-1">
                       Browser is running on port {cdp.port}, but has no debuggable tabs open. Open a tab (e.g. google.com) in your browser and click "Scan" again.
                     </span>
                   ) : (
@@ -304,17 +288,17 @@ export function InspectorPage() {
               </EmptyHeader>
 
               {cdp.error && (
-                <EmptyContent className="text-left w-full max-w-lg mt-2">
-                  <div className="flex gap-3 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-600 rounded-xl text-xs leading-relaxed w-full">
-                    <Warning className="size-5 shrink-0 text-rose-500 mt-0.5" />
+                <EmptyContent className="text-left max-w-lg mt-2">
+                  <div className="flex gap-3 p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-xl text-xs leading-relaxed w-full">
+                    <Warning className="size-5 shrink-0 text-destructive mt-0.5" />
                     <div className="space-y-1 flex-1">
-                      <p className="font-semibold text-rose-600 dark:text-rose-400">Discovery Error</p>
+                      <p className="font-semibold text-destructive">Discovery Error</p>
                       <p className="opacity-90">{cdp.error}</p>
-                      <div className="pt-2 text-[10px] opacity-75">
-                        <p className="font-semibold text-[11px] mb-1">How to fix:</p>
+                      <div className="pt-2 text-3xs opacity-75">
+                        <p className="font-semibold text-2xs mb-1">How to fix:</p>
                         <p>1. Quit your browser completely.</p>
                         <p>2. Launch from command line with remote debugging enabled:</p>
-                        <code className="block bg-rose-950/20 text-rose-400 p-1.5 rounded font-mono mt-1 whitespace-pre-wrap">
+                        <code className="block bg-destructive/10 text-destructive p-1.5 rounded font-mono mt-1 whitespace-pre-wrap">
                           /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port={cdp.port}
                         </code>
                       </div>
@@ -327,7 +311,7 @@ export function InspectorPage() {
         ) : (
           <>
             {/* Network monitor panel */}
-            <TabsContent value="network" className="flex-1 min-h-0 m-0 outline-none">
+            <TabsContent value="network" className="min-h-0 m-0">
               <NetworkMonitor
                 requests={cdp.networkRequests}
                 selectedRequest={cdp.selectedRequest}
@@ -344,7 +328,7 @@ export function InspectorPage() {
             </TabsContent>
 
             {/* Storage auditor panel */}
-            <TabsContent value="storage" className="flex-1 min-h-0 m-0 outline-none">
+            <TabsContent value="storage" className="min-h-0 m-0">
               <StorageAuditor
                 cookies={cdp.cookies}
                 localStorageItems={cdp.localStorageItems}
@@ -358,7 +342,7 @@ export function InspectorPage() {
             </TabsContent>
 
             {/* Console logs panel */}
-            <TabsContent value="console" className="flex-1 min-h-0 m-0 outline-none flex flex-col bg-background">
+            <TabsContent value="console" className="min-h-0 m-0 flex flex-col bg-background">
               <div
                 className={cn(
                   // Layout & Positioning
@@ -379,17 +363,11 @@ export function InspectorPage() {
                 >
                   Console logs
                 </span>
-                <Button
+                <Button leading="tight"
                   variant="outline"
-                  size="sm"
+                  size="md"
                   onClick={cdp.clearConsole}
                   className={cn(
-                    // Sizing & Spacing
-                    "h-7 px-2.5 gap-1",
-
-                    // Typography
-                    "text-xs",
-
                     // Interactive & States
                     "active:scale-[0.97] transition-transform duration-100 ease-out"
                   )}
@@ -398,7 +376,7 @@ export function InspectorPage() {
                 </Button>
               </div>
 
-              <ScrollArea className="flex-1 p-3 font-mono text-[11px] leading-relaxed bg-black/5 dark:bg-black/20">
+              <ScrollArea mono className="flex-1 p-3 text-2xs leading-relaxed bg-black/5 dark:bg-black/20">
                 {cdp.consoleLogs.length === 0 ? (
                   <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground h-[200px]">
                     <Terminal className="size-8 opacity-30 mb-2" />
@@ -415,17 +393,17 @@ export function InspectorPage() {
                       });
 
                       let levelColor = 'text-foreground/80';
-                      if (log.level === 'error') levelColor = 'text-rose-500 bg-rose-500/5 px-1 py-0.5 rounded';
-                      if (log.level === 'warning') levelColor = 'text-amber-500 bg-amber-500/5 px-1 py-0.5 rounded';
-                      if (log.level === 'info') levelColor = 'text-sky-400';
-                      if (log.level === 'debug') levelColor = 'text-violet-400';
+                      if (log.level === 'error') levelColor = 'text-destructive bg-destructive/5 px-1 py-0.5 rounded';
+                      if (log.level === 'warning') levelColor = 'text-warning-foreground bg-warning/5 px-1 py-0.5 rounded';
+                      if (log.level === 'info') levelColor = 'text-info';
+                      if (log.level === 'debug') levelColor = 'text-muted-foreground';
 
                       return (
                         <div key={log.id} className={`flex items-start gap-3 py-0.5 border-b border-border/10 last:border-none ${levelColor}`}>
-                          <span className="text-[10px] text-muted-foreground shrink-0 select-none">
+                          <span className="text-3xs text-muted-foreground shrink-0 select-none">
                             [{timeStr}]
                           </span>
-                          <span className="font-semibold select-none shrink-0 w-12 uppercase text-[10px] tracking-wider opacity-75">
+                          <span className="font-semibold select-none shrink-0 w-12 uppercase text-3xs tracking-wider opacity-75">
                             {log.level}
                           </span>
                           <span className="break-all whitespace-pre-wrap flex-1">{log.text}</span>

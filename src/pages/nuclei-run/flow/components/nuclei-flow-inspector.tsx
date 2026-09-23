@@ -99,7 +99,7 @@ export function NucleiFlowInspector({
             <span
               className={cn(
                 // Typography
-                "text-[10px] text-muted-foreground font-mono truncate"
+                "text-3xs text-muted-foreground font-mono truncate"
               )}
             >
               {node.id}
@@ -108,14 +108,12 @@ export function NucleiFlowInspector({
         </div>
 
         <Button
-          size="sm"
-          variant="ghost"
+          size="md"
+          variant="quiet"
           onClick={onClose}
           className={cn(
             // Sizing & Spacing
-            "h-7 w-7 p-0",
-            // Interactive & States
-            "text-muted-foreground hover:text-foreground"
+            "w-7 p-0"
           )}
         >
           <XIcon className="h-4 w-4" />
@@ -135,19 +133,19 @@ export function NucleiFlowInspector({
           return (
             <div className="flex flex-col gap-3">
               <div>
-                <span className="text-[11px] font-medium text-muted-foreground">Template Name</span>
+                <span className="text-2xs font-medium text-muted-foreground">Template Name</span>
                 <p className="font-semibold text-foreground text-sm mt-0.5">{tData.name || 'Untitled'}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <span className="text-[11px] font-medium text-muted-foreground">Author</span>
+                  <span className="text-2xs font-medium text-muted-foreground">Author</span>
                   <p className="font-mono text-xs mt-0.5 text-foreground">{tData.author || 'community'}</p>
                 </div>
                 <div>
-                  <span className="text-[11px] font-medium text-muted-foreground">Severity</span>
+                  <span className="text-2xs font-medium text-muted-foreground">Severity</span>
                   <div className="mt-0.5">
-                    <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-wider">
+                    <Badge variant="outline" className="font-bold uppercase tracking-wider">
                       {tData.severity || 'medium'}
                     </Badge>
                   </div>
@@ -156,7 +154,7 @@ export function NucleiFlowInspector({
 
               {tData.description && (
                 <div>
-                  <span className="text-[11px] font-medium text-muted-foreground">Description</span>
+                  <span className="text-2xs font-medium text-muted-foreground">Description</span>
                   <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed bg-muted/20 p-2 rounded border">
                     {tData.description}
                   </p>
@@ -165,10 +163,10 @@ export function NucleiFlowInspector({
 
               {tData.tags && tData.tags.length > 0 && (
                 <div>
-                  <span className="text-[11px] font-medium text-muted-foreground">Tags</span>
+                  <span className="text-2xs font-medium text-muted-foreground">Tags</span>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {tData.tags.map((tag, idx) => (
-                      <Badge key={idx} variant="secondary" className="text-[10px] font-mono">
+                      <Badge mono key={idx} variant="secondary">
                         {tag}
                       </Badge>
                     ))}
@@ -186,19 +184,19 @@ export function NucleiFlowInspector({
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[11px] font-medium text-muted-foreground">Step Identifier</span>
+                  <span className="text-2xs font-medium text-muted-foreground">Step Identifier</span>
                   <p className="font-mono font-semibold text-foreground text-xs mt-0.5">{rData.stepId || 'http-probe'}</p>
                 </div>
-                <Badge variant="outline" className="font-mono font-bold text-[10px] uppercase">
+                <Badge mono variant="outline" className="font-bold uppercase">
                   {rData.method || 'GET'}
                 </Badge>
               </div>
 
               <div>
-                <span className="text-[11px] font-medium text-muted-foreground">Request Path(s)</span>
+                <span className="text-2xs font-medium text-muted-foreground">Request Path(s)</span>
                 <div className="flex flex-col gap-1 mt-1">
                   {(rData.path || ['{{BaseURL}}/']).map((p, idx) => (
-                    <div key={idx} className="font-mono text-[11px] bg-muted/30 px-2 py-1 rounded border text-foreground truncate">
+                    <div key={idx} className="font-mono text-2xs bg-muted/30 px-2 py-1 rounded border text-foreground truncate">
                       {p}
                     </div>
                   ))}
@@ -207,8 +205,8 @@ export function NucleiFlowInspector({
 
               {rData.body && (
                 <div>
-                  <span className="text-[11px] font-medium text-muted-foreground">Request Body</span>
-                  <pre className="font-mono text-[11px] bg-muted/30 p-2 rounded border mt-1 overflow-x-auto text-foreground">
+                  <span className="text-2xs font-medium text-muted-foreground">Request Body</span>
+                  <pre className="font-mono text-2xs bg-muted/30 p-2 rounded border mt-1 overflow-x-auto text-foreground">
                     {rData.body}
                   </pre>
                 </div>
@@ -224,20 +222,20 @@ export function NucleiFlowInspector({
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[11px] font-medium text-muted-foreground">Matcher Type</span>
+                  <span className="text-2xs font-medium text-muted-foreground">Matcher Type</span>
                   <p className="font-semibold text-foreground text-xs mt-0.5 capitalize">{mData.type || 'status'}</p>
                 </div>
-                <Badge variant="outline" className="text-[10px] font-mono">
+                <Badge mono variant="outline">
                   Part: {mData.part || 'body'}
                 </Badge>
               </div>
 
               {mData.type === 'status' && mData.status && (
                 <div>
-                  <span className="text-[11px] font-medium text-muted-foreground">Expected Status Codes</span>
+                  <span className="text-2xs font-medium text-muted-foreground">Expected Status Codes</span>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {mData.status.map((sc, idx) => (
-                      <Badge key={idx} variant="secondary" className="font-mono text-[10px]">
+                      <Badge mono key={idx} variant="secondary">
                         {sc}
                       </Badge>
                     ))}
@@ -247,8 +245,8 @@ export function NucleiFlowInspector({
 
               {(mData.type === 'word' || mData.type === 'regex') && (
                 <div>
-                  <span className="text-[11px] font-medium text-muted-foreground">Match Patterns</span>
-                  <div className="flex flex-col gap-1 mt-1 font-mono text-[11px]">
+                  <span className="text-2xs font-medium text-muted-foreground">Match Patterns</span>
+                  <div className="flex flex-col gap-1 mt-1 font-mono text-2xs">
                     {(mData.words || mData.regex || []).map((w, idx) => (
                       <div key={idx} className="bg-muted/30 px-2 py-1 rounded border text-foreground truncate">
                         {w}
@@ -267,25 +265,25 @@ export function NucleiFlowInspector({
           return (
             <div className="flex flex-col gap-3">
               <div>
-                <span className="text-[11px] font-medium text-muted-foreground">Variable / Name</span>
+                <span className="text-2xs font-medium text-muted-foreground">Variable / Name</span>
                 <p className="font-mono font-semibold text-foreground text-xs mt-0.5">{eData.name || 'token'}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <span className="text-[11px] font-medium text-muted-foreground">Type</span>
+                  <span className="text-2xs font-medium text-muted-foreground">Type</span>
                   <p className="font-mono text-xs mt-0.5 text-foreground capitalize">{eData.type || 'regex'}</p>
                 </div>
                 <div>
-                  <span className="text-[11px] font-medium text-muted-foreground">Target Part</span>
+                  <span className="text-2xs font-medium text-muted-foreground">Target Part</span>
                   <p className="font-mono text-xs mt-0.5 text-foreground">{eData.part || 'body'}</p>
                 </div>
               </div>
 
               {eData.regex && eData.regex.length > 0 && (
                 <div>
-                  <span className="text-[11px] font-medium text-muted-foreground">Pattern(s)</span>
-                  <div className="flex flex-col gap-1 mt-1 font-mono text-[11px]">
+                  <span className="text-2xs font-medium text-muted-foreground">Pattern(s)</span>
+                  <div className="flex flex-col gap-1 mt-1 font-mono text-2xs">
                     {eData.regex.map((rgx, idx) => (
                       <div key={idx} className="bg-muted/30 px-2 py-1 rounded border text-foreground truncate">
                         {rgx}
@@ -303,7 +301,7 @@ export function NucleiFlowInspector({
           const fData: FlowNodeData = data;
           return (
             <div className="flex flex-col gap-2">
-              <span className="text-[11px] font-medium text-muted-foreground">Flow Logic Script (Nuclei v3)</span>
+              <span className="text-2xs font-medium text-muted-foreground">Flow Logic Script (Nuclei v3)</span>
               <pre className="font-mono text-xs bg-muted/30 p-2.5 rounded border text-foreground leading-relaxed overflow-x-auto">
                 {fData.flowCode || 'http(1)'}
               </pre>

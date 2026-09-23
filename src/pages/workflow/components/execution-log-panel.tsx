@@ -25,9 +25,9 @@ const levelIcons: Record<ExecutionLog['level'], typeof Info> = {
 
 const levelStyles: Record<ExecutionLog['level'], string> = {
   info: 'text-muted-foreground',
-  success: 'text-emerald-500',
-  error: 'text-red-500',
-  warning: 'text-amber-500',
+  success: 'text-emerald-600 dark:text-emerald-400',
+  error: 'text-red-600 dark:text-red-400',
+  warning: 'text-amber-600 dark:text-amber-400',
 };
 
 const EMPTY_EXECUTION_LOGS: ExecutionLog[] = [];
@@ -113,7 +113,7 @@ export function ExecutionLogPanel({ workflowId }: Readonly<ExecutionLogPanelProp
             <PlayIcon className="size-3 text-muted-foreground" />
           )}
           <span>Execution Log</span>
-          <span className="ml-1 text-[10px] text-muted-foreground">
+          <span className="ml-1 text-3xs text-muted-foreground">
             ({logs.length})
           </span>
         </button>
@@ -137,12 +137,12 @@ export function ExecutionLogPanel({ workflowId }: Readonly<ExecutionLogPanelProp
         <div ref={scrollRef} className="flex-1 min-h-0 overflow-auto">
           {logs.length === 0 ? (
             <div className="flex items-center justify-center py-4">
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-2xs text-muted-foreground">
                 {isWorkflowRunning ? 'Running...' : 'Run this workflow to see execution logs'}
               </p>
             </div>
           ) : (
-            <div className="space-y-0.5 py-1 font-mono text-[11px]">
+            <div className="space-y-0.5 py-1 font-mono text-2xs">
               {visibleLogs.map((log) => {
                 const Icon = levelIcons[log.level];
                 const isExpanded = expandedLogIds.has(log.id);
@@ -178,14 +178,14 @@ export function ExecutionLogPanel({ workflowId }: Readonly<ExecutionLogPanelProp
                         {log.message}
                       </span>
                       {log.nodeLabel && (
-                        <span className="ml-auto shrink-0 rounded bg-muted px-1.5 py-0 text-[10px] text-muted-foreground">
+                        <span className="ml-auto shrink-0 rounded bg-muted px-1.5 py-0 text-3xs text-muted-foreground">
                           {log.nodeLabel}
                         </span>
                       )}
                     </div>
                     {/* Expanded data view */}
                     {isExpanded && canExpand && (
-                      <div className="mx-3 mb-1 rounded border bg-muted/30 px-3 py-2 font-mono text-[10px]">
+                      <div className="mx-3 mb-1 rounded border bg-muted/30 px-3 py-2 font-mono text-3xs">
                         {log.inputData != null && (
                           <div className="mb-1.5">
                             <span className="font-semibold text-muted-foreground uppercase tracking-wider">Input:</span>

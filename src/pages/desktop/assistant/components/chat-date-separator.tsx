@@ -42,7 +42,7 @@ export function ChatDateSeparator({ date }: Readonly<ChatDateSeparatorProps>) {
             // Sizing & Spacing
             'px-2.5 py-0.5 rounded-full',
             // Typography
-            'text-[11px] font-medium text-muted-foreground select-none',
+            'text-2xs font-medium text-muted-foreground select-none',
             // Backgrounds & Borders
             'bg-background/95 border border-border/50 shadow-2xs backdrop-blur-xs',
           )}

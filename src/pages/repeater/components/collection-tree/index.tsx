@@ -136,15 +136,12 @@ export function CollectionsTree({ workspaceId }: Readonly<{ workspaceId: string 
                     </EmptyDescription>
                   </EmptyHeader>
                   <EmptyContent>
-                    <Button
+                    <Button leading="tight"
                       variant="outline"
                       size="sm"
                       className={cn(
                         // Sizing & Spacing
-                        'h-6 gap-1 px-2',
-
-                        // Typography
-                        'text-xs'
+                        'px-2'
                       )}
                       onClick={() => setFilterQuery('')}
                     >
@@ -164,15 +161,12 @@ export function CollectionsTree({ workspaceId }: Readonly<{ workspaceId: string 
                     </EmptyDescription>
                   </EmptyHeader>
                   <EmptyContent>
-                    <Button
+                    <Button leading="tight"
                       variant="outline"
                       size="sm"
                       className={cn(
                         // Sizing & Spacing
-                        'h-6 gap-1 px-2',
-
-                        // Typography
-                        'text-xs'
+                        'px-2'
                       )}
                       onClick={handleCreateCollection}
                     >

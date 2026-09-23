@@ -46,7 +46,7 @@ export function ToolConfirmationCard({ confirmation }: Readonly<ToolConfirmation
         // Sizing & Spacing
         'mb-3',
         // Backgrounds & Borders
-        'rounded-lg border border-warning/40 bg-warning/5',
+        'rounded-lg border-warning/40 bg-warning/5',
       )}
     >
       <ToolHeader

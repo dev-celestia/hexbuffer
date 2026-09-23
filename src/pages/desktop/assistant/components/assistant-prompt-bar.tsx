@@ -81,16 +81,14 @@ function PromptInputAttachmentsBar() {
         </div>
         <Button
           type="button"
-          variant="ghost"
+          variant="quiet"
           size="sm"
           onClick={attachments.clear}
           className={cn(
-            // Layout & Positioning
-            'shrink-0',
             // Sizing & Spacing
             'h-5 px-1.5',
             // Typography
-            'text-[11px] text-muted-foreground hover:text-foreground',
+            'text-2xs',
             // Interactive & States
             'transition-colors',
           )}
@@ -341,7 +339,7 @@ export function AssistantPromptBar({
                 {/* Specialist Agent Selector Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger>
-                    <Button
+                    <Button leading="tight"
                       type="button"
                       variant="ghost"
                       size="sm"
@@ -349,15 +347,15 @@ export function AssistantPromptBar({
                       title="Select Specialist Agent"
                       className={cn(
                         // Layout & Positioning
-                        'flex items-center gap-1.5 shrink-0',
+                        'flex gap-1.5',
                         // Sizing & Spacing
                         'h-8 px-2 max-w-[125px] xs:max-w-[145px] sm:max-w-[170px]',
                         // Typography
-                        'text-xs font-normal',
+                        'font-normal',
                         // Backgrounds & Borders
-                        'rounded-md border border-border bg-background',
+                        'rounded-md border-border bg-background',
                         // Interactive & States
-                        'hover:bg-accent hover:text-foreground transition-colors',
+                        'hover:text-foreground transition-colors',
                       )}
                     >
                       <img
@@ -371,12 +369,12 @@ export function AssistantPromptBar({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" side="top" className="w-56 p-1">
                     <DropdownMenuGroup>
-                      <DropdownMenuLabel className="px-2 py-1 text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">
+                      <DropdownMenuLabel className="px-2 py-1 text-3xs font-semibold tracking-wider uppercase text-muted-foreground">
                         Specialist Agents
                       </DropdownMenuLabel>
-                      <DropdownMenuItem
+                      <DropdownMenuItem leading="tight"
                         onClick={() => onSelectAgent?.('all')}
-                        className="flex items-center justify-between px-2 py-1.5 text-xs cursor-pointer rounded-md"
+                        className="justify-between py-1.5 cursor-pointer"
                       >
                         <div className="flex items-center gap-2">
                           <img
@@ -394,10 +392,10 @@ export function AssistantPromptBar({
                       {ALL_AGENTS_LIST.filter((a) => a.id !== 'orchestrator').map((agent) => {
                         const isSelected = selectedAgent === agent.id;
                         return (
-                          <DropdownMenuItem
+                          <DropdownMenuItem leading="tight"
                             key={agent.id}
                             onClick={() => onSelectAgent?.(agent.id)}
-                            className="flex items-center justify-between px-2 py-1.5 text-xs cursor-pointer rounded-md"
+                            className="justify-between py-1.5 cursor-pointer"
                           >
                             <div className="flex items-center gap-2">
                               <img
@@ -482,15 +480,15 @@ export function AssistantPromptBar({
                     title={isPaused ? 'Resume stream' : 'Pause stream'}
                     className={cn(
                       // Layout & Positioning
-                      'flex items-center justify-center shrink-0',
+                      'flex',
                       // Sizing & Spacing
-                      'size-8 p-0',
+                      'p-0',
                       // Typography
                       isPaused ? 'text-warning' : 'text-muted-foreground',
                       // Backgrounds & Borders
-                      'rounded-md border border-border bg-background',
+                      'rounded-md border-border bg-background',
                       // Interactive & States
-                      'hover:bg-accent hover:text-foreground transition-colors',
+                      'hover:text-foreground transition-colors',
                     )}
                   >
                     {isPaused ? <PlayIcon className="size-4" weight="fill" /> : <PauseIcon className="size-4" weight="fill" />}

@@ -76,7 +76,7 @@ export function AgentBadgeHeader({
             // Sizing & Spacing
             'py-0 px-1.5',
             // Typography
-            'text-[10px] font-medium uppercase tracking-wider',
+            'text-3xs uppercase tracking-wider',
             agent.badgeClass,
           )}
         >
@@ -89,7 +89,7 @@ export function AgentBadgeHeader({
         <span
           className={cn(
             // Typography
-            'text-[11px] text-muted-foreground/70 font-mono',
+            'text-2xs text-muted-foreground/70 font-mono',
           )}
         >
           • {providerDisplay}
@@ -104,7 +104,7 @@ export function AgentBadgeHeader({
             // Sizing & Spacing
             'py-0 px-1.5',
             // Typography
-            'text-[10px] text-warning border-warning/40',
+            'text-warning border-warning/40',
             // Backgrounds & Borders
             'bg-warning/10',
           )}
@@ -120,7 +120,7 @@ export function AgentBadgeHeader({
             // Layout & Positioning
             'ml-auto',
             // Typography
-            'text-[10px] text-muted-foreground/60 font-mono select-none',
+            'text-3xs text-muted-foreground/60 font-mono select-none',
           )}
         >
           {timestamp}

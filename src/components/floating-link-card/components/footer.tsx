@@ -29,7 +29,7 @@ export function Footer({
     <CardFooter
       className={cn(
         // Layout & Positioning
-        "flex items-center justify-end gap-1.5"
+        "justify-end gap-1.5"
       )}
     >
       {children}

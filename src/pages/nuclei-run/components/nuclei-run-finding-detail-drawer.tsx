@@ -77,7 +77,7 @@ export function NucleiRunFindingDetailDrawer({
             <span
               className={cn(
                 // Layout & Positioning
-                "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold uppercase",
+                "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-2xs font-semibold uppercase",
                 // Backgrounds & Borders
                 sevConfig.bg,
                 sevConfig.text,
@@ -94,7 +94,7 @@ export function NucleiRunFindingDetailDrawer({
                 // Layout & Positioning
                 "px-1.5 py-0.5 rounded",
                 // Typography
-                "text-[10px] font-mono uppercase",
+                "text-3xs font-mono uppercase",
                 // Backgrounds & Borders
                 protoBadge.bg,
                 protoBadge.text
@@ -104,15 +104,15 @@ export function NucleiRunFindingDetailDrawer({
             </span>
 
             {finding.cve_id && (
-              <Badge
+              <Badge size="sm"
                 variant="outline"
                 className={cn(
                   // Sizing & Spacing
-                  "h-4 px-1.5",
+                  "px-1.5",
                   // Typography
-                  "text-[10px] font-bold text-amber-500",
+                  "font-bold text-warning",
                   // Backgrounds & Borders
-                  "border-amber-500/30"
+                  "border-warning/30"
                 )}
               >
                 {finding.cve_id}
@@ -133,7 +133,7 @@ export function NucleiRunFindingDetailDrawer({
           <span
             className={cn(
               // Typography
-              "font-mono text-[11px] text-muted-foreground"
+              "font-mono text-2xs text-muted-foreground"
             )}
           >
             {finding.template_id}
@@ -141,14 +141,12 @@ export function NucleiRunFindingDetailDrawer({
         </div>
 
         <Button
-          size="sm"
-          variant="ghost"
+          size="md"
+          variant="quiet"
           onClick={onClose}
           className={cn(
             // Sizing & Spacing
-            "h-7 w-7 p-0",
-            // Interactive & States
-            "text-muted-foreground hover:text-foreground"
+            "w-7 p-0"
           )}
         >
           <XIcon className="h-4 w-4" />
@@ -164,15 +162,13 @@ export function NucleiRunFindingDetailDrawer({
           "border-b bg-muted/5"
         )}
       >
-        <Button
-          size="sm"
+        <Button leading="tight"
+          size="md"
           variant="outline"
           onClick={() => onSendToRepeater(finding)}
           className={cn(
             // Layout & Positioning
-            "flex-1 flex items-center justify-center gap-1.5",
-            // Sizing & Spacing
-            "h-7 text-xs font-medium",
+            "flex-1 flex gap-1.5",
             // Interactive & States
             "hover:text-emerald-500 hover:border-emerald-500/40"
           )}
@@ -181,15 +177,13 @@ export function NucleiRunFindingDetailDrawer({
           <span>Repeater</span>
         </Button>
 
-        <Button
-          size="sm"
+        <Button leading="tight"
+          size="md"
           variant="outline"
           onClick={() => onSendToComparer(finding)}
           className={cn(
             // Layout & Positioning
-            "flex-1 flex items-center justify-center gap-1.5",
-            // Sizing & Spacing
-            "h-7 text-xs font-medium",
+            "flex-1 flex gap-1.5",
             // Interactive & States
             "hover:text-sky-500 hover:border-sky-500/40"
           )}
@@ -198,15 +192,13 @@ export function NucleiRunFindingDetailDrawer({
           <span>Comparer</span>
         </Button>
 
-        <Button
-          size="sm"
+        <Button leading="tight"
+          size="md"
           variant="outline"
           onClick={() => onCopyCurl(finding)}
           className={cn(
             // Layout & Positioning
-            "flex items-center justify-center gap-1.5",
-            // Sizing & Spacing
-            "h-7 px-2.5 text-xs font-medium"
+            "flex gap-1.5"
           )}
         >
           <CopyIcon className="h-3.5 w-3.5" />
@@ -235,7 +227,7 @@ export function NucleiRunFindingDetailDrawer({
               // Layout & Positioning
               "flex items-center gap-1",
               // Typography
-              "font-semibold text-muted-foreground text-[11px] uppercase tracking-wider"
+              "font-semibold text-muted-foreground text-2xs uppercase tracking-wider"
             )}
           >
             <GlobeIcon className="h-3.5 w-3.5" /> Matched Endpoint
@@ -245,7 +237,7 @@ export function NucleiRunFindingDetailDrawer({
               // Sizing & Spacing
               "p-2 rounded",
               // Typography
-              "font-mono text-[11px] break-all select-all",
+              "font-mono text-2xs break-all select-all",
               // Backgrounds & Borders
               "bg-muted/40 border border-border/50"
             )}
@@ -265,7 +257,7 @@ export function NucleiRunFindingDetailDrawer({
             <span
               className={cn(
                 // Typography
-                "font-semibold text-muted-foreground text-[11px] uppercase tracking-wider"
+                "font-semibold text-muted-foreground text-2xs uppercase tracking-wider"
               )}
             >
               Extracted Evidence
@@ -283,7 +275,7 @@ export function NucleiRunFindingDetailDrawer({
                     // Sizing & Spacing
                     "p-2 rounded",
                     // Typography
-                    "font-mono text-[11px] text-amber-500 break-all select-all",
+                    "font-mono text-2xs text-amber-500 break-all select-all",
                     // Backgrounds & Borders
                     "bg-amber-500/10 border border-amber-500/20"
                   )}
@@ -306,7 +298,7 @@ export function NucleiRunFindingDetailDrawer({
             <span
               className={cn(
                 // Typography
-                "font-semibold text-muted-foreground text-[11px] uppercase tracking-wider"
+                "font-semibold text-muted-foreground text-2xs uppercase tracking-wider"
               )}
             >
               Description
@@ -335,7 +327,7 @@ export function NucleiRunFindingDetailDrawer({
                 // Layout & Positioning
                 "flex items-center gap-1",
                 // Typography
-                "font-semibold text-muted-foreground text-[11px] uppercase tracking-wider"
+                "font-semibold text-muted-foreground text-2xs uppercase tracking-wider"
               )}
             >
               <CheckCircleIcon className="h-3.5 w-3.5 text-emerald-500" /> Remediation
@@ -366,7 +358,7 @@ export function NucleiRunFindingDetailDrawer({
             <span
               className={cn(
                 // Typography
-                "font-semibold text-muted-foreground text-[11px] uppercase tracking-wider"
+                "font-semibold text-muted-foreground text-2xs uppercase tracking-wider"
               )}
             >
               Tags
@@ -378,14 +370,12 @@ export function NucleiRunFindingDetailDrawer({
               )}
             >
               {finding.tags.map((tag) => (
-                <Badge
+                <Badge size="sm" mono
                   key={tag}
                   variant="secondary"
                   className={cn(
                     // Sizing & Spacing
-                    "h-4 px-1.5",
-                    // Typography
-                    "text-[10px] font-mono",
+                    "px-1.5",
                     // Backgrounds & Borders
                     "bg-muted/60"
                   )}
@@ -415,7 +405,7 @@ export function NucleiRunFindingDetailDrawer({
                 // Layout & Positioning
                 "flex items-center gap-1",
                 // Typography
-                "font-semibold text-muted-foreground text-[11px] uppercase tracking-wider"
+                "font-semibold text-muted-foreground text-2xs uppercase tracking-wider"
               )}
             >
               <CodeBlockIcon className="h-3.5 w-3.5" /> cURL Probe
@@ -427,7 +417,7 @@ export function NucleiRunFindingDetailDrawer({
                 // Layout & Positioning
                 "flex items-center gap-0.5",
                 // Typography
-                "text-primary hover:underline text-[10px]",
+                "text-primary hover:underline text-3xs",
                 // Interactive & States
                 "cursor-pointer"
               )}
@@ -440,7 +430,7 @@ export function NucleiRunFindingDetailDrawer({
               // Sizing & Spacing
               "p-2.5 rounded",
               // Typography
-              "font-mono text-[10px] text-muted-foreground overflow-x-auto select-all",
+              "font-mono text-3xs text-muted-foreground overflow-x-auto select-all",
               // Backgrounds & Borders
               "bg-muted/40 border border-border/50"
             )}
@@ -455,7 +445,7 @@ export function NucleiRunFindingDetailDrawer({
             // Layout & Positioning
             "mt-auto pt-3 border-t flex flex-col gap-1",
             // Typography
-            "text-[11px] text-muted-foreground font-mono"
+            "text-2xs text-muted-foreground font-mono"
           )}
         >
           <div

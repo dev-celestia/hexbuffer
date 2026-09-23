@@ -155,15 +155,11 @@ export function CustomPortsDialog({
 
         {/* Textarea Input */}
         <div>
-          <Textarea
+          <Textarea leading="tight" mono
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={`Examples:\n80, 443, 8080\n1 - 4\n3000..3010\n80/tcp\nweb, db`}
             rows={7}
-            className={cn(
-              // Typography
-              "font-mono text-xs"
-            )}
           />
         </div>
 
@@ -207,7 +203,7 @@ export function CustomPortsDialog({
               "gap-x-4 gap-y-1 pt-1",
 
               // Typography
-              "font-mono text-[11px]"
+              "font-mono text-2xs"
             )}
           >
             <div><span className="text-foreground font-semibold">1,2,3,4</span> <span className="text-muted-foreground font-sans">➔ comma separated</span></div>

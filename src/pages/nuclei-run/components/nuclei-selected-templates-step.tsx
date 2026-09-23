@@ -209,45 +209,45 @@ export function NucleiSelectedTemplatesStep({
         <div className="flex items-center gap-2 flex-1 min-w-[280px] max-w-xl">
           <GlobeIcon className="size-4 text-primary shrink-0" />
           <div className="flex-1 relative">
-            <Input
+            <Input textSize="xs" mono
               value={targetInput}
               onChange={(e) => setTargetInput(e.target.value)}
               placeholder="https://example.com or http://localhost:3000 (comma/newline separated)"
-              className="h-8 text-xs font-mono bg-background border-border"
+              className="h-8 bg-background border-border"
             />
           </div>
         </div>
 
         {/* Middle: Engine Rate & Concurrency Badges */}
-        <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground">
-          <Badge variant="outline" className="h-6 px-2 border-border/80 text-muted-foreground font-mono">
+        <div className="hidden sm:flex items-center gap-1.5 text-3xs font-mono text-muted-foreground">
+          <Badge mono variant="outline" className="h-6 border-border/80 text-muted-foreground">
             Rate: {config.rate_limit_rps} RPS
           </Badge>
-          <Badge variant="outline" className="h-6 px-2 border-border/80 text-muted-foreground font-mono">
+          <Badge mono variant="outline" className="h-6 border-border/80 text-muted-foreground">
             Threads: {config.concurrency}
           </Badge>
         </div>
 
         {/* Right: Primary Scan All & Step Actions */}
         <div className="flex items-center gap-2 shrink-0">
-          <Button
+          <Button leading="tight"
             variant="outline"
             size="xs"
             onClick={() => {
               if (onBackToHub) onBackToHub();
               else setActiveTab('hub');
             }}
-            className="h-7 px-2.5 text-xs gap-1 border-border hover:bg-muted/30"
+            className="h-7 px-2.5 hover:bg-muted/30"
           >
             <ArrowLeftIcon className="size-3.5" />
             <span>Add More Templates</span>
           </Button>
 
-          <Button
+          <Button leading="tight"
             size="xs"
             disabled={selectedTemplateIds.length === 0}
             onClick={handleScanAll}
-            className="h-7 px-3.5 text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-sm"
+            className="h-7 px-3.5 gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-sm"
           >
             <PlayIcon className="size-3.5" />
             <span>Scan All ({selectedTemplateIds.length})</span>
@@ -266,7 +266,7 @@ export function NucleiSelectedTemplatesStep({
       >
         {/* Left: Grouping Mode Switcher */}
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider font-semibold">
+          <span className="text-2xs font-mono text-muted-foreground uppercase tracking-wider font-semibold">
             Group By:
           </span>
           <div className="flex items-center gap-1 bg-muted/30 p-0.5 rounded-md border border-border/50">
@@ -274,7 +274,7 @@ export function NucleiSelectedTemplatesStep({
               type="button"
               onClick={() => setGroupingMode('directory')}
               className={cn(
-                "px-2 py-1 text-[11px] font-mono rounded transition-colors",
+                "px-2 py-1 text-2xs font-mono rounded transition-colors",
                 groupingMode === 'directory'
                   ? "bg-background text-foreground font-bold shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -286,7 +286,7 @@ export function NucleiSelectedTemplatesStep({
               type="button"
               onClick={() => setGroupingMode('severity')}
               className={cn(
-                "px-2 py-1 text-[11px] font-mono rounded transition-colors",
+                "px-2 py-1 text-2xs font-mono rounded transition-colors",
                 groupingMode === 'severity'
                   ? "bg-background text-foreground font-bold shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -298,7 +298,7 @@ export function NucleiSelectedTemplatesStep({
               type="button"
               onClick={() => setGroupingMode('category')}
               className={cn(
-                "px-2 py-1 text-[11px] font-mono rounded transition-colors",
+                "px-2 py-1 text-2xs font-mono rounded transition-colors",
                 groupingMode === 'category'
                   ? "bg-background text-foreground font-bold shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -310,7 +310,7 @@ export function NucleiSelectedTemplatesStep({
               type="button"
               onClick={() => setGroupingMode('saved')}
               className={cn(
-                "px-2 py-1 text-[11px] font-mono rounded transition-colors",
+                "px-2 py-1 text-2xs font-mono rounded transition-colors",
                 groupingMode === 'saved'
                   ? "bg-background text-foreground font-bold shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -325,48 +325,48 @@ export function NucleiSelectedTemplatesStep({
         <div className="flex items-center gap-2 shrink-0">
           {isSavingGroup ? (
             <div className="flex items-center gap-1.5">
-              <Input
+              <Input textSize="xs" mono
                 value={newGroupName}
                 onChange={(e) => setNewGroupName(e.target.value)}
                 placeholder="e.g. Critical CVEs Set"
-                className="h-7 w-44 text-xs font-mono bg-background"
+                className="w-44 bg-background"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleSaveGroup();
                   if (e.key === 'Escape') setIsSavingGroup(false);
                 }}
               />
-              <Button size="xs" onClick={handleSaveGroup} className="h-7 px-2 text-xs">
+              <Button leading="tight" size="xs" onClick={handleSaveGroup} className="h-7">
                 Save
               </Button>
-              <Button
+              <Button leading="tight"
                 variant="ghost"
                 size="xs"
                 onClick={() => setIsSavingGroup(false)}
-                className="h-7 px-1.5 text-xs text-muted-foreground"
+                className="h-7 px-1.5 text-muted-foreground"
               >
                 ✕
               </Button>
             </div>
           ) : (
-            <Button
+            <Button leading="tight"
               variant="outline"
               size="xs"
               onClick={() => setIsSavingGroup(true)}
               disabled={selectedTemplateIds.length === 0}
-              className="h-7 px-2 text-xs gap-1"
+              className="h-7"
             >
               <BookmarkSimpleIcon className="size-3.5 text-amber-400" />
               <span>Save Set for Reuse</span>
             </Button>
           )}
 
-          <Button
+          <Button leading="tight"
             variant="ghost"
             size="xs"
             onClick={deselectAllTemplates}
             disabled={selectedTemplateIds.length === 0}
-            className="h-7 px-2 text-xs gap-1 text-muted-foreground hover:text-destructive"
+            className="h-7 text-muted-foreground hover:text-destructive"
           >
             <TrashIcon className="size-3.5" />
             <span>Clear Staging</span>
@@ -384,13 +384,13 @@ export function NucleiSelectedTemplatesStep({
               <p className="text-xs text-muted-foreground mt-1 max-w-sm">
                 Explore the Template Hub in Step 1 to add high-impact CVEs, recon fingerprints, or tech stack checks.
               </p>
-              <Button
+              <Button leading="tight"
                 size="sm"
                 onClick={() => {
                   if (onBackToHub) onBackToHub();
                   else setActiveTab('hub');
                 }}
-                className="mt-4 h-8 text-xs gap-1.5 bg-primary text-primary-foreground font-medium"
+                className="mt-4 h-8 gap-1.5 bg-primary text-primary-foreground"
               >
                 <ArrowLeftIcon className="size-3.5" />
                 <span>Go to Step 1: Template Hub</span>
@@ -423,44 +423,44 @@ export function NucleiSelectedTemplatesStep({
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold text-foreground font-mono">{group.name}</span>
-                          <Badge variant="outline" className="h-4 px-1.5 text-[9px] font-mono text-primary">
+                          <Badge size="sm" mono variant="outline" className="px-1.5 text-4xs text-primary">
                             {group.templateIds.length} templates
                           </Badge>
                         </div>
                         {group.description && (
-                          <p className="text-[11px] text-muted-foreground line-clamp-2">{group.description}</p>
+                          <p className="text-2xs text-muted-foreground line-clamp-2">{group.description}</p>
                         )}
-                        <span className="text-[10px] text-muted-foreground font-mono">
+                        <span className="text-3xs text-muted-foreground font-mono">
                           Saved: {new Date(group.createdAt).toLocaleDateString()}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
                         <div className="flex items-center gap-1.5">
-                          <Button
+                          <Button leading="tight"
                             size="xs"
                             onClick={() => loadSavedGroup(group.id)}
-                            className="h-6 px-2 text-xs gap-1 bg-primary text-primary-foreground"
+                            className="h-6 bg-primary text-primary-foreground"
                           >
                             <FolderOpenIcon className="size-3" />
                             <span>Load into Staging</span>
                           </Button>
-                          <Button
+                          <Button leading="tight"
                             variant="outline"
                             size="xs"
                             onClick={() => handleScanGroup(group.templateIds)}
-                            className="h-6 px-2 text-xs gap-1 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+                            className="h-6 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
                           >
                             <PlayIcon className="size-3" />
                             <span>Scan Set</span>
                           </Button>
                         </div>
 
-                        <Button
+                        <Button leading="tight"
                           variant="ghost"
                           size="xs"
                           onClick={() => deleteSavedGroup(group.id)}
-                          className="h-6 px-1.5 text-xs text-muted-foreground hover:text-destructive"
+                          className="h-6 px-1.5 text-muted-foreground hover:text-destructive"
                         >
                           <TrashIcon className="size-3" />
                         </Button>
@@ -485,7 +485,7 @@ export function NucleiSelectedTemplatesStep({
                       <span className="text-xs font-mono font-bold text-foreground truncate">
                         {groupName}
                       </span>
-                      <Badge variant="outline" className="h-4 px-1.5 text-[9px] font-mono text-muted-foreground">
+                      <Badge size="sm" mono variant="outline" className="px-1.5 text-4xs text-muted-foreground">
                         {items.length} {items.length === 1 ? 'template' : 'templates'}
                       </Badge>
                     </div>
@@ -495,7 +495,7 @@ export function NucleiSelectedTemplatesStep({
                         size="xs"
                         variant="outline"
                         onClick={() => handleScanGroup(items.map((t) => t.id))}
-                        className="h-6 px-2.5 text-[11px] gap-1 border-primary/30 text-primary hover:bg-primary/10 font-medium"
+                        className="h-6 px-2.5 text-2xs border-primary/30 text-primary hover:bg-primary/10"
                       >
                         <PlayIcon className="size-3 text-primary" />
                         <span>Scan Group ({items.length})</span>
@@ -522,10 +522,10 @@ export function NucleiSelectedTemplatesStep({
                         >
                           {/* Item Metadata */}
                           <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
-                            <Badge
+                            <Badge mono
                               variant="outline"
                               className={cn(
-                                "h-4 px-1 text-[9px] font-mono capitalize shrink-0 font-medium",
+                                "h-4 px-1 text-4xs capitalize shrink-0",
                                 sevCfg.bg,
                                 sevCfg.text,
                                 sevCfg.border
@@ -540,12 +540,12 @@ export function NucleiSelectedTemplatesStep({
                                   {template.id}
                                 </span>
                                 {template.directory && (
-                                  <span className="text-[9px] font-mono text-muted-foreground px-1 bg-muted/40 rounded">
+                                  <span className="text-4xs font-mono text-muted-foreground px-1 bg-muted/40 rounded">
                                     {template.directory}
                                   </span>
                                 )}
                               </div>
-                              <span className="text-[11px] text-muted-foreground truncate">
+                              <span className="text-2xs text-muted-foreground truncate">
                                 {template.name}
                               </span>
                             </div>
@@ -553,14 +553,14 @@ export function NucleiSelectedTemplatesStep({
 
                           {/* Individual Actions: On-Demand Scan Item & Remove */}
                           <div className="flex items-center gap-2 shrink-0">
-                            <Button
+                            <Button mono
                               size="xs"
                               variant="outline"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleScanSingleItem(template.id);
                               }}
-                              className="h-6 px-2 text-[10px] font-mono gap-1 hover:border-emerald-500/40 hover:text-emerald-400"
+                              className="h-6 hover:border-emerald-500/40 hover:text-emerald-400"
                             >
                               <PlayIcon className="size-3 text-emerald-400" />
                               <span>Scan Item</span>
@@ -601,10 +601,10 @@ export function NucleiSelectedTemplatesStep({
             {/* Header */}
             <div className="p-3 border-b border-border bg-muted/10 flex items-center justify-between">
               <div className="flex items-center gap-1.5 min-w-0">
-                <Badge
+                <Badge mono
                   variant="outline"
                   className={cn(
-                    "h-4 px-1.5 text-[9px] font-mono capitalize shrink-0 font-medium",
+                    "h-4 px-1.5 text-4xs capitalize shrink-0",
                     SEVERITY_CONFIG[activeTemplate.severity]?.bg,
                     SEVERITY_CONFIG[activeTemplate.severity]?.text,
                     SEVERITY_CONFIG[activeTemplate.severity]?.border
@@ -633,7 +633,7 @@ export function NucleiSelectedTemplatesStep({
                   type="button"
                   onClick={() => setInspectorMode('yaml')}
                   className={cn(
-                    "px-2 py-0.5 text-[10px] font-mono rounded",
+                    "px-2 py-0.5 text-3xs font-mono rounded",
                     inspectorMode === 'yaml' ? "bg-background font-bold shadow-sm" : "text-muted-foreground"
                   )}
                 >
@@ -643,7 +643,7 @@ export function NucleiSelectedTemplatesStep({
                   type="button"
                   onClick={() => setInspectorMode('flow')}
                   className={cn(
-                    "px-2 py-0.5 text-[10px] font-mono rounded",
+                    "px-2 py-0.5 text-3xs font-mono rounded",
                     inspectorMode === 'flow' ? "bg-background font-bold shadow-sm" : "text-muted-foreground"
                   )}
                 >
@@ -651,10 +651,10 @@ export function NucleiSelectedTemplatesStep({
                 </button>
               </div>
 
-              <Button
+              <Button mono
                 size="xs"
                 onClick={() => handleScanSingleItem(activeTemplate.id)}
-                className="h-6 px-2 text-[10px] gap-1 bg-primary text-primary-foreground font-mono"
+                className="h-6 bg-primary text-primary-foreground"
               >
                 <PlayIcon className="size-3" />
                 <span>Scan Item Now</span>

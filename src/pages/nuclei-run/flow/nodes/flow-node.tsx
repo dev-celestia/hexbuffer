@@ -69,7 +69,7 @@ export function FlowNode({
             // Layout & Positioning
             "px-1.5 py-0.5 rounded border uppercase shrink-0",
             // Typography
-            "text-[9px] font-mono font-bold",
+            "text-4xs font-mono font-bold",
             // Backgrounds & Borders
             "bg-amber-500/15 text-amber-500 border-amber-500/30"
           )}
@@ -92,7 +92,7 @@ export function FlowNode({
             // Sizing & Spacing
             "p-2 rounded max-h-24 overflow-y-auto",
             // Typography
-            "font-mono text-[10px] text-amber-400 select-all leading-relaxed",
+            "font-mono text-3xs text-amber-400 select-all leading-relaxed",
             // Backgrounds & Borders
             "bg-amber-500/10 border border-amber-500/20"
           )}
@@ -106,7 +106,7 @@ export function FlowNode({
               // Layout & Positioning
               "line-clamp-1",
               // Typography
-              "text-[10px] text-muted-foreground"
+              "text-3xs text-muted-foreground"
             )}
           >
             {nodeData.description}
@@ -118,7 +118,7 @@ export function FlowNode({
             // Layout & Positioning
             "flex items-center gap-1 pt-1",
             // Typography
-            "text-[10px] text-muted-foreground font-mono"
+            "text-3xs text-muted-foreground font-mono"
           )}
         >
           <CodeIcon className="h-3 w-3" />

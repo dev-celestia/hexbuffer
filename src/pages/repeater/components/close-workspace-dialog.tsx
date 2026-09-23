@@ -88,7 +88,7 @@ export function CloseWorkspaceDialog({
                 data-slot="close-workspace-impact"
                 className={cn(
                   // Typography
-                  'text-[11px] text-muted-foreground'
+                  'text-2xs text-muted-foreground'
                 )}
               >
                 {describeCounts(

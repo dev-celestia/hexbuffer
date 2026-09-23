@@ -55,16 +55,13 @@ export function NotesPage() {
               "text-muted-foreground"
             )}
           />
-          <Input
+          <Input textSize="xs"
             value={hook.searchQuery}
             onChange={(e) => hook.setSearchQuery(e.target.value)}
             placeholder="Search open tabs & contents..."
             className={cn(
               // Sizing & Spacing
-              "h-7 pl-8 pr-7 w-full",
-
-              // Typography
-              "text-xs",
+              "pl-8 pr-7",
 
               // Backgrounds & Borders
               "bg-background"
@@ -103,7 +100,7 @@ export function NotesPage() {
             size="sm"
             onClick={() => hook.setIsSavedNotesOpen(true)}
             title="Browse all saved notes library"
-            className="flex items-center gap-2"
+            className="flex gap-2"
           >
             <FolderSimpleIcon className="size-3.5 text-primary" />
             <span className="text-xs mt-0.5">Manage Saved Notes</span>
@@ -113,7 +110,7 @@ export function NotesPage() {
                 "px-1.5 py-0.2 rounded-full",
 
                 // Typography
-                "text-[10px] font-mono font-medium",
+                "text-3xs font-mono font-medium",
 
                 // Backgrounds & Borders
                 "bg-primary/10 text-primary"
@@ -123,15 +120,12 @@ export function NotesPage() {
             </span>
           </Button>
 
-          <Button
+          <Button leading="tight"
             size="xs"
             onClick={hook.onTabAdd}
             className={cn(
               // Layout & Positioning
-              "flex items-center",
-
-              // Typography
-              "text-xs font-medium cursor-pointer"
+              "flex"
             )}
             title="Create a new note"
           >

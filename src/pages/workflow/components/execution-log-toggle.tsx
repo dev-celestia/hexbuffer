@@ -12,11 +12,10 @@ export function ExecutionLogToggle({ showExecutionLog, onToggle }: Readonly<Exec
   return (
     <Button
       variant="ghost"
-      size="sm"
+      size="md"
       className={cn(
-        'absolute bottom-2 left-2 z-20 h-7 w-7 rounded-md p-0',
-        'bg-background/80 backdrop-blur-sm border',
-        'hover:bg-accent'
+        'absolute bottom-2 left-2 z-20 w-7 rounded-md p-0',
+        'bg-background/80 backdrop-blur-sm'
       )}
       onClick={() => onToggle(!showExecutionLog)}
       title={showExecutionLog ? 'Hide execution log' : 'Show execution log'}

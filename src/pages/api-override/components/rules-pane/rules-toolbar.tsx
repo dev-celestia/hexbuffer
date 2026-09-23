@@ -48,14 +48,14 @@ export function RulesToolbar({ domains, onAdd, searchQuery, onSearchChange }: Ru
           >
             Target Hosts &amp; Rules
           </h3>
-          <Badge
+          <Badge size="sm" mono
             variant="secondary"
             className={cn(
               // Sizing & Spacing
-              "h-4 px-1.5",
+              "px-1.5",
 
               // Typography
-              "font-mono text-[9px] text-muted-foreground"
+              "text-4xs text-muted-foreground"
             )}
           >
             {domains.length}
@@ -100,7 +100,7 @@ export function RulesToolbar({ domains, onAdd, searchQuery, onSearchChange }: Ru
         <div
           className={cn(
             // Typography
-            "text-[11px] leading-relaxed"
+            "text-2xs leading-relaxed"
           )}
         >
           <span
@@ -151,16 +151,13 @@ export function RulesToolbar({ domains, onAdd, searchQuery, onSearchChange }: Ru
             "text-muted-foreground"
           )}
         />
-        <Input
+        <Input textSize="xs"
           placeholder="Filter hosts and rules..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           className={cn(
             // Sizing & Spacing
             "h-7.5 pl-7.5",
-
-            // Typography
-            "text-xs",
 
             // Backgrounds & Borders
             "border-border bg-muted/30",

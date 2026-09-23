@@ -32,7 +32,7 @@ export function NotesPreviewPane({
         category: 'Visual Media',
         label: 'Drawing Studio',
         description: 'Open visual canvas studio',
-        icon: <PaintBrushIcon className="size-4 text-purple-500 shrink-0" />,
+        icon: <PaintBrushIcon className="size-4 text-purple-600 dark:text-purple-400 shrink-0" />,
         action: onOpenDrawingStudio,
       },
     ];

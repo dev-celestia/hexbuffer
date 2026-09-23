@@ -28,7 +28,7 @@ export function ForgeLoadingView() {
           'rounded-full border border-border/60 bg-muted/30'
         )}
       >
-        <Spinner className="size-4 text-primary" />
+        <Spinner className="text-primary" />
       </div>
 
       <div

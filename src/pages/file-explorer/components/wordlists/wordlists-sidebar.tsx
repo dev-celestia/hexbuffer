@@ -60,12 +60,8 @@ export function WordlistsSidebar({
         >
           Categories ({tags.length})
         </span>
-        <Badge
+        <Badge mono
           variant="outline"
-          className={cn(
-            // Typography
-            "text-[10px] font-mono"
-          )}
         >
           {totalInstalled}/{totalWordlists}
         </Badge>
@@ -127,7 +123,7 @@ export function WordlistsSidebar({
           <span
             className={cn(
               // Typography
-              "text-[10px] font-mono text-muted-foreground ml-1 shrink-0"
+              "text-3xs font-mono text-muted-foreground ml-1 shrink-0"
             )}
           >
             {totalWordlists}
@@ -194,13 +190,13 @@ export function WordlistsSidebar({
               >
                 {allInstalled && (
                   <span title="All installed">
-                    <CheckCircleIcon className="size-3 text-emerald-500 shrink-0" />
+                    <CheckCircleIcon className="size-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   </span>
                 )}
                 <span
                   className={cn(
                     // Typography
-                    "text-[10px] font-mono text-muted-foreground"
+                    "text-3xs font-mono text-muted-foreground"
                   )}
                 >
                   {tag.count}
@@ -224,20 +220,17 @@ export function WordlistsSidebar({
           "border-border bg-muted/20"
         )}
       >
-        <Button
-          size="sm"
+        <Button leading="tight"
+          size="md"
           variant="outline"
           disabled={bundleDownloading}
           onClick={() => onDownloadBundle(selectedTag)}
           className={cn(
             // Layout & Positioning
-            "w-full flex items-center justify-center",
+            "w-full flex",
 
             // Sizing & Spacing
-            "h-7 gap-1.5 px-2",
-
-            // Typography
-            "text-xs font-medium"
+            "gap-1.5 px-2"
           )}
         >
           {bundleDownloading ? (

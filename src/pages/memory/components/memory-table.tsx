@@ -104,7 +104,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
             <TableHead
               className={cn(
                 // Sizing & Spacing
-                "w-10 px-2 text-center"
+                "w-10 text-center"
               )}
             >
               Pin
@@ -160,7 +160,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
             <TableHead
               className={cn(
                 // Sizing & Spacing
-                "w-24 px-2 text-right"
+                "w-24 text-right"
               )}
             >
               Actions
@@ -179,7 +179,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                   isSelected ? "bg-muted font-medium" : "hover:bg-muted/40",
 
                   // Interactive & States
-                  "cursor-pointer transition-colors"
+                  "cursor-pointer"
                 )}
               >
                 {/* Pin toggle */}
@@ -208,7 +208,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                         "size-3.5",
 
                         // Typography
-                        entry.pinned ? "text-amber-500" : "text-muted-foreground/40"
+                        entry.pinned ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground/40"
                       )}
                     />
                   </button>
@@ -248,7 +248,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                         <span
                           className={cn(
                             // Typography
-                            "text-[10px] text-muted-foreground font-mono shrink-0"
+                            "text-3xs text-muted-foreground font-mono shrink-0"
                           )}
                           title="Hybrid recall match score"
                         >
@@ -262,7 +262,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                         "line-clamp-1",
 
                         // Typography
-                        "text-[11px] text-muted-foreground font-normal"
+                        "text-2xs text-muted-foreground font-normal"
                       )}
                     >
                       {entry.content}
@@ -280,7 +280,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                   <span
                     className={cn(
                       // Typography
-                      "text-[11px] font-mono text-muted-foreground"
+                      "text-2xs font-mono text-muted-foreground"
                     )}
                   >
                     {entry.namespace}
@@ -298,7 +298,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                     variant={getMemoryTypeBadgeVariant(entry.memoryType)}
                     className={cn(
                       // Sizing & Spacing
-                      "text-[10px] px-1.5 py-0 capitalize"
+                      "px-1.5 py-0 capitalize"
                     )}
                   >
                     {entry.memoryType}
@@ -315,7 +315,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                   <span
                     className={cn(
                       // Typography
-                      "text-[11px] text-muted-foreground"
+                      "text-2xs text-muted-foreground"
                     )}
                   >
                     {getImportanceLabel(entry.importance)}
@@ -330,20 +330,17 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                   )}
                 >
                   {entry.edgesCount > 0 ? (
-                    <Badge
+                    <Badge mono
                       variant="outline"
                       className={cn(
-                        // Layout & Positioning
-                        "inline-flex items-center gap-1",
-
                         // Sizing & Spacing
-                        "text-[10px] px-1.5 py-0 font-mono"
+                        "px-1.5 py-0"
                       )}
                     >
                       <GitForkIcon
                         className={cn(
                           // Sizing & Spacing
-                          "size-3 text-indigo-400"
+                          "size-3 text-indigo-600 dark:text-indigo-400"
                         )}
                       />
                       <span>{entry.edgesCount}</span>
@@ -352,7 +349,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                     <span
                       className={cn(
                         // Typography
-                        "text-[11px] text-muted-foreground/50"
+                        "text-2xs text-muted-foreground/50"
                       )}
                     >
                       —
@@ -370,7 +367,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                   <span
                     className={cn(
                       // Typography
-                      "text-[11px] text-muted-foreground"
+                      "text-2xs text-muted-foreground"
                     )}
                     title={entry.updatedAt}
                   >
@@ -402,13 +399,13 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                       }}
                       className={cn(
                         // Sizing & Spacing
-                        "h-6 w-6 p-0",
+                        "w-6 p-0",
 
                         // Typography
                         "text-muted-foreground",
 
                         // Interactive & States
-                        "hover:text-indigo-400"
+                        "hover:text-indigo-600 dark:hover:text-indigo-400"
                       )}
                       title="Link finding relationship"
                     >
@@ -423,17 +420,11 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                     {/* Edit */}
                     <Button
                       size="sm"
-                      variant="ghost"
+                      variant="quiet"
                       onClick={() => handleOpenEdit(entry)}
                       className={cn(
                         // Sizing & Spacing
-                        "h-6 w-6 p-0",
-
-                        // Typography
-                        "text-muted-foreground",
-
-                        // Interactive & States
-                        "hover:text-foreground"
+                        "w-6 p-0"
                       )}
                       title="Edit memory"
                     >
@@ -452,7 +443,7 @@ export function MemoryTable({ state }: Readonly<MemoryTableProps>) {
                       onClick={() => void handleDeleteEntry(entry.id)}
                       className={cn(
                         // Sizing & Spacing
-                        "h-6 w-6 p-0",
+                        "w-6 p-0",
 
                         // Typography
                         "text-muted-foreground",

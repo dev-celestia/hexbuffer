@@ -20,7 +20,7 @@ export const FlowNodeBody = React.memo(function FlowNodeBody({
         // Sizing & Spacing
         'border-t px-3 py-1.5',
         // Typography
-        'text-[10px] text-muted-foreground',
+        'text-3xs text-muted-foreground',
         className,
       )}
     >

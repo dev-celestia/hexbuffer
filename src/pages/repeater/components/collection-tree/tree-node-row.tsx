@@ -279,7 +279,7 @@ export function TreeNodeRow({
                       'rounded border px-1',
 
                       // Typography
-                      'font-mono text-[9px] leading-4 font-bold uppercase',
+                      'font-mono text-4xs leading-4 font-bold uppercase',
 
                       // Backgrounds & Borders
                       methodTreatment.pill
@@ -348,7 +348,7 @@ export function TreeNodeRow({
                       'shrink-0',
 
                       // Typography
-                      'text-[10px] leading-none tabular-nums',
+                      'text-3xs leading-none tabular-nums',
                       isSelected ? 'text-foreground/60' : 'text-muted-foreground/60'
                     )}
                   >
@@ -367,7 +367,7 @@ export function TreeNodeRow({
                     'truncate',
 
                     // Typography
-                    'font-mono text-[10px] leading-4',
+                    'font-mono text-3xs leading-4',
                     'text-muted-foreground'
                   )}
                 >
@@ -403,27 +403,25 @@ export function TreeNodeRow({
         <ContextMenuContent className="w-48">
           {isCollection && (
             <>
-              <ContextMenuItem
+              <ContextMenuItem leading="tight"
                 onClick={() => onAddChild(node.originalId, 'endpoint')}
-                className="text-xs"
               >
                 <PlusIcon className="mr-2 h-4 w-4" />
                 New Endpoint
               </ContextMenuItem>
-              <ContextMenuItem
+              <ContextMenuItem leading="tight"
                 onClick={() => onAddChild(node.originalId, 'collection')}
-                className="text-xs"
               >
                 <img src={folderIcon} className="mr-2 h-4 w-4" alt="folder" />
                 New Folder
               </ContextMenuItem>
             </>
           )}
-          <ContextMenuItem onClick={() => onRename(node)} className="text-xs">
+          <ContextMenuItem leading="tight" onClick={() => onRename(node)}>
             <PencilSimpleIcon className="mr-2 h-4 w-4" />
             Rename
           </ContextMenuItem>
-          <ContextMenuItem onClick={() => onDelete(node)} variant="destructive" className="text-xs">
+          <ContextMenuItem leading="tight" onClick={() => onDelete(node)} variant="destructive">
             <TrashIcon className="mr-2 h-4 w-4" />
             Delete
           </ContextMenuItem>

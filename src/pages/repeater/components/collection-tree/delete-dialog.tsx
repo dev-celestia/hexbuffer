@@ -100,7 +100,7 @@ export function DeleteDialog({
                     'rounded border px-1',
 
                     // Typography
-                    'font-mono text-[9px] leading-4 font-bold uppercase',
+                    'font-mono text-4xs leading-4 font-bold uppercase',
 
                     // Backgrounds & Borders
                     methodTreatment.pill
@@ -129,7 +129,7 @@ export function DeleteDialog({
                   'truncate',
 
                   // Typography
-                  'font-mono text-[10px] text-muted-foreground'
+                  'font-mono text-3xs text-muted-foreground'
                 )}
               >
                 {deleteTarget.url}
@@ -140,7 +140,7 @@ export function DeleteDialog({
                   data-slot="delete-impact"
                   className={cn(
                     // Typography
-                    'text-[11px] text-muted-foreground'
+                    'text-2xs text-muted-foreground'
                   )}
                 >
                   {describeCounts(

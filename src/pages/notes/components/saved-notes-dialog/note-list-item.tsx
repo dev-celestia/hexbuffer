@@ -120,7 +120,7 @@ export function NoteListItem({
                 "gap-1.5"
               )}
             >
-              <Input
+              <Input textSize="xs"
                 autoFocus
                 value={editingName}
                 onChange={(e) => onSetEditingName(e.target.value)}
@@ -129,10 +129,7 @@ export function NoteListItem({
                 }}
                 className={cn(
                   // Sizing & Spacing
-                  "h-6.5 px-2 py-0",
-
-                  // Typography
-                  "text-xs"
+                  "h-6.5 py-0"
                 )}
               />
               <Button
@@ -144,10 +141,7 @@ export function NoteListItem({
                   "h-6.5 w-6.5 p-0",
 
                   // Typography
-                  "text-primary",
-
-                  // Interactive & States
-                  "cursor-pointer"
+                  "text-primary"
                 )}
                 title="Save name"
               >
@@ -163,10 +157,7 @@ export function NoteListItem({
                   "h-6.5 w-6.5 p-0",
 
                   // Typography
-                  "text-muted-foreground",
-
-                  // Interactive & States
-                  "cursor-pointer"
+                  "text-muted-foreground"
                 )}
                 title="Cancel"
               >
@@ -228,7 +219,7 @@ export function NoteListItem({
               "gap-x-1.5 gap-y-0.5",
 
               // Typography
-              "text-[10px] text-muted-foreground"
+              "text-3xs text-muted-foreground"
             )}
           >
             <span
@@ -267,7 +258,7 @@ export function NoteListItem({
                 "px-1.5 py-0",
 
                 // Typography
-                "text-[10px] font-normal",
+                "font-normal",
 
                 // Backgrounds & Borders
                 isActiveTab
@@ -279,16 +270,13 @@ export function NoteListItem({
             </Badge>
           )}
 
-          <Button
+          <Button leading="tight"
             size="sm"
             variant={isOpenInTab ? 'secondary' : 'default'}
             onClick={onOpen}
             className={cn(
               // Sizing & Spacing
-              "h-6.5 px-2.5",
-
-              // Typography
-              "text-xs font-medium cursor-pointer"
+              "h-6.5"
             )}
           >
             <ArrowSquareOutIcon className="size-3 mr-1" />
@@ -324,7 +312,7 @@ export function NoteListItem({
           "pt-2 border-t border-border/50 gap-0.5",
 
           // Typography
-          "text-[10px] text-muted-foreground"
+          "text-3xs text-muted-foreground"
         )}
       >
         {isDeletingConfirm ? (
@@ -343,7 +331,7 @@ export function NoteListItem({
             <span
               className={cn(
                 // Typography
-                "text-[10px] text-destructive font-medium"
+                "text-3xs text-destructive font-medium"
               )}
             >
               Delete note?
@@ -353,7 +341,7 @@ export function NoteListItem({
               onClick={onConfirmDelete}
               className={cn(
                 // Typography
-                "text-[10px] font-bold text-destructive hover:underline cursor-pointer"
+                "text-3xs font-bold text-destructive hover:underline cursor-pointer"
               )}
             >
               Yes
@@ -363,7 +351,7 @@ export function NoteListItem({
               onClick={onCancelDelete}
               className={cn(
                 // Typography
-                "text-[10px] text-muted-foreground hover:underline cursor-pointer"
+                "text-3xs text-muted-foreground hover:underline cursor-pointer"
               )}
             >
               Cancel
@@ -373,15 +361,15 @@ export function NoteListItem({
           <>
             {isOpenInTab && (
               <Button
-                variant="ghost"
+                variant="quiet"
                 size="sm"
                 onClick={onCloseTab}
                 className={cn(
                   // Sizing & Spacing
-                  "h-6 px-1.5",
+                  "px-1.5",
 
                   // Typography
-                  "text-[10px] text-muted-foreground hover:text-foreground cursor-pointer"
+                  "text-3xs"
                 )}
                 title="Close tab (keeps note saved in library)"
               >

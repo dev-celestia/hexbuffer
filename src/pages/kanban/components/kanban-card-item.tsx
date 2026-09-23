@@ -55,7 +55,7 @@ export function KanbanCardItem({ card, isDragging, isOverlay = false, onToggleSu
 
       {/* Description */}
       {card.description && (
-        <p className="mt-1.5 ml-[18px] text-[11px] leading-relaxed text-muted-foreground line-clamp-2">
+        <p className="mt-1.5 ml-[18px] text-2xs leading-relaxed text-muted-foreground line-clamp-2">
           {card.description}
         </p>
       )}
@@ -66,7 +66,7 @@ export function KanbanCardItem({ card, isDragging, isOverlay = false, onToggleSu
           {card.tags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-0.5 rounded px-1.5 py-px text-[10px] font-medium bg-muted text-muted-foreground"
+              className="inline-flex items-center gap-0.5 rounded px-1.5 py-px text-3xs font-medium bg-muted text-muted-foreground"
             >
               <TagIcon className="h-2.5 w-2.5" />
               {tag}
@@ -79,7 +79,7 @@ export function KanbanCardItem({ card, isDragging, isOverlay = false, onToggleSu
       {totalSubs > 0 && (
         <div className="mt-2.5 ml-[18px] space-y-1">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+            <div className="flex items-center gap-1 text-3xs text-muted-foreground">
               {doneSubs === totalSubs ? (
                 <CheckCircleIcon className="h-3 w-3 text-primary" />
               ) : (
@@ -101,7 +101,7 @@ export function KanbanCardItem({ card, isDragging, isOverlay = false, onToggleSu
       <div className="mt-2.5 ml-[18px] flex items-center gap-2">
         {card.assignee && (
           <span
-            className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-black shrink-0"
+            className="inline-flex h-5 w-5 items-center justify-center rounded-full text-4xs font-bold text-black shrink-0"
             style={{ backgroundColor: card.assigneeColor ?? '#00c950' }}
             title={card.assignee}
           >
@@ -110,7 +110,7 @@ export function KanbanCardItem({ card, isDragging, isOverlay = false, onToggleSu
         )}
         {card.dueDate && (
           <span
-            className={`inline-flex items-center gap-1 text-[10px] font-mono ${isOverdue ? 'text-red-400' : 'text-muted-foreground'
+            className={`inline-flex items-center gap-1 text-3xs font-mono ${isOverdue ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'
               }`}
           >
             <CalendarBlankIcon className="h-2.5 w-2.5" />

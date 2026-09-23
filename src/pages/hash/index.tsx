@@ -53,7 +53,7 @@ export function HashPage() {
               "h-4 min-w-4 px-1",
 
               // Typography
-              "text-[9px] font-bold leading-none",
+              "text-4xs font-bold leading-none",
 
               // Backgrounds & Borders
               "rounded-full bg-emerald-500 text-white"
@@ -225,7 +225,7 @@ export function HashPage() {
                 <span
                   className={cn(
                     // Typography
-                    "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                    "text-2xs font-semibold uppercase tracking-wider text-muted-foreground"
                   )}
                 >
                   {page.attackEngine.status}
@@ -243,7 +243,7 @@ export function HashPage() {
                     "max-w-md px-1.5 py-0.5",
 
                     // Typography
-                    "text-[10px] font-mono",
+                    "text-3xs font-mono",
 
                     // Backgrounds & Borders
                     "text-red-700 dark:text-red-300 bg-red-500/10 rounded border border-red-500/20"
@@ -260,7 +260,7 @@ export function HashPage() {
                     "px-1.5 py-0.5",
 
                     // Typography
-                    "text-[10px] font-mono",
+                    "text-3xs font-mono",
 
                     // Backgrounds & Borders
                     "text-muted-foreground bg-muted rounded border border-border/60"
@@ -277,7 +277,7 @@ export function HashPage() {
                     "px-1.5 py-0.5",
 
                     // Typography
-                    "text-[10px] font-mono",
+                    "text-3xs font-mono",
 
                     // Backgrounds & Borders
                     "text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 rounded border border-emerald-500/20"
@@ -298,17 +298,14 @@ export function HashPage() {
                 "gap-2"
               )}
             >
-              <Badge
+              <Badge mono
                 variant="secondary"
                 className={cn(
                   // Layout & Positioning
-                  "flex items-center",
-
-                  // Sizing & Spacing
-                  "h-5 px-2",
+                  "flex",
 
                   // Typography
-                  "text-[11px] font-mono",
+                  "text-2xs",
 
                   // Backgrounds & Borders
                   "rounded-sm"
@@ -318,17 +315,14 @@ export function HashPage() {
                   ? `Hashcat ${page.hashcatInfo.version ?? ''}`.trimEnd()
                   : 'Hashcat Engine'}
               </Badge>
-              <Badge
+              <Badge mono
                 variant="secondary"
                 className={cn(
                   // Layout & Positioning
-                  "flex items-center",
-
-                  // Sizing & Spacing
-                  "h-5 px-2",
+                  "flex",
 
                   // Typography
-                  "text-[11px] font-mono",
+                  "text-2xs",
 
                   // Backgrounds & Borders
                   "rounded-sm"
@@ -337,17 +331,14 @@ export function HashPage() {
                 {page.attackAlgorithm.toUpperCase()}
               </Badge>
               {page.attackConfig && (
-                <Badge
+                <Badge mono
                   variant="outline"
                   className={cn(
                     // Layout & Positioning
-                    "flex items-center",
-
-                    // Sizing & Spacing
-                    "h-5 px-2",
+                    "flex",
 
                     // Typography
-                    "text-[11px] font-mono capitalize",
+                    "text-2xs capitalize",
 
                     // Backgrounds & Borders
                     "rounded-sm"
@@ -393,7 +384,7 @@ export function HashPage() {
                   "flex-1 min-h-0"
                 )}
               >
-                <ResizablePanelGroup orientation="horizontal" className="h-full">
+                <ResizablePanelGroup orientation="horizontal">
                   <ResizablePanel defaultSize={50} minSize={30}>
                     <HashInputPanel
                       input={page.input}
@@ -432,7 +423,7 @@ export function HashPage() {
                     "px-3 py-2 gap-2",
 
                     // Typography
-                    "text-[11px]",
+                    "text-2xs",
 
                     // Backgrounds & Borders
                     "bg-amber-500/10 border-b border-amber-500/20",
@@ -449,7 +440,7 @@ export function HashPage() {
                   </span>
                 </div>
               )}
-              <ResizablePanelGroup orientation="horizontal" className="h-full">
+              <ResizablePanelGroup orientation="horizontal">
                 <ResizablePanel defaultSize={35} minSize={25}>
                   <div
                     className={cn(

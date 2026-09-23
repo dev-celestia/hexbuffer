@@ -79,7 +79,7 @@ export function ResultsPanel({ results, onExport }: Readonly<ResultsPanelProps>)
           <span
             className={cn(
               // Typography
-              "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+              "text-2xs font-semibold uppercase tracking-wider text-muted-foreground"
             )}
           >
             Cracked Results
@@ -87,7 +87,7 @@ export function ResultsPanel({ results, onExport }: Readonly<ResultsPanelProps>)
           <span
             className={cn(
               // Typography
-              "text-[10px] text-emerald-600 dark:text-emerald-400 font-mono"
+              "text-3xs text-emerald-600 dark:text-emerald-400 font-mono"
             )}
           >
             {results.length} recovered
@@ -212,7 +212,7 @@ export function ResultsPanel({ results, onExport }: Readonly<ResultsPanelProps>)
               <span
                 className={cn(
                   // Typography
-                  "text-[11px] text-muted-foreground/70"
+                  "text-2xs text-muted-foreground/70"
                 )}
               >
                 Cracked passwords will appear here in real time
@@ -266,7 +266,7 @@ export function ResultsPanel({ results, onExport }: Readonly<ResultsPanelProps>)
             "border-t border-border/40 bg-muted/10",
 
             // Typography
-            "text-[11px] text-muted-foreground"
+            "text-2xs text-muted-foreground"
           )}
         >
           <span>
@@ -322,11 +322,11 @@ function ResultCard({ result, onCopy }: Readonly<ResultCardProps>) {
             "flex items-center gap-1.5"
           )}
         >
-          <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0" />
+          <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span
             className={cn(
               // Typography
-              "text-[10px] uppercase tracking-wider text-muted-foreground font-semibold"
+              "text-3xs uppercase tracking-wider text-muted-foreground font-semibold"
             )}
           >
             {algorithmLabel}
@@ -342,7 +342,7 @@ function ResultCard({ result, onCopy }: Readonly<ResultCardProps>) {
           <span
             className={cn(
               // Typography
-              "text-[10px] text-muted-foreground/70"
+              "text-3xs text-muted-foreground/70"
             )}
           >
             {new Date(result.crackedAt).toLocaleTimeString()}
@@ -381,7 +381,7 @@ function ResultCard({ result, onCopy }: Readonly<ResultCardProps>) {
         <span
           className={cn(
             // Typography
-            "text-[10px] uppercase text-muted-foreground/70 shrink-0 font-medium"
+            "text-3xs uppercase text-muted-foreground/70 shrink-0 font-medium"
           )}
         >
           Hash:
@@ -412,7 +412,7 @@ function ResultCard({ result, onCopy }: Readonly<ResultCardProps>) {
         <span
           className={cn(
             // Typography
-            "text-[10px] uppercase text-emerald-600/80 dark:text-emerald-400/80 shrink-0 font-semibold"
+            "text-3xs uppercase text-emerald-600/80 dark:text-emerald-400/80 shrink-0 font-semibold"
           )}
         >
           Plain:
@@ -432,7 +432,7 @@ function ResultCard({ result, onCopy }: Readonly<ResultCardProps>) {
         <div
           className={cn(
             // Typography
-            "text-[10px] text-muted-foreground/60"
+            "text-3xs text-muted-foreground/60"
           )}
         >
           Cracked after {result.attempts.toLocaleString()} attempts

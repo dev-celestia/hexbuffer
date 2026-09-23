@@ -150,7 +150,7 @@ export const WindowMinimizedOverlay = React.memo(function WindowMinimizedOverlay
         <span
           className={cn(
             // Typography
-            "text-[11px] font-medium text-foreground truncate leading-tight group-hover/min:text-primary transition-colors"
+            "text-2xs font-medium text-foreground truncate leading-tight group-hover/min:text-primary transition-colors"
           )}
         >
           {displayTitle}

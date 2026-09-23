@@ -98,7 +98,7 @@ export function HttpHistoryPage() {
         <Card
           className={cn(
             // Layout & Positioning
-            "flex flex-col flex-1 overflow-hidden",
+            "flex-1",
 
             // Sizing & Spacing
             "!py-0",

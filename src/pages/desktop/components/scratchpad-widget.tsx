@@ -48,7 +48,7 @@ export function ScratchpadWidget() {
         <span
           className={cn(
             // Typography
-            "text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase"
+            "text-3xs font-mono font-bold tracking-wider text-muted-foreground uppercase"
           )}
         >
           Scratchpad

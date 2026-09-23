@@ -36,6 +36,15 @@
 
   --font-sans: 'Geist', 'Geist Fallback', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* Type scale — sub-`xs` steps. Mirrors the design system's token layer
+     (celestia-starter/packages/ui/src/styles/globals.css) so `text-2xs` /
+     `text-3xs` / `text-4xs` resolve here. Size only, no paired line-height, so
+     they are an exact drop-in for the `text-[Npx]` values they replace. */
+  --text-2xs: 11px;
+  --text-3xs: 10px;
+  --text-4xs: 9px;
+
   --color-brand: var(--brand);
   --color-highlight: var(--highlight);
 
@@ -96,12 +105,24 @@
 
 :root {
   --radius: 0.475rem;
-  --success: #059669;
-  --warning: #D97706;
-  /* Text drawn on a warning-tinted surface. `--warning` is too light for body copy over
-     `bg-warning/10` in this theme (2.9:1); this pair restores AA (8.1:1 light, 9.9:1 dark). */
+  /* Status colours — text/icon role. These are the design system's canonical
+     values (celestia-starter/packages/ui/src/styles/globals.css), kept in sync
+     so the package's `success` / `warning` / `info` variants on Badge and Alert
+     render correctly here. AA-verified against --background, --card, --muted and
+     --secondary: success 5.4:1, warning 6.1:1, info 5.9:1 on white.
+
+     Previously these were the Tailwind -600 literals (#059669 / #D97706 /
+     #2563EB), i.e. a *tint* role: `--warning` measured only 3.19:1 as text, and
+     2.86:1 over its own `bg-warning/10`. The package treats the same names as
+     text colours, so the tint role now lives only in --warning-foreground. */
+  --success: #007b2a;
+  --warning: #994e00;
+  --info: #0062c9;
+  /* Text drawn on a warning-tinted surface (`bg-warning/10`). A deliberate local
+     addition: the package uses `--warning-foreground` for text on a *solid*
+     warning fill (white on amber), a case this app never renders. Measured 7.8:1
+     against the tint above. */
   --warning-foreground: #78350f;
-  --info: #2563EB;
   --agent-orchestrator: #7C3AED;
   --agent-traffic: #2563EB;
   --agent-repeater: #059669;
@@ -124,7 +145,9 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
+  /* Text drawn on a *solid* `bg-destructive` fill. The package's canonical value; the previous
+     one was a verbatim copy of --destructive, i.e. 1.00:1 against its own fill. */
+  --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: #E84B8A;
@@ -144,10 +167,10 @@
 }
 
 .dark {
-  --success: #34D399;
-  --warning: #FBBF24;
+  --success: #43b966;
+  --warning: #da8b00;
+  --info: #1ca2ff;
   --warning-foreground: #FDE68A;
-  --info: #60A5FA;
   --agent-orchestrator: #A78BFA;
   --agent-traffic: #60A5FA;
   --agent-repeater: #34D399;
@@ -169,8 +192,12 @@
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
+  /* Canonical package values. The previous pair put a *dark* red (L 0.396) in --destructive,
+     which measured 1.52:1 as text on the app background and 1.50:1 over its own /10 tint —
+     the reason `components/error-boundary/error-fallback.tsx` had to hard-code
+     `text-red-600 dark:text-red-400` instead of using the token. */
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.205 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(60.585% 0.0036 16.205 / 0.15);
   --ring: #E84B8A;

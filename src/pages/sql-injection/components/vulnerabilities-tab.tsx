@@ -36,7 +36,7 @@ export function VulnerabilitiesTab({
       <div className="h-full flex flex-col items-center justify-center gap-2 text-muted-foreground select-none">
         <WarningCircleIcon className="h-10 w-10 text-muted-foreground/35" />
         <span className="text-xs font-semibold">No vulnerabilities detected</span>
-        <span className="text-[10px] text-muted-foreground/60 text-center max-w-[240px]">
+        <span className="text-3xs text-muted-foreground/60 text-center max-w-[240px]">
           Configure parameters, select injection methods, and start scanning to identify weaknesses.
         </span>
       </div>
@@ -52,12 +52,12 @@ export function VulnerabilitiesTab({
             <Table className="text-xs border-b">
               <TableHeader className="sticky top-0 z-10 bg-muted/95 border-b backdrop-blur-sm shadow-sm select-none">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="h-9 py-0 font-bold text-muted-foreground uppercase text-[10px] tracking-wider">Parameter</TableHead>
-                  <TableHead className="h-9 py-0 font-bold text-muted-foreground uppercase text-[10px] tracking-wider">Location</TableHead>
-                  <TableHead className="h-9 py-0 font-bold text-muted-foreground uppercase text-[10px] tracking-wider">Technique</TableHead>
-                  <TableHead className="h-9 py-0 font-bold text-muted-foreground uppercase text-[10px] tracking-wider">DBMS</TableHead>
-                  <TableHead className="h-9 py-0 font-bold text-muted-foreground uppercase text-[10px] tracking-wider">Severity</TableHead>
-                  <TableHead className="h-9 py-0 font-bold text-muted-foreground uppercase text-[10px] tracking-wider">PoC Payload</TableHead>
+                  <TableHead className="h-9 py-0 font-bold text-muted-foreground uppercase text-3xs tracking-wider">Parameter</TableHead>
+                  <TableHead className="h-9 py-0 font-bold text-muted-foreground uppercase text-3xs tracking-wider">Location</TableHead>
+                  <TableHead className="h-9 py-0 font-bold text-muted-foreground uppercase text-3xs tracking-wider">Technique</TableHead>
+                  <TableHead className="h-9 py-0 font-bold text-muted-foreground uppercase text-3xs tracking-wider">DBMS</TableHead>
+                  <TableHead className="h-9 py-0 font-bold text-muted-foreground uppercase text-3xs tracking-wider">Severity</TableHead>
+                  <TableHead className="h-9 py-0 font-bold text-muted-foreground uppercase text-3xs tracking-wider">PoC Payload</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -71,8 +71,8 @@ export function VulnerabilitiesTab({
                       }`}
                       onClick={() => onSelectVuln(vuln.id)}
                     >
-                      <TableCell className="font-mono py-1.5 font-semibold text-foreground max-w-[120px] truncate">{vuln.param_name}</TableCell>
-                      <TableCell className="py-1.5 text-muted-foreground uppercase text-[10px] font-bold">{vuln.param_location}</TableCell>
+                      <TableCell mono className="py-1.5 font-semibold text-foreground max-w-[120px] truncate">{vuln.param_name}</TableCell>
+                      <TableCell className="py-1.5 text-muted-foreground uppercase text-3xs font-bold">{vuln.param_location}</TableCell>
                       <TableCell className="py-1.5 text-muted-foreground">
                         {TECHNIQUE_LABELS[vuln.technique as SqliTechnique] || vuln.technique.replace('_', ' ')}
                       </TableCell>
@@ -80,15 +80,15 @@ export function VulnerabilitiesTab({
                       <TableCell className="py-1.5">
                         <Badge
                           variant="outline"
-                          className={`text-[9px] font-extrabold tracking-wide uppercase px-1.5 py-0 h-4 rounded-full select-none ${
+                          className={`text-4xs font-extrabold tracking-wide uppercase px-1.5 py-0 h-4 rounded-full select-none ${
                             SEVERITY_COLORS[vuln.severity] || ''
                           }`}
                         >
                           {vuln.severity}
                         </Badge>
                       </TableCell>
-                      <TableCell
-                        className="font-mono text-[10px] py-1.5 truncate max-w-[160px] text-muted-foreground"
+                      <TableCell mono
+                        className="text-3xs py-1.5 truncate max-w-[160px] text-muted-foreground"
                         title={vuln.poc_request}
                       >
                         {vuln.poc_request}
@@ -108,7 +108,7 @@ export function VulnerabilitiesTab({
             {/* Vulnerability Details Panel */}
             <ResizablePanel defaultSize="32" minSize="20" className="flex flex-col h-full bg-card/45">
               <div className="flex h-9 shrink-0 items-center justify-between border-b bg-muted/15 px-3 select-none">
-                <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
+                <span className="text-3xs font-bold uppercase text-muted-foreground tracking-wider">
                   Vulnerability Details
                 </span>
                 <Badge
@@ -125,12 +125,12 @@ export function VulnerabilitiesTab({
                 <div className="p-4 space-y-4 text-xs">
                   {/* Parameter & Location */}
                   <div className="space-y-1">
-                    <Label className="text-[10px] text-muted-foreground/75 font-semibold uppercase tracking-wider block">
+                    <Label className="text-3xs text-muted-foreground/75 font-semibold uppercase tracking-wider block">
                       Vulnerable Target
                     </Label>
                     <p className="font-mono text-xs font-semibold text-foreground flex items-center gap-1.5">
                       <span>{selectedVulnData.param_name}</span>
-                      <span className="text-[10px] text-muted-foreground uppercase bg-muted/50 border px-1 rounded-sm leading-none py-0.5">
+                      <span className="text-3xs text-muted-foreground uppercase bg-muted/50 border px-1 rounded-sm leading-none py-0.5">
                         {selectedVulnData.param_location}
                       </span>
                     </p>
@@ -138,7 +138,7 @@ export function VulnerabilitiesTab({
 
                   {/* Technique */}
                   <div className="space-y-1">
-                    <Label className="text-[10px] text-muted-foreground/75 font-semibold uppercase tracking-wider block">
+                    <Label className="text-3xs text-muted-foreground/75 font-semibold uppercase tracking-wider block">
                       Attack Vector (Technique)
                     </Label>
                     <p className="font-medium text-foreground">
@@ -148,7 +148,7 @@ export function VulnerabilitiesTab({
 
                   {/* DBMS */}
                   <div className="space-y-1">
-                    <Label className="text-[10px] text-muted-foreground/75 font-semibold uppercase tracking-wider block">
+                    <Label className="text-3xs text-muted-foreground/75 font-semibold uppercase tracking-wider block">
                       Database Management System
                     </Label>
                     <p className="font-semibold text-foreground">
@@ -158,10 +158,10 @@ export function VulnerabilitiesTab({
 
                   {/* Database Fingerprint */}
                   <div className="space-y-1">
-                    <Label className="text-[10px] text-muted-foreground/75 font-semibold uppercase tracking-wider block">
+                    <Label className="text-3xs text-muted-foreground/75 font-semibold uppercase tracking-wider block">
                       DBMS Fingerprint
                     </Label>
-                    <div className="font-mono text-[10px] text-foreground bg-muted/15 border p-2 rounded-md break-all leading-relaxed">
+                    <div className="font-mono text-3xs text-foreground bg-muted/15 border p-2 rounded-md break-all leading-relaxed">
                       {selectedVulnData.fingerprint || 'No fingerprint returned.'}
                     </div>
                   </div>
@@ -169,12 +169,12 @@ export function VulnerabilitiesTab({
                   {/* Proof of Concept Request */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <Label className="text-[10px] text-muted-foreground/75 font-semibold uppercase tracking-wider block">
+                      <Label className="text-3xs text-muted-foreground/75 font-semibold uppercase tracking-wider block">
                         Proof of Concept Payload
                       </Label>
                       <button
                         onClick={handleCopyPoC}
-                        className={`flex items-center gap-1 text-[10px] font-medium border px-1.5 py-0.5 rounded transition-all hover:bg-muted/50 ${
+                        className={`flex items-center gap-1 text-3xs font-medium border px-1.5 py-0.5 rounded transition-all hover:bg-muted/50 ${
                           copied ? 'border-green-500/20 text-green-600 bg-green-500/5' : 'text-muted-foreground'
                         }`}
                       >
@@ -191,7 +191,7 @@ export function VulnerabilitiesTab({
                         )}
                       </button>
                     </div>
-                    <pre className="p-2.5 bg-muted/20 border rounded-md text-[10px] font-mono whitespace-pre-wrap break-all max-h-48 overflow-y-auto leading-relaxed text-muted-foreground">
+                    <pre className="p-2.5 bg-muted/20 border rounded-md text-3xs font-mono whitespace-pre-wrap break-all max-h-48 overflow-y-auto leading-relaxed text-muted-foreground">
                       {selectedVulnData.poc_request}
                     </pre>
                   </div>

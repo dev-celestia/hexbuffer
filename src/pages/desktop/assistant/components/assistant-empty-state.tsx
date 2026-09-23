@@ -49,7 +49,7 @@ export function AssistantEmptyState({ model, providerDisplay }: Readonly<Assista
                 // Layout & Positioning
                 'flex items-center gap-1.5',
                 // Typography
-                'text-[11px] font-mono text-muted-foreground/80',
+                'text-2xs font-mono text-muted-foreground/80',
               )}
             >
               <span>Provider:</span>

@@ -28,7 +28,7 @@ export function FileDropOverlay({ show, title }: Readonly<FileDropOverlayProps>)
     >
       <UploadSimpleIcon className="size-8 text-primary" />
       <p className="text-xs font-semibold text-foreground">{title}</p>
-      <p className="text-[11px] text-muted-foreground">Release to add files</p>
+      <p className="text-2xs text-muted-foreground">Release to add files</p>
     </div>
   );
 }

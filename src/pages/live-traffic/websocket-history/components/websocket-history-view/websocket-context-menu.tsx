@@ -108,18 +108,18 @@ export function WebSocketContextMenu({
     <ContextMenu>
       <ContextMenuTrigger>{children}</ContextMenuTrigger>
       <ContextMenuContent className="w-52">
-        <ContextMenuItem onClick={handleCopyUrl} className="text-xs">
+        <ContextMenuItem leading="tight" onClick={handleCopyUrl}>
           <CopyIcon className="mr-2 size-3.5 text-muted-foreground" />
           Copy URL
         </ContextMenuItem>
-        <ContextMenuItem onClick={handleCopyHost} className="text-xs">
+        <ContextMenuItem leading="tight" onClick={handleCopyHost}>
           <GlobeIcon className="mr-2 size-3.5 text-muted-foreground" />
           Copy Host
         </ContextMenuItem>
 
         <ContextMenuSeparator />
 
-        <ContextMenuItem onClick={handleOpenInRepeater} className="text-xs">
+        <ContextMenuItem leading="tight" onClick={handleOpenInRepeater}>
           <PaperPlaneTiltIcon className="mr-2 size-3.5 text-primary" />
           Send to Repeater
         </ContextMenuItem>
@@ -133,10 +133,9 @@ export function WebSocketContextMenu({
 
         <ContextMenuSeparator />
 
-        <ContextMenuItem
+        <ContextMenuItem leading="tight"
           onClick={handleDelete}
           variant="destructive"
-          className="text-xs"
         >
           <TrashIcon className="mr-2 size-3.5" />
           Delete Connection

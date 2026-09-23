@@ -111,7 +111,7 @@ export function PayloadsTab() {
                       value={payload.values.join('\n')}
                       onChange={(value) => handleSimpleListTextChange(position.name, value)}
                       language="markdown"
-                      className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-[10px]"
+                      className="text-xs [&_.cm-content]:text-xs [&_.cm-gutters]:text-3xs"
                       theme={theme}
                       disableValidation
                     />

@@ -27,7 +27,7 @@ export const FlowNodeStatus = React.memo(function FlowNodeStatus({
         // Sizing & Spacing
         'border-t px-3 py-1.5',
         // Typography
-        'text-[10px]',
+        'text-3xs',
         // Backgrounds & Borders
         status === 'running' && 'border-amber-500/20 bg-amber-500/[0.04]',
         status === 'success' && 'border-emerald-500/20 bg-emerald-500/[0.04]',

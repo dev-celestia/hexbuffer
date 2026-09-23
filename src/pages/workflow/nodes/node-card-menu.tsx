@@ -50,7 +50,7 @@ export function NodeCardMenu({ nodeId, nodeLabel }: Readonly<{ nodeId: string; n
       type="button"
       size="icon"
       variant="ghost"
-      className="nodrag nopan size-6 shrink-0 text-muted-foreground opacity-70 transition-opacity hover:opacity-100"
+      className="nodrag nopan size-6 text-muted-foreground opacity-70 transition-opacity hover:opacity-100"
       title="Node menu"
       onPointerDown={(event) => event.stopPropagation()}
       onClick={handleOpenMenu}

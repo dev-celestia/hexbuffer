@@ -96,19 +96,19 @@ function TriggerNodeComponent({
               CATEGORY_BORDER.trigger,
               CATEGORY_BG.trigger,
               selected && 'ring-2 ring-ring ring-offset-2 ring-offset-background',
-              triggerNeedsHost && 'border-amber-500 shadow-amber-500/20',
-              isExecuting && 'border-red-500 animate-pulse ring-2 ring-red-500 ring-offset-2 shadow-lg shadow-red-500/25',
+              triggerNeedsHost && 'border-warning shadow-warning/20',
+              isExecuting && 'border-destructive animate-pulse ring-2 ring-destructive ring-offset-2 shadow-lg shadow-destructive/25',
             )}
           />
         }
       >
         {triggerNeedsHost && (
-          <div className="rounded-t-[5px] border-b border-amber-500/40 bg-amber-500/15 px-3 py-2 text-amber-700 dark:text-amber-200">
+          <div className="rounded-t-[5px] border-b border-warning/40 bg-warning/15 px-3 py-2 text-warning-foreground">
             <div className="flex items-start gap-2">
               <WarningCircleIcon className="mt-0.5 size-5 shrink-0" />
               <div className="min-w-0">
-                <p className="text-[11px] font-bold uppercase leading-none">Host required</p>
-                <p className="mt-1 text-[10px] leading-tight">
+                <p className="text-2xs font-bold uppercase leading-none">Host required</p>
+                <p className="mt-1 text-3xs leading-tight">
                   Add at least one host before this trigger <br /> can capture traffic.
                 </p>
               </div>
@@ -122,12 +122,12 @@ function TriggerNodeComponent({
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs">{nodeData.label}</p>
-            <p className="truncate text-[10px] text-muted-foreground">Trigger</p>
+            <p className="truncate text-3xs text-muted-foreground">Trigger</p>
           </div>
           {warning && (
             <span title={warning}>
               <WarningCircleIcon
-                className={cn('shrink-0 text-amber-500', triggerNeedsHost ? 'size-5' : 'size-3.5')}
+                className={cn('shrink-0 text-warning', triggerNeedsHost ? 'size-5' : 'size-3.5')}
                 aria-label={warning}
               />
             </span>
@@ -140,14 +140,14 @@ function TriggerNodeComponent({
 
         {isManual && (
           <div className="border-t border-blue-500/20 px-3 py-1.5">
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-              <div className="size-1.5 rounded-full bg-emerald-500" />
+            <div className="flex items-center gap-1.5 text-3xs text-muted-foreground">
+              <div className="size-1.5 rounded-full bg-success" />
               <span className="flex-1">Manual trigger</span>
               <Button
                 type="button"
                 size="sm"
                 variant="outline"
-                className="nodrag nopan h-6 px-2 text-[10px]"
+                className="nodrag nopan px-2 text-3xs"
                 disabled={isExecuting}
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={handleManualRun}
@@ -165,24 +165,24 @@ function TriggerNodeComponent({
             className={cn(
               'border-t px-3 py-1.5',
               liveTrafficNeedsHost
-                ? 'border-amber-500/30 bg-amber-500/[0.06]'
+                ? 'border-warning/30 bg-warning/[0.06]'
                 : isWorkflowListening
                   ? 'border-cyan-500/20 bg-cyan-500/[0.03]'
-                  : 'border-amber-500/20 bg-amber-500/[0.04]'
+                  : 'border-warning/20 bg-warning/[0.04]'
             )}
           >
-            <div className="flex items-center gap-1.5 text-[10px]">
+            <div className="flex items-center gap-1.5 text-3xs">
               <div
                 className={cn(
                   'size-1.5 rounded-full',
                   liveTrafficNeedsHost
-                    ? 'bg-amber-500'
+                    ? 'bg-warning'
                     : isWorkflowListening
                       ? 'animate-pulse bg-cyan-400 shadow-[0_0_4px_theme(colors.cyan.400)]'
-                      : 'bg-amber-500'
+                      : 'bg-warning'
                 )}
               />
-              <span className={cn('font-medium', liveTrafficNeedsHost ? 'text-amber-500' : isWorkflowListening ? 'text-cyan-400' : 'text-amber-500')}>
+              <span className={cn('font-medium', liveTrafficNeedsHost ? 'text-warning-foreground' : isWorkflowListening ? 'text-cyan-600 dark:text-cyan-400' : 'text-warning-foreground')}>
                 {liveTrafficNeedsHost ? 'Host required' : isWorkflowListening ? 'Listening' : 'Listening paused'}
               </span>
               {[
@@ -207,24 +207,24 @@ function TriggerNodeComponent({
             className={cn(
               'border-t px-3 py-1.5',
               websocketNeedsHost
-                ? 'border-amber-500/30 bg-amber-500/[0.06]'
+                ? 'border-warning/30 bg-warning/[0.06]'
                 : isWorkflowListening
                   ? 'border-violet-500/20 bg-violet-500/[0.03]'
-                  : 'border-amber-500/20 bg-amber-500/[0.04]'
+                  : 'border-warning/20 bg-warning/[0.04]'
             )}
           >
-            <div className="flex items-center gap-1.5 text-[10px]">
+            <div className="flex items-center gap-1.5 text-3xs">
               <div
                 className={cn(
                   'size-1.5 rounded-full',
                   websocketNeedsHost
-                    ? 'bg-amber-500'
+                    ? 'bg-warning'
                     : isWorkflowListening
                       ? 'animate-pulse bg-violet-400 shadow-[0_0_4px_theme(colors.violet.400)]'
-                      : 'bg-amber-500'
+                      : 'bg-warning'
                 )}
               />
-              <span className={cn('font-medium', websocketNeedsHost ? 'text-amber-500' : isWorkflowListening ? 'text-violet-400' : 'text-amber-500')}>
+              <span className={cn('font-medium', websocketNeedsHost ? 'text-warning-foreground' : isWorkflowListening ? 'text-violet-600 dark:text-violet-400' : 'text-warning-foreground')}>
                 {websocketNeedsHost ? 'Host required' : isWorkflowListening ? 'Listening for messages' : 'Listening paused'}
               </span>
               {[
@@ -250,19 +250,19 @@ function TriggerNodeComponent({
               'border-t px-3 py-1.5',
               isWorkflowListening
                 ? 'border-blue-500/20 bg-blue-500/[0.03]'
-                : 'border-amber-500/20 bg-amber-500/[0.04]'
+                : 'border-warning/20 bg-warning/[0.04]'
             )}
           >
-            <div className="flex items-center gap-1.5 text-[10px]">
+            <div className="flex items-center gap-1.5 text-3xs">
               <div
                 className={cn(
                   'size-1.5 rounded-full',
                   isWorkflowListening
                     ? 'animate-pulse bg-blue-400 shadow-[0_0_4px_theme(colors.blue.400)]'
-                    : 'bg-amber-500'
+                    : 'bg-warning'
                 )}
               />
-              <span className={cn('font-medium', isWorkflowListening ? 'text-blue-400' : 'text-amber-500')}>
+              <span className={cn('font-medium', isWorkflowListening ? 'text-blue-600 dark:text-blue-400' : 'text-warning-foreground')}>
                 {isWorkflowListening ? 'Listening for pages' : 'Listening paused'}
               </span>
               {[
@@ -293,7 +293,7 @@ function TriggerNodeComponent({
       {description && (
         <TooltipContent side="right" sideOffset={12} className="max-w-52">
           <p className="font-medium">{nodeData.label}</p>
-          <p className="text-[11px] opacity-80">{description}</p>
+          <p className="text-2xs opacity-80">{description}</p>
         </TooltipContent>
       )}
     </Tooltip>

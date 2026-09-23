@@ -52,7 +52,7 @@ export function ListenerPage() {
         <span
           className={cn(
             // Typography
-            "text-[10px] font-semibold font-mono tracking-wider text-muted-foreground select-none"
+            "text-3xs font-semibold font-mono tracking-wider text-muted-foreground select-none"
           )}
         >
           LISTENER: {page.isEnabled ? 'ACTIVE' : 'DISABLED'}

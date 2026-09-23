@@ -109,7 +109,7 @@ export function RecentsWidget() {
               <span
                 className={cn(
                   // Typography
-                  "text-[11px] font-medium tracking-tight text-foreground truncate"
+                  "text-2xs font-medium tracking-tight text-foreground truncate"
                 )}
               >
                 {item.label}
@@ -139,7 +139,7 @@ export function RecentsWidget() {
                     "text-[7.5px] font-bold uppercase tracking-wider select-none",
                     // Backgrounds & Borders
                     item.flag === 'alpha'
-                      ? "bg-rose-500/15 text-rose-500 dark:text-rose-400 border border-rose-500/20"
+                      ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20"
                       : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20"
                   )}
                 >
@@ -158,7 +158,7 @@ export function RecentsWidget() {
             // Sizing & Spacing
             "py-2 px-1.5",
             // Typography
-            "text-[11px] text-muted-foreground/70"
+            "text-2xs text-muted-foreground/70"
           )}
         >
           No recent apps

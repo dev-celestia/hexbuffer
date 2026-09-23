@@ -106,7 +106,7 @@ export function ForgePanel() {
                     'rounded border px-1',
 
                     // Typography
-                    'font-mono text-[10px] leading-4 font-semibold tabular-nums',
+                    'font-mono text-3xs leading-4 font-semibold tabular-nums',
 
                     // Backgrounds & Borders
                     statusTreatment.pill
@@ -125,7 +125,7 @@ export function ForgePanel() {
                     'rounded border px-1',
 
                     // Typography
-                    'font-mono text-[10px] leading-4 font-semibold',
+                    'font-mono text-3xs leading-4 font-semibold',
 
                     // Backgrounds & Borders
                     FAILURE.pill

@@ -93,7 +93,7 @@ export function ContextsEmptyState({ onStartCreate, onClose }: Readonly<Contexts
               <span
                 className={cn(
                   // Typography
-                  'text-[11px] text-muted-foreground'
+                  'text-2xs text-muted-foreground'
                 )}
               >
                 Reference a variable anywhere in a request with{' '}
@@ -103,7 +103,7 @@ export function ContextsEmptyState({ onStartCreate, onClose }: Readonly<Contexts
                     'rounded px-1 py-0.5',
 
                     // Typography
-                    'font-mono text-[10px] text-sky-600 dark:text-sky-400',
+                    'font-mono text-3xs text-sky-600 dark:text-sky-400',
 
                     // Backgrounds & Borders
                     'bg-sky-500/10'
@@ -138,7 +138,7 @@ export function ContextsEmptyState({ onStartCreate, onClose }: Readonly<Contexts
               <span
                 className={cn(
                   // Typography
-                  'text-[11px] text-muted-foreground'
+                  'text-2xs text-muted-foreground'
                 )}
               >
                 Exactly one environment is active at a time — the one the request bar shows.
@@ -147,14 +147,11 @@ export function ContextsEmptyState({ onStartCreate, onClose }: Readonly<Contexts
           </ul>
 
           <EmptyContent>
-            <Button
+            <Button leading="tight"
               size="sm"
               className={cn(
                 // Sizing & Spacing
-                'h-6 gap-1 px-2',
-
-                // Typography
-                'text-xs'
+                'px-2'
               )}
               onClick={onStartCreate}
             >

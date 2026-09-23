@@ -45,7 +45,7 @@ export function SettingsGroup({ label, description, children, className }: Reado
             <h2
               className={cn(
                 // Typography
-                'text-[11px] font-semibold uppercase tracking-wider text-muted-foreground'
+                'text-2xs font-semibold uppercase tracking-wider text-muted-foreground'
               )}
             >
               {label}

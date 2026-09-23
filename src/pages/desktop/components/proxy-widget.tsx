@@ -28,11 +28,11 @@ export function ProxyWidget() {
   const renderProxyStatus = () => {
     switch (proxyStatus) {
       case 'connected':
-        return <span className="text-emerald-500">Connected</span>;
+        return <span className="text-emerald-600 dark:text-emerald-400">Connected</span>;
       case 'starting':
-        return <span className="text-amber-500 animate-pulse">Starting...</span>;
+        return <span className="text-amber-600 dark:text-amber-400 animate-pulse">Starting...</span>;
       case 'stopping':
-        return <span className="text-amber-500 animate-pulse">Stopping...</span>;
+        return <span className="text-amber-600 dark:text-amber-400 animate-pulse">Stopping...</span>;
       case 'disconnected':
       default:
         return <span className="text-muted-foreground">Disconnected</span>;
@@ -83,7 +83,7 @@ export function ProxyWidget() {
           <span
             className={cn(
               // Typography
-              "text-[10px] font-mono font-bold tracking-wider text-muted-foreground uppercase"
+              "text-3xs font-mono font-bold tracking-wider text-muted-foreground uppercase"
             )}
           >
             Proxy
@@ -119,7 +119,7 @@ export function ProxyWidget() {
                 "mt-0.5",
 
                 // Typography
-                "text-[9px] text-muted-foreground font-mono"
+                "text-4xs text-muted-foreground font-mono"
               )}
             >
               Port {activePort}

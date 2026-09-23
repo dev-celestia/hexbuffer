@@ -96,31 +96,28 @@ export function ScanResultsTable({
               <TableRow
                 key={`${result.host}:${result.port}`}
                 className={cn(
-                  // Backgrounds & Borders
-                  "border-b",
-
                   // Interactive & States
-                  "hover:bg-muted/20 transition-colors"
+                  "hover:bg-muted/20"
                 )}
               >
-                <TableCell
+                <TableCell mono
                   className={cn(
                     // Sizing & Spacing
                     "py-1.5",
 
                     // Typography
-                    "font-mono font-medium"
+                    "font-medium"
                   )}
                 >
                   {result.host}
                 </TableCell>
-                <TableCell
+                <TableCell mono
                   className={cn(
                     // Sizing & Spacing
                     "py-1.5",
 
                     // Typography
-                    "font-mono font-semibold text-primary"
+                    "font-semibold text-primary"
                   )}
                 >
                   {result.port}
@@ -133,10 +130,6 @@ export function ScanResultsTable({
                 >
                   <Badge
                     variant="outline"
-                    className={cn(
-                      // Sizing & Spacing
-                      "h-5 text-[10px]"
-                    )}
                   >
                     {result.state}
                   </Badge>
@@ -152,13 +145,13 @@ export function ScanResultsTable({
                 >
                   {result.service || 'unknown'}
                 </TableCell>
-                <TableCell
+                <TableCell mono
                   className={cn(
                     // Sizing & Spacing
                     "py-1.5",
 
                     // Typography
-                    "text-muted-foreground font-mono"
+                    "text-muted-foreground"
                   )}
                 >
                   <div
@@ -176,7 +169,7 @@ export function ScanResultsTable({
                         "w-10",
 
                         // Typography
-                        "text-[10px] text-right"
+                        "text-3xs text-right"
                       )}
                     >
                       {ms ? `${ms}ms` : '-'}
@@ -212,13 +205,13 @@ export function ScanResultsTable({
                     )}
                   </div>
                 </TableCell>
-                <TableCell
+                <TableCell mono
                   className={cn(
                     // Sizing & Spacing
                     "max-w-[400px] py-1.5",
 
                     // Typography
-                    "truncate font-mono text-[11px] text-foreground/80"
+                    "truncate text-2xs text-foreground/80"
                   )}
                   title={result.banner ?? ''}
                 >
@@ -232,7 +225,7 @@ export function ScanResultsTable({
                         "max-w-[350px] px-1 py-0.5",
 
                         // Typography
-                        "truncate text-[10px]",
+                        "truncate text-3xs",
 
                         // Backgrounds & Borders
                         "bg-muted/30 rounded"

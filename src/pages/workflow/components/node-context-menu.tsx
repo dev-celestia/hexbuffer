@@ -56,7 +56,7 @@ export function NodeContextMenu({ state, onClose, onDelete, onProperties }: Read
     >
       {/* Header */}
       <div className="border-b px-3 py-1.5">
-        <p className="truncate text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="truncate text-3xs font-semibold uppercase tracking-wider text-muted-foreground">
           {state.nodeLabel}
         </p>
       </div>
@@ -82,7 +82,7 @@ export function NodeContextMenu({ state, onClose, onDelete, onProperties }: Read
           type="button"
           className={cn(
             'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs',
-            'text-red-500 hover:bg-red-500/10 transition-colors'
+            'text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors'
           )}
           onClick={() => {
             onDelete(state.nodeId);

@@ -76,10 +76,10 @@ export function MemoryLinkDialog({ state }: Readonly<MemoryLinkDialogProps>) {
               "flex items-center gap-2",
 
               // Typography
-              "text-sm font-semibold"
+              "font-semibold"
             )}
           >
-            <GitForkIcon className="size-4 text-indigo-400" />
+            <GitForkIcon className="size-4 text-indigo-600 dark:text-indigo-400" />
             <span>Link Memory Relationship</span>
           </DialogTitle>
         </DialogHeader>
@@ -93,7 +93,7 @@ export function MemoryLinkDialog({ state }: Readonly<MemoryLinkDialogProps>) {
           >
             {/* From Source */}
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs font-medium">Source Memory</Label>
+              <Label leading="tight">Source Memory</Label>
               <div
                 className={cn(
                   // Sizing & Spacing
@@ -109,7 +109,7 @@ export function MemoryLinkDialog({ state }: Readonly<MemoryLinkDialogProps>) {
 
             {/* Relation Type */}
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs font-medium">Relationship</Label>
+              <Label leading="tight">Relationship</Label>
               <Select
                 value={relation}
                 // Base UI reports a cleared selection as `null`; a link always has a relation.
@@ -117,12 +117,12 @@ export function MemoryLinkDialog({ state }: Readonly<MemoryLinkDialogProps>) {
                   if (v !== null) setRelation(v);
                 }}
               >
-                <SelectTrigger className="h-8 text-xs">
+                <SelectTrigger leading="tight" className="h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {EDGE_RELATIONS.map((r) => (
-                    <SelectItem key={r.id} value={r.id} className="text-xs">
+                    <SelectItem leading="tight" key={r.id} value={r.id}>
                       {r.label} ({r.description})
                     </SelectItem>
                   ))}
@@ -132,7 +132,7 @@ export function MemoryLinkDialog({ state }: Readonly<MemoryLinkDialogProps>) {
 
             {/* Target Memory */}
             <div className="flex flex-col gap-1.5">
-              <Label className="text-xs font-medium">Target Memory</Label>
+              <Label leading="tight">Target Memory</Label>
               {candidateEntries.length === 0 ? (
                 <div className="text-muted-foreground p-2 border border-dashed rounded text-xs">
                   No other memory entries available in store.
@@ -145,12 +145,12 @@ export function MemoryLinkDialog({ state }: Readonly<MemoryLinkDialogProps>) {
                   // absorbed.
                   onValueChange={(v) => setTargetId(v ?? '')}
                 >
-                  <SelectTrigger className="h-8 text-xs truncate">
+                  <SelectTrigger leading="tight" className="h-8 truncate">
                     <SelectValue placeholder="Select target memory..." />
                   </SelectTrigger>
                   <SelectContent>
                     {candidateEntries.map((e) => (
-                      <SelectItem key={e.id} value={e.id} className="text-xs">
+                      <SelectItem leading="tight" key={e.id} value={e.id}>
                         <span className="font-medium">{e.title}</span>{' '}
                         <span className="text-muted-foreground font-mono">[{e.memoryType}]</span>
                       </SelectItem>
@@ -162,22 +162,20 @@ export function MemoryLinkDialog({ state }: Readonly<MemoryLinkDialogProps>) {
           </div>
 
           <DialogFooter className="pt-2">
-            <Button
+            <Button leading="tight"
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setIsLinkDialogOpen(false)}
               disabled={linking}
-              className="text-xs"
             >
               Cancel
             </Button>
-            <Button
+            <Button leading="tight"
               type="submit"
               variant="default"
               size="sm"
               disabled={!targetId || linking}
-              className="text-xs"
             >
               {linking ? 'Linking…' : 'Create Link'}
             </Button>

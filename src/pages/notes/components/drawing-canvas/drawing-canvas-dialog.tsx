@@ -126,7 +126,7 @@ export function DrawingCanvasDialog({
                 "bg-popover border-primary/40"
               )}
             >
-              <Input
+              <Input textSize="xs"
                 autoFocus
                 placeholder="Enter node label or text..."
                 value={textInputVal}
@@ -140,29 +140,26 @@ export function DrawingCanvasDialog({
                 }}
                 className={cn(
                   // Sizing & Spacing
-                  "h-7 px-2 py-0",
-
-                  // Typography
-                  "text-xs",
+                  "py-0",
 
                   // Backgrounds & Borders
                   "bg-background"
                 )}
               />
               <Button
-                size="sm"
+                size="md"
                 variant="default"
                 onClick={() => hook.handleSaveText(textInputVal)}
-                className="h-7 w-7 p-0 cursor-pointer"
+                className="w-7 p-0"
                 title="Save text"
               >
                 <CheckIcon className="size-3.5" />
               </Button>
               <Button
-                size="sm"
-                variant="ghost"
+                size="md"
+                variant="quiet"
                 onClick={hook.handleCancelText}
-                className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground cursor-pointer"
+                className="w-7 p-0"
                 title="Cancel"
               >
                 <XIcon className="size-3.5" />
@@ -175,7 +172,7 @@ export function DrawingCanvasDialog({
         <DialogFooter
           className={cn(
             // Layout & Positioning
-            "flex flex-row items-center justify-between shrink-0",
+            "flex-row items-center justify-between shrink-0",
 
             // Sizing & Spacing
             "px-5 py-3 border-t",
@@ -209,16 +206,13 @@ export function DrawingCanvasDialog({
               "gap-2"
             )}
           >
-            <Button
+            <Button leading="tight"
               variant="outline"
               size="sm"
               onClick={hook.handleExportPng}
               className={cn(
                 // Sizing & Spacing
-                "h-8 px-3",
-
-                // Typography
-                "text-xs font-medium cursor-pointer"
+                "h-8 px-3"
               )}
               title="Download canvas as PNG file"
             >
@@ -226,34 +220,31 @@ export function DrawingCanvasDialog({
               <span>Export PNG</span>
             </Button>
 
-            <Button
+            <Button leading="tight"
               variant="outline"
               size="sm"
               onClick={() => onOpenChange(false)}
               className={cn(
                 // Sizing & Spacing
-                "h-8 px-3",
-
-                // Typography
-                "text-xs font-medium cursor-pointer"
+                "h-8 px-3"
               )}
             >
               Cancel
             </Button>
 
-            <Button
+            <Button leading="tight"
               variant="default"
               size="sm"
               onClick={hook.handleInsertIntoNote}
               className={cn(
                 // Layout & Positioning
-                "flex items-center",
+                "flex",
 
                 // Sizing & Spacing
                 "gap-1.5 h-8 px-4",
 
                 // Typography
-                "text-xs font-semibold cursor-pointer"
+                "font-semibold"
               )}
             >
               <PlusCircleIcon className="size-4" />

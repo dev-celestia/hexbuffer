@@ -76,13 +76,13 @@ export function NucleiRunConsoleStream({
           >
             Telemetry Stream
           </span>
-          <Badge
+          <Badge size="sm" mono
             variant="outline"
             className={cn(
               // Sizing & Spacing
-              "h-4 px-1.5",
+              "px-1.5",
               // Typography
-              "text-[10px] font-mono text-zinc-400",
+              "text-zinc-400",
               // Backgrounds & Borders
               "border-zinc-700"
             )}
@@ -111,7 +111,7 @@ export function NucleiRunConsoleStream({
               placeholder="Filter logs..."
               className={cn(
                 // Sizing & Spacing
-                "pl-7 h-6 text-[11px] w-full",
+                "pl-7 h-6 text-2xs",
                 // Typography
                 "text-zinc-200 placeholder:text-zinc-500",
                 // Backgrounds & Borders
@@ -126,7 +126,7 @@ export function NucleiRunConsoleStream({
               // Layout & Positioning
               "flex items-center gap-1.5",
               // Typography
-              "text-[11px] text-zinc-400"
+              "text-2xs text-zinc-400"
             )}
           >
             <Switch
@@ -146,7 +146,7 @@ export function NucleiRunConsoleStream({
             onClick={onClearLogs}
             className={cn(
               // Sizing & Spacing
-              "h-6 w-6 p-0",
+              "w-6 p-0",
               // Interactive & States
               "text-zinc-400 hover:text-red-400 hover:bg-zinc-800"
             )}
@@ -210,7 +210,7 @@ export function NucleiRunConsoleStream({
                     // Layout & Positioning
                     "px-1 rounded shrink-0 select-none",
                     // Typography
-                    "text-[10px] uppercase font-bold",
+                    "text-3xs uppercase font-bold",
                     // Backgrounds & Borders
                     isVuln && "bg-red-500 text-black",
                     isSuccess && "bg-emerald-500 text-black",

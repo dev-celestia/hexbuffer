@@ -162,7 +162,7 @@ export function JwtDecodeView({
                   <span
                     className={cn(
                       // Typography
-                      "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                      "text-2xs font-semibold uppercase tracking-wider text-muted-foreground"
                     )}
                   >
                     JWT Token
@@ -173,7 +173,7 @@ export function JwtDecodeView({
                       "hidden sm:inline",
 
                       // Typography
-                      "text-[10px] text-muted-foreground"
+                      "text-3xs text-muted-foreground"
                     )}
                   >
                     Paste token to decode
@@ -181,19 +181,13 @@ export function JwtDecodeView({
                 </div>
                 {onClear && (
                   <Button
-                    variant="ghost"
+                    variant="quiet"
                     size="icon"
                     onClick={onClear}
                     disabled={!tokenInput}
                     className={cn(
                       // Sizing & Spacing
-                      "h-6 w-6",
-
-                      // Typography
-                      "text-muted-foreground",
-
-                      // Interactive & States
-                      "hover:text-foreground"
+                      "h-6 w-6"
                     )}
                     title="Clear token"
                   >
@@ -268,7 +262,7 @@ export function JwtDecodeView({
                   <span
                     className={cn(
                       // Typography
-                      "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                      "text-2xs font-semibold uppercase tracking-wider text-muted-foreground"
                     )}
                   >
                     Decoded Breakdown
@@ -280,7 +274,7 @@ export function JwtDecodeView({
                         "px-1.5 py-0.2",
 
                         // Typography
-                        "text-[10px] font-mono text-white",
+                        "text-3xs font-mono text-white",
 
                         // Backgrounds & Borders
                         "bg-primary rounded"
@@ -291,7 +285,7 @@ export function JwtDecodeView({
                   )}
                 </div>
                 <Button
-                  variant="ghost"
+                  variant="quiet"
                   size="icon"
                   onClick={() =>
                     onCopy(
@@ -303,13 +297,7 @@ export function JwtDecodeView({
                   disabled={!decoded}
                   className={cn(
                     // Sizing & Spacing
-                    "h-6 w-6",
-
-                    // Typography
-                    "text-muted-foreground",
-
-                    // Interactive & States
-                    "hover:text-foreground"
+                    "h-6 w-6"
                   )}
                   title="Copy JSON"
                 >
@@ -354,7 +342,7 @@ export function JwtDecodeView({
                       <Label
                         className={cn(
                           // Typography
-                          "text-[10px] font-bold uppercase tracking-wider text-muted-foreground"
+                          "text-3xs font-bold uppercase tracking-wider text-muted-foreground"
                         )}
                       >
                         Signature
@@ -423,7 +411,7 @@ export function JwtDecodeView({
                           <span
                             className={cn(
                               // Typography
-                              "font-mono break-all text-[11px] opacity-85"
+                              "font-mono break-all text-2xs opacity-85"
                             )}
                           >
                             {decoded.signature}
@@ -486,7 +474,7 @@ export function JwtDecodeView({
               <span
                 className={cn(
                   // Typography
-                  "text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+                  "text-2xs font-semibold uppercase tracking-wider text-muted-foreground"
                 )}
               >
                 Vulnerability Findings
@@ -497,7 +485,7 @@ export function JwtDecodeView({
                   "hidden sm:inline",
 
                   // Typography
-                  "text-[10px] text-muted-foreground"
+                  "text-3xs text-muted-foreground"
                 )}
               >
                 {vulnerabilities.length} issue{vulnerabilities.length !== 1 ? 's' : ''} detected

@@ -106,11 +106,11 @@ function ActionNodeComponent({
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs">{nodeData.label}</p>
-            <p className="truncate text-[10px] text-muted-foreground">Action</p>
+            <p className="truncate text-3xs text-muted-foreground">Action</p>
           </div>
           {warning && (
             <WarningCircleIcon
-              className="size-3.5 shrink-0 text-amber-500"
+              className="size-3.5 shrink-0 text-amber-600 dark:text-amber-400"
               aria-label={warning}
             />
           )}
@@ -133,7 +133,7 @@ function ActionNodeComponent({
       {description && (
         <TooltipContent side="right" sideOffset={12} className="max-w-52">
           <p className="font-medium">{nodeData.label}</p>
-          <p className="text-[11px] opacity-80">{description}</p>
+          <p className="text-2xs opacity-80">{description}</p>
         </TooltipContent>
       )}
     </Tooltip>
