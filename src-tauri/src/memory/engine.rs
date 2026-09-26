@@ -135,6 +135,7 @@ impl UtekeEngine {
     /// the ORT library fails to load, uteke caches that failure for the life of
     /// the process, so a retry after installing the runtime needs an app restart.
     pub fn warm_up(&self) -> Result<(), String> {
+        let _ = crate::memory::runtime::detect_existing_ort_runtime();
         let engine = self.inner.lock();
         engine
             .embed_text("hexbuffer memory engine warm-up")

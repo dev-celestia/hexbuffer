@@ -56,6 +56,11 @@ pub fn init(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     app.manage(hexbuffer::commands::nuclei::NucleiScanState::default());
     app.manage(hexbuffer::commands::regression::RegressionEngineState::new());
 
+    // Detect existing ONNX Runtime installation if present (e.g. from prior download, Homebrew, etc.)
+    if let Some(ort_path) = hexbuffer::memory::runtime::detect_existing_ort_runtime() {
+        crate::log(&format!("Found ONNX Runtime library at {}", ort_path.display()));
+    }
+
     let uteke_dir = app_dir.join("uteke");
     match hexbuffer::UtekeEngine::new(uteke_dir) {
         Ok(engine) => {

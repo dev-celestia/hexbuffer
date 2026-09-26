@@ -112,7 +112,12 @@ export async function executeTriggerScanAiTool(args: Record<string, any>) {
     },
   });
 
-  await triggerScan({ url } as TriggerScanOptions);
+  try {
+    await triggerScan({ url } as TriggerScanOptions);
+  } catch (err: any) {
+    cancelJob(jobId);
+    throw new Error(`Failed to start browser scan for ${url}: ${err?.message || String(err)}`);
+  }
   return `Browser scan started for ${url} as job ${jobId}. Poll get_job_status with jobId "${jobId}"; once it completes, call get_crawl_context for the full results.`;
 }
 

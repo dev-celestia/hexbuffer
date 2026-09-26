@@ -2,6 +2,8 @@ import { invoke } from '@tauri-apps/api/core';
 import { useBrowserAutomationStore } from '@/stores/browser-automation';
 import { useNavStore } from '@/stores/nav';
 
+import { useAppStore, type ProxyRuntimeStatus } from '@/stores/app';
+
 export interface TriggerScanOptions {
   url: string;
   maxDepth?: number;
@@ -14,14 +16,14 @@ export async function triggerScan(options: TriggerScanOptions): Promise<void> {
   if (!url) return;
 
   // Ensure the proxy is running before launching the browser crawl.
-  try {
-    const status = await invoke<{ running: boolean }>('get_proxy_status');
-    if (!status.running) {
-      await invoke('start_proxy', { port: 8888, tlsPort: 8889 });
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-    }
-  } catch (error) {
-    console.error('[orchestrator] Failed to ensure proxy is running:', error);
+  const appStore = useAppStore.getState();
+  const status = await invoke<ProxyRuntimeStatus>('get_proxy_status').catch(() => ({
+    running: false,
+    port: null,
+    connections: 0,
+  }));
+  if (!status.running) {
+    await appStore.startProxy();
   }
 
   const store = useBrowserAutomationStore.getState();
@@ -30,7 +32,7 @@ export async function triggerScan(options: TriggerScanOptions): Promise<void> {
     maxDepth: maxDepth ?? 3,
     maxPages: maxPages ?? 100,
   });
-  store.startCrawl(headless ?? true);
+  await store.startCrawl(headless ?? true);
   useNavStore.getState().triggerNavBlink('/browser');
 }
 

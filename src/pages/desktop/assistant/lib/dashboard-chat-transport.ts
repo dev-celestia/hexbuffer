@@ -365,6 +365,7 @@ export class DashboardSettingsChatTransport implements ChatTransport<DashboardCh
           finishStream();
         } catch (error) {
           if (started && !finished) {
+            finishReasoning();
             writer.write({ type: 'text-end', id: textId });
             writer.write({ type: 'finish', finishReason: 'error' });
           } else if (!started) {

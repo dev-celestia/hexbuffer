@@ -3,25 +3,24 @@ import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import {
   addPendingToolConfirmation,
-  clearPendingToolConfirmations,
+  cancelAllPendingToolConfirmations,
   removePendingToolConfirmation,
   describeToolResult,
+  isConfirmationRequired,
+  CONFIRMATION_TTL_MS,
 } from './confirmation';
 import { executeAiToolCall } from './executor';
 import type { AppAiToolCallPayload } from './types';
 import { cancelJob, listJobs } from '../jobs/job-registry';
 import { toErrorMessage } from '@/lib/ipc';
 
-// Matches CONFIRMATION_TIMEOUT_SECS in src-tauri/src/ai/tool_loop.rs so the card stops
-// being executable at the same moment the backend stops waiting.
-const CONFIRMATION_TTL_MS = 600_000;
-
 /**
  * Listens for Tauri IPC events emitted by the Rust AI engine (`ai:execute-tool`).
  * The engine scopes these events to this window's label, and each call carries a
  * per-call secret token that must be echoed back when resolving the result.
- * Tools flagged `requiresConfirmation` are parked as pending confirmation cards for
- * the user to approve or deny; the rest execute immediately.
+ * Tools flagged `requiresConfirmation` (or falling back to the confirmation tier
+ * if unspecified) are parked as pending confirmation cards for the user to approve
+ * or deny; the rest execute immediately.
  */
 export async function setupAiToolEventListener(): Promise<UnlistenFn> {
   const currentLabel = getCurrentWindow().label;
@@ -31,7 +30,11 @@ export async function setupAiToolEventListener(): Promise<UnlistenFn> {
     async (event) => {
       const { id, token, tool_name, arguments: args, requiresConfirmation } = event.payload;
 
-      if (requiresConfirmation) {
+      const needsConfirmation =
+        requiresConfirmation === true ||
+        (requiresConfirmation === undefined && isConfirmationRequired(tool_name));
+
+      if (needsConfirmation) {
         const createdAt = Date.now();
         addPendingToolConfirmation({
           id,
@@ -51,6 +54,11 @@ export async function setupAiToolEventListener(): Promise<UnlistenFn> {
           token,
           success: true,
           message: describeToolResult(result),
+        }).catch((resolveError) => {
+          console.error(
+            `[AI Tool Dispatcher] Failed to report tool result for ${tool_name} (${id}):`,
+            resolveError,
+          );
         });
       } catch (err) {
         const message = toErrorMessage(err, 'Unknown error');
@@ -73,7 +81,7 @@ export async function setupAiToolEventListener(): Promise<UnlistenFn> {
   const unlistenAborted = await listen<{ requestId?: string }>(
     'ai-chat:aborted',
     () => {
-      clearPendingToolConfirmations();
+      void cancelAllPendingToolConfirmations('The chat was aborted by user.');
     },
     { target: { kind: 'AnyLabel', label: currentLabel } },
   );

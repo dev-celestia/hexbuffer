@@ -296,7 +296,7 @@ The 2026-09-21 resolution table is unreliable and should not be used as a work q
 |---|---|---|
 | **F2** | ✅ Resolved | **Not fixed.** `send-to.ts:20` is still `if (!logId) return;` (R1). The resolution note describes `engagement.rs` / `initialize_engagement` — an entirely different feature, which suggests the row was filled in from the wrong line of the fix list. |
 | **F15** | ⬜ Open | Still open (R13). |
-| **F20** | ⬜ Open | Still open — `crawl.ts:20` hardcodes `port: 8888, tlsPort: 8889`. |
+| **F20** | ✅ Resolved | Fixed — `crawl.ts` and `lifecycle.ts` delegate to `useAppStore` dynamic proxy configuration and handle errors. |
 | **F16** | ⬜ Open | The listed symptom no longer matches the code: the *failure* path now has `.catch(() => {})`; it is the *success* path that is unguarded (R12). |
 | **F8** | ✅ Resolved | Plausible, but the evidence cited (engagement plan) is the same mismatched note as F2's — re-verify independently. |
 | **F9 / F5** | 🟡 Partial | Consistent with the code: `toProviderMessages` still drops everything but role+text (`dashboard-chat-transport.ts:77-89`). |

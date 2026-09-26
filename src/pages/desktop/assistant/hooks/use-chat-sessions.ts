@@ -19,12 +19,17 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const activeSessionIdRef = useRef<string | null>(null);
+  const sessionsRef = useRef<ChatSession[]>(sessions);
   // Monotonic guard so a slower, earlier `switchSession` load can never overwrite a later one.
   const switchSeqRef = useRef(0);
 
   useEffect(() => {
     activeSessionIdRef.current = activeSessionId;
   }, [activeSessionId]);
+
+  useEffect(() => {
+    sessionsRef.current = sessions;
+  }, [sessions]);
 
   const loadSessions = useCallback(async () => {
     const seq = ++switchSeqRef.current;
@@ -137,27 +142,24 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
       try {
         await invoke('delete_chat_session', { id: sessionId });
 
-        setSessions((prev) => {
-          const next = prev.filter((s) => s.id !== sessionId);
+        const next = sessionsRef.current.filter((s) => s.id !== sessionId);
+        setSessions(next);
 
-          // If we deleted the active session, switch to another or clear
-          if (sessionId === activeSessionIdRef.current) {
-            if (next.length > 0) {
-              void switchSession(next[0].id);
-            } else {
-              // No sessions left — clear the view
-              setActiveSessionId(null);
-              setMessagesRef.current?.([]);
-            }
+        // If we deleted the active session, switch to another or clear
+        if (sessionId === activeSessionIdRef.current) {
+          if (next.length > 0) {
+            void switchSession(next[0].id);
+          } else {
+            // No sessions left — clear the view
+            setActiveSessionId(null);
+            setMessagesRef.current?.([]);
           }
-
-          return next;
-        });
+        }
       } catch (error) {
         console.error('Failed to delete chat session:', error);
       }
     },
-    [switchSession],
+    [switchSession, setMessagesRef],
   );
 
   const renameSession = useCallback(async (sessionId: string, title: string) => {
@@ -188,25 +190,23 @@ export function useChatSessions({ setMessagesRef }: UseChatSessionsOptions) {
                 ? `${cleanPrompt.slice(0, 40)}…`
                 : cleanPrompt;
 
-            setSessions((prev) => {
-              const current = prev.find((s) => s.id === sessionId);
-              const isDefaultTitle =
-                !current ||
-                !current.title ||
-                current.title.toLowerCase() === 'new chat' ||
-                current.title.startsWith('New Chat');
+            const current = sessionsRef.current.find((s) => s.id === sessionId);
+            const isDefaultTitle =
+              !current ||
+              !current.title ||
+              current.title.toLowerCase() === 'new chat' ||
+              current.title.startsWith('New Chat');
 
-              if (!isDefaultTitle) {
-                return prev;
-              }
-
+            if (isDefaultTitle) {
               // Persist the title change to SQLite
               invoke('rename_chat_session', { id: sessionId, title }).catch((err) => {
                 console.error('Failed to persist auto session title:', err);
               });
 
-              return prev.map((s) => (s.id === sessionId ? { ...s, title } : s));
-            });
+              setSessions((prev) =>
+                prev.map((s) => (s.id === sessionId ? { ...s, title } : s)),
+              );
+            }
           }
         }
       } catch (error) {

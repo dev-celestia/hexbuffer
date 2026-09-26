@@ -62,7 +62,7 @@ async function dispatchToolExecution(toolName: string, args: Record<string, any>
 
     // Intruder Tools
     case 'start_invoker_attack':
-      return executeStartInvokerAttackAiTool();
+      return executeStartInvokerAttackAiTool(args);
 
     case 'stop_invoker_attack':
       return executeStopInvokerAttackAiTool();

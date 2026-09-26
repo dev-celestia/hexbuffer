@@ -129,7 +129,8 @@ pub async fn open_cdp_browser(_app: tauri::AppHandle, port: u16) -> Result<(), S
         hexbuffer::paths::get_shared_app_dir().join(format!("cdp-browser-profile-{}", port));
     std::fs::create_dir_all(&profile_dir).map_err(|e| e.to_string())?;
 
-    let proxy_port = hexbuffer::proxy::active_proxy_port().unwrap_or(8888);
+    let proxy_port =
+        hexbuffer::proxy::active_proxy_port().unwrap_or_else(hexbuffer::proxy::default_proxy_port);
 
     let mut args = vec![
         format!("--remote-debugging-port={}", port),

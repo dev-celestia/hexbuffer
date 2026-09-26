@@ -1,6 +1,6 @@
 import { Button, Tool, ToolHeader, ToolContent, ToolInput, Tooltip, TooltipContent, TooltipTrigger } from '@celestia-project/ui';
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DURATION, EASE_OUT } from '../lib/motion';
 
 import {
@@ -17,6 +17,20 @@ interface ToolConfirmationCardProps {
 
 export function ToolConfirmationCard({ confirmation }: Readonly<ToolConfirmationCardProps>) {
   const [busy, setBusy] = useState(false);
+  const [isExpired, setIsExpired] = useState(() => Date.now() > confirmation.expiresAt);
+
+  useEffect(() => {
+    if (isExpired) return;
+    const remainingMs = confirmation.expiresAt - Date.now();
+    if (remainingMs <= 0) {
+      setIsExpired(true);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setIsExpired(true);
+    }, remainingMs);
+    return () => clearTimeout(timer);
+  }, [confirmation.expiresAt, isExpired]);
 
   const handleDecision = async (approve: boolean) => {
     setBusy(true);
@@ -72,14 +86,27 @@ export function ToolConfirmationCard({ confirmation }: Readonly<ToolConfirmation
         state="approval-requested"
       />
       <ToolContent>
-        <p
-          className={cn(
-            // Typography
-            'text-xs text-muted-foreground',
-          )}
-        >
-          The assistant requested permission to run this action. Review parameters before approving:
-        </p>
+        {isExpired ? (
+          <p
+            className={cn(
+              // Sizing & Spacing
+              'py-1',
+              // Typography
+              'text-xs text-destructive font-medium',
+            )}
+          >
+            This confirmation has expired and can no longer be executed.
+          </p>
+        ) : (
+          <p
+            className={cn(
+              // Typography
+              'text-xs text-muted-foreground',
+            )}
+          >
+            The assistant requested permission to run this action. Review parameters before approving:
+          </p>
+        )}
         <ToolInput input={confirmation.arguments} />
         <div
           className={cn(
@@ -94,9 +121,9 @@ export function ToolConfirmationCard({ confirmation }: Readonly<ToolConfirmation
           <Button
             size="sm"
             onClick={() => handleDecision(true)}
-            disabled={busy}
+            disabled={busy || isExpired}
           >
-            Approve &amp; Execute
+            {isExpired ? 'Expired' : 'Approve & Execute'}
           </Button>
           <Button
             size="sm"
@@ -104,7 +131,7 @@ export function ToolConfirmationCard({ confirmation }: Readonly<ToolConfirmation
             onClick={() => handleDecision(false)}
             disabled={busy}
           >
-            Deny
+            {isExpired ? 'Dismiss' : 'Deny'}
           </Button>
         </div>
       </ToolContent>

@@ -128,7 +128,12 @@ export function registerJob(registration: JobRegistration): Job {
   };
 
   entries = [...entries, entry];
-  entry.unsubscribe = registration.subscribe(applyUpdate, settle);
+  const unsub = registration.subscribe(applyUpdate, settle);
+  if (TERMINAL_STATUSES.has(entry.job.status)) {
+    unsub?.();
+  } else {
+    entry.unsubscribe = unsub;
+  }
   notify();
   return entry.job;
 }

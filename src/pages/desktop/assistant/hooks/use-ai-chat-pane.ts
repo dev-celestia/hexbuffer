@@ -7,7 +7,7 @@ import { useAssistantChat } from './use-assistant-chat';
 import { useTrackedActions, clearTrackedActions } from '../lib/ai-tools';
 import {
   usePendingToolConfirmations,
-  clearPendingToolConfirmations,
+  cancelAllPendingToolConfirmations,
 } from '../lib/ai-tools/confirmation';
 import { getMessageText } from '../lib/message-utils';
 import { getContextWindow } from '../constants';
@@ -158,7 +158,7 @@ export function useAiChatPane() {
     async (sessionId: string) => {
       if (isStreaming) return;
       clearTrackedActions();
-      clearPendingToolConfirmations();
+      void cancelAllPendingToolConfirmations('Switched chat session.');
       await switchSession(sessionId);
     },
     [isStreaming, switchSession],
@@ -167,7 +167,7 @@ export function useAiChatPane() {
   const handleCreateSession = useCallback(() => {
     if (isStreaming) return Promise.resolve(null);
     clearTrackedActions();
-    clearPendingToolConfirmations();
+    void cancelAllPendingToolConfirmations('Created new chat session.');
     return createSession();
   }, [isStreaming, createSession]);
 
@@ -175,7 +175,7 @@ export function useAiChatPane() {
     async (sessionId: string) => {
       if (isStreaming) return;
       clearTrackedActions();
-      clearPendingToolConfirmations();
+      void cancelAllPendingToolConfirmations('Deleted chat session.');
       await deleteSession(sessionId);
     },
     [isStreaming, deleteSession],

@@ -88,12 +88,27 @@ const MemoryPage = React.lazy(() =>
 
 
 
+import { setupAiToolEventListener } from "@/pages/desktop/assistant/lib/ai-tools/listener";
+
 function AutomationEventWatchers() {
   React.useEffect(() => {
     startLiveTrafficWatcher();
     startPageCrawledWatcher();
 
+    let unlistenAiTools: (() => void) | undefined;
+    let cancelled = false;
+    setupAiToolEventListener()
+      .then((fn) => {
+        if (cancelled) fn();
+        else unlistenAiTools = fn;
+      })
+      .catch((err) => {
+        console.error('Failed to initialize AI tool event listener:', err);
+      });
+
     return () => {
+      cancelled = true;
+      unlistenAiTools?.();
       stopLiveTrafficWatcher();
       stopPageCrawledWatcher();
     };

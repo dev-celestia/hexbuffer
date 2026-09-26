@@ -9,12 +9,19 @@ import {
 } from '@/pages/desktop/assistant/lib/jobs/job-registry';
 import { assertHostInScope } from '@/triggers/scope';
 
+import type { AttackMode } from '@/pages/intruder/types';
+
 export const INVOKER_AI_TOOL_DEFINITION = {
   name: 'start_invoker_attack',
   description: 'Launch a brute-force or payload injection attack using the Intruder / Invoker engine.',
   parameters: {
     type: 'object',
-    properties: {},
+    properties: {
+      attack_type: {
+        type: 'string',
+        description: 'Attack strategy (sniper, battering_ram, pitchfork, cluster_bomb)',
+      },
+    },
   },
 };
 
@@ -50,7 +57,18 @@ export const SEND_TO_INTRUDER_AI_TOOL_DEFINITION = {
   },
 };
 
-export async function executeStartInvokerAttackAiTool(): Promise<string> {
+const ATTACK_MODE_MAP: Record<string, AttackMode> = {
+  sniper: 'Sniper',
+  battering_ram: 'BatteringRam',
+  batteringram: 'BatteringRam',
+  pitchfork: 'Pitchfork',
+  cluster_bomb: 'ClusterBomb',
+  clusterbomb: 'ClusterBomb',
+};
+
+export async function executeStartInvokerAttackAiTool(
+  args: { attack_type?: string; attackType?: string } = {},
+): Promise<string> {
   const state = useIntruderStore.getState();
   const tabId = state.activeTabId;
   const tab = state.tabs.find((t) => t.id === tabId);
@@ -61,12 +79,27 @@ export async function executeStartInvokerAttackAiTool(): Promise<string> {
     return `An Intruder attack is already running on tab ${tab.name}. Stop it (cancel_job or stop_invoker_attack) before launching another.`;
   }
 
-  // Never fuzz an out-of-scope host, even if the active tab was populated off the
-  // model's critical path.
-  const baseUrl = tab.config?.base_request?.url;
-  if (baseUrl && /^https?:\/\//i.test(baseUrl)) {
-    assertHostInScope(baseUrl, 'launch an Intruder attack against');
+  const requestedType = (args.attack_type ?? args.attackType)?.trim();
+  if (requestedType) {
+    const normalized = requestedType.toLowerCase();
+    const mappedMode = ATTACK_MODE_MAP[normalized];
+    if (!mappedMode) {
+      throw new Error(
+        `Invalid attack strategy "${requestedType}". Allowed values: sniper, battering_ram, pitchfork, cluster_bomb.`,
+      );
+    }
+    state.updateConfig({ mode: mappedMode });
   }
+
+  // Never fuzz an out-of-scope host, even if the active tab was populated off the
+  // model's critical path. Reject missing or non-http URLs unconditionally.
+  const baseUrl = tab.config?.base_request?.url;
+  if (!baseUrl || !/^https?:\/\//i.test(baseUrl)) {
+    throw new Error(
+      `Cannot launch Intruder attack: active tab has invalid target URL "${baseUrl || '(empty)'}". Target must be an absolute http(s) URL.`,
+    );
+  }
+  assertHostInScope(baseUrl, 'launch an Intruder attack against');
 
   // A stale startError from a previous failed launch would otherwise settle the
   // new job as errored before this attack even starts.
@@ -158,7 +191,7 @@ export async function executeSendToIntruderAiTool(args: {
   }
 
   await sendToIntruder({
-    logId: logId || '',
+    logId: logId || undefined,
     rawRequest,
     payloadValues,
   });

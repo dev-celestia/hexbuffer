@@ -78,6 +78,9 @@ ripemd = "0.1"
 libc = "0.2"
 parking_lot = "0.12"
 sysinfo = "0.33"
+flate2 = "1.0"
+tar = "0.4"
+zip = { version = "2.2", default-features = false, features = ["deflate"] }
 
 # Development profile: Fast compile & link, line tables for stack traces
 [profile.dev]

@@ -74,7 +74,6 @@ const AUTO_APPROVED_TOOLS: &[&str] = &[
     "forward_paused_request",
     "send_to_intruder",
     "navigate_to_app",
-    "add_scope_target",
     "toggle_browser_crawl",
     "list_jobs",
     "get_job_status",
@@ -105,6 +104,7 @@ const CONFIRMATION_TOOLS: &[&str] = &[
     "stop_invoker_attack",
     "toggle_intercept",
     "drop_paused_request",
+    "add_scope_target",
     "remove_scope_target",
     "stop_browser_crawl",
     "cancel_job",
@@ -348,11 +348,16 @@ fn frontend_tool_definitions() -> Vec<ToolDefinition> {
         crate::tools::ToggleInterceptTool.definition(),
         ToolDefinition {
             name: "forward_paused_request".to_string(),
-            description: "Forward the currently paused/intercepted HTTP request in the proxy queue."
+            description: "Forward the currently paused/intercepted HTTP request in the proxy queue. Optionally wait for a request to arrive."
                 .to_string(),
             parameters: json!({
                 "type": "object",
-                "properties": {},
+                "properties": {
+                    "waitSeconds": {
+                        "type": "number",
+                        "description": "Seconds to wait for a paused request to appear before giving up (default 0, max 60)."
+                    }
+                },
                 "required": []
             }),
         },

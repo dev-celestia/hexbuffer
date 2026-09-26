@@ -9,7 +9,7 @@ export interface HttpRequest {
   max_hops: number;
 }
 
-export type AttackMode = 'Sniper';
+export type AttackMode = 'Sniper' | 'BatteringRam' | 'Pitchfork' | 'ClusterBomb';
 
 export type PayloadType = 'SimpleList' | 'RuntimeFile' | 'NumberRange';
 

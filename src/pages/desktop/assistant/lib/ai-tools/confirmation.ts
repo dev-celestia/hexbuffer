@@ -15,7 +15,26 @@ export interface PendingToolConfirmation {
 }
 
 // Matches CONFIRMATION_TIMEOUT_SECS in src-tauri/src/ai/tool_loop.rs.
-const CONFIRMATION_TTL_MS = 600_000;
+export const CONFIRMATION_TTL_MS = 600_000;
+
+export const CONFIRMATION_TOOLS = new Set<string>([
+  'trigger_scan',
+  'trigger_port_scan',
+  'start_invoker_attack',
+  'stop_invoker_attack',
+  'toggle_intercept',
+  'drop_paused_request',
+  'add_scope_target',
+  'remove_scope_target',
+  'stop_browser_crawl',
+  'cancel_job',
+  'trigger_nuclei_scan',
+  'stop_nuclei_scan',
+]);
+
+export function isConfirmationRequired(toolName: string): boolean {
+  return CONFIRMATION_TOOLS.has(toolName);
+}
 
 const TOOL_LABELS: Record<string, string> = {
   trigger_scan: 'Launch a browser scan',
@@ -23,10 +42,13 @@ const TOOL_LABELS: Record<string, string> = {
   start_invoker_attack: 'Launch an Invoker attack',
   stop_invoker_attack: 'Stop active Intruder attack',
   toggle_intercept: 'Toggle proxy interception',
-  forward_paused_request: 'Forward paused HTTP request',
   drop_paused_request: 'Drop paused HTTP request',
+  add_scope_target: 'Add host to target scope',
   remove_scope_target: 'Remove host from proxy target scope',
   stop_browser_crawl: 'Stop active browser crawl',
+  cancel_job: 'Cancel background job',
+  trigger_nuclei_scan: 'Launch Nuclei vulnerability scan',
+  stop_nuclei_scan: 'Stop active Nuclei scan',
 };
 
 export function toolConfirmationLabel(toolName: string): string {
@@ -94,6 +116,30 @@ export function clearPendingToolConfirmations(): void {
   }
 }
 
+/** Cancel all pending confirmations and resolve them to Rust as cancelled to unblock waiters. */
+export async function cancelAllPendingToolConfirmations(
+  reason = 'The operation was cancelled by the user.',
+): Promise<void> {
+  const current = [...pendingConfirmations];
+  if (current.length === 0) return;
+
+  pendingConfirmations = [];
+  notifyConfirmationListeners();
+
+  await Promise.allSettled(
+    current.map((item) =>
+      invoke('resolve_ai_tool_result', {
+        id: item.id,
+        token: item.token,
+        success: false,
+        message: reason,
+      }).catch((err) => {
+        console.error(`[AI Tool Confirmation] Failed to cancel confirmation ${item.id}:`, err);
+      }),
+    ),
+  );
+}
+
 function subscribePendingConfirmations(listener: () => void) {
   confirmationListeners.add(listener);
   const interval = window.setInterval(pruneExpiredConfirmations, 30_000);
@@ -144,6 +190,8 @@ export async function approveToolConfirmation(id: string): Promise<void> {
       token: confirmation.token,
       success: true,
       message: describeToolResult(result),
+    }).catch((error) => {
+      console.error(`[AI Tool Confirmation] Failed to report success for ${confirmation.toolName} (${id}):`, error);
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

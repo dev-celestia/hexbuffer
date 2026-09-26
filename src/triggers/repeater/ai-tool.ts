@@ -6,6 +6,7 @@ import { createCollection, createFolder, createEndpoint, selectEndpoint } from '
 import { sendRawToRepeater } from './send-to';
 import { sendRequest } from './ui';
 import { assertHostInScope } from '@/triggers/scope';
+import { parseRawHttpRequest } from '@/lib/http-message';
 
 const HTTP_METHOD_PATTERN = /^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS|TRACE|CONNECT)$/;
 
@@ -195,8 +196,13 @@ export async function executeSendToRepeaterAiTool(args: Record<string, any>) {
 
   // A complete raw HTTP request is forwarded untouched.
   if (raw && looksLikeRawHttpRequest(raw)) {
-    if (/^https?:\/\//i.test(url)) {
-      assertHostInScope(url, 'send a request to');
+    let targetUrl: string | undefined = url;
+    if (!targetUrl) {
+      const parsed = parseRawHttpRequest(raw);
+      targetUrl = parsed?.url;
+    }
+    if (targetUrl && /^https?:\/\//i.test(targetUrl)) {
+      assertHostInScope(targetUrl, 'send a request to');
     }
     await sendRawToRepeater({ raw, url: url || undefined, name });
     return `Request sent to the Repeater tab${url ? ` (target: ${url})` : ''} for manual inspection.`;

@@ -74,9 +74,9 @@ export function addTargets(params: AddTargetsParams): void {
   }
 }
 
-export function deleteTarget(params: DeleteTargetParams): void {
+export function deleteTarget(params: DeleteTargetParams): boolean {
   const { targetId } = params;
-  if (!targetId) return;
+  if (!targetId) return false;
 
   const store = useTargetStore.getState();
   const needle = normalizeHost(targetId);
@@ -93,7 +93,9 @@ export function deleteTarget(params: DeleteTargetParams): void {
   if (resolved) {
     store.removeTarget(resolved.id);
     useNavStore.getState().triggerNavBlink('/');
+    return true;
   }
+  return false;
 }
 
 export function deleteAllTargets(): void {

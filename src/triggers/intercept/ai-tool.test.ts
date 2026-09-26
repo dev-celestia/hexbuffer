@@ -4,14 +4,20 @@ vi.mock('./ui', () => ({
   forwardPaused: vi.fn(),
   dropPaused: vi.fn(),
 }));
+const toggleInterceptMock = vi.fn();
 vi.mock('@/pages/intercept/state/intercept-store', () => ({
   useInterceptStore: {
-    getState: () => ({ toggleIntercept: vi.fn(), requests: [], selectedRequestId: null }),
+    getState: vi.fn(() => ({
+      toggleIntercept: toggleInterceptMock,
+      requests: [],
+      selectedRequestId: null,
+    })),
   },
 }));
 
 import { forwardPaused } from './ui';
 import { executeForwardPausedRequestAiTool } from './ai-tool';
+import { useInterceptStore } from '@/pages/intercept/state/intercept-store';
 
 describe('forward_paused_request bounded wait', () => {
   beforeEach(() => {
@@ -70,5 +76,25 @@ describe('forward_paused_request bounded wait', () => {
     const result = await executeForwardPausedRequestAiTool({ waitSeconds: 'soon' });
     expect(result).toContain('No paused request');
     expect(forwardPaused).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('toggle_intercept boolean parsing', () => {
+  it('correctly disables interception when passed string "false"', async () => {
+    toggleInterceptMock.mockReset();
+    const { executeToggleInterceptAiTool } = await import('./ai-tool');
+    const result = await executeToggleInterceptAiTool({ enabled: 'false' });
+
+    expect(toggleInterceptMock).toHaveBeenCalledWith(false);
+    expect(result).toContain('disabled');
+  });
+
+  it('correctly enables interception when passed boolean true', async () => {
+    toggleInterceptMock.mockReset();
+    const { executeToggleInterceptAiTool } = await import('./ai-tool');
+    const result = await executeToggleInterceptAiTool({ enabled: true });
+
+    expect(toggleInterceptMock).toHaveBeenCalledWith(true);
+    expect(result).toContain('enabled');
   });
 });

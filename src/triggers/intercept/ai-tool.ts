@@ -42,7 +42,11 @@ export const DROP_PAUSED_REQUEST_AI_TOOL_DEFINITION = {
 };
 
 export async function executeToggleInterceptAiTool(args: Record<string, any>) {
-  const enabled = Boolean(args.enabled);
+  const raw = args?.enabled;
+  const enabled =
+    typeof raw === 'string'
+      ? raw.trim().toLowerCase() === 'true' || raw.trim() === '1'
+      : Boolean(raw);
   await useInterceptStore.getState().toggleIntercept(enabled);
   return `Proxy traffic interception ${enabled ? 'enabled' : 'disabled'}.`;
 }

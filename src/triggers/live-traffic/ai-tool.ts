@@ -62,6 +62,9 @@ export async function executeRemoveScopeTargetAiTool(args: {
     throw new Error('Target identifier is required.');
   }
 
-  deleteTarget({ targetId: target });
+  const removed = deleteTarget({ targetId: target });
+  if (!removed) {
+    throw new Error(`Target "${target}" was not found in target scope.`);
+  }
   return `Removed "${target}" from the target scope.`;
 }

@@ -120,6 +120,10 @@ pub async fn list_memory_namespaces(
 pub async fn initialize_memory_engine(
     engine: State<'_, UtekeEngine>,
 ) -> Result<EngineStatusDto, String> {
+    // 1. Ensure the ONNX Runtime dynamic library is available on disk
+    crate::memory::runtime::ensure_ort_runtime().await?;
+
+    // 2. Initialize the model session and warm up the engine
     let engine = engine.inner().clone();
     tauri::async_runtime::spawn_blocking(move || {
         engine.warm_up()?;
